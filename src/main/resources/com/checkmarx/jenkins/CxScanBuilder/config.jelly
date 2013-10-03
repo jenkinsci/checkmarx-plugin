@@ -9,7 +9,11 @@
     Creates a text field that shows the value of the "name" property.
     When submitted, it will be passed to the corresponding constructor parameter.
   -->
-  <f:entry title="Name" field="name">
+  <f:entry title="Checkmarx Server URL" field="serverUrl">
+    <f:textbox />
+  </f:entry>
+
+  <f:entry title="Username" field="username">
     <f:textbox />
   </f:entry>
 </j:jelly>

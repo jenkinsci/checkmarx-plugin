@@ -7,11 +7,15 @@ import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
+import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * The main entry point for Checkmarx plugin. This class implements the Builder
@@ -22,10 +26,35 @@ import java.io.IOException;
  */
 
 public class CxScanBuilder extends Builder {
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    // Persistent plugin configuration parameters
+    //////////////////////////////////////////////////////////////////////////////////////
+
+    private String serverUrl;
+    private String username;
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    // Constructors
+    //////////////////////////////////////////////////////////////////////////////////////
+
     @DataBoundConstructor
-    public CxScanBuilder()
+    public CxScanBuilder(String serverUrl, String username)
     {
-        super();
+        this.serverUrl = serverUrl;
+        this.username = username;
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    // Configuration fields getters
+    //////////////////////////////////////////////////////////////////////////////////////
+
+    public String getServerUrl() {
+        return serverUrl;
+    }
+
+    public String getUsername() {
+        return username;
     }
 
     @Override
@@ -41,6 +70,14 @@ public class CxScanBuilder extends Builder {
     }
 
 
+    /*public String getIconPath() {
+        PluginWrapper wrapper = Hudson.getInstance().getPluginManager().getPlugin([YOUR-PLUGIN-MAIN-CLASS].class);
+        return Hudson.getInstance().getRootUrl() + "plugin/"+ wrapper.getShortName()+"/";
+    }*/
+
+    public String getMyString() {
+        return "Hello Jenkins!";
+    }
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
@@ -48,6 +85,23 @@ public class CxScanBuilder extends Builder {
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
             return true;
         }
+
+        //////////////////////////////////////////////////////////////////////////////////////
+        // Field value validators
+        //////////////////////////////////////////////////////////////////////////////////////
+
+        public FormValidation doCheckServerUrl(@QueryParameter String value) {
+
+            try {
+                URL u = new URL(value);
+
+                return FormValidation.ok();
+            } catch (MalformedURLException e)
+            {
+                return FormValidation.error(e.getMessage());
+            }
+        }
+
 
         /**
          * This human readable name is used in the configuration screen.
