@@ -41,72 +41,41 @@ public class CxScanBuilder extends Builder {
     private String includeExtensions;
     private String locationPathExclude;
 
+    private boolean visibleToOthers;
+    private boolean incremental;
+    private String sourceEncoding;
     private String comment;
 
     /*
 
     V -comment <text>                             Scan comment. Example: -comment 'important scan1'. Optional.
-    -Configuration <configuration>              If configuration is not set, "Default Configuration" will be used for a
+    V -Configuration <configuration>  (either Default Configuration or Japanese (Shift-JIS))            If configuration is not set, "Default Configuration" will be used for a
                                                 new project. Optional.
     V -CxPassword <password>                      Login password
     V -CxServer <server>                          IP address or resolvable name of CxSuite web server
     V -CxUser <username>                          Login username
-    -incremental                                Run incremental scan instead of full scan. Optional.
-    -LocationBranch <branch>                    Sources GIT branch. Required if -LocationType is GIT. Optional.
-    -LocationPassword <password>                Source control or network password. Required if -LocationType is
+    V -incremental                                Run incremental scan instead of full scan. Optional.
+    R -LocationBranch <branch>                    Sources GIT branch. Required if -LocationType is GIT. Optional.
+    R -LocationPassword <password>                Source control or network password. Required if -LocationType is
                                                 TFS/SVN/shared.
-    -LocationPath <path>                        Local or shared path to sources or source repository branch. Required if
+    D -LocationPath <path>                        Local or shared path to sources or source repository branch. Required if
                                                 -LocationType is folder/shared.
     V -LocationPathExclude <file list>            List of ignored folders. Relative paths are resolved retalive to
                                                 -LocationPath. Example: -LocationPathExclude test* log_*. Optional.
-    -LocationPort <url>                         Source control system port. Default 8080/80 (TFS/SVN). Optional.
-    -LocationPrivateKey <file>                  GIT private key location. Required  if -LocationType is GIT in SSH mode.
-    -LocationPublicKey <file>                   GIT public key location. Required  if -LocationType is GIT in SSH mode.
-    -LocationType <folder|shared|TFS|SVN|GIT>   Source location type: folder, shared folder, source repository: SVN,
+    R -LocationPort <url>                         Source control system port. Default 8080/80 (TFS/SVN). Optional.
+    R -LocationPrivateKey <file>                  GIT private key location. Required  if -LocationType is GIT in SSH mode.
+    R -LocationPublicKey <file>                   GIT public key location. Required  if -LocationType is GIT in SSH mode.
+    D -LocationType <folder|shared|TFS|SVN|GIT>   Source location type: folder, shared folder, source repository: SVN,
                                                 TFS, GIT
-    -LocationURL <url>                          Source control URL. Required if -LocationType is TFS/SVN/GIT.
-    -LocationUser <username>                    Source control or network username. Required if -LocationType is
+    R -LocationURL <url>                          Source control URL. Required if -LocationType is TFS/SVN/GIT.
+    R -LocationUser <username>                    Source control or network username. Required if -LocationType is
                                                 TFS/SVN/shared.
-    -log <file>                                 Log file. Optional.
+    D -log <file>                                 Log file. Optional.
     V -Preset <preset>                            If preset is not specified, will use the predefined preset for an
                                                 existing project, and Default preset for a new project. Optional.
-    -private                                    Scan will not be visible to other users. Optional.
+    V -private                                    Scan will not be visible to other users. Optional.
     V -comment <text>                             Scan comment. Example: -comment 'important scan1'. Optional.
-    -Configuration <configuration>              If configuration is not set, "Default Configuration" will be used for a
-                                                new project. Optional.
-    V -CxPassword <password>                      Login password
-    V -CxServer <server>                          IP address or resolvable name of CxSuite web server
-    V -CxUser <username>                          Login username
-    -incremental                                Run incremental scan instead of full scan. Optional.
-    -LocationBranch <branch>                    Sources GIT branch. Required if -LocationType is GIT. Optional.
-    -LocationPassword <password>                Source control or network password. Required if -LocationType is
-                                                TFS/SVN/shared.
-    -LocationPath <path>                        Local or shared path to sources or source repository branch. Required if
-                                                -LocationType is folder/shared.
-    V -LocationPathExclude <file list>            List of ignored folders. Relative paths are resolved retalive to
-                                                -LocationPath. Example: -LocationPathExclude test* log_*. Optional.
-    -LocationPort <url>                         Source control system port. Default 8080/80 (TFS/SVN). Optional.
-    -LocationPrivateKey <file>                  GIT private key location. Required  if -LocationType is GIT in SSH mode.
-    -LocationPublicKey <file>                   GIT public key location. Required  if -LocationType is GIT in SSH mode.
-    -LocationType <folder|shared|TFS|SVN|GIT>   Source location type: folder, shared folder, source repository: SVN,
-                                                TFS, GIT
-    -LocationURL <url>                          Source control URL. Required if -LocationType is TFS/SVN/GIT.
-    -LocationUser <username>                    Source control or network username. Required if -LocationType is
-                                                TFS/SVN/shared.
-    -log <file>                                 Log file. Optional.
-    V -Preset <preset>                            If preset is not specified, will use the predefined preset for an
-                                                existing project, and Default preset for a new project. Optional.
-    -private                                    Scan will not be visible to other users. Optional.
-    V -ProjectName <project name>                 A full absolute name of a project. The full Project name includes the
-                                                whole path to the project, including Server, service provider, company,
-                                                and team. Example:  -ProjectName "CxServer\SP\Company\Users\bs java" If
-                                                project with such a name doesn't exist in the system, new project will
-                                                be created.
-    -ReportCSV <file>                           Name or path to results CSV file. Optional.
-    -ReportPDF <file>                           Name or path to results PDF file. Optional.
-    -ReportRTF <file>                           Name or path to results RTF file. Optional.
-    -ReportXML <file>                           Name or path to results XML file. Optional.
-    -v,--verbose                                Turns on verbose mode. All messages and events will be sent to the
+    D  -v,--verbose                                Turns on verbose mode. All messages and events will be sent to the
                                                 console/log file.  Optional.
      */
 
@@ -125,6 +94,9 @@ public class CxScanBuilder extends Builder {
                          boolean presetSpecified,
                          String includeExtensions,
                          String locationPathExclude,
+                         boolean visibleToOthers,
+                         boolean incremental,
+                         String sourceEncoding,
                          String comment)
     {
         this.serverUrl = serverUrl;
@@ -135,6 +107,9 @@ public class CxScanBuilder extends Builder {
         this.presetSpecified = presetSpecified;
         this.includeExtensions = includeExtensions;
         this.locationPathExclude = locationPathExclude;
+        this.visibleToOthers = visibleToOthers;
+        this.incremental = incremental;
+        this.sourceEncoding = sourceEncoding;   // TODO: Convert string to enum
         this.comment = comment;
     }
 
@@ -175,6 +150,18 @@ public class CxScanBuilder extends Builder {
         return locationPathExclude;
     }
 
+    public boolean isVisibleToOthers() {
+        return visibleToOthers;
+    }
+
+    public boolean isIncremental() {
+        return incremental;
+    }
+
+    public String getSourceEncoding() {
+        return sourceEncoding;
+    }
+
     public String getComment() {
         return comment;
     }
@@ -205,7 +192,7 @@ public class CxScanBuilder extends Builder {
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
-        public static String DEFAULT_INCLUDE_EXTENSION = ".java, .c, .cs";
+        public static String DEFAULT_INCLUDE_EXTENSION = ".java, .c, .cs"; // TODO: set real default value
         public static String DEFAULT_EXCLUDE_FOLDERS = "target, work, src/main/resources";
 
 
@@ -218,12 +205,7 @@ public class CxScanBuilder extends Builder {
         //////////////////////////////////////////////////////////////////////////////////////
 
         public FormValidation doCheckServerUrl(@QueryParameter String value) {
-            try {
-                Thread.sleep(20*1000);
-            } catch (Exception e)
-            {
-
-            }
+            // TODO: Implement server url verification after web service code is integrated
             try {
                 URL u = new URL(value);
                 return FormValidation.ok();

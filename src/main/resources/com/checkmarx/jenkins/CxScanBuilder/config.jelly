@@ -41,6 +41,21 @@
         <f:textbox default="${descriptor.DEFAULT_EXCLUDE_FOLDERS}"/>
     </f:entry>
 
+    <f:entry title="Visible to others" field="visibleToOther">
+        <f:checkbox/>
+    </f:entry>
+
+    <f:entry title="Incremental" field="incremental">
+        <f:checkbox/>
+    </f:entry>
+
+    <f:entry title="Configuration (Source Character Encoding)" field="sourceEncoding">
+        <select name="sourceEncoding">
+            <option value="0">Default Configuration (UTF-8)</option>
+            <option value="1">Japanese (Shift-JIS)</option>
+        </select>
+    </f:entry>
+
     <f:entry title="Comment" field="comment">
         <f:textarea/>
     </f:entry>
