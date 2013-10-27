@@ -30,7 +30,7 @@
         <dependency>
             <groupId>com.checkmarx</groupId>
             <artifactId>CxConsole</artifactId>
-            <version>7.1.2.15</version>
+            <version>7.1.2.16</version>
         </dependency>
     </dependencies>
 

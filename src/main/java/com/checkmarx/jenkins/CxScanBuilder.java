@@ -1,5 +1,6 @@
 package com.checkmarx.jenkins;
 
+import com.checkmarx.cxconsole.CxConsoleLauncher;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -9,6 +10,10 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
+import org.apache.log4j.SimpleLayout;
+import org.apache.log4j.WriterAppender;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -170,7 +175,20 @@ public class CxScanBuilder extends Builder {
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-        return super.perform(build, launcher, listener);
+        //boolean result = super.perform(build, launcher, listener);
+
+        WriterAppender appender = new WriterAppender(new PatternLayout(),listener.getLogger());
+        Logger.getLogger("com.checkmarx.cxconsole").addAppender(appender);
+        Logger.getLogger("com.checkmarx.cxviewer").addAppender(appender);
+        System.out.println("Hello Jenkins");
+        listener.getLogger().println("Hello Jenkins logger");
+        listener.getLogger().flush();
+
+        CxConsoleLauncher.main(new String[]{"Scan"});
+
+
+
+        return true;//result;
     }
 
 
