@@ -1,6 +1,13 @@
 package com.checkmarx.jenkins;
 
 import com.checkmarx.cxconsole.CxConsoleLauncher;
+import com.checkmarx.cxviewer.ws.generated.CxCLIWebService;
+import com.checkmarx.cxviewer.ws.generated.CxCLIWebServiceSoap;
+import com.checkmarx.cxviewer.ws.resolver.CxClientType;
+import com.checkmarx.cxviewer.ws.resolver.CxWSResolver;
+import com.checkmarx.cxviewer.ws.resolver.CxWSResolverSoap;
+import com.checkmarx.cxviewer.ws.resolver.CxWSResponseDiscovery;
+import com.sun.xml.internal.ws.wsdl.parser.InaccessibleWSDLException;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -223,11 +230,36 @@ public class CxScanBuilder extends Builder {
         //////////////////////////////////////////////////////////////////////////////////////
 
         public FormValidation doCheckServerUrl(@QueryParameter String value) {
-            // TODO: Implement server url verification after web service code is integrated
+            final String WS_RESOLVER_PATH = "/cxwebinterface/cxWSResolver.asmx";
+            final int WS_CLI_INTERFACE_VERSION = 0;
+            final String NO_CONNECTION_ERROR_MESSAGE = "Checkmarx server did not respond on the specified URL";
+
             try {
-                URL u = new URL(value);
-                return FormValidation.ok();
-            } catch (MalformedURLException e)
+                URL url = new URL(value);
+                if (!url.getPath().isEmpty())
+                {
+                    return FormValidation.error("URL Must not contain path");
+                }
+                if (url.getQuery()!=null)
+                {
+                    return FormValidation.error("URL Must not contain query parameters");
+                }
+                url = new URL(url.toString() + WS_RESOLVER_PATH);
+
+                CxWSResolver cxWSResolver = new CxWSResolver(url);
+                CxWSResolverSoap cxWSResolverSoap = cxWSResolver.getCxWSResolverSoap();
+                CxWSResponseDiscovery cxWSResponseDiscovery = cxWSResolverSoap.getWebServiceUrl(CxClientType.CLI,WS_CLI_INTERFACE_VERSION);
+                if (cxWSResponseDiscovery.isIsSuccesfull())
+                {
+                    return FormValidation.ok();
+                } else {
+                    return FormValidation.error(NO_CONNECTION_ERROR_MESSAGE);
+                }
+            } catch (InaccessibleWSDLException e)
+            {
+                return FormValidation.error(NO_CONNECTION_ERROR_MESSAGE);
+            }
+            catch (Exception e)
             {
                 return FormValidation.error(e.getMessage());
             }
