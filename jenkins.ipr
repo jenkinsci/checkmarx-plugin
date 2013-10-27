@@ -255,6 +255,17 @@
         <root url="jar://$MAVEN_REPOSITORY$/args4j/args4j/2.0.21/args4j-2.0.21-sources.jar!/" />
       </SOURCES>
     </library>
+    <library name="Maven: com.checkmarx:CxConsole:7.1.2.15">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/checkmarx/CxConsole/7.1.2.15/CxConsole-7.1.2.15.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/com/checkmarx/CxConsole/7.1.2.15/CxConsole-7.1.2.15-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/checkmarx/CxConsole/7.1.2.15/CxConsole-7.1.2.15-sources.jar!/" />
+      </SOURCES>
+    </library>
     <library name="Maven: com.github.stephenc.findbugs:findbugs-annotations:1.3.9-1">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/com/github/stephenc/findbugs/findbugs-annotations/1.3.9-1/findbugs-annotations-1.3.9-1.jar!/" />
