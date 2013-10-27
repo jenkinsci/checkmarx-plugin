@@ -58,38 +58,10 @@ public class CxScanBuilder extends Builder {
     private String sourceEncoding;
     private String comment;
 
-    /*
+    //////////////////////////////////////////////////////////////////////////////////////
+    // Private variables
+    //////////////////////////////////////////////////////////////////////////////////////
 
-    V -comment <text>                             Scan comment. Example: -comment 'important scan1'. Optional.
-    V -Configuration <configuration>  (either Default Configuration or Japanese (Shift-JIS))            If configuration is not set, "Default Configuration" will be used for a
-                                                new project. Optional.
-    V -CxPassword <password>                      Login password
-    V -CxServer <server>                          IP address or resolvable name of CxSuite web server
-    V -CxUser <username>                          Login username
-    V -incremental                                Run incremental scan instead of full scan. Optional.
-    R -LocationBranch <branch>                    Sources GIT branch. Required if -LocationType is GIT. Optional.
-    R -LocationPassword <password>                Source control or network password. Required if -LocationType is
-                                                TFS/SVN/shared.
-    D -LocationPath <path>                        Local or shared path to sources or source repository branch. Required if
-                                                -LocationType is folder/shared.
-    V -LocationPathExclude <file list>            List of ignored folders. Relative paths are resolved retalive to
-                                                -LocationPath. Example: -LocationPathExclude test* log_*. Optional.
-    R -LocationPort <url>                         Source control system port. Default 8080/80 (TFS/SVN). Optional.
-    R -LocationPrivateKey <file>                  GIT private key location. Required  if -LocationType is GIT in SSH mode.
-    R -LocationPublicKey <file>                   GIT public key location. Required  if -LocationType is GIT in SSH mode.
-    D -LocationType <folder|shared|TFS|SVN|GIT>   Source location type: folder, shared folder, source repository: SVN,
-                                                TFS, GIT
-    R -LocationURL <url>                          Source control URL. Required if -LocationType is TFS/SVN/GIT.
-    R -LocationUser <username>                    Source control or network username. Required if -LocationType is
-                                                TFS/SVN/shared.
-    D -log <file>                                 Log file. Optional.
-    V -Preset <preset>                            If preset is not specified, will use the predefined preset for an
-                                                existing project, and Default preset for a new project. Optional.
-    V -private                                    Scan will not be visible to other users. Optional.
-    V -comment <text>                             Scan comment. Example: -comment 'important scan1'. Optional.
-    D  -v,--verbose                                Turns on verbose mode. All messages and events will be sent to the
-                                                console/log file.  Optional.
-     */
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Constructors
@@ -220,6 +192,8 @@ public class CxScanBuilder extends Builder {
         public static String DEFAULT_INCLUDE_EXTENSION = ".java, .c, .cs"; // TODO: set real default value
         public static String DEFAULT_EXCLUDE_FOLDERS = "target, work, src/main/resources";
 
+        private String webServiceUrl;
+
 
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
             return true;
@@ -230,19 +204,43 @@ public class CxScanBuilder extends Builder {
         //////////////////////////////////////////////////////////////////////////////////////
 
         public FormValidation doCheckServerUrl(@QueryParameter String value) {
+            try {
+                this.webServiceUrl = null;
+                this.webServiceUrl = resolveWebServiceURL(value);
+                return FormValidation.ok();
+            } catch (Exception e)
+            {
+                return FormValidation.error(e.getMessage());
+            }
+        }
+
+
+        public FormValidation doCheckPassword(@QueryParameter String value, @QueryParameter String username) {
+
+            String password = value;
+
+            if (this.webServiceUrl==null) {
+                return FormValidation.warning("Server URL not set");
+            }
+            return FormValidation.warning("Username:" + username + " pass:" + password);
+
+        }
+
+        private String resolveWebServiceURL(String serverUrl) throws Exception
+        {
             final String WS_RESOLVER_PATH = "/cxwebinterface/cxWSResolver.asmx";
             final int WS_CLI_INTERFACE_VERSION = 0;
             final String NO_CONNECTION_ERROR_MESSAGE = "Checkmarx server did not respond on the specified URL";
 
             try {
-                URL url = new URL(value);
+                URL url = new URL(serverUrl);
                 if (!url.getPath().isEmpty())
                 {
-                    return FormValidation.error("URL Must not contain path");
+                    throw new Exception("URL Must not contain path");
                 }
                 if (url.getQuery()!=null)
                 {
-                    return FormValidation.error("URL Must not contain query parameters");
+                    throw new Exception("URL Must not contain query parameters");
                 }
                 url = new URL(url.toString() + WS_RESOLVER_PATH);
 
@@ -251,17 +249,13 @@ public class CxScanBuilder extends Builder {
                 CxWSResponseDiscovery cxWSResponseDiscovery = cxWSResolverSoap.getWebServiceUrl(CxClientType.CLI,WS_CLI_INTERFACE_VERSION);
                 if (cxWSResponseDiscovery.isIsSuccesfull())
                 {
-                    return FormValidation.ok();
+                    return cxWSResponseDiscovery.getServiceURL();
                 } else {
-                    return FormValidation.error(NO_CONNECTION_ERROR_MESSAGE);
+                    throw new Exception(NO_CONNECTION_ERROR_MESSAGE);
                 }
             } catch (InaccessibleWSDLException e)
             {
-                return FormValidation.error(NO_CONNECTION_ERROR_MESSAGE);
-            }
-            catch (Exception e)
-            {
-                return FormValidation.error(e.getMessage());
+                throw new Exception(NO_CONNECTION_ERROR_MESSAGE);
             }
         }
 
