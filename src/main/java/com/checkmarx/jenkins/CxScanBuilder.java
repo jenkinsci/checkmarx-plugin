@@ -213,11 +213,10 @@ public class CxScanBuilder extends Builder {
         //////////////////////////////////////////////////////////////////////////////////////
 
         public FormValidation doCheckServerUrl(@QueryParameter String value) {
-            logger.debug("Test logger");
             try {
                 this.webServiceUrl = null;
                 this.webServiceUrl = resolveWebServiceURL(value);
-                return FormValidation.ok();
+                return FormValidation.ok("Server Validated Successfully");
             } catch (Exception e)
             {
                 return FormValidation.error(e.getMessage());
@@ -267,6 +266,11 @@ public class CxScanBuilder extends Builder {
             final String NO_CONNECTION_ERROR_MESSAGE = "Checkmarx server did not respond on the specified URL";
 
             try {
+                if (serverUrl==null || serverUrl.isEmpty())
+                {
+                    throw new Exception("Provide Server URL");
+                }
+
                 URL url = new URL(serverUrl);
                 if (!url.getPath().isEmpty())
                 {
