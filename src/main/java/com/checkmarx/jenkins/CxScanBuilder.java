@@ -44,7 +44,8 @@ public class CxScanBuilder extends Builder {
     //////////////////////////////////////////////////////////////////////////////////////
 
     static {
-        PropertyConfigurator.configure(CxScanBuilder.class.getResource("log4j.properties"));
+        //PropertyConfigurator.configure(CxScanBuilder.class.getResource("log4j.properties"));
+        BasicConfigurator.configure();  // TODO: Find out why the property configuration does not work
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -101,7 +102,7 @@ public class CxScanBuilder extends Builder {
         this.locationPathExclude = locationPathExclude;
         this.visibleToOthers = visibleToOthers;
         this.incremental = incremental;
-        this.sourceEncoding = sourceEncoding;   // TODO: Convert string to enum
+        this.sourceEncoding = sourceEncoding;
         this.comment = comment;
     }
 
@@ -165,7 +166,7 @@ public class CxScanBuilder extends Builder {
         //boolean result = super.perform(build, launcher, listener);
 
         WriterAppender appender = new WriterAppender(new PatternLayout(),listener.getLogger());
-        Logger.getLogger("com.checkmarx.cxconsole").addAppender(appender);
+        Logger.getLogger("com.checkmarx.cxconsole").addAppender(appender);  // Consider using only com.checkmarx.cxconsole.commands logger
         Logger.getLogger("com.checkmarx.cxviewer").addAppender(appender);
         System.out.println("Hello Jenkins");
         listener.getLogger().println("Hello Jenkins logger");
