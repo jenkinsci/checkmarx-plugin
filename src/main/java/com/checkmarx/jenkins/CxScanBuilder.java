@@ -27,6 +27,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.LinkedList;
 
 /**
  * The main entry point for Checkmarx plugin. This class implements the Builder
@@ -170,13 +171,60 @@ public class CxScanBuilder extends Builder {
         listener.getLogger().println("Hello Jenkins logger");
         listener.getLogger().flush();
 
-        CxConsoleLauncher.main(new String[]{"Scan"});
+
+
+
+
+
+
+
+        CxConsoleLauncher.main(createCliCommandLineArgs());
 
 
 
         return true;//result;
     }
 
+    private String[] createCliCommandLineArgs()
+    {
+        LinkedList<String> args = new LinkedList<String>();
+        args.add("Scan");
+        args.add("-comment");  args.add(this.getComment());
+        if (getSourceEncoding().equals("1"))
+        {
+            args.add("-Configuration");
+            args.add("Japanese (Shift-JIS)");
+        }
+
+        args.add("-CxPassword"); args.add(this.getPassword());
+        args.add("-CxServer");   args.add(this.getServerUrl());
+        args.add("-CxUser");     args.add(this.getUsername());
+        if (this.isIncremental())
+        {
+            args.add("-incremental");
+        }
+        args.add("-LocationPath"); args.add("/Users/denis/Documents/iOSDevMac/Checkmarx/CLI/ScaneeProject/src"); // TODO: Add real path
+        args.add("-LocationPathExclude"); args.add(getLocationPathExclude());
+        args.add("-LocationType"); args.add("folder");
+        if (this.isPresetSpecified())
+        {
+            args.add("-Preset"); args.add(this.getPreset());
+        }
+
+        if (!this.isVisibleToOthers())
+        {
+            args.add("-private");
+        }
+
+        args.add("-ProjectName"); args.add(this.getProjectName());
+        args.add("-v");
+
+
+
+
+
+        return args.toArray(new String[0]);
+    }
 
 
     @Override
@@ -190,9 +238,7 @@ public class CxScanBuilder extends Builder {
         return Hudson.getInstance().getRootUrl() + "plugin/"+ wrapper.getShortName()+"/";
     }*/
 
-    public String getMyString() {
-        return "Hello Jenkins!";
-    }
+
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
