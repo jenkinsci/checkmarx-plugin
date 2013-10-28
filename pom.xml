@@ -32,6 +32,11 @@
             <artifactId>CxConsole</artifactId>
             <version>7.1.2.16</version>
         </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.14</version>
+        </dependency>
     </dependencies>
 
     <pluginRepositories>

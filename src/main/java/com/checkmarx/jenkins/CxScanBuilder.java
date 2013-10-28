@@ -1,8 +1,10 @@
 package com.checkmarx.jenkins;
 
 import com.checkmarx.cxconsole.CxConsoleLauncher;
+import com.checkmarx.cxviewer.ws.generated.Credentials;
 import com.checkmarx.cxviewer.ws.generated.CxCLIWebService;
 import com.checkmarx.cxviewer.ws.generated.CxCLIWebServiceSoap;
+import com.checkmarx.cxviewer.ws.generated.CxWSResponseLoginData;
 import com.checkmarx.cxviewer.ws.resolver.CxClientType;
 import com.checkmarx.cxviewer.ws.resolver.CxWSResolver;
 import com.checkmarx.cxviewer.ws.resolver.CxWSResolverSoap;
@@ -17,10 +19,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.SimpleLayout;
-import org.apache.log4j.WriterAppender;
+import org.apache.log4j.*;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -38,6 +37,14 @@ import java.net.URL;
  */
 
 public class CxScanBuilder extends Builder {
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    // Static Initializer
+    //////////////////////////////////////////////////////////////////////////////////////
+
+    static {
+        PropertyConfigurator.configure(CxScanBuilder.class.getResource("log4j.properties"));
+    }
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Persistent plugin configuration parameters
@@ -189,8 +196,10 @@ public class CxScanBuilder extends Builder {
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
-        public static String DEFAULT_INCLUDE_EXTENSION = ".java, .c, .cs"; // TODO: set real default value
-        public static String DEFAULT_EXCLUDE_FOLDERS = "target, work, src/main/resources";
+        public final static String DEFAULT_INCLUDE_EXTENSION = ".java, .c, .cs"; // TODO: set real default value
+        public final static String DEFAULT_EXCLUDE_FOLDERS = "target, work, src/main/resources";
+
+        private static Logger logger = Logger.getLogger(DescriptorImpl.class);
 
         private String webServiceUrl;
 
@@ -204,6 +213,7 @@ public class CxScanBuilder extends Builder {
         //////////////////////////////////////////////////////////////////////////////////////
 
         public FormValidation doCheckServerUrl(@QueryParameter String value) {
+            logger.debug("Test logger");
             try {
                 this.webServiceUrl = null;
                 this.webServiceUrl = resolveWebServiceURL(value);
@@ -216,13 +226,37 @@ public class CxScanBuilder extends Builder {
 
 
         public FormValidation doCheckPassword(@QueryParameter String value, @QueryParameter String username) {
+            final int LCID = 1033;
 
             String password = value;
 
             if (this.webServiceUrl==null) {
                 return FormValidation.warning("Server URL not set");
             }
-            return FormValidation.warning("Username:" + username + " pass:" + password);
+
+            try {
+
+                CxCLIWebService cxCLIWebService = new CxCLIWebService(new URL(this.webServiceUrl));
+                CxCLIWebServiceSoap cxCLIWebServiceSoap = cxCLIWebService.getCxCLIWebServiceSoap();
+                Credentials credentials = new Credentials();
+                credentials.setUser(username);
+                credentials.setPass(password);
+                CxWSResponseLoginData cxWSResponseLoginData = cxCLIWebServiceSoap.login(credentials, LCID);
+                if (cxWSResponseLoginData.isIsSuccesfull())
+                {
+                    return FormValidation.ok("Login Successful");
+                } else {
+                    return FormValidation.error(cxWSResponseLoginData.getErrorMessage());
+                }
+
+            } catch (InaccessibleWSDLException e)
+            {
+                return FormValidation.error("Error connecting to the server");
+            } catch (Exception e)
+            {
+                return FormValidation.error(e.getMessage());
+            }
+
 
         }
 
@@ -255,6 +289,7 @@ public class CxScanBuilder extends Builder {
                 }
             } catch (InaccessibleWSDLException e)
             {
+                logger.debug(e);
                 throw new Exception(NO_CONNECTION_ERROR_MESSAGE);
             }
         }
