@@ -71,6 +71,7 @@ public class CxScanBuilder extends Builder {
     // Private variables
     //////////////////////////////////////////////////////////////////////////////////////
 
+    private static Logger logger = Logger.getLogger(CxScanBuilder.class);
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Constructors
@@ -166,27 +167,24 @@ public class CxScanBuilder extends Builder {
         //boolean result = super.perform(build, launcher, listener);
 
         WriterAppender appender = new WriterAppender(new PatternLayout(),listener.getLogger());
-        Logger.getLogger("com.checkmarx.cxconsole").addAppender(appender);  // Consider using only com.checkmarx.cxconsole.commands logger
-        Logger.getLogger("com.checkmarx.cxviewer").addAppender(appender);
-        System.out.println("Hello Jenkins");
-        listener.getLogger().println("Hello Jenkins logger");
-        listener.getLogger().flush();
+        appender.setThreshold(Level.INFO);
+        Logger.getLogger("com.checkmarx.cxconsole.commands").addAppender(appender);
+
+        // Debug appenders
+        ConsoleAppender debugAppender = new ConsoleAppender();
+        debugAppender.setThreshold(Level.DEBUG);
+        Logger.getLogger("com.checkmarx.cxconsole").addAppender(debugAppender);
+        Logger.getLogger("com.checkmarx.cxviewer").addAppender(debugAppender);
 
 
-
-
-
-
-
-
-        CxConsoleLauncher.main(createCliCommandLineArgs());
+        CxConsoleLauncher.main(createCliCommandLineArgs(build));
 
 
 
         return true;//result;
     }
 
-    private String[] createCliCommandLineArgs()
+    private String[] createCliCommandLineArgs(AbstractBuild<?, ?> build) throws IOException
     {
         LinkedList<String> args = new LinkedList<String>();
         args.add("Scan");
@@ -204,7 +202,13 @@ public class CxScanBuilder extends Builder {
         {
             args.add("-incremental");
         }
-        args.add("-LocationPath"); args.add("/Users/denis/Documents/iOSDevMac/Checkmarx/CLI/ScaneeProject/src"); // TODO: Add real path
+
+        if (build.getWorkspace().isRemote())
+        {
+            logger.error("Workspace is on remote machine");
+            throw new IOException("Workspace is on remote machine");
+        }
+        args.add("-LocationPath"); args.add(build.getWorkspace().getRemote());
         args.add("-LocationPathExclude"); args.add(getLocationPathExclude());
         args.add("-LocationType"); args.add("folder");
         if (this.isPresetSpecified())
@@ -218,7 +222,6 @@ public class CxScanBuilder extends Builder {
         }
 
         args.add("-ProjectName"); args.add(this.getProjectName());
-        args.add("-v");
 
 
 
