@@ -1,6 +1,7 @@
 package com.checkmarx.jenkins;
 
 import com.checkmarx.cxconsole.CxConsoleLauncher;
+import com.checkmarx.cxconsole.commands.CxConsoleCommand;
 import com.checkmarx.cxviewer.ws.generated.Credentials;
 import com.checkmarx.cxviewer.ws.generated.CxCLIWebService;
 import com.checkmarx.cxviewer.ws.generated.CxCLIWebServiceSoap;
@@ -24,6 +25,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -164,7 +166,6 @@ public class CxScanBuilder extends Builder {
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-        //boolean result = super.perform(build, launcher, listener);
 
         WriterAppender appender = new WriterAppender(new PatternLayout(),listener.getLogger());
         appender.setThreshold(Level.INFO);
@@ -177,11 +178,8 @@ public class CxScanBuilder extends Builder {
         Logger.getLogger("com.checkmarx.cxviewer").addAppender(debugAppender);
 
 
-        CxConsoleLauncher.main(createCliCommandLineArgs(build));
-
-
-
-        return true;//result;
+        int cxConsoleLauncherExitCode =  CxConsoleLauncher.runCli(createCliCommandLineArgs(build));
+        return cxConsoleLauncherExitCode == CxConsoleCommand.CODE_OK; // Return true if exit code == CODE_OK
     }
 
     private String[] createCliCommandLineArgs(AbstractBuild<?, ?> build) throws IOException
@@ -222,9 +220,10 @@ public class CxScanBuilder extends Builder {
         }
 
         args.add("-ProjectName"); args.add(this.getProjectName());
+        File reportFile = new File(new File(build.getRootDir(),"checkmarx"),"ScanReport.xml");
+        args.add("-ReportXML"); args.add(reportFile.getAbsolutePath());
 
-
-
+        args.add("-v");
 
 
         return args.toArray(new String[0]);
