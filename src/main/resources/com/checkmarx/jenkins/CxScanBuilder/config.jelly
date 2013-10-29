@@ -27,7 +27,7 @@
     </f:entry>
 
 
-    <f:optionalBlock name="presetSpecified" title="Set Preset" inline="true">
+    <f:optionalBlock title="Set Preset" inline="true" field="presetSpecified">
         <f:entry title="Preset" field="preset">
             <f:textbox/>
         </f:entry>
@@ -41,7 +41,7 @@
         <f:textbox default="${descriptor.DEFAULT_EXCLUDE_FOLDERS}"/>
     </f:entry>
 
-    <f:entry title="Visible to others" field="visibleToOther">
+    <f:entry title="Visible to others" field="visibleToOthers">
         <f:checkbox/>
     </f:entry>
 
