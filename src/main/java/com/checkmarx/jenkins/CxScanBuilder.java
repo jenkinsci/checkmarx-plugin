@@ -187,7 +187,7 @@ public class CxScanBuilder extends Builder {
         LinkedList<String> args = new LinkedList<String>();
         args.add("Scan");
         args.add("-comment");  args.add(this.getComment());
-        if (getSourceEncoding().equals("1"))
+        if ("1".equals(getSourceEncoding()))
         {
             args.add("-Configuration");
             args.add("Japanese (Shift-JIS)");

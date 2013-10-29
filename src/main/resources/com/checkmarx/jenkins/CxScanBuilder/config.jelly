@@ -51,8 +51,14 @@
 
     <f:entry title="Configuration (Source Character Encoding)" field="sourceEncoding">
         <select name="sourceEncoding">
-            <option value="0">Default Configuration (UTF-8)</option>
-            <option value="1">Japanese (Shift-JIS)</option>
+            <j:if test="${instance.sourceEncoding==0}">
+                <option value="0" selected="true">Default Configuration (UTF-8)</option>
+                <option value="1">Japanese (Shift-JIS)</option>
+            </j:if>
+            <j:if test="${instance.sourceEncoding==1}">
+                <option value="0" >Default Configuration (UTF-8)</option>
+                <option value="1" selected="true">Japanese (Shift-JIS)</option>
+            </j:if>
         </select>
     </f:entry>
 
