@@ -20,7 +20,9 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.*;
+import org.codehaus.groovy.runtime.ArrayUtil;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -207,7 +209,14 @@ public class CxScanBuilder extends Builder {
             throw new IOException("Workspace is on remote machine");
         }
         args.add("-LocationPath"); args.add(build.getWorkspace().getRemote());
-        args.add("-LocationPathExclude"); args.add(getLocationPathExclude());
+        args.add("-LocationPathExclude");
+        String[] excludeFolders = StringUtils.split(getLocationPathExclude()," ,;:");
+        for (String excludeFolder : excludeFolders)
+        {
+            args.add(excludeFolder);
+        }
+
+
         args.add("-LocationType"); args.add("folder");
         if (this.isPresetSpecified())
         {
@@ -225,8 +234,10 @@ public class CxScanBuilder extends Builder {
 
         args.add("-v");
 
+        String[] result =  args.toArray(new String[0]);
 
-        return args.toArray(new String[0]);
+        logger.debug("CLI Command Arguments: " + StringUtils.join(result," "));
+        return result;
     }
 
 
