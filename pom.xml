@@ -8,8 +8,8 @@
         <!-- which version of Jenkins is this plugin built against? -->
     </parent>
 
-    <groupId>com.checkmarx</groupId>
-    <artifactId>jenkins</artifactId>
+    <groupId>com.checkmarx.jenkins</groupId>
+    <artifactId>checkmarx</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
@@ -52,6 +52,8 @@
         </pluginRepository>
     </pluginRepositories>
 
+
+
     <build>
         <plugins>
             <plugin>
@@ -67,8 +69,16 @@
                 <artifactId>maven-hpi-plugin</artifactId>
                 <configuration>
                     <pluginFirstClassLoader>true</pluginFirstClassLoader>
+                    <archive>
+                        <manifestEntries>
+                            <Long-Name>Jenkins Checkmarx Plugin</Long-Name>
+                            <Url>http://www.checkmarx.com</Url>
+                        </manifestEntries>
+                    </archive>
                 </configuration>
             </plugin>
+
+
         </plugins>
     </build>
 
