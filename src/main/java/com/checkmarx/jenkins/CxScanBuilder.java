@@ -63,7 +63,7 @@ public class CxScanBuilder extends Builder {
 
     private String preset;
     private boolean presetSpecified;
-    private String includeExtensions;
+    private String extensionsExclude;
     private String locationPathExclude;
 
     private boolean visibleToOthers;
@@ -90,7 +90,7 @@ public class CxScanBuilder extends Builder {
                          String projectName,
                          String preset,
                          boolean presetSpecified,
-                         String includeExtensions,
+                         String extensionsExclude,
                          String locationPathExclude,
                          boolean visibleToOthers,
                          boolean incremental,
@@ -103,7 +103,7 @@ public class CxScanBuilder extends Builder {
         this.projectName = projectName;
         this.preset = preset;
         this.presetSpecified = presetSpecified;
-        this.includeExtensions = includeExtensions;
+        this.extensionsExclude = extensionsExclude;
         this.locationPathExclude = locationPathExclude;
         this.visibleToOthers = visibleToOthers;
         this.incremental = incremental;
@@ -140,8 +140,8 @@ public class CxScanBuilder extends Builder {
     }
 
 
-    public String getIncludeExtensions() {
-        return includeExtensions;
+    public String getExtensionsExclude() {
+        return extensionsExclude;
     }
 
     public String getLocationPathExclude() {
@@ -216,6 +216,13 @@ public class CxScanBuilder extends Builder {
             args.add(excludeFolder);
         }
 
+        // TODO: Add exclude extensions
+        /*String[] excludeExtensions = StringUtils.split(getExtensionsExclude()," ,;:");
+        for (String excludeExtension : excludeExtensions)
+        {
+            args.add(excludeExtension);
+        }*/
+
 
         args.add("-LocationType"); args.add("folder");
         if (this.isPresetSpecified())
@@ -256,8 +263,8 @@ public class CxScanBuilder extends Builder {
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
-        public final static String DEFAULT_INCLUDE_EXTENSION = ".java, .c, .cs"; // TODO: set real default value
-        public final static String DEFAULT_EXCLUDE_FOLDERS = "target, work, src/main/resources";
+        public final static String DEFAULT_EXCLUDE_EXTENSION = "DS_Store, ipr, iws, bak, tmp, aac, aif, iff, m3u, mid, mp3, mpa, ra, wav, wma, 3g2, 3gp, asf, asx, avi, flv, mov, mp4, mpg, rm, swf, vob, wmv, bmp, gif, jpg, png, psd, tif, swf, jar, zip, rar, exe, dll, pdb, 7z, gz, tar.gz, tar, gz,ahtm, ahtml, fhtml, hdm, hdml, hsql, ht, hta, htc, htd, htm, html, htmls, ihtml, mht, mhtm, mhtml, ssi, stm, stml, ttml, txn, xhtm, xhtml, class, iml";
+        public final static String DEFAULT_EXCLUDE_FOLDERS = "_cvs, .svn, .hg, .git, .bzr, bin, obj, backup, .idea";
 
         private static Logger logger = Logger.getLogger(DescriptorImpl.class);
 
