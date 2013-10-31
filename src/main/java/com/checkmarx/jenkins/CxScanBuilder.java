@@ -179,12 +179,12 @@ public class CxScanBuilder extends Builder {
         Logger.getLogger("com.checkmarx.cxconsole").addAppender(debugAppender);
         Logger.getLogger("com.checkmarx.cxviewer").addAppender(debugAppender);
 
-
-        int cxConsoleLauncherExitCode =  CxConsoleLauncher.runCli(createCliCommandLineArgs(build));
+        File checkmarxBuildDir = new File(build.getRootDir(),"checkmarx");
+        int cxConsoleLauncherExitCode =  CxConsoleLauncher.runCli(createCliCommandLineArgs(build,checkmarxBuildDir));
         return cxConsoleLauncherExitCode == CxConsoleCommand.CODE_OK; // Return true if exit code == CODE_OK
     }
 
-    private String[] createCliCommandLineArgs(AbstractBuild<?, ?> build) throws IOException
+    private String[] createCliCommandLineArgs(AbstractBuild<?, ?> build, File checkmarxBuildDir) throws IOException
     {
         LinkedList<String> args = new LinkedList<String>();
         args.add("Scan");
@@ -242,11 +242,11 @@ public class CxScanBuilder extends Builder {
         }
 
         args.add("-ProjectName"); args.add(this.getProjectName());
-        File reportFile = new File(new File(build.getRootDir(),"checkmarx"),"ScanReport.xml");
+        File reportFile = new File(checkmarxBuildDir,"ScanReport.xml");
         args.add("-ReportXML"); args.add(reportFile.getAbsolutePath());
 
         args.add("-v");
-        File logFile = new File(new File(build.getRootDir(),"checkmarx"),"cx_scan.log");
+        File logFile = new File(checkmarxBuildDir,"cx_scan.log");
         args.add("-log"); args.add(logFile.getAbsolutePath());
 
 
