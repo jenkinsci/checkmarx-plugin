@@ -210,20 +210,25 @@ public class CxScanBuilder extends Builder {
         }
         args.add("-LocationPath"); args.add(build.getWorkspace().getRemote());
 
-        args.add("-LocationPathExclude");
         String[] excludeFolders = StringUtils.split(getLocationPathExclude()," ,;:");
-        for (String excludeFolder : excludeFolders)
+        if (excludeFolders.length > 0)
         {
-            args.add(excludeFolder);
+            args.add("-LocationPathExclude");
+            for (String excludeFolder : excludeFolders)
+            {
+                args.add(excludeFolder);
+            }
         }
 
-        args.add("-ExtensionsExclude");
         String[] excludeExtensions = StringUtils.split(getExtensionsExclude()," ,;:");
-        for (String excludeExtension : excludeExtensions)
+        if (excludeExtensions.length > 0)
         {
-            args.add(excludeExtension);
+            args.add("-ExtensionsExclude");
+            for (String excludeExtension : excludeExtensions)
+            {
+                args.add(excludeExtension);
+            }
         }
-
 
         args.add("-LocationType"); args.add("folder");
         if (this.isPresetSpecified())
