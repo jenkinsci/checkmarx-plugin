@@ -246,7 +246,7 @@ public class CxScanBuilder extends Builder {
         args.add("-ReportXML"); args.add(reportFile.getAbsolutePath());
 
         args.add("-v");
-        File logFile = new File(new File(build.getRootDir(),"checkmarx"),"log.txt");
+        File logFile = new File(new File(build.getRootDir(),"checkmarx"),"cx_scan.log");
         args.add("-log"); args.add(logFile.getAbsolutePath());
 
 
