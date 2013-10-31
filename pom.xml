@@ -30,7 +30,7 @@
         <dependency>
             <groupId>com.checkmarx</groupId>
             <artifactId>CxConsole</artifactId>
-            <version>7.1.2.16</version>
+            <version>7.1.2.17</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>

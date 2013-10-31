@@ -209,6 +209,7 @@ public class CxScanBuilder extends Builder {
             throw new IOException("Workspace is on remote machine");
         }
         args.add("-LocationPath"); args.add(build.getWorkspace().getRemote());
+
         args.add("-LocationPathExclude");
         String[] excludeFolders = StringUtils.split(getLocationPathExclude()," ,;:");
         for (String excludeFolder : excludeFolders)
@@ -216,12 +217,12 @@ public class CxScanBuilder extends Builder {
             args.add(excludeFolder);
         }
 
-        // TODO: Add exclude extensions
-        /*String[] excludeExtensions = StringUtils.split(getExtensionsExclude()," ,;:");
+        args.add("-ExtensionsExclude");
+        String[] excludeExtensions = StringUtils.split(getExtensionsExclude()," ,;:");
         for (String excludeExtension : excludeExtensions)
         {
             args.add(excludeExtension);
-        }*/
+        }
 
 
         args.add("-LocationType"); args.add("folder");
