@@ -15,6 +15,7 @@ import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
@@ -180,7 +181,10 @@ public class CxScanBuilder extends Builder {
         Logger.getLogger("com.checkmarx.cxviewer").addAppender(debugAppender);
 
         File checkmarxBuildDir = new File(build.getRootDir(),"checkmarx");
-        int cxConsoleLauncherExitCode =  CxConsoleLauncher.runCli(createCliCommandLineArgs(build,checkmarxBuildDir));
+        int cxConsoleLauncherExitCode = CxConsoleCommand.CODE_OK;// CxConsoleLauncher.runCli(createCliCommandLineArgs(build,checkmarxBuildDir));
+
+        build.addAction(new CxScanResult());
+
         return cxConsoleLauncherExitCode == CxConsoleCommand.CODE_OK; // Return true if exit code == CODE_OK
     }
 
