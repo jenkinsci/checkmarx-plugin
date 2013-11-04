@@ -2,5 +2,11 @@
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
     <h2>Checkmarx jobMain</h2>
-    <p> bla bla bla </p>
+    <p>Last build vulnerabilities summary: </p>
+    <ul>
+        <li>High: ${it.highCount} </li>
+        <li>Medium: ${it.mediumCount} </li>
+        <li>Low: ${it.lowCount} </li>
+        <li>Info: ${it.infoCount} </li>
+    </ul>
 </j:jelly>
