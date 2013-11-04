@@ -1,7 +1,6 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-    <st:nbsp/>
-    <h1>Checkmarx scan results will be here</h1>
 
-
+    <h2>Checkmarx jobMain</h2>
+    <p> bla bla bla </p>
 </j:jelly>

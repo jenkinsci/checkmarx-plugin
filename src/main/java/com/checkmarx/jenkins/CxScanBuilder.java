@@ -181,11 +181,18 @@ public class CxScanBuilder extends Builder {
         Logger.getLogger("com.checkmarx.cxviewer").addAppender(debugAppender);
 
         File checkmarxBuildDir = new File(build.getRootDir(),"checkmarx");
-        int cxConsoleLauncherExitCode = CxConsoleCommand.CODE_OK;// CxConsoleLauncher.runCli(createCliCommandLineArgs(build,checkmarxBuildDir));
+        int cxConsoleLauncherExitCode = CxConsoleCommand.CODE_OK; //CxConsoleLauncher.runCli(createCliCommandLineArgs(build,checkmarxBuildDir));
 
-        build.addAction(new CxScanResult());
+        build.addAction(new CxScanResult(build));
+
 
         return cxConsoleLauncherExitCode == CxConsoleCommand.CODE_OK; // Return true if exit code == CODE_OK
+    }
+
+    @Override
+    public Action getProjectAction(AbstractProject<?, ?> project) {
+        // TODO: Check for nulls and provide fallbacks
+        return project.getLastBuild().getAction(CxScanResult.class);
     }
 
     private String[] createCliCommandLineArgs(AbstractBuild<?, ?> build, File checkmarxBuildDir) throws IOException

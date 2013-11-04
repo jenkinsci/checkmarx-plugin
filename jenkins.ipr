@@ -563,6 +563,17 @@
         <root url="jar://$MAVEN_REPOSITORY$/jaxen/jaxen/1.1-beta-11/jaxen-1.1-beta-11-sources.jar!/" />
       </SOURCES>
     </library>
+    <library name="Maven: jdom:jdom:1.1.1">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/jdom/jdom/1.1.1/jdom-1.1.1.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/jdom/jdom/1.1.1/jdom-1.1.1-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/jdom/jdom/1.1.1/jdom-1.1.1-sources.jar!/" />
+      </SOURCES>
+    </library>
     <library name="Maven: jfree:jcommon:1.0.12">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/jfree/jcommon/1.0.12/jcommon-1.0.12.jar!/" />

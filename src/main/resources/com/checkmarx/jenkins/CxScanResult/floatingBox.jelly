@@ -1,7 +1,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-    <st:nbsp/>
-    <h1>Checkmarx scan results will be here</h1>
-
-
+    <div>
+    <h3 align="center">Checkmarx Security Vulnerabilities Trend</h3>
+    <img src="checkmarx/graph"></img>
+    </div>
 </j:jelly>

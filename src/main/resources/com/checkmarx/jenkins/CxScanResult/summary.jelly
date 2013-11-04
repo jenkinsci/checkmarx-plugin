@@ -1,0 +1,12 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
+         xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <t:summary icon="/plugin/checkmarx/CxIcon24x24.png">
+        <p>Found vulnerabilities summary: </p>
+        <ul>
+            <li>High: ${it.highCount} </li>
+            <li>Medium: ${it.mediumCount} </li>
+            <li>Low: ${it.lowCount} </li>
+            <li>Info: ${it.infoCount} </li>
+        </ul>
+    </t:summary>
+</j:jelly>

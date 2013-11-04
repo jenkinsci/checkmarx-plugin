@@ -71,6 +71,7 @@
                     <pluginFirstClassLoader>true</pluginFirstClassLoader>
                     <archive>
                         <manifestEntries>
+                            <Plugin-Class>com.checkmarx.jenkins.CxPlugin</Plugin-Class>
                             <Long-Name>Jenkins Checkmarx Plugin</Long-Name>
                             <Url>http://www.checkmarx.com</Url>
                         </manifestEntries>
