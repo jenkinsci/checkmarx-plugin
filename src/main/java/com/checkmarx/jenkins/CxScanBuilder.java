@@ -191,8 +191,6 @@ public class CxScanBuilder extends Builder {
             cxScanResult.readScanXMLReport(reportFile);
         }
         build.addAction(cxScanResult);
-
-
         return cxConsoleLauncherExitCode == CxConsoleCommand.CODE_OK; // Return true if exit code == CODE_OK
     }
 

@@ -1,7 +1,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
     <t:summary icon="/plugin/checkmarx/CxIcon24x24.png">
-        <j:if test="${it.resultValid}">
+        <j:if test="${it.resultIsValid}">
             <p>Found vulnerabilities summary: </p>
             <ul>
                 <li>High: ${it.highCount} </li>
@@ -10,7 +10,7 @@
                 <li>Info: ${it.infoCount} </li>
             </ul>
         </j:if>
-        <j:if test="${!it.resultValid}">
+        <j:if test="${!it.resultIsValid}">
             <p>Scan finished with the following error:</p>
             <p>${it.errorMessage}</p>
         </j:if>

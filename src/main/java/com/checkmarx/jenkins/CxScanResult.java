@@ -422,6 +422,7 @@ public class CxScanResult implements HealthReportingAction {
             saxParser.parse(scanXMLReport,handler);
 
             CxScanResult.this.resultIsValid = true;
+            CxScanResult.this.errorMessage=null;
 
         } catch (ParserConfigurationException e)
         {

@@ -2,7 +2,7 @@
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
     <h2>Checkmarx</h2>
-    <j:if test="${it.resultValid}">
+    <j:if test="${it.resultIsValid}">
         <p>Last build vulnerabilities summary: </p>
         <ul>
             <li>High: ${it.highCount} </li>
@@ -11,7 +11,7 @@
             <li>Info: ${it.infoCount} </li>
         </ul>
     </j:if>
-    <j:if test="${!it.resultValid}">
+    <j:if test="${!it.resultIsValid}">
         <p>Last scan finished with the following error:</p>
         <p>${it.errorMessage}</p>
     </j:if>

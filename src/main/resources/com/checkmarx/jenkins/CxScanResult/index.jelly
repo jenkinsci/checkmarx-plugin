@@ -1,7 +1,12 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-    <st:nbsp/>
-    <h1>Checkmarx scan results will be here</h1>
+    <j:if test="${it.resultIsValid}">
+        <st:redirect url="${it.resultDeepLink}">Scan Results</st:redirect>
+    </j:if>
+    <j:if test="${!it.resultIsValid}">
+        <p>Scan finished with the following error:</p>
+        <p>${it.errorMessage}</p>
+    </j:if>
 
 
 </j:jelly>
