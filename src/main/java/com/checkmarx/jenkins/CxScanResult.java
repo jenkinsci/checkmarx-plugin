@@ -3,10 +3,12 @@ package com.checkmarx.jenkins;
 import hudson.Functions;
 import hudson.PluginWrapper;
 import hudson.model.*;
-import hudson.model.Messages;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.*;
 import hudson.util.*;
+import org.apache.log4j.Logger;
+import org.jdom2.Document;
+import org.jdom2.JDOMException;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
@@ -18,13 +20,17 @@ import org.jfree.chart.renderer.category.StackedAreaRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.ui.RectangleInsets;
-import org.jvnet.localizer.Localizable;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
-import org.kohsuke.stapler.export.Exported;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import java.awt.*;
-import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -45,9 +51,15 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CxScanResult implements HealthReportingAction {
 
 
-    public final AbstractBuild<?,?> owner;
 
+    public final AbstractBuild<?,?> owner;
     private Map<String,String> descriptions = new ConcurrentHashMap<String, String>();
+
+    private int highCount;
+    private int mediumCount;
+    private int lowCount;
+    private int infoCount;
+    private String resultDeepLink;
 
     public CxScanResult(AbstractBuild owner)
     {
@@ -77,22 +89,22 @@ public class CxScanResult implements HealthReportingAction {
 
     public int getHighCount()
     {
-        return 1;
+        return highCount;
     }
 
     public int getMediumCount()
     {
-        return 2;
+        return mediumCount;
     }
 
     public int getLowCount()
     {
-        return 3;
+        return lowCount;
     }
 
     public int getInfoCount()
     {
-        return 4;
+        return infoCount;
     }
 
     // Example method, to remove on finish
@@ -264,19 +276,13 @@ public class CxScanResult implements HealthReportingAction {
 
         // set the background color for the chart...
 
-//        final StandardLegend legend = (StandardLegend) chart.getLegend();
-//        legend.setAnchor(StandardLegend.SOUTH);
-
         chart.setBackgroundPaint(Color.white);
 
         final CategoryPlot plot = chart.getCategoryPlot();
 
-        // plot.setAxisOffset(new Spacer(Spacer.ABSOLUTE, 5.0, 5.0, 5.0, 5.0));
         plot.setBackgroundPaint(Color.WHITE);
         plot.setOutlinePaint(null);
         plot.setForegroundAlpha(0.8f);
-//        plot.setDomainGridlinesVisible(true);
-//        plot.setDomainGridlinePaint(Color.white);
         plot.setRangeGridlinesVisible(true);
         plot.setRangeGridlinePaint(Color.black);
 
@@ -312,9 +318,9 @@ public class CxScanResult implements HealthReportingAction {
             }
         };
         plot.setRenderer(ar);
-        ar.setSeriesPaint(0,ColorPalette.RED); // Failures.
-        ar.setSeriesPaint(1,ColorPalette.YELLOW); // Skips.
-        ar.setSeriesPaint(2,ColorPalette.BLUE); // Total.
+        ar.setSeriesPaint(0,ColorPalette.RED); // high.
+        ar.setSeriesPaint(1,ColorPalette.YELLOW); // medium.
+        ar.setSeriesPaint(2,ColorPalette.BLUE); // low.
 
         // crop extra space around the graph
         plot.setInsets(new RectangleInsets(0,0,0,5.0));
@@ -352,6 +358,64 @@ public class CxScanResult implements HealthReportingAction {
         }
 
         return this;
+    }
+
+    public void readScanXMLReport(File scanXMLReport)
+    {
+
+        DefaultHandler handler = new DefaultHandler(){
+            @Override
+            public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+                super.startElement(uri, localName, qName, attributes);
+
+                if ("Result".equals(qName))
+                {
+                    String severity = attributes.getValue("Severity");
+                    if (severity.equals("High")) //TODO: Set real attribute name
+                    {
+                        CxScanResult.this.highCount++;
+
+                    } else if (severity.equals("Medium")) //TODO: Set real attribute name
+                    {
+                        CxScanResult.this.mediumCount++;
+
+                    } else if (severity.equals("Low"))  //TODO: Set real attribute name
+                    {
+                        CxScanResult.this.lowCount++;
+                    } else if (severity.equals("Information"))
+                    {
+                        CxScanResult.this.infoCount++;
+                    }
+                } else {
+                    if ("CxXMLResults".equals(qName))
+                    {
+                        CxScanResult.this.resultDeepLink = attributes.getValue("DeepLink");
+                    }
+                }
+            }
+        };
+
+        try {
+            scanXMLReport = new File("/Users/denis/Documents/iOSDevMac/Checkmarx/Jenkins/Plugin/jenkins/work/jobs/j6/builds/2013-11-04_16-38-28/checkmarx/ScanReport.xml"); // TODO: remove debug code
+            SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
+
+            CxScanResult.this.highCount=0;
+            CxScanResult.this.mediumCount=0;
+            CxScanResult.this.lowCount=0;
+            CxScanResult.this.infoCount=0;
+
+            saxParser.parse(scanXMLReport,handler);
+        } catch (ParserConfigurationException e)
+        {
+            Logger logger = Logger.getLogger(CxScanResult.class);
+            logger.fatal(e);
+        } catch (SAXException e)
+        {
+
+        } catch (IOException e)
+        {
+
+        }
     }
 
 }

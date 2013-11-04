@@ -1146,6 +1146,17 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/hamcrest/hamcrest-library/1.3/hamcrest-library-1.3-sources.jar!/" />
       </SOURCES>
     </library>
+    <library name="Maven: org.jdom:jdom2:2.0.5">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/jdom/jdom2/2.0.5/jdom2-2.0.5.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/org/jdom/jdom2/2.0.5/jdom2-2.0.5-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/jdom/jdom2/2.0.5/jdom2-2.0.5-sources.jar!/" />
+      </SOURCES>
+    </library>
     <library name="Maven: org.jenkins-ci.lib:lib-jenkins-maven-artifact-manager:1.2">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/org/jenkins-ci/lib/lib-jenkins-maven-artifact-manager/1.2/lib-jenkins-maven-artifact-manager-1.2.jar!/" />
