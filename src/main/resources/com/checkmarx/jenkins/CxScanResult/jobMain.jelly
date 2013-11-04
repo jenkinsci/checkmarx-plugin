@@ -2,11 +2,17 @@
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
     <h2>Checkmarx</h2>
-    <p>Last build vulnerabilities summary: </p>
-    <ul>
-        <li>High: ${it.highCount} </li>
-        <li>Medium: ${it.mediumCount} </li>
-        <li>Low: ${it.lowCount} </li>
-        <li>Info: ${it.infoCount} </li>
-    </ul>
+    <j:if test="${it.resultValid}">
+        <p>Last build vulnerabilities summary: </p>
+        <ul>
+            <li>High: ${it.highCount} </li>
+            <li>Medium: ${it.mediumCount} </li>
+            <li>Low: ${it.lowCount} </li>
+            <li>Info: ${it.infoCount} </li>
+        </ul>
+    </j:if>
+    <j:if test="${!it.resultValid}">
+        <p>Last scan finished with the following error:</p>
+        <p>${it.errorMessage}</p>
+    </j:if>
 </j:jelly>

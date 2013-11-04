@@ -7,8 +7,7 @@ import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.*;
 import hudson.util.*;
 import org.apache.log4j.Logger;
-import org.jdom2.Document;
-import org.jdom2.JDOMException;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
@@ -60,10 +59,15 @@ public class CxScanResult implements HealthReportingAction {
     private int lowCount;
     private int infoCount;
     private String resultDeepLink;
+    private boolean resultIsValid;
+    private String errorMessage;
+
 
     public CxScanResult(AbstractBuild owner)
     {
         this.owner = owner;
+        this.resultIsValid=false;
+        this.errorMessage = "No Scan Results"; // error message to appear if results were not parsed
     }
 
 
@@ -105,6 +109,18 @@ public class CxScanResult implements HealthReportingAction {
     public int getInfoCount()
     {
         return infoCount;
+    }
+
+    public String getResultDeepLink() {
+        return resultDeepLink;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public boolean isResultIsValid() {
+        return resultIsValid;
     }
 
     // Example method, to remove on finish
@@ -362,7 +378,7 @@ public class CxScanResult implements HealthReportingAction {
 
     public void readScanXMLReport(File scanXMLReport)
     {
-
+        Logger logger = Logger.getLogger(CxScanResult.class);
         DefaultHandler handler = new DefaultHandler(){
             @Override
             public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
@@ -375,11 +391,11 @@ public class CxScanResult implements HealthReportingAction {
                     {
                         CxScanResult.this.highCount++;
 
-                    } else if (severity.equals("Medium")) //TODO: Set real attribute name
+                    } else if (severity.equals("Medium"))
                     {
                         CxScanResult.this.mediumCount++;
 
-                    } else if (severity.equals("Low"))  //TODO: Set real attribute name
+                    } else if (severity.equals("Low"))
                     {
                         CxScanResult.this.lowCount++;
                     } else if (severity.equals("Information"))
@@ -396,7 +412,6 @@ public class CxScanResult implements HealthReportingAction {
         };
 
         try {
-            scanXMLReport = new File("/Users/denis/Documents/iOSDevMac/Checkmarx/Jenkins/Plugin/jenkins/work/jobs/j6/builds/2013-11-04_16-38-28/checkmarx/ScanReport.xml"); // TODO: remove debug code
             SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
 
             CxScanResult.this.highCount=0;
@@ -405,16 +420,22 @@ public class CxScanResult implements HealthReportingAction {
             CxScanResult.this.infoCount=0;
 
             saxParser.parse(scanXMLReport,handler);
+
+            CxScanResult.this.resultIsValid = true;
+
         } catch (ParserConfigurationException e)
         {
-            Logger logger = Logger.getLogger(CxScanResult.class);
             logger.fatal(e);
         } catch (SAXException e)
         {
-
+            CxScanResult.this.resultIsValid = false;
+            CxScanResult.this.errorMessage = e.getMessage();
+            logger.warn(e);
         } catch (IOException e)
         {
-
+            CxScanResult.this.resultIsValid = false;
+            CxScanResult.this.errorMessage = e.getMessage();
+            logger.warn(e);
         }
     }
 

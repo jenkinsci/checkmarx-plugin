@@ -183,10 +183,13 @@ public class CxScanBuilder extends Builder {
         File checkmarxBuildDir = new File(build.getRootDir(),"checkmarx");
         File reportFile = new File(checkmarxBuildDir,"ScanReport.xml");
 
-        int cxConsoleLauncherExitCode = CxConsoleCommand.CODE_OK; //CxConsoleLauncher.runCli(createCliCommandLineArgs(build,checkmarxBuildDir,reportFile));
+        int cxConsoleLauncherExitCode = CxConsoleLauncher.runCli(createCliCommandLineArgs(build,checkmarxBuildDir,reportFile));
 
         CxScanResult cxScanResult = new CxScanResult(build);
-        cxScanResult.readScanXMLReport(reportFile);
+        if (cxConsoleLauncherExitCode == CxConsoleCommand.CODE_OK)
+        {
+            cxScanResult.readScanXMLReport(reportFile);
+        }
         build.addAction(cxScanResult);
 
 
