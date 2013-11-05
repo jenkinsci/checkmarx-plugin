@@ -65,4 +65,12 @@
     <f:entry title="Comment" field="comment">
         <f:textarea/>
     </f:entry>
+
+
+    <f:optionalBlock title="Enable Vulnerability Threshold" inline="true" field="vulnerabilityThresholdEnabled">
+        <f:entry title="High Severity Vulnerabilities Threshold" field="highThreshold">
+            <f:number clazz="non-negative-number" default="0"/>
+        </f:entry>
+    </f:optionalBlock>
+
 </j:jelly>

@@ -11,12 +11,10 @@ import com.checkmarx.cxviewer.ws.resolver.CxWSResolver;
 import com.checkmarx.cxviewer.ws.resolver.CxWSResolverSoap;
 import com.checkmarx.cxviewer.ws.resolver.CxWSResponseDiscovery;
 import com.sun.xml.internal.ws.wsdl.parser.InaccessibleWSDLException;
+import hudson.AbortException;
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Action;
-import hudson.model.BuildListener;
+import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
@@ -72,6 +70,9 @@ public class CxScanBuilder extends Builder {
     private String sourceEncoding;
     private String comment;
 
+    private boolean vulnerabilityThresholdEnabled;
+    private int highThreshold;
+
     //////////////////////////////////////////////////////////////////////////////////////
     // Private variables
     //////////////////////////////////////////////////////////////////////////////////////
@@ -96,7 +97,9 @@ public class CxScanBuilder extends Builder {
                          boolean visibleToOthers,
                          boolean incremental,
                          String sourceEncoding,
-                         String comment)
+                         String comment,
+                         boolean vulnerabilityThresholdEnabled,
+                         int highThreshold)
     {
         this.serverUrl = serverUrl;
         this.username = username;
@@ -110,6 +113,8 @@ public class CxScanBuilder extends Builder {
         this.incremental = incremental;
         this.sourceEncoding = sourceEncoding;
         this.comment = comment;
+        this.vulnerabilityThresholdEnabled = vulnerabilityThresholdEnabled;
+        this.highThreshold = highThreshold;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -165,7 +170,13 @@ public class CxScanBuilder extends Builder {
         return comment;
     }
 
+    public boolean isVulnerabilityThresholdEnabled() {
+        return vulnerabilityThresholdEnabled;
+    }
 
+    public int getHighThreshold() {
+        return highThreshold;
+    }
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
@@ -183,6 +194,7 @@ public class CxScanBuilder extends Builder {
         File checkmarxBuildDir = new File(build.getRootDir(),"checkmarx");
         File reportFile = new File(checkmarxBuildDir,"ScanReport.xml");
 
+        listener.started(null);
         int cxConsoleLauncherExitCode = CxConsoleLauncher.runCli(createCliCommandLineArgs(build,checkmarxBuildDir,reportFile));
 
         CxScanResult cxScanResult = new CxScanResult(build);
@@ -191,7 +203,18 @@ public class CxScanBuilder extends Builder {
             cxScanResult.readScanXMLReport(reportFile);
         }
         build.addAction(cxScanResult);
-        return cxConsoleLauncherExitCode == CxConsoleCommand.CODE_OK; // Return true if exit code == CODE_OK
+        if (cxConsoleLauncherExitCode != CxConsoleCommand.CODE_OK)
+        {
+            listener.finished(Result.FAILURE);
+            logger.debug("Checkmarx build step finished with: AbortException and Result.FAILURE");
+            throw new AbortException("Checkmarx Scan Failed"); // This exception marks the build as failed
+        } else {
+            // TODO: Return Result.UNSTABLE when threshold fail
+            listener.finished(Result.SUCCESS);
+            logger.debug("Checkmarx build step finished with: Result.SUCCESS");
+            return true;
+        }
+
     }
 
     // return can be empty but never null
@@ -415,6 +438,15 @@ public class CxScanBuilder extends Builder {
             }
         }
 
+        public FormValidation doCheckHighThreshold(@QueryParameter int value)
+        {
+            if (value >= 0)
+            {
+                return FormValidation.ok();
+            } else {
+                return FormValidation.error("Number must be non-negative");
+            }
+        }
 
         /**
          * This human readable name is used in the configuration screen.
