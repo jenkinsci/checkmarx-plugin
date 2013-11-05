@@ -194,10 +194,36 @@ public class CxScanBuilder extends Builder {
         return cxConsoleLauncherExitCode == CxConsoleCommand.CODE_OK; // Return true if exit code == CODE_OK
     }
 
+    // return can be empty but never null
     @Override
     public Action getProjectAction(AbstractProject<?, ?> project) {
-        // TODO: Check for nulls and provide fallbacks
-        return project.getLastBuild().getAction(CxScanResult.class);
+        AbstractBuild<?, ?> lastBuild = project.getLastBuild();
+        if (lastBuild!=null)
+        {
+            Action a = lastBuild.getAction(CxScanResult.class);
+            if (a != null)
+            {
+                return a;
+            }
+        }
+
+        // Return empty action
+        return new Action() {
+            @Override
+            public String getIconFileName() {
+                return null;
+            }
+
+            @Override
+            public String getDisplayName() {
+                return null;
+            }
+
+            @Override
+            public String getUrlName() {
+                return null;
+            }
+        };
     }
 
     private String[] createCliCommandLineArgs(AbstractBuild<?, ?> build, File checkmarxBuildDir, File reportFile) throws IOException

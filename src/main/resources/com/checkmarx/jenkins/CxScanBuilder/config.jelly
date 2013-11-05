@@ -42,7 +42,7 @@
     </f:entry>
 
     <f:entry title="Visible to others" field="visibleToOthers">
-        <f:checkbox/>
+        <f:checkbox default="true"/>
     </f:entry>
 
     <f:entry title="Incremental" field="incremental">
