@@ -10,8 +10,21 @@
 
     <groupId>com.checkmarx.jenkins</groupId>
     <artifactId>checkmarx</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>7.1.3.1</version>
     <packaging>hpi</packaging>
+
+    <licenses>
+        <license>
+            <name>TBD (e.g. The Apache Software License, Version 2.0)</name>
+            <url>TBD (e.g. http://www.apache.org/licenses/LICENSE-2.0.txt)</url>
+            <distribution>TBD (e.g. repo)</distribution>
+            <comments>TBD (e.g. A business-friendly OSS license)</comments>
+        </license>
+    </licenses>
+    <organization>
+        <name>Checkmarx Ltd.</name>
+        <url>http://www.checkmarx.com</url>
+    </organization>
 
     <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
     <repositories>
