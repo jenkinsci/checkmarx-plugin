@@ -9,6 +9,7 @@
                 <li>Low: ${it.lowCount} </li>
                 <li>Info: ${it.infoCount} </li>
             </ul>
+            <p><a href="${it.urlName}">Detailed report</a></p>
         </j:if>
         <j:if test="${!it.resultIsValid}">
             <p>Scan finished with the following error:</p>
