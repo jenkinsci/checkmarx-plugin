@@ -1,6 +1,6 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-    <t:summary icon="/plugin/checkmarx/CxIcon24x24.png">
+    <t:summary icon="/plugin/checkmarx/CxIcon48x48.png">
         <j:if test="${it.resultIsValid}">
             <p>Found vulnerabilities summary: </p>
             <ul>
