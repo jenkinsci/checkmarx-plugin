@@ -1,8 +1,26 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
     <j:if test="${it.resultIsValid}">
-        <st:redirect url="${it.resultDeepLink}">Scan Results</st:redirect>
+        <p>Checkmarx Scan Results Summary</p>
+        <table  border="1">
+            <tr>
+                <th>Vulnerability Type</th>
+                <th>Occurrences</th>
+                <th>Severity</th>
+            </tr>
+
+            <j:forEach var="qr" items="${it.queryResultList}">
+                <tr>
+                    <td>${qr.prettyName}</td>
+                    <td>${qr.count}</td>
+                    <td>${qr.severity}</td>
+                </tr>
+            </j:forEach>
+
+        </table>
+        <p><a href="${it.resultDeepLink}">Full Scan Results</a></p>
     </j:if>
+
     <j:if test="${!it.resultIsValid}">
         <p>Scan finished with the following error:</p>
         <p>${it.errorMessage}</p>

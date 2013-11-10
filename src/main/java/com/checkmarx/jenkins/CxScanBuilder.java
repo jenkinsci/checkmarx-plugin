@@ -197,24 +197,30 @@ public class CxScanBuilder extends Builder {
         listener.started(null);
         int cxConsoleLauncherExitCode = CxConsoleLauncher.runCli(createCliCommandLineArgs(build,checkmarxBuildDir,reportFile));
 
-        CxScanResult cxScanResult = new CxScanResult(build);
-        if (cxConsoleLauncherExitCode == CxConsoleCommand.CODE_OK)
-        {
-            cxScanResult.readScanXMLReport(reportFile);
-        }
-        build.addAction(cxScanResult);
         if (cxConsoleLauncherExitCode != CxConsoleCommand.CODE_OK)
         {
             listener.finished(Result.FAILURE);
             logger.debug("Checkmarx build step finished with: AbortException and Result.FAILURE");
             throw new AbortException("Checkmarx Scan Failed"); // This exception marks the build as failed
-        } else {
-            // TODO: Return Result.UNSTABLE when threshold fail
-            listener.finished(Result.SUCCESS);
-            logger.debug("Checkmarx build step finished with: Result.SUCCESS");
-            return true;
         }
 
+        CxScanResult cxScanResult = new CxScanResult(build);
+        cxScanResult.readScanXMLReport(reportFile);
+        build.addAction(cxScanResult);
+
+        if (this.isVulnerabilityThresholdEnabled())
+        {
+            if (cxScanResult.getHighCount() >  this.getHighThreshold())
+            {
+                listener.finished(Result.UNSTABLE);
+                logger.debug("Checkmarx build step finished with: Result.UNSTABLE");
+                return true;
+            }
+        }
+
+        listener.finished(Result.SUCCESS);
+        logger.debug("Checkmarx build step finished with: Result.SUCCESS");
+        return true;
     }
 
     // return can be empty but never null

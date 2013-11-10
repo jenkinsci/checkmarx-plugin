@@ -32,6 +32,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -58,6 +59,7 @@ public class CxScanResult implements HealthReportingAction {
     private int mediumCount;
     private int lowCount;
     private int infoCount;
+    private LinkedList<QueryResult> queryResultList;
     private String resultDeepLink;
     private boolean resultIsValid;
     private String errorMessage;
@@ -68,6 +70,7 @@ public class CxScanResult implements HealthReportingAction {
         this.owner = owner;
         this.resultIsValid=false;
         this.errorMessage = "No Scan Results"; // error message to appear if results were not parsed
+        this.queryResultList = new LinkedList<QueryResult>();
     }
 
 
@@ -123,50 +126,9 @@ public class CxScanResult implements HealthReportingAction {
         return resultIsValid;
     }
 
-    // Example method, to remove on finish
-    public void doFloatingBox(org.kohsuke.stapler.StaplerRequest req,
-                      org.kohsuke.stapler.StaplerResponse rsp)
-            throws IOException
-    {
-
-        hudson.util.Graph graph = new hudson.util.Graph(System.currentTimeMillis(),600,600){
-
-            @Override
-            protected JFreeChart createGraph() {
-                DefaultCategoryDataset ds = new DefaultCategoryDataset();
-                ds.addValue(1,"row1key","col1key");
-                ds.addValue(4,"row1key","col2key");
-                ds.addValue(2,"row1key","col3key");
-                ds.addValue(5,"row1key","col4key");
-                JFreeChart j = ChartFactory.createLineChart("Checkmarx Scan Results","Build","# of Vulnerabilities",ds, PlotOrientation.VERTICAL,true,true,true);
-                return j;
-            }
-        };
-        graph.doPng(req,rsp);
+    public LinkedList<QueryResult> getQueryResultList() {
+        return queryResultList;
     }
-
-    // Example method, to remove on finish
-    public void doMap(org.kohsuke.stapler.StaplerRequest req,
-                      org.kohsuke.stapler.StaplerResponse rsp)
-            throws IOException
-    {
-
-        hudson.util.Graph graph = new hudson.util.Graph(System.currentTimeMillis(),600,600){
-
-            @Override
-            protected JFreeChart createGraph() {
-                DefaultCategoryDataset ds = new DefaultCategoryDataset();
-                ds.addValue(1,"row1key","col1key");
-                ds.addValue(4,"row1key","col2key");
-                ds.addValue(2,"row1key","col3key");
-                ds.addValue(5,"row1key","col4key");
-                JFreeChart j = ChartFactory.createLineChart("Checkmarx Scan Results","Build","# of Vulnerabilities",ds, PlotOrientation.VERTICAL,true,true,true);
-                return j;
-            }
-        };
-        graph.doMap(req,rsp);
-    }
-
 
     /**
      * Gets the diff string of failures.
@@ -283,7 +245,7 @@ public class CxScanResult implements HealthReportingAction {
                 "count",                  // range axis label
                 dataset,                  // data
                 PlotOrientation.VERTICAL, // orientation
-                false,                     // include legend
+                true,                     // include legend
                 true,                     // tooltips
                 false                     // urls
         );
@@ -379,37 +341,7 @@ public class CxScanResult implements HealthReportingAction {
     public void readScanXMLReport(File scanXMLReport)
     {
         Logger logger = Logger.getLogger(CxScanResult.class);
-        DefaultHandler handler = new DefaultHandler(){
-            @Override
-            public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-                super.startElement(uri, localName, qName, attributes);
-
-                if ("Result".equals(qName))
-                {
-                    String severity = attributes.getValue("Severity");
-                    if (severity.equals("High")) //TODO: Set real attribute name
-                    {
-                        CxScanResult.this.highCount++;
-
-                    } else if (severity.equals("Medium"))
-                    {
-                        CxScanResult.this.mediumCount++;
-
-                    } else if (severity.equals("Low"))
-                    {
-                        CxScanResult.this.lowCount++;
-                    } else if (severity.equals("Information"))
-                    {
-                        CxScanResult.this.infoCount++;
-                    }
-                } else {
-                    if ("CxXMLResults".equals(qName))
-                    {
-                        CxScanResult.this.resultDeepLink = attributes.getValue("DeepLink");
-                    }
-                }
-            }
-        };
+        ResultsParseHandler handler = new ResultsParseHandler();
 
         try {
             SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
@@ -437,6 +369,98 @@ public class CxScanResult implements HealthReportingAction {
             CxScanResult.this.resultIsValid = false;
             CxScanResult.this.errorMessage = e.getMessage();
             logger.warn(e);
+        }
+    }
+
+    private class ResultsParseHandler extends DefaultHandler {
+
+        private String currentQueryName;
+        private String currentQuerySeverity;
+        private int    currentQueryNumOfResults;
+
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+            super.startElement(uri, localName, qName, attributes);
+
+            if ("Result".equals(qName))
+            {
+                currentQueryNumOfResults++;
+                String severity = attributes.getValue("Severity");
+                if (severity.equals("High"))
+                {
+                    CxScanResult.this.highCount++;
+
+                } else if (severity.equals("Medium"))
+                {
+                    CxScanResult.this.mediumCount++;
+
+                } else if (severity.equals("Low"))
+                {
+                    CxScanResult.this.lowCount++;
+                } else if (severity.equals("Information"))
+                {
+                    CxScanResult.this.infoCount++;
+                }
+            } if ("Query".equals(qName)) {
+                currentQueryName = attributes.getValue("name");
+                currentQuerySeverity = attributes.getValue("Severity");
+                currentQueryNumOfResults = 0;
+
+
+            } else {
+                if ("CxXMLResults".equals(qName))
+                {
+                    CxScanResult.this.resultDeepLink = attributes.getValue("DeepLink");
+                }
+            }
+        }
+
+        @Override
+        public void endElement(String uri, String localName, String qName) throws SAXException {
+            super.endElement(uri, localName, qName);
+            if ("Query".equals(qName)) {
+                QueryResult qr = new QueryResult();
+                qr.setName(currentQueryName);
+                qr.setSeverity(currentQuerySeverity);
+                qr.setCount(currentQueryNumOfResults);
+                CxScanResult.this.queryResultList.add(qr);
+
+            }
+        }
+    }
+
+    public static class QueryResult {
+        private String name;
+        private String severity;
+        private int count;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getSeverity() {
+            return severity;
+        }
+
+        public void setSeverity(String severity) {
+            this.severity = severity;
+        }
+
+        public int getCount() {
+            return count;
+        }
+
+        public void setCount(int count) {
+            this.count = count;
+        }
+
+        public String getPrettyName()
+        {
+            return this.name.replace('_',' ');
         }
     }
 
