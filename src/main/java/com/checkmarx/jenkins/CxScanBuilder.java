@@ -1,5 +1,7 @@
 package com.checkmarx.jenkins;
 
+import com.checkmarx.components.zipper.ZipListener;
+import com.checkmarx.components.zipper.Zipper;
 import com.checkmarx.cxconsole.CxConsoleLauncher;
 import com.checkmarx.cxconsole.commands.CxConsoleCommand;
 import com.checkmarx.cxviewer.ws.generated.Credentials;
@@ -19,16 +21,17 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.*;
-import org.codehaus.groovy.runtime.ArrayUtil;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.LinkedList;
 
@@ -42,14 +45,6 @@ import java.util.LinkedList;
 
 public class CxScanBuilder extends Builder {
 
-    //////////////////////////////////////////////////////////////////////////////////////
-    // Static Initializer
-    //////////////////////////////////////////////////////////////////////////////////////
-
-    static {
-        //PropertyConfigurator.configure(CxScanBuilder.class.getResource("log4j.properties"));
-        BasicConfigurator.configure();  // TODO: Find out why the property configuration does not work
-    }
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Persistent plugin configuration parameters
@@ -78,6 +73,7 @@ public class CxScanBuilder extends Builder {
     //////////////////////////////////////////////////////////////////////////////////////
 
     private static Logger logger = Logger.getLogger(CxScanBuilder.class);
+    private final long MAX_ZIP_SIZE = 100*1024; //200 * 1024 * 1024;
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Constructors
@@ -179,8 +175,14 @@ public class CxScanBuilder extends Builder {
     }
 
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher,BuildListener listener) throws InterruptedException, IOException {
 
+
+        submitScan(build,listener);
+
+
+        // Old code
+        /*
         WriterAppender appender = new WriterAppender(new PatternLayout(),listener.getLogger());
         appender.setThreshold(Level.INFO);
         Logger.getLogger("com.checkmarx.cxconsole.commands").addAppender(appender);
@@ -219,7 +221,7 @@ public class CxScanBuilder extends Builder {
         }
 
         listener.finished(Result.SUCCESS);
-        logger.debug("Checkmarx build step finished with: Result.SUCCESS");
+        logger.debug("Checkmarx build step finished with: Result.SUCCESS");*/
         return true;
     }
 
@@ -324,6 +326,42 @@ public class CxScanBuilder extends Builder {
 
         logger.debug("CLI Command Arguments: " + StringUtils.join(result," "));
         return result;
+    }
+
+
+
+
+    private void submitScan(AbstractBuild<?, ?> build, final BuildListener listener) throws AbortException, IOException
+    {
+
+        ZipListener zipListener = new ZipListener() {
+            @Override
+            public void updateProgress(String fileName, long size) {
+                listener.getLogger().append("Zipping (" + FileUtils.byteCountToDisplaySize(size) + "): " + fileName + "\n");
+            }
+
+        };
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        File baseDir = new File(build.getWorkspace().getRemote());
+
+        listener.getLogger().append("\nStarting to zip the workspace\n\n");
+        try {
+            new Zipper().zip(baseDir,this.getLocationPathExclude(),byteArrayOutputStream,MAX_ZIP_SIZE,zipListener);
+        } catch (Zipper.MaxZipSizeReached e)
+        {
+            throw new AbortException("Checkmarx Scan Failed: Reached maximum upload size limit of " + FileUtils.byteCountToDisplaySize(MAX_ZIP_SIZE));
+        } catch (Zipper.NoFilesToZip e)
+        {
+            throw new AbortException("Checkmarx Scan Failed: No files to scan");
+        }
+
+
+        // webService.scan(byteArrayOutputStream.getBytes())
+
+
+
     }
 
 

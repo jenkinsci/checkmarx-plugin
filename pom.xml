@@ -41,6 +41,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.checkmarx.components</groupId>
+            <artifactId>zipper</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.checkmarx</groupId>
             <artifactId>CxConsole</artifactId>
             <version>7.1.2.17</version>
@@ -64,7 +70,6 @@
             <url>http://repo.jenkins-ci.org/public/</url>
         </pluginRepository>
     </pluginRepositories>
-
 
 
     <build>
@@ -92,6 +97,42 @@
                 </configuration>
             </plugin>
 
+            <plugin>
+                <groupId>org.jvnet.jax-ws-commons</groupId>
+                <artifactId>jaxws-maven-plugin</artifactId>
+                <version>2.3</version>
+                <executions>
+                    <execution>
+                        <id>CxCLIWebService</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>wsimport</goal>
+                        </goals>
+                        <configuration>
+                            <wsdlUrls>
+                                <wsdlUrl>${basedir}/src/main/resources/com/checkmarx/jenkins/CxWebService/CxCLIWebService.wsdl</wsdlUrl>
+                            </wsdlUrls>
+                            <packageName>com.checkmarx.ws.CxCLIWebService</packageName>
+                            <target>2.1</target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>cxwsresolver</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>wsimport</goal>
+                        </goals>
+                        <configuration>
+                            <wsdlUrls>
+                                <wsdlUrl>${basedir}/src/main/resources/com/checkmarx/jenkins/CxWebService/cxwsresolver.wsdl</wsdlUrl>
+                            </wsdlUrls>
+                            <packageName>com.checkmarx.ws.CxWSResolver</packageName>
+                            <target>2.1</target>
+                        </configuration>
+                    </execution>
+                </executions>
+
+            </plugin>
 
         </plugins>
     </build>
