@@ -12,6 +12,7 @@ import com.checkmarx.cxviewer.ws.resolver.CxClientType;
 import com.checkmarx.cxviewer.ws.resolver.CxWSResolver;
 import com.checkmarx.cxviewer.ws.resolver.CxWSResolverSoap;
 import com.checkmarx.cxviewer.ws.resolver.CxWSResponseDiscovery;
+import com.checkmarx.ws.CxCLIWebService.*;
 import com.sun.xml.internal.ws.wsdl.parser.InaccessibleWSDLException;
 import hudson.AbortException;
 import hudson.Extension;
@@ -73,7 +74,7 @@ public class CxScanBuilder extends Builder {
     //////////////////////////////////////////////////////////////////////////////////////
 
     private static Logger logger = Logger.getLogger(CxScanBuilder.class);
-    private final long MAX_ZIP_SIZE = 100*1024; //200 * 1024 * 1024;
+    private final long MAX_ZIP_SIZE = 200 * 1024 * 1024;
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Constructors
@@ -177,8 +178,14 @@ public class CxScanBuilder extends Builder {
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher,BuildListener listener) throws InterruptedException, IOException {
 
+        CxWebService cxWebService = new CxWebService(getServerUrl());
+        cxWebService.login(getUsername(),getPassword());
+        listener.getLogger().append("Checkmarx server login successful\n");
 
-        submitScan(build,listener);
+        CxWSResponseRunID cxWSResponseRunID = submitScan(build, listener, cxWebService);
+        listener.getLogger().append("\nScan job submitted successfully\n");
+
+        cxWebService.trackScanProgress(cxWSResponseRunID,listener);
 
 
         // Old code
@@ -331,7 +338,7 @@ public class CxScanBuilder extends Builder {
 
 
 
-    private void submitScan(AbstractBuild<?, ?> build, final BuildListener listener) throws AbortException, IOException
+    private CxWSResponseRunID submitScan(AbstractBuild<?, ?> build, final BuildListener listener, CxWebService cxWebService) throws AbortException, IOException
     {
 
         ZipListener zipListener = new ZipListener() {
@@ -358,10 +365,33 @@ public class CxScanBuilder extends Builder {
         }
 
 
-        // webService.scan(byteArrayOutputStream.getBytes())
+        return cxWebService.scan(createCliScanArgs(byteArrayOutputStream.toByteArray()));
+   }
 
+    private CliScanArgs createCliScanArgs(byte[] compressedSources)
+    {
 
+        ProjectSettings projectSettings = new ProjectSettings();
+        projectSettings.setDescription(getComment());
+        // TODO: implement presentID
+        projectSettings.setProjectName(getProjectName());
+        projectSettings.setScanConfigurationID(0); // TODO: Re-implement source encoding settings
 
+        LocalCodeContainer localCodeContainer = new LocalCodeContainer();
+        localCodeContainer.setFileName("src.zip"); // TODO: Check what filename to set
+        localCodeContainer.setZippedFile(compressedSources);
+
+        SourceCodeSettings sourceCodeSettings = new SourceCodeSettings();
+        sourceCodeSettings.setSourceOrigin(SourceLocationType.LOCAL);
+        sourceCodeSettings.setPackagedCode(localCodeContainer);
+
+        CliScanArgs args = new CliScanArgs();
+        args.setIsIncremental(isIncremental());
+        args.setIsPrivateScan(!isVisibleToOthers());
+        args.setPrjSettings(projectSettings);
+        args.setSrcCodeSettings(sourceCodeSettings);
+
+        return args;
     }
 
 
