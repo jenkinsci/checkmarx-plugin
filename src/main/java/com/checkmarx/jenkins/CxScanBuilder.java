@@ -178,6 +178,11 @@ public class CxScanBuilder extends Builder {
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher,BuildListener listener) throws InterruptedException, IOException {
 
+        File checkmarxBuildDir = new File(build.getRootDir(),"checkmarx");
+        File reportFile = new File(checkmarxBuildDir,"ScanReport.xml");
+
+        initLogger(checkmarxBuildDir,listener);
+
         CxWebService cxWebService = new CxWebService(getServerUrl());
         cxWebService.login(getUsername(),getPassword());
         listener.getLogger().append("Checkmarx server login successful\n");
@@ -262,6 +267,24 @@ public class CxScanBuilder extends Builder {
                 return null;
             }
         };
+    }
+
+    private void initLogger(File checkmarxBuildDir, BuildListener listener)
+    {
+        WriterAppender writerAppender = new WriterAppender(new PatternLayout("%m%n"),listener.getLogger());
+        writerAppender.setThreshold(Level.INFO);
+        Logger.getLogger("com.checkmarx.jenkins").addAppender(writerAppender);
+        String logFileName = checkmarxBuildDir.getAbsolutePath() + File.separator + "checkmarx.log";
+
+        try {
+            FileAppender fileAppender = new FileAppender(new PatternLayout("%d %-5p: %m%n"),logFileName);
+            fileAppender.setThreshold(Level.DEBUG);
+            Logger.getLogger("com.checkmarx.jenkins").addAppender(fileAppender);
+        } catch (IOException e)
+        {
+            logger.warn("Could not open log file for writing: " + logFileName);
+            logger.debug(e);
+        }
     }
 
     private String[] createCliCommandLineArgs(AbstractBuild<?, ?> build, File checkmarxBuildDir, File reportFile) throws IOException
@@ -373,7 +396,7 @@ public class CxScanBuilder extends Builder {
 
         ProjectSettings projectSettings = new ProjectSettings();
         projectSettings.setDescription(getComment());
-        // TODO: implement presentID
+        // TODO: implement presetID
         projectSettings.setProjectName(getProjectName());
         projectSettings.setScanConfigurationID(0); // TODO: Re-implement source encoding settings
 
