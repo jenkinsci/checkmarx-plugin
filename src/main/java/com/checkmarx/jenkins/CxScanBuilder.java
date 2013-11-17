@@ -273,7 +273,7 @@ public class CxScanBuilder extends Builder {
     {
         WriterAppender writerAppender = new WriterAppender(new PatternLayout("%m%n"),listener.getLogger());
         writerAppender.setThreshold(Level.INFO);
-        Logger.getLogger("com.checkmarx.jenkins").addAppender(writerAppender);
+        Logger.getLogger("com.checkmarx").addAppender(writerAppender);
         String logFileName = checkmarxBuildDir.getAbsolutePath() + File.separator + "checkmarx.log";
 
         try {

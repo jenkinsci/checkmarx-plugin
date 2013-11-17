@@ -24,7 +24,7 @@ public class CxWebService {
     private final static Logger logger = Logger.getLogger(CxWebService.class);
     private final static QName CXWSRESOLVER_QNAME = new QName("http://Checkmarx.com", "CxWSResolver");
     private final static QName CXCLIWEBSERVICE_QNAME = new QName("http://Checkmarx.com/v7", "CxCLIWebService");
-    private final static int WEBSERVICE_API_VERSION = 1;
+    private final static int WEBSERVICE_API_VERSION = 7;
     private final static String CXWSRESOLVER_PATH = "/cxwebinterface/cxwsresolver.asmx";
     private final static int LCID = 1033; // English
 
