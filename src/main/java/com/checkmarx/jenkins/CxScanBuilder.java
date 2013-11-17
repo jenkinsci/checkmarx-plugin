@@ -2,17 +2,11 @@ package com.checkmarx.jenkins;
 
 import com.checkmarx.components.zipper.ZipListener;
 import com.checkmarx.components.zipper.Zipper;
-import com.checkmarx.cxconsole.CxConsoleLauncher;
-import com.checkmarx.cxconsole.commands.CxConsoleCommand;
-import com.checkmarx.cxviewer.ws.generated.Credentials;
-import com.checkmarx.cxviewer.ws.generated.CxCLIWebService;
-import com.checkmarx.cxviewer.ws.generated.CxCLIWebServiceSoap;
-import com.checkmarx.cxviewer.ws.generated.CxWSResponseLoginData;
-import com.checkmarx.cxviewer.ws.resolver.CxClientType;
-import com.checkmarx.cxviewer.ws.resolver.CxWSResolver;
-import com.checkmarx.cxviewer.ws.resolver.CxWSResolverSoap;
-import com.checkmarx.cxviewer.ws.resolver.CxWSResponseDiscovery;
 import com.checkmarx.ws.CxCLIWebService.*;
+import com.checkmarx.ws.CxWSResolver.CxClientType;
+import com.checkmarx.ws.CxWSResolver.CxWSResolver;
+import com.checkmarx.ws.CxWSResolver.CxWSResolverSoap;
+import com.checkmarx.ws.CxWSResolver.CxWSResponseDiscovery;
 import com.sun.xml.internal.ws.wsdl.parser.InaccessibleWSDLException;
 import hudson.AbortException;
 import hudson.Extension;
@@ -23,13 +17,13 @@ import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.*;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
+import javax.xml.namespace.QName;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -471,8 +465,8 @@ public class CxScanBuilder extends Builder {
             }
 
             try {
-
-                CxCLIWebService cxCLIWebService = new CxCLIWebService(new URL(this.webServiceUrl));
+                // TODO: Use CxWebService for implementation
+                CxCLIWebService cxCLIWebService = new CxCLIWebService(new URL(this.webServiceUrl),new QName("http://Checkmarx.com/v7", "CxCLIWebService"));
                 CxCLIWebServiceSoap cxCLIWebServiceSoap = cxCLIWebService.getCxCLIWebServiceSoap();
                 Credentials credentials = new Credentials();
                 credentials.setUser(username);
@@ -519,7 +513,8 @@ public class CxScanBuilder extends Builder {
                 }
                 url = new URL(url.toString() + WS_RESOLVER_PATH);
 
-                CxWSResolver cxWSResolver = new CxWSResolver(url);
+                // TODO: Use CxWebServer for implementation
+                CxWSResolver cxWSResolver = new CxWSResolver(url,new QName("http://Checkmarx.com", "CxWSResolver"));
                 CxWSResolverSoap cxWSResolverSoap = cxWSResolver.getCxWSResolverSoap();
                 CxWSResponseDiscovery cxWSResponseDiscovery = cxWSResolverSoap.getWebServiceUrl(CxClientType.CLI,WS_CLI_INTERFACE_VERSION);
                 if (cxWSResponseDiscovery.isIsSuccesfull())

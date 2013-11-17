@@ -47,11 +47,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.checkmarx</groupId>
-            <artifactId>CxConsole</artifactId>
-            <version>7.1.2.17</version>
-        </dependency>
-        <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>1.2.14</version>
@@ -86,7 +81,7 @@
                 <groupId>org.jenkins-ci.tools</groupId>
                 <artifactId>maven-hpi-plugin</artifactId>
                 <configuration>
-                    <pluginFirstClassLoader>true</pluginFirstClassLoader>
+                    <pluginFirstClassLoader>false</pluginFirstClassLoader>
                     <archive>
                         <manifestEntries>
                             <Plugin-Class>com.checkmarx.jenkins.CxPlugin</Plugin-Class>
