@@ -111,18 +111,41 @@ public class CxWebService {
 
     public void trackScanProgress(CxWSResponseRunID cxWSResponseRunID, BuildListener listener) throws AbortException
     {
-
+        boolean locReported = false;
+        loop:
         while (true)
         {
             CxWSResponseScanStatus status = this.getScanStatus(cxWSResponseRunID);
-            String message;
-                switch (status.getCurrentStatus())
+            switch (status.getCurrentStatus())
             {
                 // In progress states
-                case QUEUED:
-                case WORKING:
-                case UNZIPPING:
                 case WAITING_TO_PROCESS:
+                    logger.info("Scan job waiting for processing");
+                    break ;
+
+                case QUEUED:
+                    if (!locReported)
+                    {
+                        logger.info("Source contains: " + status.getLOC() + " lines of code.");
+                        locReported = true;
+                    }
+                    logger.info("Scan job queued at position: " + status.getQueuePosition());
+                    break ;
+
+                case UNZIPPING:
+                    logger.info("Unzipping: " + status.getCurrentStagePercent() + "% finished");
+                    logger.info("LOC: " + status.getLOC());
+                    logger.info("StageMessage: " + status.getStageMessage());
+                    logger.info("StepMessage: " + status.getStepMessage());
+                    logger.info("StepDetails: " + status.getStepDetails());
+
+                    break ;
+
+                case WORKING:
+                    logger.info("Scanning: " + status.getStageMessage() + " " + status.getStepDetails() +
+                            " (stage: " + status.getCurrentStagePercent() + "%, total: "+ status.getTotalPercent() + "%)");
+                    break ;
+
 
                 // End of progress states
                 case FINISHED:
@@ -130,10 +153,12 @@ public class CxWebService {
                 case DELETED:
                 case UNKNOWN:
                 case CANCELED:
+                    logger.info("Scan " + status.getStageName() + " RunID: " + status.getRunId());
+                    break loop;
             }
 
             try {
-                Thread.currentThread().wait(10);
+                Thread.sleep(10*1000);
             } catch (InterruptedException e)
             {
                 String err = "Process interrupted while waiting for scan results";
