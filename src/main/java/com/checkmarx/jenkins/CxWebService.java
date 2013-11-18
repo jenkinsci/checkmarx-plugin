@@ -6,9 +6,13 @@ import com.checkmarx.ws.CxWSResolver.*;
 import com.sun.xml.internal.ws.wsdl.parser.InaccessibleWSDLException;
 import hudson.AbortException;
 import hudson.model.BuildListener;
+import hudson.util.IOUtils;
 import org.apache.log4j.Logger;
 
 import javax.xml.namespace.QName;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -109,10 +113,11 @@ public class CxWebService {
 
 
 
-    public void trackScanProgress(CxWSResponseRunID cxWSResponseRunID, BuildListener listener) throws AbortException
+    public long trackScanProgress(CxWSResponseRunID cxWSResponseRunID, BuildListener listener) throws AbortException
     {
+        assert sessionId!=null : "Trying to track scan progress before login";
+
         boolean locReported = false;
-        loop:
         while (true)
         {
             CxWSResponseScanStatus status = this.getScanStatus(cxWSResponseRunID);
@@ -149,12 +154,17 @@ public class CxWebService {
 
                 // End of progress states
                 case FINISHED:
+                    logger.info("Scan Finished Successfully -  RunID: " + status.getRunId() + " ScanID:" + status.getScanId());
+                    return status.getScanId();
+
                 case FAILED:
                 case DELETED:
                 case UNKNOWN:
                 case CANCELED:
-                    logger.info("Scan " + status.getStageName() + " RunID: " + status.getRunId());
-                    break loop;
+                    String message = "Scan " + status.getStageName() + " -  RunID: " + status.getRunId() + " ScanID:" + status.getScanId();
+                    logger.info(message);
+                    logger.info("Stage Message" +  status.getStageMessage());
+                    throw new AbortException(message);
             }
 
             try {
@@ -170,6 +180,81 @@ public class CxWebService {
 
 
 
+    }
+
+    public void retrieveScanReport(long scanId, File reportFile) throws AbortException
+    {
+        assert sessionId!=null : "Trying to retrieve scan report before login";
+
+        CxWSReportRequest cxWSReportRequest = new CxWSReportRequest();
+        cxWSReportRequest.setScanID(scanId);
+        cxWSReportRequest.setType(CxWSReportType.XML);
+        logger.info("Requesting Scan Report Generation");
+        CxWSCreateReportResponse cxWSCreateReportResponse = cxCLIWebServiceSoap.createScanReport(sessionId,cxWSReportRequest);
+        if (!cxWSCreateReportResponse.isIsSuccesfull())
+        {
+            String message = "Error requesting scan report generation: " + cxWSCreateReportResponse.getErrorMessage();
+            logger.error(message);
+            throw new AbortException(message);
+        }
+
+        // Wait for the report to become ready
+
+        while (true)
+        {
+            CxWSReportStatusResponse cxWSReportStatusResponse = cxCLIWebServiceSoap.getScanReportStatus(sessionId,cxWSCreateReportResponse.getID());
+            if (!cxWSReportStatusResponse.isIsSuccesfull())
+            {
+                String message = "Error retrieving scan report status: " + cxWSReportStatusResponse.getErrorMessage();
+                logger.error(message);
+                throw new AbortException(message);
+            }
+            if (cxWSReportStatusResponse.isIsFailed())
+            {
+                String message = "Failed to create scan report";
+                logger.error("Web method getScanReportStatus returned status response with isFailed field set to true");
+                logger.error(message);
+                throw new AbortException(message);
+            }
+
+            if (cxWSReportStatusResponse.isIsReady())
+            {
+                logger.info("Scan report generated on Checkmarx server");
+                break;
+            }
+
+            logger.info("Report generation in progress");
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e)
+            {
+                String err = "Process interrupted while waiting for scan results";
+                logger.error(err);
+                logger.error(e);
+                throw new AbortException(err);
+            }
+        }
+
+        CxWSResponseScanResults cxWSResponseScanResults = cxCLIWebServiceSoap.getScanReport(sessionId,cxWSCreateReportResponse.getID());
+        if (!cxWSResponseScanResults.isIsSuccesfull()) {
+            String message = "Error retrieving scan report: " + cxWSResponseScanResults.getErrorMessage();
+            logger.error(message);
+            throw new AbortException(message);
+        }
+
+        // Save results on disk
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream(reportFile);
+            IOUtils.write(cxWSResponseScanResults.getScanResults(),fileOutputStream);
+
+        } catch (IOException e)
+        {
+            logger.debug(e);
+            String message = "Can't create report file: " + reportFile.getAbsolutePath();
+            logger.info(message);
+            throw new AbortException(message);
+        }
+        logger.info("Scan report written to: " + reportFile.getAbsolutePath());
     }
 
 }

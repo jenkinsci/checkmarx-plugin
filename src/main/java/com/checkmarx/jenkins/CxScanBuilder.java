@@ -173,6 +173,7 @@ public class CxScanBuilder extends Builder {
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher,BuildListener listener) throws InterruptedException, IOException {
 
         File checkmarxBuildDir = new File(build.getRootDir(),"checkmarx");
+        checkmarxBuildDir.mkdir();
         File reportFile = new File(checkmarxBuildDir,"ScanReport.xml");
 
         initLogger(checkmarxBuildDir,listener);
@@ -184,7 +185,9 @@ public class CxScanBuilder extends Builder {
         CxWSResponseRunID cxWSResponseRunID = submitScan(build, listener, cxWebService);
         listener.getLogger().append("\nScan job submitted successfully\n");
 
-        cxWebService.trackScanProgress(cxWSResponseRunID,listener);
+        long scanId =  cxWebService.trackScanProgress(cxWSResponseRunID,listener);
+
+        cxWebService.retrieveScanReport(scanId,reportFile);
 
 
         // Old code
@@ -280,6 +283,8 @@ public class CxScanBuilder extends Builder {
             logger.debug(e);
         }
     }
+
+
 
     private String[] createCliCommandLineArgs(AbstractBuild<?, ?> build, File checkmarxBuildDir, File reportFile) throws IOException
     {
