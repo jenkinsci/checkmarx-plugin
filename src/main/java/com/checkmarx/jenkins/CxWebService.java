@@ -113,7 +113,7 @@ public class CxWebService {
 
 
 
-    public long trackScanProgress(CxWSResponseRunID cxWSResponseRunID, BuildListener listener) throws AbortException
+    public long trackScanProgress(CxWSResponseRunID cxWSResponseRunID) throws AbortException
     {
         assert sessionId!=null : "Trying to track scan progress before login";
 

@@ -193,7 +193,7 @@ public class CxScanBuilder extends Builder {
             return true;
         }
 
-        long scanId =  cxWebService.trackScanProgress(cxWSResponseRunID,listener);
+        long scanId =  cxWebService.trackScanProgress(cxWSResponseRunID);
 
         cxWebService.retrieveScanReport(scanId,reportFile);
 
@@ -260,9 +260,9 @@ public class CxScanBuilder extends Builder {
         String logFileName = checkmarxBuildDir.getAbsolutePath() + File.separator + "checkmarx.log";
 
         try {
-            FileAppender fileAppender = new FileAppender(new PatternLayout("%d %-5p: %m%n"),logFileName);
+            FileAppender fileAppender = new FileAppender(new PatternLayout("%C: [%d] %-5p: %m%n"),logFileName);
             fileAppender.setThreshold(Level.DEBUG);
-            Logger.getLogger("com.checkmarx.jenkins").addAppender(fileAppender);
+            Logger.getLogger("com.checkmarx").addAppender(fileAppender);
         } catch (IOException e)
         {
             logger.warn("Could not open log file for writing: " + logFileName);
@@ -276,7 +276,7 @@ public class CxScanBuilder extends Builder {
         ZipListener zipListener = new ZipListener() {
             @Override
             public void updateProgress(String fileName, long size) {
-                listener.getLogger().append("Zipping (" + FileUtils.byteCountToDisplaySize(size) + "): " + fileName + "\n");
+                logger.info("Zipping (" + FileUtils.byteCountToDisplaySize(size) + "): " + fileName);
             }
 
         };
@@ -285,7 +285,7 @@ public class CxScanBuilder extends Builder {
 
         File baseDir = new File(build.getWorkspace().getRemote());
 
-        listener.getLogger().append("\nStarting to zip the workspace\n\n");
+        logger.info("Starting to zip the workspace");
         try {
             new Zipper().zip(baseDir,this.getFilterPattern(),byteArrayOutputStream,MAX_ZIP_SIZE,zipListener);
         } catch (Zipper.MaxZipSizeReached e)
