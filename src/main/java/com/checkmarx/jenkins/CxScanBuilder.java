@@ -24,11 +24,9 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import javax.xml.namespace.QName;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
-import java.util.LinkedList;
+import java.util.Properties;
 
 /**
  * The main entry point for Checkmarx plugin. This class implements the Builder
@@ -69,7 +67,6 @@ public class CxScanBuilder extends Builder {
     //////////////////////////////////////////////////////////////////////////////////////
 
     private static Logger logger = Logger.getLogger(CxScanBuilder.class);
-    private final long MAX_ZIP_SIZE = 200 * 1024 * 1024;
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Constructors
@@ -179,7 +176,7 @@ public class CxScanBuilder extends Builder {
         initLogger(checkmarxBuildDir,listener);
 
         listener.started(null);
-        logger.info("Checkmarx Jenkins plugin version: " + "TBD"); // TODO: Add plugin version
+        logger.info("Checkmarx Jenkins plugin version: " + CxConfig.version());
 
         CxWebService cxWebService = new CxWebService(getServerUrl());
         cxWebService.login(getUsername(),getPassword());
@@ -288,10 +285,10 @@ public class CxScanBuilder extends Builder {
 
         logger.info("Starting to zip the workspace");
         try {
-            new Zipper().zip(baseDir,this.getFilterPattern(),byteArrayOutputStream,MAX_ZIP_SIZE,zipListener);
+            new Zipper().zip(baseDir,this.getFilterPattern(),byteArrayOutputStream,CxConfig.maxZipSize(),zipListener);
         } catch (Zipper.MaxZipSizeReached e)
         {
-            throw new AbortException("Checkmarx Scan Failed: Reached maximum upload size limit of " + FileUtils.byteCountToDisplaySize(MAX_ZIP_SIZE));
+            throw new AbortException("Checkmarx Scan Failed: Reached maximum upload size limit of " + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()));
         } catch (Zipper.NoFilesToZip e)
         {
             throw new AbortException("Checkmarx Scan Failed: No files to scan");
@@ -346,7 +343,8 @@ public class CxScanBuilder extends Builder {
         //public final static String DEFAULT_EXCLUDE_EXTENSION = "DS_Store, ipr, iws, bak, tmp, aac, aif, iff, m3u, mid, mp3, mpa, ra, wav, wma, 3g2, 3gp, asf, asx, avi, flv, mov, mp4, mpg, rm, swf, vob, wmv, bmp, gif, jpg, png, psd, tif, swf, jar, zip, rar, exe, dll, pdb, 7z, gz, tar.gz, tar, gz,ahtm, ahtml, fhtml, hdm, hdml, hsql, ht, hta, htc, htd, htm, html, htmls, ihtml, mht, mhtm, mhtml, ssi, stm, stml, ttml, txn, xhtm, xhtml, class, iml";
         //public final static String DEFAULT_EXCLUDE_FOLDERS = "_cvs, .svn, .hg, .git, .bzr, bin, obj, backup, .idea";
         // TODO: Set real value for DEFAULT_FILTER_PATTERNS
-        public final static String DEFAULT_FILTER_PATTERNS = "!**/_cvs/**/*, !**/.svn/**/*, !**/.hg/**/*, !**/.git/**/*, !**/.bzr/**/*, !**/bin/**/*, !**/obj/**/*, !**/backup/**/*, !**/.idea/**/*";
+        public final static String DEFAULT_FILTER_PATTERNS = CxConfig.defaultFilterPattern();
+        //"!**/_cvs/**/*, !**/.svn/**/*, !**/.hg/**/*, !**/.git/**/*, !**/.bzr/**/*, !**/bin/**/*, !**/obj/**/*, !**/backup/**/*, !**/.idea/**/*";
 
         private static Logger logger = Logger.getLogger(DescriptorImpl.class);
 
