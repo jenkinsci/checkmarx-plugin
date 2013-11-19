@@ -33,12 +33,8 @@
         </f:entry>
     </f:optionalBlock>
 
-    <f:entry title="Exclude Extensions" field="extensionsExclude">
-        <f:textbox default="${descriptor.DEFAULT_EXCLUDE_EXTENSION}"/>
-    </f:entry>
-
-    <f:entry title="Exclude Folders" field="locationPathExclude">
-        <f:textbox default="${descriptor.DEFAULT_EXCLUDE_FOLDERS}"/>
+    <f:entry title="Include/Exclude wildcard patterns" field="filterPattern">
+        <f:textbox default="${descriptor.DEFAULT_FILTER_PATTERNS}"/>
     </f:entry>
 
     <f:entry title="Visible to others" field="visibleToOthers">

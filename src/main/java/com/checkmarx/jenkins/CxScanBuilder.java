@@ -52,8 +52,7 @@ public class CxScanBuilder extends Builder {
 
     private String preset;
     private boolean presetSpecified;
-    private String extensionsExclude;
-    private String locationPathExclude;
+    private String filterPattern;
 
     private boolean visibleToOthers;
     private boolean incremental;
@@ -85,8 +84,7 @@ public class CxScanBuilder extends Builder {
                          String projectName,
                          String preset,
                          boolean presetSpecified,
-                         String extensionsExclude,
-                         String locationPathExclude,
+                         String filterPattern,
                          boolean visibleToOthers,
                          boolean incremental,
                          String sourceEncoding,
@@ -101,8 +99,7 @@ public class CxScanBuilder extends Builder {
         this.projectName = projectName;
         this.preset = preset;
         this.presetSpecified = presetSpecified;
-        this.extensionsExclude = extensionsExclude;
-        this.locationPathExclude = locationPathExclude;
+        this.filterPattern = filterPattern;
         this.visibleToOthers = visibleToOthers;
         this.incremental = incremental;
         this.sourceEncoding = sourceEncoding;
@@ -140,13 +137,8 @@ public class CxScanBuilder extends Builder {
         return presetSpecified;
     }
 
-
-    public String getExtensionsExclude() {
-        return extensionsExclude;
-    }
-
-    public String getLocationPathExclude() {
-        return locationPathExclude;
+    public String getFilterPattern() {
+        return filterPattern;
     }
 
     public boolean isVisibleToOthers() {
@@ -278,82 +270,6 @@ public class CxScanBuilder extends Builder {
         }
     }
 
-
-
-    private String[] createCliCommandLineArgs(AbstractBuild<?, ?> build, File checkmarxBuildDir, File reportFile) throws IOException
-    {
-        LinkedList<String> args = new LinkedList<String>();
-        args.add("Scan");
-        args.add("-comment");  args.add(this.getComment());
-        if ("1".equals(getSourceEncoding()))
-        {
-            args.add("-Configuration");
-            args.add("Japanese (Shift-JIS)");
-        }
-
-        args.add("-CxPassword"); args.add(this.getPassword());
-        args.add("-CxServer");   args.add(this.getServerUrl());
-        args.add("-CxUser");     args.add(this.getUsername());
-        if (this.isIncremental())
-        {
-            args.add("-incremental");
-        }
-
-        if (build.getWorkspace().isRemote())
-        {
-            logger.error("Workspace is on remote machine");
-            throw new IOException("Workspace is on remote machine");
-        }
-        args.add("-LocationPath"); args.add(build.getWorkspace().getRemote());
-
-        String[] excludeFolders = StringUtils.split(getLocationPathExclude()," ,;:");
-        if (excludeFolders.length > 0)
-        {
-            args.add("-LocationPathExclude");
-            for (String excludeFolder : excludeFolders)
-            {
-                args.add(excludeFolder);
-            }
-        }
-
-        String[] excludeExtensions = StringUtils.split(getExtensionsExclude()," ,;:");
-        if (excludeExtensions.length > 0)
-        {
-            args.add("-ExtensionsExclude");
-            for (String excludeExtension : excludeExtensions)
-            {
-                args.add(excludeExtension);
-            }
-        }
-
-        args.add("-LocationType"); args.add("folder");
-        if (this.isPresetSpecified())
-        {
-            args.add("-Preset"); args.add(this.getPreset());
-        }
-
-        if (!this.isVisibleToOthers())
-        {
-            args.add("-private");
-        }
-
-        args.add("-ProjectName"); args.add(this.getProjectName());
-        args.add("-ReportXML"); args.add(reportFile.getAbsolutePath());
-
-        args.add("-v");
-        File logFile = new File(checkmarxBuildDir,"cx_scan.log");
-        args.add("-log"); args.add(logFile.getAbsolutePath());
-
-
-        String[] result =  args.toArray(new String[0]);
-
-        logger.debug("CLI Command Arguments: " + StringUtils.join(result," "));
-        return result;
-    }
-
-
-
-
     private CxWSResponseRunID submitScan(AbstractBuild<?, ?> build, final BuildListener listener, CxWebService cxWebService) throws AbortException, IOException
     {
 
@@ -371,7 +287,7 @@ public class CxScanBuilder extends Builder {
 
         listener.getLogger().append("\nStarting to zip the workspace\n\n");
         try {
-            new Zipper().zip(baseDir,this.getLocationPathExclude(),byteArrayOutputStream,MAX_ZIP_SIZE,zipListener);
+            new Zipper().zip(baseDir,this.getFilterPattern(),byteArrayOutputStream,MAX_ZIP_SIZE,zipListener);
         } catch (Zipper.MaxZipSizeReached e)
         {
             throw new AbortException("Checkmarx Scan Failed: Reached maximum upload size limit of " + FileUtils.byteCountToDisplaySize(MAX_ZIP_SIZE));
@@ -426,8 +342,10 @@ public class CxScanBuilder extends Builder {
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
-        public final static String DEFAULT_EXCLUDE_EXTENSION = "DS_Store, ipr, iws, bak, tmp, aac, aif, iff, m3u, mid, mp3, mpa, ra, wav, wma, 3g2, 3gp, asf, asx, avi, flv, mov, mp4, mpg, rm, swf, vob, wmv, bmp, gif, jpg, png, psd, tif, swf, jar, zip, rar, exe, dll, pdb, 7z, gz, tar.gz, tar, gz,ahtm, ahtml, fhtml, hdm, hdml, hsql, ht, hta, htc, htd, htm, html, htmls, ihtml, mht, mhtm, mhtml, ssi, stm, stml, ttml, txn, xhtm, xhtml, class, iml";
-        public final static String DEFAULT_EXCLUDE_FOLDERS = "_cvs, .svn, .hg, .git, .bzr, bin, obj, backup, .idea";
+        //public final static String DEFAULT_EXCLUDE_EXTENSION = "DS_Store, ipr, iws, bak, tmp, aac, aif, iff, m3u, mid, mp3, mpa, ra, wav, wma, 3g2, 3gp, asf, asx, avi, flv, mov, mp4, mpg, rm, swf, vob, wmv, bmp, gif, jpg, png, psd, tif, swf, jar, zip, rar, exe, dll, pdb, 7z, gz, tar.gz, tar, gz,ahtm, ahtml, fhtml, hdm, hdml, hsql, ht, hta, htc, htd, htm, html, htmls, ihtml, mht, mhtm, mhtml, ssi, stm, stml, ttml, txn, xhtm, xhtml, class, iml";
+        //public final static String DEFAULT_EXCLUDE_FOLDERS = "_cvs, .svn, .hg, .git, .bzr, bin, obj, backup, .idea";
+        // TODO: Set real value for DEFAULT_FILTER_PATTERNS
+        public final static String DEFAULT_FILTER_PATTERNS = "!**/_cvs/**/*, !**/.svn/**/*, !**/.hg/**/*, !**/.git/**/*, !**/.bzr/**/*, !**/bin/**/*, !**/obj/**/*, !**/backup/**/*, !**/.idea/**/*";
 
         private static Logger logger = Logger.getLogger(DescriptorImpl.class);
 
