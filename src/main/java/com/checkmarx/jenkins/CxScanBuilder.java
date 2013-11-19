@@ -179,6 +179,7 @@ public class CxScanBuilder extends Builder {
         initLogger(checkmarxBuildDir,listener);
 
         listener.started(null);
+        logger.info("Checkmarx Jenkins plugin version: " + "TBD"); // TODO: Add plugin version
 
         CxWebService cxWebService = new CxWebService(getServerUrl());
         cxWebService.login(getUsername(),getPassword());
@@ -349,7 +350,7 @@ public class CxScanBuilder extends Builder {
 
         private static Logger logger = Logger.getLogger(DescriptorImpl.class);
 
-        private String webServiceUrl;
+        private CxWebService cxWebService;
 
 
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
@@ -362,8 +363,8 @@ public class CxScanBuilder extends Builder {
 
         public FormValidation doCheckServerUrl(@QueryParameter String value) {
             try {
-                this.webServiceUrl = null;
-                this.webServiceUrl = resolveWebServiceURL(value);
+                this.cxWebService = null;
+                this.cxWebService = new CxWebService(value);
                 return FormValidation.ok("Server Validated Successfully");
             } catch (Exception e)
             {
@@ -373,32 +374,17 @@ public class CxScanBuilder extends Builder {
 
 
         public FormValidation doCheckPassword(@QueryParameter String value, @QueryParameter String username) {
-            final int LCID = 1033;
 
             String password = value;
 
-            if (this.webServiceUrl==null) {
+            if (this.cxWebService==null) {
                 return FormValidation.warning("Server URL not set");
             }
 
             try {
-                // TODO: Use CxWebService for implementation
-                CxCLIWebService cxCLIWebService = new CxCLIWebService(new URL(this.webServiceUrl),new QName("http://Checkmarx.com/v7", "CxCLIWebService"));
-                CxCLIWebServiceSoap cxCLIWebServiceSoap = cxCLIWebService.getCxCLIWebServiceSoap();
-                Credentials credentials = new Credentials();
-                credentials.setUser(username);
-                credentials.setPass(password);
-                CxWSResponseLoginData cxWSResponseLoginData = cxCLIWebServiceSoap.login(credentials, LCID);
-                if (cxWSResponseLoginData.isIsSuccesfull())
-                {
-                    return FormValidation.ok("Login Successful");
-                } else {
-                    return FormValidation.error(cxWSResponseLoginData.getErrorMessage());
-                }
+                this.cxWebService.login(username,password);
+                return FormValidation.ok("Login Successful");
 
-            } catch (InaccessibleWSDLException e)
-            {
-                return FormValidation.error("Error connecting to the server");
             } catch (Exception e)
             {
                 return FormValidation.error(e.getMessage());

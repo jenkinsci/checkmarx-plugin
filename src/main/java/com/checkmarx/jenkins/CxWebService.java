@@ -38,7 +38,15 @@ public class CxWebService {
     public CxWebService(String serverUrl) throws MalformedURLException, AbortException
     {
         logger.info("Establishing connection with Checkmarx server at: " + serverUrl);
+        URL serverUrlUrl = new URL(serverUrl);
+        if (serverUrlUrl.getPath().length() > 0)
+        {
+            String message = "Checkmarx server url must not contain path: " + serverUrl;
+            logger.debug(message);
+            throw new AbortException(message);
+        }
         URL resolverUrl = new URL(serverUrl + CXWSRESOLVER_PATH);
+
         logger.debug("Resolver url: " + resolverUrl);
         CxWSResolver cxWSResolver;
         try {
