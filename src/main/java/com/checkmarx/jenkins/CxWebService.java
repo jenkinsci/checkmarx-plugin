@@ -225,7 +225,7 @@ public class CxWebService {
 
             logger.info("Report generation in progress");
             try {
-                Thread.sleep(100); // TODO: Set real waiting time
+                Thread.sleep(2*1000);
             } catch (InterruptedException e)
             {
                 String err = "Process interrupted while waiting for scan results";

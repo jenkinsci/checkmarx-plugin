@@ -67,10 +67,13 @@
     </f:entry>
 
 
-    <f:optionalBlock title="Enable Vulnerability Threshold" inline="true" field="vulnerabilityThresholdEnabled">
-        <f:entry title="High Severity Vulnerabilities Threshold" field="highThreshold">
-            <f:number clazz="non-negative-number" default="0"/>
-        </f:entry>
+    <f:optionalBlock title="Wait for scan results" inline="true" field="waitForResultsEnabled">
+        <f:optionalBlock title="Enable Vulnerability Threshold" inline="true" field="vulnerabilityThresholdEnabled">
+            <f:entry title="High Severity Vulnerabilities Threshold" field="highThreshold">
+                <f:number clazz="non-negative-number" default="0"/>
+            </f:entry>
+        </f:optionalBlock>
     </f:optionalBlock>
+
 
 </j:jelly>

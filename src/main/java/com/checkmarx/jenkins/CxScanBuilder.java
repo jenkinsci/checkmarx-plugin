@@ -60,6 +60,8 @@ public class CxScanBuilder extends Builder {
     private String sourceEncoding;
     private String comment;
 
+    private boolean waitForResultsEnabled;
+
     private boolean vulnerabilityThresholdEnabled;
     private int highThreshold;
 
@@ -89,6 +91,7 @@ public class CxScanBuilder extends Builder {
                          boolean incremental,
                          String sourceEncoding,
                          String comment,
+                         boolean waitForResultsEnabled,
                          boolean vulnerabilityThresholdEnabled,
                          int highThreshold)
     {
@@ -104,6 +107,7 @@ public class CxScanBuilder extends Builder {
         this.incremental = incremental;
         this.sourceEncoding = sourceEncoding;
         this.comment = comment;
+        this.waitForResultsEnabled = waitForResultsEnabled;
         this.vulnerabilityThresholdEnabled = vulnerabilityThresholdEnabled;
         this.highThreshold = highThreshold;
     }
@@ -161,6 +165,10 @@ public class CxScanBuilder extends Builder {
         return comment;
     }
 
+    public boolean isWaitForResultsEnabled() {
+        return waitForResultsEnabled;
+    }
+
     public boolean isVulnerabilityThresholdEnabled() {
         return vulnerabilityThresholdEnabled;
     }
@@ -187,6 +195,12 @@ public class CxScanBuilder extends Builder {
         CxWSResponseRunID cxWSResponseRunID = submitScan(build, listener, cxWebService);
         logger.info("\nScan job submitted successfully\n");
 
+        if (!isWaitForResultsEnabled())
+        {
+            listener.finished(Result.SUCCESS);
+            return true;
+        }
+
         long scanId =  cxWebService.trackScanProgress(cxWSResponseRunID,listener);
 
         cxWebService.retrieveScanReport(scanId,reportFile);
@@ -202,14 +216,14 @@ public class CxScanBuilder extends Builder {
             if (cxScanResult.getHighCount() >  this.getHighThreshold())
             {
                 listener.finished(Result.UNSTABLE);
-                logger.info("Build step marked as UNSTABLE. Number of high severity vulnerabilities: " +
+                logger.info("Build step finished: UNSTABLE. Number of high severity vulnerabilities: " +
                         cxScanResult.getHighCount() + " stability threshold: " + this.getHighThreshold());
-                return true;
+                return false;
             }
         }
 
         listener.finished(Result.SUCCESS);
-        logger.info("Build step marked as SUCCESS. Number of high severity vulnerabilities: " +
+        logger.info("Build step finished: SUCCESS. Number of high severity vulnerabilities: " +
                 cxScanResult.getHighCount() + " stability threshold: " + this.getHighThreshold());
         return true;
     }
