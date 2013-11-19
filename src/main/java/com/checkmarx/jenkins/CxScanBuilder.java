@@ -203,20 +203,20 @@ public class CxScanBuilder extends Builder {
         cxScanResult.readScanXMLReport(reportFile);
         build.addAction(cxScanResult);
 
+        logger.info("Number of high severity vulnerabilities: " +
+                cxScanResult.getHighCount() + " stability threshold: " + this.getHighThreshold());
+
         if (this.isVulnerabilityThresholdEnabled())
         {
             if (cxScanResult.getHighCount() >  this.getHighThreshold())
             {
+                build.setResult(Result.UNSTABLE);    // Marks the build result as UNSTABLE
                 listener.finished(Result.UNSTABLE);
-                logger.info("Build step finished: UNSTABLE. Number of high severity vulnerabilities: " +
-                        cxScanResult.getHighCount() + " stability threshold: " + this.getHighThreshold());
-                return false;
+                return true;
             }
         }
 
         listener.finished(Result.SUCCESS);
-        logger.info("Build step finished: SUCCESS. Number of high severity vulnerabilities: " +
-                cxScanResult.getHighCount() + " stability threshold: " + this.getHighThreshold());
         return true;
     }
 
