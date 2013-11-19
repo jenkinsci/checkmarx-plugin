@@ -382,8 +382,6 @@ public class CxScanBuilder extends Builder {
             {
                 return FormValidation.error(e.getMessage());
             }
-
-
         }
 
         public FormValidation doCheckHighThreshold(@QueryParameter int value)

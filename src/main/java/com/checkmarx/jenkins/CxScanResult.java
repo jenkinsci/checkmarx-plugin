@@ -31,6 +31,7 @@ import javax.xml.parsers.SAXParserFactory;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -164,16 +165,6 @@ public class CxScanResult implements HealthReportingAction {
     }
 
 
-
-    /**
-     * A shortcut for summary.jelly
-     *
-     * @return List of failed tests from associated test result.
-     */
-    public List<CaseResult> getFailedTests() {
-        return Collections.emptyList();
-    }
-
     /**
      * Generates a PNG image for the test result trend.
      */
@@ -185,7 +176,9 @@ public class CxScanResult implements HealthReportingAction {
         }
 
         if(req.checkIfModified(owner.getTimestamp(),rsp))
-            return;
+        {
+            //return; // TODO: check why the timestap does not refresh
+        }
 
         ChartUtil.generateGraph(req,rsp,createChart(req,buildDataSet(req)),calcDefaultSize());
     }
@@ -220,17 +213,21 @@ public class CxScanResult implements HealthReportingAction {
             return new Area(500,200);
     }
 
+    private enum Severity {
+        High,
+        Medium,
+        Low;
+    }
+
     private CategoryDataset buildDataSet(StaplerRequest req) {
         boolean highOnly = Boolean.valueOf(req.getParameter("highOnly"));
 
-        DataSetBuilder<String,ChartUtil.NumberOnlyBuildLabel> dsb = new DataSetBuilder<String,ChartUtil.NumberOnlyBuildLabel>();
+        DataSetBuilder<Severity,ChartUtil.NumberOnlyBuildLabel> dsb = new DataSetBuilder<Severity,ChartUtil.NumberOnlyBuildLabel>();
 
         for( CxScanResult a=this; a!=null; a=a.getPreviousResult() ) {
-            dsb.add( a.getHighCount(), "High", new ChartUtil.NumberOnlyBuildLabel(a.owner));
-            if(!highOnly) {
-                dsb.add( a.getMediumCount(), "Medium", new ChartUtil.NumberOnlyBuildLabel(a.owner));
-                dsb.add( a.getLowCount(),"Low", new ChartUtil.NumberOnlyBuildLabel(a.owner));
-            }
+            dsb.add( a.getHighCount(), Severity.High, new ChartUtil.NumberOnlyBuildLabel(a.owner));
+            dsb.add( a.getMediumCount(), Severity.Medium, new ChartUtil.NumberOnlyBuildLabel(a.owner));
+            dsb.add( a.getLowCount(),Severity.Low, new ChartUtil.NumberOnlyBuildLabel(a.owner));
         }
         return dsb.build();
     }
@@ -296,9 +293,9 @@ public class CxScanResult implements HealthReportingAction {
             }
         };
         plot.setRenderer(ar);
-        ar.setSeriesPaint(0,ColorPalette.RED); // high.
-        ar.setSeriesPaint(1,ColorPalette.YELLOW); // medium.
-        ar.setSeriesPaint(2,ColorPalette.BLUE); // low.
+        ar.setSeriesPaint(0,new Color(246,0,22)); // high.
+        ar.setSeriesPaint(1,new Color(249,167,16)); // medium.
+        ar.setSeriesPaint(2,new Color(254,255,3)); // low.
 
         // crop extra space around the graph
         plot.setInsets(new RectangleInsets(0,0,0,5.0));
