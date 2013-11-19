@@ -34,7 +34,7 @@
     </f:optionalBlock>
 
     <f:entry title="Include/Exclude wildcard patterns" field="filterPattern">
-        <f:textbox default="${descriptor.DEFAULT_FILTER_PATTERNS}"/>
+        <f:textarea default="${descriptor.DEFAULT_FILTER_PATTERNS}"/>
     </f:entry>
 
     <f:entry title="Visible to others" field="visibleToOthers">

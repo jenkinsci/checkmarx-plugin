@@ -340,12 +340,7 @@ public class CxScanBuilder extends Builder {
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
-        //public final static String DEFAULT_EXCLUDE_EXTENSION = "DS_Store, ipr, iws, bak, tmp, aac, aif, iff, m3u, mid, mp3, mpa, ra, wav, wma, 3g2, 3gp, asf, asx, avi, flv, mov, mp4, mpg, rm, swf, vob, wmv, bmp, gif, jpg, png, psd, tif, swf, jar, zip, rar, exe, dll, pdb, 7z, gz, tar.gz, tar, gz,ahtm, ahtml, fhtml, hdm, hdml, hsql, ht, hta, htc, htd, htm, html, htmls, ihtml, mht, mhtm, mhtml, ssi, stm, stml, ttml, txn, xhtm, xhtml, class, iml";
-        //public final static String DEFAULT_EXCLUDE_FOLDERS = "_cvs, .svn, .hg, .git, .bzr, bin, obj, backup, .idea";
-        // TODO: Set real value for DEFAULT_FILTER_PATTERNS
         public final static String DEFAULT_FILTER_PATTERNS = CxConfig.defaultFilterPattern();
-        //"!**/_cvs/**/*, !**/.svn/**/*, !**/.hg/**/*, !**/.git/**/*, !**/.bzr/**/*, !**/bin/**/*, !**/obj/**/*, !**/backup/**/*, !**/.idea/**/*";
-
         private static Logger logger = Logger.getLogger(DescriptorImpl.class);
 
         private CxWebService cxWebService;
