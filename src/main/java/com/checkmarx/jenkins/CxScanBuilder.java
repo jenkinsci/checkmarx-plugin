@@ -386,46 +386,6 @@ public class CxScanBuilder extends Builder {
 
         }
 
-        private String resolveWebServiceURL(String serverUrl) throws Exception
-        {
-            final String WS_RESOLVER_PATH = "/cxwebinterface/cxWSResolver.asmx";
-            final int WS_CLI_INTERFACE_VERSION = 0;
-            final String NO_CONNECTION_ERROR_MESSAGE = "Checkmarx server did not respond on the specified URL";
-
-            try {
-                if (serverUrl==null || serverUrl.isEmpty())
-                {
-                    throw new Exception("Provide Server URL");
-                }
-
-                URL url = new URL(serverUrl);
-                if (!url.getPath().isEmpty())
-                {
-                    throw new Exception("URL Must not contain path");
-                }
-                if (url.getQuery()!=null)
-                {
-                    throw new Exception("URL Must not contain query parameters");
-                }
-                url = new URL(url.toString() + WS_RESOLVER_PATH);
-
-                // TODO: Use CxWebServer for implementation
-                CxWSResolver cxWSResolver = new CxWSResolver(url,new QName("http://Checkmarx.com", "CxWSResolver"));
-                CxWSResolverSoap cxWSResolverSoap = cxWSResolver.getCxWSResolverSoap();
-                CxWSResponseDiscovery cxWSResponseDiscovery = cxWSResolverSoap.getWebServiceUrl(CxClientType.CLI,WS_CLI_INTERFACE_VERSION);
-                if (cxWSResponseDiscovery.isIsSuccesfull())
-                {
-                    return cxWSResponseDiscovery.getServiceURL();
-                } else {
-                    throw new Exception(NO_CONNECTION_ERROR_MESSAGE);
-                }
-            } catch (InaccessibleWSDLException e)
-            {
-                logger.debug(e);
-                throw new Exception(NO_CONNECTION_ERROR_MESSAGE);
-            }
-        }
-
         public FormValidation doCheckHighThreshold(@QueryParameter int value)
         {
             if (value >= 0)
