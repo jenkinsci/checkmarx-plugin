@@ -27,7 +27,7 @@ public class CxConfig {
 
     public static long maxZipSize()
     {
-        return Integer.getInteger(configuration.getProperty(CONFIGURATION_MAX_ZIP_SIZE_KEY));
+        return Integer.parseInt(configuration.getProperty(CONFIGURATION_MAX_ZIP_SIZE_KEY));
     }
 
     public static String defaultFilterPattern()
