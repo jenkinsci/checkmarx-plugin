@@ -225,7 +225,7 @@ public class CxWebService {
 
             logger.info("Report generation in progress");
             try {
-                Thread.sleep(100);
+                Thread.sleep(100); // TODO: Set real waiting time
             } catch (InterruptedException e)
             {
                 String err = "Process interrupted while waiting for scan results";
@@ -246,6 +246,7 @@ public class CxWebService {
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(reportFile);
             IOUtils.write(cxWSResponseScanResults.getScanResults(),fileOutputStream);
+            fileOutputStream.close();
 
         } catch (IOException e)
         {

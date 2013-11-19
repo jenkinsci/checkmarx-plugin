@@ -178,42 +178,20 @@ public class CxScanBuilder extends Builder {
 
         initLogger(checkmarxBuildDir,listener);
 
+        listener.started(null);
+
         CxWebService cxWebService = new CxWebService(getServerUrl());
         cxWebService.login(getUsername(),getPassword());
-        listener.getLogger().append("Checkmarx server login successful\n");
+        logger.info("Checkmarx server login successful");
 
         CxWSResponseRunID cxWSResponseRunID = submitScan(build, listener, cxWebService);
-        listener.getLogger().append("\nScan job submitted successfully\n");
+        logger.info("\nScan job submitted successfully\n");
 
         long scanId =  cxWebService.trackScanProgress(cxWSResponseRunID,listener);
 
         cxWebService.retrieveScanReport(scanId,reportFile);
 
-
-        // Old code
-        /*
-        WriterAppender appender = new WriterAppender(new PatternLayout(),listener.getLogger());
-        appender.setThreshold(Level.INFO);
-        Logger.getLogger("com.checkmarx.cxconsole.commands").addAppender(appender);
-
-        // Debug appenders
-        ConsoleAppender debugAppender = new ConsoleAppender();
-        debugAppender.setThreshold(Level.DEBUG);
-        Logger.getLogger("com.checkmarx.cxconsole").addAppender(debugAppender);
-        Logger.getLogger("com.checkmarx.cxviewer").addAppender(debugAppender);
-
-        File checkmarxBuildDir = new File(build.getRootDir(),"checkmarx");
-        File reportFile = new File(checkmarxBuildDir,"ScanReport.xml");
-
-        listener.started(null);
-        int cxConsoleLauncherExitCode = CxConsoleLauncher.runCli(createCliCommandLineArgs(build,checkmarxBuildDir,reportFile));
-
-        if (cxConsoleLauncherExitCode != CxConsoleCommand.CODE_OK)
-        {
-            listener.finished(Result.FAILURE);
-            logger.debug("Checkmarx build step finished with: AbortException and Result.FAILURE");
-            throw new AbortException("Checkmarx Scan Failed"); // This exception marks the build as failed
-        }
+        // Parse scan report and present results in Jenkins
 
         CxScanResult cxScanResult = new CxScanResult(build);
         cxScanResult.readScanXMLReport(reportFile);
@@ -224,13 +202,15 @@ public class CxScanBuilder extends Builder {
             if (cxScanResult.getHighCount() >  this.getHighThreshold())
             {
                 listener.finished(Result.UNSTABLE);
-                logger.debug("Checkmarx build step finished with: Result.UNSTABLE");
+                logger.info("Build step marked as UNSTABLE. Number of high severity vulnerabilities: " +
+                        cxScanResult.getHighCount() + " stability threshold: " + this.getHighThreshold());
                 return true;
             }
         }
 
         listener.finished(Result.SUCCESS);
-        logger.debug("Checkmarx build step finished with: Result.SUCCESS");*/
+        logger.info("Build step marked as SUCCESS. Number of high severity vulnerabilities: " +
+                cxScanResult.getHighCount() + " stability threshold: " + this.getHighThreshold());
         return true;
     }
 
