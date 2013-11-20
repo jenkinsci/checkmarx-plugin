@@ -177,7 +177,7 @@ public class CxScanResult implements HealthReportingAction {
 
         if(req.checkIfModified(owner.getTimestamp(),rsp))
         {
-            //return; // TODO: check why the timestap does not refresh
+            return; // TODO: check why the timestamp does not refresh
         }
 
         ChartUtil.generateGraph(req,rsp,createChart(req,buildDataSet(req)),calcDefaultSize());
