@@ -112,6 +112,20 @@
                         </configuration>
                     </execution>
                     <execution>
+                    <id>CxJenkinsWebService</id>
+                    <phase>generate-sources</phase>
+                    <goals>
+                        <goal>wsimport</goal>
+                    </goals>
+                    <configuration>
+                        <wsdlUrls>
+                            <wsdlUrl>${basedir}/src/main/resources/com/checkmarx/jenkins/CxWebService/CxJenkinsWebService.wsdl</wsdlUrl>
+                        </wsdlUrls>
+                        <packageName>com.checkmarx.ws.CxJenkinsWebService</packageName>
+                        <target>2.1</target>
+                    </configuration>
+                </execution>
+                    <execution>
                         <id>cxwsresolver</id>
                         <phase>generate-sources</phase>
                         <goals>
@@ -125,6 +139,7 @@
                             <target>2.1</target>
                         </configuration>
                     </execution>
+
                 </executions>
 
             </plugin>

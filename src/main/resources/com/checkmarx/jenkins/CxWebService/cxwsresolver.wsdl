@@ -20,6 +20,7 @@
           <s:enumeration value="InteliJ" />
           <s:enumeration value="Audit" />
           <s:enumeration value="SDK" />
+          <s:enumeration value="Jenkins" />
         </s:restriction>
       </s:simpleType>
       <s:element name="GetWebServiceUrlResponse">
@@ -84,10 +85,10 @@
   </wsdl:binding>
   <wsdl:service name="CxWSResolver">
     <wsdl:port name="CxWSResolverSoap" binding="tns:CxWSResolverSoap">
-      <soap:address location="http://10.31.0.149/Cxwebinterface/cxwsresolver.asmx" />
+      <soap:address location="http://10.31.0.149/cxwebinterface/CxWSResolver.asmx" />
     </wsdl:port>
     <wsdl:port name="CxWSResolverSoap12" binding="tns:CxWSResolverSoap12">
-      <soap12:address location="http://10.31.0.149/Cxwebinterface/cxwsresolver.asmx" />
+      <soap12:address location="http://10.31.0.149/cxwebinterface/CxWSResolver.asmx" />
     </wsdl:port>
   </wsdl:service>
 </wsdl:definitions>
