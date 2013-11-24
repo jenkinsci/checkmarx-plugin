@@ -343,9 +343,45 @@ public class CxScanBuilder extends Builder {
 
         private CxWebService cxWebService;
 
+        //////////////////////////////////////////////////////////////////////////////////////
+        //  Persistent plugin global configuration parameters
+        //////////////////////////////////////////////////////////////////////////////////////
+
+        private String serverUrl;
+        private String username;
+        private String password;
+
+        public String getServerUrl() {
+            return serverUrl;
+        }
+
+        public void setServerUrl(String serverUrl) {
+            this.serverUrl = serverUrl;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
 
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
             return true;
+        }
+
+
+        public DescriptorImpl() {
+            load();
         }
 
         //////////////////////////////////////////////////////////////////////////////////////
@@ -407,7 +443,8 @@ public class CxScanBuilder extends Builder {
             // ^Can also use req.bindJSON(this, formData);
             //  (easier when there are many fields; need set* methods for this, like setUseFrench)
 
-            // save();
+            req.bindJSON(this, formData.getJSONObject("checkmarx"));
+            save();
             return super.configure(req,formData);
         }
 

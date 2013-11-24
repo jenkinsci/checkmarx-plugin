@@ -17,4 +17,19 @@
       <f:checkbox />
     </f:entry>
   </f:section> -->
+    <f:section title="Checkmarx Plugin" name="checkmarx">
+        <f:entry title="Checkmarx Server URL" field="serverUrl">
+            <f:textbox/>
+        </f:entry>
+
+        <f:entry title="Username" field="username">
+            <f:textbox/>
+        </f:entry>
+
+        <f:entry title="Password" field="password">
+            <f:password/>
+        </f:entry>
+    </f:section>
+
+
 </j:jelly>
