@@ -72,8 +72,6 @@ public class CxScanBuilder extends Builder {
     // Constructors
     //////////////////////////////////////////////////////////////////////////////////////
 
-
-
     @DataBoundConstructor
     public CxScanBuilder(String serverUrl,
                          String username,

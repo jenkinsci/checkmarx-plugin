@@ -63,7 +63,7 @@
     </f:entry>
 
 
-    <f:optionalBlock title="Wait for scan results" inline="true" field="waitForResultsEnabled">
+    <f:optionalBlock title="Wait for scan results" inline="true" field="waitForResultsEnabled" checked="${instance==null?true:instance.waitForResultsEnabled}">
         <f:optionalBlock title="Enable Vulnerability Threshold" inline="true" field="vulnerabilityThresholdEnabled">
             <f:entry title="High Severity Vulnerabilities Threshold" field="highThreshold">
                 <f:number clazz="non-negative-number" default="0"/>
