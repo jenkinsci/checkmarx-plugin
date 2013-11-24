@@ -3,11 +3,6 @@ package com.checkmarx.jenkins;
 import com.checkmarx.components.zipper.ZipListener;
 import com.checkmarx.components.zipper.Zipper;
 import com.checkmarx.ws.CxCLIWebService.*;
-import com.checkmarx.ws.CxWSResolver.CxClientType;
-import com.checkmarx.ws.CxWSResolver.CxWSResolver;
-import com.checkmarx.ws.CxWSResolver.CxWSResolverSoap;
-import com.checkmarx.ws.CxWSResolver.CxWSResponseDiscovery;
-import com.sun.xml.internal.ws.wsdl.parser.InaccessibleWSDLException;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.Launcher;
@@ -17,16 +12,12 @@ import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.*;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
-import javax.xml.namespace.QName;
 import java.io.*;
-import java.net.URL;
-import java.util.Properties;
 
 /**
  * The main entry point for Checkmarx plugin. This class implements the Builder
@@ -43,6 +34,7 @@ public class CxScanBuilder extends Builder {
     // Persistent plugin configuration parameters
     //////////////////////////////////////////////////////////////////////////////////////
 
+    private boolean useOwnServerCredentials;
     private String serverUrl;
     private String username;
     private String password;
@@ -73,7 +65,8 @@ public class CxScanBuilder extends Builder {
     //////////////////////////////////////////////////////////////////////////////////////
 
     @DataBoundConstructor
-    public CxScanBuilder(String serverUrl,
+    public CxScanBuilder(boolean useOwnServerCredentials,
+                         String serverUrl,
                          String username,
                          String password,
                          String projectName,
@@ -88,6 +81,7 @@ public class CxScanBuilder extends Builder {
                          boolean vulnerabilityThresholdEnabled,
                          int highThreshold)
     {
+        this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
         this.username = username;
         this.password = password;
@@ -107,6 +101,15 @@ public class CxScanBuilder extends Builder {
     //////////////////////////////////////////////////////////////////////////////////////
     // Configuration fields getters
     //////////////////////////////////////////////////////////////////////////////////////
+
+
+    public boolean isUseOwnServerCredentials() {
+        return useOwnServerCredentials;
+    }
+
+    public void setUseOwnServerCredentials(boolean useOwnServerCredentials) {
+        this.useOwnServerCredentials = useOwnServerCredentials;
+    }
 
     public String getServerUrl() {
         return serverUrl;
@@ -176,8 +179,13 @@ public class CxScanBuilder extends Builder {
         listener.started(null);
         logger.info("Checkmarx Jenkins plugin version: " + CxConfig.version());
 
-        CxWebService cxWebService = new CxWebService(getServerUrl());
-        cxWebService.login(getUsername(),getPassword());
+        String serverUrlToUse = isUseOwnServerCredentials() ? getServerUrl() : getDescriptor().getServerUrl();
+        String usernameToUse  = isUseOwnServerCredentials() ? getUsername()  : getDescriptor().getUsername();
+        String passwordToUse  = isUseOwnServerCredentials() ? getPassword()  : getDescriptor().getPassword();
+        CxWebService cxWebService = new CxWebService(serverUrlToUse);
+        cxWebService.login(usernameToUse,passwordToUse);
+
+
         logger.info("Checkmarx server login successful");
 
         CxWSResponseRunID cxWSResponseRunID = submitScan(build, listener, cxWebService);

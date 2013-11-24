@@ -10,21 +10,29 @@
       Creates a text field that shows the value of the "name" property.
       When submitted, it will be passed to the corresponding constructor parameter.
     -->
-    <f:entry title="Checkmarx Server URL" field="serverUrl">
-        <f:textbox/>
-    </f:entry>
+    <f:optionalBlock title="Use default server credentials "
+                     inline="true"
+                     field="useOwnServerCredentials"
+                     negative="true"
+                     checked="${instance==null?true:!instance.useOwnServerCredentials}">
 
-    <f:entry title="Username" field="username">
-        <f:textbox/>
-    </f:entry>
+        <f:entry title="Checkmarx Server URL" field="serverUrl">
+            <f:textbox default="${descriptor.serverUrl}"/>
+        </f:entry>
 
-    <f:entry title="Password" field="password">
-        <f:password/>
-    </f:entry>
+        <f:entry title="Username" field="username">
+            <f:textbox default="${descriptor.username}"/>
+        </f:entry>
+
+        <f:entry title="Password" field="password">
+            <f:password/>
+        </f:entry>
+    </f:optionalBlock>
 
     <f:entry title="Checkmarx Project Name" field="projectName">
         <f:textbox/>
     </f:entry>
+
 
 
     <f:optionalBlock title="Set Preset" inline="true" field="presetSpecified">
@@ -63,7 +71,10 @@
     </f:entry>
 
 
-    <f:optionalBlock title="Wait for scan results" inline="true" field="waitForResultsEnabled" checked="${instance==null?true:instance.waitForResultsEnabled}">
+    <f:optionalBlock title="Wait for scan results"
+                     inline="true"
+                     field="waitForResultsEnabled"
+                     checked="${instance==null?true:instance.waitForResultsEnabled}">
         <f:optionalBlock title="Enable Vulnerability Threshold" inline="true" field="vulnerabilityThresholdEnabled">
             <f:entry title="High Severity Vulnerabilities Threshold" field="highThreshold">
                 <f:number clazz="non-negative-number" default="0"/>
