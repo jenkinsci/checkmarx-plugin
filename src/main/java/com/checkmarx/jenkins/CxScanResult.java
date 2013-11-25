@@ -49,12 +49,11 @@ import java.util.concurrent.ConcurrentHashMap;
 // One option is to inherit from AbstractTestResultAction<CxScanResult>
 
 
-public class CxScanResult implements HealthReportingAction {
+public class CxScanResult implements Action {
 
 
 
     public final AbstractBuild<?,?> owner;
-    private Map<String,String> descriptions = new ConcurrentHashMap<String, String>();
 
     private int highCount;
     private int mediumCount;
@@ -129,23 +128,6 @@ public class CxScanResult implements HealthReportingAction {
 
     public LinkedList<QueryResult> getQueryResultList() {
         return queryResultList;
-    }
-
-    /**
-     * Gets the diff string of failures.
-     */
-    public final String getFailureDiffString() {
-        CxScanResult prev = getPreviousResult();
-        if(prev==null)  return "";  // no record
-
-        return " / "+ Functions.getDiffString(this.getHighCount() - prev.getHighCount());
-    }
-
-    public HealthReport getBuildHealth() {
-        final int highCount = getHighCount();
-        int score = highCount; // TODO: implement real health calculation
-        String description = "Number of high severity vulnerabilities: " + Integer.toString(highCount);
-        return new HealthReport(score, description);
     }
 
     /**

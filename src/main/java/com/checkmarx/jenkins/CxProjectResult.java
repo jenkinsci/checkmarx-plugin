@@ -31,7 +31,7 @@ import java.util.LinkedList;
  * Time: 12:07
  * Description:
  */
-public class CxProjectResult implements HealthReportingAction {
+public class CxProjectResult implements Action {
 
     private AbstractProject owner;
 
@@ -77,16 +77,6 @@ public class CxProjectResult implements HealthReportingAction {
         return "/plugin/"+ wrapper.getShortName()+"/";
     }
 
-    @Override
-    public HealthReport getBuildHealth() {
-        HealthReportingAction a = getLastBuildAction();
-        if (a!=null)
-        {
-            return a.getBuildHealth();
-        }
-        return null;
-    }
-
     public boolean isResultAvailable()
     {
         return getLastBuildAction() != null;
@@ -95,9 +85,6 @@ public class CxProjectResult implements HealthReportingAction {
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     // Graph generation logic
     ///////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
 
     /**
      * Generates a PNG image for the test result trend.

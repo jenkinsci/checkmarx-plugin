@@ -15,5 +15,4 @@
     <j:if test="${!it.resultAvailable}">
         <p>No scan results available</p>
     </j:if>
-    <p>Test: A${it.lastBuildAction.owner.displayName}A A${it}A</p>
 </j:jelly>
