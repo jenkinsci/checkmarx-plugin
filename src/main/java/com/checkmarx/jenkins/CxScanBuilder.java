@@ -227,33 +227,7 @@ public class CxScanBuilder extends Builder {
     // return can be empty but never null
     @Override
     public Action getProjectAction(AbstractProject<?, ?> project) {
-        AbstractBuild<?, ?> lastBuild = project.getLastBuild();
-        if (lastBuild!=null)
-        {
-            Action a = lastBuild.getAction(CxScanResult.class);
-            if (a != null)
-            {
-                return a;
-            }
-        }
-
-        // Return empty action
-        return new Action() {
-            @Override
-            public String getIconFileName() {
-                return null;
-            }
-
-            @Override
-            public String getDisplayName() {
-                return null;
-            }
-
-            @Override
-            public String getUrlName() {
-                return null;
-            }
-        };
+        return new CxProjectResult(project);
     }
 
     private void initLogger(File checkmarxBuildDir, BuildListener listener)
@@ -395,6 +369,11 @@ public class CxScanBuilder extends Builder {
         //////////////////////////////////////////////////////////////////////////////////////
         // Field value validators
         //////////////////////////////////////////////////////////////////////////////////////
+
+        public FormValidation doCheckUseOwnServerCredentials(@QueryParameter boolean value)
+        {
+            return FormValidation.error("Test: " + value);
+        }
 
         public FormValidation doCheckServerUrl(@QueryParameter String value) {
             try {

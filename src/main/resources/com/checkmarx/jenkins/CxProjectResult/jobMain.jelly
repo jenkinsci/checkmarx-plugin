@@ -1,0 +1,19 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
+         xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+
+    <h2>Checkmarx</h2>
+    <j:if test="${it.resultAvailable}">
+        <p>Last build vulnerabilities summary: </p>
+        <ul>
+            <li>High: ${it.lastBuildAction.highCount} </li>
+            <li>Medium: ${it.lastBuildAction.mediumCount} </li>
+            <li>Low: ${it.lastBuildAction.lowCount} </li>
+            <li>Info: ${it.lastBuildAction.infoCount} </li>
+        </ul>
+        <p><a href="${it.urlName}">Detailed report</a></p>
+    </j:if>
+    <j:if test="${!it.resultAvailable}">
+        <p>No scan results available</p>
+    </j:if>
+    <p>Test: A${it.lastBuildAction.owner.displayName}A A${it}A</p>
+</j:jelly>
