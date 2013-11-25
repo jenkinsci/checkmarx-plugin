@@ -97,11 +97,7 @@ public class CxProjectResult implements Action {
         }
 
         CxScanResult cxScanResult = getLastBuildAction();
-        if (cxScanResult==null)
-        {
-            return;
-        }
-        if(req.checkIfModified(cxScanResult.owner.getTimestamp(),rsp))
+        if(cxScanResult!=null && req.checkIfModified(cxScanResult.owner.getTimestamp(),rsp))
         {
             return;
         }
@@ -114,11 +110,7 @@ public class CxProjectResult implements Action {
      */
     public void doGraphMap( StaplerRequest req, StaplerResponse rsp) throws IOException {
         CxScanResult cxScanResult = getLastBuildAction();
-        if (cxScanResult==null)
-        {
-            return;
-        }
-        if(req.checkIfModified(cxScanResult.owner.getTimestamp(),rsp))
+        if(cxScanResult!=null && req.checkIfModified(cxScanResult.owner.getTimestamp(),rsp))
         {
             return;
         }
@@ -148,14 +140,29 @@ public class CxProjectResult implements Action {
 
     private CategoryDataset buildDataSet(StaplerRequest req) {
 
-        DataSetBuilder<Severity,ChartUtil.NumberOnlyBuildLabel> dsb = new DataSetBuilder<Severity,ChartUtil.NumberOnlyBuildLabel>();
+        CxScanResult lastBuildAction = getLastBuildAction();
+        if (lastBuildAction==null)
+        {
+            // We get here is there are no builds with scan results.
+            // In this case we generate an empty graph
+            DataSetBuilder<Severity,String> dsb = new DataSetBuilder<Severity,String>();
 
-        for( CxScanResult a=getLastBuildAction(); a!=null; a=a.getPreviousResult() ) {
-            dsb.add( a.getHighCount(), Severity.High, new ChartUtil.NumberOnlyBuildLabel(a.owner));
-            dsb.add( a.getMediumCount(), Severity.Medium, new ChartUtil.NumberOnlyBuildLabel(a.owner));
-            dsb.add( a.getLowCount(),Severity.Low, new ChartUtil.NumberOnlyBuildLabel(a.owner));
+            dsb.add( 0, Severity.High, "0");
+            dsb.add( 0, Severity.Medium, "0");
+            dsb.add( 0, Severity.Low, "0");
+            return dsb.build();
+
+        }  else {
+            DataSetBuilder<Severity,ChartUtil.NumberOnlyBuildLabel> dsb = new DataSetBuilder<Severity,ChartUtil.NumberOnlyBuildLabel>();
+
+            for( CxScanResult a=lastBuildAction; a!=null; a=a.getPreviousResult() ) {
+                dsb.add( a.getHighCount(), Severity.High, new ChartUtil.NumberOnlyBuildLabel(a.owner));
+                dsb.add( a.getMediumCount(), Severity.Medium, new ChartUtil.NumberOnlyBuildLabel(a.owner));
+                dsb.add( a.getLowCount(),Severity.Low, new ChartUtil.NumberOnlyBuildLabel(a.owner));
+            }
+            return dsb.build();
         }
-        return dsb.build();
+
     }
 
     private JFreeChart createChart(StaplerRequest req,CategoryDataset dataset) {
