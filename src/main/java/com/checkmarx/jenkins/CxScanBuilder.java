@@ -224,12 +224,6 @@ public class CxScanBuilder extends Builder {
         return true;
     }
 
-    // return can be empty but never null
-    @Override
-    public Action getProjectAction(AbstractProject<?, ?> project) {
-        return new CxProjectResult(project);
-    }
-
     private void initLogger(File checkmarxBuildDir, BuildListener listener)
     {
         WriterAppender writerAppender = new WriterAppender(new PatternLayout("%m%n"),listener.getLogger());
