@@ -8,7 +8,6 @@
                 body
                 {
                 margin: 0px;
-                background-image: url(${resources}/bg.jpg);
                 background-repeat: no-repeat;
                 background-color: #e9f5fb;
                 background-position: left top;
@@ -172,7 +171,10 @@
                 {
                 width: 70%;
                 margin: 0 auto;
+                margin-bottom: 20px;
                 padding-top: 5px;
+                float:left;
+
                 }
                 .PageContent
                 {
@@ -275,23 +277,17 @@
             </style>
         </l:header>
 
-        <l:side-panel>
-
-        </l:side-panel>
+        <st:include page="sidepanel.jelly" it="${it.owner}" />
 
         <l:main-panel>
-            <div class="PageHeader">
-                <div class="Logo">
-                    <img alt="CheckMarX" src="${resources}/e.jpg" height="24px"/>
-                </div>
-            </div>
+
             <div class="PageContent">
                 <div class="drop-shadow lifted">
                     <div class="ScanHeader">
-                        <div>
-                            TBD tests</div>
-                        <div>
-                            TBD 14-Nov-2013 08:51</div>
+                        <div class="Logo">
+                            <img alt="CheckMarX" src="${resources}/e.jpg" height="24px" style=""/>
+                        </div>
+
                     </div>
                     <div class="ScanContent">
                         <div class="ScanContentLeft">
