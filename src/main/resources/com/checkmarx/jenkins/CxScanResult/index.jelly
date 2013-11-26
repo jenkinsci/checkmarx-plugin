@@ -400,7 +400,7 @@
                                         </tr>
                                         <tr>
                                             <td>
-                                                Scan Duration
+                                                Scan Time
                                             </td>
                                             <td>
                                                 ${it.scanTime}
@@ -461,14 +461,5 @@
             </div>
 
         </l:main-panel>
-
     </l:layout>
-
-
-
-
-
-
-
-
 </j:jelly>
