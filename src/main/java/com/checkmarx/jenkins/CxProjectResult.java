@@ -132,12 +132,6 @@ public class CxProjectResult implements Action {
             return new Area(500,200);
     }
 
-    private enum Severity {
-        High,
-        Medium,
-        Low;
-    }
-
     private CategoryDataset buildDataSet(StaplerRequest req) {
 
         CxScanResult lastBuildAction = getLastBuildAction();
@@ -145,20 +139,20 @@ public class CxProjectResult implements Action {
         {
             // We get here is there are no builds with scan results.
             // In this case we generate an empty graph
-            DataSetBuilder<Severity,String> dsb = new DataSetBuilder<Severity,String>();
+            DataSetBuilder<CxResultSeverity,String> dsb = new DataSetBuilder<CxResultSeverity,String>();
 
-            dsb.add( 0, Severity.High, "0");
-            dsb.add( 0, Severity.Medium, "0");
-            dsb.add( 0, Severity.Low, "0");
+            dsb.add( 0, CxResultSeverity.HIGH,   "0");
+            dsb.add( 0, CxResultSeverity.MEDIUM, "0");
+            dsb.add( 0, CxResultSeverity.LOW,    "0");
             return dsb.build();
 
         }  else {
-            DataSetBuilder<Severity,ChartUtil.NumberOnlyBuildLabel> dsb = new DataSetBuilder<Severity,ChartUtil.NumberOnlyBuildLabel>();
+            DataSetBuilder<CxResultSeverity,ChartUtil.NumberOnlyBuildLabel> dsb = new DataSetBuilder<CxResultSeverity,ChartUtil.NumberOnlyBuildLabel>();
 
             for( CxScanResult a=lastBuildAction; a!=null; a=a.getPreviousResult() ) {
-                dsb.add( a.getHighCount(), Severity.High, new ChartUtil.NumberOnlyBuildLabel(a.owner));
-                dsb.add( a.getMediumCount(), Severity.Medium, new ChartUtil.NumberOnlyBuildLabel(a.owner));
-                dsb.add( a.getLowCount(),Severity.Low, new ChartUtil.NumberOnlyBuildLabel(a.owner));
+                dsb.add( a.getHighCount(),   CxResultSeverity.HIGH,   new ChartUtil.NumberOnlyBuildLabel(a.owner));
+                dsb.add( a.getMediumCount(), CxResultSeverity.MEDIUM, new ChartUtil.NumberOnlyBuildLabel(a.owner));
+                dsb.add( a.getLowCount(),    CxResultSeverity.LOW,    new ChartUtil.NumberOnlyBuildLabel(a.owner));
             }
             return dsb.build();
         }

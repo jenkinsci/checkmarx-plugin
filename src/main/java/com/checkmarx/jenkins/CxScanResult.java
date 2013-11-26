@@ -1,26 +1,10 @@
 package com.checkmarx.jenkins;
 
-import hudson.Functions;
 import hudson.PluginWrapper;
 import hudson.model.*;
-import hudson.tasks.junit.CaseResult;
-import hudson.tasks.test.*;
-import hudson.util.*;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.CategoryAxis;
-import org.jfree.chart.axis.CategoryLabelPositions;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.renderer.category.StackedAreaRenderer;
-import org.jfree.data.category.CategoryDataset;
-import org.jfree.data.category.DefaultCategoryDataset;
-import org.jfree.ui.RectangleInsets;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -28,15 +12,9 @@ import org.xml.sax.helpers.DefaultHandler;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
-import java.util.Collections;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created with IntelliJ IDEA.
@@ -59,7 +37,11 @@ public class CxScanResult implements Action {
     private int mediumCount;
     private int lowCount;
     private int infoCount;
-    private LinkedList<QueryResult> queryResultList;
+    private LinkedList<QueryResult> highQueryResultList;
+    private LinkedList<QueryResult> mediumQueryResultList;
+    private LinkedList<QueryResult> lowQueryResultList;
+    private LinkedList<QueryResult> infoQueryResultList;
+
     private String resultDeepLink;
     private boolean resultIsValid;
     private String errorMessage;
@@ -70,7 +52,10 @@ public class CxScanResult implements Action {
         this.owner = owner;
         this.resultIsValid=false;
         this.errorMessage = "No Scan Results"; // error message to appear if results were not parsed
-        this.queryResultList = new LinkedList<QueryResult>();
+        this.highQueryResultList   = new LinkedList<QueryResult>();
+        this.mediumQueryResultList = new LinkedList<QueryResult>();
+        this.lowQueryResultList    = new LinkedList<QueryResult>();
+        this.infoQueryResultList   = new LinkedList<QueryResult>();
     }
 
 
@@ -126,8 +111,20 @@ public class CxScanResult implements Action {
         return resultIsValid;
     }
 
-    public LinkedList<QueryResult> getQueryResultList() {
-        return queryResultList;
+    public LinkedList<QueryResult> getHighQueryResultList() {
+        return highQueryResultList;
+    }
+
+    public LinkedList<QueryResult> getMediumQueryResultList() {
+        return mediumQueryResultList;
+    }
+
+    public LinkedList<QueryResult> getLowQueryResultList() {
+        return lowQueryResultList;
+    }
+
+    public LinkedList<QueryResult> getInfoQueryResultList() {
+        return infoQueryResultList;
     }
 
     /**
@@ -194,18 +191,18 @@ public class CxScanResult implements Action {
             {
                 currentQueryNumOfResults++;
                 String severity = attributes.getValue("Severity");
-                if (severity.equals("High"))
+                if (severity.equals(CxResultSeverity.HIGH.xmlParseString))
                 {
                     CxScanResult.this.highCount++;
 
-                } else if (severity.equals("Medium"))
+                } else if (severity.equals(CxResultSeverity.MEDIUM.xmlParseString))
                 {
                     CxScanResult.this.mediumCount++;
 
-                } else if (severity.equals("Low"))
+                } else if (severity.equals(CxResultSeverity.LOW.xmlParseString))
                 {
                     CxScanResult.this.lowCount++;
-                } else if (severity.equals("Information"))
+                } else if (severity.equals(CxResultSeverity.INFO.xmlParseString))
                 {
                     CxScanResult.this.infoCount++;
                 }
@@ -231,8 +228,23 @@ public class CxScanResult implements Action {
                 qr.setName(currentQueryName);
                 qr.setSeverity(currentQuerySeverity);
                 qr.setCount(currentQueryNumOfResults);
-                CxScanResult.this.queryResultList.add(qr);
 
+                if (StringUtils.containsIgnoreCase(qr.getSeverity(),CxResultSeverity.HIGH.xmlParseString))
+                {
+                    CxScanResult.this.highQueryResultList.add(qr);
+                } else if (StringUtils.containsIgnoreCase(qr.getSeverity(),CxResultSeverity.MEDIUM.xmlParseString))
+                {
+                    CxScanResult.this.highQueryResultList.add(qr);
+                } else if(StringUtils.containsIgnoreCase(qr.getSeverity(),CxResultSeverity.LOW.xmlParseString))
+                {
+                    CxScanResult.this.highQueryResultList.add(qr);
+                } else if (StringUtils.containsIgnoreCase(qr.getSeverity(),CxResultSeverity.INFO.xmlParseString))
+                {
+                    CxScanResult.this.highQueryResultList.add(qr);
+                } else {
+                    Logger logger = Logger.getLogger(CxScanResult.class);
+                    logger.warn("Encountered a result query with unknown severity: " + qr.getSeverity());
+                };
             }
         }
     }
