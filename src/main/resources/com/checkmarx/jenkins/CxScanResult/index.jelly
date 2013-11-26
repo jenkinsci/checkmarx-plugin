@@ -289,12 +289,13 @@
                         </div>
 
                     </div>
-                    <div class="ScanContent">
+                    <j:if test="${it.resultIsValid}">
+                        <div class="ScanContent">
                         <div class="ScanContentLeft">
                             <div class="lifted-No-Shadow">
                                 <div class="ScanSummery">
                                     <div style="float: left;">
-                                        Scan Results<st:nbsp/>(TBD 79 Risks)</div>
+                                        Scan Results<st:nbsp/>(${it.highCount + it.mediumCount + it.lowCount + it.infoCount} Risks)</div>
                                     <div class="ButtonContainer">
                                         <a id="aViewer" target="_blank" class="btn_green" href="${it.resultDeepLink}"
                                            title="Open Code Viewer">Open Code Viewer</a>
@@ -312,143 +313,66 @@
                                         <tr class="SeverityHeader">
                                             <td colspan="3">
                                                 <div class="sprite-high_status icoheader">
-                                                    High<st:nbsp/>Risk Vulnerabilities<st:nbsp/>(TBD 0)
+                                                    High<st:nbsp/>Risk Vulnerabilities<st:nbsp/>(${it.highCount})
                                                 </div>
                                             </td>
                                         </tr>
+
+                                        <j:forEach var="qr" items="${it.highQueryResultList}">
                                         <tr>
-                                            <td>
-                                                <st:nbsp/>
-                                            </td>
-                                            <td>
-                                                <st:nbsp/>
-                                            </td>
-                                            <td>
-                                                <st:nbsp/>
-                                            </td>
+                                            <td><st:nbsp/></td>
+                                            <td class="Vulnerability">${qr.prettyName}</td>
+                                            <td>${qr.count}</td>
                                         </tr>
+                                        </j:forEach>
+
                                         <tr class="SeverityHeader">
                                             <td colspan="3">
                                                 <div class="sprite-med_status icoheader">
-                                                    Medium<st:nbsp/>Risk Vulnerabilities<st:nbsp/>(TBD  75)
+                                                    Medium<st:nbsp/>Risk Vulnerabilities<st:nbsp/>(${it.mediumCount})
                                                 </div>
                                             </td>
                                         </tr>
-                                        <tr>
-                                            <td>
-                                                <st:nbsp/>
-                                            </td>
-                                            <td class="Vulnerability">
-                                                TBD FLS_Update
-                                            </td>
-                                            <td>
-                                                TBD 39
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <st:nbsp/>
-                                            </td>
-                                            <td class="Vulnerability">
-                                                TBD Sharing_With_Controller
-                                            </td>
-                                            <td>
-                                                TBD 12
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <st:nbsp/>
-                                            </td>
-                                            <td class="Vulnerability">
-                                                TBD FLS_Update_Partial
-                                            </td>
-                                            <td>
-                                                TBD 8
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <st:nbsp/>
-                                            </td>
-                                            <td class="Vulnerability">
-                                                FLS_Create
-                                            </td>
-                                            <td>
-                                                7
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <st:nbsp/>
-                                            </td>
-                                            <td class="Vulnerability">
-                                                Sharing
-                                            </td>
-                                            <td>
-                                                6
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <st:nbsp/>
-                                            </td>
-                                            <td class="Vulnerability">
-                                                FLS_Create_Partial
-                                            </td>
-                                            <td>
-                                                2
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <st:nbsp/>
-                                            </td>
-                                            <td class="Vulnerability">
-                                                CRUD_Delete
-                                            </td>
-                                            <td>
-                                                1
-                                            </td>
-                                        </tr>
+                                        <j:forEach var="qr" items="${it.mediumQueryResultList}">
+                                            <tr>
+                                                <td><st:nbsp/></td>
+                                                <td class="Vulnerability">${qr.prettyName}</td>
+                                                <td>${qr.count}</td>
+                                            </tr>
+                                        </j:forEach>
+
                                         <tr class="SeverityHeader">
                                             <td colspan="3">
                                                 <div class="sprite-low_status icoheader">
                                                     <div>
-                                                        Low<st:nbsp/>Risk Vulnerabilities<st:nbsp/>(TBD 4)
+                                                        Low<st:nbsp/>Risk Vulnerabilities<st:nbsp/>(${it.lowCount})
                                                     </div>
                                                 </div>
                                             </td>
                                         </tr>
-                                        <tr>
-                                            <td>
-                                                <st:nbsp/>
-                                            </td>
-                                            <td class="Vulnerability">
-                                                Escape_False_Warning
-                                            </td>
-                                            <td>
-                                                4
-                                            </td>
-                                        </tr>
+
+                                        <j:forEach var="qr" items="${it.lowQueryResultList}">
+                                            <tr>
+                                                <td><st:nbsp/></td>
+                                                <td class="Vulnerability">${qr.prettyName}</td>
+                                                <td>${qr.count}</td>
+                                            </tr>
+                                        </j:forEach>
+
                                         <tr class="SeverityHeader">
                                             <td colspan="3">
                                                 <div class="sprite-info_status icoheader">
-                                                    Medium<st:nbsp/>Risk Vulnerabilities<st:nbsp/>(TBD 75)
+                                                    Info<st:nbsp/>Risk Vulnerabilities<st:nbsp/>(${it.infoCount})
                                                 </div>
                                             </td>
                                         </tr>
-                                        <tr>
-                                            <td>
-                                                <st:nbsp/>
-                                            </td>
-                                            <td class="Vulnerability">
-                                                TBD Escape_False_Warning
-                                            </td>
-                                            <td>
-                                                TBD 4
-                                            </td>
-                                        </tr>
+                                        <j:forEach var="qr" items="${it.infoQueryResultList}">
+                                            <tr>
+                                                <td><st:nbsp/></td>
+                                                <td class="Vulnerability">${qr.prettyName}</td>
+                                                <td>${qr.count}</td>
+                                            </tr>
+                                        </j:forEach>
                                     </tbody>
                                 </table>
                             </div>
@@ -471,31 +395,24 @@
                                                 Scan Start
                                             </td>
                                             <td>
-                                                14-Nov-2013 08:50
+                                                ${it.scanStart}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>
-                                                Scan Complete
+                                                Scan Duration
                                             </td>
                                             <td>
-                                                14-Nov-2013 08:51
+                                                ${it.scanTime}
                                             </td>
                                         </tr>
-                                        <tr>
-                                            <td>
-                                                Scan Risk
-                                            </td>
-                                            <td>
-                                                32%
-                                            </td>
-                                        </tr>
+
                                         <tr>
                                             <td>
                                                 Scan Type
                                             </td>
                                             <td>
-                                                OWASP TOP 10 - 2010
+                                                ${it.scanType}
                                             </td>
                                         </tr>
                                         <tr>
@@ -503,7 +420,7 @@
                                                 Lines of Code
                                             </td>
                                             <td>
-                                                1,290
+                                                ${it.linesOfCodeScanned}
                                             </td>
                                         </tr>
                                         <tr>
@@ -511,16 +428,35 @@
                                                 File Count
                                             </td>
                                             <td>
-                                                45
+                                                ${it.filesScanned}
                                             </td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
-                        <div class="Clear">
-                        </div>
+                        <div class="Clear"></div>
                     </div>
+                    </j:if>
+                    <j:if test="${!it.resultIsValid}">
+                        <div class="ScanContent">
+                        <div class="ScanContentLeft">
+                            <div class="lifted-No-Shadow">
+                                <div class="ScanSummery">
+                                    <div style="float: left;">
+
+                                        Scan finished with the following error:<br/><br/>
+                                        ${it.errorMessage}
+
+                                    </div>
+                                    <div class="Clear"></div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                        <div class="Clear"></div>
+                    </j:if>
+
                 </div>
             </div>
 
@@ -528,31 +464,7 @@
 
     </l:layout>
 
-    <!--j:if test="${it.resultIsValid}">
-        <p>Checkmarx Scan Results Summary</p>
-        <table  border="1">
-            <tr>
-                <th>Vulnerability Type</th>
-                <th>Occurrences</th>
-                <th>Severity</th>
-            </tr>
 
-            <j:forEach var="qr" items="${it.queryResultList}">
-                <tr>
-                    <td>${qr.prettyName}</td>
-                    <td>${qr.count}</td>
-                    <td>${qr.severity}</td>
-                </tr>
-            </j:forEach>
-
-        </table>
-        <p><a href="${it.resultDeepLink}">Full Scan Results</a></p>
-    </j:if>
-
-    <j:if test="${!it.resultIsValid}">
-        <p>Scan finished with the following error:</p>
-        <p>${it.errorMessage}</p>
-    </j:if-->
 
 
 

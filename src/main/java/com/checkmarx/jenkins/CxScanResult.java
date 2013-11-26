@@ -29,7 +29,7 @@ import java.util.LinkedList;
 
 public class CxScanResult implements Action {
 
-
+    private static final Logger logger = Logger.getLogger(CxScanResult.class);
 
     public final AbstractBuild<?,?> owner;
 
@@ -43,6 +43,13 @@ public class CxScanResult implements Action {
     private LinkedList<QueryResult> infoQueryResultList;
 
     private String resultDeepLink;
+
+    private String scanStart;
+    private String scanTime;
+    private String linesOfCodeScanned;
+    private String filesScanned;
+    private String scanType;
+
     private boolean resultIsValid;
     private String errorMessage;
 
@@ -103,6 +110,26 @@ public class CxScanResult implements Action {
         return resultDeepLink;
     }
 
+    public String getScanStart() {
+        return scanStart;
+    }
+
+    public String getScanTime() {
+        return scanTime;
+    }
+
+    public String getLinesOfCodeScanned() {
+        return linesOfCodeScanned;
+    }
+
+    public String getFilesScanned() {
+        return filesScanned;
+    }
+
+    public String getScanType() {
+        return scanType;
+    }
+
     public String getErrorMessage() {
         return errorMessage;
     }
@@ -145,7 +172,6 @@ public class CxScanResult implements Action {
 
     public void readScanXMLReport(File scanXMLReport)
     {
-        Logger logger = Logger.getLogger(CxScanResult.class);
         ResultsParseHandler handler = new ResultsParseHandler();
 
         try {
@@ -215,7 +241,12 @@ public class CxScanResult implements Action {
             } else {
                 if ("CxXMLResults".equals(qName))
                 {
-                    CxScanResult.this.resultDeepLink = attributes.getValue("DeepLink");
+                    CxScanResult.this.resultDeepLink    = attributes.getValue("DeepLink");
+                    CxScanResult.this.scanStart         = attributes.getValue("ScanStart");
+                    CxScanResult.this.scanTime          = attributes.getValue("ScanTime");
+                    CxScanResult.this.linesOfCodeScanned= attributes.getValue("LinesOfCodeScanned");
+                    CxScanResult.this.filesScanned      = attributes.getValue("FilesScanned");
+                    CxScanResult.this.scanType          = attributes.getValue("ScanType");
                 }
             }
         }
@@ -234,15 +265,14 @@ public class CxScanResult implements Action {
                     CxScanResult.this.highQueryResultList.add(qr);
                 } else if (StringUtils.containsIgnoreCase(qr.getSeverity(),CxResultSeverity.MEDIUM.xmlParseString))
                 {
-                    CxScanResult.this.highQueryResultList.add(qr);
+                    CxScanResult.this.mediumQueryResultList.add(qr);
                 } else if(StringUtils.containsIgnoreCase(qr.getSeverity(),CxResultSeverity.LOW.xmlParseString))
                 {
-                    CxScanResult.this.highQueryResultList.add(qr);
+                    CxScanResult.this.lowQueryResultList.add(qr);
                 } else if (StringUtils.containsIgnoreCase(qr.getSeverity(),CxResultSeverity.INFO.xmlParseString))
                 {
-                    CxScanResult.this.highQueryResultList.add(qr);
+                    CxScanResult.this.infoQueryResultList.add(qr);
                 } else {
-                    Logger logger = Logger.getLogger(CxScanResult.class);
                     logger.warn("Encountered a result query with unknown severity: " + qr.getSeverity());
                 };
             }
