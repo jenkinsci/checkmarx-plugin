@@ -179,10 +179,9 @@
                 .PageContent
                 {
                 padding-top: 59px;
-                width: 70%;
+                width: 90%;
                 min-width: 900px;
-                margin-left: auto;
-                margin-right: auto;
+
                 }
                 .ScanHeader
                 {
@@ -247,6 +246,13 @@
                 {
                 color: #3c87d2;
                 font-size: 12px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                }
+                table.SeveritiesTable td.Vulnerability + td
+                {
+                    text-align: right;
+                    padding-right: 45px;
                 }
                 .ScanDetails
                 {
@@ -307,7 +313,7 @@
                                     <colgroup>
                                         <col style="width: 45px" />
                                         <col />
-                                        <col />
+                                        <col style="width: 85px"/>
                                     </colgroup>
                                     <tbody>
                                         <tr class="SeverityHeader">
