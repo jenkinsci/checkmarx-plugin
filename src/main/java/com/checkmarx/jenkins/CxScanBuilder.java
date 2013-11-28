@@ -3,12 +3,14 @@ package com.checkmarx.jenkins;
 import com.checkmarx.components.zipper.ZipListener;
 import com.checkmarx.components.zipper.Zipper;
 import com.checkmarx.ws.CxCLIWebService.*;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
+import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
@@ -18,6 +20,7 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.*;
+import java.util.List;
 
 /**
  * The main entry point for Checkmarx plugin. This class implements the Builder
@@ -317,6 +320,7 @@ public class CxScanBuilder extends Builder {
         public final static String DEFAULT_FILTER_PATTERNS = CxConfig.defaultFilterPattern();
         private static Logger logger = Logger.getLogger(DescriptorImpl.class);
 
+        @XStreamOmitField
         private CxWebService cxWebService;
 
         //////////////////////////////////////////////////////////////////////////////////////
@@ -364,11 +368,6 @@ public class CxScanBuilder extends Builder {
         // Field value validators
         //////////////////////////////////////////////////////////////////////////////////////
 
-        public FormValidation doCheckUseOwnServerCredentials(@QueryParameter boolean value)
-        {
-            return FormValidation.error("Test: " + value);
-        }
-
         public FormValidation doCheckServerUrl(@QueryParameter String value) {
             try {
                 this.cxWebService = null;
@@ -381,12 +380,15 @@ public class CxScanBuilder extends Builder {
         }
 
 
-        public FormValidation doCheckPassword(@QueryParameter String value, @QueryParameter String username) {
+        public FormValidation doCheckPassword(@QueryParameter String serverUrl, @QueryParameter String password, @QueryParameter String username) {
 
-            String password = value;
 
             if (this.cxWebService==null) {
-                return FormValidation.warning("Server URL not set");
+                try {
+                    this.cxWebService = new CxWebService(serverUrl);
+                } catch (Exception e) {
+                    return FormValidation.warning("Server URL not set");
+                }
             }
 
             try {
@@ -397,6 +399,51 @@ public class CxScanBuilder extends Builder {
             {
                 return FormValidation.error(e.getMessage());
             }
+        }
+
+        public ComboBoxModel doFillProjectNameItems(@QueryParameter boolean useOwnServerCredentials,
+                                                    @QueryParameter String serverUrl,
+                                                    @QueryParameter String username,
+                                                    @QueryParameter String password)
+        {
+            String serverUrlToUse = !useOwnServerCredentials ? serverUrl : getServerUrl();
+            String usernameToUse  = !useOwnServerCredentials ? username  : getUsername();
+            String passwordToUse  = !useOwnServerCredentials ? password  : getPassword();
+
+
+            ComboBoxModel projectNames = new ComboBoxModel();
+
+            try {
+                if (this.cxWebService == null) {
+                    this.cxWebService = new CxWebService(serverUrlToUse);
+                }
+
+                if (!this.cxWebService.isLoggedIn()) {
+                    this.cxWebService.login(usernameToUse, passwordToUse);
+                }
+
+                List<ProjectDisplayData> projectsDisplayData = this.cxWebService.getProjectsDisplayData();
+                for(ProjectDisplayData pd : projectsDisplayData)
+                {
+                    projectNames.add(pd.getProjectName());
+                }
+
+                System.out.println("Projects list: " + projectNames.size());
+                return projectNames;
+
+            } catch (Exception e) {
+                System.out.println("Projects list: empty");
+                return projectNames; // Return empty list of project names
+            }
+        }
+
+        public FormValidation doCheckProjectName(@QueryParameter String projectName)
+        {
+            if (projectName.length() > 200)
+            {
+                return FormValidation.error("Project name must be shorter than 200 characters");
+            }
+            return FormValidation.ok();
         }
 
         public FormValidation doCheckHighThreshold(@QueryParameter int value)

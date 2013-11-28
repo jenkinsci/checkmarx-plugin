@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -264,6 +265,28 @@ public class CxWebService {
             throw new AbortException(message);
         }
         logger.info("Scan report written to: " + reportFile.getAbsolutePath());
+    }
+
+    public List<ProjectDisplayData> getProjectsDisplayData() throws AbortException
+    {
+        assert sessionId!=null : "Trying to retrieve projects display data before login";
+
+        CxWSResponseProjectsDisplayData cxWSResponseProjectsDisplayData = this.cxCLIWebServiceSoap.getProjectsDisplayData(this.sessionId);
+        if (!cxWSResponseProjectsDisplayData.isIsSuccesfull())
+        {
+            String message = "Error retrieving projects display data from server: "  + cxWSResponseProjectsDisplayData.getErrorMessage();
+            logger.error(message);
+            throw new AbortException(message);
+        }
+
+        return cxWSResponseProjectsDisplayData.getProjectList().getProjectDisplayData();
+    }
+
+
+
+    public boolean isLoggedIn()
+    {
+        return this.sessionId!=null;
     }
 
 }

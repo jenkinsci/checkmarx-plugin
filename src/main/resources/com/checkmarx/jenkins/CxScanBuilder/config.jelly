@@ -29,11 +29,12 @@
         </f:entry>
     </f:optionalBlock>
 
-    <f:entry title="Checkmarx Project Name" field="projectName">
-        <f:textbox/>
+
+    <f:entry title="Checkmarx Project Name"
+             field="projectName"
+             description="Existing projects appear in a completion list (up to 20)">
+        <f:combobox field="projectName"/>
     </f:entry>
-
-
 
     <f:optionalBlock title="Set Preset" inline="true" field="presetSpecified">
         <f:entry title="Preset" field="preset">
@@ -81,6 +82,5 @@
             </f:entry>
         </f:optionalBlock>
     </f:optionalBlock>
-
 
 </j:jelly>
