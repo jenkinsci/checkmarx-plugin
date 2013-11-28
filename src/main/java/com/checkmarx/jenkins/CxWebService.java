@@ -282,7 +282,18 @@ public class CxWebService {
         return cxWSResponseProjectsDisplayData.getProjectList().getProjectDisplayData();
     }
 
-
+    public List<Preset> getPresets() throws AbortException
+    {
+        assert sessionId!=null : "Trying to retrieve presetes before login";
+        CxWSResponsePresetList cxWSResponsePresetList = this.cxCLIWebServiceSoap.getPresetList(this.sessionId);
+        if (!cxWSResponsePresetList.isIsSuccesfull())
+        {
+            String message = "Error retrieving presets from server: "  + cxWSResponsePresetList.getErrorMessage();
+            logger.error(message);
+            throw new AbortException(message);
+        }
+        return cxWSResponsePresetList.getPresetList().getPreset();
+    }
 
     public boolean isLoggedIn()
     {

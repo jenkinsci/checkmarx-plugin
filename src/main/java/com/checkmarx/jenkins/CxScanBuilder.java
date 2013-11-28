@@ -12,6 +12,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.*;
@@ -62,6 +63,8 @@ public class CxScanBuilder extends Builder {
     //////////////////////////////////////////////////////////////////////////////////////
 
     private static Logger logger = Logger.getLogger(CxScanBuilder.class);
+    @XStreamOmitField
+    private FileAppender fileAppender;
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Constructors
@@ -223,6 +226,7 @@ public class CxScanBuilder extends Builder {
             }
         }
 
+        closeLogger();
         listener.finished(Result.SUCCESS);
         return true;
     }
@@ -235,7 +239,7 @@ public class CxScanBuilder extends Builder {
         String logFileName = checkmarxBuildDir.getAbsolutePath() + File.separator + "checkmarx.log";
 
         try {
-            FileAppender fileAppender = new FileAppender(new PatternLayout("%C: [%d] %-5p: %m%n"),logFileName);
+            fileAppender = new FileAppender(new PatternLayout("%C: [%d] %-5p: %m%n"),logFileName);
             fileAppender.setThreshold(Level.DEBUG);
             Logger.getLogger("com.checkmarx").addAppender(fileAppender);
         } catch (IOException e)
@@ -243,6 +247,11 @@ public class CxScanBuilder extends Builder {
             logger.warn("Could not open log file for writing: " + logFileName);
             logger.debug(e);
         }
+    }
+
+    private void closeLogger()
+    {
+        fileAppender.close();
     }
 
     private CxWSResponseRunID submitScan(AbstractBuild<?, ?> build, final BuildListener listener, CxWebService cxWebService) throws AbortException, IOException
@@ -280,7 +289,15 @@ public class CxScanBuilder extends Builder {
 
         ProjectSettings projectSettings = new ProjectSettings();
         projectSettings.setDescription(getComment());
-        // TODO: implement presetID
+        long presetLong = 0;
+        try {
+            presetLong = Long.parseLong(getPreset());
+        } catch (Exception e)
+        {
+            logger.error("Encountered illegal preset value: " + getPreset() + ". Using default preset.");
+        }
+
+        projectSettings.setPresetID(presetLong);
         projectSettings.setProjectName(getProjectName());
         projectSettings.setScanConfigurationID(0); // TODO: Re-implement source encoding settings
 
@@ -445,6 +462,42 @@ public class CxScanBuilder extends Builder {
             }
             return FormValidation.ok();
         }
+
+        public ListBoxModel doFillPresetItems(@QueryParameter boolean useOwnServerCredentials,
+                                              @QueryParameter String serverUrl,
+                                              @QueryParameter String username,
+                                              @QueryParameter String password)
+        {
+            String serverUrlToUse = !useOwnServerCredentials ? serverUrl : getServerUrl();
+            String usernameToUse  = !useOwnServerCredentials ? username  : getUsername();
+            String passwordToUse  = !useOwnServerCredentials ? password  : getPassword();
+
+            ListBoxModel listBoxModel = new ListBoxModel();
+
+            try {
+                if (this.cxWebService == null) {
+                    this.cxWebService = new CxWebService(serverUrlToUse);
+                }
+
+                if (!this.cxWebService.isLoggedIn()) {
+                    this.cxWebService.login(usernameToUse, passwordToUse);
+                }
+
+                List<Preset> presets = this.cxWebService.getPresets();
+                for(Preset p : presets)
+                {
+                    listBoxModel.add(new ListBoxModel.Option(p.getPresetName(),Long.toString(p.getID())));
+                }
+
+                System.out.println("Presets list: " + listBoxModel.size());
+                return listBoxModel;
+
+            } catch (Exception e) {
+                System.out.println("Presets list: empty");
+                return listBoxModel; // Return empty list of project names
+            }
+        }
+
 
         public FormValidation doCheckHighThreshold(@QueryParameter int value)
         {

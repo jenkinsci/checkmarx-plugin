@@ -36,11 +36,9 @@
         <f:combobox field="projectName"/>
     </f:entry>
 
-    <f:optionalBlock title="Set Preset" inline="true" field="presetSpecified">
-        <f:entry title="Preset" field="preset">
-            <f:textbox/>
-        </f:entry>
-    </f:optionalBlock>
+    <f:entry title="Preset" field="preset">
+        <f:select/>
+    </f:entry>
 
     <f:entry title="Include/Exclude wildcard patterns" field="filterPattern">
         <f:textarea default="${descriptor.DEFAULT_FILTER_PATTERNS}"/>
