@@ -32,7 +32,7 @@
 
     <f:entry title="Checkmarx Project Name"
              field="projectName"
-             description="Existing projects appear in a completion list (up to 20)">
+             description="Existing projects appear in a completion list when server url is provided (up to 20)">
         <f:combobox field="projectName"/>
     </f:entry>
 
@@ -52,8 +52,8 @@
         <f:checkbox/>
     </f:entry>
 
-    <f:entry title="Configuration (Source Character Encoding)" field="sourceEncoding">
-        <select name="sourceEncoding">
+    <f:entry title="Source Character Encoding (Configuration)" field="sourceEncoding" description="Default Configuration uses UTF-8">
+        <!--select name="sourceEncoding">
             <j:if test="${instance.sourceEncoding==0}">
                 <option value="0" selected="true">Default Configuration (UTF-8)</option>
                 <option value="1">Japanese (Shift-JIS)</option>
@@ -62,7 +62,8 @@
                 <option value="0" >Default Configuration (UTF-8)</option>
                 <option value="1" selected="true">Japanese (Shift-JIS)</option>
             </j:if>
-        </select>
+        </select-->
+        <f:select/>
     </f:entry>
 
     <f:entry title="Comment" field="comment">

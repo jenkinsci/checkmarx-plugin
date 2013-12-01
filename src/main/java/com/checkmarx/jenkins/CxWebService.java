@@ -75,6 +75,7 @@ public class CxWebService {
 
     public void login(String username, String password) throws AbortException
     {
+        sessionId=null;
         Credentials credentials = new Credentials();
         credentials.setUser(username);
         credentials.setPass(password);
@@ -82,13 +83,13 @@ public class CxWebService {
 
         if (!cxWSResponseLoginData.isIsSuccesfull())
         {
-            String message = "Login to Checkmarx server failed: " +  cxWSResponseLoginData.getErrorMessage();
-            logger.error(message);
-            throw new AbortException(message);
+            logger.error("Login to Checkmarx server failed:");
+            logger.error(cxWSResponseLoginData.getErrorMessage());
+            throw new AbortException(cxWSResponseLoginData.getErrorMessage());
         }
 
         sessionId = cxWSResponseLoginData.getSessionId();
-        logger.debug("Login successful");
+        logger.debug("Login successful, sessionId: " + sessionId);
     }
 
     public CxWSResponseRunID scan(CliScanArgs args) throws AbortException
@@ -294,6 +295,23 @@ public class CxWebService {
         }
         return cxWSResponsePresetList.getPresetList().getPreset();
     }
+
+    // Source encoding is called "configuration" in server terms
+    public List<ConfigurationSet> getSourceEncodings() throws AbortException
+    {
+        assert sessionId!=null : "Trying to retrieve configurations before login";
+        CxWSResponseConfigSetList cxWSResponseConfigSetList = this.cxCLIWebServiceSoap.getConfigurationSetList(sessionId);
+        if (!cxWSResponseConfigSetList.isIsSuccesfull())
+        {
+            String message = "Error retrieving configurations from server: "  + cxWSResponseConfigSetList.getErrorMessage();
+            logger.error(message);
+            throw new AbortException(message);
+        }
+        return cxWSResponseConfigSetList.getConfigSetList().getConfigurationSet();
+    }
+
+
+
 
     public boolean isLoggedIn()
     {
