@@ -40,9 +40,17 @@
         <f:select/>
     </f:entry>
 
-    <f:entry title="Include/Exclude wildcard patterns" field="filterPattern">
-        <f:textarea default="${descriptor.DEFAULT_FILTER_PATTERNS}"/>
+
+    <f:entry title="Exclude folders" field="excludeFolders">
+        <f:textbox/>
     </f:entry>
+
+    <f:advanced title="Advanced exclude/include settings">
+        <f:entry title="Include/Exclude wildcard patterns" field="filterPattern">
+            <f:textarea default="${descriptor.DEFAULT_FILTER_PATTERNS}"/>
+        </f:entry>
+    </f:advanced>
+
 
     <f:entry title="Visible to others" field="visibleToOthers">
         <f:checkbox default="true"/>
@@ -53,17 +61,7 @@
     </f:entry>
 
     <f:entry title="Source Character Encoding (Configuration)" field="sourceEncoding" description="Default Configuration uses UTF-8">
-        <!--select name="sourceEncoding">
-            <j:if test="${instance.sourceEncoding==0}">
-                <option value="0" selected="true">Default Configuration (UTF-8)</option>
-                <option value="1">Japanese (Shift-JIS)</option>
-            </j:if>
-            <j:if test="${instance.sourceEncoding==1}">
-                <option value="0" >Default Configuration (UTF-8)</option>
-                <option value="1" selected="true">Japanese (Shift-JIS)</option>
-            </j:if>
-        </select-->
-        <f:select/>
+         <f:select/>
     </f:entry>
 
     <f:entry title="Comment" field="comment">

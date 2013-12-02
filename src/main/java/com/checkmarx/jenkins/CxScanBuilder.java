@@ -15,6 +15,7 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.*;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -47,6 +48,7 @@ public class CxScanBuilder extends Builder {
 
     private String preset;
     private boolean presetSpecified;
+    private String excludeFolders;
     private String filterPattern;
 
     private boolean visibleToOthers;
@@ -82,6 +84,7 @@ public class CxScanBuilder extends Builder {
                          String projectName,
                          String preset,
                          boolean presetSpecified,
+                         String excludeFolders,
                          String filterPattern,
                          boolean visibleToOthers,
                          boolean incremental,
@@ -98,6 +101,7 @@ public class CxScanBuilder extends Builder {
         this.projectName = projectName;
         this.preset = preset;
         this.presetSpecified = presetSpecified;
+        this.excludeFolders = excludeFolders;
         this.filterPattern = filterPattern;
         this.visibleToOthers = visibleToOthers;
         this.incremental = incremental;
@@ -143,6 +147,10 @@ public class CxScanBuilder extends Builder {
 
     public boolean isPresetSpecified() {
         return presetSpecified;
+    }
+
+    public String getExcludeFolders() {
+        return excludeFolders;
     }
 
     public String getFilterPattern() {
@@ -273,9 +281,11 @@ public class CxScanBuilder extends Builder {
 
         File baseDir = new File(build.getWorkspace().getRemote());
 
+        String combinedFilterPattern = this.getFilterPattern() + "," + processExcludeFolders(this.getExcludeFolders());
+
         logger.info("Starting to zip the workspace");
         try {
-            new Zipper().zip(baseDir,this.getFilterPattern(),byteArrayOutputStream,CxConfig.maxZipSize(),zipListener);
+            new Zipper().zip(baseDir,combinedFilterPattern,byteArrayOutputStream,CxConfig.maxZipSize(),zipListener);
         } catch (Zipper.MaxZipSizeReached e)
         {
             throw new AbortException("Checkmarx Scan Failed: Reached maximum upload size limit of " + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()));
@@ -286,7 +296,29 @@ public class CxScanBuilder extends Builder {
 
 
         return cxWebService.scan(createCliScanArgs(byteArrayOutputStream.toByteArray()));
-   }
+    }
+
+    private String processExcludeFolders(String excludeFolders)
+    {
+        if (excludeFolders==null)
+        {
+            return "";
+        }
+        StringBuffer result = new StringBuffer();
+        String[] patterns = StringUtils.split(excludeFolders, ",\n");
+        for(String p : patterns)
+        {
+            p = p.trim();
+            if (p.length()>0)
+            {
+                result.append("!**/");
+                result.append(p);
+                result.append("/**/*, ");
+            }
+        }
+        logger.debug("Exclude folders converted to: " +result.toString());
+        return result.toString();
+    }
 
     private CliScanArgs createCliScanArgs(byte[] compressedSources)
     {
