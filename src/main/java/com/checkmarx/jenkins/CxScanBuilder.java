@@ -3,6 +3,7 @@ package com.checkmarx.jenkins;
 import com.checkmarx.components.zipper.ZipListener;
 import com.checkmarx.components.zipper.Zipper;
 import com.checkmarx.ws.CxCLIWebService.*;
+import com.sun.istack.internal.NotNull;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import hudson.AbortException;
 import hudson.Extension;
@@ -119,10 +120,6 @@ public class CxScanBuilder extends Builder {
 
     public boolean isUseOwnServerCredentials() {
         return useOwnServerCredentials;
-    }
-
-    public void setUseOwnServerCredentials(boolean useOwnServerCredentials) {
-        this.useOwnServerCredentials = useOwnServerCredentials;
     }
 
     public String getServerUrl() {
@@ -298,13 +295,14 @@ public class CxScanBuilder extends Builder {
         return cxWebService.scan(createCliScanArgs(byteArrayOutputStream.toByteArray()));
     }
 
+    @NotNull
     private String processExcludeFolders(String excludeFolders)
     {
         if (excludeFolders==null)
         {
             return "";
         }
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         String[] patterns = StringUtils.split(excludeFolders, ",\n");
         for(String p : patterns)
         {
@@ -341,12 +339,12 @@ public class CxScanBuilder extends Builder {
             configuration = Long.parseLong(getSourceEncoding());
         } catch (Exception e)
         {
-            logger.error("Encountered illegal source encodign (configuration) value: " + getSourceEncoding() + ". Using default configuration.");
+            logger.error("Encountered illegal source encoding (configuration) value: " + getSourceEncoding() + ". Using default configuration.");
         }
         projectSettings.setScanConfigurationID(configuration);
 
         LocalCodeContainer localCodeContainer = new LocalCodeContainer();
-        localCodeContainer.setFileName("src.zip"); // TODO: Check what filename to set
+        localCodeContainer.setFileName("src.zip");
         localCodeContainer.setZippedFile(compressedSources);
 
         SourceCodeSettings sourceCodeSettings = new SourceCodeSettings();
