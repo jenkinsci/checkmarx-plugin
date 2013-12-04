@@ -3,9 +3,7 @@ package com.checkmarx.jenkins;
 
 import com.checkmarx.ws.CxCLIWebService.*;
 import com.checkmarx.ws.CxWSResolver.*;
-import com.sun.xml.internal.ws.wsdl.parser.InaccessibleWSDLException;
 import hudson.AbortException;
-import hudson.model.BuildListener;
 import hudson.util.IOUtils;
 import org.apache.log4j.Logger;
 
@@ -52,7 +50,7 @@ public class CxWebService {
         CxWSResolver cxWSResolver;
         try {
             cxWSResolver = new CxWSResolver(resolverUrl,CXWSRESOLVER_QNAME);
-        } catch (InaccessibleWSDLException e){
+        } catch (javax.xml.ws.WebServiceException e){
             logger.error("Failed to resolve Checkmarx webservice url with resolver at: " + resolverUrl);
             logger.error(e);
             throw new AbortException("Checkmarx server was not found on url: " + serverUrl);
