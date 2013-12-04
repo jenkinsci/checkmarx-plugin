@@ -184,59 +184,76 @@ public class CxScanBuilder extends Builder {
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher,BuildListener listener) throws InterruptedException, IOException {
 
-        File checkmarxBuildDir = new File(build.getRootDir(),"checkmarx");
-        checkmarxBuildDir.mkdir();
-        File reportFile = new File(checkmarxBuildDir,"ScanReport.xml");
+        try {
+            File checkmarxBuildDir = new File(build.getRootDir(),"checkmarx");
+            checkmarxBuildDir.mkdir();
+            File reportFile = new File(checkmarxBuildDir,"ScanReport.xml");
 
-        initLogger(checkmarxBuildDir,listener);
+            initLogger(checkmarxBuildDir,listener);
 
-        listener.started(null);
-        logger.info("Checkmarx Jenkins plugin version: " + CxConfig.version());
+            listener.started(null);
+            logger.info("Checkmarx Jenkins plugin version: " + CxConfig.version());
 
-        String serverUrlToUse = isUseOwnServerCredentials() ? getServerUrl() : getDescriptor().getServerUrl();
-        String usernameToUse  = isUseOwnServerCredentials() ? getUsername()  : getDescriptor().getUsername();
-        String passwordToUse  = isUseOwnServerCredentials() ? getPassword()  : getDescriptor().getPassword();
-        CxWebService cxWebService = new CxWebService(serverUrlToUse);
-        cxWebService.login(usernameToUse,passwordToUse);
+            String serverUrlToUse = isUseOwnServerCredentials() ? getServerUrl() : getDescriptor().getServerUrl();
+            String usernameToUse  = isUseOwnServerCredentials() ? getUsername()  : getDescriptor().getUsername();
+            String passwordToUse  = isUseOwnServerCredentials() ? getPassword()  : getDescriptor().getPassword();
+            CxWebService cxWebService = new CxWebService(serverUrlToUse);
+            cxWebService.login(usernameToUse,passwordToUse);
 
 
-        logger.info("Checkmarx server login successful");
+            logger.info("Checkmarx server login successful");
 
-        CxWSResponseRunID cxWSResponseRunID = submitScan(build, listener, cxWebService);
-        logger.info("\nScan job submitted successfully\n");
+            CxWSResponseRunID cxWSResponseRunID = submitScan(build, listener, cxWebService);
+            logger.info("\nScan job submitted successfully\n");
 
-        if (!isWaitForResultsEnabled())
-        {
-            listener.finished(Result.SUCCESS);
-            return true;
-        }
-
-        long scanId =  cxWebService.trackScanProgress(cxWSResponseRunID);
-
-        cxWebService.retrieveScanReport(scanId,reportFile);
-
-        // Parse scan report and present results in Jenkins
-
-        CxScanResult cxScanResult = new CxScanResult(build);
-        cxScanResult.readScanXMLReport(reportFile);
-        build.addAction(cxScanResult);
-
-        logger.info("Number of high severity vulnerabilities: " +
-                cxScanResult.getHighCount() + " stability threshold: " + this.getHighThreshold());
-
-        if (this.isVulnerabilityThresholdEnabled())
-        {
-            if (cxScanResult.getHighCount() >  this.getHighThreshold())
+            if (!isWaitForResultsEnabled())
             {
-                build.setResult(Result.UNSTABLE);    // Marks the build result as UNSTABLE
-                listener.finished(Result.UNSTABLE);
+                listener.finished(Result.SUCCESS);
                 return true;
             }
-        }
 
-        closeLogger();
-        listener.finished(Result.SUCCESS);
-        return true;
+            long scanId =  cxWebService.trackScanProgress(cxWSResponseRunID);
+
+            cxWebService.retrieveScanReport(scanId,reportFile);
+
+            // Parse scan report and present results in Jenkins
+
+            CxScanResult cxScanResult = new CxScanResult(build);
+            cxScanResult.readScanXMLReport(reportFile);
+            build.addAction(cxScanResult);
+
+            logger.info("Number of high severity vulnerabilities: " +
+                    cxScanResult.getHighCount() + " stability threshold: " + this.getHighThreshold());
+
+            if (this.isVulnerabilityThresholdEnabled())
+            {
+                if (cxScanResult.getHighCount() >  this.getHighThreshold())
+                {
+                    build.setResult(Result.UNSTABLE);    // Marks the build result as UNSTABLE
+                    listener.finished(Result.UNSTABLE);
+                    return true;
+                }
+            }
+
+            closeLogger();
+            listener.finished(Result.SUCCESS);
+            return true;
+        } catch (Error e)
+        {
+            logger.error(e);
+            closeLogger();
+            throw e;
+        }  catch (AbortException e)
+        {
+            logger.error(e);
+            closeLogger();
+            throw e;
+        }catch (IOException e)
+        {
+            logger.error(e);
+            closeLogger();
+            throw e;
+        }
     }
 
     private void initLogger(File checkmarxBuildDir, BuildListener listener)
