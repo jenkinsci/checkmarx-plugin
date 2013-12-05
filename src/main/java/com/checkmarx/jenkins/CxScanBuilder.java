@@ -17,6 +17,7 @@ import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.*;
+import org.jetbrains.annotations.NotNull;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -312,6 +313,7 @@ public class CxScanBuilder extends Builder {
         return cxWebService.scan(createCliScanArgs(byteArrayOutputStream.toByteArray()));
     }
 
+    @NotNull
     private String processExcludeFolders(String excludeFolders)
     {
         if (excludeFolders==null)
