@@ -232,7 +232,7 @@ public class CxScanResult implements Action {
                 {
                     CxScanResult.this.infoCount++;
                 }
-            } if ("Query".equals(qName)) {
+            } else if ("Query".equals(qName)) {  //TODO: Validate that the added else does not ruin correctness
                 currentQueryName = attributes.getValue("name");
                 currentQuerySeverity = attributes.getValue("Severity");
                 currentQueryNumOfResults = 0;
