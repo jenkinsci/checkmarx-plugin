@@ -3,9 +3,11 @@ package com.checkmarx.jenkins;
 import hudson.Extension;
 import hudson.Functions;
 import hudson.PluginWrapper;
+import hudson.matrix.MatrixProject;
 import hudson.model.*;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.util.*;
+import org.apache.log4j.Logger;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
@@ -236,16 +238,26 @@ public class CxProjectResult implements Action {
         return relPath;
     }
 
-
     @Extension
     public static class Factory extends TransientProjectActionFactory {
+
+        private static final Logger logger = Logger.getLogger(Factory.class);
+
+        /**
+         * This factory method is called by Jenkins to create instances of CxProjectResult
+         * for every project in the system.
+         */
         @Override
         public Collection<? extends Action> createFor(AbstractProject project) {
-
-            LinkedList<Action> list = new LinkedList<Action>();
-            list.add(new CxProjectResult(project));
-            return list;
-
+            if (!(project instanceof MatrixProject))
+            {
+                // We don't want to add the CxProectResult action to MatrixProject,
+                // since it does not make sense to present our vulnerability graph in this level
+                LinkedList<Action> list = new LinkedList<Action>();
+                list.add(new CxProjectResult(project));
+                return list;
+            }
+            return null;
         };
     };
 }
