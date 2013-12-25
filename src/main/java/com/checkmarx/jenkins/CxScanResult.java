@@ -215,22 +215,26 @@ public class CxScanResult implements Action {
 
             if ("Result".equals(qName))
             {
-                currentQueryNumOfResults++;
-                String severity = attributes.getValue("Severity");
-                if (severity.equals(CxResultSeverity.HIGH.xmlParseString))
+                String falsePositive = attributes.getValue("FalsePositive");
+                if (!"True".equals(falsePositive))
                 {
-                    CxScanResult.this.highCount++;
+                    currentQueryNumOfResults++;
+                    String severity = attributes.getValue("Severity");
+                    if (severity.equals(CxResultSeverity.HIGH.xmlParseString))
+                    {
+                        CxScanResult.this.highCount++;
 
-                } else if (severity.equals(CxResultSeverity.MEDIUM.xmlParseString))
-                {
-                    CxScanResult.this.mediumCount++;
+                    } else if (severity.equals(CxResultSeverity.MEDIUM.xmlParseString))
+                    {
+                        CxScanResult.this.mediumCount++;
 
-                } else if (severity.equals(CxResultSeverity.LOW.xmlParseString))
-                {
-                    CxScanResult.this.lowCount++;
-                } else if (severity.equals(CxResultSeverity.INFO.xmlParseString))
-                {
-                    CxScanResult.this.infoCount++;
+                    } else if (severity.equals(CxResultSeverity.LOW.xmlParseString))
+                    {
+                        CxScanResult.this.lowCount++;
+                    } else if (severity.equals(CxResultSeverity.INFO.xmlParseString))
+                    {
+                        CxScanResult.this.infoCount++;
+                    }
                 }
             } else if ("Query".equals(qName)) {  //TODO: Validate that the added else does not ruin correctness
                 currentQueryName = attributes.getValue("name");
