@@ -441,6 +441,24 @@ public class CxScanBuilder extends Builder {
         }
 
         //////////////////////////////////////////////////////////////////////////////////////
+        //  Helper methods for jelly views
+        //////////////////////////////////////////////////////////////////////////////////////
+
+        // Provides a description string to be displayed near "Use default server credentials"
+        // configuration option
+        public String getCredentialsDescription()
+        {
+            if (getServerUrl()==null || getServerUrl().isEmpty() ||
+                getUsername()==null || getUsername().isEmpty())
+            {
+                return "not set";
+            }
+
+            return "Server URL: " + getServerUrl() + " username: " + getUsername();
+
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////
         // Field value validators
         //////////////////////////////////////////////////////////////////////////////////////
 

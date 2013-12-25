@@ -10,7 +10,7 @@
       Creates a text field that shows the value of the "name" property.
       When submitted, it will be passed to the corresponding constructor parameter.
     -->
-    <f:optionalBlock title="Use default server credentials "
+    <f:optionalBlock title="Use default server credentials (${descriptor.credentialsDescription})"
                      inline="true"
                      field="useOwnServerCredentials"
                      negative="true"
@@ -28,7 +28,6 @@
             <f:password/>
         </f:entry>
     </f:optionalBlock>
-
 
     <f:entry title="Checkmarx Project Name"
              field="projectName"
