@@ -71,6 +71,9 @@ public class CxScanBuilder extends Builder {
 
     @XStreamOmitField
     private FileAppender fileAppender;
+    @XStreamOmitField
+    private int numberOfFilesZipped = 0;
+
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Constructors
@@ -276,11 +279,12 @@ public class CxScanBuilder extends Builder {
 
     private CxWSResponseRunID submitScan(AbstractBuild<?, ?> build, final BuildListener listener, CxWebService cxWebService) throws AbortException, IOException
     {
-
+        this.numberOfFilesZipped = 0;
         ZipListener zipListener = new ZipListener() {
             @Override
             public void updateProgress(String fileName, long size) {
                 logger.info("Zipping (" + FileUtils.byteCountToDisplaySize(size) + "): " + fileName);
+                CxScanBuilder.this.numberOfFilesZipped++;
             }
 
         };
@@ -293,7 +297,9 @@ public class CxScanBuilder extends Builder {
 
         logger.info("Starting to zip the workspace");
         try {
-            new Zipper().zip(baseDir,combinedFilterPattern,byteArrayOutputStream,CxConfig.maxZipSize(),zipListener);
+            new Zipper().zip(baseDir, combinedFilterPattern, byteArrayOutputStream, CxConfig.maxZipSize(), zipListener);
+            logger.info("Zipping complete with " + this.numberOfFilesZipped + " files, total compressed size: " +
+                    FileUtils.byteCountToDisplaySize(byteArrayOutputStream.size()));
         } catch (Zipper.MaxZipSizeReached e)
         {
             throw new AbortException("Checkmarx Scan Failed: Reached maximum upload size limit of " + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()));
