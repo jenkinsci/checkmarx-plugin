@@ -43,6 +43,7 @@
     <option name="OPEN_IN_BROWSER" value="false" />
     <option name="OUTPUT_DIRECTORY" />
   </component>
+  <component name="IdProvider" IDEtalkID="F3242145C86B7AE470932F533DB157BE" />
   <component name="ImportConfiguration">
     <option name="VENDOR" />
     <option name="RELEASE_TAG" />
@@ -254,15 +255,15 @@
         <root url="jar://$MAVEN_REPOSITORY$/args4j/args4j/2.0.21/args4j-2.0.21-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: com.checkmarx.components:zipper:1.0">
+    <library name="Maven: com.checkmarx.components:zipper:1.1">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/checkmarx/components/zipper/1.0/zipper-1.0.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/checkmarx/components/zipper/1.1/zipper-1.1.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/com/checkmarx/components/zipper/1.0/zipper-1.0-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/checkmarx/components/zipper/1.1/zipper-1.1-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/checkmarx/components/zipper/1.0/zipper-1.0-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/checkmarx/components/zipper/1.1/zipper-1.1-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: com.github.stephenc.findbugs:findbugs-annotations:1.3.9-1">

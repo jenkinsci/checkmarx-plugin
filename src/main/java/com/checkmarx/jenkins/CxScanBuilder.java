@@ -52,7 +52,6 @@ public class CxScanBuilder extends Builder {
     private String excludeFolders;
     private String filterPattern;
 
-    private boolean visibleToOthers;
     private boolean incremental;
     private String sourceEncoding;
     private String comment;
@@ -87,7 +86,6 @@ public class CxScanBuilder extends Builder {
                          boolean presetSpecified,
                          String excludeFolders,
                          String filterPattern,
-                         boolean visibleToOthers,
                          boolean incremental,
                          String sourceEncoding,
                          String comment,
@@ -104,7 +102,6 @@ public class CxScanBuilder extends Builder {
         this.presetSpecified = presetSpecified;
         this.excludeFolders = excludeFolders;
         this.filterPattern = filterPattern;
-        this.visibleToOthers = visibleToOthers;
         this.incremental = incremental;
         this.sourceEncoding = sourceEncoding;
         this.comment = comment;
@@ -152,10 +149,6 @@ public class CxScanBuilder extends Builder {
 
     public String getFilterPattern() {
         return filterPattern;
-    }
-
-    public boolean isVisibleToOthers() {
-        return visibleToOthers;
     }
 
     public boolean isIncremental() {
@@ -371,7 +364,7 @@ public class CxScanBuilder extends Builder {
 
         CliScanArgs args = new CliScanArgs();
         args.setIsIncremental(isIncremental());
-        args.setIsPrivateScan(!isVisibleToOthers());
+        args.setIsPrivateScan(false);
         args.setPrjSettings(projectSettings);
         args.setSrcCodeSettings(sourceCodeSettings);
 

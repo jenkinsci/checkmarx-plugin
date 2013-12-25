@@ -51,11 +51,6 @@
         </f:entry>
     </f:advanced>
 
-
-    <f:entry title="Visible to others" field="visibleToOthers">
-        <f:checkbox default="true"/>
-    </f:entry>
-
     <f:entry title="Incremental" field="incremental">
         <f:checkbox/>
     </f:entry>
