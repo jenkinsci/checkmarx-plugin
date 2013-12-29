@@ -72,6 +72,11 @@
                 <f:number clazz="non-negative-number" default="0"/>
             </f:entry>
         </f:optionalBlock>
+
+        <f:entry title="Generate PDF Report" field="generatePdfReport">
+            <f:checkbox/>
+        </f:entry>
+
     </f:optionalBlock>
 
 </j:jelly>

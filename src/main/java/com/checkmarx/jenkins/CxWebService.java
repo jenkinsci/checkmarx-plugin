@@ -190,14 +190,14 @@ public class CxWebService {
 
     }
 
-    public void retrieveScanReport(long scanId, File reportFile) throws AbortException
+    public void retrieveScanReport(long scanId, File reportFile, CxWSReportType reportType) throws AbortException
     {
         assert sessionId!=null : "Trying to retrieve scan report before login";
 
         CxWSReportRequest cxWSReportRequest = new CxWSReportRequest();
         cxWSReportRequest.setScanID(scanId);
-        cxWSReportRequest.setType(CxWSReportType.XML);
-        logger.info("Requesting Scan Report Generation");
+        cxWSReportRequest.setType(reportType);
+        logger.info("Requesting " + reportType.toString().toUpperCase() + " Scan Report Generation");
         CxWSCreateReportResponse cxWSCreateReportResponse = cxCLIWebServiceSoap.createScanReport(sessionId,cxWSReportRequest);
         if (!cxWSCreateReportResponse.isIsSuccesfull())
         {
@@ -205,6 +205,8 @@ public class CxWebService {
             logger.error(message);
             throw new AbortException(message);
         }
+
+
 
         // Wait for the report to become ready
 
@@ -231,7 +233,7 @@ public class CxWebService {
                 break;
             }
 
-            logger.info("Report generation in progress");
+            logger.info(reportType.toString().toUpperCase() + " Report generation in progress");
             try {
                 Thread.sleep(5*1000);
             } catch (InterruptedException e)

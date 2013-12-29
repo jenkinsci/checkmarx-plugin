@@ -60,6 +60,7 @@ public class CxScanBuilder extends Builder {
 
     private boolean vulnerabilityThresholdEnabled;
     private int highThreshold;
+    private boolean generatePdfReport;
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Private variables
@@ -94,7 +95,8 @@ public class CxScanBuilder extends Builder {
                          String comment,
                          boolean waitForResultsEnabled,
                          boolean vulnerabilityThresholdEnabled,
-                         int highThreshold)
+                         int highThreshold,
+                         boolean generatePdfReport)
     {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
@@ -111,6 +113,7 @@ public class CxScanBuilder extends Builder {
         this.waitForResultsEnabled = waitForResultsEnabled;
         this.vulnerabilityThresholdEnabled = vulnerabilityThresholdEnabled;
         this.highThreshold = highThreshold;
+        this.generatePdfReport =  generatePdfReport;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -178,13 +181,17 @@ public class CxScanBuilder extends Builder {
         return highThreshold;
     }
 
+    public boolean isGeneratePdfReport() {
+        return generatePdfReport;
+    }
+
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher,BuildListener listener) throws InterruptedException, IOException {
 
         try {
             File checkmarxBuildDir = new File(build.getRootDir(),"checkmarx");
             checkmarxBuildDir.mkdir();
-            File reportFile = new File(checkmarxBuildDir,"ScanReport.xml");
+
 
             initLogger(checkmarxBuildDir,listener);
 
@@ -211,12 +218,20 @@ public class CxScanBuilder extends Builder {
 
             long scanId =  cxWebService.trackScanProgress(cxWSResponseRunID);
 
-            cxWebService.retrieveScanReport(scanId,reportFile);
+            File xmlReportFile = new File(checkmarxBuildDir,"ScanReport.xml");
+            cxWebService.retrieveScanReport(scanId,xmlReportFile,CxWSReportType.XML);
+
+            if (this.generatePdfReport)
+            {
+                File pdfReportFile = new File(checkmarxBuildDir,"ScanReport.pdf");
+                cxWebService.retrieveScanReport(scanId, pdfReportFile, CxWSReportType.PDF);
+            }
+
 
             // Parse scan report and present results in Jenkins
 
             CxScanResult cxScanResult = new CxScanResult(build);
-            cxScanResult.readScanXMLReport(reportFile);
+            cxScanResult.readScanXMLReport(xmlReportFile);
             build.addAction(cxScanResult);
 
             logger.info("Number of high severity vulnerabilities: " +
