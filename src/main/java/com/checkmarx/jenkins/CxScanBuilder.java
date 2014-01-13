@@ -582,14 +582,19 @@ public class CxScanBuilder extends Builder {
 
         public FormValidation doCheckProjectName(@QueryParameter String projectName)
         {
-
-            if (projectName.length() > 200)
+            CxWSBasicRepsonse cxWSBasicRepsonse = this.cxWebService.validateProjectName(projectName);
+            if (cxWSBasicRepsonse.isIsSuccesfull())
             {
-                return FormValidation.error("Project name must be shorter than 200 characters");
+                return FormValidation.ok("Project Name Validated Successfully");
+            } else {
+                if (cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("Illegal project name"))
+                {
+                    return FormValidation.error("Illegal project name");
+                } else {
+                    logger.warn("Couldn't validate project name with Checkmarx sever:\n" + cxWSBasicRepsonse.getErrorMessage());
+                    return FormValidation.warning("Can't reach server to validate project name");
+                }
             }
-            // TODO: Add project validation using IsValidProjectName web service
-
-            return FormValidation.ok();
         }
 
 

@@ -2,6 +2,7 @@ package com.checkmarx.jenkins;
 
 
 import com.checkmarx.ws.CxJenkinsWebService.*;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSBasicRepsonse;
 import com.checkmarx.ws.CxWSResolver.*;
 import hudson.AbortException;
 import hudson.util.IOUtils;
@@ -310,7 +311,11 @@ public class CxWebService {
         return cxWSResponseConfigSetList.getConfigSetList().getConfigurationSet();
     }
 
-
+    public CxWSBasicRepsonse validateProjectName(String cxProjectName)
+    {
+        assert sessionId!=null : "Trying to validate project name before login";
+        return this.cxJenkinsWebServiceSoap.isValidProjectName(sessionId,cxProjectName,""); // TODO: Specify group id
+    }
 
 
     public boolean isLoggedIn()
