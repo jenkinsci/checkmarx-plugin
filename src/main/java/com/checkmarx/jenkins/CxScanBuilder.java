@@ -2,7 +2,7 @@ package com.checkmarx.jenkins;
 
 import com.checkmarx.components.zipper.ZipListener;
 import com.checkmarx.components.zipper.Zipper;
-import com.checkmarx.ws.CxCLIWebService.*;
+import com.checkmarx.ws.CxJenkinsWebService.*;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import hudson.AbortException;
 import hudson.Extension;

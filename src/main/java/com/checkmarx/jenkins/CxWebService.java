@@ -1,7 +1,7 @@
 package com.checkmarx.jenkins;
 
 
-import com.checkmarx.ws.CxCLIWebService.*;
+import com.checkmarx.ws.CxJenkinsWebService.*;
 import com.checkmarx.ws.CxWSResolver.*;
 import hudson.AbortException;
 import hudson.util.IOUtils;
@@ -27,12 +27,12 @@ public class CxWebService {
     private final static Logger logger = Logger.getLogger(CxWebService.class);
     private final static QName CXWSRESOLVER_QNAME = new QName("http://Checkmarx.com", "CxWSResolver");
     private final static QName CXCLIWEBSERVICE_QNAME = new QName("http://Checkmarx.com/v7", "CxCLIWebService");
-    private final static int WEBSERVICE_API_VERSION = 7;
+    private final static int WEBSERVICE_API_VERSION = 1;
     private final static String CXWSRESOLVER_PATH = "/cxwebinterface/cxwsresolver.asmx";
     private final static int LCID = 1033; // English
 
     private String sessionId;
-    private CxCLIWebServiceSoap cxCLIWebServiceSoap;
+    private CxJenkinsWebServiceSoap cxCLIWebServiceSoap;
 
     public CxWebService(String serverUrl) throws MalformedURLException, AbortException
     {
@@ -56,7 +56,7 @@ public class CxWebService {
             throw new AbortException("Checkmarx server was not found on url: " + serverUrl);
         }
         CxWSResolverSoap cxWSResolverSoap =  cxWSResolver.getCxWSResolverSoap();
-        CxWSResponseDiscovery cxWSResponseDiscovery = cxWSResolverSoap.getWebServiceUrl(CxClientType.CLI,WEBSERVICE_API_VERSION); // TODO: Replace CLI with Jenkins
+        CxWSResponseDiscovery cxWSResponseDiscovery = cxWSResolverSoap.getWebServiceUrl(CxClientType.JENKINS,WEBSERVICE_API_VERSION);
         if (!cxWSResponseDiscovery.isIsSuccesfull())
         {
             String message = "Failed to resolve Checkmarx webservice url: \n" + cxWSResponseDiscovery.getErrorMessage();
@@ -66,8 +66,8 @@ public class CxWebService {
 
         URL webServiceUrl = new URL(cxWSResponseDiscovery.getServiceURL());
         logger.debug("Webservice url: " + webServiceUrl);
-        CxCLIWebService cxCLIWebService = new CxCLIWebService(webServiceUrl,CXCLIWEBSERVICE_QNAME);
-        cxCLIWebServiceSoap = cxCLIWebService.getCxCLIWebServiceSoap();
+        CxJenkinsWebService cxCLIWebService = new CxJenkinsWebService(webServiceUrl,CXCLIWEBSERVICE_QNAME);
+        cxCLIWebServiceSoap = cxCLIWebService.getCxJenkinsWebServiceSoap();
 
     }
 

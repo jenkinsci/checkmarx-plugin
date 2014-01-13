@@ -8,20 +8,13 @@
       <sourceFolder url="file://$MODULE_DIR$/target/generated-sources/wsimport" isTestSource="false" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
-      <excludeFolder url="file://$MODULE_DIR$/target/checkmarx" />
       <excludeFolder url="file://$MODULE_DIR$/target/classes" />
       <excludeFolder url="file://$MODULE_DIR$/target/generated-sources/groovy-stubs" />
-      <excludeFolder url="file://$MODULE_DIR$/target/inject-tests" />
       <excludeFolder url="file://$MODULE_DIR$/target/jaxws" />
-      <excludeFolder url="file://$MODULE_DIR$/target/jenkins-for-test" />
-      <excludeFolder url="file://$MODULE_DIR$/target/surefire" />
-      <excludeFolder url="file://$MODULE_DIR$/target/surefire-reports" />
-      <excludeFolder url="file://$MODULE_DIR$/target/test-classes" />
-      <excludeFolder url="file://$MODULE_DIR$/target/work" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: com.checkmarx.components:zipper:1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.checkmarx.components:zipper:1.1.1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.ant:ant:1.9.2" level="project" />
     <orderEntry type="library" name="Maven: org.apache.ant:ant-launcher:1.9.2" level="project" />
     <orderEntry type="library" name="Maven: log4j:log4j:1.2.14" level="project" />
