@@ -324,6 +324,7 @@ public class CxScanBuilder extends Builder {
         }
 
 
+
         return cxWebService.scan(createCliScanArgs(byteArrayOutputStream.toByteArray()));
     }
 
@@ -354,7 +355,7 @@ public class CxScanBuilder extends Builder {
     {
 
         ProjectSettings projectSettings = new ProjectSettings();
-        projectSettings.setDescription(getComment());
+        projectSettings.setDescription(getComment()); // TODO: Move comment to other web service
         long presetLong = 0; // Default value to use in case of exception
         try {
             presetLong = Long.parseLong(getPreset());
