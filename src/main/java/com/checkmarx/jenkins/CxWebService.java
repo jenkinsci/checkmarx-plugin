@@ -25,8 +25,6 @@ import java.util.List;
 public class CxWebService {
 
     private final static Logger logger = Logger.getLogger(CxWebService.class);
-    private final static QName CXWSRESOLVER_QNAME = new QName("http://Checkmarx.com", "CxWSResolver");
-    private final static QName CXCLIWEBSERVICE_QNAME = new QName("http://Checkmarx.com/v7", "CxCLIWebService");
     private final static int WEBSERVICE_API_VERSION = 7;
     private final static String CXWSRESOLVER_PATH = "/cxwebinterface/cxwsresolver.asmx";
     private final static int LCID = 1033; // English
@@ -49,7 +47,7 @@ public class CxWebService {
         logger.debug("Resolver url: " + resolverUrl);
         CxWSResolver cxWSResolver;
         try {
-            cxWSResolver = new CxWSResolver(resolverUrl,CXWSRESOLVER_QNAME);
+            cxWSResolver = new CxWSResolver(resolverUrl);
         } catch (javax.xml.ws.WebServiceException e){
             logger.error("Failed to resolve Checkmarx webservice url with resolver at: " + resolverUrl);
             logger.error(e);
@@ -66,7 +64,7 @@ public class CxWebService {
 
         URL webServiceUrl = new URL(cxWSResponseDiscovery.getServiceURL());
         logger.debug("Webservice url: " + webServiceUrl);
-        CxCLIWebService cxCLIWebService = new CxCLIWebService(webServiceUrl,CXCLIWEBSERVICE_QNAME);
+        CxCLIWebService cxCLIWebService = new CxCLIWebService(webServiceUrl);
         cxCLIWebServiceSoap = cxCLIWebService.getCxCLIWebServiceSoap();
 
     }
