@@ -109,7 +109,7 @@
                         </goals>
                         <configuration>
                             <wsdlUrls>
-                                <wsdlUrl>${basedir}/src/main/resources/com/checkmarx/jenkins/CxWebService/CxCLIWebService.wsdl</wsdlUrl>
+                                <wsdlUrl>${basedir}/src/main/config/com/checkmarx/jenkins/CxWebService/CxCLIWebService.wsdl</wsdlUrl>
                             </wsdlUrls>
                             <packageName>com.checkmarx.ws.CxCLIWebService</packageName>
                             <target>2.1</target>
@@ -123,7 +123,7 @@
                     </goals>
                     <configuration>
                         <wsdlUrls>
-                            <wsdlUrl>${basedir}/src/main/resources/com/checkmarx/jenkins/CxWebService/CxJenkinsWebService.wsdl</wsdlUrl>
+                            <wsdlUrl>${basedir}/src/main/config/com/checkmarx/jenkins/CxWebService/CxJenkinsWebService.wsdl</wsdlUrl>
                         </wsdlUrls>
                         <packageName>com.checkmarx.ws.CxJenkinsWebService</packageName>
                         <target>2.1</target>
@@ -137,7 +137,7 @@
                         </goals>
                         <configuration>
                             <wsdlUrls>
-                                <wsdlUrl>${basedir}/src/main/resources/com/checkmarx/jenkins/CxWebService/cxwsresolver.wsdl</wsdlUrl>
+                                <wsdlUrl>${basedir}/src/main/config/com/checkmarx/jenkins/CxWebService/cxwsresolver.wsdl</wsdlUrl>
                             </wsdlUrls>
                             <packageName>com.checkmarx.ws.CxWSResolver</packageName>
                             <target>2.1</target>
