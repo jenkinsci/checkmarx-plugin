@@ -1,7 +1,8 @@
 package com.checkmarx.jenkins;
 
 
-import com.checkmarx.ws.CxCLIWebService.*;
+import com.checkmarx.ws.CxJenkinsWebService.*;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSBasicRepsonse;
 import com.checkmarx.ws.CxWSResolver.*;
 import hudson.AbortException;
 import hudson.util.IOUtils;
@@ -25,12 +26,14 @@ import java.util.List;
 public class CxWebService {
 
     private final static Logger logger = Logger.getLogger(CxWebService.class);
-    private final static int WEBSERVICE_API_VERSION = 7;
+    private final static QName CXWSRESOLVER_QNAME = new QName("http://Checkmarx.com", "CxWSResolver");
+    private final static QName CXJENKINSWEBSERVICE_QNAME = new QName("http://Checkmarx.com/v7", "CxJenkinsWebService");
+    private final static int WEBSERVICE_API_VERSION = 1;
     private final static String CXWSRESOLVER_PATH = "/cxwebinterface/cxwsresolver.asmx";
     private final static int LCID = 1033; // English
 
     private String sessionId;
-    private CxCLIWebServiceSoap cxCLIWebServiceSoap;
+    private CxJenkinsWebServiceSoap cxJenkinsWebServiceSoap;
 
     public CxWebService(String serverUrl) throws MalformedURLException, AbortException
     {
@@ -47,14 +50,14 @@ public class CxWebService {
         logger.debug("Resolver url: " + resolverUrl);
         CxWSResolver cxWSResolver;
         try {
-            cxWSResolver = new CxWSResolver(resolverUrl);
+            cxWSResolver = new CxWSResolver(resolverUrl,CXWSRESOLVER_QNAME);
         } catch (javax.xml.ws.WebServiceException e){
             logger.error("Failed to resolve Checkmarx webservice url with resolver at: " + resolverUrl);
             logger.error(e);
             throw new AbortException("Checkmarx server was not found on url: " + serverUrl);
         }
         CxWSResolverSoap cxWSResolverSoap =  cxWSResolver.getCxWSResolverSoap();
-        CxWSResponseDiscovery cxWSResponseDiscovery = cxWSResolverSoap.getWebServiceUrl(CxClientType.CLI,WEBSERVICE_API_VERSION); // TODO: Replace CLI with Jenkins
+        CxWSResponseDiscovery cxWSResponseDiscovery = cxWSResolverSoap.getWebServiceUrl(CxClientType.JENKINS,WEBSERVICE_API_VERSION);
         if (!cxWSResponseDiscovery.isIsSuccesfull())
         {
             String message = "Failed to resolve Checkmarx webservice url: \n" + cxWSResponseDiscovery.getErrorMessage();
@@ -64,8 +67,8 @@ public class CxWebService {
 
         URL webServiceUrl = new URL(cxWSResponseDiscovery.getServiceURL());
         logger.debug("Webservice url: " + webServiceUrl);
-        CxCLIWebService cxCLIWebService = new CxCLIWebService(webServiceUrl);
-        cxCLIWebServiceSoap = cxCLIWebService.getCxCLIWebServiceSoap();
+        CxJenkinsWebService cxJenkinsWebService = new CxJenkinsWebService(webServiceUrl,CXJENKINSWEBSERVICE_QNAME);
+        cxJenkinsWebServiceSoap = cxJenkinsWebService.getCxJenkinsWebServiceSoap();
 
     }
 
@@ -75,7 +78,7 @@ public class CxWebService {
         Credentials credentials = new Credentials();
         credentials.setUser(username);
         credentials.setPass(password);
-        CxWSResponseLoginData cxWSResponseLoginData = cxCLIWebServiceSoap.login(credentials,LCID);
+        CxWSResponseLoginData cxWSResponseLoginData = cxJenkinsWebServiceSoap.login(credentials,LCID);
 
         if (!cxWSResponseLoginData.isIsSuccesfull())
         {
@@ -92,7 +95,7 @@ public class CxWebService {
     {
         assert sessionId!=null : "Trying to scan before login";
 
-        CxWSResponseRunID cxWSResponseRunID = cxCLIWebServiceSoap.scan(sessionId,args);
+        CxWSResponseRunID cxWSResponseRunID = cxJenkinsWebServiceSoap.scan(sessionId,args);
         if (!cxWSResponseRunID.isIsSuccesfull())
         {
             String message = "Submission of sources for scan failed: \n" + cxWSResponseRunID.getErrorMessage();
@@ -107,7 +110,7 @@ public class CxWebService {
     private CxWSResponseScanStatus getScanStatus(CxWSResponseRunID cxWSResponseRunID) throws AbortException
     {
         assert sessionId!=null : "Trying to get scan status before login";
-        CxWSResponseScanStatus cxWSResponseScanStatus = cxCLIWebServiceSoap.getStatusOfSingleScan(sessionId,cxWSResponseRunID.getRunId());
+        CxWSResponseScanStatus cxWSResponseScanStatus = cxJenkinsWebServiceSoap.getStatusOfSingleScan(sessionId,cxWSResponseRunID.getRunId());
         if (!cxWSResponseScanStatus.isIsSuccesfull())
         {
             String message = "Error communicating with Checkmarx server: \n" + cxWSResponseScanStatus.getErrorMessage();
@@ -196,7 +199,7 @@ public class CxWebService {
         cxWSReportRequest.setScanID(scanId);
         cxWSReportRequest.setType(reportType);
         logger.info("Requesting " + reportType.toString().toUpperCase() + " Scan Report Generation");
-        CxWSCreateReportResponse cxWSCreateReportResponse = cxCLIWebServiceSoap.createScanReport(sessionId,cxWSReportRequest);
+        CxWSCreateReportResponse cxWSCreateReportResponse = cxJenkinsWebServiceSoap.createScanReport(sessionId,cxWSReportRequest);
         if (!cxWSCreateReportResponse.isIsSuccesfull())
         {
             String message = "Error requesting scan report generation: " + cxWSCreateReportResponse.getErrorMessage();
@@ -210,7 +213,7 @@ public class CxWebService {
 
         while (true)
         {
-            CxWSReportStatusResponse cxWSReportStatusResponse = cxCLIWebServiceSoap.getScanReportStatus(sessionId,cxWSCreateReportResponse.getID());
+            CxWSReportStatusResponse cxWSReportStatusResponse = cxJenkinsWebServiceSoap.getScanReportStatus(sessionId,cxWSCreateReportResponse.getID());
             if (!cxWSReportStatusResponse.isIsSuccesfull())
             {
                 String message = "Error retrieving scan report status: " + cxWSReportStatusResponse.getErrorMessage();
@@ -243,7 +246,7 @@ public class CxWebService {
             }
         }
 
-        CxWSResponseScanResults cxWSResponseScanResults = cxCLIWebServiceSoap.getScanReport(sessionId,cxWSCreateReportResponse.getID());
+        CxWSResponseScanResults cxWSResponseScanResults = cxJenkinsWebServiceSoap.getScanReport(sessionId,cxWSCreateReportResponse.getID());
         if (!cxWSResponseScanResults.isIsSuccesfull()) {
             String message = "Error retrieving scan report: " + cxWSResponseScanResults.getErrorMessage();
             logger.error(message);
@@ -270,7 +273,7 @@ public class CxWebService {
     {
         assert sessionId!=null : "Trying to retrieve projects display data before login";
 
-        CxWSResponseProjectsDisplayData cxWSResponseProjectsDisplayData = this.cxCLIWebServiceSoap.getProjectsDisplayData(this.sessionId);
+        CxWSResponseProjectsDisplayData cxWSResponseProjectsDisplayData = this.cxJenkinsWebServiceSoap.getProjectsDisplayData(this.sessionId);
         if (!cxWSResponseProjectsDisplayData.isIsSuccesfull())
         {
             String message = "Error retrieving projects display data from server: "  + cxWSResponseProjectsDisplayData.getErrorMessage();
@@ -284,7 +287,7 @@ public class CxWebService {
     public List<Preset> getPresets() throws AbortException
     {
         assert sessionId!=null : "Trying to retrieve presetes before login";
-        CxWSResponsePresetList cxWSResponsePresetList = this.cxCLIWebServiceSoap.getPresetList(this.sessionId);
+        CxWSResponsePresetList cxWSResponsePresetList = this.cxJenkinsWebServiceSoap.getPresetList(this.sessionId);
         if (!cxWSResponsePresetList.isIsSuccesfull())
         {
             String message = "Error retrieving presets from server: "  + cxWSResponsePresetList.getErrorMessage();
@@ -298,7 +301,7 @@ public class CxWebService {
     public List<ConfigurationSet> getSourceEncodings() throws AbortException
     {
         assert sessionId!=null : "Trying to retrieve configurations before login";
-        CxWSResponseConfigSetList cxWSResponseConfigSetList = this.cxCLIWebServiceSoap.getConfigurationSetList(sessionId);
+        CxWSResponseConfigSetList cxWSResponseConfigSetList = this.cxJenkinsWebServiceSoap.getConfigurationSetList(sessionId);
         if (!cxWSResponseConfigSetList.isIsSuccesfull())
         {
             String message = "Error retrieving configurations from server: "  + cxWSResponseConfigSetList.getErrorMessage();
@@ -308,7 +311,11 @@ public class CxWebService {
         return cxWSResponseConfigSetList.getConfigSetList().getConfigurationSet();
     }
 
-
+    public CxWSBasicRepsonse validateProjectName(String cxProjectName)
+    {
+        assert sessionId!=null : "Trying to validate project name before login";
+        return this.cxJenkinsWebServiceSoap.isValidProjectName(sessionId,cxProjectName,""); // TODO: Specify group id
+    }
 
 
     public boolean isLoggedIn()

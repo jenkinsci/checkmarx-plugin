@@ -10,7 +10,12 @@
 
     <groupId>com.checkmarx.jenkins</groupId>
     <artifactId>checkmarx</artifactId>
-    <version>7.1.3.8</version>
+    <!-- Version format:  X1.X2.X3.HF-V1.V2
+        X is the version of the minimum required Checkmarx server
+        FH is the minimum required hot fix number of server version X
+        V is the version of the Jenkins plugin, where V2 is optional
+        V version sequence is independent of X.HF version sequence -->
+    <version>7.1.3.0-9</version>
     <packaging>hpi</packaging>
 
     <properties>
@@ -47,7 +52,7 @@
         <dependency>
             <groupId>com.checkmarx.components</groupId>
             <artifactId>zipper</artifactId>
-            <version>1.1</version>
+            <version>1.1.1</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
@@ -127,7 +132,7 @@
                 <artifactId>jaxws-maven-plugin</artifactId>
                 <version>2.3</version>
                 <executions>
-                    <execution>
+                    <!--execution>
                         <id>CxCLIWebService</id>
                         <phase>generate-sources</phase>
                         <goals>
@@ -140,7 +145,7 @@
                             <packageName>com.checkmarx.ws.CxCLIWebService</packageName>
                             <target>2.1</target>
                         </configuration>
-                    </execution>
+                    </execution-->
                     <execution>
                     <id>CxJenkinsWebService</id>
                     <phase>generate-sources</phase>

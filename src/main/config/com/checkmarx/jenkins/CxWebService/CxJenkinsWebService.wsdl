@@ -36,6 +36,7 @@
           <s:element minOccurs="0" maxOccurs="1" name="SourceControlSetting" type="tns:SourceControlSettings" />
           <s:element minOccurs="0" maxOccurs="1" name="PackagedCode" type="tns:LocalCodeContainer" />
           <s:element minOccurs="0" maxOccurs="1" name="SourcePullingAction" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SourceFilterLists" type="tns:SourceFilterPatterns" />
         </s:sequence>
       </s:complexType>
       <s:simpleType name="SourceLocationType">
@@ -110,6 +111,12 @@
         <s:sequence>
           <s:element minOccurs="0" maxOccurs="1" name="ZippedFile" type="s:base64Binary" />
           <s:element minOccurs="0" maxOccurs="1" name="FileName" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SourceFilterPatterns">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ExcludeFilesPatterns" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ExcludeFoldersPatterns" type="s:string" />
         </s:sequence>
       </s:complexType>
       <s:element name="ScanResponse">
@@ -297,6 +304,7 @@
           <s:element minOccurs="0" maxOccurs="1" name="SourceCodeSettings" type="tns:SourceCodeSettings" />
           <s:element minOccurs="0" maxOccurs="1" name="ScheduleSettings" type="tns:ScheduleSettings" />
           <s:element minOccurs="0" maxOccurs="1" name="ScanActionSettings" type="tns:ScanActionSettings" />
+          <s:element minOccurs="0" maxOccurs="1" name="ProjectIssueTrackingSettings" type="tns:CxWSProjectIssueTrackingSettings" />
         </s:sequence>
       </s:complexType>
       <s:complexType name="ScheduleSettings">
@@ -364,6 +372,24 @@
           <s:enumeration value="PostScanAction" />
         </s:restriction>
       </s:simpleType>
+      <s:complexType name="CxWSProjectIssueTrackingSettings">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="TrackingSystemID" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="Params" type="tns:ArrayOfCxWSIssueTrackingParam" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfCxWSIssueTrackingParam">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="CxWSIssueTrackingParam" nillable="true" type="tns:CxWSIssueTrackingParam" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="CxWSIssueTrackingParam">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Value" />
+          <s:element minOccurs="0" maxOccurs="1" name="Type" type="s:string" />
+        </s:sequence>
+      </s:complexType>
       <s:element name="Login">
         <s:complexType>
           <s:sequence>
@@ -427,27 +453,6 @@
           </s:sequence>
         </s:complexType>
       </s:element>
-      <s:element name="GetAssociatedGroupsListResponse">
-        <s:complexType>
-          <s:sequence>
-            <s:element minOccurs="0" maxOccurs="1" name="GetAssociatedGroupsListResult" type="tns:CxWSResponseGroupList" />
-          </s:sequence>
-        </s:complexType>
-      </s:element>
-      <s:complexType name="CxWSResponseGroupList">
-        <s:complexContent mixed="false">
-          <s:extension base="tns:CxWSBasicRepsonse">
-            <s:sequence>
-              <s:element minOccurs="0" maxOccurs="1" name="GroupList" type="tns:ArrayOfGroup" />
-            </s:sequence>
-          </s:extension>
-        </s:complexContent>
-      </s:complexType>
-      <s:complexType name="ArrayOfGroup">
-        <s:sequence>
-          <s:element minOccurs="0" maxOccurs="unbounded" name="Group" nillable="true" type="tns:Group" />
-        </s:sequence>
-      </s:complexType>
       <s:complexType name="Group">
         <s:sequence>
           <s:element minOccurs="0" maxOccurs="1" name="GroupName" type="s:string" />
@@ -464,6 +469,27 @@
           <s:enumeration value="Server" />
         </s:restriction>
       </s:simpleType>
+      <s:complexType name="ArrayOfGroup">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="Group" nillable="true" type="tns:Group" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetAssociatedGroupsListResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAssociatedGroupsListResult" type="tns:CxWSResponseGroupList" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="CxWSResponseGroupList">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:CxWSBasicRepsonse">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="GroupList" type="tns:ArrayOfGroup" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
       <s:element name="GetStatusOfSingleScan">
         <s:complexType>
           <s:sequence>
@@ -524,6 +550,22 @@
           <s:enumeration value="WaitingToProcess" />
         </s:restriction>
       </s:simpleType>
+      <s:element name="IsValidProjectName">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SessionID" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ProjectName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="GroupId" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="IsValidProjectNameResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="IsValidProjectNameResult" type="tns:CxWSBasicRepsonse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
       <s:element name="CreateScanReport">
         <s:complexType>
           <s:sequence>
@@ -662,6 +704,12 @@
   <wsdl:message name="GetStatusOfSingleScanSoapOut">
     <wsdl:part name="parameters" element="tns:GetStatusOfSingleScanResponse" />
   </wsdl:message>
+  <wsdl:message name="IsValidProjectNameSoapIn">
+    <wsdl:part name="parameters" element="tns:IsValidProjectName" />
+  </wsdl:message>
+  <wsdl:message name="IsValidProjectNameSoapOut">
+    <wsdl:part name="parameters" element="tns:IsValidProjectNameResponse" />
+  </wsdl:message>
   <wsdl:message name="CreateScanReportSoapIn">
     <wsdl:part name="parameters" element="tns:CreateScanReport" />
   </wsdl:message>
@@ -712,6 +760,10 @@
     <wsdl:operation name="GetStatusOfSingleScan">
       <wsdl:input message="tns:GetStatusOfSingleScanSoapIn" />
       <wsdl:output message="tns:GetStatusOfSingleScanSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="IsValidProjectName">
+      <wsdl:input message="tns:IsValidProjectNameSoapIn" />
+      <wsdl:output message="tns:IsValidProjectNameSoapOut" />
     </wsdl:operation>
     <wsdl:operation name="CreateScanReport">
       <wsdl:input message="tns:CreateScanReportSoapIn" />
@@ -793,6 +845,15 @@
     </wsdl:operation>
     <wsdl:operation name="GetStatusOfSingleScan">
       <soap:operation soapAction="http://Checkmarx.com/v7/GetStatusOfSingleScan" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="IsValidProjectName">
+      <soap:operation soapAction="http://Checkmarx.com/v7/IsValidProjectName" style="document" />
       <wsdl:input>
         <soap:body use="literal" />
       </wsdl:input>
@@ -902,6 +963,15 @@
         <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="IsValidProjectName">
+      <soap12:operation soapAction="http://Checkmarx.com/v7/IsValidProjectName" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="CreateScanReport">
       <soap12:operation soapAction="http://Checkmarx.com/v7/CreateScanReport" style="document" />
       <wsdl:input>
@@ -932,10 +1002,10 @@
   </wsdl:binding>
   <wsdl:service name="CxJenkinsWebService">
     <wsdl:port name="CxJenkinsWebServiceSoap" binding="tns:CxJenkinsWebServiceSoap">
-      <soap:address location="http://10.31.0.149/cxwebinterface/Jenkins/CxJenkinsWebService.asmx" />
+      <soap:address location="http://10.31.0.61/CxWebInterface/Jenkins/CxJenkinsWebService.asmx" />
     </wsdl:port>
     <wsdl:port name="CxJenkinsWebServiceSoap12" binding="tns:CxJenkinsWebServiceSoap12">
-      <soap12:address location="http://10.31.0.149/cxwebinterface/Jenkins/CxJenkinsWebService.asmx" />
+      <soap12:address location="http://10.31.0.61/CxWebInterface/Jenkins/CxJenkinsWebService.asmx" />
     </wsdl:port>
   </wsdl:service>
 </wsdl:definitions>
