@@ -131,7 +131,7 @@
                 <groupId>org.jvnet.jax-ws-commons</groupId>
                 <artifactId>jaxws-maven-plugin</artifactId>
                 <version>2.3</version>
-                <executions>
+                <executions-->
                     <!--execution>
                         <id>CxCLIWebService</id>
                         <phase>generate-sources</phase>
@@ -146,7 +146,7 @@
                             <target>2.1</target>
                         </configuration>
                     </execution-->
-                    <execution>
+                    <!--execution>
                     <id>CxJenkinsWebService</id>
                     <phase>generate-sources</phase>
                     <goals>
@@ -228,7 +228,7 @@
                             <goal>wsdl2java</goal>
                         </goals>
                     </execution>
-                    <execution>
+                    <!--execution>
                         <id>generate-sources-cli</id>
                         <phase>generate-sources</phase>
                         <configuration>
@@ -246,7 +246,7 @@
                         <goals>
                             <goal>wsdl2java</goal>
                         </goals>
-                    </execution>
+                    </execution-->
                 </executions>
             </plugin>
 
