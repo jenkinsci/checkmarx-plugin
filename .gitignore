@@ -3,3 +3,4 @@ jenkins.iws
 work
 sonar-project.properties
 .sonar
+*.iml
