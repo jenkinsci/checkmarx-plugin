@@ -304,7 +304,8 @@ public class CxScanBuilder extends Builder {
 
         };
 
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        OutputStream connectionStream = cxWebService.scanSreamingInit(createCliScanArgs(new byte[]{}));
+        OutputStream nullSink = new ByteArrayOutputStream();
 
         File baseDir = new File(build.getWorkspace().getRemote());
 
@@ -312,9 +313,9 @@ public class CxScanBuilder extends Builder {
 
         logger.info("Starting to zip the workspace");
         try {
-            new Zipper().zip(baseDir, combinedFilterPattern, byteArrayOutputStream, CxConfig.maxZipSize(), zipListener);
+            new Zipper().zip(baseDir, combinedFilterPattern, connectionStream, CxConfig.maxZipSize(), zipListener);
             logger.info("Zipping complete with " + this.numberOfFilesZipped + " files, total compressed size: " +
-                    FileUtils.byteCountToDisplaySize(byteArrayOutputStream.size()));
+                    FileUtils.byteCountToDisplaySize(0)); // TODO: Get zippedSize
         } catch (Zipper.MaxZipSizeReached e)
         {
             throw new AbortException("Checkmarx Scan Failed: Reached maximum upload size limit of " + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()));
@@ -325,7 +326,8 @@ public class CxScanBuilder extends Builder {
 
 
 
-        return cxWebService.scan(createCliScanArgs(byteArrayOutputStream.toByteArray()));
+        //return cxWebService.scan(createCliScanArgs(byteArrayOutputStream.toByteArray()));
+        return cxWebService.scanStreamingComplete();
     }
 
     @NotNull

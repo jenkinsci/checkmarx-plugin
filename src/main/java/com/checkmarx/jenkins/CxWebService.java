@@ -6,14 +6,17 @@ import com.checkmarx.ws.CxJenkinsWebService.CxWSBasicRepsonse;
 import com.checkmarx.ws.CxWSResolver.*;
 import hudson.AbortException;
 import hudson.util.IOUtils;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Base64OutputStream;
 import org.apache.log4j.Logger;
 
 import javax.xml.namespace.QName;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -34,6 +37,9 @@ public class CxWebService {
 
     private String sessionId;
     private CxJenkinsWebServiceSoap cxJenkinsWebServiceSoap;
+    private final URL webServiceUrl;
+    private String streamingSoapMessageTail;
+    private HttpURLConnection streamingUrlConnection;
 
     public CxWebService(String serverUrl) throws MalformedURLException, AbortException
     {
@@ -50,7 +56,7 @@ public class CxWebService {
         logger.debug("Resolver url: " + resolverUrl);
         CxWSResolver cxWSResolver;
         try {
-            cxWSResolver = new CxWSResolver(resolverUrl,CXWSRESOLVER_QNAME);
+            cxWSResolver = new CxWSResolver(resolverUrl,CXWSRESOLVER_QNAME);  // TODO: Remove qname
         } catch (javax.xml.ws.WebServiceException e){
             logger.error("Failed to resolve Checkmarx webservice url with resolver at: " + resolverUrl);
             logger.error(e);
@@ -65,9 +71,9 @@ public class CxWebService {
             throw new AbortException(message);
         }
 
-        URL webServiceUrl = new URL(cxWSResponseDiscovery.getServiceURL());
+        webServiceUrl = new URL(cxWSResponseDiscovery.getServiceURL());
         logger.debug("Webservice url: " + webServiceUrl);
-        CxJenkinsWebService cxJenkinsWebService = new CxJenkinsWebService(webServiceUrl,CXJENKINSWEBSERVICE_QNAME);
+        CxJenkinsWebService cxJenkinsWebService = new CxJenkinsWebService(webServiceUrl,CXJENKINSWEBSERVICE_QNAME); // TODO: Remove qname
         cxJenkinsWebServiceSoap = cxJenkinsWebService.getCxJenkinsWebServiceSoap();
 
     }
@@ -317,6 +323,111 @@ public class CxWebService {
         return this.cxJenkinsWebServiceSoap.isValidProjectName(sessionId,cxProjectName,""); // TODO: Specify group id
     }
 
+    /**
+     * Same as "scan" method, but works by streaming the LocalCodeContainer.zippedFile contents.
+     * The attribute LocalCodeContainer.zippedFile inside args is ignored, and zippedFileInputStream is used instead.
+     * @param args
+     * @param zippedFileInputStream - Input stream to used instead of LocalCodeContainer.zippedFile attribute
+     * @return
+     * @throws AbortException
+     */
+
+    public OutputStream scanSreamingInit(CliScanArgs args)
+    {
+        try {
+
+            final String soapMessageHead = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+                    "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
+                    "  <soap:Body>\n" +
+                    "    <Scan xmlns=\"http://Checkmarx.com/v7\">\n" +
+                    "      <sessionId>" + sessionId + "</sessionId>\n" +
+                    "      <args>\n" +
+                    "        <PrjSettings>\n" +
+                    "          <projectID>" + args.getPrjSettings().getProjectID()  + "</projectID>\n" +
+                    "          <ProjectName>" + args.getPrjSettings().getProjectName() + "</ProjectName>\n" +
+                    "          <PresetID>" + args.getPrjSettings().getPresetID() + "</PresetID>\n" +
+                    "          <AssociatedGroupID>" + args.getPrjSettings().getAssociatedGroupID() + "</AssociatedGroupID>\n" +
+                    "          <ScanConfigurationID>" + args.getPrjSettings().getScanConfigurationID() + "</ScanConfigurationID>\n" +
+                    "          <Description></Description>\n" +
+                    "        </PrjSettings>\n" +
+                    "        <SrcCodeSettings>\n" +
+                    "          <SourceOrigin>" + args.getSrcCodeSettings().getSourceOrigin().value() + "</SourceOrigin>\n" +
+                    "          <UserCredentials>\n" +
+                    "            <User></User>\n" +
+                    "            <Pass></Pass>\n" +
+                    "          </UserCredentials>\n" +
+                    "          <PathList>\n" +
+                    "            <ScanPath xsi:nil=\"true\" />\n" +
+                    "            <ScanPath xsi:nil=\"true\" />\n" +
+                    "          </PathList>\n" +
+                    "          <PackagedCode>\n" +
+                    "            <ZippedFile>";
+
+            streamingSoapMessageTail = "</ZippedFile>\n" +
+                    "            <FileName>src.zip</FileName>\n" +
+                    "          </PackagedCode>\n" +
+                    "          <SourcePullingAction>" + args.getSrcCodeSettings().getSourcePullingAction() + "</SourcePullingAction>\n" +
+                    "        </SrcCodeSettings>\n" +
+                    "        <IsPrivateScan>false</IsPrivateScan>\n" +
+                    "        <IsIncremental>false</IsIncremental>\n" +
+                    "      </args>\n" +
+                    "    </Scan>\n" +
+                    "  </soap:Body>\n" +
+                    "</soap:Envelope>";
+
+
+
+            /*
+            POST /cxwebinterface/Jenkins/CxJenkinsWebService.asmx HTTP/1.1
+            Host: localhost
+            Content-Type: text/xml; charset=utf-8
+            Content-Length: length
+            SOAPAction: "http://Checkmarx.com/v7/Scan"
+            */
+
+
+            streamingUrlConnection = (HttpURLConnection)webServiceUrl.openConnection();
+            streamingUrlConnection.setDoOutput(true);
+            streamingUrlConnection.addRequestProperty("Content-Type","text/xml; charset=utf-8");
+            streamingUrlConnection.addRequestProperty("SOAPAction","\"http://Checkmarx.com/v7/Scan\"");
+            streamingUrlConnection.setDoOutput(true);
+            streamingUrlConnection.getOutputStream().write(soapMessageHead.getBytes("UTF-8"));
+
+            streamingUrlConnection.connect();
+
+            return new Base64OutputStream(streamingUrlConnection.getOutputStream());
+
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    public CxWSResponseRunID scanStreamingComplete() throws AbortException
+    {
+        try {
+            streamingUrlConnection.getOutputStream().write(streamingSoapMessageTail.getBytes("UTF-8"));
+            int responseCode = streamingUrlConnection.getResponseCode();
+            System.out.println("Response code: " + responseCode);
+            byte[] buffer = new byte[64*1024];
+            final int readBytes = streamingUrlConnection.getInputStream().read(buffer);
+            byte[] filledBuffer = Arrays.copyOf(buffer,readBytes);
+            String output = new String(filledBuffer, "UTF-8");
+            System.out.println("Connection output: \n" + output);
+
+            CxWSResponseRunID result = new CxWSResponseRunID();
+            result.setProjectID(5);
+            result.setRunId("3");
+            return result;
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
     public boolean isLoggedIn()
     {
