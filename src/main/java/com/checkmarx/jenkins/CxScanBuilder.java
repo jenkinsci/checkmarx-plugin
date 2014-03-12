@@ -319,6 +319,7 @@ public class CxScanBuilder extends Builder {
             logger.info("Zipping complete with " + this.numberOfFilesZipped + " files, total compressed size: " +
                     FileUtils.byteCountToDisplaySize(tempFile.length() / 8 * 6)); // We print here the size of compressed sources before encoding to base 64
             fileOutputStream.close();
+            logger.info("Temporary file with zipped and base64 encoded sources was created at: " + tempFile.getAbsoluteFile());
         } catch (Zipper.MaxZipSizeReached e)
         {
             throw new AbortException("Checkmarx Scan Failed: Reached maximum upload size limit of " + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()));
@@ -332,7 +333,10 @@ public class CxScanBuilder extends Builder {
         // Streaming scan web service will nullify zippedFile filed and use tempFile
         // instead
         final CliScanArgs cliScanArgs = createCliScanArgs(new byte[]{});
-        return cxWebService.scanSreaming(cliScanArgs, tempFile);
+        final CxWSResponseRunID cxWSResponseRunID = cxWebService.scanStreaming(cliScanArgs, tempFile);
+        tempFile.delete();
+
+        return cxWSResponseRunID;
     }
 
     @NotNull

@@ -331,44 +331,6 @@ public class CxWebService {
 
     private Pair<byte[],byte[]> createScanSoapMessage(CliScanArgs args)
     {
-        /*final String soapMessageHead = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
-                "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
-                "  <soap:Body>\n" +
-                "    <Scan xmlns=\"http://Checkmarx.com/v7\">\n" +
-                "      <sessionId>" + sessionId + "</sessionId>\n" +
-                "      <args>\n" +
-                "        <PrjSettings>\n" +
-                "          <projectID>" + args.getPrjSettings().getProjectID()  + "</projectID>\n" +
-                "          <ProjectName>" + args.getPrjSettings().getProjectName() + "</ProjectName>\n" +
-                "          <PresetID>" + args.getPrjSettings().getPresetID() + "</PresetID>\n" +
-                "          <AssociatedGroupID>" + args.getPrjSettings().getAssociatedGroupID() + "</AssociatedGroupID>\n" +
-                "          <ScanConfigurationID>" + args.getPrjSettings().getScanConfigurationID() + "</ScanConfigurationID>\n" +
-                "          <Description></Description>\n" +
-                "        </PrjSettings>\n" +
-                "        <SrcCodeSettings>\n" +
-                "          <SourceOrigin>" + args.getSrcCodeSettings().getSourceOrigin().value() + "</SourceOrigin>\n" +
-                "          <UserCredentials>\n" +
-                "            <User></User>\n" +
-                "            <Pass></Pass>\n" +
-                "          </UserCredentials>\n" +
-                "          <PathList>\n" +
-                "            <ScanPath xsi:nil=\"true\" />\n" +
-                "            <ScanPath xsi:nil=\"true\" />\n" +
-                "          </PathList>\n" +
-                "          <PackagedCode>\n" +
-                "            <ZippedFile>";
-
-        final String streamingSoapMessageTail = "</ZippedFile>\n" +
-                "            <FileName>src.zip</FileName>\n" +
-                "          </PackagedCode>\n" +
-                "          <SourcePullingAction>" + args.getSrcCodeSettings().getSourcePullingAction() + "</SourcePullingAction>\n" +
-                "        </SrcCodeSettings>\n" +
-                "        <IsPrivateScan>false</IsPrivateScan>\n" +
-                "        <IsIncremental>false</IsIncremental>\n" +
-                "      </args>\n" +
-                "    </Scan>\n" +
-                "  </soap:Body>\n" +
-                "</soap:Envelope>";    */
 
         final String soapMessageHead = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
                 "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
@@ -436,85 +398,66 @@ public class CxWebService {
     /**
      * Same as "scan" method, but works by streaming the LocalCodeContainer.zippedFile contents.
      * NOTE: The attribute LocalCodeContainer.zippedFile inside args is REPLACED by empty byte array,
-     * and zippedFileInputStream is used instead.
+     * and base64ZipFile temp file is used instead.
      * @param args
-     * @param base64ZipFile - Input stream to used instead of LocalCodeContainer.zippedFile attribute
+     * @param base64ZipFile - Temp file used instead of LocalCodeContainer.zippedFile attribute, should
+     *                      contain zipped sources encoded with base 64 encoding
      * @return
      * @throws AbortException
      */
 
-    public CxWSResponseRunID scanSreaming(CliScanArgs args, File base64ZipFile)
+    public CxWSResponseRunID scanStreaming(CliScanArgs args, File base64ZipFile) throws AbortException
     {
+        assert sessionId!=null;
+
         try {
-
-            /*
-            POST /cxwebinterface/Jenkins/CxJenkinsWebService.asmx HTTP/1.1
-            Host: localhost
-            Content-Type: text/xml; charset=utf-8
-            Content-Length: length
-            SOAPAction: "http://Checkmarx.com/v7/Scan"
-            */
-
-
             // Nullify the zippedFile field
             args.getSrcCodeSettings().getPackagedCode().setZippedFile(new byte[]{});
             Pair<byte[],byte[]> soapMessage = createScanSoapMessage(args);
 
+            // Create HTTP connection
 
             final HttpURLConnection streamingUrlConnection = (HttpURLConnection)webServiceUrl.openConnection();
-            //streamingUrlConnection.setRequestMethod("POST"); // TODO: Check if needed
             streamingUrlConnection.addRequestProperty("Content-Type","text/xml; charset=utf-8");
             streamingUrlConnection.addRequestProperty("SOAPAction","\"http://Checkmarx.com/v7/Scan\"");
             streamingUrlConnection.setDoOutput(true);
+            // Calculate the length of the soap message
             final long length = soapMessage.getLeft().length + soapMessage.getRight().length + base64ZipFile.length();
             streamingUrlConnection.setFixedLengthStreamingMode((int)length);
             streamingUrlConnection.connect();
             final OutputStream os = streamingUrlConnection.getOutputStream();
 
+            logger.info("Uploading sources to Checkmarx server");
             os.write(soapMessage.getLeft());
             final FileInputStream fis = new FileInputStream(base64ZipFile);
-
             org.apache.commons.io.IOUtils.copyLarge(fis, os);
 
             os.write(soapMessage.getRight());
             os.close();
+            logger.info("Finished uploading sources to Checkmarx server");
 
 
-            int responseCode = streamingUrlConnection.getResponseCode();
-            System.out.println("Response code: " + responseCode);
-            //byte[] buffer = new byte[64*1024];
-            //final int readBytes = streamingUrlConnection.getInputStream().read(buffer);
-            //byte[] filledBuffer = Arrays.copyOf(buffer,readBytes);
-            //String output = new String(filledBuffer, "UTF-8");
-            //System.out.println("Connection output: \n" + output);
+            CxWSResponseRunID cxWSResponseRunID = parseXmlResponse(streamingUrlConnection.getInputStream());
 
-            /*
-            HTTP/1.1 200 OK
-            Content-Type: text/xml; charset=utf-8
-            Content-Length: length
+            if (!cxWSResponseRunID.isIsSuccesfull())
+            {
+                String message = "Submission of sources for scan failed: \n" + cxWSResponseRunID.getErrorMessage();
+                logger.error(message);
+                throw new AbortException(message);
+            }
 
-            <?xml version="1.0" encoding="utf-8"?>
-            <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-            <soap:Body>
-            <ScanResponse xmlns="http://Checkmarx.com/v7">
-            <ScanResult>
-            <ProjectID>long</ProjectID>
-            <RunId>string</RunId>
-            </ScanResult>
-            </ScanResponse>
-            </soap:Body>
-            </soap:Envelope> */
-
-            return parseXmlResponse(streamingUrlConnection.getInputStream());
+            return cxWSResponseRunID;
 
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(),e);
+            throw new AbortException(e.getMessage());
         } catch (JAXBException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
+            throw new AbortException(e.getMessage());
         } catch (XMLStreamException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
+            throw new AbortException(e.getMessage());
         }
-        return null;
     }
 
 
