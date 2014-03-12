@@ -14,6 +14,7 @@ import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import net.sf.json.JSONObject;
+import org.apache.commons.codec.binary.Base64OutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.*;
@@ -304,8 +305,10 @@ public class CxScanBuilder extends Builder {
 
         };
 
-        OutputStream connectionStream = cxWebService.scanSreamingInit(createCliScanArgs(new byte[]{}));
         OutputStream nullSink = new ByteArrayOutputStream();
+        File tempFile = File.createTempFile("src", ".zip");
+        OutputStream fileOutputStream = new FileOutputStream(tempFile);
+        final Base64OutputStream base64FileOutputStream = new Base64OutputStream(fileOutputStream,true,0,null);
 
         File baseDir = new File(build.getWorkspace().getRemote());
 
@@ -313,9 +316,10 @@ public class CxScanBuilder extends Builder {
 
         logger.info("Starting to zip the workspace");
         try {
-            new Zipper().zip(baseDir, combinedFilterPattern, connectionStream, CxConfig.maxZipSize(), zipListener);
+            new Zipper().zip(baseDir, combinedFilterPattern, base64FileOutputStream, 0, zipListener); // TODO: Set max zip size
             logger.info("Zipping complete with " + this.numberOfFilesZipped + " files, total compressed size: " +
                     FileUtils.byteCountToDisplaySize(0)); // TODO: Get zippedSize
+            fileOutputStream.close();
         } catch (Zipper.MaxZipSizeReached e)
         {
             throw new AbortException("Checkmarx Scan Failed: Reached maximum upload size limit of " + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()));
@@ -325,9 +329,9 @@ public class CxScanBuilder extends Builder {
         }
 
 
-
+ 
         //return cxWebService.scan(createCliScanArgs(byteArrayOutputStream.toByteArray()));
-        return cxWebService.scanStreamingComplete();
+        return cxWebService.scanSreaming(createCliScanArgs(new byte[]{}), tempFile);
     }
 
     @NotNull

@@ -10,6 +10,9 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Base64OutputStream;
 import org.apache.log4j.Logger;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -332,7 +335,7 @@ public class CxWebService {
      * @throws AbortException
      */
 
-    public OutputStream scanSreamingInit(CliScanArgs args)
+    public CxWSResponseRunID scanSreaming(CliScanArgs args, File base64ZipFile)
     {
         try {
 
@@ -375,7 +378,14 @@ public class CxWebService {
                     "  </soap:Body>\n" +
                     "</soap:Envelope>";
 
+            final JAXBContext context = JAXBContext.newInstance(Scan.class);//"com.checkmarx.ws.CxJenkinsWebService");
+            final Marshaller marshaller = context.createMarshaller();
 
+            Scan scan = new Scan();
+            scan.setArgs(args);
+            scan.setSessionId(sessionId);
+
+            marshaller.marshal(scan,System.out);
 
             /*
             POST /cxwebinterface/Jenkins/CxJenkinsWebService.asmx HTTP/1.1
@@ -387,29 +397,26 @@ public class CxWebService {
 
 
             streamingUrlConnection = (HttpURLConnection)webServiceUrl.openConnection();
-            streamingUrlConnection.setDoOutput(true);
+            streamingUrlConnection.setRequestMethod("POST");
             streamingUrlConnection.addRequestProperty("Content-Type","text/xml; charset=utf-8");
             streamingUrlConnection.addRequestProperty("SOAPAction","\"http://Checkmarx.com/v7/Scan\"");
             streamingUrlConnection.setDoOutput(true);
-            streamingUrlConnection.getOutputStream().write(soapMessageHead.getBytes("UTF-8"));
+
+            final long length = soapMessageHead.getBytes("UTF-8").length + streamingSoapMessageTail.getBytes("UTF-8").length + base64ZipFile.length();
+            streamingUrlConnection.setFixedLengthStreamingMode((int)length);
 
             streamingUrlConnection.connect();
+            final OutputStream os = streamingUrlConnection.getOutputStream();
 
-            return new Base64OutputStream(streamingUrlConnection.getOutputStream());
+            os.write(soapMessageHead.getBytes("UTF-8"));
+            final FileInputStream fis = new FileInputStream(base64ZipFile);
+
+            org.apache.commons.io.IOUtils.copyLarge(fis, os);
+
+            os.write(streamingSoapMessageTail.getBytes("UTF-8"));
+            os.close();
 
 
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-
-    public CxWSResponseRunID scanStreamingComplete() throws AbortException
-    {
-        try {
-            streamingUrlConnection.getOutputStream().write(streamingSoapMessageTail.getBytes("UTF-8"));
             int responseCode = streamingUrlConnection.getResponseCode();
             System.out.println("Response code: " + responseCode);
             byte[] buffer = new byte[64*1024];
@@ -422,12 +429,16 @@ public class CxWebService {
             result.setProjectID(5);
             result.setRunId("3");
             return result;
-        } catch (Exception e)
-        {
+
+
+        } catch (IOException e) {
             e.printStackTrace();
-            return null;
+        } catch (JAXBException e) {
+            e.printStackTrace();
         }
+        return null;
     }
+
 
     public boolean isLoggedIn()
     {
