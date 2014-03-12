@@ -13,7 +13,15 @@ import org.apache.log4j.Logger;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.MimeHeaders;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -378,14 +386,23 @@ public class CxWebService {
                     "  </soap:Body>\n" +
                     "</soap:Envelope>";
 
-            final JAXBContext context = JAXBContext.newInstance(Scan.class);//"com.checkmarx.ws.CxJenkinsWebService");
+            final JAXBContext context = JAXBContext.newInstance(Scan.class,ScanResponse.class);//"com.checkmarx.ws.CxJenkinsWebService");
             final Marshaller marshaller = context.createMarshaller();
 
             Scan scan = new Scan();
             scan.setArgs(args);
             scan.setSessionId(sessionId);
 
-            marshaller.marshal(scan,System.out);
+            ByteArrayOutputStream scanMessage = new ByteArrayOutputStream();
+            marshaller.marshal(scan,scanMessage);
+            ByteArrayInputStream scanMessgaeInStream = new ByteArrayInputStream(scanMessage.toByteArray());
+
+            MessageFactory mf = MessageFactory.newInstance();
+            final SOAPMessage message = mf.createMessage();
+
+            message.writeTo(System.out);
+
+
 
             /*
             POST /cxwebinterface/Jenkins/CxJenkinsWebService.asmx HTTP/1.1
@@ -419,21 +436,55 @@ public class CxWebService {
 
             int responseCode = streamingUrlConnection.getResponseCode();
             System.out.println("Response code: " + responseCode);
-            byte[] buffer = new byte[64*1024];
-            final int readBytes = streamingUrlConnection.getInputStream().read(buffer);
-            byte[] filledBuffer = Arrays.copyOf(buffer,readBytes);
-            String output = new String(filledBuffer, "UTF-8");
-            System.out.println("Connection output: \n" + output);
+            //byte[] buffer = new byte[64*1024];
+            //final int readBytes = streamingUrlConnection.getInputStream().read(buffer);
+            //byte[] filledBuffer = Arrays.copyOf(buffer,readBytes);
+            //String output = new String(filledBuffer, "UTF-8");
+            //System.out.println("Connection output: \n" + output);
 
-            CxWSResponseRunID result = new CxWSResponseRunID();
-            result.setProjectID(5);
-            result.setRunId("3");
-            return result;
+            /*
+            HTTP/1.1 200 OK
+            Content-Type: text/xml; charset=utf-8
+            Content-Length: length
+
+            <?xml version="1.0" encoding="utf-8"?>
+            <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+            <soap:Body>
+            <ScanResponse xmlns="http://Checkmarx.com/v7">
+            <ScanResult>
+            <ProjectID>long</ProjectID>
+            <RunId>string</RunId>
+            </ScanResult>
+            </ScanResponse>
+            </soap:Body>
+            </soap:Envelope> */
+
+            final InputStream resultStream = streamingUrlConnection.getInputStream();
+            XMLInputFactory xif = XMLInputFactory.newFactory();
+            XMLStreamReader xsr = xif.createXMLStreamReader(resultStream);
+            xsr.nextTag();
+            while(!xsr.getLocalName().equals("ScanResponse")) {
+                xsr.nextTag();
+            }
+
+            final Unmarshaller unmarshaller = context.createUnmarshaller();
+            final ScanResponse scanResponse = (ScanResponse)unmarshaller.unmarshal(xsr);
+            xsr.close();
+
+            //CxWSResponseRunID result = new CxWSResponseRunID();
+            //result.setProjectID(5);
+            //result.setRunId("3");
+            return scanResponse.getScanResult();
 
 
         } catch (IOException e) {
             e.printStackTrace();
         } catch (JAXBException e) {
+            e.printStackTrace();
+        } catch (SOAPException e)
+        {
+            e.printStackTrace();
+        } catch (XMLStreamException e) {
             e.printStackTrace();
         }
         return null;
