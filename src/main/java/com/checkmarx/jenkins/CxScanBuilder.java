@@ -305,8 +305,7 @@ public class CxScanBuilder extends Builder {
 
         };
 
-        OutputStream nullSink = new ByteArrayOutputStream();
-        File tempFile = File.createTempFile("src", ".zip");
+        File tempFile = File.createTempFile("base64ZippedSource", ".bin");
         OutputStream fileOutputStream = new FileOutputStream(tempFile);
         final Base64OutputStream base64FileOutputStream = new Base64OutputStream(fileOutputStream,true,0,null);
 
@@ -318,7 +317,7 @@ public class CxScanBuilder extends Builder {
         try {
             new Zipper().zip(baseDir, combinedFilterPattern, base64FileOutputStream, 0, zipListener); // TODO: Set max zip size
             logger.info("Zipping complete with " + this.numberOfFilesZipped + " files, total compressed size: " +
-                    FileUtils.byteCountToDisplaySize(0)); // TODO: Get zippedSize
+                    FileUtils.byteCountToDisplaySize(tempFile.length() / 8 * 6)); // We print here the size of compressed sources before encoding to base 64
             fileOutputStream.close();
         } catch (Zipper.MaxZipSizeReached e)
         {
@@ -329,9 +328,11 @@ public class CxScanBuilder extends Builder {
         }
 
 
- 
-        //return cxWebService.scan(createCliScanArgs(byteArrayOutputStream.toByteArray()));
-        return cxWebService.scanSreaming(createCliScanArgs(new byte[]{}), tempFile);
+        // Create cliScanArgs object with dummy byte array for zippedFile field
+        // Streaming scan web service will nullify zippedFile filed and use tempFile
+        // instead
+        final CliScanArgs cliScanArgs = createCliScanArgs(new byte[]{});
+        return cxWebService.scanSreaming(cliScanArgs, tempFile);
     }
 
     @NotNull

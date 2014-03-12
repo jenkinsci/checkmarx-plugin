@@ -6,8 +6,7 @@ import com.checkmarx.ws.CxJenkinsWebService.CxWSBasicRepsonse;
 import com.checkmarx.ws.CxWSResolver.*;
 import hudson.AbortException;
 import hudson.util.IOUtils;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Base64OutputStream;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 
 import javax.xml.bind.JAXBContext;
@@ -16,7 +15,6 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
-import javax.xml.soap.MimeHeaders;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLInputFactory;
@@ -26,8 +24,6 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -49,8 +45,6 @@ public class CxWebService {
     private String sessionId;
     private CxJenkinsWebServiceSoap cxJenkinsWebServiceSoap;
     private final URL webServiceUrl;
-    private String streamingSoapMessageTail;
-    private HttpURLConnection streamingUrlConnection;
 
     public CxWebService(String serverUrl) throws MalformedURLException, AbortException
     {
@@ -334,11 +328,117 @@ public class CxWebService {
         return this.cxJenkinsWebServiceSoap.isValidProjectName(sessionId,cxProjectName,""); // TODO: Specify group id
     }
 
+
+    private Pair<byte[],byte[]> createScanSoapMessage(CliScanArgs args)
+    {
+        /*final String soapMessageHead = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+                "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
+                "  <soap:Body>\n" +
+                "    <Scan xmlns=\"http://Checkmarx.com/v7\">\n" +
+                "      <sessionId>" + sessionId + "</sessionId>\n" +
+                "      <args>\n" +
+                "        <PrjSettings>\n" +
+                "          <projectID>" + args.getPrjSettings().getProjectID()  + "</projectID>\n" +
+                "          <ProjectName>" + args.getPrjSettings().getProjectName() + "</ProjectName>\n" +
+                "          <PresetID>" + args.getPrjSettings().getPresetID() + "</PresetID>\n" +
+                "          <AssociatedGroupID>" + args.getPrjSettings().getAssociatedGroupID() + "</AssociatedGroupID>\n" +
+                "          <ScanConfigurationID>" + args.getPrjSettings().getScanConfigurationID() + "</ScanConfigurationID>\n" +
+                "          <Description></Description>\n" +
+                "        </PrjSettings>\n" +
+                "        <SrcCodeSettings>\n" +
+                "          <SourceOrigin>" + args.getSrcCodeSettings().getSourceOrigin().value() + "</SourceOrigin>\n" +
+                "          <UserCredentials>\n" +
+                "            <User></User>\n" +
+                "            <Pass></Pass>\n" +
+                "          </UserCredentials>\n" +
+                "          <PathList>\n" +
+                "            <ScanPath xsi:nil=\"true\" />\n" +
+                "            <ScanPath xsi:nil=\"true\" />\n" +
+                "          </PathList>\n" +
+                "          <PackagedCode>\n" +
+                "            <ZippedFile>";
+
+        final String streamingSoapMessageTail = "</ZippedFile>\n" +
+                "            <FileName>src.zip</FileName>\n" +
+                "          </PackagedCode>\n" +
+                "          <SourcePullingAction>" + args.getSrcCodeSettings().getSourcePullingAction() + "</SourcePullingAction>\n" +
+                "        </SrcCodeSettings>\n" +
+                "        <IsPrivateScan>false</IsPrivateScan>\n" +
+                "        <IsIncremental>false</IsIncremental>\n" +
+                "      </args>\n" +
+                "    </Scan>\n" +
+                "  </soap:Body>\n" +
+                "</soap:Envelope>";    */
+
+        final String soapMessageHead = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+                "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
+                "xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" " +
+                "xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
+                "  <soap:Body>\n";
+
+        final String soapMessageTail = "\n  </soap:Body>\n</soap:Envelope>";
+        final String zippedFileOpenTag = "<ZippedFile>";
+        final String zippedFileCloseTag = "</ZippedFile>";
+
+        try {
+            final JAXBContext context = JAXBContext.newInstance(Scan.class);
+            final Marshaller marshaller = context.createMarshaller();
+
+            StringWriter scanMessage = new StringWriter();
+            scanMessage.write(soapMessageHead);
+
+            Scan scan = new Scan();
+            scan.setArgs(args);
+            scan.setSessionId(sessionId);
+            marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
+            marshaller.marshal(scan, scanMessage);
+
+            scanMessage.write(soapMessageTail);
+            final String[] parts = scanMessage.toString().split(zippedFileOpenTag + zippedFileCloseTag);
+            assert parts.length == 2;
+            final String startPart = parts[0] + zippedFileOpenTag;
+            final String endPart   = zippedFileCloseTag + parts[1];
+            Pair<byte[],byte[]> result = Pair.of(startPart.getBytes("UTF-8"), endPart.getBytes("UTF-8"));
+
+            return result;
+        } catch (JAXBException e)
+        {
+            // Getting here indicates a bug
+            logger.error(e.getMessage(),e);
+            throw new Error(e);
+        } catch (UnsupportedEncodingException e)
+        {
+            // Getting here indicates a bug
+            logger.error(e.getMessage(),e);
+            throw new Error(e);
+        }
+    }
+
+    private CxWSResponseRunID parseXmlResponse(InputStream inputStream) throws XMLStreamException, JAXBException
+    {
+        XMLInputFactory xif = XMLInputFactory.newFactory();
+        XMLStreamReader xsr = xif.createXMLStreamReader(inputStream);
+        xsr.nextTag();
+        while(!xsr.getLocalName().equals("ScanResponse")) {
+            xsr.nextTag();
+        }
+
+        final JAXBContext context = JAXBContext.newInstance(ScanResponse.class);
+        final Unmarshaller unmarshaller = context.createUnmarshaller();
+        final ScanResponse scanResponse = (ScanResponse)unmarshaller.unmarshal(xsr);
+        xsr.close();
+        return scanResponse.getScanResult();
+    }
+
+
+
+
     /**
      * Same as "scan" method, but works by streaming the LocalCodeContainer.zippedFile contents.
-     * The attribute LocalCodeContainer.zippedFile inside args is ignored, and zippedFileInputStream is used instead.
+     * NOTE: The attribute LocalCodeContainer.zippedFile inside args is REPLACED by empty byte array,
+     * and zippedFileInputStream is used instead.
      * @param args
-     * @param zippedFileInputStream - Input stream to used instead of LocalCodeContainer.zippedFile attribute
+     * @param base64ZipFile - Input stream to used instead of LocalCodeContainer.zippedFile attribute
      * @return
      * @throws AbortException
      */
@@ -346,63 +446,6 @@ public class CxWebService {
     public CxWSResponseRunID scanSreaming(CliScanArgs args, File base64ZipFile)
     {
         try {
-
-            final String soapMessageHead = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
-                    "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
-                    "  <soap:Body>\n" +
-                    "    <Scan xmlns=\"http://Checkmarx.com/v7\">\n" +
-                    "      <sessionId>" + sessionId + "</sessionId>\n" +
-                    "      <args>\n" +
-                    "        <PrjSettings>\n" +
-                    "          <projectID>" + args.getPrjSettings().getProjectID()  + "</projectID>\n" +
-                    "          <ProjectName>" + args.getPrjSettings().getProjectName() + "</ProjectName>\n" +
-                    "          <PresetID>" + args.getPrjSettings().getPresetID() + "</PresetID>\n" +
-                    "          <AssociatedGroupID>" + args.getPrjSettings().getAssociatedGroupID() + "</AssociatedGroupID>\n" +
-                    "          <ScanConfigurationID>" + args.getPrjSettings().getScanConfigurationID() + "</ScanConfigurationID>\n" +
-                    "          <Description></Description>\n" +
-                    "        </PrjSettings>\n" +
-                    "        <SrcCodeSettings>\n" +
-                    "          <SourceOrigin>" + args.getSrcCodeSettings().getSourceOrigin().value() + "</SourceOrigin>\n" +
-                    "          <UserCredentials>\n" +
-                    "            <User></User>\n" +
-                    "            <Pass></Pass>\n" +
-                    "          </UserCredentials>\n" +
-                    "          <PathList>\n" +
-                    "            <ScanPath xsi:nil=\"true\" />\n" +
-                    "            <ScanPath xsi:nil=\"true\" />\n" +
-                    "          </PathList>\n" +
-                    "          <PackagedCode>\n" +
-                    "            <ZippedFile>";
-
-            streamingSoapMessageTail = "</ZippedFile>\n" +
-                    "            <FileName>src.zip</FileName>\n" +
-                    "          </PackagedCode>\n" +
-                    "          <SourcePullingAction>" + args.getSrcCodeSettings().getSourcePullingAction() + "</SourcePullingAction>\n" +
-                    "        </SrcCodeSettings>\n" +
-                    "        <IsPrivateScan>false</IsPrivateScan>\n" +
-                    "        <IsIncremental>false</IsIncremental>\n" +
-                    "      </args>\n" +
-                    "    </Scan>\n" +
-                    "  </soap:Body>\n" +
-                    "</soap:Envelope>";
-
-            final JAXBContext context = JAXBContext.newInstance(Scan.class,ScanResponse.class);//"com.checkmarx.ws.CxJenkinsWebService");
-            final Marshaller marshaller = context.createMarshaller();
-
-            Scan scan = new Scan();
-            scan.setArgs(args);
-            scan.setSessionId(sessionId);
-
-            ByteArrayOutputStream scanMessage = new ByteArrayOutputStream();
-            marshaller.marshal(scan,scanMessage);
-            ByteArrayInputStream scanMessgaeInStream = new ByteArrayInputStream(scanMessage.toByteArray());
-
-            MessageFactory mf = MessageFactory.newInstance();
-            final SOAPMessage message = mf.createMessage();
-
-            message.writeTo(System.out);
-
-
 
             /*
             POST /cxwebinterface/Jenkins/CxJenkinsWebService.asmx HTTP/1.1
@@ -413,24 +456,27 @@ public class CxWebService {
             */
 
 
-            streamingUrlConnection = (HttpURLConnection)webServiceUrl.openConnection();
-            streamingUrlConnection.setRequestMethod("POST");
+            // Nullify the zippedFile field
+            args.getSrcCodeSettings().getPackagedCode().setZippedFile(new byte[]{});
+            Pair<byte[],byte[]> soapMessage = createScanSoapMessage(args);
+
+
+            final HttpURLConnection streamingUrlConnection = (HttpURLConnection)webServiceUrl.openConnection();
+            //streamingUrlConnection.setRequestMethod("POST"); // TODO: Check if needed
             streamingUrlConnection.addRequestProperty("Content-Type","text/xml; charset=utf-8");
             streamingUrlConnection.addRequestProperty("SOAPAction","\"http://Checkmarx.com/v7/Scan\"");
             streamingUrlConnection.setDoOutput(true);
-
-            final long length = soapMessageHead.getBytes("UTF-8").length + streamingSoapMessageTail.getBytes("UTF-8").length + base64ZipFile.length();
+            final long length = soapMessage.getLeft().length + soapMessage.getRight().length + base64ZipFile.length();
             streamingUrlConnection.setFixedLengthStreamingMode((int)length);
-
             streamingUrlConnection.connect();
             final OutputStream os = streamingUrlConnection.getOutputStream();
 
-            os.write(soapMessageHead.getBytes("UTF-8"));
+            os.write(soapMessage.getLeft());
             final FileInputStream fis = new FileInputStream(base64ZipFile);
 
             org.apache.commons.io.IOUtils.copyLarge(fis, os);
 
-            os.write(streamingSoapMessageTail.getBytes("UTF-8"));
+            os.write(soapMessage.getRight());
             os.close();
 
 
@@ -459,30 +505,11 @@ public class CxWebService {
             </soap:Body>
             </soap:Envelope> */
 
-            final InputStream resultStream = streamingUrlConnection.getInputStream();
-            XMLInputFactory xif = XMLInputFactory.newFactory();
-            XMLStreamReader xsr = xif.createXMLStreamReader(resultStream);
-            xsr.nextTag();
-            while(!xsr.getLocalName().equals("ScanResponse")) {
-                xsr.nextTag();
-            }
-
-            final Unmarshaller unmarshaller = context.createUnmarshaller();
-            final ScanResponse scanResponse = (ScanResponse)unmarshaller.unmarshal(xsr);
-            xsr.close();
-
-            //CxWSResponseRunID result = new CxWSResponseRunID();
-            //result.setProjectID(5);
-            //result.setRunId("3");
-            return scanResponse.getScanResult();
-
+            return parseXmlResponse(streamingUrlConnection.getInputStream());
 
         } catch (IOException e) {
             e.printStackTrace();
         } catch (JAXBException e) {
-            e.printStackTrace();
-        } catch (SOAPException e)
-        {
             e.printStackTrace();
         } catch (XMLStreamException e) {
             e.printStackTrace();
