@@ -69,8 +69,9 @@ public class CxScanBuilder extends Builder {
     static {
          BasicConfigurator.configure();  // Set the log4j system to log to console
     }
-    private static Logger logger = Logger.getLogger(CxScanBuilder.class);
-
+    private final static Logger staticLogger = Logger.getLogger(CxScanBuilder.class);
+    private Logger instanceLogger = staticLogger; // Instance logger redirects to static logger until
+                                                  // it is initialized in perform method
     @XStreamOmitField
     private FileAppender fileAppender;
     @XStreamOmitField
@@ -187,17 +188,19 @@ public class CxScanBuilder extends Builder {
     }
 
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher,BuildListener listener) throws InterruptedException, IOException {
+    public boolean perform(final AbstractBuild<?, ?> build,
+                           final Launcher launcher,
+                           final BuildListener listener) throws InterruptedException, IOException {
 
         try {
             File checkmarxBuildDir = new File(build.getRootDir(),"checkmarx");
             checkmarxBuildDir.mkdir();
 
 
-            initLogger(checkmarxBuildDir,listener);
+            initLogger(checkmarxBuildDir,listener,instanceLoggerSuffix(build));
 
             listener.started(null);
-            logger.info("Checkmarx Jenkins plugin version: " + CxConfig.version());
+            instanceLogger.info("Checkmarx Jenkins plugin version: " + CxConfig.version());
 
             String serverUrlToUse = isUseOwnServerCredentials() ? getServerUrl() : getDescriptor().getServerUrl();
             String usernameToUse  = isUseOwnServerCredentials() ? getUsername()  : getDescriptor().getUsername();
@@ -206,10 +209,10 @@ public class CxScanBuilder extends Builder {
             cxWebService.login(usernameToUse,passwordToUse);
 
 
-            logger.info("Checkmarx server login successful");
+            instanceLogger.info("Checkmarx server login successful");
 
             CxWSResponseRunID cxWSResponseRunID = submitScan(build, listener, cxWebService);
-            logger.info("\nScan job submitted successfully\n");
+            instanceLogger.info("\nScan job submitted successfully\n");
 
             if (!isWaitForResultsEnabled())
             {
@@ -235,7 +238,7 @@ public class CxScanBuilder extends Builder {
             cxScanResult.readScanXMLReport(xmlReportFile);
             build.addAction(cxScanResult);
 
-            logger.info("Number of high severity vulnerabilities: " +
+            instanceLogger.info("Number of high severity vulnerabilities: " +
                     cxScanResult.getHighCount() + " stability threshold: " + this.getHighThreshold());
 
             if (this.isVulnerabilityThresholdEnabled())
@@ -248,49 +251,59 @@ public class CxScanBuilder extends Builder {
                 }
             }
 
-            closeLogger();
             listener.finished(Result.SUCCESS);
             return true;
         } catch (Error e)
         {
-            logger.error(e);
+            instanceLogger.error(e);
             closeLogger();
             throw e;
         }  catch (AbortException e)
         {
-            logger.error(e);
+            instanceLogger.error(e);
             closeLogger();
             throw e;
         }catch (IOException e)
         {
-            logger.error(e);
+            instanceLogger.error(e);
             closeLogger();
             throw e;
+        } finally {
+            closeLogger();
         }
     }
 
-    private void initLogger(File checkmarxBuildDir, BuildListener listener)
+    private String instanceLoggerSuffix(final AbstractBuild<?, ?> build)
     {
-        WriterAppender writerAppender = new WriterAppender(new PatternLayout("%m%n"),listener.getLogger());
+        return build.getProject().getDisplayName() + "-" + build.getDisplayName();
+    }
+
+    private void initLogger(final File checkmarxBuildDir, final BuildListener listener, final String loggerSuffix)
+    {
+        final String loggerPrefix = "com.checkmarx." + loggerSuffix;
+        instanceLogger = Logger.getLogger(loggerPrefix + "." + getClass().getName());
+        final WriterAppender writerAppender = new WriterAppender(new PatternLayout("%m%n"),listener.getLogger());
         writerAppender.setThreshold(Level.INFO);
-        Logger.getLogger("com.checkmarx").addAppender(writerAppender);
+        final Logger parentLogger = Logger.getLogger(loggerPrefix);
+        parentLogger.addAppender(writerAppender);
         String logFileName = checkmarxBuildDir.getAbsolutePath() + File.separator + "checkmarx.log";
 
         try {
             fileAppender = new FileAppender(new PatternLayout("%C: [%d] %-5p: %m%n"),logFileName);
             fileAppender.setThreshold(Level.DEBUG);
-            Logger.getLogger("com.checkmarx").addAppender(fileAppender);
+            parentLogger.addAppender(fileAppender);
         } catch (IOException e)
         {
-            logger.warn("Could not open log file for writing: " + logFileName);
-            logger.debug(e);
+            staticLogger.warn("Could not open log file for writing: " + logFileName);
+            staticLogger.debug(e);
         }
     }
 
     private void closeLogger()
     {
-        Logger.getLogger("com.checkmarx").removeAppender(fileAppender);
+        instanceLogger.removeAppender(fileAppender);
         fileAppender.close();
+        instanceLogger = staticLogger; // Redirect all logs back to static logger
     }
 
     private CxWSResponseRunID submitScan(AbstractBuild<?, ?> build, final BuildListener listener, CxWebService cxWebService) throws AbortException, IOException
@@ -299,14 +312,14 @@ public class CxScanBuilder extends Builder {
         ZipListener zipListener = new ZipListener() {
             @Override
             public void updateProgress(String fileName, long size) {
-                logger.info("Zipping (" + FileUtils.byteCountToDisplaySize(size) + "): " + fileName);
+                instanceLogger.info("Zipping (" + FileUtils.byteCountToDisplaySize(size) + "): " + fileName);
                 CxScanBuilder.this.numberOfFilesZipped++;
             }
 
         };
 
         File tempFile = File.createTempFile("base64ZippedSource", ".bin");
-        logger.info("Created temporary file for zipped sources: " + tempFile.getAbsolutePath());
+        instanceLogger.info("Created temporary file for zipped sources: " + tempFile.getAbsolutePath());
 
         OutputStream fileOutputStream = new FileOutputStream(tempFile);
         final Base64OutputStream base64FileOutputStream = new Base64OutputStream(fileOutputStream,true,0,null);
@@ -315,10 +328,10 @@ public class CxScanBuilder extends Builder {
 
         String combinedFilterPattern = this.getFilterPattern() + "," + processExcludeFolders(this.getExcludeFolders());
 
-        logger.info("Starting to zip the workspace");
+        instanceLogger.info("Starting to zip the workspace");
         try {
             new Zipper().zip(baseDir, combinedFilterPattern, base64FileOutputStream, 0, zipListener); // TODO: Set max zip size
-            logger.info("Zipping complete with " + this.numberOfFilesZipped + " files, total compressed size: " +
+            instanceLogger.info("Zipping complete with " + this.numberOfFilesZipped + " files, total compressed size: " +
                     FileUtils.byteCountToDisplaySize(tempFile.length() / 8 * 6)); // We print here the size of compressed sources before encoding to base 64
             fileOutputStream.close();
         } catch (Zipper.MaxZipSizeReached e)
@@ -336,7 +349,7 @@ public class CxScanBuilder extends Builder {
         final CliScanArgs cliScanArgs = createCliScanArgs(new byte[]{});
         final CxWSResponseRunID cxWSResponseRunID = cxWebService.scanStreaming(cliScanArgs, tempFile);
         tempFile.delete();
-        logger.info("Temp file was removed");
+        instanceLogger.info("Temp file was removed");
 
         return cxWSResponseRunID;
     }
@@ -360,7 +373,7 @@ public class CxScanBuilder extends Builder {
                 result.append("/**/*, ");
             }
         }
-        logger.debug("Exclude folders converted to: " +result.toString());
+        instanceLogger.debug("Exclude folders converted to: " +result.toString());
         return result.toString();
     }
 
@@ -374,7 +387,7 @@ public class CxScanBuilder extends Builder {
             presetLong = Long.parseLong(getPreset());
         } catch (Exception e)
         {
-            logger.error("Encountered illegal preset value: " + getPreset() + ". Using default preset.");
+            instanceLogger.error("Encountered illegal preset value: " + getPreset() + ". Using default preset.");
         }
 
         projectSettings.setPresetID(presetLong);
@@ -385,7 +398,7 @@ public class CxScanBuilder extends Builder {
             configuration = Long.parseLong(getSourceEncoding());
         } catch (Exception e)
         {
-            logger.error("Encountered illegal source encoding (configuration) value: " + getSourceEncoding() + ". Using default configuration.");
+            instanceLogger.error("Encountered illegal source encoding (configuration) value: " + getSourceEncoding() + ". Using default configuration.");
         }
         projectSettings.setScanConfigurationID(configuration);
 
@@ -423,7 +436,7 @@ public class CxScanBuilder extends Builder {
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
         public final static String DEFAULT_FILTER_PATTERNS = CxConfig.defaultFilterPattern();
-        private static Logger logger = Logger.getLogger(DescriptorImpl.class);
+        private final static Logger logger = Logger.getLogger(DescriptorImpl.class);
 
         @XStreamOmitField // The @XStreamOmitField annotation makes the xStream serialization
         // system ignore this field while saving class state to a file
