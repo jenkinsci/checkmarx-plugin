@@ -19,6 +19,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -439,6 +440,7 @@ public class CxScanBuilder extends Builder {
 
         @XStreamOmitField // The @XStreamOmitField annotation makes the xStream serialization
         // system ignore this field while saving class state to a file
+        @Nullable
         private CxWebService cxWebService;
 
         //////////////////////////////////////////////////////////////////////////////////////
@@ -607,6 +609,11 @@ public class CxScanBuilder extends Builder {
 
         public FormValidation doCheckProjectName(@QueryParameter String projectName)
         {
+            if (this.cxWebService==null)
+            {
+                return FormValidation.warning("Can't validate project name without server credentials");
+            }
+
             CxWSBasicRepsonse cxWSBasicRepsonse = this.cxWebService.validateProjectName(projectName);
             if (cxWSBasicRepsonse.isIsSuccesfull())
             {
