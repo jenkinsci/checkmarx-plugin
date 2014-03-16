@@ -206,7 +206,7 @@ public class CxScanBuilder extends Builder {
 
             logger.info("Checkmarx server login successful");
 
-            CxWSResponseRunID cxWSResponseRunID = submitScan(build, listener, cxWebService);
+            CxWSResponseRunID cxWSResponseRunID = submitScan(build, cxWebService);
             logger.info("\nScan job submitted successfully\n");
 
             if (!isWaitForResultsEnabled())
@@ -291,46 +291,20 @@ public class CxScanBuilder extends Builder {
         fileAppender.close();
     }
 
-    private CxWSResponseRunID submitScan(AbstractBuild<?, ?> build, final BuildListener listener, CxWebService cxWebService) throws AbortException, IOException
+    private CxWSResponseRunID submitScan(AbstractBuild<?, ?> build, CxWebService cxWebService) throws IOException
     {
-
-        /*
-
-        ByteArrayOutputStream byteArrayOutputStream = null;
-        try {
-            FilePath remoteDir = build.getWorkspace();
-            String combinedFilterPattern = this.getFilterPattern() + "," + processExcludeFolders(this.getExcludeFolders());
-            CxZipperCallable zipperCallable = new CxZipperCallable(combinedFilterPattern);
-
-            CxZipResult zipResult = remoteDir.act(zipperCallable);
-
-            byteArrayOutputStream = zipResult.getStream();
-
-            logger.info("Zipping complete with " + zipResult.getNumOfZippedFiles() + " files, total compressed size: " +
-                    FileUtils.byteCountToDisplaySize(byteArrayOutputStream.size()));
-        } catch (Zipper.MaxZipSizeReached e)
-        {
-            throw new AbortException("Checkmarx Scan Failed: Reached maximum upload size limit of " + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()));
-        } catch (Zipper.NoFilesToZip e)
-        {
-            throw new AbortException("Checkmarx Scan Failed: No files to scan");
-        } catch (InterruptedException e) {
-            throw new AbortException("Checkmarx Scan Failed: Remote scan interrupted");
-        }
-
-        return cxWebService.scan(createCliScanArgs(byteArrayOutputStream.toByteArray()));
-
-        */
-        FilePath tempFile = null;
-
         logger.info("Starting to zip the workspace");
+
         try {
+            // hudson.FilePath will work in distributed Jenkins installation
             FilePath baseDir = build.getWorkspace();
             String combinedFilterPattern = this.getFilterPattern() + "," + processExcludeFolders(this.getExcludeFolders());
+            // Implementation of FilePath.FileCallable allows extracting a java.io.File from
+            // hudson.FilePath and still working with it in remote mode
             CxZipperCallable zipperCallable = new CxZipperCallable(combinedFilterPattern);
 
             CxZipResult zipResult = baseDir.act(zipperCallable);
-            tempFile = zipResult.getTempFile();
+            FilePath tempFile = zipResult.getTempFile();
             int numOfZippedFiles = zipResult.getNumOfZippedFiles();
 
             logger.info("Zipping complete with " + numOfZippedFiles + " files, total compressed size: " +

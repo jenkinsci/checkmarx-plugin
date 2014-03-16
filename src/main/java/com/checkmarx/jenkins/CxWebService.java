@@ -435,6 +435,7 @@ public class CxWebService {
 
             os.write(soapMessage.getRight());
             os.close();
+            fis.close();
             logger.info("Finished uploading sources to Checkmarx server");
 
 
