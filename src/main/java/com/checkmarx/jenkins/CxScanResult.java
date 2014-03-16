@@ -29,7 +29,7 @@ import java.util.LinkedList;
 
 public class CxScanResult implements Action {
 
-    private static final Logger logger = Logger.getLogger(CxScanResult.class);
+    private final Logger logger;
 
     public final AbstractBuild<?,?> owner;
 
@@ -54,8 +54,9 @@ public class CxScanResult implements Action {
     private String errorMessage;
 
 
-    public CxScanResult(AbstractBuild owner)
+    public CxScanResult(final AbstractBuild owner, final String loggerSuffix)
     {
+        logger = CxLogUtils.loggerWithSuffix(getClass(),loggerSuffix);
         this.owner = owner;
         this.resultIsValid=false;
         this.errorMessage = "No Scan Results"; // error message to appear if results were not parsed

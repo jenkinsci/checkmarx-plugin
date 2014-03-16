@@ -205,7 +205,7 @@ public class CxScanBuilder extends Builder {
             String serverUrlToUse = isUseOwnServerCredentials() ? getServerUrl() : getDescriptor().getServerUrl();
             String usernameToUse  = isUseOwnServerCredentials() ? getUsername()  : getDescriptor().getUsername();
             String passwordToUse  = isUseOwnServerCredentials() ? getPassword()  : getDescriptor().getPassword();
-            CxWebService cxWebService = new CxWebService(serverUrlToUse);
+            CxWebService cxWebService = new CxWebService(serverUrlToUse,instanceLoggerSuffix(build));
             cxWebService.login(usernameToUse,passwordToUse);
 
 
@@ -234,7 +234,7 @@ public class CxScanBuilder extends Builder {
 
             // Parse scan report and present results in Jenkins
 
-            CxScanResult cxScanResult = new CxScanResult(build);
+            CxScanResult cxScanResult = new CxScanResult(build,instanceLoggerSuffix(build));
             cxScanResult.readScanXMLReport(xmlReportFile);
             build.addAction(cxScanResult);
 
@@ -280,11 +280,10 @@ public class CxScanBuilder extends Builder {
 
     private void initLogger(final File checkmarxBuildDir, final BuildListener listener, final String loggerSuffix)
     {
-        final String loggerPrefix = "com.checkmarx." + loggerSuffix;
-        instanceLogger = Logger.getLogger(loggerPrefix + "." + getClass().getName());
+        instanceLogger = CxLogUtils.loggerWithSuffix(getClass(),loggerSuffix);
         final WriterAppender writerAppender = new WriterAppender(new PatternLayout("%m%n"),listener.getLogger());
         writerAppender.setThreshold(Level.INFO);
-        final Logger parentLogger = Logger.getLogger(loggerPrefix);
+        final Logger parentLogger = CxLogUtils.parentLoggerWithSuffix(loggerSuffix);
         parentLogger.addAppender(writerAppender);
         String logFileName = checkmarxBuildDir.getAbsolutePath() + File.separator + "checkmarx.log";
 

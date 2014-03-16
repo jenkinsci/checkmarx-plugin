@@ -8,6 +8,8 @@ import hudson.AbortException;
 import hudson.util.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -33,19 +35,26 @@ import java.util.List;
  */
 public class CxWebService {
 
-    private final static Logger logger = Logger.getLogger(CxWebService.class);
     private final static QName CXWSRESOLVER_QNAME = new QName("http://Checkmarx.com", "CxWSResolver");
     private final static QName CXJENKINSWEBSERVICE_QNAME = new QName("http://Checkmarx.com/v7", "CxJenkinsWebService");
     private final static int WEBSERVICE_API_VERSION = 1;
     private final static String CXWSRESOLVER_PATH = "/cxwebinterface/cxwsresolver.asmx";
     private final static int LCID = 1033; // English
 
+    private final Logger logger;
     private String sessionId;
     private CxJenkinsWebServiceSoap cxJenkinsWebServiceSoap;
     private final URL webServiceUrl;
 
+
     public CxWebService(String serverUrl) throws MalformedURLException, AbortException
     {
+        this(serverUrl,null);
+    }
+
+    public CxWebService(@NotNull final String serverUrl,@Nullable final String loggerSuffix) throws MalformedURLException, AbortException
+    {
+        logger = CxLogUtils.loggerWithSuffix(getClass(),loggerSuffix);
         logger.info("Establishing connection with Checkmarx server at: " + serverUrl);
         URL serverUrlUrl = new URL(serverUrl);
         if (serverUrlUrl.getPath().length() > 0)
