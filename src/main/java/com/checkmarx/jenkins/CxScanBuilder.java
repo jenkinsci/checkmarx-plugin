@@ -6,6 +6,7 @@ import com.checkmarx.ws.CxJenkinsWebService.*;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import hudson.AbortException;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
@@ -73,9 +74,6 @@ public class CxScanBuilder extends Builder {
 
     @XStreamOmitField
     private FileAppender fileAppender;
-    @XStreamOmitField
-    private int numberOfFilesZipped = 0;
-
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Constructors
@@ -295,48 +293,70 @@ public class CxScanBuilder extends Builder {
 
     private CxWSResponseRunID submitScan(AbstractBuild<?, ?> build, final BuildListener listener, CxWebService cxWebService) throws AbortException, IOException
     {
-        this.numberOfFilesZipped = 0;
-        ZipListener zipListener = new ZipListener() {
-            @Override
-            public void updateProgress(String fileName, long size) {
-                logger.info("Zipping (" + FileUtils.byteCountToDisplaySize(size) + "): " + fileName);
-                CxScanBuilder.this.numberOfFilesZipped++;
-            }
 
-        };
+        /*
 
-        File tempFile = File.createTempFile("base64ZippedSource", ".bin");
-        OutputStream fileOutputStream = new FileOutputStream(tempFile);
-        final Base64OutputStream base64FileOutputStream = new Base64OutputStream(fileOutputStream,true,0,null);
-
-        File baseDir = new File(build.getWorkspace().getRemote());
-
-        String combinedFilterPattern = this.getFilterPattern() + "," + processExcludeFolders(this.getExcludeFolders());
-
-        logger.info("Starting to zip the workspace");
+        ByteArrayOutputStream byteArrayOutputStream = null;
         try {
-            new Zipper().zip(baseDir, combinedFilterPattern, base64FileOutputStream, 0, zipListener); // TODO: Set max zip size
-            logger.info("Zipping complete with " + this.numberOfFilesZipped + " files, total compressed size: " +
-                    FileUtils.byteCountToDisplaySize(tempFile.length() / 8 * 6)); // We print here the size of compressed sources before encoding to base 64
-            fileOutputStream.close();
-            logger.info("Temporary file with zipped and base64 encoded sources was created at: " + tempFile.getAbsoluteFile());
+            FilePath remoteDir = build.getWorkspace();
+            String combinedFilterPattern = this.getFilterPattern() + "," + processExcludeFolders(this.getExcludeFolders());
+            CxZipperCallable zipperCallable = new CxZipperCallable(combinedFilterPattern);
+
+            CxZipResult zipResult = remoteDir.act(zipperCallable);
+
+            byteArrayOutputStream = zipResult.getStream();
+
+            logger.info("Zipping complete with " + zipResult.getNumOfZippedFiles() + " files, total compressed size: " +
+                    FileUtils.byteCountToDisplaySize(byteArrayOutputStream.size()));
         } catch (Zipper.MaxZipSizeReached e)
         {
             throw new AbortException("Checkmarx Scan Failed: Reached maximum upload size limit of " + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()));
         } catch (Zipper.NoFilesToZip e)
         {
             throw new AbortException("Checkmarx Scan Failed: No files to scan");
+        } catch (InterruptedException e) {
+            throw new AbortException("Checkmarx Scan Failed: Remote scan interrupted");
         }
 
+        return cxWebService.scan(createCliScanArgs(byteArrayOutputStream.toByteArray()));
 
-        // Create cliScanArgs object with dummy byte array for zippedFile field
-        // Streaming scan web service will nullify zippedFile filed and use tempFile
-        // instead
-        final CliScanArgs cliScanArgs = createCliScanArgs(new byte[]{});
-        final CxWSResponseRunID cxWSResponseRunID = cxWebService.scanStreaming(cliScanArgs, tempFile);
-        tempFile.delete();
+        */
+        FilePath tempFile = null;
 
-        return cxWSResponseRunID;
+        logger.info("Starting to zip the workspace");
+        try {
+            FilePath baseDir = build.getWorkspace();
+            String combinedFilterPattern = this.getFilterPattern() + "," + processExcludeFolders(this.getExcludeFolders());
+            CxZipperCallable zipperCallable = new CxZipperCallable(combinedFilterPattern);
+
+            CxZipResult zipResult = baseDir.act(zipperCallable);
+            tempFile = zipResult.getTempFile();
+            int numOfZippedFiles = zipResult.getNumOfZippedFiles();
+
+            logger.info("Zipping complete with " + numOfZippedFiles + " files, total compressed size: " +
+                    FileUtils.byteCountToDisplaySize(tempFile.length() / 8 * 6)); // We print here the size of compressed sources before encoding to base 64
+            logger.info("Temporary file with zipped and base64 encoded sources was created at: " + tempFile.getRemote());
+
+            // Create cliScanArgs object with dummy byte array for zippedFile field
+            // Streaming scan web service will nullify zippedFile filed and use tempFile
+            // instead
+            final CliScanArgs cliScanArgs = createCliScanArgs(new byte[]{});
+            final CxWSResponseRunID cxWSResponseRunID = cxWebService.scanStreaming(cliScanArgs, tempFile);
+            tempFile.delete();
+
+            return cxWSResponseRunID;
+        }
+        catch (Zipper.MaxZipSizeReached e)
+        {
+            throw new AbortException("Checkmarx Scan Failed: Reached maximum upload size limit of " + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()));
+        }
+        catch (Zipper.NoFilesToZip e)
+        {
+            throw new AbortException("Checkmarx Scan Failed: No files to scan");
+        }
+        catch (InterruptedException e) {
+            throw new AbortException("Checkmarx Scan Failed: Remote scan interrupted");
+        }
     }
 
     @NotNull
