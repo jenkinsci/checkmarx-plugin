@@ -347,11 +347,16 @@ public class CxWebService {
             StringWriter scanMessage = new StringWriter();
             scanMessage.write(soapMessageHead);
 
+            // Nullify the zippedFile field, and save its old value for restoring later
+            final byte[] oldZippedFileValue = args.getSrcCodeSettings().getPackagedCode().getZippedFile();
+            args.getSrcCodeSettings().getPackagedCode().setZippedFile(new byte[]{});
             Scan scan = new Scan();
             scan.setArgs(args);
             scan.setSessionId(sessionId);
             marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
             marshaller.marshal(scan, scanMessage);
+            args.getSrcCodeSettings().getPackagedCode().setZippedFile(oldZippedFileValue); // Restore the old value
+
 
             scanMessage.write(soapMessageTail);
             final String[] parts = scanMessage.toString().split(zippedFileOpenTag + zippedFileCloseTag);
@@ -409,8 +414,7 @@ public class CxWebService {
         assert sessionId!=null;
 
         try {
-            // Nullify the zippedFile field
-            args.getSrcCodeSettings().getPackagedCode().setZippedFile(new byte[]{});
+
             Pair<byte[],byte[]> soapMessage = createScanSoapMessage(args);
 
             // Create HTTP connection

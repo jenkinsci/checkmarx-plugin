@@ -306,6 +306,8 @@ public class CxScanBuilder extends Builder {
         };
 
         File tempFile = File.createTempFile("base64ZippedSource", ".bin");
+        logger.info("Created temporary file for zipped sources: " + tempFile.getAbsolutePath());
+
         OutputStream fileOutputStream = new FileOutputStream(tempFile);
         final Base64OutputStream base64FileOutputStream = new Base64OutputStream(fileOutputStream,true,0,null);
 
@@ -319,7 +321,6 @@ public class CxScanBuilder extends Builder {
             logger.info("Zipping complete with " + this.numberOfFilesZipped + " files, total compressed size: " +
                     FileUtils.byteCountToDisplaySize(tempFile.length() / 8 * 6)); // We print here the size of compressed sources before encoding to base 64
             fileOutputStream.close();
-            logger.info("Temporary file with zipped and base64 encoded sources was created at: " + tempFile.getAbsoluteFile());
         } catch (Zipper.MaxZipSizeReached e)
         {
             throw new AbortException("Checkmarx Scan Failed: Reached maximum upload size limit of " + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()));
@@ -335,6 +336,7 @@ public class CxScanBuilder extends Builder {
         final CliScanArgs cliScanArgs = createCliScanArgs(new byte[]{});
         final CxWSResponseRunID cxWSResponseRunID = cxWebService.scanStreaming(cliScanArgs, tempFile);
         tempFile.delete();
+        logger.info("Temp file was removed");
 
         return cxWSResponseRunID;
     }
