@@ -1,5 +1,6 @@
 package com.checkmarx.jenkins;
 
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import hudson.PluginWrapper;
 import hudson.model.*;
 import org.apache.commons.lang.StringUtils;
@@ -29,6 +30,7 @@ import java.util.LinkedList;
 
 public class CxScanResult implements Action {
 
+    @XStreamOmitField
     private final Logger logger;
 
     public final AbstractBuild<?,?> owner;
@@ -237,7 +239,7 @@ public class CxScanResult implements Action {
                         CxScanResult.this.infoCount++;
                     }
                 }
-            } else if ("Query".equals(qName)) {  //TODO: Validate that the added else does not ruin correctness
+            } else if ("Query".equals(qName)) {
                 currentQueryName = attributes.getValue("name");
                 currentQuerySeverity = attributes.getValue("Severity");
                 currentQueryNumOfResults = 0;

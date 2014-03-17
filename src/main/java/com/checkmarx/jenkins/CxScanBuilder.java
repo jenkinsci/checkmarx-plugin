@@ -73,6 +73,7 @@ public class CxScanBuilder extends Builder {
          BasicConfigurator.configure();  // Set the log4j system to log to console
     }
     private final static Logger staticLogger = Logger.getLogger(CxScanBuilder.class);
+    @XStreamOmitField
     private Logger instanceLogger = staticLogger; // Instance logger redirects to static logger until
                                                   // it is initialized in perform method
     @XStreamOmitField
@@ -210,7 +211,7 @@ public class CxScanBuilder extends Builder {
 
             instanceLogger.info("Checkmarx server login successful");
 
-            CxWSResponseRunID cxWSResponseRunID = submitScan(build, cxWebService);
+            CxWSResponseRunID cxWSResponseRunID = submitScan(build, cxWebService,listener);
             instanceLogger.info("\nScan job submitted successfully\n");
 
 
@@ -255,15 +256,15 @@ public class CxScanBuilder extends Builder {
             return true;
         } catch (Error e)
         {
-            instanceLogger.error(e);
+            instanceLogger.error(e.getMessage(),e);
             throw e;
-        }  catch (AbortException e)
+        } catch (AbortException e)
         {
-            instanceLogger.error(e);
+            instanceLogger.error(e.getMessage(),e);
             throw e;
-        }catch (IOException e)
+        } catch (IOException e)
         {
-            instanceLogger.error(e);
+            instanceLogger.error(e.getMessage(),e);
             throw e;
         } finally {
             closeLogger();
@@ -302,10 +303,10 @@ public class CxScanBuilder extends Builder {
         instanceLogger = staticLogger; // Redirect all logs back to static logger
     }
 
-    private CxWSResponseRunID submitScan(AbstractBuild<?, ?> build, CxWebService cxWebService) throws IOException
+    private CxWSResponseRunID submitScan(final AbstractBuild<?, ?> build, final CxWebService cxWebService, final BuildListener listener) throws IOException
     {
 
-        instanceLogger.info("Starting to zip the workspace");
+        instanceLogger.info("Started zipping the workspace");
 
         try {
             // hudson.FilePath will work in distributed Jenkins installation
@@ -326,6 +327,7 @@ public class CxScanBuilder extends Builder {
             instanceLogger.info("Zipping complete with " + numOfZippedFiles + " files, total compressed size: " +
                     FileUtils.byteCountToDisplaySize(tempFile.length() / 8 * 6)); // We print here the size of compressed sources before encoding to base 64
             instanceLogger.info("Temporary file with zipped and base64 encoded sources was created at: " + tempFile.getRemote());
+            listener.getLogger().flush();
             // Create cliScanArgs object with dummy byte array for zippedFile field
             // Streaming scan web service will nullify zippedFile filed and use tempFile
             // instead
