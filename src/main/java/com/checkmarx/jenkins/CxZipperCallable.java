@@ -6,6 +6,7 @@ import com.checkmarx.ws.CxJenkinsWebService.CliScanArgs;
 import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseRunID;
 import hudson.AbortException;
 import hudson.FilePath;
+import hudson.remoting.Callable;
 import hudson.remoting.VirtualChannel;
 import org.apache.commons.codec.binary.Base64OutputStream;
 import org.apache.commons.io.FileUtils;
@@ -31,12 +32,27 @@ public class CxZipperCallable implements FilePath.FileCallable<CxZipResult> {
     }
 
     @Override
-    public CxZipResult invoke(File file, VirtualChannel channel) throws IOException, InterruptedException {
+    public CxZipResult invoke(final File file, final VirtualChannel channel) throws IOException, InterruptedException {
+
+        System.out.println("SlaveNote Privet !!!! ++++++ ***********************");
 
         ZipListener zipListener = new ZipListener() {
             @Override
             public void updateProgress(String fileName, long size) {
                 numOfZippedFiles++;
+                try {
+                    channel.callAsync(new Callable<Object, Throwable>() {
+                        @Override
+                        public Object call() throws Throwable {
+                            System.out.println("Call from Slave!!!!!!");
+                            return null;
+                        }
+                    });
+
+                } catch (IOException e)
+                {
+                    // TODO: Handle
+                }
             }
         };
 

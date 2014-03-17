@@ -9,6 +9,7 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
+import hudson.remoting.VirtualChannel;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.ComboBoxModel;
@@ -195,8 +196,14 @@ public class CxScanBuilder extends Builder {
             File checkmarxBuildDir = new File(build.getRootDir(),"checkmarx");
             checkmarxBuildDir.mkdir();
 
+            build.getWorkspace().act(new FilePath.FileCallable<Object>() {
+                @Override
+                public Object invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
+                    return null;
+                }
+            })
 
-            initLogger(checkmarxBuildDir,listener,instanceLoggerSuffix(build));
+            initLogger(checkmarxBuildDir, listener, instanceLoggerSuffix(build));
 
             listener.started(null);
             instanceLogger.info("Checkmarx Jenkins plugin version: " + CxConfig.version());
@@ -313,6 +320,9 @@ public class CxScanBuilder extends Builder {
         try {
             // hudson.FilePath will work in distributed Jenkins installation
             FilePath baseDir = build.getWorkspace();
+
+
+
             String combinedFilterPattern = this.getFilterPattern() + "," + processExcludeFolders(this.getExcludeFolders());
             // Implementation of FilePath.FileCallable allows extracting a java.io.File from
             // hudson.FilePath and still working with it in remote mode
@@ -324,8 +334,7 @@ public class CxScanBuilder extends Builder {
 
             instanceLogger.info("Zipping complete with " + numOfZippedFiles + " files, total compressed size: " +
                     FileUtils.byteCountToDisplaySize(tempFile.length() / 8 * 6)); // We print here the size of compressed sources before encoding to base 64
-            instanceLogger.info("Temporary file with zipped and base64 encoded sources was created at: " + tempFile.getRemote()); //TODO: Log remote machine name
-
+            instanceLogger.info("Temporary file with zipped and base64 encoded sources was created at: " + tempFile.getRemote());
             // Create cliScanArgs object with dummy byte array for zippedFile field
             // Streaming scan web service will nullify zippedFile filed and use tempFile
             // instead
@@ -344,7 +353,7 @@ public class CxScanBuilder extends Builder {
             throw new AbortException("Checkmarx Scan Failed: No files to scan");
         }
         catch (InterruptedException e) {
-            throw new AbortException("Checkmarx Scan Failed: Remote scan interrupted");
+            throw new AbortException("Remote operation failed on slave node: " + e.getMessage());
         }
     }
 
