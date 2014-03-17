@@ -1,6 +1,5 @@
 package com.checkmarx.jenkins;
 
-import com.checkmarx.components.zipper.ZipListener;
 import com.checkmarx.components.zipper.Zipper;
 import com.checkmarx.ws.CxJenkinsWebService.*;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
@@ -9,14 +8,12 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
-import hudson.remoting.VirtualChannel;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import net.sf.json.JSONObject;
-import org.apache.commons.codec.binary.Base64OutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.*;
@@ -608,7 +605,7 @@ public class CxScanBuilder extends Builder {
         {
             if (this.cxWebService==null)
             {
-                return FormValidation.warning("Can't validate project name without server credentials");
+                return FormValidation.warning("Can't validate project name without valid server url");
             }
 
             CxWSBasicRepsonse cxWSBasicRepsonse = this.cxWebService.validateProjectName(projectName);

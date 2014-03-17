@@ -36,8 +36,6 @@ import java.util.List;
  */
 public class CxWebService {
 
-    private final static QName CXWSRESOLVER_QNAME = new QName("http://Checkmarx.com", "CxWSResolver");
-    private final static QName CXJENKINSWEBSERVICE_QNAME = new QName("http://Checkmarx.com/v7", "CxJenkinsWebService");
     private final static int WEBSERVICE_API_VERSION = 1;
     private final static String CXWSRESOLVER_PATH = "/cxwebinterface/cxwsresolver.asmx";
     private final static int LCID = 1033; // English
@@ -69,7 +67,7 @@ public class CxWebService {
         logger.debug("Resolver url: " + resolverUrl);
         CxWSResolver cxWSResolver;
         try {
-            cxWSResolver = new CxWSResolver(resolverUrl,CXWSRESOLVER_QNAME);  // TODO: Remove qname
+            cxWSResolver = new CxWSResolver(resolverUrl);  // TODO: Remove qname
         } catch (javax.xml.ws.WebServiceException e){
             logger.error("Failed to resolve Checkmarx webservice url with resolver at: " + resolverUrl);
             logger.error(e);
@@ -86,7 +84,7 @@ public class CxWebService {
 
         webServiceUrl = new URL(cxWSResponseDiscovery.getServiceURL());
         logger.debug("Webservice url: " + webServiceUrl);
-        CxJenkinsWebService cxJenkinsWebService = new CxJenkinsWebService(webServiceUrl,CXJENKINSWEBSERVICE_QNAME); // TODO: Remove qname
+        CxJenkinsWebService cxJenkinsWebService = new CxJenkinsWebService(webServiceUrl); // TODO: Remove qname
         cxJenkinsWebServiceSoap = cxJenkinsWebService.getCxJenkinsWebServiceSoap();
 
     }
@@ -412,10 +410,10 @@ public class CxWebService {
      * Same as "scan" method, but works by streaming the LocalCodeContainer.zippedFile contents.
      * NOTE: The attribute LocalCodeContainer.zippedFile inside args is REPLACED by empty byte array,
      * and base64ZipFile temp file is used instead.
-     * @param args
+     * @param args - CliScanArgs instance initialized with all the required parameters for submitting a scan
      * @param base64ZipFile - Temp file used instead of LocalCodeContainer.zippedFile attribute, should
      *                      contain zipped sources encoded with base 64 encoding
-     * @return
+     * @return CxWSResponseRunID object which is similar to the return value of scan web service method
      * @throws AbortException
      */
 

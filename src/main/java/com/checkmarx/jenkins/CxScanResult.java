@@ -281,7 +281,7 @@ public class CxScanResult implements Action {
                     CxScanResult.this.infoQueryResultList.add(qr);
                 } else {
                     logger.warn("Encountered a result query with unknown severity: " + qr.getSeverity());
-                };
+                }
             }
         }
     }

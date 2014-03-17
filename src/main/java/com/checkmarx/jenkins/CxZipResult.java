@@ -1,6 +1,7 @@
 package com.checkmarx.jenkins;
 
 import hudson.FilePath;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
@@ -15,16 +16,19 @@ import java.io.Serializable;
 public class CxZipResult implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    @NotNull
     private final FilePath tempFile;
     private final int numOfZippedFiles;
+    @NotNull
     private final String logMessage;
 
-    public CxZipResult(FilePath tempFile, int numOfZippedFiles, String logMessage) {
+    public CxZipResult(@NotNull FilePath tempFile, int numOfZippedFiles, @NotNull String logMessage) {
         this.tempFile = tempFile;
         this.numOfZippedFiles = numOfZippedFiles;
         this.logMessage = logMessage;
     }
 
+    @NotNull
     public FilePath getTempFile() {
         return tempFile;
     }
@@ -33,6 +37,7 @@ public class CxZipResult implements Serializable {
         return numOfZippedFiles;
     }
 
+    @NotNull
     public String getLogMessage() {
         return logMessage;
     }

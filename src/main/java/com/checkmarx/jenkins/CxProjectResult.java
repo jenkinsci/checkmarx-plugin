@@ -258,7 +258,7 @@ public class CxProjectResult implements Action {
                 return list;
             }
             return null;
-        };
-    };
+        }
+    }
 }
 

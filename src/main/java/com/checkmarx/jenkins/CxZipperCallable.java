@@ -10,6 +10,7 @@ import hudson.remoting.Callable;
 import hudson.remoting.VirtualChannel;
 import org.apache.commons.codec.binary.Base64OutputStream;
 import org.apache.commons.io.FileUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 
@@ -23,11 +24,13 @@ import java.io.*;
 public class CxZipperCallable implements FilePath.FileCallable<CxZipResult> {
     private static final long serialVersionUID = 1L;
 
+    @NotNull
     private final String combinedFilterPattern;
     private int numOfZippedFiles;
+    @NotNull
     private final StringBuffer logMessage = new StringBuffer();
 
-    public CxZipperCallable(String combinedFilterPattern){
+    public CxZipperCallable(@NotNull String combinedFilterPattern){
         this.combinedFilterPattern = combinedFilterPattern;
         this.numOfZippedFiles = 0;
     }
