@@ -22,12 +22,12 @@ import java.io.*;
 public class CxZipperCallable implements FilePath.FileCallable<CxZipResult> {
     private static final long serialVersionUID = 1L;
 
-    private String combinedFilterPattern;
+    private final String combinedFilterPattern;
     private int numOfZippedFiles;
 
     public CxZipperCallable(String combinedFilterPattern){
         this.combinedFilterPattern = combinedFilterPattern;
-        numOfZippedFiles = 0;
+        this.numOfZippedFiles = 0;
     }
 
     @Override
@@ -40,14 +40,14 @@ public class CxZipperCallable implements FilePath.FileCallable<CxZipResult> {
             }
         };
 
-        File tempFile = File.createTempFile("base64ZippedSource", ".bin");
-        OutputStream fileOutputStream = new FileOutputStream(tempFile);
+        final File tempFile = File.createTempFile("base64ZippedSource", ".bin");
+        final OutputStream fileOutputStream = new FileOutputStream(tempFile);
         final Base64OutputStream base64FileOutputStream = new Base64OutputStream(fileOutputStream,true,0,null);
 
-        new Zipper().zip(file, combinedFilterPattern, base64FileOutputStream, 0, zipListener);
+        new Zipper().zip(file, combinedFilterPattern, base64FileOutputStream, 0, zipListener); // TODO: Add maximum zip size
         fileOutputStream.close();
 
-        FilePath remoteTempFile = new FilePath(tempFile);
+        final FilePath remoteTempFile = new FilePath(tempFile);
         return new CxZipResult(remoteTempFile, numOfZippedFiles);
     }
 }

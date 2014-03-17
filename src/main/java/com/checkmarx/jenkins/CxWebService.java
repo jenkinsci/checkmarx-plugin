@@ -407,7 +407,7 @@ public class CxWebService {
      * @throws AbortException
      */
 
-    public CxWSResponseRunID scanStreaming(CliScanArgs args, FilePath base64ZipFile) throws AbortException
+    public CxWSResponseRunID scanStreaming(final CliScanArgs args, final FilePath base64ZipFile) throws AbortException
     {
         assert sessionId!=null;
 

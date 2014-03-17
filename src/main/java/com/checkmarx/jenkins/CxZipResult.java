@@ -15,8 +15,8 @@ import java.io.Serializable;
 public class CxZipResult implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private FilePath tempFile;
-    private int numOfZippedFiles;
+    private final FilePath tempFile;
+    private final int numOfZippedFiles;
 
     public CxZipResult(FilePath tempFile, int numOfZippedFiles) {
         this.tempFile = tempFile;
