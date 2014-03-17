@@ -5,6 +5,7 @@ import com.checkmarx.ws.CxJenkinsWebService.*;
 import com.checkmarx.ws.CxJenkinsWebService.CxWSBasicRepsonse;
 import com.checkmarx.ws.CxWSResolver.*;
 import hudson.AbortException;
+import hudson.FilePath;
 import hudson.util.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
@@ -113,7 +114,7 @@ public class CxWebService {
     {
         assert sessionId!=null : "Trying to scan before login";
 
-        CxWSResponseRunID cxWSResponseRunID = cxJenkinsWebServiceSoap.scan(sessionId,args);
+        CxWSResponseRunID cxWSResponseRunID = cxJenkinsWebServiceSoap.scan(sessionId, args);
         if (!cxWSResponseRunID.isIsSuccesfull())
         {
             String message = "Submission of sources for scan failed: \n" + cxWSResponseRunID.getErrorMessage();
@@ -418,7 +419,7 @@ public class CxWebService {
      * @throws AbortException
      */
 
-    public CxWSResponseRunID scanStreaming(CliScanArgs args, File base64ZipFile) throws AbortException
+    public CxWSResponseRunID scanStreaming(final CliScanArgs args, final FilePath base64ZipFile) throws AbortException
     {
         assert sessionId!=null;
 
@@ -440,11 +441,12 @@ public class CxWebService {
 
             logger.info("Uploading sources to Checkmarx server");
             os.write(soapMessage.getLeft());
-            final FileInputStream fis = new FileInputStream(base64ZipFile);
+            final InputStream fis = base64ZipFile.read();
             org.apache.commons.io.IOUtils.copyLarge(fis, os);
 
             os.write(soapMessage.getRight());
             os.close();
+            fis.close();
             logger.info("Finished uploading sources to Checkmarx server");
 
 
@@ -466,6 +468,9 @@ public class CxWebService {
             logger.error(e.getMessage(), e);
             throw new AbortException(e.getMessage());
         } catch (XMLStreamException e) {
+            logger.error(e.getMessage(), e);
+            throw new AbortException(e.getMessage());
+        } catch (InterruptedException e) {
             logger.error(e.getMessage(), e);
             throw new AbortException(e.getMessage());
         }

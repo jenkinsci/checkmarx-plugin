@@ -6,6 +6,7 @@ import com.checkmarx.ws.CxJenkinsWebService.*;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import hudson.AbortException;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
@@ -75,9 +76,6 @@ public class CxScanBuilder extends Builder {
                                                   // it is initialized in perform method
     @XStreamOmitField
     private FileAppender fileAppender;
-    @XStreamOmitField
-    private int numberOfFilesZipped = 0;
-
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Constructors
@@ -212,8 +210,9 @@ public class CxScanBuilder extends Builder {
 
             instanceLogger.info("Checkmarx server login successful");
 
-            CxWSResponseRunID cxWSResponseRunID = submitScan(build, listener, cxWebService);
+            CxWSResponseRunID cxWSResponseRunID = submitScan(build, cxWebService);
             instanceLogger.info("\nScan job submitted successfully\n");
+
 
             if (!isWaitForResultsEnabled())
             {
@@ -306,52 +305,47 @@ public class CxScanBuilder extends Builder {
         instanceLogger = staticLogger; // Redirect all logs back to static logger
     }
 
-    private CxWSResponseRunID submitScan(AbstractBuild<?, ?> build, final BuildListener listener, CxWebService cxWebService) throws AbortException, IOException
+    private CxWSResponseRunID submitScan(AbstractBuild<?, ?> build, CxWebService cxWebService) throws IOException
     {
-        this.numberOfFilesZipped = 0;
-        ZipListener zipListener = new ZipListener() {
-            @Override
-            public void updateProgress(String fileName, long size) {
-                instanceLogger.info("Zipping (" + FileUtils.byteCountToDisplaySize(size) + "): " + fileName);
-                CxScanBuilder.this.numberOfFilesZipped++;
-            }
-
-        };
-
-        File tempFile = File.createTempFile("base64ZippedSource", ".bin");
-        instanceLogger.info("Created temporary file for zipped sources: " + tempFile.getAbsolutePath());
-
-        OutputStream fileOutputStream = new FileOutputStream(tempFile);
-        final Base64OutputStream base64FileOutputStream = new Base64OutputStream(fileOutputStream,true,0,null);
-
-        File baseDir = new File(build.getWorkspace().getRemote());
-
-        String combinedFilterPattern = this.getFilterPattern() + "," + processExcludeFolders(this.getExcludeFolders());
 
         instanceLogger.info("Starting to zip the workspace");
+
         try {
-            new Zipper().zip(baseDir, combinedFilterPattern, base64FileOutputStream, 0, zipListener); // TODO: Set max zip size
-            instanceLogger.info("Zipping complete with " + this.numberOfFilesZipped + " files, total compressed size: " +
+            // hudson.FilePath will work in distributed Jenkins installation
+            FilePath baseDir = build.getWorkspace();
+            String combinedFilterPattern = this.getFilterPattern() + "," + processExcludeFolders(this.getExcludeFolders());
+            // Implementation of FilePath.FileCallable allows extracting a java.io.File from
+            // hudson.FilePath and still working with it in remote mode
+            CxZipperCallable zipperCallable = new CxZipperCallable(combinedFilterPattern);
+
+            CxZipResult zipResult = baseDir.act(zipperCallable);
+            final FilePath tempFile = zipResult.getTempFile();
+            final int numOfZippedFiles = zipResult.getNumOfZippedFiles();
+
+            instanceLogger.info("Zipping complete with " + numOfZippedFiles + " files, total compressed size: " +
                     FileUtils.byteCountToDisplaySize(tempFile.length() / 8 * 6)); // We print here the size of compressed sources before encoding to base 64
-            fileOutputStream.close();
-        } catch (Zipper.MaxZipSizeReached e)
+            instanceLogger.info("Temporary file with zipped and base64 encoded sources was created at: " + tempFile.getRemote()); //TODO: Log remote machine name
+
+            // Create cliScanArgs object with dummy byte array for zippedFile field
+            // Streaming scan web service will nullify zippedFile filed and use tempFile
+            // instead
+            final CliScanArgs cliScanArgs = createCliScanArgs(new byte[]{});
+            final CxWSResponseRunID cxWSResponseRunID = cxWebService.scanStreaming(cliScanArgs, tempFile);
+            tempFile.delete();
+
+            return cxWSResponseRunID;
+        }
+        catch (Zipper.MaxZipSizeReached e)
         {
             throw new AbortException("Checkmarx Scan Failed: Reached maximum upload size limit of " + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()));
-        } catch (Zipper.NoFilesToZip e)
+        }
+        catch (Zipper.NoFilesToZip e)
         {
             throw new AbortException("Checkmarx Scan Failed: No files to scan");
         }
-
-
-        // Create cliScanArgs object with dummy byte array for zippedFile field
-        // Streaming scan web service will nullify zippedFile filed and use tempFile
-        // instead
-        final CliScanArgs cliScanArgs = createCliScanArgs(new byte[]{});
-        final CxWSResponseRunID cxWSResponseRunID = cxWebService.scanStreaming(cliScanArgs, tempFile);
-        tempFile.delete();
-        instanceLogger.info("Temp file was removed");
-
-        return cxWSResponseRunID;
+        catch (InterruptedException e) {
+            throw new AbortException("Checkmarx Scan Failed: Remote scan interrupted");
+        }
     }
 
     @NotNull
