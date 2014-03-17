@@ -196,13 +196,6 @@ public class CxScanBuilder extends Builder {
             File checkmarxBuildDir = new File(build.getRootDir(),"checkmarx");
             checkmarxBuildDir.mkdir();
 
-            build.getWorkspace().act(new FilePath.FileCallable<Object>() {
-                @Override
-                public Object invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
-                    return null;
-                }
-            })
-
             initLogger(checkmarxBuildDir, listener, instanceLoggerSuffix(build));
 
             listener.started(null);
@@ -263,17 +256,14 @@ public class CxScanBuilder extends Builder {
         } catch (Error e)
         {
             instanceLogger.error(e);
-            closeLogger();
             throw e;
         }  catch (AbortException e)
         {
             instanceLogger.error(e);
-            closeLogger();
             throw e;
         }catch (IOException e)
         {
             instanceLogger.error(e);
-            closeLogger();
             throw e;
         } finally {
             closeLogger();
@@ -328,7 +318,8 @@ public class CxScanBuilder extends Builder {
             // hudson.FilePath and still working with it in remote mode
             CxZipperCallable zipperCallable = new CxZipperCallable(combinedFilterPattern);
 
-            CxZipResult zipResult = baseDir.act(zipperCallable);
+            final CxZipResult zipResult = baseDir.act(zipperCallable);
+            instanceLogger.info(zipResult.getLogMessage());
             final FilePath tempFile = zipResult.getTempFile();
             final int numOfZippedFiles = zipResult.getNumOfZippedFiles();
 
@@ -341,6 +332,7 @@ public class CxScanBuilder extends Builder {
             final CliScanArgs cliScanArgs = createCliScanArgs(new byte[]{});
             final CxWSResponseRunID cxWSResponseRunID = cxWebService.scanStreaming(cliScanArgs, tempFile);
             tempFile.delete();
+            instanceLogger.info("Temporary file deleted");
 
             return cxWSResponseRunID;
         }

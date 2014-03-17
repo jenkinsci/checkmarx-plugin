@@ -25,6 +25,7 @@ public class CxZipperCallable implements FilePath.FileCallable<CxZipResult> {
 
     private final String combinedFilterPattern;
     private int numOfZippedFiles;
+    private final StringBuffer logMessage = new StringBuffer();
 
     public CxZipperCallable(String combinedFilterPattern){
         this.combinedFilterPattern = combinedFilterPattern;
@@ -34,25 +35,11 @@ public class CxZipperCallable implements FilePath.FileCallable<CxZipResult> {
     @Override
     public CxZipResult invoke(final File file, final VirtualChannel channel) throws IOException, InterruptedException {
 
-        System.out.println("SlaveNote Privet !!!! ++++++ ***********************");
-
         ZipListener zipListener = new ZipListener() {
             @Override
             public void updateProgress(String fileName, long size) {
                 numOfZippedFiles++;
-                try {
-                    channel.callAsync(new Callable<Object, Throwable>() {
-                        @Override
-                        public Object call() throws Throwable {
-                            System.out.println("Call from Slave!!!!!!");
-                            return null;
-                        }
-                    });
-
-                } catch (IOException e)
-                {
-                    // TODO: Handle
-                }
+                logMessage.append("Zipping (" + FileUtils.byteCountToDisplaySize(size) + "): " + fileName + "\n");
             }
         };
 
@@ -60,10 +47,10 @@ public class CxZipperCallable implements FilePath.FileCallable<CxZipResult> {
         final OutputStream fileOutputStream = new FileOutputStream(tempFile);
         final Base64OutputStream base64FileOutputStream = new Base64OutputStream(fileOutputStream,true,0,null);
 
-        new Zipper().zip(file, combinedFilterPattern, base64FileOutputStream, 0, zipListener); // TODO: Add maximum zip size
+        new Zipper().zip(file, combinedFilterPattern, base64FileOutputStream, CxConfig.maxZipSize(), zipListener);
         fileOutputStream.close();
 
         final FilePath remoteTempFile = new FilePath(tempFile);
-        return new CxZipResult(remoteTempFile, numOfZippedFiles);
+        return new CxZipResult(remoteTempFile, numOfZippedFiles, logMessage.toString());
     }
 }

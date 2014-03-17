@@ -17,10 +17,12 @@ public class CxZipResult implements Serializable {
 
     private final FilePath tempFile;
     private final int numOfZippedFiles;
+    private final String logMessage;
 
-    public CxZipResult(FilePath tempFile, int numOfZippedFiles) {
+    public CxZipResult(FilePath tempFile, int numOfZippedFiles, String logMessage) {
         this.tempFile = tempFile;
         this.numOfZippedFiles = numOfZippedFiles;
+        this.logMessage = logMessage;
     }
 
     public FilePath getTempFile() {
@@ -29,5 +31,9 @@ public class CxZipResult implements Serializable {
 
     public int getNumOfZippedFiles(){
         return numOfZippedFiles;
+    }
+
+    public String getLogMessage() {
+        return logMessage;
     }
 }
