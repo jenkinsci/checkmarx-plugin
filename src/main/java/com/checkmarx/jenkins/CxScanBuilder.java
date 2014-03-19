@@ -21,8 +21,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 
+import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.util.List;
@@ -432,11 +434,6 @@ public class CxScanBuilder extends Builder {
         public final static String DEFAULT_FILTER_PATTERNS = CxConfig.defaultFilterPattern();
         private final static Logger logger = Logger.getLogger(DescriptorImpl.class);
 
-        @XStreamOmitField // The @XStreamOmitField annotation makes the xStream serialization
-        // system ignore this field while saving class state to a file
-        @Nullable
-        private CxWebService cxWebService;
-
         //////////////////////////////////////////////////////////////////////////////////////
         //  Persistent plugin global configuration parameters
         //////////////////////////////////////////////////////////////////////////////////////
@@ -505,10 +502,9 @@ public class CxScanBuilder extends Builder {
          * is performed concurrently with other doCheckXXX and doFillXXXItems methods.
          */
 
-        public synchronized FormValidation doCheckServerUrl(@QueryParameter String value) {
+        public synchronized FormValidation doCheckServerUrl(final @QueryParameter String value) {
             try {
-                this.cxWebService = null;
-                this.cxWebService = new CxWebService(value);
+                new CxWebService(value);
                 return FormValidation.ok("Server Validated Successfully");
             } catch (Exception e)
             {
@@ -522,21 +518,18 @@ public class CxScanBuilder extends Builder {
          * is performed concurrently with other doCheckXXX and doFillXXXItems methods.
          */
 
-        public synchronized FormValidation doCheckPassword(@QueryParameter String serverUrl,
-                                              @QueryParameter String password,
-                                              @QueryParameter String username) {
-
-
-            if (this.cxWebService==null) {
-                try {
-                    this.cxWebService = new CxWebService(serverUrl);
-                } catch (Exception e) {
-                    return FormValidation.warning("Server URL not set");
-                }
+        public synchronized FormValidation doCheckPassword(   final @QueryParameter String serverUrl,
+                                                              final @QueryParameter String password,
+                                                              final @QueryParameter String username) {
+            CxWebService cxWebService = null;
+            try {
+                cxWebService = new CxWebService(serverUrl);
+            } catch (Exception e) {
+                return FormValidation.warning("Server URL not set");
             }
 
             try {
-                this.cxWebService.login(username,password);
+                cxWebService.login(username,password);
                 return FormValidation.ok("Login Successful");
 
             } catch (Exception e)
@@ -546,7 +539,7 @@ public class CxScanBuilder extends Builder {
         }
 
         // Prepares a this.cxWebService object to be connected and logged in
-        private void prepareLoggedInWebservice(boolean useOwnServerCredentials,
+        private CxWebService prepareLoggedInWebservice(boolean useOwnServerCredentials,
                                                String serverUrl,
                                                String username,
                                                String password)
@@ -557,15 +550,11 @@ public class CxScanBuilder extends Builder {
             String passwordToUse  = !useOwnServerCredentials ? password  : getPassword();
             logger.debug("prepareLoggedInWebservice: server: " + serverUrlToUse + " user: " + usernameToUse + " pass: " + passwordToUse);
 
-            if (this.cxWebService == null) {
-                this.cxWebService = new CxWebService(serverUrlToUse);
-                logger.debug("prepareLoggedInWebservice: created cxWebService");
-            }
-
-            if (!this.cxWebService.isLoggedIn()) {
-                this.cxWebService.login(usernameToUse, passwordToUse);
-                logger.debug("prepareLoggedInWebservice: logged in");
-            }
+            CxWebService cxWebService = new CxWebService(serverUrlToUse);
+            logger.debug("prepareLoggedInWebservice: created cxWebService");
+            cxWebService.login(usernameToUse, passwordToUse);
+            logger.debug("prepareLoggedInWebservice: logged in");
+            return cxWebService;
         }
 
         /* This method is synchronized to avoid multiple threads performing simultaneous login web service calls.
@@ -574,19 +563,19 @@ public class CxScanBuilder extends Builder {
          * is performed concurrently with other doCheckXXX and doFillXXXItems methods.
          */
 
-        public synchronized ComboBoxModel doFillProjectNameItems(@QueryParameter boolean useOwnServerCredentials,
-                                                    @QueryParameter String serverUrl,
-                                                    @QueryParameter String username,
-                                                    @QueryParameter String password)
+        public synchronized ComboBoxModel doFillProjectNameItems(   final @QueryParameter boolean useOwnServerCredentials,
+                                                                    final @QueryParameter String serverUrl,
+                                                                    final @QueryParameter String username,
+                                                                    final @QueryParameter String password)
         {
 
 
             ComboBoxModel projectNames = new ComboBoxModel();
 
             try {
-                prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
+                final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
 
-                List<ProjectDisplayData> projectsDisplayData = this.cxWebService.getProjectsDisplayData();
+                List<ProjectDisplayData> projectsDisplayData = cxWebService.getProjectsDisplayData();
                 for(ProjectDisplayData pd : projectsDisplayData)
                 {
                     projectNames.add(pd.getProjectName());
@@ -601,26 +590,32 @@ public class CxScanBuilder extends Builder {
             }
         }
 
-        public FormValidation doCheckProjectName(@QueryParameter String projectName)
+        public FormValidation doCheckProjectName(final @QueryParameter String projectName,
+                                                 final @QueryParameter boolean useOwnServerCredentials,
+                                                 final @QueryParameter String serverUrl,
+                                                 final @QueryParameter String username,
+                                                 final @QueryParameter String password)
         {
-            if (this.cxWebService==null)
+            try {
+                final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
+                CxWSBasicRepsonse cxWSBasicRepsonse = cxWebService.validateProjectName(projectName);
+                if (cxWSBasicRepsonse.isIsSuccesfull())
+                {
+                    return FormValidation.ok("Project Name Validated Successfully");
+                } else {
+                    if (cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("Illegal project name"))
+                    {
+                        return FormValidation.error("Illegal project name");
+                    } else {
+                        logger.warn("Couldn't validate project name with Checkmarx sever:\n" + cxWSBasicRepsonse.getErrorMessage());
+                        return FormValidation.warning("Can't reach server to validate project name");
+                    }
+                }
+            } catch (Exception e)
             {
-                return FormValidation.warning("Can't validate project name without valid server url");
+                return FormValidation.warning("Can't reach server to validate project name");
             }
 
-            CxWSBasicRepsonse cxWSBasicRepsonse = this.cxWebService.validateProjectName(projectName);
-            if (cxWSBasicRepsonse.isIsSuccesfull())
-            {
-                return FormValidation.ok("Project Name Validated Successfully");
-            } else {
-                if (cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("Illegal project name"))
-                {
-                    return FormValidation.error("Illegal project name");
-                } else {
-                    logger.warn("Couldn't validate project name with Checkmarx sever:\n" + cxWSBasicRepsonse.getErrorMessage());
-                    return FormValidation.warning("Can't reach server to validate project name");
-                }
-            }
         }
 
 
@@ -632,16 +627,16 @@ public class CxScanBuilder extends Builder {
          * is performed concurrently with other doCheckXXX and doFillXXXItems methods.
          */
 
-        public synchronized ListBoxModel doFillPresetItems(@QueryParameter boolean useOwnServerCredentials,
-                                              @QueryParameter String serverUrl,
-                                              @QueryParameter String username,
-                                              @QueryParameter String password)
+        public synchronized ListBoxModel doFillPresetItems(   final @QueryParameter boolean useOwnServerCredentials,
+                                                              final @QueryParameter String serverUrl,
+                                                              final @QueryParameter String username,
+                                                              final @QueryParameter String password)
         {
             ListBoxModel listBoxModel = new ListBoxModel();
             try {
-                prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
+                final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
 
-                List<Preset> presets = this.cxWebService.getPresets();
+                final List<Preset> presets = cxWebService.getPresets();
                 for(Preset p : presets)
                 {
                     listBoxModel.add(new ListBoxModel.Option(p.getPresetName(),Long.toString(p.getID())));
@@ -667,16 +662,16 @@ public class CxScanBuilder extends Builder {
          */
 
 
-        public synchronized ListBoxModel doFillSourceEncodingItems(@QueryParameter boolean useOwnServerCredentials,
-                                              @QueryParameter String serverUrl,
-                                              @QueryParameter String username,
-                                              @QueryParameter String password)
+        public synchronized ListBoxModel doFillSourceEncodingItems(   final @QueryParameter boolean useOwnServerCredentials,
+                                                                      final @QueryParameter String serverUrl,
+                                                                      final @QueryParameter String username,
+                                                                      final @QueryParameter String password)
         {
             ListBoxModel listBoxModel = new ListBoxModel();
             try {
-                prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
+                final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
 
-                List<ConfigurationSet> sourceEncodings = this.cxWebService.getSourceEncodings();
+                final List<ConfigurationSet> sourceEncodings = cxWebService.getSourceEncodings();
                 for(ConfigurationSet cs : sourceEncodings)
                 {
                     listBoxModel.add(new ListBoxModel.Option(cs.getConfigSetName(),Long.toString(cs.getID())));
@@ -694,7 +689,7 @@ public class CxScanBuilder extends Builder {
 
         };
 
-        public FormValidation doCheckHighThreshold(@QueryParameter int value)
+        public FormValidation doCheckHighThreshold(final @QueryParameter int value)
         {
             if (value >= 0)
             {
