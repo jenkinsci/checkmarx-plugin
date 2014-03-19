@@ -67,7 +67,7 @@ public class CxWebService {
         logger.debug("Resolver url: " + resolverUrl);
         CxWSResolver cxWSResolver;
         try {
-            cxWSResolver = new CxWSResolver(resolverUrl);  // TODO: Remove qname
+            cxWSResolver = new CxWSResolver(resolverUrl);  
         } catch (javax.xml.ws.WebServiceException e){
             logger.error("Failed to resolve Checkmarx webservice url with resolver at: " + resolverUrl);
             logger.error(e);
@@ -84,7 +84,7 @@ public class CxWebService {
 
         webServiceUrl = new URL(cxWSResponseDiscovery.getServiceURL());
         logger.debug("Webservice url: " + webServiceUrl);
-        CxJenkinsWebService cxJenkinsWebService = new CxJenkinsWebService(webServiceUrl); // TODO: Remove qname
+        CxJenkinsWebService cxJenkinsWebService = new CxJenkinsWebService(webServiceUrl);
         cxJenkinsWebServiceSoap = cxJenkinsWebService.getCxJenkinsWebServiceSoap();
 
     }
