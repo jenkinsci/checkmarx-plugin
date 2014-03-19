@@ -496,13 +496,11 @@ public class CxScanBuilder extends Builder {
         // Field value validators
         //////////////////////////////////////////////////////////////////////////////////////
 
-        /* This method is synchronized to avoid multiple threads performing simultaneous login web service calls.
-         * Simultaneous login calls result in all session id, except the most recently generated to be invalid.
-         * Using an invalid session id, results in ReConnect error message coming from server. Call to this method
-         * is performed concurrently with other doCheckXXX and doFillXXXItems methods.
+        /*
+         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+         *  shared state to avoid synchronization issues.
          */
-
-        public synchronized FormValidation doCheckServerUrl(final @QueryParameter String value) {
+        public FormValidation doCheckServerUrl(final @QueryParameter String value) {
             try {
                 new CxWebService(value);
                 return FormValidation.ok("Server Validated Successfully");
@@ -512,13 +510,11 @@ public class CxScanBuilder extends Builder {
             }
         }
 
-        /* This method is synchronized to avoid multiple threads performing simultaneous login web service calls.
-         * Simultaneous login calls result in all session id, except the most recently generated to be invalid.
-         * Using an invalid session id, results in ReConnect error message coming from server. Call to this method
-         * is performed concurrently with other doCheckXXX and doFillXXXItems methods.
+        /*
+         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+         *  shared state to avoid synchronization issues.
          */
-
-        public synchronized FormValidation doCheckPassword(   final @QueryParameter String serverUrl,
+        public FormValidation doCheckPassword(   final @QueryParameter String serverUrl,
                                                               final @QueryParameter String password,
                                                               final @QueryParameter String username) {
             CxWebService cxWebService = null;
@@ -539,6 +535,10 @@ public class CxScanBuilder extends Builder {
         }
 
         // Prepares a this.cxWebService object to be connected and logged in
+        /*
+         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+         *  shared state to avoid synchronization issues.
+         */
         private CxWebService prepareLoggedInWebservice(boolean useOwnServerCredentials,
                                                String serverUrl,
                                                String username,
@@ -557,13 +557,11 @@ public class CxScanBuilder extends Builder {
             return cxWebService;
         }
 
-        /* This method is synchronized to avoid multiple threads performing simultaneous login web service calls.
-         * Simultaneous login calls result in all session id, except the most recently generated to be invalid.
-         * Using an invalid session id, results in ReConnect error message coming from server. Call to this method
-         * is performed concurrently with other doCheckXXX and doFillXXXItems methods.
+        /*
+         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+         *  shared state to avoid synchronization issues.
          */
-
-        public synchronized ComboBoxModel doFillProjectNameItems(   final @QueryParameter boolean useOwnServerCredentials,
+        public  ComboBoxModel doFillProjectNameItems(   final @QueryParameter boolean useOwnServerCredentials,
                                                                     final @QueryParameter String serverUrl,
                                                                     final @QueryParameter String username,
                                                                     final @QueryParameter String password)
@@ -589,6 +587,11 @@ public class CxScanBuilder extends Builder {
                 return projectNames; // Return empty list of project names
             }
         }
+
+        /*
+         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+         *  shared state to avoid synchronization issues.
+         */
 
         public FormValidation doCheckProjectName(final @QueryParameter String projectName,
                                                  final @QueryParameter boolean useOwnServerCredentials,
@@ -620,14 +623,12 @@ public class CxScanBuilder extends Builder {
 
 
         // Provides a list of presets from checkmarx server for dynamic drop-down list in configuration page
-
-        /* This method is synchronized to avoid multiple threads performing simultaneous login web service calls.
-         * Simultaneous login calls result in all session id, except the most recently generated to be invalid.
-         * Using an invalid session id, results in ReConnect error message coming from server. Call to this method
-         * is performed concurrently with other doCheckXXX and doFillXXXItems methods.
+        /*
+         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+         *  shared state to avoid synchronization issues.
          */
 
-        public synchronized ListBoxModel doFillPresetItems(   final @QueryParameter boolean useOwnServerCredentials,
+        public ListBoxModel doFillPresetItems(   final @QueryParameter boolean useOwnServerCredentials,
                                                               final @QueryParameter String serverUrl,
                                                               final @QueryParameter String username,
                                                               final @QueryParameter String password)
@@ -654,15 +655,12 @@ public class CxScanBuilder extends Builder {
         }
 
         // Provides a list of source encodings from checkmarx server for dynamic drop-down list in configuration page
-
-        /* This method is synchronized to avoid multiple threads performing simultaneous login web service calls.
-         * Simultaneous login calls result in all session id, except the most recently generated to be invalid.
-         * Using an invalid session id, results in ReConnect error message coming from server. Call to this method
-         * is performed concurrently with other doCheckXXX and doFillXXXItems methods.
+        /*
+         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+         *  shared state to avoid synchronization issues.
          */
 
-
-        public synchronized ListBoxModel doFillSourceEncodingItems(   final @QueryParameter boolean useOwnServerCredentials,
+        public ListBoxModel doFillSourceEncodingItems(   final @QueryParameter boolean useOwnServerCredentials,
                                                                       final @QueryParameter String serverUrl,
                                                                       final @QueryParameter String username,
                                                                       final @QueryParameter String password)
@@ -688,6 +686,11 @@ public class CxScanBuilder extends Builder {
             }
 
         };
+
+        /*
+         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+         *  shared state to avoid synchronization issues.
+         */
 
         public FormValidation doCheckHighThreshold(final @QueryParameter int value)
         {
