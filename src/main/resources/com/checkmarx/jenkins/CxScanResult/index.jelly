@@ -214,6 +214,12 @@
                 float: right;
                 margin-top: -7px;
                 }
+
+                .ButtonContainer a
+                {
+                  margin: 0px 5px;
+                }
+
                 .icoheader
                 {
                 width: auto !important;
@@ -304,7 +310,14 @@
                                         Scan Results<st:nbsp/>(${it.highCount + it.mediumCount + it.lowCount + it.infoCount} Risks)</div>
                                     <div class="ButtonContainer">
                                         <a id="aViewer" target="_blank" class="btn_green" href="${it.resultDeepLink}"
-                                           title="Open Code Viewer">Open Code Viewer</a>
+                                           title="Open Code Viewer">Open Code Viewer
+                                        </a>
+
+                                        <j:if test="${it.pdfReportReady}">
+                                            <a id="pdfViewer" target="_blank" class="btn_green" href="${app.rootUrl}${it.owner.url}${it.urlName}${it.pdfReportUrl}"
+                                               title="Open PDF Report">Open PDF Report
+                                            </a>
+                                        </j:if>
                                     </div>
                                     <div class="Clear">
                                     </div>

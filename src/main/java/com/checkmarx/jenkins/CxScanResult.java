@@ -3,13 +3,17 @@ package com.checkmarx.jenkins;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import hudson.PluginWrapper;
 import hudson.model.*;
+import hudson.util.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import javax.servlet.ServletOutputStream;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -45,6 +49,7 @@ public class CxScanResult implements Action {
     private LinkedList<QueryResult> infoQueryResultList;
 
     private String resultDeepLink;
+    private File pdfReport;
 
     private String scanStart;
     private String scanTime;
@@ -155,6 +160,25 @@ public class CxScanResult implements Action {
 
     public LinkedList<QueryResult> getInfoQueryResultList() {
         return infoQueryResultList;
+    }
+
+    public boolean isPdfReportReady() {
+        File buildDirectory = owner.getRootDir();
+        pdfReport = new File(buildDirectory, "/checkmarx/ScanReport.pdf");
+        return pdfReport.exists();
+    }
+
+    public String getPdfReportUrl(){
+        return "/pdfReport";
+    }
+
+    public void doPdfReport(StaplerRequest req, StaplerResponse rsp) throws IOException {
+        rsp.setContentType("application/pdf");
+        ServletOutputStream outputStream = rsp.getOutputStream();
+        IOUtils.copy(pdfReport, outputStream);
+
+        outputStream.flush();
+        outputStream.close();
     }
 
     /**
@@ -320,5 +344,4 @@ public class CxScanResult implements Action {
             return this.name.replace('_',' ');
         }
     }
-
 }
