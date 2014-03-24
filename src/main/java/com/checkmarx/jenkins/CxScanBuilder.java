@@ -46,7 +46,7 @@ public class CxScanBuilder extends Builder {
     private String username;
     private String password;
     private String projectName;
-    private String groupName;
+    private String groupId;
 
     private String preset;
     private boolean presetSpecified;
@@ -86,7 +86,7 @@ public class CxScanBuilder extends Builder {
                          String username,
                          String password,
                          String projectName,
-                         String groupName,
+                         String groupId,
                          String preset,
                          boolean presetSpecified,
                          String excludeFolders,
@@ -104,7 +104,7 @@ public class CxScanBuilder extends Builder {
         this.username = username;
         this.password = password;
         this.projectName = projectName;
-        this.groupName = groupName;
+        this.groupId = groupId;
         this.preset = preset;
         this.presetSpecified = presetSpecified;
         this.excludeFolders = excludeFolders;
@@ -143,8 +143,8 @@ public class CxScanBuilder extends Builder {
         return projectName;
     }
 
-    public String getGroupName() {
-        return groupName;
+    public String getGroupId() {
+        return groupId;
     }
 
     public String getPreset() {
@@ -391,8 +391,8 @@ public class CxScanBuilder extends Builder {
         }
 
         projectSettings.setPresetID(presetLong);
-        final String fullyQualifiedProjectName = getGroupName() + "\\" + getProjectName();
-        projectSettings.setProjectName(fullyQualifiedProjectName);
+        projectSettings.setProjectName(getProjectName());
+        projectSettings.setAssociatedGroupID(getGroupId());
 
         long configuration = 0; // Default value to use in case of exception
         try {
@@ -602,11 +602,12 @@ public class CxScanBuilder extends Builder {
                                                  final @QueryParameter boolean useOwnServerCredentials,
                                                  final @QueryParameter String serverUrl,
                                                  final @QueryParameter String username,
-                                                 final @QueryParameter String password)
+                                                 final @QueryParameter String password,
+                                                 final @QueryParameter String groupId)
         {
             try {
                 final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
-                CxWSBasicRepsonse cxWSBasicRepsonse = cxWebService.validateProjectName(projectName);
+                CxWSBasicRepsonse cxWSBasicRepsonse = cxWebService.validateProjectName(projectName,groupId);
                 if (cxWSBasicRepsonse.isIsSuccesfull())
                 {
                     return FormValidation.ok("Project Name Validated Successfully");
@@ -699,7 +700,7 @@ public class CxScanBuilder extends Builder {
          *  shared state to avoid synchronization issues.
          */
 
-        public ListBoxModel doFillGroupNameItems(   final @QueryParameter boolean useOwnServerCredentials,
+        public ListBoxModel doFillGroupIdItems(   final @QueryParameter boolean useOwnServerCredentials,
                                                          final @QueryParameter String serverUrl,
                                                          final @QueryParameter String username,
                                                          final @QueryParameter String password)
@@ -710,7 +711,7 @@ public class CxScanBuilder extends Builder {
                 final List<Group> groups = cxWebService.getAssociatedGroups();
                 for(Group group : groups)
                 {
-                    listBoxModel.add(new ListBoxModel.Option(group.getGroupName(),group.getGroupName()));
+                    listBoxModel.add(new ListBoxModel.Option(group.getGroupName(),group.getID()));
                 }
 
                 logger.debug("Associated groups list: " + listBoxModel.size());

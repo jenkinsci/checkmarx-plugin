@@ -9,6 +9,7 @@ import hudson.FilePath;
 import hudson.util.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
+import org.hamcrest.Matchers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,7 +17,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.namespace.QName;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -26,6 +26,10 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+
+import static ch.lambdaj.Lambda.filter;
+import static ch.lambdaj.Lambda.having;
+import static ch.lambdaj.Lambda.on;
 
 /**
  * Created with IntelliJ IDEA.
@@ -332,10 +336,10 @@ public class CxWebService {
         return cxWSResponseConfigSetList.getConfigSetList().getConfigurationSet();
     }
 
-    public CxWSBasicRepsonse validateProjectName(String cxProjectName)
+    public CxWSBasicRepsonse validateProjectName(String cxProjectName, String groupId)
     {
         assert sessionId!=null : "Trying to validate project name before login";
-        return this.cxJenkinsWebServiceSoap.isValidProjectName(sessionId,cxProjectName,""); // TODO: Specify group id
+        return this.cxJenkinsWebServiceSoap.isValidProjectName(sessionId,cxProjectName,groupId);
     }
 
 
@@ -440,7 +444,31 @@ public class CxWebService {
 
         try {
 
+            // Server bug work around
+
+            final String groupId = args.getPrjSettings().getAssociatedGroupID();
+            final String originalProjectName = args.getPrjSettings().getProjectName();
+            final List<Group> groups = getAssociatedGroups();
+            final List<Group> selected = filter(
+                    having(on(Group.class).getID(), Matchers.equalTo(groupId))
+                    , groups);
+
+            if (selected.size()==1)
+            {
+                final String fullyQualifiedProjectName = selected.get(0).getGroupName() + "\\" + args.getPrjSettings().getProjectName();
+                args.getPrjSettings().setProjectName(fullyQualifiedProjectName);
+            } else {
+                // TODO: Handle error
+            }
+
+
+
+
+            // Work around end
+
+
             Pair<byte[],byte[]> soapMessage = createScanSoapMessage(args);
+            args.getPrjSettings().setProjectName(originalProjectName);
 
             // Create HTTP connection
 

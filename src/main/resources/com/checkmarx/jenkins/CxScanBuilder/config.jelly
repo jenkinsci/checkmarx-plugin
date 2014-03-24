@@ -35,7 +35,7 @@
         <f:combobox field="projectName"/>
     </f:entry>
 
-    <f:entry title="Team" field="groupName">
+    <f:entry title="Team" field="groupId">
         <f:select/>
     </f:entry>
 
