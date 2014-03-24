@@ -214,6 +214,11 @@
       <module fileurl="file://$PROJECT_DIR$/jenkins.iml" filepath="$PROJECT_DIR$/jenkins.iml" />
     </modules>
   </component>
+  <component name="ProjectResources">
+    <resource url="jelly:core" location="$USER_HOME$/Downloads/maven-jellydoc-plugin-master/maven-jellydoc-plugin/schemas/core.xsd" />
+    <resource url="jelly:define" location="$USER_HOME$/Downloads/maven-jellydoc-plugin-master/annotation/schemas/define.xsd" />
+    <resource url="/lib/form" location="$USER_HOME$/Downloads/taglib-form.xsd" />
+  </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_6" assert-keyword="true" jdk-15="true" project-jdk-name="1.6" project-jdk-type="JavaSDK" />
   <component name="SvnBranchConfigurationManager">
     <option name="mySupportsUserInfoFilter" value="true" />

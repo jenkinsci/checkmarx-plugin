@@ -25,6 +25,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The main entry point for Checkmarx plugin. This class implements the Builder
@@ -694,7 +695,7 @@ public class CxScanBuilder extends Builder {
                 return listBoxModel; // Return empty list of project names
             }
 
-        };
+        }
 
 
         // Provides a list of source encodings from checkmarx server for dynamic drop-down list in configuration page
@@ -727,7 +728,7 @@ public class CxScanBuilder extends Builder {
                 return listBoxModel; // Return empty list of project names
             }
 
-        };
+        }
 
         /*
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
@@ -742,6 +743,23 @@ public class CxScanBuilder extends Builder {
             } else {
                 return FormValidation.error("Number must be non-negative");
             }
+        }
+
+        public String getDefaultProjectName()
+        {
+            // Retrieves the job name from request URL, cleans it from special characters,\
+            // and returns as a default project name.
+
+            final String url = getCurrentDescriptorByNameUrl();
+            final String[] urlComponents = url.split("/");
+            if (urlComponents.length > 0)
+            {
+                final String jobName = urlComponents[urlComponents.length-1];
+                final String cleanJobName = jobName.replaceAll("[^\\w\\s_]", "");
+                return cleanJobName;
+            }
+            // This is a fallback if the above code fails
+            return "";
         }
 
         /**
