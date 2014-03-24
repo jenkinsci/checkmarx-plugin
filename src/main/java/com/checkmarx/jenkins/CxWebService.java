@@ -407,7 +407,20 @@ public class CxWebService {
         return scanResponse.getScanResult();
     }
 
+    public List<Group> getAssociatedGroups() throws AbortException
+    {
+        assert sessionId!=null : "Trying to retrieve teams before login";
 
+        final CxWSResponseGroupList associatedGroupsList = this.cxJenkinsWebServiceSoap.getAssociatedGroupsList(sessionId);
+        if (!associatedGroupsList.isIsSuccesfull())
+        {
+            String message = "Error retrieving associated groups (teams) from server: "  + associatedGroupsList.getErrorMessage();
+            logger.error(message);
+            throw new AbortException(message);
+        }
+
+        return associatedGroupsList.getGroupList().getGroup();
+    }
 
 
     /**
@@ -457,7 +470,7 @@ public class CxWebService {
             if (!cxWSResponseRunID.isIsSuccesfull())
             {
                 String message = "Submission of sources for scan failed: \n" + cxWSResponseRunID.getErrorMessage();
-                logger.error(message);
+                //logger.error(message); // Logging will be done in a catch (IOException e) statement below
                 throw new AbortException(message);
             }
 

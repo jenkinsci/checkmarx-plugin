@@ -18,13 +18,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.*;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 
-import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.util.List;
@@ -49,6 +46,7 @@ public class CxScanBuilder extends Builder {
     private String username;
     private String password;
     private String projectName;
+    private String groupName;
 
     private String preset;
     private boolean presetSpecified;
@@ -88,6 +86,7 @@ public class CxScanBuilder extends Builder {
                          String username,
                          String password,
                          String projectName,
+                         String groupName,
                          String preset,
                          boolean presetSpecified,
                          String excludeFolders,
@@ -105,6 +104,7 @@ public class CxScanBuilder extends Builder {
         this.username = username;
         this.password = password;
         this.projectName = projectName;
+        this.groupName = groupName;
         this.preset = preset;
         this.presetSpecified = presetSpecified;
         this.excludeFolders = excludeFolders;
@@ -141,6 +141,10 @@ public class CxScanBuilder extends Builder {
 
     public String getProjectName() {
         return projectName;
+    }
+
+    public String getGroupName() {
+        return groupName;
     }
 
     public String getPreset() {
@@ -387,7 +391,8 @@ public class CxScanBuilder extends Builder {
         }
 
         projectSettings.setPresetID(presetLong);
-        projectSettings.setProjectName(getProjectName());
+        final String fullyQualifiedProjectName = getGroupName() + "\\" + getProjectName();
+        projectSettings.setProjectName(fullyQualifiedProjectName);
 
         long configuration = 0; // Default value to use in case of exception
         try {
@@ -681,6 +686,39 @@ public class CxScanBuilder extends Builder {
             } catch (Exception e) {
                 logger.debug("Source encodings list: empty");
                 String message = "Provide Checkmarx server credentials to see source encodings list";
+                listBoxModel.add(new ListBoxModel.Option(message,message));
+                return listBoxModel; // Return empty list of project names
+            }
+
+        };
+
+
+        // Provides a list of source encodings from checkmarx server for dynamic drop-down list in configuration page
+        /*
+         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+         *  shared state to avoid synchronization issues.
+         */
+
+        public ListBoxModel doFillGroupNameItems(   final @QueryParameter boolean useOwnServerCredentials,
+                                                         final @QueryParameter String serverUrl,
+                                                         final @QueryParameter String username,
+                                                         final @QueryParameter String password)
+        {
+            ListBoxModel listBoxModel = new ListBoxModel();
+            try {
+                final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
+                final List<Group> groups = cxWebService.getAssociatedGroups();
+                for(Group group : groups)
+                {
+                    listBoxModel.add(new ListBoxModel.Option(group.getGroupName(),group.getGroupName()));
+                }
+
+                logger.debug("Associated groups list: " + listBoxModel.size());
+                return listBoxModel;
+
+            } catch (Exception e) {
+                logger.debug("Associated groups: empty");
+                String message = "Provide Checkmarx server credentials to see teams list";
                 listBoxModel.add(new ListBoxModel.Option(message,message));
                 return listBoxModel; // Return empty list of project names
             }

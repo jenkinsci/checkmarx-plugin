@@ -35,6 +35,10 @@
         <f:combobox field="projectName"/>
     </f:entry>
 
+    <f:entry title="Team" field="groupName">
+        <f:select/>
+    </f:entry>
+
     <f:entry title="Preset" field="preset">
         <f:select/>
     </f:entry>
