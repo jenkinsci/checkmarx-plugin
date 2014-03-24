@@ -27,9 +27,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
-import static ch.lambdaj.Lambda.filter;
-import static ch.lambdaj.Lambda.having;
-import static ch.lambdaj.Lambda.on;
+import static ch.lambdaj.Lambda.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -444,28 +442,40 @@ public class CxWebService {
 
         try {
 
+            ////////////////////////////////////////////////////////////////////////////////////////////
             // Server bug work around
+            // Server fails to read the group id from associatedGroupID field of prjSettings. The work
+            // around is to prefix the project name with the group name.
+            ///////////////////////////////////////////////////////////////////////////////////////////
 
             final String groupId = args.getPrjSettings().getAssociatedGroupID();
             final String originalProjectName = args.getPrjSettings().getProjectName();
             final List<Group> groups = getAssociatedGroups();
-            final List<Group> selected = filter(
-                    having(on(Group.class).getID(), Matchers.equalTo(groupId))
-                    , groups);
+            final List<Group> selected = filter(having(on(Group.class).getID(), Matchers.equalTo(groupId)), groups);
 
-            if (selected.size()==1)
+            if (selected.size()>=1)
             {
                 final String fullyQualifiedProjectName = selected.get(0).getGroupName() + "\\" + args.getPrjSettings().getProjectName();
                 args.getPrjSettings().setProjectName(fullyQualifiedProjectName);
-            } else {
-                // TODO: Handle error
             }
 
+            if (selected.size()==0)
+            {
+                final String message = "Could not translate group id: " + groupId + " to group name";
+                logger.error(message);
+                throw new AbortException(message);
 
+            } else if (selected.size() > 1) {
+                logger.warn("Server returned more than one group with id: " + groupId);
+                for(Group g : selected)
+                {
+                    logger.warn("Group Id: " + g.getID() + " groupName: " + g.getGroupName());
+                }
+            }
 
-
+            ////////////////////////////////////////////////////////////////////////////////////////////
             // Work around end
-
+            ////////////////////////////////////////////////////////////////////////////////////////////
 
             Pair<byte[],byte[]> soapMessage = createScanSoapMessage(args);
             args.getPrjSettings().setProjectName(originalProjectName);
