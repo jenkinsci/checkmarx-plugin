@@ -615,6 +615,9 @@ public class CxScanBuilder extends Builder {
                     if (cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("Illegal project name"))
                     {
                         return FormValidation.error("Illegal project name");
+                    } else if (cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("Project name already exists"))
+                    {
+                        return FormValidation.ok("Scan will be added to existing project");
                     } else {
                         logger.warn("Couldn't validate project name with Checkmarx sever:\n" + cxWSBasicRepsonse.getErrorMessage());
                         return FormValidation.warning("Can't reach server to validate project name");
