@@ -335,7 +335,7 @@ public class CxScanBuilder extends Builder {
             // Streaming scan web service will nullify zippedFile filed and use tempFile
             // instead
             final CliScanArgs cliScanArgs = createCliScanArgs(new byte[]{});
-            final CxWSResponseRunID cxWSResponseRunID = cxWebService.scanStreaming(cliScanArgs, tempFile);
+            final CxWSResponseRunID cxWSResponseRunID = cxWebService.scan(cliScanArgs, tempFile);
             tempFile.delete();
             instanceLogger.info("Temporary file deleted");
 

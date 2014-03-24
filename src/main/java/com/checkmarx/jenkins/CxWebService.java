@@ -112,7 +112,7 @@ public class CxWebService {
         logger.debug("Login successful, sessionId: " + sessionId);
     }
 
-    public CxWSResponseRunID scan(CliScanArgs args) throws AbortException
+    public CxWSResponseRunID scanWithByteArray(CliScanArgs args) throws AbortException
     {
         assert sessionId!=null : "Trying to scan before login";
 
@@ -434,7 +434,7 @@ public class CxWebService {
      * @throws AbortException
      */
 
-    public CxWSResponseRunID scanStreaming(final CliScanArgs args, final FilePath base64ZipFile) throws AbortException
+    public CxWSResponseRunID scan(final CliScanArgs args, final FilePath base64ZipFile) throws AbortException
     {
         assert sessionId!=null;
 
