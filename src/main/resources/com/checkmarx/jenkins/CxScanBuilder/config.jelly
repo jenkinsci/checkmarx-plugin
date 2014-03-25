@@ -60,7 +60,7 @@
                 <f:optionalBlock title="Schedule periodic full scans" field="fullScansScheduled"
                         inline="true" checked="${instance.fullScansScheduled}">
 
-                    <f:entry title="After how many incremental scans (2-99)" field="fullScanCycle">
+                    <f:entry title="After how many incremental scans (${instance.fullScanCycleMin}-${instance.fullScanCycleMax})" field="fullScanCycle">
                        <f:number default="10"/>
                     </f:entry>
 

@@ -56,7 +56,7 @@ public class CxScanBuilder extends Builder {
     private boolean fullScansScheduled;
     private int fullScanCycle;
 
-    private final static int FULL_SCAN_CYCLE_MIN = 2;
+    private final static int FULL_SCAN_CYCLE_MIN = 1;
     private final static int FULL_SCAN_CYCLE_MAX = 99;
 
     private boolean isThisBuildIncremental;
@@ -202,6 +202,14 @@ public class CxScanBuilder extends Builder {
 
     public boolean isGeneratePdfReport() {
         return generatePdfReport;
+    }
+
+    public int getFullScanCycleMin(){
+        return FULL_SCAN_CYCLE_MIN;
+    }
+
+    public int getFullScanCycleMax(){
+        return FULL_SCAN_CYCLE_MAX;
     }
 
     @Override
@@ -714,7 +722,7 @@ public class CxScanBuilder extends Builder {
                 return FormValidation.ok();
             }
             else{
-                return FormValidation.error("Number must be in the range 2-99");
+                return FormValidation.error("Number must be in the range " + FULL_SCAN_CYCLE_MIN + "-" + FULL_SCAN_CYCLE_MAX);
             }
         }
 
