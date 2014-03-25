@@ -50,9 +50,26 @@
         </f:entry>
     </f:advanced>
 
-    <f:entry title="Incremental" field="incremental">
-        <f:checkbox/>
-    </f:entry>
+    <f:optionalBlock title="Incremental"
+                     field="incremental"
+                     inline="true"
+                     checked="${instance==null?true:instance.incremental}">
+
+        <f:block>
+            <table style="margin-left: 20px;">
+                <f:optionalBlock title="Schedule periodic full scans" field="fullScansScheduled"
+                        inline="true" checked="${instance.fullScansScheduled}">
+
+                    <f:entry title="After how many incremental scans (2-99)" field="fullScanCycle">
+                       <f:number default="10"/>
+                    </f:entry>
+
+                </f:optionalBlock>
+            </table>
+        </f:block>
+
+    </f:optionalBlock>
+
 
     <f:entry title="Source Character Encoding (Configuration)" field="sourceEncoding" description="Default Configuration uses UTF-8">
          <f:select/>

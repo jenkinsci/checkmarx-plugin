@@ -18,13 +18,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.*;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 
-import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.util.List;
@@ -56,6 +53,14 @@ public class CxScanBuilder extends Builder {
     private String filterPattern;
 
     private boolean incremental;
+    private boolean fullScansScheduled;
+    private int fullScanCycle;
+
+    private final static int FULL_SCAN_CYCLE_MIN = 2;
+    private final static int FULL_SCAN_CYCLE_MAX = 99;
+
+    private boolean isThisBuildIncremental;
+
     private String sourceEncoding;
     private String comment;
 
@@ -93,6 +98,8 @@ public class CxScanBuilder extends Builder {
                          String excludeFolders,
                          String filterPattern,
                          boolean incremental,
+                         boolean fullScansScheduled,
+                         int fullScanCycle,
                          String sourceEncoding,
                          String comment,
                          boolean waitForResultsEnabled,
@@ -110,6 +117,8 @@ public class CxScanBuilder extends Builder {
         this.excludeFolders = excludeFolders;
         this.filterPattern = filterPattern;
         this.incremental = incremental;
+        this.fullScansScheduled = fullScansScheduled;
+        this.fullScanCycle = fullScanCycle;
         this.sourceEncoding = sourceEncoding;
         this.comment = comment;
         this.waitForResultsEnabled = waitForResultsEnabled;
@@ -161,6 +170,14 @@ public class CxScanBuilder extends Builder {
 
     public boolean isIncremental() {
         return incremental;
+    }
+
+    public boolean isFullScansScheduled(){
+        return fullScansScheduled;
+    }
+
+    public int getFullScanCycle(){
+        return fullScanCycle;
     }
 
     public String getSourceEncoding() {
@@ -304,6 +321,14 @@ public class CxScanBuilder extends Builder {
 
     private CxWSResponseRunID submitScan(final AbstractBuild<?, ?> build, final CxWebService cxWebService, final BuildListener listener) throws IOException
     {
+        isThisBuildIncremental = isThisBuildIncremental(build.getNumber());
+
+        if(isThisBuildIncremental){
+            instanceLogger.info("\nScan job started in incremental scan mode\n");
+        }
+        else{
+            instanceLogger.info("\nScan job started in full scan mode\n");
+        }
 
         instanceLogger.info("Started zipping the workspace");
 
@@ -407,7 +432,7 @@ public class CxScanBuilder extends Builder {
         sourceCodeSettings.setPackagedCode(localCodeContainer);
 
         CliScanArgs args = new CliScanArgs();
-        args.setIsIncremental(isIncremental());
+        args.setIsIncremental(isThisBuildIncremental);
         args.setIsPrivateScan(false);
         args.setPrjSettings(projectSettings);
         args.setSrcCodeSettings(sourceCodeSettings);
@@ -415,6 +440,29 @@ public class CxScanBuilder extends Builder {
         return args;
     }
 
+    private boolean isThisBuildIncremental(int buildNumber) {
+
+        boolean askedForIncremental = isIncremental();
+        if(!askedForIncremental){
+            return false;
+        }
+
+        boolean askedForPeriodicFullScans = isFullScansScheduled();
+        if(!askedForPeriodicFullScans){
+            return true;
+        }
+
+        // if user entered invalid value for full scan cycle - all scans will be incremental
+        if (fullScanCycle < FULL_SCAN_CYCLE_MIN || fullScanCycle > FULL_SCAN_CYCLE_MAX){
+            return true;
+        }
+
+        // If user asked to perform full scans for every 10 scans -
+        // then the ordinal numbers of full scans will be "1", "11", "21" and so on...
+        boolean shouldBeFullScan = (buildNumber % fullScanCycle == 1);
+
+        return !shouldBeFullScan;
+    }
 
     @Override
     public DescriptorImpl getDescriptor() {
@@ -659,6 +707,16 @@ public class CxScanBuilder extends Builder {
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
          *  shared state to avoid synchronization issues.
          */
+
+        public FormValidation doCheckFullScanCycle( final @QueryParameter int value)
+        {
+            if(value >= FULL_SCAN_CYCLE_MIN && value <= FULL_SCAN_CYCLE_MAX){
+                return FormValidation.ok();
+            }
+            else{
+                return FormValidation.error("Number must be in the range 2-99");
+            }
+        }
 
         public ListBoxModel doFillSourceEncodingItems(   final @QueryParameter boolean useOwnServerCredentials,
                                                                       final @QueryParameter String serverUrl,
