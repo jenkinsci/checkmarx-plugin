@@ -367,6 +367,8 @@ public class CxWebService {
 
 
             scanMessage.write(soapMessageTail);
+            // Here we split the message around  <ZippedFile></ZippedFile> substring. We know that the opening
+            // and closing tag are adjacent because the zippedFile property was set to empty byte array
             final String[] parts = scanMessage.toString().split(zippedFileOpenTag + zippedFileCloseTag);
             assert parts.length == 2;
             final String startPart = parts[0] + zippedFileOpenTag;
@@ -392,6 +394,8 @@ public class CxWebService {
         XMLInputFactory xif = XMLInputFactory.newFactory();
         XMLStreamReader xsr = xif.createXMLStreamReader(inputStream);
         xsr.nextTag();
+        // We now consume all tags before the first occurrence of ScanResponse,
+        // which constitute the soap message envelope header
         while(!xsr.getLocalName().equals("ScanResponse")) {
             xsr.nextTag();
         }
@@ -399,7 +403,9 @@ public class CxWebService {
         final JAXBContext context = JAXBContext.newInstance(ScanResponse.class);
         final Unmarshaller unmarshaller = context.createUnmarshaller();
         final ScanResponse scanResponse = (ScanResponse)unmarshaller.unmarshal(xsr);
+        // We neglect the consumption of soap envelope tail, since it is not used anywhere
         xsr.close();
+
         return scanResponse.getScanResult();
     }
 
