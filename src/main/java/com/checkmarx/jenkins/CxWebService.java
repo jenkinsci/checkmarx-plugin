@@ -9,6 +9,7 @@ import hudson.FilePath;
 import hudson.util.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
+import org.hamcrest.Matchers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,7 +17,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.namespace.QName;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -26,6 +26,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+
+import static ch.lambdaj.Lambda.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -51,9 +53,13 @@ public class CxWebService {
         this(serverUrl,null);
     }
 
-    public CxWebService(@NotNull final String serverUrl,@Nullable final String loggerSuffix) throws MalformedURLException, AbortException
+    public CxWebService(@NotNull final String serverUrl, @Nullable final String loggerSuffix) throws MalformedURLException, AbortException
     {
         logger = CxLogUtils.loggerWithSuffix(getClass(),loggerSuffix);
+
+        logger.info("SSL/TLS Certificate Validation Disabled");
+        CxSSLUtility.disableSSLCertificateVerification();
+
         logger.info("Establishing connection with Checkmarx server at: " + serverUrl);
         URL serverUrlUrl = new URL(serverUrl);
         if (serverUrlUrl.getPath().length() > 0)
@@ -67,7 +73,7 @@ public class CxWebService {
         logger.debug("Resolver url: " + resolverUrl);
         CxWSResolver cxWSResolver;
         try {
-            cxWSResolver = new CxWSResolver(resolverUrl);  
+            cxWSResolver = new CxWSResolver(resolverUrl);
         } catch (javax.xml.ws.WebServiceException e){
             logger.error("Failed to resolve Checkmarx webservice url with resolver at: " + resolverUrl);
             logger.error(e);
@@ -108,7 +114,7 @@ public class CxWebService {
         logger.debug("Login successful, sessionId: " + sessionId);
     }
 
-    public CxWSResponseRunID scan(CliScanArgs args) throws AbortException
+    public CxWSResponseRunID scanWithByteArray(CliScanArgs args) throws AbortException
     {
         assert sessionId!=null : "Trying to scan before login";
 
@@ -328,10 +334,10 @@ public class CxWebService {
         return cxWSResponseConfigSetList.getConfigSetList().getConfigurationSet();
     }
 
-    public CxWSBasicRepsonse validateProjectName(String cxProjectName)
+    public CxWSBasicRepsonse validateProjectName(String cxProjectName, String groupId)
     {
         assert sessionId!=null : "Trying to validate project name before login";
-        return this.cxJenkinsWebServiceSoap.isValidProjectName(sessionId,cxProjectName,""); // TODO: Specify group id
+        return this.cxJenkinsWebServiceSoap.isValidProjectName(sessionId,cxProjectName,groupId);
     }
 
 
@@ -409,7 +415,20 @@ public class CxWebService {
         return scanResponse.getScanResult();
     }
 
+    public List<Group> getAssociatedGroups() throws AbortException
+    {
+        assert sessionId!=null : "Trying to retrieve teams before login";
 
+        final CxWSResponseGroupList associatedGroupsList = this.cxJenkinsWebServiceSoap.getAssociatedGroupsList(sessionId);
+        if (!associatedGroupsList.isIsSuccesfull())
+        {
+            String message = "Error retrieving associated groups (teams) from server: "  + associatedGroupsList.getErrorMessage();
+            logger.error(message);
+            throw new AbortException(message);
+        }
+
+        return associatedGroupsList.getGroupList().getGroup();
+    }
 
 
     /**
@@ -423,13 +442,49 @@ public class CxWebService {
      * @throws AbortException
      */
 
-    public CxWSResponseRunID scanStreaming(final CliScanArgs args, final FilePath base64ZipFile) throws AbortException
+    public CxWSResponseRunID scan(final CliScanArgs args, final FilePath base64ZipFile) throws AbortException
     {
         assert sessionId!=null;
 
         try {
 
+            ////////////////////////////////////////////////////////////////////////////////////////////
+            // Server bug work around
+            // Server fails to read the group id from associatedGroupID field of prjSettings. The work
+            // around is to prefix the project name with the group name.
+            ///////////////////////////////////////////////////////////////////////////////////////////
+
+            final String groupId = args.getPrjSettings().getAssociatedGroupID();
+            final String originalProjectName = args.getPrjSettings().getProjectName();
+            final List<Group> groups = getAssociatedGroups();
+            final List<Group> selected = filter(having(on(Group.class).getID(), Matchers.equalTo(groupId)), groups);
+
+            if (selected.size()>=1)
+            {
+                final String fullyQualifiedProjectName = selected.get(0).getGroupName() + "\\" + args.getPrjSettings().getProjectName();
+                args.getPrjSettings().setProjectName(fullyQualifiedProjectName);
+            }
+
+            if (selected.size()==0)
+            {
+                final String message = "Could not translate group id: " + groupId + " to group name";
+                logger.error(message);
+                throw new AbortException(message);
+
+            } else if (selected.size() > 1) {
+                logger.warn("Server returned more than one group with id: " + groupId);
+                for(Group g : selected)
+                {
+                    logger.warn("Group Id: " + g.getID() + " groupName: " + g.getGroupName());
+                }
+            }
+
+            ////////////////////////////////////////////////////////////////////////////////////////////
+            // Work around end
+            ////////////////////////////////////////////////////////////////////////////////////////////
+
             Pair<byte[],byte[]> soapMessage = createScanSoapMessage(args);
+            args.getPrjSettings().setProjectName(originalProjectName);
 
             // Create HTTP connection
 
@@ -459,7 +514,7 @@ public class CxWebService {
             if (!cxWSResponseRunID.isIsSuccesfull())
             {
                 String message = "Submission of sources for scan failed: \n" + cxWSResponseRunID.getErrorMessage();
-                logger.error(message);
+                //logger.error(message); // Logging will be done in a catch (IOException e) statement below
                 throw new AbortException(message);
             }
 

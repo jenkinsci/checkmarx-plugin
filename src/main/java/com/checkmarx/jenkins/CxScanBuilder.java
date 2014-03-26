@@ -25,6 +25,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The main entry point for Checkmarx plugin. This class implements the Builder
@@ -46,6 +47,7 @@ public class CxScanBuilder extends Builder {
     private String username;
     private String password;
     private String projectName;
+    private String groupId;
 
     private String preset;
     private boolean presetSpecified;
@@ -93,6 +95,7 @@ public class CxScanBuilder extends Builder {
                          String username,
                          String password,
                          String projectName,
+                         String groupId,
                          String preset,
                          boolean presetSpecified,
                          String excludeFolders,
@@ -112,6 +115,7 @@ public class CxScanBuilder extends Builder {
         this.username = username;
         this.password = password;
         this.projectName = projectName;
+        this.groupId = groupId;
         this.preset = preset;
         this.presetSpecified = presetSpecified;
         this.excludeFolders = excludeFolders;
@@ -150,6 +154,10 @@ public class CxScanBuilder extends Builder {
 
     public String getProjectName() {
         return projectName;
+    }
+
+    public String getGroupId() {
+        return groupId;
     }
 
     public String getPreset() {
@@ -364,7 +372,7 @@ public class CxScanBuilder extends Builder {
             // Streaming scan web service will nullify zippedFile filed and use tempFile
             // instead
             final CliScanArgs cliScanArgs = createCliScanArgs(new byte[]{});
-            final CxWSResponseRunID cxWSResponseRunID = cxWebService.scanStreaming(cliScanArgs, tempFile);
+            final CxWSResponseRunID cxWSResponseRunID = cxWebService.scan(cliScanArgs, tempFile);
             tempFile.delete();
             instanceLogger.info("Temporary file deleted");
 
@@ -421,6 +429,7 @@ public class CxScanBuilder extends Builder {
 
         projectSettings.setPresetID(presetLong);
         projectSettings.setProjectName(getProjectName());
+        projectSettings.setAssociatedGroupID(getGroupId());
 
         long configuration = 0; // Default value to use in case of exception
         try {
@@ -653,11 +662,12 @@ public class CxScanBuilder extends Builder {
                                                  final @QueryParameter boolean useOwnServerCredentials,
                                                  final @QueryParameter String serverUrl,
                                                  final @QueryParameter String username,
-                                                 final @QueryParameter String password)
+                                                 final @QueryParameter String password,
+                                                 final @QueryParameter String groupId)
         {
             try {
                 final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
-                CxWSBasicRepsonse cxWSBasicRepsonse = cxWebService.validateProjectName(projectName);
+                CxWSBasicRepsonse cxWSBasicRepsonse = cxWebService.validateProjectName(projectName,groupId);
                 if (cxWSBasicRepsonse.isIsSuccesfull())
                 {
                     return FormValidation.ok("Project Name Validated Successfully");
@@ -665,6 +675,9 @@ public class CxScanBuilder extends Builder {
                     if (cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("Illegal project name"))
                     {
                         return FormValidation.error("Illegal project name");
+                    } else if (cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("Project name already exists"))
+                    {
+                        return FormValidation.ok("Scan will be added to existing project");
                     } else {
                         logger.warn("Couldn't validate project name with Checkmarx sever:\n" + cxWSBasicRepsonse.getErrorMessage());
                         return FormValidation.warning("Can't reach server to validate project name");
@@ -751,7 +764,40 @@ public class CxScanBuilder extends Builder {
                 return listBoxModel; // Return empty list of project names
             }
 
-        };
+        }
+
+
+        // Provides a list of source encodings from checkmarx server for dynamic drop-down list in configuration page
+        /*
+         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+         *  shared state to avoid synchronization issues.
+         */
+
+        public ListBoxModel doFillGroupIdItems(   final @QueryParameter boolean useOwnServerCredentials,
+                                                         final @QueryParameter String serverUrl,
+                                                         final @QueryParameter String username,
+                                                         final @QueryParameter String password)
+        {
+            ListBoxModel listBoxModel = new ListBoxModel();
+            try {
+                final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
+                final List<Group> groups = cxWebService.getAssociatedGroups();
+                for(Group group : groups)
+                {
+                    listBoxModel.add(new ListBoxModel.Option(group.getGroupName(),group.getID()));
+                }
+
+                logger.debug("Associated groups list: " + listBoxModel.size());
+                return listBoxModel;
+
+            } catch (Exception e) {
+                logger.debug("Associated groups: empty");
+                String message = "Provide Checkmarx server credentials to see teams list";
+                listBoxModel.add(new ListBoxModel.Option(message,message));
+                return listBoxModel; // Return empty list of project names
+            }
+
+        }
 
         /*
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
@@ -766,6 +812,23 @@ public class CxScanBuilder extends Builder {
             } else {
                 return FormValidation.error("Number must be non-negative");
             }
+        }
+
+        public String getDefaultProjectName()
+        {
+            // Retrieves the job name from request URL, cleans it from special characters,\
+            // and returns as a default project name.
+
+            final String url = getCurrentDescriptorByNameUrl();
+            final String[] urlComponents = url.split("/");
+            if (urlComponents.length > 0)
+            {
+                final String jobName = urlComponents[urlComponents.length-1];
+                final String cleanJobName = jobName.replaceAll("[^\\w\\s_]", "");
+                return cleanJobName;
+            }
+            // This is a fallback if the above code fails
+            return "";
         }
 
         /**
