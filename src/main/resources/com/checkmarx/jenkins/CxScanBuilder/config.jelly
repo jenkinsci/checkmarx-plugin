@@ -77,7 +77,7 @@
     <f:optionalBlock title="Incremental"
                      field="incremental"
                      inline="true"
-                     checked="${instance==null?true:instance.incremental}">
+                     checked="${instance.incremental}">
 
         <f:block>
             <table style="margin-left: 20px;">
