@@ -260,7 +260,7 @@ public class CxScanBuilder extends Builder {
 
             if (this.generatePdfReport)
             {
-                File pdfReportFile = new File(checkmarxBuildDir,"ScanReport.pdf");
+                File pdfReportFile = new File(checkmarxBuildDir, CxScanResult.PDF_REPORT_NAME);
                 cxWebService.retrieveScanReport(scanId, pdfReportFile, CxWSReportType.PDF);
             }
 

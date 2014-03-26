@@ -51,6 +51,8 @@ public class CxScanResult implements Action {
     private String resultDeepLink;
     private File pdfReport;
 
+    public final static String PDF_REPORT_NAME = "ScanReport.pdf";
+
     private String scanStart;
     private String scanTime;
     private String linesOfCodeScanned;
@@ -164,7 +166,7 @@ public class CxScanResult implements Action {
 
     public boolean isPdfReportReady() {
         File buildDirectory = owner.getRootDir();
-        pdfReport = new File(buildDirectory, "/checkmarx/ScanReport.pdf");
+        pdfReport = new File(buildDirectory, "/checkmarx/" + PDF_REPORT_NAME);
         return pdfReport.exists();
     }
 
