@@ -16,7 +16,7 @@
                      negative="true"
                      checked="${instance==null?true:!instance.useOwnServerCredentials}">
 
-        <f:entry title="Checkmarx Server URL" field="serverUrl">
+        <f:entry title="Checkmarx server URL" field="serverUrl">
             <f:textbox default="${descriptor.serverUrl}"/>
         </f:entry>
 
@@ -29,7 +29,7 @@
         </f:entry>
     </f:optionalBlock>
 
-    <f:entry title="Checkmarx Project Name"
+    <f:entry title="Checkmarx project name"
              field="projectName"
              description="Existing projects appear in a completion list when server url is provided (up to 20)">
 
@@ -95,7 +95,7 @@
     </f:optionalBlock>
 
 
-    <f:entry title="Source Character Encoding (Configuration)" field="sourceEncoding" description="Default Configuration uses UTF-8">
+    <f:entry title="Source character encoding (configuration)" field="sourceEncoding" description="Default Configuration uses UTF-8">
          <f:select/>
     </f:entry>
 
@@ -109,13 +109,13 @@
                      inline="true"
                      field="waitForResultsEnabled"
                      checked="${instance==null?true:instance.waitForResultsEnabled}">
-        <f:optionalBlock title="Enable Vulnerability Threshold" inline="true" field="vulnerabilityThresholdEnabled">
-            <f:entry title="High Severity Vulnerabilities Threshold" field="highThreshold">
+        <f:optionalBlock title="Enable vulnerability threshold" inline="true" field="vulnerabilityThresholdEnabled">
+            <f:entry title="High severity vulnerabilities threshold" field="highThreshold">
                 <f:number clazz="non-negative-number" default="0"/>
             </f:entry>
         </f:optionalBlock>
 
-        <f:entry title="Generate PDF Report" field="generatePdfReport">
+        <f:entry title="Generate PDF report" field="generatePdfReport">
             <f:checkbox/>
         </f:entry>
 

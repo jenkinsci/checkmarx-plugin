@@ -11,12 +11,7 @@
     tags they use. Views are always organized according to its owner class,
     so it should be straightforward to find them.
   -->
-  <!--<f:section title="Hello World Builder">
-    <f:entry title="French" field="useFrench"
-      description="Check if we should say hello in French">
-      <f:checkbox />
-    </f:entry>
-  </f:section> -->
+
     <f:section title="Checkmarx Plugin Default Credentials" name="checkmarx">
         <f:entry title="Server URL" field="serverUrl">
             <f:textbox/>
@@ -30,6 +25,5 @@
             <f:password/>
         </f:entry>
     </f:section>
-
 
 </j:jelly>
