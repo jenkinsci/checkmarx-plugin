@@ -22,6 +22,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.*;
+import java.net.HttpRetryException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -520,6 +521,11 @@ public class CxWebService {
 
             return cxWSResponseRunID;
 
+        } catch (HttpRetryException e){
+            String consoleMessage = "\nCheckmarx plugin for Jenkins does not support Single sign-on authentication." +
+                    "\nPlease, configure Checkmarx server to work in Anonymous authentication mode.\n";
+            logger.error(consoleMessage);
+            throw new AbortException(e.getMessage());
         } catch (IOException e) {
             logger.error(e.getMessage(),e);
             throw new AbortException(e.getMessage());
