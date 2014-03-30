@@ -58,9 +58,6 @@ public class CxScanBuilder extends Builder {
     private boolean fullScansScheduled;
     private int fullScanCycle;
 
-    private final static int FULL_SCAN_CYCLE_MIN = 1;
-    private final static int FULL_SCAN_CYCLE_MAX = 99;
-
     private boolean isThisBuildIncremental;
 
     private String sourceEncoding;
@@ -210,14 +207,6 @@ public class CxScanBuilder extends Builder {
 
     public boolean isGeneratePdfReport() {
         return generatePdfReport;
-    }
-
-    public int getFullScanCycleMin(){
-        return FULL_SCAN_CYCLE_MIN;
-    }
-
-    public int getFullScanCycleMax(){
-        return FULL_SCAN_CYCLE_MAX;
     }
 
     @Override
@@ -470,7 +459,7 @@ public class CxScanBuilder extends Builder {
         }
 
         // if user entered invalid value for full scan cycle - all scans will be incremental
-        if (fullScanCycle < FULL_SCAN_CYCLE_MIN || fullScanCycle > FULL_SCAN_CYCLE_MAX){
+        if (fullScanCycle < getDescriptor().FULL_SCAN_CYCLE_MIN || fullScanCycle > getDescriptor().FULL_SCAN_CYCLE_MAX){
             return true;
         }
 
@@ -497,6 +486,9 @@ public class CxScanBuilder extends Builder {
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
         public final static String DEFAULT_FILTER_PATTERNS = CxConfig.defaultFilterPattern();
+        public final static int FULL_SCAN_CYCLE_MIN = 2;
+        public final static int FULL_SCAN_CYCLE_MAX = 99;
+
         private final static Logger logger = Logger.getLogger(DescriptorImpl.class);
 
         //////////////////////////////////////////////////////////////////////////////////////
