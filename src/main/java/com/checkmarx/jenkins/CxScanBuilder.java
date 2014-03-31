@@ -24,6 +24,7 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.*;
 import java.net.MalformedURLException;
+import java.net.URLDecoder;
 import java.util.List;
 import java.util.Map;
 
@@ -812,7 +813,15 @@ public class CxScanBuilder extends Builder {
             // and returns as a default project name.
 
             final String url = getCurrentDescriptorByNameUrl();
-            final String[] urlComponents = url.split("/");
+
+            String decodedUrl = null;
+            try {
+                decodedUrl = URLDecoder.decode(url, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                decodedUrl = url;
+            }
+
+            final String[] urlComponents = decodedUrl.split("/");
             if (urlComponents.length > 0)
             {
                 final String jobName = urlComponents[urlComponents.length-1];
