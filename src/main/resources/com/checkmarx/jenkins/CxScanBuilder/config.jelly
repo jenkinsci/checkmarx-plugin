@@ -79,20 +79,14 @@
                      inline="true"
                      checked="${instance.incremental}">
 
-        <f:block>
-            <table style="margin-left: 20px;">
-                <f:entry title="" field="fullScansScheduled" checked="${instance.fullScansScheduled}">
-                    <div style="float: left"><f:checkbox/></div>
-                    <div style="float: right">Schedule periodic full scans every</div>
-                </f:entry>
-
-                <f:entry title="" field="fullScanCycle">
-                   <div style="float: left"><f:number default="10"/></div>
-                   <div style="float: right">scans (${descriptor.FULL_SCAN_CYCLE_MIN}-${descriptor.FULL_SCAN_CYCLE_MAX})</div>
-                </f:entry>
-            </table>
-        </f:block>
-
+        <f:optionalBlock title="Schedule periodic full scans"
+                         field="fullScansScheduled"
+                         inline="true"
+                         checked="${instance.fullScansScheduled}">
+                    <f:entry title="Number of incremental scans between full scans (${descriptor.FULL_SCAN_CYCLE_MIN}-${descriptor.FULL_SCAN_CYCLE_MAX})" field="fullScanCycle">
+                       <f:number default="10"/>
+                    </f:entry>
+        </f:optionalBlock>
     </f:optionalBlock>
 
 

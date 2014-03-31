@@ -463,7 +463,7 @@ public class CxScanBuilder extends Builder {
         }
 
         // if user entered invalid value for full scan cycle - all scans will be incremental
-        if (fullScanCycle < getDescriptor().FULL_SCAN_CYCLE_MIN || fullScanCycle > getDescriptor().FULL_SCAN_CYCLE_MAX){
+        if (fullScanCycle < DescriptorImpl.FULL_SCAN_CYCLE_MIN || fullScanCycle > DescriptorImpl.FULL_SCAN_CYCLE_MAX){
             return true;
         }
 
