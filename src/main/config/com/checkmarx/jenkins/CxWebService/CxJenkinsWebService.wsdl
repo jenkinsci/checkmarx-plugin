@@ -16,6 +16,7 @@
           <s:element minOccurs="0" maxOccurs="1" name="SrcCodeSettings" type="tns:SourceCodeSettings" />
           <s:element minOccurs="1" maxOccurs="1" name="IsPrivateScan" type="s:boolean" />
           <s:element minOccurs="1" maxOccurs="1" name="IsIncremental" type="s:boolean" />
+	  <s:element minOccurs="0" maxOccurs="1" name="Comment" type="s:string"/>
         </s:sequence>
       </s:complexType>
       <s:complexType name="ProjectSettings">
@@ -1002,10 +1003,10 @@
   </wsdl:binding>
   <wsdl:service name="CxJenkinsWebService">
     <wsdl:port name="CxJenkinsWebServiceSoap" binding="tns:CxJenkinsWebServiceSoap">
-      <soap:address location="http://10.31.0.61/CxWebInterface/Jenkins/CxJenkinsWebService.asmx" />
+<soap:address location="http://localhost:1515/CxWebinterface/Jenkins/CxJenkinsWebService.asmx"/>
     </wsdl:port>
     <wsdl:port name="CxJenkinsWebServiceSoap12" binding="tns:CxJenkinsWebServiceSoap12">
-      <soap12:address location="http://10.31.0.61/CxWebInterface/Jenkins/CxJenkinsWebService.asmx" />
+<soap12:address location="http://localhost:1515/CxWebinterface/Jenkins/CxJenkinsWebService.asmx"/>
     </wsdl:port>
   </wsdl:service>
 </wsdl:definitions>

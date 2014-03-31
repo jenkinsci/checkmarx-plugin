@@ -408,7 +408,7 @@ public class CxScanBuilder extends Builder {
     {
 
         ProjectSettings projectSettings = new ProjectSettings();
-        projectSettings.setDescription(getComment()); // TODO: Move comment to other web service
+
         long presetLong = 0; // Default value to use in case of exception
         try {
             presetLong = Long.parseLong(getPreset());
@@ -438,11 +438,14 @@ public class CxScanBuilder extends Builder {
         sourceCodeSettings.setSourceOrigin(SourceLocationType.LOCAL);
         sourceCodeSettings.setPackagedCode(localCodeContainer);
 
+        String commentText = getComment().trim();
+
         CliScanArgs args = new CliScanArgs();
         args.setIsIncremental(isThisBuildIncremental);
         args.setIsPrivateScan(false);
         args.setPrjSettings(projectSettings);
         args.setSrcCodeSettings(sourceCodeSettings);
+        args.setComment(commentText);
 
         return args;
     }
