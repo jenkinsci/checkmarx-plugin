@@ -83,7 +83,7 @@ public class CxScanResult implements Action {
 
     @Override
     public String getDisplayName() {
-        return "Checkmarx Last Scan Results";
+        return "Checkmarx Scan Results";
     }
 
     @Override
