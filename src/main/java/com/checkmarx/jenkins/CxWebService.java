@@ -181,7 +181,7 @@ public class CxWebService {
 
                 case WORKING:
                     logger.info("Scanning: " + status.getStageMessage() + " " + status.getStepDetails() +
-                            " (stage: " + status.getCurrentStagePercent() + "%, total: "+ status.getTotalPercent() + "%)");
+                            " (Current stage progress: " + status.getCurrentStagePercent() + "%, Total progress: "+ status.getTotalPercent() + "%)");
                     break ;
 
 
