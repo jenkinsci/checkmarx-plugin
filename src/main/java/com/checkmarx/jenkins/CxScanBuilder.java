@@ -467,9 +467,10 @@ public class CxScanBuilder extends Builder {
             return true;
         }
 
-        // If user asked to perform full scans for every 10 scans -
-        // then the ordinal numbers of full scans will be "1", "11", "21" and so on...
-        boolean shouldBeFullScan = (buildNumber % fullScanCycle == 1);
+        // If user asked to perform full scan after every 9 incremental scans -
+        // it means that every 10th scan should be full,
+        // that is the ordinal numbers of full scans will be "1", "11", "21" and so on...
+        boolean shouldBeFullScan = (buildNumber % (fullScanCycle+1) == 1);
 
         return !shouldBeFullScan;
     }
