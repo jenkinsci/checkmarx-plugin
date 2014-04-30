@@ -490,7 +490,7 @@ public class CxScanBuilder extends Builder {
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
         public final static String DEFAULT_FILTER_PATTERNS = CxConfig.defaultFilterPattern();
-        public final static int FULL_SCAN_CYCLE_MIN = 2;
+        public final static int FULL_SCAN_CYCLE_MIN = 1;
         public final static int FULL_SCAN_CYCLE_MAX = 99;
 
         private final static Logger logger = Logger.getLogger(DescriptorImpl.class);
