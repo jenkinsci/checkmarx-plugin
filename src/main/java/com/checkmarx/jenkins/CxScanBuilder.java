@@ -674,7 +674,11 @@ public class CxScanBuilder extends Builder {
                     } else if (cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("Project name already exists"))
                     {
                         return FormValidation.ok("Scan will be added to existing project");
-                    } else {
+                    } else if (cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("Unauthorized user"))
+                    {
+                        return FormValidation.error("The user is not authorized to create/run Checkmarx projects");
+                    }
+                    else {
                         logger.warn("Couldn't validate project name with Checkmarx sever:\n" + cxWSBasicRepsonse.getErrorMessage());
                         return FormValidation.warning("Can't reach server to validate project name");
                     }
