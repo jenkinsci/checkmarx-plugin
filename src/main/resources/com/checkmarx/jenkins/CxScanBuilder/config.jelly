@@ -84,7 +84,7 @@
                          inline="true"
                          checked="${instance.fullScansScheduled}">
                     <f:entry title="Number of incremental scans between full scans (${descriptor.FULL_SCAN_CYCLE_MIN}-${descriptor.FULL_SCAN_CYCLE_MAX})" field="fullScanCycle">
-                       <f:number default="10"/>
+                       <f:number clazz="positive-number" min="${descriptor.FULL_SCAN_CYCLE_MIN}" max="${descriptor.FULL_SCAN_CYCLE_MAX}" step="1" default="10"/>
                     </f:entry>
         </f:optionalBlock>
     </f:optionalBlock>
@@ -105,7 +105,7 @@
                      checked="${instance==null?true:instance.waitForResultsEnabled}">
         <f:optionalBlock title="Enable vulnerability threshold" inline="true" field="vulnerabilityThresholdEnabled">
             <f:entry title="High severity vulnerabilities threshold" field="highThreshold">
-                <f:number clazz="non-negative-number" default="0"/>
+                <f:number clazz="positive-number" min="0" step="1" default="0"/>
             </f:entry>
         </f:optionalBlock>
 
