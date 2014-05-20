@@ -257,7 +257,7 @@ public class CxScanBuilder extends Builder {
 
             // Parse scan report and present results in Jenkins
 
-            CxScanResult cxScanResult = new CxScanResult(build,instanceLoggerSuffix(build));
+            CxScanResult cxScanResult = new CxScanResult(build,instanceLoggerSuffix(build),serverUrlToUse);
             cxScanResult.readScanXMLReport(xmlReportFile);
             build.addAction(cxScanResult);
 

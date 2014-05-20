@@ -38,6 +38,7 @@ public class CxScanResult implements Action {
     private final Logger logger;
 
     public final AbstractBuild<?,?> owner;
+    private String serverUrl;
 
     private int highCount;
     private int mediumCount;
@@ -63,10 +64,11 @@ public class CxScanResult implements Action {
     private String errorMessage;
 
 
-    public CxScanResult(final AbstractBuild owner, final String loggerSuffix)
+    public CxScanResult(final AbstractBuild owner, final String loggerSuffix, String serverUrl)
     {
         logger = CxLogUtils.loggerWithSuffix(getClass(),loggerSuffix);
         this.owner = owner;
+        this.serverUrl = serverUrl;
         this.resultIsValid=false;
         this.errorMessage = "No Scan Results"; // error message to appear if results were not parsed
         this.highQueryResultList   = new LinkedList<QueryResult>();
@@ -274,7 +276,7 @@ public class CxScanResult implements Action {
             } else {
                 if ("CxXMLResults".equals(qName))
                 {
-                    CxScanResult.this.resultDeepLink    = attributes.getValue("DeepLink");
+                    CxScanResult.this.resultDeepLink    = constructDeepLink(attributes.getValue("DeepLink"));
                     CxScanResult.this.scanStart         = attributes.getValue("ScanStart");
                     CxScanResult.this.scanTime          = attributes.getValue("ScanTime");
                     CxScanResult.this.linesOfCodeScanned= attributes.getValue("LinesOfCodeScanned");
@@ -309,6 +311,12 @@ public class CxScanResult implements Action {
                     logger.warn("Encountered a result query with unknown severity: " + qr.getSeverity());
                 }
             }
+        }
+
+        private String constructDeepLink(String rawDeepLink){
+            String token = "CxWebClient";
+            String [] tokens = rawDeepLink.split(token);
+            return CxScanResult.this.serverUrl + "/" + token + tokens[1];
         }
     }
 
