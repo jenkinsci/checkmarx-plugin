@@ -668,24 +668,29 @@ public class CxScanBuilder extends Builder {
                 if (cxWSBasicRepsonse.isIsSuccesfull())
                 {
                     return FormValidation.ok("Project Name Validated Successfully");
-                } else {
-                    if (cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("Illegal project name"))
-                    {
-                        return FormValidation.error("Illegal project name");
-                    } else if (cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("Project name already exists"))
+                }
+                else {
+                    if (cxWSBasicRepsonse.getErrorMessage().startsWith("project name validation failed: duplicate name, project name") ||
+                        cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("Project name already exists"))
                     {
                         return FormValidation.ok("Scan will be added to existing project");
-                    } else if (cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("Unauthorized user"))
+                    }
+                    else if (cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("project name validation failed: unauthorized user"))
                     {
                         return FormValidation.error("The user is not authorized to create/run Checkmarx projects");
                     }
-                    else {
+                    else if (cxWSBasicRepsonse.getErrorMessage().startsWith("Exception occurred at IsValidProjectCreationRequest:"))
+                    {
                         logger.warn("Couldn't validate project name with Checkmarx sever:\n" + cxWSBasicRepsonse.getErrorMessage());
-                        return FormValidation.warning("Can't reach server to validate project name");
+                        return FormValidation.warning(cxWSBasicRepsonse.getErrorMessage());
+                    }
+                    else {
+                        return FormValidation.error(cxWSBasicRepsonse.getErrorMessage());
                     }
                 }
             } catch (Exception e)
             {
+                logger.warn("Couldn't validate project name with Checkmarx sever:\n" + e.getLocalizedMessage());
                 return FormValidation.warning("Can't reach server to validate project name");
             }
 
