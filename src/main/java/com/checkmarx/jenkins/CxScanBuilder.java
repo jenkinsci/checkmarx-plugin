@@ -18,6 +18,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -44,16 +45,17 @@ public class CxScanBuilder extends Builder {
     //////////////////////////////////////////////////////////////////////////////////////
 
     private boolean useOwnServerCredentials;
-    private String serverUrl;
-    private String username;
-    private String password;
-    private String projectName;
-    private String groupId;
 
-    private String preset;
+    @Nullable private String serverUrl;
+    @Nullable private String username;
+    @Nullable private String password;
+    @Nullable private String projectName;
+    @Nullable private String groupId;
+
+    @Nullable private String preset;
     private boolean presetSpecified;
-    private String excludeFolders;
-    private String filterPattern;
+    @Nullable private String excludeFolders;
+    @Nullable private String filterPattern;
 
     private boolean incremental;
     private boolean fullScansScheduled;
@@ -61,8 +63,8 @@ public class CxScanBuilder extends Builder {
 
     private boolean isThisBuildIncremental;
 
-    private String sourceEncoding;
-    private String comment;
+    @Nullable private String sourceEncoding;
+    @Nullable private String comment;
 
     private boolean waitForResultsEnabled;
 
@@ -89,20 +91,20 @@ public class CxScanBuilder extends Builder {
 
     @DataBoundConstructor
     public CxScanBuilder(boolean useOwnServerCredentials,
-                         String serverUrl,
-                         String username,
-                         String password,
-                         String projectName,
-                         String groupId,
-                         String preset,
+                         @Nullable String serverUrl,
+                         @Nullable String username,
+                         @Nullable String password,
+                         @Nullable String projectName,
+                         @Nullable String groupId,
+                         @Nullable String preset,
                          boolean presetSpecified,
-                         String excludeFolders,
-                         String filterPattern,
+                         @Nullable String excludeFolders,
+                         @Nullable String filterPattern,
                          boolean incremental,
                          boolean fullScansScheduled,
                          int fullScanCycle,
-                         String sourceEncoding,
-                         String comment,
+                         @Nullable String sourceEncoding,
+                         @Nullable String comment,
                          boolean waitForResultsEnabled,
                          boolean vulnerabilityThresholdEnabled,
                          int highThreshold,
@@ -138,26 +140,32 @@ public class CxScanBuilder extends Builder {
         return useOwnServerCredentials;
     }
 
+    @Nullable
     public String getServerUrl() {
         return serverUrl;
     }
 
+    @Nullable
     public String getUsername() {
         return username;
     }
 
+    @Nullable
     public String getPassword() {
         return password;
     }
 
+    @Nullable
     public String getProjectName() {
         return projectName;
     }
 
+    @Nullable
     public String getGroupId() {
         return groupId;
     }
 
+    @Nullable
     public String getPreset() {
         return preset;
     }
@@ -166,10 +174,12 @@ public class CxScanBuilder extends Builder {
         return presetSpecified;
     }
 
+    @Nullable
     public String getExcludeFolders() {
         return excludeFolders;
     }
 
+    @Nullable
     public String getFilterPattern() {
         return filterPattern;
     }
@@ -186,10 +196,12 @@ public class CxScanBuilder extends Builder {
         return fullScanCycle;
     }
 
+    @Nullable
     public String getSourceEncoding() {
         return sourceEncoding;
     }
 
+    @Nullable
     public String getComment() {
         return comment;
     }
@@ -227,7 +239,9 @@ public class CxScanBuilder extends Builder {
             String serverUrlToUse = isUseOwnServerCredentials() ? getServerUrl() : getDescriptor().getServerUrl();
             String usernameToUse  = isUseOwnServerCredentials() ? getUsername()  : getDescriptor().getUsername();
             String passwordToUse  = isUseOwnServerCredentials() ? getPassword()  : getDescriptor().getPassword();
-            CxWebService cxWebService = new CxWebService(serverUrlToUse,instanceLoggerSuffix(build));
+
+            String serverUrlToUseNotNull = serverUrlToUse != null ? serverUrlToUse : "";
+            CxWebService cxWebService = new CxWebService(serverUrlToUseNotNull,instanceLoggerSuffix(build));
             cxWebService.login(usernameToUse,passwordToUse);
 
 
@@ -438,7 +452,9 @@ public class CxScanBuilder extends Builder {
         sourceCodeSettings.setSourceOrigin(SourceLocationType.LOCAL);
         sourceCodeSettings.setPackagedCode(localCodeContainer);
 
-        String commentText = getComment().trim();
+        String commentText = getComment()!=null ? getComment() : "";
+        commentText = commentText.trim();
+
 
         CliScanArgs args = new CliScanArgs();
         args.setIsIncremental(isThisBuildIncremental);
@@ -500,31 +516,34 @@ public class CxScanBuilder extends Builder {
         //  Persistent plugin global configuration parameters
         //////////////////////////////////////////////////////////////////////////////////////
 
-        private String serverUrl;
-        private String username;
-        private String password;
+        @Nullable private String serverUrl;
+        @Nullable private String username;
+        @Nullable private String password;
 
+        @Nullable
         public String getServerUrl() {
             return serverUrl;
         }
 
-        public void setServerUrl(String serverUrl) {
+        public void setServerUrl(@Nullable String serverUrl) {
             this.serverUrl = serverUrl;
         }
 
+        @Nullable
         public String getUsername() {
             return username;
         }
 
-        public void setUsername(String username) {
+        public void setUsername(@Nullable String username) {
             this.username = username;
         }
 
+        @Nullable
         public String getPassword() {
             return password;
         }
 
-        public void setPassword(String password) {
+        public void setPassword(@Nullable String password) {
             this.password = password;
         }
 

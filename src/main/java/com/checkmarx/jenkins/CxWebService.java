@@ -96,7 +96,7 @@ public class CxWebService {
 
     }
 
-    public void login(String username, String password) throws AbortException
+    public void login(@Nullable String username, @Nullable String password) throws AbortException
     {
         sessionId=null;
         Credentials credentials = new Credentials();
