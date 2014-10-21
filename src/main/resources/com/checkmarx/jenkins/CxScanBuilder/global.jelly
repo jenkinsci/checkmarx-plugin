@@ -25,8 +25,9 @@
             <f:password/>
         </f:entry>
 
-        <f:entry title="Hide security scan results preview from all jobs" field="hideResults">
+        <f:entry title="Hide results" field="hideResults">
             <f:checkbox default="false"/>
+            <f:description>Hide security scan results preview from all jobs. Requires restart.</f:description>
         </f:entry>
     </f:section>
 
