@@ -468,7 +468,8 @@ public class CxWebService {
 
             if (selected.size()==0)
             {
-                final String message = "Could not translate group id: " + groupId + " to group name";
+                final String message = "Could not translate group (team) id: " + groupId + " to group name\n" +
+                        "Open the Job configuration page, and select a team.\n";
                 logger.error(message);
                 throw new AbortException(message);
 
