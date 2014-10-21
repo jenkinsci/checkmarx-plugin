@@ -50,6 +50,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.jenkins-ci.main</groupId>
+            <artifactId>maven-plugin</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.checkmarx.components</groupId>
             <artifactId>zipper</artifactId>
             <version>1.2.0</version>
@@ -97,6 +102,7 @@
             <artifactId>lambdaj</artifactId>
             <version>2.3.3</version>
         </dependency>
+
     </dependencies>
 
     <pluginRepositories>

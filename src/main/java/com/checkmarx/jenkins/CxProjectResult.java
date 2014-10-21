@@ -3,7 +3,9 @@ package com.checkmarx.jenkins;
 import hudson.Extension;
 import hudson.Functions;
 import hudson.PluginWrapper;
+import hudson.matrix.MatrixConfiguration;
 import hudson.matrix.MatrixProject;
+import hudson.maven.MavenModuleSet;
 import hudson.model.*;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.util.*;
@@ -249,14 +251,30 @@ public class CxProjectResult implements Action {
          */
         @Override
         public Collection<? extends Action> createFor(AbstractProject project) {
-            if (!(project instanceof MatrixProject))
+            // We don't want to add the CxProectResult action to MatrixProject (appears as Multi-Configuration in GUI),
+            // since it does not make sense to present our vulnerability graph in this level.
+
+            if (project instanceof Project)
             {
-                // We don't want to add the CxProectResult action to MatrixProject,
-                // since it does not make sense to present our vulnerability graph in this level
-                LinkedList<Action> list = new LinkedList<Action>();
-                list.add(new CxProjectResult(project));
-                return list;
+                if (((Project)project).getBuildersList().get(CxScanBuilder.class)!=null)
+                {
+                    LinkedList<Action> list = new LinkedList<Action>();
+                    list.add(new CxProjectResult(project));
+                    return list;
+                }
             }
+
+            if (project instanceof MavenModuleSet)
+            {
+                if (((MavenModuleSet) project).getPrebuilders().get(CxScanBuilder.class)!=null ||
+                    ((MavenModuleSet) project).getPostbuilders().get(CxScanBuilder.class)!=null)
+                {
+                    LinkedList<Action> list = new LinkedList<Action>();
+                    list.add(new CxProjectResult(project));
+                    return list;
+                }
+            }
+
             return null;
         }
     }
