@@ -519,6 +519,7 @@ public class CxScanBuilder extends Builder {
         @Nullable private String serverUrl;
         @Nullable private String username;
         @Nullable private String password;
+        private boolean hideResults;
 
         @Nullable
         public String getServerUrl() {
@@ -545,6 +546,14 @@ public class CxScanBuilder extends Builder {
 
         public void setPassword(@Nullable String password) {
             this.password = password;
+        }
+
+        public boolean isHideResults() {
+            return hideResults;
+        }
+
+        public void setHideResults(boolean hideResults) {
+            this.hideResults = hideResults;
         }
 
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
@@ -884,6 +893,7 @@ public class CxScanBuilder extends Builder {
             save();
             return super.configure(req,formData);
         }
+
 
 
     }

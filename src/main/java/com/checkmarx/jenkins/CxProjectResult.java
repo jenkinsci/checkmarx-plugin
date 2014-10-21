@@ -9,7 +9,9 @@ import hudson.maven.MavenModuleSet;
 import hudson.model.*;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.util.*;
+import jenkins.model.Jenkins;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
@@ -254,24 +256,25 @@ public class CxProjectResult implements Action {
             // We don't want to add the CxProectResult action to MatrixProject (appears as Multi-Configuration in GUI),
             // since it does not make sense to present our vulnerability graph in this level.
 
-            if (project instanceof Project)
-            {
-                if (((Project)project).getBuildersList().get(CxScanBuilder.class)!=null)
-                {
-                    LinkedList<Action> list = new LinkedList<Action>();
-                    list.add(new CxProjectResult(project));
-                    return list;
-                }
-            }
+            @Nullable
+            CxScanBuilder.DescriptorImpl descriptor = (CxScanBuilder.DescriptorImpl)Jenkins.getInstance().getDescriptor(CxScanBuilder.class);
+            if (descriptor!= null && !descriptor.isHideResults()) {
 
-            if (project instanceof MavenModuleSet)
-            {
-                if (((MavenModuleSet) project).getPrebuilders().get(CxScanBuilder.class)!=null ||
-                    ((MavenModuleSet) project).getPostbuilders().get(CxScanBuilder.class)!=null)
-                {
-                    LinkedList<Action> list = new LinkedList<Action>();
-                    list.add(new CxProjectResult(project));
-                    return list;
+                if (project instanceof Project) {
+                    if (((Project) project).getBuildersList().get(CxScanBuilder.class) != null) {
+                        LinkedList<Action> list = new LinkedList<Action>();
+                        list.add(new CxProjectResult(project));
+                        return list;
+                    }
+                }
+
+                if (project instanceof MavenModuleSet) {
+                    if (((MavenModuleSet) project).getPrebuilders().get(CxScanBuilder.class) != null ||
+                            ((MavenModuleSet) project).getPostbuilders().get(CxScanBuilder.class) != null) {
+                        LinkedList<Action> list = new LinkedList<Action>();
+                        list.add(new CxProjectResult(project));
+                        return list;
+                    }
                 }
             }
 
