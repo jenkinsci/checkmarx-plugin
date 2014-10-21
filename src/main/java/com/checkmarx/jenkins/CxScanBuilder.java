@@ -675,7 +675,8 @@ public class CxScanBuilder extends Builder {
                     {
                         return FormValidation.ok("Scan will be added to existing project");
                     }
-                    else if (cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("project name validation failed: unauthorized user"))
+                    else if (cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("project name validation failed: unauthorized user") ||
+                             cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("Unauthorized user"))
                     {
                         return FormValidation.error("The user is not authorized to create/run Checkmarx projects");
                     }
