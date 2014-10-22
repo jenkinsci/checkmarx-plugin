@@ -146,58 +146,76 @@ public class CxWebService {
 
 
 
-    public long trackScanProgress(CxWSResponseRunID cxWSResponseRunID) throws AbortException
+    public long trackScanProgress(final CxWSResponseRunID cxWSResponseRunID,
+                                  final String username,
+                                  final String password) throws AbortException
     {
         assert sessionId!=null : "Trying to track scan progress before login";
 
         boolean locReported = false;
         while (true)
         {
-            CxWSResponseScanStatus status = this.getScanStatus(cxWSResponseRunID);
-            switch (status.getCurrentStatus())
-            {
-                // In progress states
-                case WAITING_TO_PROCESS:
-                    logger.info("Scan job waiting for processing");
-                    break ;
+            try {
+                CxWSResponseScanStatus status = this.getScanStatus(cxWSResponseRunID);
 
-                case QUEUED:
-                    if (!locReported)
-                    {
-                        logger.info("Source contains: " + status.getLOC() + " lines of code.");
-                        locReported = true;
-                    }
-                    logger.info("Scan job queued at position: " + status.getQueuePosition());
-                    break ;
+                switch (status.getCurrentStatus())
+                {
+                    // In progress states
+                    case WAITING_TO_PROCESS:
+                        logger.info("Scan job waiting for processing");
+                        break ;
 
-                case UNZIPPING:
-                    logger.info("Unzipping: " + status.getCurrentStagePercent() + "% finished");
-                    logger.info("LOC: " + status.getLOC());
-                    logger.info("StageMessage: " + status.getStageMessage());
-                    logger.info("StepMessage: " + status.getStepMessage());
-                    logger.info("StepDetails: " + status.getStepDetails());
+                    case QUEUED:
+                        if (!locReported)
+                        {
+                            logger.info("Source contains: " + status.getLOC() + " lines of code.");
+                            locReported = true;
+                        }
+                        logger.info("Scan job queued at position: " + status.getQueuePosition());
+                        break ;
 
-                    break ;
+                    case UNZIPPING:
+                        logger.info("Unzipping: " + status.getCurrentStagePercent() + "% finished");
+                        logger.info("LOC: " + status.getLOC());
+                        logger.info("StageMessage: " + status.getStageMessage());
+                        logger.info("StepMessage: " + status.getStepMessage());
+                        logger.info("StepDetails: " + status.getStepDetails());
 
-                case WORKING:
-                    logger.info("Scanning: " + status.getStageMessage() + " " + status.getStepDetails() +
-                            " (Current stage progress: " + status.getCurrentStagePercent() + "%, Total progress: "+ status.getTotalPercent() + "%)");
-                    break ;
+                        break ;
+
+                    case WORKING:
+                        logger.info("Scanning: " + status.getStageMessage() + " " + status.getStepDetails() +
+                                " (Current stage progress: " + status.getCurrentStagePercent() + "%, Total progress: "+ status.getTotalPercent() + "%)");
+                        break ;
 
 
-                // End of progress states
-                case FINISHED:
-                    logger.info("Scan Finished Successfully -  RunID: " + status.getRunId() + " ScanID:" + status.getScanId());
-                    return status.getScanId();
+                    // End of progress states
+                    case FINISHED:
+                        logger.info("Scan Finished Successfully -  RunID: " + status.getRunId() + " ScanID:" + status.getScanId());
+                        return status.getScanId();
 
-                case FAILED:
-                case DELETED:
-                case UNKNOWN:
-                case CANCELED:
-                    String message = "Scan " + status.getStageName() + " -  RunID: " + status.getRunId() + " ScanID:" + status.getScanId();
-                    logger.info(message);
-                    logger.info("Stage Message" +  status.getStageMessage());
-                    throw new AbortException(message);
+                    case FAILED:
+                    case DELETED:
+                    case UNKNOWN:
+                    case CANCELED:
+                        String message = "Scan " + status.getStageName() + " -  RunID: " + status.getRunId() + " ScanID:" + status.getScanId();
+                        logger.info(message);
+                        logger.info("Stage Message" +  status.getStageMessage());
+                        throw new AbortException(message);
+                }
+
+            } catch (AbortException e) {
+
+                // Here we handle a case where the sessionId was timed out in the server
+                // and we need to re-login to continue working. The default sessionId
+                // timeout in the server is 24 hours.
+                if (e.getLocalizedMessage().contains("Unauthorized user")) {
+                    logger.info("SessionId was rejected by the Checkmarx server, trying to re-login");
+                    this.login(username,password);
+                    continue;
+                } else {
+                    throw e;
+                }
             }
 
             try {

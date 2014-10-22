@@ -253,9 +253,9 @@ public class CxScanBuilder extends Builder {
                 return true;
             }
 
-            String serverUrlToUse = isUseOwnServerCredentials() ? getServerUrl() : getDescriptor().getServerUrl();
-            String usernameToUse  = isUseOwnServerCredentials() ? getUsername()  : getDescriptor().getUsername();
-            String passwordToUse  = isUseOwnServerCredentials() ? getPassword()  : getDescriptor().getPassword();
+            final String serverUrlToUse = isUseOwnServerCredentials() ? getServerUrl() : getDescriptor().getServerUrl();
+            final String usernameToUse  = isUseOwnServerCredentials() ? getUsername()  : getDescriptor().getUsername();
+            final String passwordToUse  = isUseOwnServerCredentials() ? getPassword()  : getDescriptor().getPassword();
 
             String serverUrlToUseNotNull = serverUrlToUse != null ? serverUrlToUse : "";
             CxWebService cxWebService = new CxWebService(serverUrlToUseNotNull,instanceLoggerSuffix(build));
@@ -274,7 +274,7 @@ public class CxScanBuilder extends Builder {
                 return true;
             }
 
-            long scanId =  cxWebService.trackScanProgress(cxWSResponseRunID);
+            long scanId =  cxWebService.trackScanProgress(cxWSResponseRunID,usernameToUse,passwordToUse);
 
             File xmlReportFile = new File(checkmarxBuildDir,"ScanReport.xml");
             cxWebService.retrieveScanReport(scanId,xmlReportFile,CxWSReportType.XML);
