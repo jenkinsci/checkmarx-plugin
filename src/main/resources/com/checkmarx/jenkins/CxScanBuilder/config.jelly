@@ -98,6 +98,9 @@
         <f:textarea/>
     </f:entry>
 
+    <f:entry title="Skip scan if triggered by SCM Changes" field="skipSCMTriggers">
+        <f:checkbox default="false"/>
+    </f:entry>
 
     <f:optionalBlock title="Wait for scan results"
                      inline="true"

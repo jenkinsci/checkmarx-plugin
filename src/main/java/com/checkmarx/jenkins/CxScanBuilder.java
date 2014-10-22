@@ -10,6 +10,7 @@ import hudson.Launcher;
 import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
+import hudson.triggers.SCMTrigger;
 import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
@@ -26,6 +27,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -66,6 +68,7 @@ public class CxScanBuilder extends Builder {
     @Nullable private String sourceEncoding;
     @Nullable private String comment;
 
+    private boolean skipSCMTriggers;
     private boolean waitForResultsEnabled;
 
     private boolean vulnerabilityThresholdEnabled;
@@ -105,6 +108,7 @@ public class CxScanBuilder extends Builder {
                          int fullScanCycle,
                          @Nullable String sourceEncoding,
                          @Nullable String comment,
+                         boolean skipSCMTriggers,
                          boolean waitForResultsEnabled,
                          boolean vulnerabilityThresholdEnabled,
                          int highThreshold,
@@ -125,6 +129,7 @@ public class CxScanBuilder extends Builder {
         this.fullScanCycle = fullScanCycle;
         this.sourceEncoding = sourceEncoding;
         this.comment = comment;
+        this.skipSCMTriggers = skipSCMTriggers;
         this.waitForResultsEnabled = waitForResultsEnabled;
         this.vulnerabilityThresholdEnabled = vulnerabilityThresholdEnabled;
         this.highThreshold = highThreshold;
@@ -206,6 +211,10 @@ public class CxScanBuilder extends Builder {
         return comment;
     }
 
+    public boolean isSkipSCMTriggers() {
+        return skipSCMTriggers;
+    }
+
     public boolean isWaitForResultsEnabled() {
         return waitForResultsEnabled;
     }
@@ -235,6 +244,14 @@ public class CxScanBuilder extends Builder {
 
             listener.started(null);
             instanceLogger.info("Checkmarx Jenkins plugin version: " + CxConfig.version());
+
+            if (isSkipScan(build))
+            {
+                instanceLogger.info("Checkmarx scan skipped since the build was triggered by SCM. "+
+                        "Visit plugin configuration page to disable this skip.");
+                listener.finished(Result.SUCCESS);
+                return true;
+            }
 
             String serverUrlToUse = isUseOwnServerCredentials() ? getServerUrl() : getDescriptor().getServerUrl();
             String usernameToUse  = isUseOwnServerCredentials() ? getUsername()  : getDescriptor().getUsername();
@@ -490,6 +507,36 @@ public class CxScanBuilder extends Builder {
 
         return !shouldBeFullScan;
     }
+
+    // Check what triggered this build, and in case the trigger was SCM
+    // and the build is configured to skip those triggers, return true.
+    private boolean isSkipScan(final AbstractBuild<?, ?> build)
+    {
+
+        if (!isSkipSCMTriggers())
+        {
+            return false;
+        }
+
+        final List<Cause> causes = build.getCauses();
+        final List<Cause> allowedCauses = new LinkedList<Cause>();
+
+        for(Cause c : causes)
+        {
+            if (!(c instanceof SCMTrigger.SCMTriggerCause))
+            {
+                allowedCauses.add(c);
+            }
+        }
+        return allowedCauses.isEmpty();
+    }
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    //  Descriptor class
+    //
+    //////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public DescriptorImpl getDescriptor() {
