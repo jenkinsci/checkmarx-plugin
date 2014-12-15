@@ -1,6 +1,7 @@
 package com.checkmarx.jenkins;
 
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import javax.net.ssl.*;
 import java.security.GeneralSecurityException;
@@ -15,6 +16,27 @@ import java.security.cert.X509Certificate;
  */
 public class CxSSLUtility{
     private static final Logger logger = Logger.getLogger(CxSSLUtility.class);
+    @Nullable
+    private static HostnameVerifier originalHostnameVerifier = null;
+    @Nullable
+    private static SSLSocketFactory originalSSLSocketFactory = null;
+
+    public static void enableSSLCertificateVerification()
+    {
+        try {
+            HttpsURLConnection.setDefaultSSLSocketFactory(SSLContext.getDefault().getSocketFactory());
+        } catch (NoSuchAlgorithmException e) {
+            logger.error(e);
+        }
+
+        HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+            @Override
+            public boolean verify(String s, SSLSession sslSession) {
+                return false;
+            }
+        });
+    }
+
 
     public static void disableSSLCertificateVerification()
     {

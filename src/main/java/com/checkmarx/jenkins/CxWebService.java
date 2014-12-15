@@ -7,6 +7,7 @@ import com.checkmarx.ws.CxWSResolver.*;
 import hudson.AbortException;
 import hudson.FilePath;
 import hudson.util.IOUtils;
+import jenkins.model.Jenkins;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 import org.hamcrest.Matchers;
@@ -58,8 +59,12 @@ public class CxWebService {
     {
         logger = CxLogUtils.loggerWithSuffix(getClass(),loggerSuffix);
 
-        logger.info("SSL/TLS Certificate Validation Disabled");
-        CxSSLUtility.disableSSLCertificateVerification();
+        @Nullable
+        CxScanBuilder.DescriptorImpl descriptor = (CxScanBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(CxScanBuilder.class);
+        if (descriptor != null && descriptor.isDisableCertificateValidation()) {
+            logger.info("SSL/TLS Certificate Validation Disabled");
+            CxSSLUtility.disableSSLCertificateVerification();
+        }
 
         logger.info("Establishing connection with Checkmarx server at: " + serverUrl);
         URL serverUrlUrl = new URL(serverUrl);

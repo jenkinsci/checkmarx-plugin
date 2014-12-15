@@ -13,6 +13,12 @@
   -->
 
     <f:section title="Checkmarx" name="checkmarx">
+
+        <f:entry title="Disable TLS/SSL Server Certificate Validation" field="disableCertificateValidation">
+            <f:checkbox default="false"/>
+            <f:description>Disabling the validation allows connecting to Checkmarx server with self signed certificate.</f:description>
+        </f:entry>
+
         <f:entry title="Default Server URL" field="serverUrl">
             <f:textbox/>
         </f:entry>
@@ -30,10 +36,7 @@
             <f:description>Hide security scan results preview from all jobs. Requires restart.</f:description>
         </f:entry>
 
-        <f:entry title="Disable TLS/SSL Server Certificate Validation" field="disableCertificateValidation">
-            <f:checkbox default="false"/>
-            <f:description>Disabling the validation allows connecting to Checkmarx server with self signed certificate.</f:description>
-        </f:entry>
+
 
     </f:section>
 

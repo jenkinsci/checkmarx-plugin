@@ -17,6 +17,7 @@ import hudson.util.ListBoxModel;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.cxf.configuration.jsse.SSLUtils;
 import org.apache.log4j.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -609,6 +610,10 @@ public class CxScanBuilder extends Builder {
         }
 
         public void setDisableCertificateValidation(boolean disableCertificateValidation) {
+            if (this.disableCertificateValidation && !disableCertificateValidation)
+            {
+                CxSSLUtility.enableSSLCertificateVerification();
+            }
             this.disableCertificateValidation = disableCertificateValidation;
         }
 
