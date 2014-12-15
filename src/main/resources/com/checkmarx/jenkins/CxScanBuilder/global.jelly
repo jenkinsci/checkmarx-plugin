@@ -12,16 +12,16 @@
     so it should be straightforward to find them.
   -->
 
-    <f:section title="Checkmarx Plugin Default Credentials" name="checkmarx">
-        <f:entry title="Server URL" field="serverUrl">
+    <f:section title="Checkmarx" name="checkmarx">
+        <f:entry title="Default Server URL" field="serverUrl">
             <f:textbox/>
         </f:entry>
 
-        <f:entry title="Username" field="username">
+        <f:entry title="Default Username" field="username">
             <f:textbox/>
         </f:entry>
 
-        <f:entry title="Password" field="password">
+        <f:entry title="Default Password" field="password">
             <f:password/>
         </f:entry>
 
@@ -29,6 +29,12 @@
             <f:checkbox default="false"/>
             <f:description>Hide security scan results preview from all jobs. Requires restart.</f:description>
         </f:entry>
+
+        <f:entry title="Disable TLS/SSL Server Certificate Validation" field="disableCertificateValidation">
+            <f:checkbox default="false"/>
+            <f:description>Disabling the validation allows connecting to Checkmarx server with self signed certificate.</f:description>
+        </f:entry>
+
     </f:section>
 
 </j:jelly>

@@ -567,6 +567,7 @@ public class CxScanBuilder extends Builder {
         @Nullable private String username;
         @Nullable private String password;
         private boolean hideResults;
+        private boolean disableCertificateValidation;
 
         @Nullable
         public String getServerUrl() {
@@ -601,6 +602,14 @@ public class CxScanBuilder extends Builder {
 
         public void setHideResults(boolean hideResults) {
             this.hideResults = hideResults;
+        }
+
+        public boolean isDisableCertificateValidation() {
+            return disableCertificateValidation;
+        }
+
+        public void setDisableCertificateValidation(boolean disableCertificateValidation) {
+            this.disableCertificateValidation = disableCertificateValidation;
         }
 
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
