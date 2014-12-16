@@ -612,6 +612,13 @@ public class CxScanBuilder extends Builder {
         public void setDisableCertificateValidation(boolean disableCertificateValidation) {
             if (this.disableCertificateValidation && !disableCertificateValidation)
             {
+                /*
+                This condition in needed to re-enable immediately the verification of
+                server certificates as the user changes the setting. This alleviates
+                the requirement to restart the Jenkins server for configuration to take
+                effect.
+                 */
+
                 CxSSLUtility.enableSSLCertificateVerification();
             }
             this.disableCertificateValidation = disableCertificateValidation;
