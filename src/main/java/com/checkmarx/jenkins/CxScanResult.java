@@ -7,6 +7,8 @@ import hudson.util.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.xml.sax.Attributes;
@@ -49,15 +51,20 @@ public class CxScanResult implements Action {
     private LinkedList<QueryResult> lowQueryResultList;
     private LinkedList<QueryResult> infoQueryResultList;
 
+    @NotNull
     private String resultDeepLink;
     private File pdfReport;
 
     public final static String PDF_REPORT_NAME = "ScanReport.pdf";
-
+    @Nullable
     private String scanStart;
+    @Nullable
     private String scanTime;
+    @Nullable
     private String linesOfCodeScanned;
+    @Nullable
     private String filesScanned;
+    @Nullable
     private String scanType;
 
     private boolean resultIsValid;
@@ -118,26 +125,27 @@ public class CxScanResult implements Action {
         return infoCount;
     }
 
+    @NotNull
     public String getResultDeepLink() {
         return resultDeepLink;
     }
-
+    @Nullable
     public String getScanStart() {
         return scanStart;
     }
-
+    @Nullable
     public String getScanTime() {
         return scanTime;
     }
-
+    @Nullable
     public String getLinesOfCodeScanned() {
         return linesOfCodeScanned;
     }
-
+    @Nullable
     public String getFilesScanned() {
         return filesScanned;
     }
-
+    @Nullable
     public String getScanType() {
         return scanType;
     }
@@ -236,7 +244,9 @@ public class CxScanResult implements Action {
 
     private class ResultsParseHandler extends DefaultHandler {
 
+        @Nullable
         private String currentQueryName;
+        @Nullable
         private String currentQuerySeverity;
         private int    currentQueryNumOfResults;
 
@@ -246,30 +256,43 @@ public class CxScanResult implements Action {
 
             if ("Result".equals(qName))
             {
+                @Nullable
                 String falsePositive = attributes.getValue("FalsePositive");
                 if (!"True".equals(falsePositive))
                 {
                     currentQueryNumOfResults++;
-                    String severity = attributes.getValue("Severity");
-                    if (severity.equals(CxResultSeverity.HIGH.xmlParseString))
-                    {
-                        CxScanResult.this.highCount++;
+                    @Nullable
+                    String severity = attributes.getValue("SeverityIndex");
+                    if (severity!=null) {
+                        if (severity.equals(CxResultSeverity.HIGH.xmlParseString)) {
+                            CxScanResult.this.highCount++;
 
-                    } else if (severity.equals(CxResultSeverity.MEDIUM.xmlParseString))
-                    {
-                        CxScanResult.this.mediumCount++;
+                        } else if (severity.equals(CxResultSeverity.MEDIUM.xmlParseString)) {
+                            CxScanResult.this.mediumCount++;
 
-                    } else if (severity.equals(CxResultSeverity.LOW.xmlParseString))
-                    {
-                        CxScanResult.this.lowCount++;
-                    } else if (severity.equals(CxResultSeverity.INFO.xmlParseString))
-                    {
-                        CxScanResult.this.infoCount++;
+                        } else if (severity.equals(CxResultSeverity.LOW.xmlParseString)) {
+                            CxScanResult.this.lowCount++;
+
+                        } else if (severity.equals(CxResultSeverity.INFO.xmlParseString)) {
+                            CxScanResult.this.infoCount++;
+                        }
+                    } else {
+                        logger.warn("\"SeverityIndex\" attribute was not found in element \"Result\" in XML report. " +
+                                "Make sure you are working with Checkmarx server version 7.1.6 HF2 or above.");
                     }
                 }
             } else if ("Query".equals(qName)) {
                 currentQueryName = attributes.getValue("name");
-                currentQuerySeverity = attributes.getValue("Severity");
+                if (currentQueryName==null)
+                {
+                    logger.warn("\"name\" attribute was not found in element \"Query\" in XML report");
+                }
+                currentQuerySeverity = attributes.getValue("SeverityIndex");
+                if (currentQuerySeverity==null)
+                {
+                    logger.warn("\"SeverityIndex\" attribute was not found in element \"Query\" in XML report. " +
+                            "Make sure you are working with Checkmarx server version 7.1.6 HF2 or above.");
+                }
                 currentQueryNumOfResults = 0;
 
 
@@ -295,16 +318,16 @@ public class CxScanResult implements Action {
                 qr.setSeverity(currentQuerySeverity);
                 qr.setCount(currentQueryNumOfResults);
 
-                if (StringUtils.containsIgnoreCase(qr.getSeverity(),CxResultSeverity.HIGH.xmlParseString))
+                if (StringUtils.equals(qr.getSeverity(),CxResultSeverity.HIGH.xmlParseString))
                 {
                     CxScanResult.this.highQueryResultList.add(qr);
-                } else if (StringUtils.containsIgnoreCase(qr.getSeverity(),CxResultSeverity.MEDIUM.xmlParseString))
+                } else if(StringUtils.equals(qr.getSeverity(),CxResultSeverity.MEDIUM.xmlParseString))
                 {
                     CxScanResult.this.mediumQueryResultList.add(qr);
-                } else if(StringUtils.containsIgnoreCase(qr.getSeverity(),CxResultSeverity.LOW.xmlParseString))
+                } else if(StringUtils.equals(qr.getSeverity(),CxResultSeverity.LOW.xmlParseString))
                 {
                     CxScanResult.this.lowQueryResultList.add(qr);
-                } else if (StringUtils.containsIgnoreCase(qr.getSeverity(),CxResultSeverity.INFO.xmlParseString))
+                } else if(StringUtils.equals(qr.getSeverity(),CxResultSeverity.INFO.xmlParseString))
                 {
                     CxScanResult.this.infoQueryResultList.add(qr);
                 } else {
@@ -313,31 +336,44 @@ public class CxScanResult implements Action {
             }
         }
 
-        private String constructDeepLink(String rawDeepLink){
+        @NotNull
+        private String constructDeepLink(@Nullable String rawDeepLink){
+            if (rawDeepLink==null)
+            {
+                logger.warn("\"DeepLink\" attribute was not found in element \"CxXMLResults\" in XML report");
+                return "";
+            }
             String token = "CxWebClient";
             String [] tokens = rawDeepLink.split(token);
+            if (tokens.length < 1)
+            {
+                logger.warn("DeepLink value found in XML report is of unexpected format: " + rawDeepLink + "\n"
+                + "\"Open Code Viewer\" button will not be functional");
+            }
             return CxScanResult.this.serverUrl + "/" + token + tokens[1];
         }
     }
 
     public static class QueryResult {
+        @Nullable
         private String name;
+        @Nullable
         private String severity;
         private int count;
-
+        @Nullable
         public String getName() {
             return name;
         }
 
-        public void setName(String name) {
+        public void setName(@Nullable String name) {
             this.name = name;
         }
-
+        @Nullable
         public String getSeverity() {
             return severity;
         }
 
-        public void setSeverity(String severity) {
+        public void setSeverity(@Nullable String severity) {
             this.severity = severity;
         }
 
@@ -349,9 +385,14 @@ public class CxScanResult implements Action {
             this.count = count;
         }
 
+        @NotNull
         public String getPrettyName()
         {
-            return this.name.replace('_',' ');
+            if (this.name!=null) {
+                return this.name.replace('_', ' ');
+            } else {
+                return "";
+            }
         }
     }
 }
