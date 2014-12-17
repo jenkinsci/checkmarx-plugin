@@ -278,7 +278,7 @@ public class CxScanResult implements Action {
                         }
                     } else {
                         logger.warn("\"SeverityIndex\" attribute was not found in element \"Result\" in XML report. " +
-                                "Make sure you are working with Checkmarx server version 7.1.6 HF2 or above.");
+                                "Make sure you are working with Checkmarx server version 7.1.6 HF3 or above.");
                     }
                 }
             } else if ("Query".equals(qName)) {
@@ -291,7 +291,7 @@ public class CxScanResult implements Action {
                 if (currentQuerySeverity==null)
                 {
                     logger.warn("\"SeverityIndex\" attribute was not found in element \"Query\" in XML report. " +
-                            "Make sure you are working with Checkmarx server version 7.1.6 HF2 or above.");
+                            "Make sure you are working with Checkmarx server version 7.1.6 HF3 or above.");
                 }
                 currentQueryNumOfResults = 0;
 
