@@ -16,7 +16,7 @@
 
         <f:entry title="Disable TLS/SSL Server Certificate Validation" field="disableCertificateValidation">
             <f:checkbox default="false"/>
-            <f:description>Disabling the validation allows connecting to Checkmarx server with untrusted certificate.</f:description>
+            <f:description>Disable TLS/SSL server certificate validation. Allows connecting to Checkmarx server with untrusted certificate.</f:description>
         </f:entry>
 
         <f:entry title="Default Server URL" field="serverUrl">
