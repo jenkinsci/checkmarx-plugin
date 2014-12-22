@@ -33,7 +33,7 @@
 
         <f:entry title="Hide results" field="hideResults">
             <f:checkbox default="false"/>
-            <f:description>Hide security scan results preview from all jobs. Requires restart.</f:description>
+            <f:description>Hide security scan results preview from all jobs and builds.</f:description>
         </f:entry>
 
 

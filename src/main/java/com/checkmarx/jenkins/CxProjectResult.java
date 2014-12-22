@@ -3,14 +3,13 @@ package com.checkmarx.jenkins;
 import hudson.Extension;
 import hudson.Functions;
 import hudson.PluginWrapper;
-import hudson.matrix.MatrixConfiguration;
-import hudson.matrix.MatrixProject;
 import hudson.maven.MavenModuleSet;
 import hudson.model.*;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.util.*;
 import jenkins.model.Jenkins;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -65,22 +64,42 @@ public class CxProjectResult implements Action {
 
     @Override
     public String getUrlName() {
-        return "checkmarx";
+        if (isShowResults()) {
+            return "checkmarx";
+        } else {
+            return null;
+        }
     }
 
     @Override
     public String getDisplayName() {
-        return "Checkmarx Last Scan Results";
+        if (isShowResults()) {
+            return "Checkmarx Last Scan Results";
+        } else {
+            return null;
+        }
     }
 
     @Override
     public String getIconFileName() {
-        return getIconPath() + "CxIcon24x24.png";
+        if (isShowResults()) {
+            return getIconPath() + "CxIcon24x24.png";
+        } else {
+            return null;
+        }
     }
 
+    @NotNull
     public String getIconPath() {
         PluginWrapper wrapper = Hudson.getInstance().getPluginManager().getPlugin(CxPlugin.class);
         return "/plugin/"+ wrapper.getShortName()+"/";
+    }
+
+    public boolean isShowResults()
+    {
+        @Nullable
+        CxScanBuilder.DescriptorImpl descriptor = (CxScanBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(CxScanBuilder.class);
+        return (descriptor != null && !descriptor.isHideResults());
     }
 
     public boolean isResultAvailable()
@@ -120,7 +139,7 @@ public class CxProjectResult implements Action {
         {
             return;
         }
-        ChartUtil.generateClickableMap(req,rsp,createChart(req,buildDataSet(req)),calcDefaultSize());
+        ChartUtil.generateClickableMap(req, rsp, createChart(req, buildDataSet(req)), calcDefaultSize());
     }
 
 
@@ -253,31 +272,25 @@ public class CxProjectResult implements Action {
          */
         @Override
         public Collection<? extends Action> createFor(AbstractProject project) {
-            // We don't want to add the CxProectResult action to MatrixProject (appears as Multi-Configuration in GUI),
+            // We don't want to add the CxProjectResult action to MatrixProject (appears as Multi-Configuration in GUI),
             // since it does not make sense to present our vulnerability graph in this level.
 
-            @Nullable
-            CxScanBuilder.DescriptorImpl descriptor = (CxScanBuilder.DescriptorImpl)Jenkins.getInstance().getDescriptor(CxScanBuilder.class);
-            if (descriptor!= null && !descriptor.isHideResults()) {
-
-                if (project instanceof Project) {
-                    if (((Project) project).getBuildersList().get(CxScanBuilder.class) != null) {
-                        LinkedList<Action> list = new LinkedList<Action>();
-                        list.add(new CxProjectResult(project));
-                        return list;
-                    }
-                }
-
-                if (project instanceof MavenModuleSet) {
-                    if (((MavenModuleSet) project).getPrebuilders().get(CxScanBuilder.class) != null ||
-                            ((MavenModuleSet) project).getPostbuilders().get(CxScanBuilder.class) != null) {
-                        LinkedList<Action> list = new LinkedList<Action>();
-                        list.add(new CxProjectResult(project));
-                        return list;
-                    }
+            if (project instanceof Project) {
+                if (((Project) project).getBuildersList().get(CxScanBuilder.class) != null) {
+                    LinkedList<Action> list = new LinkedList<Action>();
+                    list.add(new CxProjectResult(project));
+                    return list;
                 }
             }
 
+            if (project instanceof MavenModuleSet) {
+                if (((MavenModuleSet) project).getPrebuilders().get(CxScanBuilder.class) != null ||
+                        ((MavenModuleSet) project).getPostbuilders().get(CxScanBuilder.class) != null) {
+                    LinkedList<Action> list = new LinkedList<Action>();
+                    list.add(new CxProjectResult(project));
+                    return list;
+                }
+            }
             return null;
         }
     }

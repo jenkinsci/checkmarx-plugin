@@ -1,14 +1,18 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-    <j:if test="${it.resultAvailable}">
-        <st:redirect url="${app.rootUrl}${it.lastBuildAction.owner.url}${it.lastBuildAction.urlName}"/>
-        ${it.lastBuildAction.owner.url}
-        <p>${app.rootUrl}</p>
+    <j:if test="${it.showResults}">
 
+        <j:if test="${it.resultAvailable}">
+            <st:redirect url="${app.rootUrl}${it.lastBuildAction.owner.url}${it.lastBuildAction.urlName}"/>
+            ${it.lastBuildAction.owner.url}
+            <p>${app.rootUrl}</p>
+
+        </j:if>
+
+        <j:if test="${!it.resultAvailable}">
+            <p>No scan results available</p>
+        </j:if>
     </j:if>
 
-    <j:if test="${!it.resultAvailable}">
-        <p>No scan results available</p>
-    </j:if>
 
 </j:jelly>

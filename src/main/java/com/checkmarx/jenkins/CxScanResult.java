@@ -4,6 +4,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 import hudson.PluginWrapper;
 import hudson.model.*;
 import hudson.util.IOUtils;
+import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
@@ -87,22 +88,46 @@ public class CxScanResult implements Action {
 
     @Override
     public String getIconFileName() {
-        return getIconPath() + "CxIcon24x24.png";
+        if (isShowResults())
+        {
+            return getIconPath() + "CxIcon24x24.png";
+        } else {
+            return null;
+        }
     }
 
     @Override
     public String getDisplayName() {
-        return "Checkmarx Scan Results";
+        if (isShowResults())
+        {
+            return "Checkmarx Scan Results";
+        } else {
+            return null;
+        }
     }
 
     @Override
     public String getUrlName() {
-        return "checkmarx";
+        if (isShowResults())
+        {
+            return "checkmarx";
+        } else {
+            return null;
+        }
     }
 
+    @NotNull
     public String getIconPath() {
         PluginWrapper wrapper = Hudson.getInstance().getPluginManager().getPlugin(CxPlugin.class);
         return "/plugin/"+ wrapper.getShortName()+"/";
+
+    }
+
+    public boolean isShowResults()
+    {
+        @Nullable
+        CxScanBuilder.DescriptorImpl descriptor = (CxScanBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(CxScanBuilder.class);
+        return (descriptor != null && !descriptor.isHideResults());
     }
 
     public int getHighCount()
