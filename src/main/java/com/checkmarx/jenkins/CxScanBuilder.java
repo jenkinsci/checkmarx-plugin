@@ -592,6 +592,11 @@ public class CxScanBuilder extends Builder {
         private boolean hideResults;
         private boolean disableCertificateValidation;
 
+        private boolean forcingVulnerabilityThresholdEnabled;
+        private int highThresholdEnforcement;
+        private int mediumThresholdEnforcement;
+        private int lowThresholdEnforcement;
+
         @Nullable
         public String getServerUrl() {
             return serverUrl;
@@ -644,6 +649,38 @@ public class CxScanBuilder extends Builder {
                 CxSSLUtility.enableSSLCertificateVerification();
             }
             this.disableCertificateValidation = disableCertificateValidation;
+        }
+
+        public boolean isForcingVulnerabilityThresholdEnabled() {
+            return forcingVulnerabilityThresholdEnabled;
+        }
+
+        public void setForcingVulnerabilityThresholdEnabled(boolean forcingVulnerabilityThresholdEnabled) {
+            this.forcingVulnerabilityThresholdEnabled = forcingVulnerabilityThresholdEnabled;
+        }
+
+        public int getHighThresholdEnforcement() {
+            return highThresholdEnforcement;
+        }
+
+        public void setHighThresholdEnforcement(int highThresholdEnforcement) {
+            this.highThresholdEnforcement = highThresholdEnforcement;
+        }
+
+        public int getMediumThresholdEnforcement() {
+            return mediumThresholdEnforcement;
+        }
+
+        public void setMediumThresholdEnforcement(int mediumThresholdEnforcement) {
+            this.mediumThresholdEnforcement = mediumThresholdEnforcement;
+        }
+
+        public int getLowThresholdEnforcement() {
+            return lowThresholdEnforcement;
+        }
+
+        public void setLowThresholdEnforcement(int lowThresholdEnforcement) {
+            this.lowThresholdEnforcement = lowThresholdEnforcement;
         }
 
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
@@ -931,12 +968,7 @@ public class CxScanBuilder extends Builder {
 
         public FormValidation doCheckHighThreshold(final @QueryParameter int value)
         {
-            if (value >= 0)
-            {
-                return FormValidation.ok();
-            } else {
-                return FormValidation.error("Number must be non-negative");
-            }
+            return checkNonNegativeValue(value);
         }
 
         /*
@@ -946,12 +978,7 @@ public class CxScanBuilder extends Builder {
 
         public FormValidation doCheckMediumThreshold(final @QueryParameter int value)
         {
-            if (value >= 0)
-            {
-                return FormValidation.ok();
-            } else {
-                return FormValidation.error("Number must be non-negative");
-            }
+            return checkNonNegativeValue(value);
         }
 
         /*
@@ -960,6 +987,45 @@ public class CxScanBuilder extends Builder {
          */
 
         public FormValidation doCheckLowThreshold(final @QueryParameter int value)
+        {
+            return checkNonNegativeValue(value);
+        }
+
+        /*
+         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+         *  shared state to avoid synchronization issues.
+         */
+
+        public FormValidation doCheckHighThresholdEnforcement(final @QueryParameter int value)
+        {
+            return checkNonNegativeValue(value);
+        }
+
+        /*
+         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+         *  shared state to avoid synchronization issues.
+         */
+
+        public FormValidation doCheckMediumThresholdEnforcement(final @QueryParameter int value)
+        {
+            return checkNonNegativeValue(value);
+        }
+
+        /*
+         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+         *  shared state to avoid synchronization issues.
+         */
+
+        public FormValidation doCheckLowThresholdEnforcement(final @QueryParameter int value)
+        {
+            return checkNonNegativeValue(value);
+        }
+
+        /*
+         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+         *  shared state to avoid synchronization issues.
+         */
+        private FormValidation checkNonNegativeValue(final int value)
         {
             if (value >= 0)
             {
