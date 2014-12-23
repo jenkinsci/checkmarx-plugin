@@ -36,7 +36,7 @@
             <f:description>Hide security scan results preview from all jobs and builds.</f:description>
         </f:entry>
 
-        <f:optionalBlock title="Enforce vulnerability threshold values for all jobs" inline="true" field="forcingVulnerabilityThresholdEnabled">
+        <f:optionalBlock title="Set vulnerability threshold enforcement values for all jobs" inline="true" field="forcingVulnerabilityThresholdEnabled">
             <f:entry title="High severity vulnerabilities threshold" field="highThresholdEnforcement">
                 <f:number clazz="positive-number" min="0" step="1" default="0"/>
             </f:entry>
