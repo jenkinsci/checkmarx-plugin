@@ -14,6 +14,7 @@ import hudson.triggers.SCMTrigger;
 import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -282,8 +283,10 @@ public class CxScanBuilder extends Builder {
             CxWSResponseRunID cxWSResponseRunID = submitScan(build, cxWebService,listener);
             instanceLogger.info("\nScan job submitted successfully\n");
 
+            @Nullable
+            final CxScanBuilder.DescriptorImpl descriptor = (CxScanBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(CxScanBuilder.class);
 
-            if (!isWaitForResultsEnabled())
+            if (!isWaitForResultsEnabled() && !descriptor.isForcingVulnerabilityThresholdEnabled())
             {
                 listener.finished(Result.SUCCESS);
                 return true;
@@ -307,20 +310,9 @@ public class CxScanBuilder extends Builder {
             cxScanResult.readScanXMLReport(xmlReportFile);
             build.addAction(cxScanResult);
 
-            instanceLogger.info("Number of high severity vulnerabilities: " +
-                    cxScanResult.getHighCount() + " stability threshold: " + this.getHighThreshold());
-
-            instanceLogger.info("Number of medium severity vulnerabilities: " +
-                    cxScanResult.getMediumCount() + " stability threshold: " + this.getMediumThreshold());
-
-            instanceLogger.info("Number of low severity vulnerabilities: " +
-                    cxScanResult.getLowCount() + " stability threshold: " + this.getLowThreshold());
-
-            if (this.isVulnerabilityThresholdEnabled())
+            if (descriptor.isForcingVulnerabilityThresholdEnabled() || this.isVulnerabilityThresholdEnabled())
             {
-                if ((cxScanResult.getHighCount()   > this.getHighThreshold()   &&  this.getHighThreshold() > 0 ) ||
-                    (cxScanResult.getMediumCount() > this.getMediumThreshold() &&  this.getMediumThreshold() > 0 ) ||
-                    (cxScanResult.getLowCount()    > this.getLowThreshold()    &&  this.getLowThreshold() > 0 ))
+                if (isThresholdCrossed(cxScanResult))
                 {
                     build.setResult(Result.UNSTABLE);    // Marks the build result as UNSTABLE
                     listener.finished(Result.UNSTABLE);
@@ -346,6 +338,46 @@ public class CxScanBuilder extends Builder {
             closeLogger();
         }
     }
+
+    private boolean isThresholdCrossed(@NotNull final CxScanResult cxScanResult)
+    {
+        @Nullable
+        final CxScanBuilder.DescriptorImpl descriptor = (CxScanBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(CxScanBuilder.class);
+        boolean highThresholdCrossed = false;
+        boolean mediumThresholdCrossed = false;
+        boolean lowThresholdCrossed = false;
+
+        if (descriptor!=null && descriptor.isForcingVulnerabilityThresholdEnabled())
+        {
+            instanceLogger.info("Number of high severity vulnerabilities: " +
+                    cxScanResult.getHighCount() + " stability threshold: " + descriptor.getHighThresholdEnforcement());
+
+            instanceLogger.info("Number of medium severity vulnerabilities: " +
+                    cxScanResult.getMediumCount() + " stability threshold: " + descriptor.getMediumThresholdEnforcement());
+
+            instanceLogger.info("Number of low severity vulnerabilities: " +
+                    cxScanResult.getLowCount() + " stability threshold: " + descriptor.getLowThresholdEnforcement());
+
+            highThresholdCrossed =   (cxScanResult.getHighCount()   > descriptor.getHighThresholdEnforcement()   && descriptor.getHighThresholdEnforcement()   > 0);
+            mediumThresholdCrossed = (cxScanResult.getMediumCount() > descriptor.getMediumThresholdEnforcement() && descriptor.getMediumThresholdEnforcement() > 0);
+            lowThresholdCrossed =    (cxScanResult.getLowCount()    > descriptor.getLowThresholdEnforcement()    && descriptor.getLowThresholdEnforcement()    > 0);
+        } else {
+            instanceLogger.info("Number of high severity vulnerabilities: " +
+                    cxScanResult.getHighCount() + " stability threshold: " + this.getHighThreshold());
+
+            instanceLogger.info("Number of medium severity vulnerabilities: " +
+                    cxScanResult.getMediumCount() + " stability threshold: " + this.getMediumThreshold());
+
+            instanceLogger.info("Number of low severity vulnerabilities: " +
+                    cxScanResult.getLowCount() + " stability threshold: " + this.getLowThreshold());
+
+            highThresholdCrossed =   (cxScanResult.getHighCount()   > this.getHighThreshold()   && this.getHighThreshold()   > 0);
+            mediumThresholdCrossed = (cxScanResult.getMediumCount() > this.getMediumThreshold() && this.getMediumThreshold() > 0);
+            lowThresholdCrossed =    (cxScanResult.getLowCount()    > this.getLowThreshold()    && this.getLowThreshold()    > 0);
+        }
+        return highThresholdCrossed || mediumThresholdCrossed || lowThresholdCrossed;
+    }
+
 
     private String instanceLoggerSuffix(final AbstractBuild<?, ?> build)
     {
