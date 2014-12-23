@@ -74,6 +74,8 @@ public class CxScanBuilder extends Builder {
 
     private boolean vulnerabilityThresholdEnabled;
     private int highThreshold;
+    private int mediumThreshold;
+    private int lowThreshold;
     private boolean generatePdfReport;
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -113,6 +115,8 @@ public class CxScanBuilder extends Builder {
                          boolean waitForResultsEnabled,
                          boolean vulnerabilityThresholdEnabled,
                          int highThreshold,
+                         int mediumThreshold,
+                         int lowThreshold,
                          boolean generatePdfReport)
     {
         this.useOwnServerCredentials = useOwnServerCredentials;
@@ -134,6 +138,8 @@ public class CxScanBuilder extends Builder {
         this.waitForResultsEnabled = waitForResultsEnabled;
         this.vulnerabilityThresholdEnabled = vulnerabilityThresholdEnabled;
         this.highThreshold = highThreshold;
+        this.mediumThreshold = mediumThreshold;
+        this.lowThreshold = lowThreshold;
         this.generatePdfReport =  generatePdfReport;
     }
 
@@ -228,6 +234,14 @@ public class CxScanBuilder extends Builder {
         return highThreshold;
     }
 
+    public int getMediumThreshold() {
+        return mediumThreshold;
+    }
+
+    public int getLowThreshold() {
+        return lowThreshold;
+    }
+
     public boolean isGeneratePdfReport() {
         return generatePdfReport;
     }
@@ -296,9 +310,17 @@ public class CxScanBuilder extends Builder {
             instanceLogger.info("Number of high severity vulnerabilities: " +
                     cxScanResult.getHighCount() + " stability threshold: " + this.getHighThreshold());
 
+            instanceLogger.info("Number of medium severity vulnerabilities: " +
+                    cxScanResult.getMediumCount() + " stability threshold: " + this.getMediumThreshold());
+
+            instanceLogger.info("Number of low severity vulnerabilities: " +
+                    cxScanResult.getLowCount() + " stability threshold: " + this.getLowThreshold());
+
             if (this.isVulnerabilityThresholdEnabled())
             {
-                if (cxScanResult.getHighCount() >  this.getHighThreshold())
+                if ((cxScanResult.getHighCount()   > this.getHighThreshold()   &&  this.getHighThreshold() > 0 ) ||
+                    (cxScanResult.getMediumCount() > this.getMediumThreshold() &&  this.getMediumThreshold() > 0 ) ||
+                    (cxScanResult.getLowCount()    > this.getLowThreshold()    &&  this.getLowThreshold() > 0 ))
                 {
                     build.setResult(Result.UNSTABLE);    // Marks the build result as UNSTABLE
                     listener.finished(Result.UNSTABLE);
@@ -908,6 +930,36 @@ public class CxScanBuilder extends Builder {
          */
 
         public FormValidation doCheckHighThreshold(final @QueryParameter int value)
+        {
+            if (value >= 0)
+            {
+                return FormValidation.ok();
+            } else {
+                return FormValidation.error("Number must be non-negative");
+            }
+        }
+
+        /*
+         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+         *  shared state to avoid synchronization issues.
+         */
+
+        public FormValidation doCheckMediumThreshold(final @QueryParameter int value)
+        {
+            if (value >= 0)
+            {
+                return FormValidation.ok();
+            } else {
+                return FormValidation.error("Number must be non-negative");
+            }
+        }
+
+        /*
+         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+         *  shared state to avoid synchronization issues.
+         */
+
+        public FormValidation doCheckLowThreshold(final @QueryParameter int value)
         {
             if (value >= 0)
             {

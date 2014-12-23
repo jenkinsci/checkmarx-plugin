@@ -110,6 +110,12 @@
             <f:entry title="High severity vulnerabilities threshold" field="highThreshold">
                 <f:number clazz="positive-number" min="0" step="1" default="0"/>
             </f:entry>
+            <f:entry title="Medium severity vulnerabilities threshold" field="mediumThreshold">
+                <f:number clazz="positive-number" min="0" step="1" default="0"/>
+            </f:entry>
+            <f:entry title="Low severity vulnerabilities threshold" field="lowThreshold">
+                <f:number clazz="positive-number" min="0" step="1" default="0"/>
+            </f:entry>
         </f:optionalBlock>
 
         <f:entry title="Generate PDF report" field="generatePdfReport">
