@@ -16,7 +16,6 @@
 
         <f:entry title="Disable TLS/SSL Server Certificate Validation" field="disableCertificateValidation">
             <f:checkbox default="false"/>
-            <f:description>Disable TLS/SSL server certificate validation. Allows connecting to Checkmarx server with untrusted certificate.</f:description>
         </f:entry>
 
         <f:entry title="Default Server URL" field="serverUrl">
@@ -33,7 +32,6 @@
 
         <f:entry title="Hide results" field="hideResults">
             <f:checkbox default="false"/>
-            <f:description>Hide security scan results preview from all jobs and builds.</f:description>
         </f:entry>
 
         <f:optionalBlock title="Set vulnerability threshold enforcement values for all jobs" inline="true" field="forcingVulnerabilityThresholdEnabled">
