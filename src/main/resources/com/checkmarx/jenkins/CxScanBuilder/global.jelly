@@ -48,6 +48,11 @@
             </f:entry>
         </f:optionalBlock>
 
+        <f:invisibleEntry>
+            <!-- Used for Internet Explorer cache invalidation -->
+            <f:textbox default="${descriptor.currentTime}" field="timestamp" />
+        </f:invisibleEntry>
+
     </f:section>
 
 </j:jelly>

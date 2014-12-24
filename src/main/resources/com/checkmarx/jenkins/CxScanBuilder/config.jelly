@@ -139,4 +139,8 @@
         </f:entry>
     </j:if>
 
+    <f:invisibleEntry>
+        <!-- Used for Internet Explorer cache invalidation -->
+        <f:textbox default="${descriptor.currentTime}" field="timestamp" />
+    </f:invisibleEntry>
 </j:jelly>

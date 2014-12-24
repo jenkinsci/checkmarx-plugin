@@ -741,6 +741,15 @@ public class CxScanBuilder extends Builder {
 
         }
 
+        /*
+         * Used to fill the value of hidden timestamp textbox, which in turn is used for Internet Explorer cache invalidation
+         */
+        @NotNull
+        public String getCurrentTime()
+        {
+            return String.valueOf(System.currentTimeMillis());
+        }
+
         //////////////////////////////////////////////////////////////////////////////////////
         // Field value validators
         //////////////////////////////////////////////////////////////////////////////////////
@@ -749,9 +758,11 @@ public class CxScanBuilder extends Builder {
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
          *  shared state to avoid synchronization issues.
          */
-        public FormValidation doCheckServerUrl(final @QueryParameter String value) {
+        public FormValidation doCheckServerUrl(final @QueryParameter String serverUrl,
+                                               final @QueryParameter String timestamp) {
+            // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             try {
-                new CxWebService(value);
+                new CxWebService(serverUrl);
                 return FormValidation.ok("Server Validated Successfully");
             } catch (Exception e)
             {
@@ -763,9 +774,11 @@ public class CxScanBuilder extends Builder {
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
          *  shared state to avoid synchronization issues.
          */
-        public FormValidation doCheckPassword(   final @QueryParameter String serverUrl,
-                                                              final @QueryParameter String password,
-                                                              final @QueryParameter String username) {
+        public FormValidation doCheckPassword(final @QueryParameter String serverUrl,
+                                              final @QueryParameter String password,
+                                              final @QueryParameter String username,
+                                              final @QueryParameter String timestamp) {
+            // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             CxWebService cxWebService = null;
             try {
                 cxWebService = new CxWebService(serverUrl);
@@ -813,10 +826,10 @@ public class CxScanBuilder extends Builder {
         public  ComboBoxModel doFillProjectNameItems(   final @QueryParameter boolean useOwnServerCredentials,
                                                                     final @QueryParameter String serverUrl,
                                                                     final @QueryParameter String username,
-                                                                    final @QueryParameter String password)
+                                                                    final @QueryParameter String password,
+                                                                    final @QueryParameter String timestamp)
         {
-
-
+            // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ComboBoxModel projectNames = new ComboBoxModel();
 
             try {
@@ -847,8 +860,10 @@ public class CxScanBuilder extends Builder {
                                                  final @QueryParameter String serverUrl,
                                                  final @QueryParameter String username,
                                                  final @QueryParameter String password,
-                                                 final @QueryParameter String groupId)
+                                                 final @QueryParameter String groupId,
+                                                 final @QueryParameter String timestamp)
         {
+            // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             try {
                 final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
                 CxWSBasicRepsonse cxWSBasicRepsonse = cxWebService.validateProjectName(projectName,groupId);
@@ -894,8 +909,10 @@ public class CxScanBuilder extends Builder {
         public ListBoxModel doFillPresetItems(   final @QueryParameter boolean useOwnServerCredentials,
                                                               final @QueryParameter String serverUrl,
                                                               final @QueryParameter String username,
-                                                              final @QueryParameter String password)
+                                                              final @QueryParameter String password,
+                                                              final @QueryParameter String timestamp)
         {
+            // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
             try {
                 final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
@@ -936,8 +953,10 @@ public class CxScanBuilder extends Builder {
         public ListBoxModel doFillSourceEncodingItems(   final @QueryParameter boolean useOwnServerCredentials,
                                                                       final @QueryParameter String serverUrl,
                                                                       final @QueryParameter String username,
-                                                                      final @QueryParameter String password)
+                                                                      final @QueryParameter String password,
+                                                                      final @QueryParameter String timestamp)
         {
+            // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
             try {
                 final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
@@ -970,8 +989,10 @@ public class CxScanBuilder extends Builder {
         public ListBoxModel doFillGroupIdItems(   final @QueryParameter boolean useOwnServerCredentials,
                                                          final @QueryParameter String serverUrl,
                                                          final @QueryParameter String username,
-                                                         final @QueryParameter String password)
+                                                         final @QueryParameter String password,
+                                                         final @QueryParameter String timestamp)
         {
+            // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
             try {
                 final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
