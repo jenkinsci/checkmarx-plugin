@@ -668,7 +668,7 @@ public class CxScanBuilder extends Builder {
             return disableCertificateValidation;
         }
 
-        public void setDisableCertificateValidation(boolean disableCertificateValidation) {
+        public void setDisableCertificateValidation(final boolean disableCertificateValidation) {
             if (this.disableCertificateValidation && !disableCertificateValidation)
             {
                 /*
@@ -683,6 +683,15 @@ public class CxScanBuilder extends Builder {
             this.disableCertificateValidation = disableCertificateValidation;
         }
 
+        // This getter is used to negate the logic of disableCertificateValidation filed in the UI
+        public boolean isEnableCertificateValidation() {
+            return !disableCertificateValidation;
+        }
+
+        // This setter is used to negate the logic of disableCertificateValidation filed in the UI
+        public void setEnableCertificateValidation(final boolean enableCertificateValidation) {
+            this.setDisableCertificateValidation(!enableCertificateValidation);
+        }
         public boolean isForcingVulnerabilityThresholdEnabled() {
             return forcingVulnerabilityThresholdEnabled;
         }

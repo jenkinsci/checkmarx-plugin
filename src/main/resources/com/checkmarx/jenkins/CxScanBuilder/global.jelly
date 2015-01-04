@@ -14,8 +14,8 @@
 
     <f:section title="Checkmarx" name="checkmarx">
 
-        <f:entry title="Disable TLS/SSL Server Certificate Validation" field="disableCertificateValidation">
-            <f:checkbox default="false"/>
+        <f:entry title="Enable TLS/SSL Server Certificate Validation" field="enableCertificateValidation">
+            <f:checkbox default="true"/>
         </f:entry>
 
         <f:entry title="Default Server URL" field="serverUrl">
