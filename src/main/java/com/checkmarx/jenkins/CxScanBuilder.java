@@ -622,7 +622,8 @@ public class CxScanBuilder extends Builder {
         @Nullable private String username;
         @Nullable private String password;
         private boolean hideResults;
-        private boolean disableCertificateValidation;
+        private boolean enableCertificateValidation;
+
 
         private boolean forcingVulnerabilityThresholdEnabled;
         private int highThresholdEnforcement;
@@ -664,12 +665,15 @@ public class CxScanBuilder extends Builder {
             this.hideResults = hideResults;
         }
 
-        public boolean isDisableCertificateValidation() {
-            return disableCertificateValidation;
+
+
+        public boolean isEnableCertificateValidation() {
+            return enableCertificateValidation;
         }
 
-        public void setDisableCertificateValidation(final boolean disableCertificateValidation) {
-            if (this.disableCertificateValidation && !disableCertificateValidation)
+        public void setEnableCertificateValidation(final boolean enableCertificateValidation) {
+
+            if (!this.enableCertificateValidation && enableCertificateValidation)
             {
                 /*
                 This condition in needed to re-enable immediately the verification of
@@ -680,17 +684,7 @@ public class CxScanBuilder extends Builder {
 
                 CxSSLUtility.enableSSLCertificateVerification();
             }
-            this.disableCertificateValidation = disableCertificateValidation;
-        }
-
-        // This getter is used to negate the logic of disableCertificateValidation filed in the UI
-        public boolean isEnableCertificateValidation() {
-            return !disableCertificateValidation;
-        }
-
-        // This setter is used to negate the logic of disableCertificateValidation filed in the UI
-        public void setEnableCertificateValidation(final boolean enableCertificateValidation) {
-            this.setDisableCertificateValidation(!enableCertificateValidation);
+            this.enableCertificateValidation = enableCertificateValidation;
         }
         public boolean isForcingVulnerabilityThresholdEnabled() {
             return forcingVulnerabilityThresholdEnabled;

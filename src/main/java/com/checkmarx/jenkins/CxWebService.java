@@ -61,7 +61,7 @@ public class CxWebService {
 
         @Nullable
         CxScanBuilder.DescriptorImpl descriptor = (CxScanBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(CxScanBuilder.class);
-        if (descriptor != null && descriptor.isDisableCertificateValidation()) {
+        if (descriptor != null && !descriptor.isEnableCertificateValidation()) {
             logger.info("SSL/TLS Certificate Validation Disabled");
             CxSSLUtility.disableSSLCertificateVerification();
         }
