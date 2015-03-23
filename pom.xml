@@ -34,6 +34,10 @@
 		<name>Checkmarx Ltd.</name>
 		<url>http://www.checkmarx.com</url>
 	</organization>
+	
+	<!-- The URL and name below are used by Jenkins for help dialogues -->
+	<url>https://checkmarx.atlassian.net/wiki/display/KC/CxSuite+Jenkins+Plugin</url>
+	<name>CxSuite Jenkins Plugin</name>
 
 	<dependencies>
 		<dependency>
