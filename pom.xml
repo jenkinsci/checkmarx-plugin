@@ -1,28 +1,28 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.jenkins-ci.plugins</groupId>
-        <artifactId>plugin</artifactId>
-        <version>1.509.3</version>
-        <!-- which version of Jenkins is this plugin built against? -->
-    </parent>
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.jenkins-ci.plugins</groupId>
+		<artifactId>plugin</artifactId>
+		<version>1.509.3</version>
+		<!-- Specifies oldest supported Jenkins version -->
+	</parent>
 
-    <groupId>com.checkmarx.jenkins</groupId>
-    <artifactId>checkmarx</artifactId>
-    <!-- Version format:  X1.X2.X3.HF-V1.V2
+	<groupId>com.checkmarx.jenkins</groupId>
+	<artifactId>checkmarx</artifactId>
+	<!-- Version format:  X1.X2.X3.HF-V1.V2
         X is the version of the minimum required Checkmarx server
         FH is the minimum required hot fix number of server version X
         V is the version of the Jenkins plugin, where V2 is optional
         V version sequence is independent of X.HF version sequence -->
-    <version>7.1.6.3-19</version>
-    <packaging>hpi</packaging>
+	<version>7.1.6.3-19</version>
+	<packaging>hpi</packaging>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <cxfver>2.7.10</cxfver>
-    </properties>
-    <!--licenses>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<cxfver>2.7.10</cxfver>
+	</properties>
+	<!--licenses>
         <license>
             <name>TBD (e.g. The Apache Software License, Version 2.0)</name>
             <url>TBD (e.g. http://www.apache.org/licenses/LICENSE-2.0.txt)</url>
@@ -30,120 +30,99 @@
             <comments>TBD (e.g. A business-friendly OSS license)</comments>
         </license>
     </licenses-->
-    <organization>
-        <name>Checkmarx Ltd.</name>
-        <url>http://www.checkmarx.com</url>
-    </organization>
+	<organization>
+		<name>Checkmarx Ltd.</name>
+		<url>http://www.checkmarx.com</url>
+	</organization>
 
-    <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
-    <repositories>
-        <repository>
-            <id>repo.jenkins-ci.org</id>
-            <url>http://repo.jenkins-ci.org/public/</url>
-        </repository>
-        <repository>
-            <id>internal.repo</id>
-            <name>Checkmarx Internal Repository</name>
-            <url>file:///Users/denis/Documents/iOSDevMac/Checkmarx/InternalMavenRepository</url>
-        </repository>
-    </repositories>
+	<dependencies>
+		<dependency>
+			<groupId>org.jenkins-ci.main</groupId>
+			<artifactId>maven-plugin</artifactId>
+		</dependency>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.jenkins-ci.main</groupId>
-            <artifactId>maven-plugin</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>com.checkmarx.components</groupId>
+			<artifactId>zipper</artifactId>
+			<version>RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.14</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.intellij</groupId>
+			<artifactId>annotations</artifactId>
+			<version>12.0</version>
+		</dependency>
 
-        <dependency>
-            <groupId>com.checkmarx.components</groupId>
-            <artifactId>zipper</artifactId>
-            <version>1.2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.14</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intellij</groupId>
-            <artifactId>annotations</artifactId>
-            <version>12.0</version>
-        </dependency>
+		<!--CXF Dependencies-->
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-frontend-jaxws</artifactId>
+			<version>${cxfver}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-ws-security</artifactId>
+			<version>2.6.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-transports-http-jetty</artifactId>
+			<version>${cxfver}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>4.0.1.RELEASE</version>
+		</dependency>
+		<!--End of CXF Dependencies-->
+		<dependency>
+			<groupId>com.googlecode.lambdaj</groupId>
+			<artifactId>lambdaj</artifactId>
+			<version>2.3.3</version>
+		</dependency>
 
-        <!--CXF Dependencies-->
-        <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-frontend-jaxws</artifactId>
-            <version>${cxfver}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-ws-security</artifactId>
-            <version>2.6.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-transports-http-jetty</artifactId>
-            <version>${cxfver}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>4.0.1.RELEASE</version>
-        </dependency>
-        <!--End of CXF Dependencies-->
-        <dependency>
-            <groupId>com.googlecode.lambdaj</groupId>
-            <artifactId>lambdaj</artifactId>
-            <version>2.3.3</version>
-        </dependency>
+	</dependencies>
 
-    </dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jenkins-ci.tools</groupId>
+				<artifactId>maven-hpi-plugin</artifactId>
+				<configuration>
+					<pluginFirstClassLoader>false</pluginFirstClassLoader>
+					<archive>
+						<manifestEntries>
+							<Plugin-Class>com.checkmarx.jenkins.CxPlugin</Plugin-Class>
+							<Long-Name>Jenkins Checkmarx Plugin</Long-Name>
+							<Url>http://www.checkmarx.com</Url>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>repo.jenkins-ci.org</id>
-            <url>http://repo.jenkins-ci.org/public/</url>
-        </pluginRepository>
-    </pluginRepositories>
-
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.jenkins-ci.tools</groupId>
-                <artifactId>maven-hpi-plugin</artifactId>
-                <configuration>
-                    <pluginFirstClassLoader>false</pluginFirstClassLoader>
-                    <archive>
-                        <manifestEntries>
-                            <Plugin-Class>com.checkmarx.jenkins.CxPlugin</Plugin-Class>
-                            <Long-Name>Jenkins Checkmarx Plugin</Long-Name>
-                            <Url>http://www.checkmarx.com</Url>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-            </plugin>
-
-            <!--plugin>
+			<!--plugin>
                 <groupId>org.jvnet.jax-ws-commons</groupId>
                 <artifactId>jaxws-maven-plugin</artifactId>
                 <version>2.3</version>
                 <executions-->
-                    <!--execution>
+			<!--execution>
                         <id>CxCLIWebService</id>
                         <phase>generate-sources</phase>
                         <goals>
@@ -157,7 +136,7 @@
                             <target>2.1</target>
                         </configuration>
                     </execution-->
-                    <!--execution>
+			<!--execution>
                     <id>CxJenkinsWebService</id>
                     <phase>generate-sources</phase>
                     <goals>
@@ -189,57 +168,57 @@
                 </executions>
 
             </plugin-->
-            <plugin>
-                <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf-codegen-plugin</artifactId>
-                <version>${cxfver}</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>xerces</groupId>
-                        <artifactId>xercesImpl</artifactId>
-                        <version>2.8.1</version>
-                    </dependency>
-                </dependencies>
-                <executions>
-                    <execution>
-                        <id>generate-sources-resolver</id>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <wsdlOptions>
-                                <wsdlOption>
-                                    <wsdl>${basedir}/src/main/config/com/checkmarx/jenkins/CxWebService/cxwsresolver.wsdl</wsdl>
-                                    <extraargs>
-                                        <extraarg>-p</extraarg>
-                                        <extraarg>com.checkmarx.ws.CxWSResolver</extraarg>
-                                        <extraarg>-client</extraarg>
-                                    </extraargs>
-                                </wsdlOption>
-                            </wsdlOptions>
-                        </configuration>
-                        <goals>
-                            <goal>wsdl2java</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>generate-sources-jenkins</id>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <wsdlOptions>
-                                <wsdlOption>
-                                    <wsdl>${basedir}/src/main/config/com/checkmarx/jenkins/CxWebService/CxJenkinsWebService.wsdl</wsdl>
-                                    <extraargs>
-                                        <extraarg>-p</extraarg>
-                                        <extraarg>com.checkmarx.ws.CxJenkinsWebService</extraarg>
-                                        <extraarg>-client</extraarg>
-                                    </extraargs>
-                                </wsdlOption>
-                            </wsdlOptions>
-                        </configuration>
-                        <goals>
-                            <goal>wsdl2java</goal>
-                        </goals>
-                    </execution>
-                    <!--execution>
+			<plugin>
+				<groupId>org.apache.cxf</groupId>
+				<artifactId>cxf-codegen-plugin</artifactId>
+				<version>${cxfver}</version>
+				<dependencies>
+					<dependency>
+						<groupId>xerces</groupId>
+						<artifactId>xercesImpl</artifactId>
+						<version>2.8.1</version>
+					</dependency>
+				</dependencies>
+				<executions>
+					<execution>
+						<id>generate-sources-resolver</id>
+						<phase>generate-sources</phase>
+						<configuration>
+							<wsdlOptions>
+								<wsdlOption>
+									<wsdl>${basedir}/src/main/config/com/checkmarx/jenkins/CxWebService/cxwsresolver.wsdl</wsdl>
+									<extraargs>
+										<extraarg>-p</extraarg>
+										<extraarg>com.checkmarx.ws.CxWSResolver</extraarg>
+										<extraarg>-client</extraarg>
+									</extraargs>
+								</wsdlOption>
+							</wsdlOptions>
+						</configuration>
+						<goals>
+							<goal>wsdl2java</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>generate-sources-jenkins</id>
+						<phase>generate-sources</phase>
+						<configuration>
+							<wsdlOptions>
+								<wsdlOption>
+									<wsdl>${basedir}/src/main/config/com/checkmarx/jenkins/CxWebService/CxJenkinsWebService.wsdl</wsdl>
+									<extraargs>
+										<extraarg>-p</extraarg>
+										<extraarg>com.checkmarx.ws.CxJenkinsWebService</extraarg>
+										<extraarg>-client</extraarg>
+									</extraargs>
+								</wsdlOption>
+							</wsdlOptions>
+						</configuration>
+						<goals>
+							<goal>wsdl2java</goal>
+						</goals>
+					</execution>
+					<!--execution>
                         <id>generate-sources-cli</id>
                         <phase>generate-sources</phase>
                         <configuration>
@@ -258,28 +237,28 @@
                             <goal>wsdl2java</goal>
                         </goals>
                     </execution-->
-                </executions>
-            </plugin>
+				</executions>
+			</plugin>
 
-        </plugins>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <includes>
-                    <include>com/checkmarx/jenkins/cxconfig.xml</include>
-                </includes>
-                <filtering>true</filtering>
-            </resource>
-            <resource>
-                <directory>src/main/resources</directory>
-                <excludes>
-                    <exclude>com/checkmarx/jenkins/cxconfig.xml</exclude>
-                </excludes>
-                <filtering>false</filtering>
-            </resource>
+		</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<includes>
+					<include>com/checkmarx/jenkins/cxconfig.xml</include>
+				</includes>
+				<filtering>true</filtering>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>com/checkmarx/jenkins/cxconfig.xml</exclude>
+				</excludes>
+				<filtering>false</filtering>
+			</resource>
 
-        </resources>
+		</resources>
 
-    </build>
+	</build>
 
 </project>
