@@ -15,8 +15,16 @@
         FH is the minimum required hot fix number of server version X
         V is the version of the Jenkins plugin, where V2 is optional
         V version sequence is independent of X.HF version sequence -->
-	<version>7.1.6.3-20</version>
+	<version>7.1.6.3-21</version>
 	<packaging>hpi</packaging>
+
+	<!-- The URL and name below are used by Jenkins for help dialogues -->
+	<name>Checkmarx Suite Plugin</name>
+	<description>
+        Provides automatic scan of code by Checkmarx server and shows results summary and trend in Jenkins interface.
+	</description>
+	<url>https://checkmarx.atlassian.net/wiki/display/KC/CxSuite+Jenkins+Plugin</url>
+
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -34,17 +42,12 @@
 		<name>Checkmarx Ltd.</name>
 		<url>http://www.checkmarx.com</url>
 	</organization>
-	
-	<!-- The URL and name below are used by Jenkins for help dialogues -->
-	<url>https://checkmarx.atlassian.net/wiki/display/KC/CxSuite+Jenkins+Plugin</url>
-	<name>CxSuite Jenkins Plugin</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.jenkins-ci.main</groupId>
 			<artifactId>maven-plugin</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>com.checkmarx.components</groupId>
 			<artifactId>zipper</artifactId>
@@ -115,7 +118,7 @@
 						<manifestEntries>
 							<Plugin-Class>com.checkmarx.jenkins.CxPlugin</Plugin-Class>
 							<Long-Name>Jenkins Checkmarx Plugin</Long-Name>
-							<Url>http://www.checkmarx.com</Url>
+							<Url>https://checkmarx.atlassian.net/wiki/display/KC/CxSuite+Jenkins+Plugin</Url>
 						</manifestEntries>
 					</archive>
 				</configuration>
