@@ -18,7 +18,6 @@ import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.cxf.configuration.jsse.SSLUtils;
 import org.apache.log4j.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,12 +25,13 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * The main entry point for Checkmarx plugin. This class implements the Builder
@@ -1109,7 +1109,7 @@ public class CxScanBuilder extends Builder {
             if (urlComponents.length > 0)
             {
                 final String jobName = urlComponents[urlComponents.length-1];
-                final String cleanJobName = jobName.replaceAll("[^\\w\\s_]", "");
+                final String cleanJobName = jobName.replaceAll("[\\s\\\\/]", "");
                 return cleanJobName;
             }
             // This is a fallback if the above code fails
