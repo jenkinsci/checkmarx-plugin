@@ -101,7 +101,8 @@ public class CxScanBuilder extends Builder {
                          @Nullable String serverUrl,
                          @Nullable String username,
                          @Nullable String password,
-                         @Nullable String projectName,
+                         String projectName,
+                         String buildStep,
                          @Nullable String groupId,
                          @Nullable String preset,
                          boolean presetSpecified,
@@ -124,7 +125,8 @@ public class CxScanBuilder extends Builder {
         this.serverUrl = serverUrl;
         this.username = username;
         this.password = password;
-        this.projectName = projectName;
+        // Workaround for compatibility with Conditional BuildStep Plugin
+        this.projectName = (projectName==null)? buildStep:projectName;
         this.groupId = groupId;
         this.preset = preset;
         this.presetSpecified = presetSpecified;
@@ -170,6 +172,11 @@ public class CxScanBuilder extends Builder {
 
     @Nullable
     public String getProjectName() {
+        return projectName;
+    }
+    // Workaround for compatibility with Conditional BuildStep Plugin
+    @Nullable
+    public String getBuildStep() {
         return projectName;
     }
 
@@ -386,7 +393,7 @@ public class CxScanBuilder extends Builder {
 
     private void initLogger(final File checkmarxBuildDir, final BuildListener listener, final String loggerSuffix)
     {
-        instanceLogger = CxLogUtils.loggerWithSuffix(getClass(),loggerSuffix);
+        instanceLogger = CxLogUtils.loggerWithSuffix(getClass(), loggerSuffix);
         final WriterAppender writerAppender = new WriterAppender(new PatternLayout("%m%n"),listener.getLogger());
         writerAppender.setThreshold(Level.INFO);
         final Logger parentLogger = CxLogUtils.parentLoggerWithSuffix(loggerSuffix);
