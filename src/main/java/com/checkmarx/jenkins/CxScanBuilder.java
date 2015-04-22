@@ -14,6 +14,7 @@ import hudson.triggers.SCMTrigger;
 import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
@@ -124,7 +125,7 @@ public class CxScanBuilder extends Builder {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
         this.username = username;
-        this.password = password;
+        this.password = Secret.fromString(password).getEncryptedValue();
         // Workaround for compatibility with Conditional BuildStep Plugin
         this.projectName = (projectName==null)? buildStep:projectName;
         this.groupId = groupId;
@@ -167,7 +168,7 @@ public class CxScanBuilder extends Builder {
 
     @Nullable
     public String getPassword() {
-        return password;
+        return Secret.fromString(password).getPlainText();
     }
 
     @Nullable
@@ -657,11 +658,11 @@ public class CxScanBuilder extends Builder {
 
         @Nullable
         public String getPassword() {
-            return password;
+            return Secret.fromString(password).getPlainText();
         }
 
         public void setPassword(@Nullable String password) {
-            this.password = password;
+            this.password = Secret.fromString(password).getEncryptedValue();
         }
 
         public boolean isHideResults() {
