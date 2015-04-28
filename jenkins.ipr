@@ -236,7 +236,7 @@
     <resource url="jelly:core" location="$USER_HOME$/Downloads/maven-jellydoc-plugin-master/maven-jellydoc-plugin/schemas/core.xsd" />
     <resource url="jelly:define" location="$USER_HOME$/Downloads/maven-jellydoc-plugin-master/annotation/schemas/define.xsd" />
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_6" assert-keyword="true" jdk-15="true" project-jdk-name="1.6" project-jdk-type="JavaSDK" />
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_7" default="false" assert-keyword="true" jdk-15="true" project-jdk-name="1.7" project-jdk-type="JavaSDK" />
   <component name="SvnBranchConfigurationManager">
     <option name="mySupportsUserInfoFilter" value="true" />
   </component>
@@ -1925,6 +1925,17 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$MAVEN_REPOSITORY$/org/jenkins-ci/windows-remote-command/1.3/windows-remote-command-1.3-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.jmockit:jmockit:1.16">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/jmockit/jmockit/1.16/jmockit-1.16.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/org/jmockit/jmockit/1.16/jmockit-1.16-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/jmockit/jmockit/1.16/jmockit-1.16-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: org.jruby.ext.posix:jna-posix:1.0.3">
