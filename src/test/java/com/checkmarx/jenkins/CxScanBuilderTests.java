@@ -23,49 +23,49 @@ public class CxScanBuilderTests {
     Secret secret;
 
     @Test
-    public void projectSetAndNotEmpty() {
+    public void getProjectName_projectNameSet_projectNameNotEmpty() {
         String projectName = "projectName";
         String buildStep = null;
 
         CxScanBuilder cxScanBuilder = createCxScanBuilder(projectName, buildStep, null);
-        assertEquals(cxScanBuilder.getProjectName(), projectName);
+        assertEquals(projectName, cxScanBuilder.getProjectName());
     }
 
     @Test
-    public void projectSetAndBuildStepNotEmpty() {
+    public void getBuildStep_projectNameSet_buildStepNotEmpty() {
         String projectName = "projectName";
         String buildStep = null;
 
         CxScanBuilder cxScanBuilder = createCxScanBuilder(projectName, buildStep, null);
 
-        assertEquals(cxScanBuilder.getBuildStep(), projectName);
+        assertEquals(projectName, cxScanBuilder.getBuildStep());
     }
 
     @Test
-    public void buildStepSetAndProjectNotEmpty() {
+    public void getProjectName_buildStepSet_projectNotEmpty() {
         String projectName = null;
         String buildStep = "projectName";
 
         CxScanBuilder cxScanBuilder = createCxScanBuilder(projectName, buildStep, null);
-        assertEquals(cxScanBuilder.getProjectName(), buildStep);
+        assertEquals(buildStep, cxScanBuilder.getProjectName());
     }
 
     @Test
-    public void buildStepSetAndNotEmpty() {
+    public void getBuildStep_buildStepSet_buildStepNotEmpty() {
         String projectName = null;
         String buildStep = "projectName";
 
         CxScanBuilder cxScanBuilder = createCxScanBuilder(projectName, buildStep, null);
 
-        assertEquals(cxScanBuilder.getBuildStep(), buildStep);
+        assertEquals(buildStep, cxScanBuilder.getBuildStep());
     }
 
     @Test
-    public void passwordUnchanged(@Mocked final Secret secret) {
+    public void getPassword_validPasswordEntered_returnPasswordFromPassword(@Mocked final Secret mySecret) {
         final String password = "password";
 
         new Expectations() {{
-            secret.getPlainText();
+            mySecret.getPlainText();
             result = password;
         }};
 
