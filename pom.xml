@@ -131,6 +131,8 @@
 							<Plugin-Class>com.checkmarx.jenkins.CxPlugin</Plugin-Class>
 							<Long-Name>Jenkins Checkmarx Plugin</Long-Name>
 							<Url>https://checkmarx.atlassian.net/wiki/display/KC/CxSuite+Jenkins+Plugin</Url>
+							<Repository-Version>${env.GIT_COMMIT}</Repository-Version>
+							<Implementation-Build>${env.BUILD_NUMBER}</Implementation-Build>
 						</manifestEntries>
 					</archive>
 				</configuration>
