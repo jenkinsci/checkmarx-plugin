@@ -14,9 +14,9 @@
       <profile default="true" name="Default" enabled="false">
         <processorPath useClasspath="true" />
       </profile>
-      <profile default="false" name="Maven default annotation processors profile" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+      <profile default="false" name="Annotation profile for jenkins" enabled="true">
+        <sourceOutputDir name="target\generated-sources\annotations" />
+        <sourceTestOutputDir name="target\generated-test-sources\test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
         <module name="jenkins" />
@@ -299,15 +299,15 @@
         <root url="jar://$MAVEN_REPOSITORY$/cglib/cglib-nodep/2.2/cglib-nodep-2.2-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: com.checkmarx.components:zipper:1.2.1">
+    <library name="Maven: com.checkmarx.components:zipper:1.2.1-25">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/checkmarx/components/zipper/1.2.1/zipper-1.2.1.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/checkmarx/components/zipper/1.2.1-25/zipper-1.2.1-25.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/com/checkmarx/components/zipper/1.2.1/zipper-1.2.1-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/checkmarx/components/zipper/1.2.1-25/zipper-1.2.1-25-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/checkmarx/components/zipper/1.2.1/zipper-1.2.1-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/checkmarx/components/zipper/1.2.1-25/zipper-1.2.1-25-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: com.github.stephenc.findbugs:findbugs-annotations:1.3.9-1">

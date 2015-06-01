@@ -80,7 +80,7 @@
     <orderEntry type="library" name="Maven: org.apache.maven.wagon:wagon-webdav-jackrabbit:2.4" level="project" />
     <orderEntry type="library" name="Maven: org.apache.maven.wagon:wagon-http-shared:2.4" level="project" />
     <orderEntry type="library" name="Maven: org.apache.jackrabbit:jackrabbit-webdav:2.5.2" level="project" />
-    <orderEntry type="library" name="Maven: com.checkmarx.components:zipper:1.2.1" level="project" />
+    <orderEntry type="library" name="Maven: com.checkmarx.components:zipper:1.2.1-25" level="project" />
     <orderEntry type="library" name="Maven: log4j:log4j:1.2.14" level="project" />
     <orderEntry type="library" name="Maven: org.apache.commons:commons-lang3:3.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.intellij:annotations:12.0" level="project" />
