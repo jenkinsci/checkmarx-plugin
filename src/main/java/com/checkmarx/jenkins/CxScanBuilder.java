@@ -91,7 +91,7 @@ public class CxScanBuilder extends Builder {
     private transient Logger instanceLogger = staticLogger; // Instance logger redirects to static logger until
                                                   // it is initialized in perform method
     @XStreamOmitField
-    private FileAppender fileAppender;
+    private transient FileAppender fileAppender;
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Constructors
