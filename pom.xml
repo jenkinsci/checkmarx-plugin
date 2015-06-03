@@ -15,7 +15,7 @@
         FH is the minimum required hot fix number of server version X
         V is the version of the Jenkins plugin, where V2 is optional
         V version sequence is independent of X.HF version sequence -->
-	<version>7.1.8-24</version>
+	<version>7.1.8-25</version>
 	<packaging>hpi</packaging>
 
 	<!-- The URL and name below are used by Jenkins for help dialogues -->
