@@ -29,6 +29,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<cxfver>2.7.10</cxfver>
+		<jelly.requirePI>true</jelly.requirePI>
 	</properties>
 	<!--licenses>
         <license>
