@@ -47,6 +47,7 @@
 		<dependency>
 			<groupId>org.jenkins-ci.main</groupId>
 			<artifactId>maven-plugin</artifactId>
+			<version>1.509.3</version>
 		</dependency>
 		<dependency>
 			<groupId>com.checkmarx.components</groupId>
