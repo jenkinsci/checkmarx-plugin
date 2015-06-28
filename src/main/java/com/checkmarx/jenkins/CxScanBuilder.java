@@ -821,7 +821,7 @@ public class CxScanBuilder extends Builder {
             String serverUrlToUse = !useOwnServerCredentials ? serverUrl : getServerUrl();
             String usernameToUse  = !useOwnServerCredentials ? username  : getUsername();
             String passwordToUse  = !useOwnServerCredentials ? password  : getPassword();
-            logger.debug("prepareLoggedInWebservice: server: " + serverUrlToUse + " user: " + usernameToUse + " pass: " + passwordToUse);
+            logger.debug("prepareLoggedInWebservice: server: " + serverUrlToUse + " user: " + usernameToUse);
 
             CxWebService cxWebService = new CxWebService(serverUrlToUse);
             logger.debug("prepareLoggedInWebservice: created cxWebService");
