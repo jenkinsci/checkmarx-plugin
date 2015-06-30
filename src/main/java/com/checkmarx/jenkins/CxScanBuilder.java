@@ -3,10 +3,7 @@ package com.checkmarx.jenkins;
 import com.checkmarx.components.zipper.Zipper;
 import com.checkmarx.ws.CxJenkinsWebService.*;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
-import hudson.AbortException;
-import hudson.Extension;
-import hudson.FilePath;
-import hudson.Launcher;
+import hudson.*;
 import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
@@ -455,7 +452,8 @@ public class CxScanBuilder extends Builder {
             // Create cliScanArgs object with dummy byte array for zippedFile field
             // Streaming scan web service will nullify zippedFile filed and use tempFile
             // instead
-            final CliScanArgs cliScanArgs = createCliScanArgs(new byte[]{});
+            EnvVars env = build.getEnvironment(listener);
+            final CliScanArgs cliScanArgs = createCliScanArgs(new byte[]{}, env);
             final CxWSResponseRunID cxWSResponseRunID = cxWebService.scan(cliScanArgs, tempFile);
             tempFile.delete();
             instanceLogger.info("Temporary file deleted");
@@ -498,7 +496,7 @@ public class CxScanBuilder extends Builder {
         return result.toString();
     }
 
-    private CliScanArgs createCliScanArgs(byte[] compressedSources)
+    private CliScanArgs createCliScanArgs(byte[] compressedSources, EnvVars env)
     {
 
         ProjectSettings projectSettings = new ProjectSettings();
@@ -506,20 +504,18 @@ public class CxScanBuilder extends Builder {
         long presetLong = 0; // Default value to use in case of exception
         try {
             presetLong = Long.parseLong(getPreset());
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             instanceLogger.error("Encountered illegal preset value: " + getPreset() + ". Using default preset.");
         }
 
         projectSettings.setPresetID(presetLong);
-        projectSettings.setProjectName(getProjectName());
+        projectSettings.setProjectName(env.expand(getProjectName()));
         projectSettings.setAssociatedGroupID(getGroupId());
 
         long configuration = 0; // Default value to use in case of exception
         try {
             configuration = Long.parseLong(getSourceEncoding());
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             instanceLogger.error("Encountered illegal source encoding (configuration) value: " + getSourceEncoding() + ". Using default configuration.");
         }
         projectSettings.setScanConfigurationID(configuration);
@@ -532,7 +528,7 @@ public class CxScanBuilder extends Builder {
         sourceCodeSettings.setSourceOrigin(SourceLocationType.LOCAL);
         sourceCodeSettings.setPackagedCode(localCodeContainer);
 
-        String commentText = getComment()!=null ? getComment() : "";
+        String commentText = getComment()!=null ? env.expand(getComment()) : "";
         commentText = commentText.trim();
 
 
@@ -649,6 +645,7 @@ public class CxScanBuilder extends Builder {
 
         @Nullable
         public String getUsername() {
+
             return username;
         }
 
