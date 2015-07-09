@@ -203,9 +203,8 @@ public class CxWebService {
                     case DELETED:
                     case UNKNOWN:
                     case CANCELED:
-                        String message = "Scan " + status.getStageName() + " -  RunID: " + status.getRunId() + " ScanID:" + status.getScanId();
+                        String message = "Scan " + status.getStageName() + " -  RunID: " + status.getRunId() + " ScanID: " + status.getScanId() + " Server scan status: " +  status.getStageMessage();
                         logger.info(message);
-                        logger.info("Stage Message" +  status.getStageMessage());
                         throw new AbortException(message);
                 }
 
