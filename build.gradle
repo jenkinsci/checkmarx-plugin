@@ -1,0 +1,125 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'maven'
+apply plugin: 'project-report'
+apply plugin: 'org.jenkins-ci.jpi'
+apply plugin: 'provided-base'
+
+
+
+group = 'com.checkmarx.jenkins'
+version = '7.2.1-26'
+
+description = "Provides automatic scan of code by Checkmarx server and shows results summary and trend in Jenkins interface."
+
+sourceCompatibility = 7
+targetCompatibility = 7
+
+if (project.hasProperty('buildNumber')) {
+	project.version=project.version + "-" + buildNumber
+} else {
+	project.version=project.version + "-" +"SNAPSHOT"
+}
+
+jar {
+	manifest {
+		attributes	'Implementation-Title': project.description,
+					'Implementation-Version': project.version,
+					'Repository-Version': repositoryVersion				
+	}
+}
+
+project.ext {
+  mavenRepo = "http://10.31.1.81:8081/artifactory"
+}
+
+repositories {       
+     maven { url "${project.mavenRepo}/libs-release" } 
+}
+
+dependencies {
+	provided 'com.intellij:annotations:12.0'
+    compile 'org.apache.ant:ant:1.9.2',
+		'log4j:log4j:1.2.17',
+		'org.apache.commons:commons-lang3:3.1',
+		'commons-io:commons-io:2.4'
+    testCompile 'junit:junit:4.12',
+			'org.jmockit:jmockit:1.16'
+}
+
+buildscript {
+    repositories {
+        // The plugin is currently only available via the Jenkins
+        // Maven repository, but has dependencies in Maven Central.
+        mavenCentral()
+        maven {
+            url 'http://repo.jenkins-ci.org/releases/'
+        }
+    }
+    dependencies {
+        classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.12.1',
+				  'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.+'
+    }
+}
+
+
+
+jenkinsPlugin {
+    // version of Jenkins core this plugin depends on, must be 1.420 or later
+    coreVersion = '1.509.3'
+
+    // short name of the plugin, defaults to the project name without trailing '-plugin'
+    shortName = 'checkmarx'
+
+    // human-readable name of plugin                                               
+    displayName = 'Hello World plugin built with Gradle'
+
+    // URL for plugin on Jenkins wiki or elsewhere
+    url = 'https://checkmarx.atlassian.net/wiki/display/KC/CxSuite+Jenkins+Plugin'
+
+    // plugin URL on GitHub, optional
+   // gitHubUrl = 'https://github.com/jenkinsci/some-plugin'              
+
+    // use the plugin class loader before the core class loader, defaults to false
+    pluginFirstClassLoader = true
+
+    // optional list of package prefixes that your plugin doesn't want to see from core 
+  //  maskClasses = 'groovy.grape org.apache.commons.codec'
+
+    // optional version number from which this plugin release is configuration-compatible
+    // compatibleSinceVersion = '1.1.0'
+
+    // set the directory from which the development server will run, defaults to 'work'
+    // workDir = file('/tmp/jenkins')
+
+    // URL used to deploy the plugin, defaults to the value shown
+    // repoUrl = 'http://maven.jenkins-ci.org:8081/content/repositories/releases'
+
+    // URL used to deploy snapshots of the plugin, defaults to the value shown
+    // snapshotRepoUrl = 'http://maven.jenkins-ci.org:8081/content/repositories/snapshots'
+
+    // enable injection of additional tests for checking the syntax of Jelly and other things
+    disabledTestInjection = false
+
+    // the output directory for the localizer task relative to the project root, defaults to the value shown
+    localizerOutputDir = "${project.buildDir}/generated-src/localizer"
+
+    // disable configuration of Maven Central, the local Maven cache and the Jenkins Maven repository, defaults to true
+    configureRepositories = false
+
+    // skip configuration of publications and repositories for the Maven Publishing plugin, defaults to true
+    configurePublishing = false
+
+    // plugin file extension, either 'jpi' or 'hpi', defaults to 'hpi'
+    fileExtension = 'hpi'
+
+    // the developers section is optional, and corresponds to the POM developers section
+   /* developers {
+        developer {
+            id 'abayer'
+            name 'Andrew Bayer'
+            email 'andrew.bayer@gmail.com'
+        }
+    }                            */
+}

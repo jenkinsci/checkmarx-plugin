@@ -9,3 +9,5 @@ sonar-project.properties
 .settings/org.eclipse.jdt.core.prefs
 .settings/org.eclipse.core.resources.prefs
 .settings/org.eclipse.m2e.core.prefs
+build/
+.gradle/
