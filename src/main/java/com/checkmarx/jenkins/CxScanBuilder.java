@@ -347,46 +347,37 @@ public class CxScanBuilder extends Builder {
         boolean mediumThresholdCrossed = false;
         boolean lowThresholdCrossed = false;
 
-        if (descriptor!=null && descriptor.isForcingVulnerabilityThresholdEnabled())
-        {
-            instanceLogger.info("Number of high severity vulnerabilities: " +
-                    cxScanResult.getHighCount() + " stability threshold: " + descriptor.getHighThresholdEnforcement());
+		if (descriptor != null && descriptor.isForcingVulnerabilityThresholdEnabled()) {
+			instanceLogger.info("Number of high severity vulnerabilities: " + cxScanResult.getHighCount() + " stability threshold: " + descriptor.getHighThresholdEnforcement());
 
-            instanceLogger.info("Number of medium severity vulnerabilities: " +
-                    cxScanResult.getMediumCount() + " stability threshold: " + descriptor.getMediumThresholdEnforcement());
+			instanceLogger.info("Number of medium severity vulnerabilities: " + cxScanResult.getMediumCount() + " stability threshold: " + descriptor.getMediumThresholdEnforcement());
 
-            instanceLogger.info("Number of low severity vulnerabilities: " +
-                    cxScanResult.getLowCount() + " stability threshold: " + descriptor.getLowThresholdEnforcement());
+			instanceLogger.info("Number of low severity vulnerabilities: " + cxScanResult.getLowCount() + " stability threshold: " + descriptor.getLowThresholdEnforcement());
 
 			if (descriptor.isInclusiveThresholdEnforcement()) {
-				highThresholdCrossed = (cxScanResult.getHighCount() >= descriptor.getHighThresholdEnforcement());
-				mediumThresholdCrossed = (cxScanResult.getMediumCount() >= descriptor.getMediumThresholdEnforcement());
-				lowThresholdCrossed = (cxScanResult.getLowCount() >= descriptor.getLowThresholdEnforcement());
+				highThresholdCrossed = (cxScanResult.getHighCount() >= descriptor.getHighThresholdEnforcement() && descriptor.getHighThresholdEnforcement() > 0);
+				mediumThresholdCrossed = (cxScanResult.getMediumCount() >= descriptor.getMediumThresholdEnforcement() && descriptor.getMediumThresholdEnforcement() > 0);
+				lowThresholdCrossed = (cxScanResult.getLowCount() >= descriptor.getLowThresholdEnforcement() && descriptor.getLowThresholdEnforcement() > 0);
 			} else {
 				highThresholdCrossed = (cxScanResult.getHighCount() > descriptor.getHighThresholdEnforcement() && descriptor.getHighThresholdEnforcement() > 0);
 				mediumThresholdCrossed = (cxScanResult.getMediumCount() > descriptor.getMediumThresholdEnforcement() && descriptor.getMediumThresholdEnforcement() > 0);
 				lowThresholdCrossed = (cxScanResult.getLowCount() > descriptor.getLowThresholdEnforcement() && descriptor.getLowThresholdEnforcement() > 0);
 			}
-        } else {
-            instanceLogger.info("Number of high severity vulnerabilities: " +
-                    cxScanResult.getHighCount() + " stability threshold: " + this.getHighThreshold());
+		} else {
+			instanceLogger.info("Number of high severity vulnerabilities: " + cxScanResult.getHighCount() + " stability threshold: " + this.getHighThreshold());
+			instanceLogger.info("Number of medium severity vulnerabilities: " + cxScanResult.getMediumCount() + " stability threshold: " + this.getMediumThreshold());
+			instanceLogger.info("Number of low severity vulnerabilities: " + cxScanResult.getLowCount() + " stability threshold: " + this.getLowThreshold());
 
-            instanceLogger.info("Number of medium severity vulnerabilities: " +
-                    cxScanResult.getMediumCount() + " stability threshold: " + this.getMediumThreshold());
-
-            instanceLogger.info("Number of low severity vulnerabilities: " +
-                    cxScanResult.getLowCount() + " stability threshold: " + this.getLowThreshold());
-            
 			if (inclusiveThreshold) {
-				highThresholdCrossed = (cxScanResult.getHighCount() >= getHighThreshold());
-				mediumThresholdCrossed = (cxScanResult.getMediumCount() >= getMediumThreshold());
-				lowThresholdCrossed = (cxScanResult.getLowCount() >= getLowThreshold());
+				highThresholdCrossed = (cxScanResult.getHighCount() >= getHighThreshold() && getHighThreshold() > 0);
+				mediumThresholdCrossed = (cxScanResult.getMediumCount() >= getMediumThreshold() && getMediumThreshold() > 0);
+				lowThresholdCrossed = (cxScanResult.getLowCount() >= getLowThreshold() && getLowThreshold() > 0);
 			} else {
 				highThresholdCrossed = (cxScanResult.getHighCount() > this.getHighThreshold() && this.getHighThreshold() > 0);
 				mediumThresholdCrossed = (cxScanResult.getMediumCount() > this.getMediumThreshold() && this.getMediumThreshold() > 0);
 				lowThresholdCrossed = (cxScanResult.getLowCount() > this.getLowThreshold() && this.getLowThreshold() > 0);
 			}
-        }
+		}
         return highThresholdCrossed || mediumThresholdCrossed || lowThresholdCrossed;
     }
 
@@ -753,7 +744,6 @@ public class CxScanBuilder extends Builder {
 	    }
 
 	    public DescriptorImpl() {
-	    	super(CxScanBuilder.class);
 	        load();
 	    }
 
