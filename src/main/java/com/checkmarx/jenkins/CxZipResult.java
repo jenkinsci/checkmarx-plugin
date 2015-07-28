@@ -1,10 +1,10 @@
 package com.checkmarx.jenkins;
 
 import hudson.FilePath;
-import org.jetbrains.annotations.NotNull;
 
-import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
+
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Created with IntelliJ IDEA.

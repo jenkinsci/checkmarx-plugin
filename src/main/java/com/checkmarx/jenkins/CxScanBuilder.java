@@ -75,6 +75,7 @@ public class CxScanBuilder extends Builder {
     private int highThreshold;
     private int mediumThreshold;
     private int lowThreshold;
+    private boolean inclusiveThreshold;
     private boolean generatePdfReport;
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -114,6 +115,7 @@ public class CxScanBuilder extends Builder {
                          boolean skipSCMTriggers,
                          boolean waitForResultsEnabled,
                          boolean vulnerabilityThresholdEnabled,
+                         boolean inclusiveThreshold,
                          int highThreshold,
                          int mediumThreshold,
                          int lowThreshold,
@@ -138,6 +140,7 @@ public class CxScanBuilder extends Builder {
         this.skipSCMTriggers = skipSCMTriggers;
         this.waitForResultsEnabled = waitForResultsEnabled;
         this.vulnerabilityThresholdEnabled = vulnerabilityThresholdEnabled;
+        this.inclusiveThreshold = inclusiveThreshold;
         this.highThreshold = highThreshold;
         this.mediumThreshold = mediumThreshold;
         this.lowThreshold = lowThreshold;
@@ -258,7 +261,7 @@ public class CxScanBuilder extends Builder {
                            final BuildListener listener) throws InterruptedException, IOException {
 
         try {
-            File checkmarxBuildDir = new File(build.getRootDir(),"checkmarx");
+            File checkmarxBuildDir = new File(build.getRootDir(), "checkmarx");
             checkmarxBuildDir.mkdir();
 
             initLogger(checkmarxBuildDir, listener, instanceLoggerSuffix(build));
@@ -266,44 +269,41 @@ public class CxScanBuilder extends Builder {
             listener.started(null);
             instanceLogger.info("Checkmarx Jenkins plugin version: " + CxConfig.version());
 
-            if (isSkipScan(build))
-            {
-                instanceLogger.info("Checkmarx scan skipped since the build was triggered by SCM. "+
+            if (isSkipScan(build)) {
+                instanceLogger.info("Checkmarx scan skipped since the build was triggered by SCM. " +
                         "Visit plugin configuration page to disable this skip.");
                 listener.finished(Result.SUCCESS);
                 return true;
             }
 
             final String serverUrlToUse = isUseOwnServerCredentials() ? getServerUrl() : getDescriptor().getServerUrl();
-            final String usernameToUse  = isUseOwnServerCredentials() ? getUsername()  : getDescriptor().getUsername();
-            final String passwordToUse  = isUseOwnServerCredentials() ? getPassword()  : getDescriptor().getPassword();
+            final String usernameToUse = isUseOwnServerCredentials() ? getUsername() : getDescriptor().getUsername();
+            final String passwordToUse = isUseOwnServerCredentials() ? getPassword() : getDescriptor().getPassword();
 
             String serverUrlToUseNotNull = serverUrlToUse != null ? serverUrlToUse : "";
-            CxWebService cxWebService = new CxWebService(serverUrlToUseNotNull,instanceLoggerSuffix(build));
-            cxWebService.login(usernameToUse,passwordToUse);
+            CxWebService cxWebService = new CxWebService(serverUrlToUseNotNull, instanceLoggerSuffix(build));
+            cxWebService.login(usernameToUse, passwordToUse);
 
 
             instanceLogger.info("Checkmarx server login successful");
 
-            CxWSResponseRunID cxWSResponseRunID = submitScan(build, cxWebService,listener);
+            CxWSResponseRunID cxWSResponseRunID = submitScan(build, cxWebService, listener);
             instanceLogger.info("\nScan job submitted successfully\n");
 
             @Nullable
-            final CxScanBuilder.DescriptorImpl descriptor = (CxScanBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(CxScanBuilder.class);
+            final DescriptorImpl descriptor = (DescriptorImpl) Jenkins.getInstance().getDescriptor(CxScanBuilder.class);
 
-            if (!isWaitForResultsEnabled() && !descriptor.isForcingVulnerabilityThresholdEnabled())
-            {
+            if (!isWaitForResultsEnabled() && !descriptor.isForcingVulnerabilityThresholdEnabled()) {
                 listener.finished(Result.SUCCESS);
                 return true;
             }
 
-            long scanId =  cxWebService.trackScanProgress(cxWSResponseRunID,usernameToUse,passwordToUse);
+            long scanId = cxWebService.trackScanProgress(cxWSResponseRunID, usernameToUse, passwordToUse);
 
-            File xmlReportFile = new File(checkmarxBuildDir,"ScanReport.xml");
-            cxWebService.retrieveScanReport(scanId,xmlReportFile,CxWSReportType.XML);
+            File xmlReportFile = new File(checkmarxBuildDir, "ScanReport.xml");
+            cxWebService.retrieveScanReport(scanId, xmlReportFile, CxWSReportType.XML);
 
-            if (this.generatePdfReport)
-            {
+            if (this.generatePdfReport) {
                 File pdfReportFile = new File(checkmarxBuildDir, CxScanResult.PDF_REPORT_NAME);
                 cxWebService.retrieveScanReport(scanId, pdfReportFile, CxWSReportType.PDF);
             }
@@ -311,15 +311,13 @@ public class CxScanBuilder extends Builder {
 
             // Parse scan report and present results in Jenkins
 
-            CxScanResult cxScanResult = new CxScanResult(build,instanceLoggerSuffix(build),serverUrlToUse);
+            CxScanResult cxScanResult = new CxScanResult(build, instanceLoggerSuffix(build), serverUrlToUse);
             cxScanResult.readScanXMLReport(xmlReportFile);
             build.addAction(cxScanResult);
 
-            if (descriptor.isForcingVulnerabilityThresholdEnabled() || this.isVulnerabilityThresholdEnabled())
-            {
-                if (isThresholdCrossed(cxScanResult))
-                {
-                    build.setResult(Result.UNSTABLE);    // Marks the build result as UNSTABLE
+            if (descriptor.isForcingVulnerabilityThresholdEnabled() || this.isVulnerabilityThresholdEnabled()) {
+                if (isThresholdCrossed(cxScanResult)) {
+                    build.setResult(Result.UNSTABLE); // Marks the build result as UNSTABLE
                     listener.finished(Result.UNSTABLE);
                     return true;
                 }
@@ -327,27 +325,24 @@ public class CxScanBuilder extends Builder {
 
             listener.finished(Result.SUCCESS);
             return true;
-        } catch (Error e)
-        {
-            instanceLogger.error(e.getMessage(),e);
+        } catch (AbortException e) {
+            instanceLogger.error(e.getMessage(), e);
             throw e;
-        } catch (AbortException e)
-        {
-            instanceLogger.error(e.getMessage(),e);
+        } catch (MalformedURLException e) {
+            instanceLogger.error(e.getMessage(), e);
             throw e;
-        } catch (IOException e)
-        {
-            instanceLogger.error(e.getMessage(),e);
+        } catch (IOException e) {
+            instanceLogger.error(e.getMessage(), e);
             throw e;
         } finally {
             closeLogger();
         }
-    }
+	}
 
     private boolean isThresholdCrossed(@NotNull final CxScanResult cxScanResult)
     {
         @Nullable
-        final CxScanBuilder.DescriptorImpl descriptor = (CxScanBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(CxScanBuilder.class);
+        final DescriptorImpl descriptor = getDescriptor();
         boolean highThresholdCrossed = false;
         boolean mediumThresholdCrossed = false;
         boolean lowThresholdCrossed = false;
@@ -363,9 +358,15 @@ public class CxScanBuilder extends Builder {
             instanceLogger.info("Number of low severity vulnerabilities: " +
                     cxScanResult.getLowCount() + " stability threshold: " + descriptor.getLowThresholdEnforcement());
 
-            highThresholdCrossed =   (cxScanResult.getHighCount()   > descriptor.getHighThresholdEnforcement()   && descriptor.getHighThresholdEnforcement()   > 0);
-            mediumThresholdCrossed = (cxScanResult.getMediumCount() > descriptor.getMediumThresholdEnforcement() && descriptor.getMediumThresholdEnforcement() > 0);
-            lowThresholdCrossed =    (cxScanResult.getLowCount()    > descriptor.getLowThresholdEnforcement()    && descriptor.getLowThresholdEnforcement()    > 0);
+			if (descriptor.isInclusiveThresholdEnforcement()) {
+				highThresholdCrossed = (cxScanResult.getHighCount() >= descriptor.getHighThresholdEnforcement());
+				mediumThresholdCrossed = (cxScanResult.getMediumCount() >= descriptor.getMediumThresholdEnforcement());
+				lowThresholdCrossed = (cxScanResult.getLowCount() >= descriptor.getLowThresholdEnforcement());
+			} else {
+				highThresholdCrossed = (cxScanResult.getHighCount() > descriptor.getHighThresholdEnforcement() && descriptor.getHighThresholdEnforcement() > 0);
+				mediumThresholdCrossed = (cxScanResult.getMediumCount() > descriptor.getMediumThresholdEnforcement() && descriptor.getMediumThresholdEnforcement() > 0);
+				lowThresholdCrossed = (cxScanResult.getLowCount() > descriptor.getLowThresholdEnforcement() && descriptor.getLowThresholdEnforcement() > 0);
+			}
         } else {
             instanceLogger.info("Number of high severity vulnerabilities: " +
                     cxScanResult.getHighCount() + " stability threshold: " + this.getHighThreshold());
@@ -375,10 +376,16 @@ public class CxScanBuilder extends Builder {
 
             instanceLogger.info("Number of low severity vulnerabilities: " +
                     cxScanResult.getLowCount() + " stability threshold: " + this.getLowThreshold());
-
-            highThresholdCrossed =   (cxScanResult.getHighCount()   > this.getHighThreshold()   && this.getHighThreshold()   > 0);
-            mediumThresholdCrossed = (cxScanResult.getMediumCount() > this.getMediumThreshold() && this.getMediumThreshold() > 0);
-            lowThresholdCrossed =    (cxScanResult.getLowCount()    > this.getLowThreshold()    && this.getLowThreshold()    > 0);
+            
+			if (inclusiveThreshold) {
+				highThresholdCrossed = (cxScanResult.getHighCount() >= getHighThreshold());
+				mediumThresholdCrossed = (cxScanResult.getMediumCount() >= getMediumThreshold());
+				lowThresholdCrossed = (cxScanResult.getLowCount() >= getLowThreshold());
+			} else {
+				highThresholdCrossed = (cxScanResult.getHighCount() > this.getHighThreshold() && this.getHighThreshold() > 0);
+				mediumThresholdCrossed = (cxScanResult.getMediumCount() > this.getMediumThreshold() && this.getMediumThreshold() > 0);
+				lowThresholdCrossed = (cxScanResult.getLowCount() > this.getLowThreshold() && this.getLowThreshold() > 0);
+			}
         }
         return highThresholdCrossed || mediumThresholdCrossed || lowThresholdCrossed;
     }
@@ -609,539 +616,560 @@ public class CxScanBuilder extends Builder {
     }*/
 
 
-    @Extension
-    public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
+    public boolean isInclusiveThreshold() {
+		return inclusiveThreshold;
+	}
 
-        public final static String DEFAULT_FILTER_PATTERNS = CxConfig.defaultFilterPattern();
-        public final static int FULL_SCAN_CYCLE_MIN = 1;
-        public final static int FULL_SCAN_CYCLE_MAX = 99;
+	public void setInclusiveThreshold(boolean inclusiveThreshold) {
+		this.inclusiveThreshold = inclusiveThreshold;
+	}
 
-        private final static Logger logger = Logger.getLogger(DescriptorImpl.class);
 
-        //////////////////////////////////////////////////////////////////////////////////////
-        //  Persistent plugin global configuration parameters
-        //////////////////////////////////////////////////////////////////////////////////////
+	@Extension
+	public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
-        @Nullable private String serverUrl;
-        @Nullable private String username;
-        @Nullable private String password;
-        private boolean hideResults;
-        private boolean enableCertificateValidation;
+	    public final static String DEFAULT_FILTER_PATTERNS = CxConfig.defaultFilterPattern();
+	    public final static int FULL_SCAN_CYCLE_MIN = 1;
+	    public final static int FULL_SCAN_CYCLE_MAX = 99;
 
+	    private final static Logger logger = Logger.getLogger(DescriptorImpl.class);
 
-        private boolean forcingVulnerabilityThresholdEnabled;
-        private int highThresholdEnforcement;
-        private int mediumThresholdEnforcement;
-        private int lowThresholdEnforcement;
+	    //////////////////////////////////////////////////////////////////////////////////////
+	    //  Persistent plugin global configuration parameters
+	    //////////////////////////////////////////////////////////////////////////////////////
 
-        @Nullable
-        public String getServerUrl() {
-            return serverUrl;
-        }
-
-        public void setServerUrl(@Nullable String serverUrl) {
-            this.serverUrl = serverUrl;
-        }
-
-        @Nullable
-        public String getUsername() {
-
-            return username;
-        }
-
-        public void setUsername(@Nullable String username) {
-            this.username = username;
-        }
-
-        @Nullable
-        public String getPassword() {
-            return Secret.fromString(password).getPlainText();
-        }
-
-        public void setPassword(@Nullable String password) {
-            this.password = Secret.fromString(password).getEncryptedValue();
-        }
-
-        public boolean isHideResults() {
-            return hideResults;
-        }
-
-        public void setHideResults(boolean hideResults) {
-            this.hideResults = hideResults;
-        }
-
-
-
-        public boolean isEnableCertificateValidation() {
-            return enableCertificateValidation;
-        }
-
-        public void setEnableCertificateValidation(final boolean enableCertificateValidation) {
-
-            if (!this.enableCertificateValidation && enableCertificateValidation)
-            {
-                /*
-                This condition in needed to re-enable immediately the verification of
-                server certificates as the user changes the setting. This alleviates
-                the requirement to restart the Jenkins server for configuration to take
-                effect.
-                 */
-
-                CxSSLUtility.enableSSLCertificateVerification();
-            }
-            this.enableCertificateValidation = enableCertificateValidation;
-        }
-        public boolean isForcingVulnerabilityThresholdEnabled() {
-            return forcingVulnerabilityThresholdEnabled;
-        }
-
-        public void setForcingVulnerabilityThresholdEnabled(boolean forcingVulnerabilityThresholdEnabled) {
-            this.forcingVulnerabilityThresholdEnabled = forcingVulnerabilityThresholdEnabled;
-        }
-
-        public int getHighThresholdEnforcement() {
-            return highThresholdEnforcement;
-        }
-
-        public void setHighThresholdEnforcement(int highThresholdEnforcement) {
-            this.highThresholdEnforcement = highThresholdEnforcement;
-        }
-
-        public int getMediumThresholdEnforcement() {
-            return mediumThresholdEnforcement;
-        }
-
-        public void setMediumThresholdEnforcement(int mediumThresholdEnforcement) {
-            this.mediumThresholdEnforcement = mediumThresholdEnforcement;
-        }
-
-        public int getLowThresholdEnforcement() {
-            return lowThresholdEnforcement;
-        }
-
-        public void setLowThresholdEnforcement(int lowThresholdEnforcement) {
-            this.lowThresholdEnforcement = lowThresholdEnforcement;
-        }
-
-        public boolean isApplicable(Class<? extends AbstractProject> aClass) {
-            return true;
-        }
-
-        public DescriptorImpl() {
-            load();
-        }
-
-        //////////////////////////////////////////////////////////////////////////////////////
-        //  Helper methods for jelly views
-        //////////////////////////////////////////////////////////////////////////////////////
-
-        // Provides a description string to be displayed near "Use default server credentials"
-        // configuration option
-        public String getCredentialsDescription()
-        {
-            if (getServerUrl()==null || getServerUrl().isEmpty() ||
-                getUsername()==null || getUsername().isEmpty())
-            {
-                return "not set";
-            }
-
-            return "Server URL: " + getServerUrl() + " username: " + getUsername();
-
-        }
-
-        /*
-         * Used to fill the value of hidden timestamp textbox, which in turn is used for Internet Explorer cache invalidation
-         */
-        @NotNull
-        public String getCurrentTime()
-        {
-            return String.valueOf(System.currentTimeMillis());
-        }
-
-        //////////////////////////////////////////////////////////////////////////////////////
-        // Field value validators
-        //////////////////////////////////////////////////////////////////////////////////////
-
-        /*
-         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-         *  shared state to avoid synchronization issues.
-         */
-        public FormValidation doCheckServerUrl(final @QueryParameter String serverUrl,
-                                               final @QueryParameter String timestamp) {
-            // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
-            try {
-                new CxWebService(serverUrl);
-                return FormValidation.ok("Server Validated Successfully");
-            } catch (Exception e)
-            {
-                return FormValidation.error(e.getMessage());
-            }
-        }
-
-        /*
-         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-         *  shared state to avoid synchronization issues.
-         */
-        public FormValidation doCheckPassword(final @QueryParameter String serverUrl,
-                                              final @QueryParameter String password,
-                                              final @QueryParameter String username,
-                                              final @QueryParameter String timestamp) {
-            // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
-            CxWebService cxWebService = null;
-            try {
-                cxWebService = new CxWebService(serverUrl);
-            } catch (Exception e) {
-                return FormValidation.warning("Server URL not set");
-            }
-
-            try {
-                cxWebService.login(username,password);
-                return FormValidation.ok("Login Successful");
-
-            } catch (Exception e)
-            {
-                return FormValidation.error(e.getMessage());
-            }
-        }
-
-        // Prepares a this.cxWebService object to be connected and logged in
-        /*
-         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-         *  shared state to avoid synchronization issues.
-         */
-        private CxWebService prepareLoggedInWebservice(boolean useOwnServerCredentials,
-                                               String serverUrl,
-                                               String username,
-                                               String password)
-                throws AbortException, MalformedURLException
-        {
-            String serverUrlToUse = !useOwnServerCredentials ? serverUrl : getServerUrl();
-            String usernameToUse  = !useOwnServerCredentials ? username  : getUsername();
-            String passwordToUse  = !useOwnServerCredentials ? password  : getPassword();
-            logger.debug("prepareLoggedInWebservice: server: " + serverUrlToUse + " user: " + usernameToUse);
-
-            CxWebService cxWebService = new CxWebService(serverUrlToUse);
-            logger.debug("prepareLoggedInWebservice: created cxWebService");
-            cxWebService.login(usernameToUse, passwordToUse);
-            logger.debug("prepareLoggedInWebservice: logged in");
-            return cxWebService;
-        }
-
-        /*
-         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-         *  shared state to avoid synchronization issues.
-         */
-        public  ComboBoxModel doFillProjectNameItems(   final @QueryParameter boolean useOwnServerCredentials,
-                                                                    final @QueryParameter String serverUrl,
-                                                                    final @QueryParameter String username,
-                                                                    final @QueryParameter String password,
-                                                                    final @QueryParameter String timestamp)
-        {
-            // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
-            ComboBoxModel projectNames = new ComboBoxModel();
-
-            try {
-                final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
-
-                List<ProjectDisplayData> projectsDisplayData = cxWebService.getProjectsDisplayData();
-                for(ProjectDisplayData pd : projectsDisplayData)
-                {
-                    projectNames.add(pd.getProjectName());
-                }
-
-                logger.debug("Projects list: " + projectNames.size());
-                return projectNames;
-
-            } catch (Exception e) {
-                logger.debug("Projects list: empty");
-                return projectNames; // Return empty list of project names
-            }
-        }
-
-        /*
-         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-         *  shared state to avoid synchronization issues.
-         */
-
-        public FormValidation doCheckProjectName(final @QueryParameter String projectName,
-                                                 final @QueryParameter boolean useOwnServerCredentials,
-                                                 final @QueryParameter String serverUrl,
-                                                 final @QueryParameter String username,
-                                                 final @QueryParameter String password,
-                                                 final @QueryParameter String groupId,
-                                                 final @QueryParameter String timestamp)
-        {
-            // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
-            try {
-                final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
-                CxWSBasicRepsonse cxWSBasicRepsonse = cxWebService.validateProjectName(projectName,groupId);
-                if (cxWSBasicRepsonse.isIsSuccesfull())
-                {
-                    return FormValidation.ok("Project Name Validated Successfully");
-                }
-                else {
-                    if (cxWSBasicRepsonse.getErrorMessage().startsWith("project name validation failed: duplicate name, project name") ||
-                        cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("Project name already exists"))
-                    {
-                        return FormValidation.ok("Scan will be added to existing project");
-                    }
-                    else if (cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("project name validation failed: unauthorized user") ||
-                             cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("Unauthorized user"))
-                    {
-                        return FormValidation.error("The user is not authorized to create/run Checkmarx projects");
-                    }
-                    else if (cxWSBasicRepsonse.getErrorMessage().startsWith("Exception occurred at IsValidProjectCreationRequest:"))
-                    {
-                        logger.warn("Couldn't validate project name with Checkmarx sever:\n" + cxWSBasicRepsonse.getErrorMessage());
-                        return FormValidation.warning(cxWSBasicRepsonse.getErrorMessage());
-                    }
-                    else {
-                        return FormValidation.error(cxWSBasicRepsonse.getErrorMessage());
-                    }
-                }
-            } catch (Exception e)
-            {
-                logger.warn("Couldn't validate project name with Checkmarx sever:\n" + e.getLocalizedMessage());
-                return FormValidation.warning("Can't reach server to validate project name");
-            }
-
-        }
-
-
-        // Provides a list of presets from checkmarx server for dynamic drop-down list in configuration page
-        /*
-         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-         *  shared state to avoid synchronization issues.
-         */
-
-        public ListBoxModel doFillPresetItems(   final @QueryParameter boolean useOwnServerCredentials,
-                                                              final @QueryParameter String serverUrl,
-                                                              final @QueryParameter String username,
-                                                              final @QueryParameter String password,
-                                                              final @QueryParameter String timestamp)
-        {
-            // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
-            ListBoxModel listBoxModel = new ListBoxModel();
-            try {
-                final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
-
-                final List<Preset> presets = cxWebService.getPresets();
-                for(Preset p : presets)
-                {
-                    listBoxModel.add(new ListBoxModel.Option(p.getPresetName(),Long.toString(p.getID())));
-                }
-
-                logger.debug("Presets list: " + listBoxModel.size());
-                return listBoxModel;
-
-            } catch (Exception e) {
-                logger.debug("Presets list: empty");
-                String message = "Provide Checkmarx server credentials to see presets list";
-                listBoxModel.add(new ListBoxModel.Option(message,message));
-                return listBoxModel; // Return empty list of project names
-            }
-        }
-
-        // Provides a list of source encodings from checkmarx server for dynamic drop-down list in configuration page
-        /*
-         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-         *  shared state to avoid synchronization issues.
-         */
-
-        public FormValidation doCheckFullScanCycle( final @QueryParameter int value)
-        {
-            if(value >= FULL_SCAN_CYCLE_MIN && value <= FULL_SCAN_CYCLE_MAX){
-                return FormValidation.ok();
-            }
-            else{
-                return FormValidation.error("Number must be in the range " + FULL_SCAN_CYCLE_MIN + "-" + FULL_SCAN_CYCLE_MAX);
-            }
-        }
-
-        public ListBoxModel doFillSourceEncodingItems(   final @QueryParameter boolean useOwnServerCredentials,
-                                                                      final @QueryParameter String serverUrl,
-                                                                      final @QueryParameter String username,
-                                                                      final @QueryParameter String password,
-                                                                      final @QueryParameter String timestamp)
-        {
-            // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
-            ListBoxModel listBoxModel = new ListBoxModel();
-            try {
-                final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
-
-                final List<ConfigurationSet> sourceEncodings = cxWebService.getSourceEncodings();
-                for(ConfigurationSet cs : sourceEncodings)
-                {
-                    listBoxModel.add(new ListBoxModel.Option(cs.getConfigSetName(),Long.toString(cs.getID())));
-                }
-
-                logger.debug("Source encodings list: " + listBoxModel.size());
-                return listBoxModel;
-
-            } catch (Exception e) {
-                logger.debug("Source encodings list: empty");
-                String message = "Provide Checkmarx server credentials to see source encodings list";
-                listBoxModel.add(new ListBoxModel.Option(message,message));
-                return listBoxModel; // Return empty list of project names
-            }
-
-        }
-
-
-        // Provides a list of source encodings from checkmarx server for dynamic drop-down list in configuration page
-        /*
-         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-         *  shared state to avoid synchronization issues.
-         */
-
-        public ListBoxModel doFillGroupIdItems(   final @QueryParameter boolean useOwnServerCredentials,
-                                                         final @QueryParameter String serverUrl,
-                                                         final @QueryParameter String username,
-                                                         final @QueryParameter String password,
-                                                         final @QueryParameter String timestamp)
-        {
-            // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
-            ListBoxModel listBoxModel = new ListBoxModel();
-            try {
-                final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
-                final List<Group> groups = cxWebService.getAssociatedGroups();
-                for(Group group : groups)
-                {
-                    listBoxModel.add(new ListBoxModel.Option(group.getGroupName(),group.getID()));
-                }
-
-                logger.debug("Associated groups list: " + listBoxModel.size());
-                return listBoxModel;
-
-            } catch (Exception e) {
-                logger.debug("Associated groups: empty");
-                String message = "Provide Checkmarx server credentials to see teams list";
-                listBoxModel.add(new ListBoxModel.Option(message,message));
-                return listBoxModel; // Return empty list of project names
-            }
-
-        }
-
-        /*
-         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-         *  shared state to avoid synchronization issues.
-         */
-
-        public FormValidation doCheckHighThreshold(final @QueryParameter int value)
-        {
-            return checkNonNegativeValue(value);
-        }
-
-        /*
-         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-         *  shared state to avoid synchronization issues.
-         */
-
-        public FormValidation doCheckMediumThreshold(final @QueryParameter int value)
-        {
-            return checkNonNegativeValue(value);
-        }
-
-        /*
-         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-         *  shared state to avoid synchronization issues.
-         */
-
-        public FormValidation doCheckLowThreshold(final @QueryParameter int value)
-        {
-            return checkNonNegativeValue(value);
-        }
-
-        /*
-         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-         *  shared state to avoid synchronization issues.
-         */
-
-        public FormValidation doCheckHighThresholdEnforcement(final @QueryParameter int value)
-        {
-            return checkNonNegativeValue(value);
-        }
-
-        /*
-         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-         *  shared state to avoid synchronization issues.
-         */
-
-        public FormValidation doCheckMediumThresholdEnforcement(final @QueryParameter int value)
-        {
-            return checkNonNegativeValue(value);
-        }
-
-        /*
-         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-         *  shared state to avoid synchronization issues.
-         */
-
-        public FormValidation doCheckLowThresholdEnforcement(final @QueryParameter int value)
-        {
-            return checkNonNegativeValue(value);
-        }
-
-        /*
-         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-         *  shared state to avoid synchronization issues.
-         */
-        private FormValidation checkNonNegativeValue(final int value)
-        {
-            if (value >= 0)
-            {
-                return FormValidation.ok();
-            } else {
-                return FormValidation.error("Number must be non-negative");
-            }
-        }
-
-        public String getDefaultProjectName()
-        {
-            // Retrieves the job name from request URL, cleans it from special characters,\
-            // and returns as a default project name.
-
-            final String url = getCurrentDescriptorByNameUrl();
-
-            String decodedUrl = null;
-            try {
-                decodedUrl = URLDecoder.decode(url, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                decodedUrl = url;
-            }
-
-            final String[] urlComponents = decodedUrl.split("/");
-            if (urlComponents.length > 0)
-            {
-                final String jobName = urlComponents[urlComponents.length-1];
-                final String cleanJobName = jobName.replaceAll("[\\s\\\\/]", "");
-                return cleanJobName;
-            }
-            // This is a fallback if the above code fails
-            return "";
-        }
-
-        /**
-         * This human readable name is used in the configuration screen.
-         */
-        public String getDisplayName() {
-            return "Execute Checkmarx Scan";
-        }
-
-        @Override
-        public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
-            // To persist global configuration information,
-            // set that to properties and call save().
-
-            // ^Can also use req.bindJSON(this, formData);
-            //  (easier when there are many fields; need set* methods for this, like setUseFrench)
-
-            req.bindJSON(this, formData.getJSONObject("checkmarx"));
-            save();
-            return super.configure(req,formData);
-        }
-
-
-
-    }
+	    @Nullable private String serverUrl;
+	    @Nullable private String username;
+	    @Nullable private String password;
+	    private boolean hideResults;
+	    private boolean enableCertificateValidation;
+
+
+	    private boolean forcingVulnerabilityThresholdEnabled;
+	    private int highThresholdEnforcement;
+	    private int mediumThresholdEnforcement;
+	    private int lowThresholdEnforcement;
+	    private boolean inclusiveThresholdEnforcement;
+
+	    @Nullable
+	    public String getServerUrl() {
+	        return serverUrl;
+	    }
+
+	    public void setServerUrl(@Nullable String serverUrl) {
+	        this.serverUrl = serverUrl;
+	    }
+
+	    @Nullable
+	    public String getUsername() {
+
+	        return username;
+	    }
+
+	    public void setUsername(@Nullable String username) {
+	        this.username = username;
+	    }
+
+	    @Nullable
+	    public String getPassword() {
+	        return Secret.fromString(password).getPlainText();
+	    }
+
+	    public void setPassword(@Nullable String password) {
+	        this.password = Secret.fromString(password).getEncryptedValue();
+	    }
+
+	    public boolean isHideResults() {
+	        return hideResults;
+	    }
+
+	    public void setHideResults(boolean hideResults) {
+	        this.hideResults = hideResults;
+	    }
+
+
+
+	    public boolean isEnableCertificateValidation() {
+	        return enableCertificateValidation;
+	    }
+
+	    public void setEnableCertificateValidation(final boolean enableCertificateValidation) {
+
+	        if (!this.enableCertificateValidation && enableCertificateValidation)
+	        {
+	            /*
+	            This condition in needed to re-enable immediately the verification of
+	            server certificates as the user changes the setting. This alleviates
+	            the requirement to restart the Jenkins server for configuration to take
+	            effect.
+	             */
+
+	            CxSSLUtility.enableSSLCertificateVerification();
+	        }
+	        this.enableCertificateValidation = enableCertificateValidation;
+	    }
+	    public boolean isForcingVulnerabilityThresholdEnabled() {
+	        return forcingVulnerabilityThresholdEnabled;
+	    }
+
+	    public void setForcingVulnerabilityThresholdEnabled(boolean forcingVulnerabilityThresholdEnabled) {
+	        this.forcingVulnerabilityThresholdEnabled = forcingVulnerabilityThresholdEnabled;
+	    }
+
+	    public boolean isInclusiveThresholdEnforcement() {
+			return inclusiveThresholdEnforcement;
+		}
+
+		public void setInclusiveThresholdEnforcement(boolean inclusiveThreshold) {
+			this.inclusiveThresholdEnforcement = inclusiveThreshold;
+		}
+
+		public int getHighThresholdEnforcement() {
+	        return highThresholdEnforcement;
+	    }
+
+	    public void setHighThresholdEnforcement(int highThresholdEnforcement) {
+	        this.highThresholdEnforcement = highThresholdEnforcement;
+	    }
+
+	    public int getMediumThresholdEnforcement() {
+	        return mediumThresholdEnforcement;
+	    }
+
+	    public void setMediumThresholdEnforcement(int mediumThresholdEnforcement) {
+	        this.mediumThresholdEnforcement = mediumThresholdEnforcement;
+	    }
+
+	    public int getLowThresholdEnforcement() {
+	        return lowThresholdEnforcement;
+	    }
+
+	    public void setLowThresholdEnforcement(int lowThresholdEnforcement) {
+	        this.lowThresholdEnforcement = lowThresholdEnforcement;
+	    }
+
+	    public boolean isApplicable(Class<? extends AbstractProject> aClass) {
+	        return true;
+	    }
+
+	    public DescriptorImpl() {
+	    	super(CxScanBuilder.class);
+	        load();
+	    }
+
+	    //////////////////////////////////////////////////////////////////////////////////////
+	    //  Helper methods for jelly views
+	    //////////////////////////////////////////////////////////////////////////////////////
+
+	    // Provides a description string to be displayed near "Use default server credentials"
+	    // configuration option
+	    public String getCredentialsDescription()
+	    {
+	        if (getServerUrl()==null || getServerUrl().isEmpty() ||
+	            getUsername()==null || getUsername().isEmpty())
+	        {
+	            return "not set";
+	        }
+
+	        return "Server URL: " + getServerUrl() + " username: " + getUsername();
+
+	    }
+
+	    /*
+	     * Used to fill the value of hidden timestamp textbox, which in turn is used for Internet Explorer cache invalidation
+	     */
+	    @NotNull
+	    public String getCurrentTime()
+	    {
+	        return String.valueOf(System.currentTimeMillis());
+	    }
+
+	    //////////////////////////////////////////////////////////////////////////////////////
+	    // Field value validators
+	    //////////////////////////////////////////////////////////////////////////////////////
+
+	    /*
+	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+	     *  shared state to avoid synchronization issues.
+	     */
+	    public FormValidation doCheckServerUrl(final @QueryParameter String serverUrl,
+	                                           final @QueryParameter String timestamp) {
+	        // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
+	        try {
+	            new CxWebService(serverUrl);
+	            return FormValidation.ok("Server Validated Successfully");
+	        } catch (Exception e)
+	        {
+	            return FormValidation.error(e.getMessage());
+	        }
+	    }
+
+	    /*
+	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+	     *  shared state to avoid synchronization issues.
+	     */
+	    public FormValidation doCheckPassword(final @QueryParameter String serverUrl,
+	                                          final @QueryParameter String password,
+	                                          final @QueryParameter String username,
+	                                          final @QueryParameter String timestamp) {
+	        // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
+	        CxWebService cxWebService = null;
+	        try {
+	            cxWebService = new CxWebService(serverUrl);
+	        } catch (Exception e) {
+	            return FormValidation.warning("Server URL not set");
+	        }
+
+	        try {
+	            cxWebService.login(username,password);
+	            return FormValidation.ok("Login Successful");
+
+	        } catch (Exception e)
+	        {
+	            return FormValidation.error(e.getMessage());
+	        }
+	    }
+
+	    // Prepares a this.cxWebService object to be connected and logged in
+	    /*
+	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+	     *  shared state to avoid synchronization issues.
+	     */
+	    private CxWebService prepareLoggedInWebservice(boolean useOwnServerCredentials,
+	                                           String serverUrl,
+	                                           String username,
+	                                           String password)
+	            throws AbortException, MalformedURLException
+	    {
+	        String serverUrlToUse = !useOwnServerCredentials ? serverUrl : getServerUrl();
+	        String usernameToUse  = !useOwnServerCredentials ? username  : getUsername();
+	        String passwordToUse  = !useOwnServerCredentials ? password  : getPassword();
+	        logger.debug("prepareLoggedInWebservice: server: " + serverUrlToUse + " user: " + usernameToUse);
+
+	        CxWebService cxWebService = new CxWebService(serverUrlToUse);
+	        logger.debug("prepareLoggedInWebservice: created cxWebService");
+	        cxWebService.login(usernameToUse, passwordToUse);
+	        logger.debug("prepareLoggedInWebservice: logged in");
+	        return cxWebService;
+	    }
+
+	    /*
+	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+	     *  shared state to avoid synchronization issues.
+	     */
+	    public  ComboBoxModel doFillProjectNameItems(   final @QueryParameter boolean useOwnServerCredentials,
+	                                                                final @QueryParameter String serverUrl,
+	                                                                final @QueryParameter String username,
+	                                                                final @QueryParameter String password,
+	                                                                final @QueryParameter String timestamp)
+	    {
+	        // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
+	        ComboBoxModel projectNames = new ComboBoxModel();
+
+	        try {
+	            final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
+
+	            List<ProjectDisplayData> projectsDisplayData = cxWebService.getProjectsDisplayData();
+	            for(ProjectDisplayData pd : projectsDisplayData)
+	            {
+	                projectNames.add(pd.getProjectName());
+	            }
+
+	            logger.debug("Projects list: " + projectNames.size());
+	            return projectNames;
+
+	        } catch (Exception e) {
+	            logger.debug("Projects list: empty");
+	            return projectNames; // Return empty list of project names
+	        }
+	    }
+
+	    /*
+	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+	     *  shared state to avoid synchronization issues.
+	     */
+
+	    public FormValidation doCheckProjectName(final @QueryParameter String projectName,
+	                                             final @QueryParameter boolean useOwnServerCredentials,
+	                                             final @QueryParameter String serverUrl,
+	                                             final @QueryParameter String username,
+	                                             final @QueryParameter String password,
+	                                             final @QueryParameter String groupId,
+	                                             final @QueryParameter String timestamp)
+	    {
+	        // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
+	        try {
+	            final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
+	            CxWSBasicRepsonse cxWSBasicRepsonse = cxWebService.validateProjectName(projectName,groupId);
+	            if (cxWSBasicRepsonse.isIsSuccesfull())
+	            {
+	                return FormValidation.ok("Project Name Validated Successfully");
+	            }
+	            else {
+	                if (cxWSBasicRepsonse.getErrorMessage().startsWith("project name validation failed: duplicate name, project name") ||
+	                    cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("Project name already exists"))
+	                {
+	                    return FormValidation.ok("Scan will be added to existing project");
+	                }
+	                else if (cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("project name validation failed: unauthorized user") ||
+	                         cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("Unauthorized user"))
+	                {
+	                    return FormValidation.error("The user is not authorized to create/run Checkmarx projects");
+	                }
+	                else if (cxWSBasicRepsonse.getErrorMessage().startsWith("Exception occurred at IsValidProjectCreationRequest:"))
+	                {
+	                    logger.warn("Couldn't validate project name with Checkmarx sever:\n" + cxWSBasicRepsonse.getErrorMessage());
+	                    return FormValidation.warning(cxWSBasicRepsonse.getErrorMessage());
+	                }
+	                else {
+	                    return FormValidation.error(cxWSBasicRepsonse.getErrorMessage());
+	                }
+	            }
+	        } catch (Exception e)
+	        {
+	            logger.warn("Couldn't validate project name with Checkmarx sever:\n" + e.getLocalizedMessage());
+	            return FormValidation.warning("Can't reach server to validate project name");
+	        }
+
+	    }
+
+
+	    // Provides a list of presets from checkmarx server for dynamic drop-down list in configuration page
+	    /*
+	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+	     *  shared state to avoid synchronization issues.
+	     */
+
+	    public ListBoxModel doFillPresetItems(   final @QueryParameter boolean useOwnServerCredentials,
+	                                                          final @QueryParameter String serverUrl,
+	                                                          final @QueryParameter String username,
+	                                                          final @QueryParameter String password,
+	                                                          final @QueryParameter String timestamp)
+	    {
+	        // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
+	        ListBoxModel listBoxModel = new ListBoxModel();
+	        try {
+	            final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
+
+	            final List<Preset> presets = cxWebService.getPresets();
+	            for(Preset p : presets)
+	            {
+	                listBoxModel.add(new ListBoxModel.Option(p.getPresetName(),Long.toString(p.getID())));
+	            }
+
+	            logger.debug("Presets list: " + listBoxModel.size());
+	            return listBoxModel;
+
+	        } catch (Exception e) {
+	            logger.debug("Presets list: empty");
+	            String message = "Provide Checkmarx server credentials to see presets list";
+	            listBoxModel.add(new ListBoxModel.Option(message,message));
+	            return listBoxModel; // Return empty list of project names
+	        }
+	    }
+
+	    // Provides a list of source encodings from checkmarx server for dynamic drop-down list in configuration page
+	    /*
+	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+	     *  shared state to avoid synchronization issues.
+	     */
+
+	    public FormValidation doCheckFullScanCycle( final @QueryParameter int value)
+	    {
+	        if(value >= FULL_SCAN_CYCLE_MIN && value <= FULL_SCAN_CYCLE_MAX){
+	            return FormValidation.ok();
+	        }
+	        else{
+	            return FormValidation.error("Number must be in the range " + FULL_SCAN_CYCLE_MIN + "-" + FULL_SCAN_CYCLE_MAX);
+	        }
+	    }
+
+	    public ListBoxModel doFillSourceEncodingItems(   final @QueryParameter boolean useOwnServerCredentials,
+	                                                                  final @QueryParameter String serverUrl,
+	                                                                  final @QueryParameter String username,
+	                                                                  final @QueryParameter String password,
+	                                                                  final @QueryParameter String timestamp)
+	    {
+	        // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
+	        ListBoxModel listBoxModel = new ListBoxModel();
+	        try {
+	            final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
+
+	            final List<ConfigurationSet> sourceEncodings = cxWebService.getSourceEncodings();
+	            for(ConfigurationSet cs : sourceEncodings)
+	            {
+	                listBoxModel.add(new ListBoxModel.Option(cs.getConfigSetName(),Long.toString(cs.getID())));
+	            }
+
+	            logger.debug("Source encodings list: " + listBoxModel.size());
+	            return listBoxModel;
+
+	        } catch (Exception e) {
+	            logger.debug("Source encodings list: empty");
+	            String message = "Provide Checkmarx server credentials to see source encodings list";
+	            listBoxModel.add(new ListBoxModel.Option(message,message));
+	            return listBoxModel; // Return empty list of project names
+	        }
+
+	    }
+
+
+	    // Provides a list of source encodings from checkmarx server for dynamic drop-down list in configuration page
+	    /*
+	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+	     *  shared state to avoid synchronization issues.
+	     */
+
+	    public ListBoxModel doFillGroupIdItems(   final @QueryParameter boolean useOwnServerCredentials,
+	                                                     final @QueryParameter String serverUrl,
+	                                                     final @QueryParameter String username,
+	                                                     final @QueryParameter String password,
+	                                                     final @QueryParameter String timestamp)
+	    {
+	        // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
+	        ListBoxModel listBoxModel = new ListBoxModel();
+	        try {
+	            final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
+	            final List<Group> groups = cxWebService.getAssociatedGroups();
+	            for(Group group : groups)
+	            {
+	                listBoxModel.add(new ListBoxModel.Option(group.getGroupName(),group.getID()));
+	            }
+
+	            logger.debug("Associated groups list: " + listBoxModel.size());
+	            return listBoxModel;
+
+	        } catch (Exception e) {
+	            logger.debug("Associated groups: empty");
+	            String message = "Provide Checkmarx server credentials to see teams list";
+	            listBoxModel.add(new ListBoxModel.Option(message,message));
+	            return listBoxModel; // Return empty list of project names
+	        }
+
+	    }
+
+	    /*
+	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+	     *  shared state to avoid synchronization issues.
+	     */
+
+	    public FormValidation doCheckHighThreshold(final @QueryParameter int value)
+	    {
+	        return checkNonNegativeValue(value);
+	    }
+
+	    /*
+	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+	     *  shared state to avoid synchronization issues.
+	     */
+
+	    public FormValidation doCheckMediumThreshold(final @QueryParameter int value)
+	    {
+	        return checkNonNegativeValue(value);
+	    }
+
+	    /*
+	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+	     *  shared state to avoid synchronization issues.
+	     */
+
+	    public FormValidation doCheckLowThreshold(final @QueryParameter int value)
+	    {
+	        return checkNonNegativeValue(value);
+	    }
+
+	    /*
+	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+	     *  shared state to avoid synchronization issues.
+	     */
+
+	    public FormValidation doCheckHighThresholdEnforcement(final @QueryParameter int value)
+	    {
+	        return checkNonNegativeValue(value);
+	    }
+
+	    /*
+	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+	     *  shared state to avoid synchronization issues.
+	     */
+
+	    public FormValidation doCheckMediumThresholdEnforcement(final @QueryParameter int value)
+	    {
+	        return checkNonNegativeValue(value);
+	    }
+
+	    /*
+	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+	     *  shared state to avoid synchronization issues.
+	     */
+
+	    public FormValidation doCheckLowThresholdEnforcement(final @QueryParameter int value)
+	    {
+	        return checkNonNegativeValue(value);
+	    }
+
+	    /*
+	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+	     *  shared state to avoid synchronization issues.
+	     */
+	    private FormValidation checkNonNegativeValue(final int value)
+	    {
+	        if (value >= 0)
+	        {
+	            return FormValidation.ok();
+	        } else {
+	            return FormValidation.error("Number must be non-negative");
+	        }
+	    }
+
+	    public String getDefaultProjectName()
+	    {
+	        // Retrieves the job name from request URL, cleans it from special characters,\
+	        // and returns as a default project name.
+
+	        final String url = getCurrentDescriptorByNameUrl();
+
+	        String decodedUrl = null;
+	        try {
+	            decodedUrl = URLDecoder.decode(url, "UTF-8");
+	        } catch (UnsupportedEncodingException e) {
+	            decodedUrl = url;
+	        }
+
+	        final String[] urlComponents = decodedUrl.split("/");
+	        if (urlComponents.length > 0)
+	        {
+	            final String jobName = urlComponents[urlComponents.length-1];
+	            final String cleanJobName = jobName.replaceAll("[\\s\\\\/]", "");
+	            return cleanJobName;
+	        }
+	        // This is a fallback if the above code fails
+	        return "";
+	    }
+
+	    /**
+	     * This human readable name is used in the configuration screen.
+	     */
+	    public String getDisplayName() {
+	        return "Execute Checkmarx Scan";
+	    }
+
+	    @Override
+	    public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
+	        // To persist global configuration information,
+	        // set that to properties and call save().
+
+	        // ^Can also use req.bindJSON(this, formData);
+	        //  (easier when there are many fields; need set* methods for this, like setUseFrench)
+
+	        req.bindJSON(this, formData.getJSONObject("checkmarx"));
+	        save();
+	        return super.configure(req,formData);
+	    }
+
+
+
+	}
+
+	
 }

@@ -105,22 +105,24 @@
 
     <j:if test="${!descriptor.forcingVulnerabilityThresholdEnabled}">
 
-        <f:optionalBlock title="Enable synchronous mode"
-                         inline="true"
-                         field="waitForResultsEnabled"
-                         checked="${instance==null?true:instance.waitForResultsEnabled}">
+	<f:optionalBlock title="Enable synchronous mode"
+		inline="true" field="waitForResultsEnabled"
+		checked="${instance==null?true:instance.waitForResultsEnabled}">
 
-                <f:optionalBlock title="Enable vulnerability threshold" inline="true" field="vulnerabilityThresholdEnabled">
-                    <f:entry title="High severity vulnerabilities threshold" field="highThreshold">
-                        <f:number clazz="positive-number" min="0" step="1" default="0"/>
-                    </f:entry>
-                    <f:entry title="Medium severity vulnerabilities threshold" field="mediumThreshold">
-                        <f:number clazz="positive-number" min="0" step="1" default="0"/>
-                    </f:entry>
-                    <f:entry title="Low severity vulnerabilities threshold" field="lowThreshold">
-                        <f:number clazz="positive-number" min="0" step="1" default="0"/>
-                    </f:entry>
-                </f:optionalBlock>
+	<f:optionalBlock title="Enable vulnerability threshold" inline="true" field="vulnerabilityThresholdEnabled">
+		<f:entry title="Threshold includes the specified number" field="inclusiveThreshold">
+			<f:checkbox default="false" />
+		</f:entry>
+		<f:entry title="High severity vulnerabilities threshold" field="highThreshold">
+			<f:number clazz="positive-number" min="0" step="1" default="0" />
+		</f:entry>
+		<f:entry title="Medium severity vulnerabilities threshold" field="mediumThreshold">
+			<f:number clazz="positive-number" min="0" step="1" default="0" />
+		</f:entry>
+		<f:entry title="Low severity vulnerabilities threshold" field="lowThreshold">
+			<f:number clazz="positive-number" min="0" step="1" default="0" />
+		</f:entry>
+	</f:optionalBlock>
 
 
             <f:entry title="Generate PDF report" field="generatePdfReport">

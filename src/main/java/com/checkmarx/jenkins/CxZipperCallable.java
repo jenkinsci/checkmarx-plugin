@@ -1,18 +1,19 @@
 package com.checkmarx.jenkins;
 
-import com.checkmarx.components.zipper.ZipListener;
-import com.checkmarx.components.zipper.Zipper;
-import com.checkmarx.ws.CxJenkinsWebService.CliScanArgs;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseRunID;
-import hudson.AbortException;
 import hudson.FilePath;
-import hudson.remoting.Callable;
 import hudson.remoting.VirtualChannel;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+
 import org.apache.commons.codec.binary.Base64OutputStream;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.*;
+import com.checkmarx.components.zipper.ZipListener;
+import com.checkmarx.components.zipper.Zipper;
 
 /**
  * Created with IntelliJ IDEA.

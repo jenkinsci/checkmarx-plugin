@@ -10,7 +10,6 @@ import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertEquals;
 
-
 /**
  * @author Sergey Kadaner
  * @since 21/04/2015
@@ -19,67 +18,65 @@ import static org.junit.Assert.assertEquals;
 @RunWith(JMockit.class)
 public class CxScanBuilderTests {
 
-    @Mocked
-    Secret secret;
+	@Mocked
+	Secret secret;
 
-    @Test
-    public void getProjectName_projectNameSet_projectNameNotEmpty() {
-        String projectName = "projectName";
-        String buildStep = null;
+	@Test
+	public void getProjectName_projectNameSet_projectNameNotEmpty() {
+		String projectName = "projectName";
+		String buildStep = null;
 
-        CxScanBuilder cxScanBuilder = createCxScanBuilder(projectName, buildStep, null);
-        assertEquals(projectName, cxScanBuilder.getProjectName());
-    }
+		CxScanBuilder cxScanBuilder = createCxScanBuilder(projectName, buildStep, null);
+		assertEquals(projectName, cxScanBuilder.getProjectName());
+	}
 
-    @Test
-    public void getBuildStep_projectNameSet_buildStepNotEmpty() {
-        String projectName = "projectName";
-        String buildStep = null;
+	@Test
+	public void getBuildStep_projectNameSet_buildStepNotEmpty() {
+		String projectName = "projectName";
+		String buildStep = null;
 
-        CxScanBuilder cxScanBuilder = createCxScanBuilder(projectName, buildStep, null);
+		CxScanBuilder cxScanBuilder = createCxScanBuilder(projectName, buildStep, null);
 
-        assertEquals(projectName, cxScanBuilder.getBuildStep());
-    }
+		assertEquals(projectName, cxScanBuilder.getBuildStep());
+	}
 
-    @Test
-    public void getProjectName_buildStepSet_projectNotEmpty() {
-        String projectName = null;
-        String buildStep = "projectName";
+	@Test
+	public void getProjectName_buildStepSet_projectNotEmpty() {
+		String projectName = null;
+		String buildStep = "projectName";
 
-        CxScanBuilder cxScanBuilder = createCxScanBuilder(projectName, buildStep, null);
-        assertEquals(buildStep, cxScanBuilder.getProjectName());
-    }
+		CxScanBuilder cxScanBuilder = createCxScanBuilder(projectName, buildStep, null);
+		assertEquals(buildStep, cxScanBuilder.getProjectName());
+	}
 
-    @Test
-    public void getBuildStep_buildStepSet_buildStepNotEmpty() {
-        String projectName = null;
-        String buildStep = "projectName";
+	@Test
+	public void getBuildStep_buildStepSet_buildStepNotEmpty() {
+		String projectName = null;
+		String buildStep = "projectName";
 
-        CxScanBuilder cxScanBuilder = createCxScanBuilder(projectName, buildStep, null);
+		CxScanBuilder cxScanBuilder = createCxScanBuilder(projectName, buildStep, null);
 
-        assertEquals(buildStep, cxScanBuilder.getBuildStep());
-    }
+		assertEquals(buildStep, cxScanBuilder.getBuildStep());
+	}
 
-    @Test
-    public void getPassword_validPasswordEntered_returnPasswordFromPassword(@Mocked final Secret mySecret) {
-        final String password = "password";
+	@Test
+	public void getPassword_validPasswordEntered_returnPasswordFromPassword(@Mocked final Secret mySecret) {
+		final String password = "password";
 
-        new Expectations() {{
-            mySecret.getPlainText();
-            result = password;
-        }};
+		new Expectations() {
+			{
+				mySecret.getPlainText();
+				result = password;
+			}
+		};
 
+		CxScanBuilder cxScanBuilder = createCxScanBuilder(null, null, password);
 
-        CxScanBuilder cxScanBuilder = createCxScanBuilder(null, null, password);
+		assertEquals(password, cxScanBuilder.getPassword());
+	}
 
-        assertEquals(password, cxScanBuilder.getPassword());
-    }
-
-    @NotNull
-    private CxScanBuilder createCxScanBuilder(String projectName, String buildStep, String password) {
-        return new CxScanBuilder(false, null, null, password,
-                projectName,
-                buildStep,
-                null, null, false, null, null, false, false, 0, null, null, false, false, false, 0, 0, 0, false);
-    }
+	@NotNull
+	private CxScanBuilder createCxScanBuilder(String projectName, String buildStep, String password) {
+		return new CxScanBuilder(false, null, null, password, projectName, buildStep, null, null, false, null, null, false, false, 0, null, null, false, false, false, false, 0, 0, 0, false);
+	}
 }
