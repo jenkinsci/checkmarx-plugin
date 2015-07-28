@@ -77,6 +77,6 @@ public class CxScanBuilderTests {
 
 	@NotNull
 	private CxScanBuilder createCxScanBuilder(String projectName, String buildStep, String password) {
-		return new CxScanBuilder(false, null, null, password, projectName, buildStep, null, null, false, null, null, false, false, 0, null, null, false, false, false, false, 0, 0, 0, false);
+		return new CxScanBuilder(false, null, null, password, projectName, buildStep, null, null, false, null, null, false, false, 0, null, null, false, false, false, 0, 0, 0, false);
 	}
 }

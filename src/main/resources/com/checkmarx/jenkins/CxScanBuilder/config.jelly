@@ -106,13 +106,11 @@
     <j:if test="${!descriptor.forcingVulnerabilityThresholdEnabled}">
 
 	<f:optionalBlock title="Enable synchronous mode"
-		inline="true" field="waitForResultsEnabled"
+                         inline="true"
+                         field="waitForResultsEnabled"
 		checked="${instance==null?true:instance.waitForResultsEnabled}">
 
 	<f:optionalBlock title="Enable vulnerability threshold" inline="true" field="vulnerabilityThresholdEnabled">
-		<f:entry title="Threshold includes the specified number" field="inclusiveThreshold">
-			<f:checkbox default="false" />
-		</f:entry>
 		<f:entry title="High severity vulnerabilities threshold" field="highThreshold">
 			<f:number clazz="positive-number" min="0" step="1" default="0" />
 		</f:entry>

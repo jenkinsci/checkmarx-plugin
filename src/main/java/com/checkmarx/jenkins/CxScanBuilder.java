@@ -75,7 +75,6 @@ public class CxScanBuilder extends Builder {
     private int highThreshold;
     private int mediumThreshold;
     private int lowThreshold;
-    private boolean inclusiveThreshold;
     private boolean generatePdfReport;
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -115,7 +114,6 @@ public class CxScanBuilder extends Builder {
                          boolean skipSCMTriggers,
                          boolean waitForResultsEnabled,
                          boolean vulnerabilityThresholdEnabled,
-                         boolean inclusiveThreshold,
                          int highThreshold,
                          int mediumThreshold,
                          int lowThreshold,
@@ -140,7 +138,6 @@ public class CxScanBuilder extends Builder {
         this.skipSCMTriggers = skipSCMTriggers;
         this.waitForResultsEnabled = waitForResultsEnabled;
         this.vulnerabilityThresholdEnabled = vulnerabilityThresholdEnabled;
-        this.inclusiveThreshold = inclusiveThreshold;
         this.highThreshold = highThreshold;
         this.mediumThreshold = mediumThreshold;
         this.lowThreshold = lowThreshold;
@@ -347,36 +344,35 @@ public class CxScanBuilder extends Builder {
         boolean mediumThresholdCrossed = false;
         boolean lowThresholdCrossed = false;
 
-		if (descriptor != null && descriptor.isForcingVulnerabilityThresholdEnabled()) {
-			instanceLogger.info("Number of high severity vulnerabilities: " + cxScanResult.getHighCount() + " stability threshold: " + descriptor.getHighThresholdEnforcement());
+        if (descriptor!=null && descriptor.isForcingVulnerabilityThresholdEnabled())
+        {
+            instanceLogger.info("Number of high severity vulnerabilities: " +
+                    cxScanResult.getHighCount() + " stability threshold: " + descriptor.getHighThresholdEnforcement());
 
-			instanceLogger.info("Number of medium severity vulnerabilities: " + cxScanResult.getMediumCount() + " stability threshold: " + descriptor.getMediumThresholdEnforcement());
+            instanceLogger.info("Number of medium severity vulnerabilities: " +
+                    cxScanResult.getMediumCount() + " stability threshold: " + descriptor.getMediumThresholdEnforcement());
 
-			instanceLogger.info("Number of low severity vulnerabilities: " + cxScanResult.getLowCount() + " stability threshold: " + descriptor.getLowThresholdEnforcement());
+            instanceLogger.info("Number of low severity vulnerabilities: " +
+                    cxScanResult.getLowCount() + " stability threshold: " + descriptor.getLowThresholdEnforcement());
 
-			if (descriptor.isInclusiveThresholdEnforcement()) {
-				highThresholdCrossed = (cxScanResult.getHighCount() >= descriptor.getHighThresholdEnforcement() && descriptor.getHighThresholdEnforcement() > 0);
-				mediumThresholdCrossed = (cxScanResult.getMediumCount() >= descriptor.getMediumThresholdEnforcement() && descriptor.getMediumThresholdEnforcement() > 0);
-				lowThresholdCrossed = (cxScanResult.getLowCount() >= descriptor.getLowThresholdEnforcement() && descriptor.getLowThresholdEnforcement() > 0);
-			} else {
-				highThresholdCrossed = (cxScanResult.getHighCount() > descriptor.getHighThresholdEnforcement() && descriptor.getHighThresholdEnforcement() > 0);
-				mediumThresholdCrossed = (cxScanResult.getMediumCount() > descriptor.getMediumThresholdEnforcement() && descriptor.getMediumThresholdEnforcement() > 0);
-				lowThresholdCrossed = (cxScanResult.getLowCount() > descriptor.getLowThresholdEnforcement() && descriptor.getLowThresholdEnforcement() > 0);
-			}
+			highThresholdCrossed = (cxScanResult.getHighCount() > descriptor.getHighThresholdEnforcement() );
+			mediumThresholdCrossed = (cxScanResult.getMediumCount() > descriptor.getMediumThresholdEnforcement());
+			lowThresholdCrossed = (cxScanResult.getLowCount() > descriptor.getLowThresholdEnforcement() );
+
 		} else {
-			instanceLogger.info("Number of high severity vulnerabilities: " + cxScanResult.getHighCount() + " stability threshold: " + this.getHighThreshold());
-			instanceLogger.info("Number of medium severity vulnerabilities: " + cxScanResult.getMediumCount() + " stability threshold: " + this.getMediumThreshold());
-			instanceLogger.info("Number of low severity vulnerabilities: " + cxScanResult.getLowCount() + " stability threshold: " + this.getLowThreshold());
+            instanceLogger.info("Number of high severity vulnerabilities: " +
+                    cxScanResult.getHighCount() + " stability threshold: " + this.getHighThreshold());
 
-			if (inclusiveThreshold) {
-				highThresholdCrossed = (cxScanResult.getHighCount() >= getHighThreshold() && getHighThreshold() > 0);
-				mediumThresholdCrossed = (cxScanResult.getMediumCount() >= getMediumThreshold() && getMediumThreshold() > 0);
-				lowThresholdCrossed = (cxScanResult.getLowCount() >= getLowThreshold() && getLowThreshold() > 0);
-			} else {
-				highThresholdCrossed = (cxScanResult.getHighCount() > this.getHighThreshold() && this.getHighThreshold() > 0);
-				mediumThresholdCrossed = (cxScanResult.getMediumCount() > this.getMediumThreshold() && this.getMediumThreshold() > 0);
-				lowThresholdCrossed = (cxScanResult.getLowCount() > this.getLowThreshold() && this.getLowThreshold() > 0);
-			}
+            instanceLogger.info("Number of medium severity vulnerabilities: " +
+                    cxScanResult.getMediumCount() + " stability threshold: " + this.getMediumThreshold());
+
+            instanceLogger.info("Number of low severity vulnerabilities: " +
+                    cxScanResult.getLowCount() + " stability threshold: " + this.getLowThreshold());
+
+			highThresholdCrossed = (cxScanResult.getHighCount() > getHighThreshold());
+			mediumThresholdCrossed = (cxScanResult.getMediumCount() > getMediumThreshold());
+			lowThresholdCrossed = (cxScanResult.getLowCount() > getLowThreshold());
+			
 		}
         return highThresholdCrossed || mediumThresholdCrossed || lowThresholdCrossed;
     }
@@ -607,15 +603,6 @@ public class CxScanBuilder extends Builder {
     }*/
 
 
-    public boolean isInclusiveThreshold() {
-		return inclusiveThreshold;
-	}
-
-	public void setInclusiveThreshold(boolean inclusiveThreshold) {
-		this.inclusiveThreshold = inclusiveThreshold;
-	}
-
-
 	@Extension
 	public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
@@ -640,7 +627,6 @@ public class CxScanBuilder extends Builder {
 	    private int highThresholdEnforcement;
 	    private int mediumThresholdEnforcement;
 	    private int lowThresholdEnforcement;
-	    private boolean inclusiveThresholdEnforcement;
 
 	    @Nullable
 	    public String getServerUrl() {
@@ -706,14 +692,6 @@ public class CxScanBuilder extends Builder {
 	    public void setForcingVulnerabilityThresholdEnabled(boolean forcingVulnerabilityThresholdEnabled) {
 	        this.forcingVulnerabilityThresholdEnabled = forcingVulnerabilityThresholdEnabled;
 	    }
-
-	    public boolean isInclusiveThresholdEnforcement() {
-			return inclusiveThresholdEnforcement;
-		}
-
-		public void setInclusiveThresholdEnforcement(boolean inclusiveThreshold) {
-			this.inclusiveThresholdEnforcement = inclusiveThreshold;
-		}
 
 		public int getHighThresholdEnforcement() {
 	        return highThresholdEnforcement;

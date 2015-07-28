@@ -36,9 +36,6 @@
         </f:entry>
 
         <f:optionalBlock title="Set vulnerability threshold enforcement values for all jobs" inline="true" field="forcingVulnerabilityThresholdEnabled">
-        	<f:entry title="Threshold includes the specified number" field="inclusiveThresholdEnforcement">
-            	<f:checkbox default="false"/>
-        	</f:entry>
             <f:entry title="High severity vulnerabilities threshold" field="highThresholdEnforcement">
                 <f:number clazz="positive-number" min="0" step="1" default="0"/>
             </f:entry>
