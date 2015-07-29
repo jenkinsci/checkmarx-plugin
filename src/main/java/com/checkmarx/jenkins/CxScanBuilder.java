@@ -1,27 +1,22 @@
 package com.checkmarx.jenkins;
 
-import com.checkmarx.components.zipper.Zipper;
-import com.checkmarx.ws.CxJenkinsWebService.*;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
-import hudson.*;
-import hudson.model.*;
+import hudson.AbortException;
+import hudson.EnvVars;
+import hudson.Extension;
+import hudson.FilePath;
+import hudson.Launcher;
+import hudson.model.BuildListener;
+import hudson.model.Result;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.Cause;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.triggers.SCMTrigger;
 import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
-import hudson.util.ListBoxModel;
 import hudson.util.Secret;
-import jenkins.model.Jenkins;
-import net.sf.json.JSONObject;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.*;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
+import hudson.util.ListBoxModel;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +25,37 @@ import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.util.LinkedList;
 import java.util.List;
+
+import net.sf.json.JSONObject;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.FileAppender;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
+import org.apache.log4j.WriterAppender;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
+
+import com.checkmarx.components.zipper.Zipper;
+import com.checkmarx.ws.CxJenkinsWebService.CliScanArgs;
+import com.checkmarx.ws.CxJenkinsWebService.ConfigurationSet;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSBasicRepsonse;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSReportType;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseRunID;
+import com.checkmarx.ws.CxJenkinsWebService.Group;
+import com.checkmarx.ws.CxJenkinsWebService.LocalCodeContainer;
+import com.checkmarx.ws.CxJenkinsWebService.Preset;
+import com.checkmarx.ws.CxJenkinsWebService.ProjectDisplayData;
+import com.checkmarx.ws.CxJenkinsWebService.ProjectSettings;
+import com.checkmarx.ws.CxJenkinsWebService.SourceCodeSettings;
+import com.checkmarx.ws.CxJenkinsWebService.SourceLocationType;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
  * The main entry point for Checkmarx plugin. This class implements the Builder
@@ -259,7 +285,7 @@ public class CxScanBuilder extends Builder {
         try {
             File checkmarxBuildDir = new File(build.getRootDir(), "checkmarx");
             checkmarxBuildDir.mkdir();
-
+            
             initLogger(checkmarxBuildDir, listener, instanceLoggerSuffix(build));
 
             listener.started(null);
@@ -272,9 +298,12 @@ public class CxScanBuilder extends Builder {
                 return true;
             }
 
-            final String serverUrlToUse = isUseOwnServerCredentials() ? getServerUrl() : getDescriptor().getServerUrl();
-            final String usernameToUse = isUseOwnServerCredentials() ? getUsername() : getDescriptor().getUsername();
-            final String passwordToUse = isUseOwnServerCredentials() ? getPassword() : getDescriptor().getPassword();
+            @Nullable
+            final DescriptorImpl descriptor = (DescriptorImpl) getDescriptor();
+            
+            final String serverUrlToUse = isUseOwnServerCredentials() ? getServerUrl() : descriptor.getServerUrl();
+            final String usernameToUse = isUseOwnServerCredentials() ? getUsername() : descriptor.getUsername();
+            final String passwordToUse = isUseOwnServerCredentials() ? getPassword() : descriptor.getPassword();
 
             String serverUrlToUseNotNull = serverUrlToUse != null ? serverUrlToUse : "";
             CxWebService cxWebService = new CxWebService(serverUrlToUseNotNull, instanceLoggerSuffix(build));
@@ -286,8 +315,7 @@ public class CxScanBuilder extends Builder {
             CxWSResponseRunID cxWSResponseRunID = submitScan(build, cxWebService, listener);
             instanceLogger.info("\nScan job submitted successfully\n");
 
-            @Nullable
-            final DescriptorImpl descriptor = (DescriptorImpl) Jenkins.getInstance().getDescriptor(CxScanBuilder.class);
+            
 
             if (!isWaitForResultsEnabled() && !descriptor.isForcingVulnerabilityThresholdEnabled()) {
                 listener.finished(Result.SUCCESS);
@@ -489,8 +517,7 @@ public class CxScanBuilder extends Builder {
         return result.toString();
     }
 
-    private CliScanArgs createCliScanArgs(byte[] compressedSources, EnvVars env)
-    {
+    private CliScanArgs createCliScanArgs(byte[] compressedSources, EnvVars env) {
 
         ProjectSettings projectSettings = new ProjectSettings();
 
