@@ -117,8 +117,7 @@ public class CxScanBuilder extends Builder {
                          int highThreshold,
                          int mediumThreshold,
                          int lowThreshold,
-                         boolean generatePdfReport)
-    {
+                         boolean generatePdfReport) {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
         this.username = username;
@@ -747,8 +746,7 @@ public class CxScanBuilder extends Builder {
 	     * Used to fill the value of hidden timestamp textbox, which in turn is used for Internet Explorer cache invalidation
 	     */
 	    @NotNull
-	    public String getCurrentTime()
-	    {
+	    public String getCurrentTime() {
 	        return String.valueOf(System.currentTimeMillis());
 	    }
 
@@ -760,23 +758,7 @@ public class CxScanBuilder extends Builder {
 	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
 	     *  shared state to avoid synchronization issues.
 	     */
-	    public FormValidation doCheckServerUrl(final @QueryParameter String serverUrl,
-	                                           final @QueryParameter String timestamp) {
-	        // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
-	        try {
-	            new CxWebService(serverUrl);
-	            return FormValidation.ok("Server Validated Successfully");
-	        } catch (Exception e)
-	        {
-	            return FormValidation.error(e.getMessage());
-	        }
-	    }
-
-	    /*
-	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-	     *  shared state to avoid synchronization issues.
-	     */
-	    public FormValidation doCheckPassword(final @QueryParameter String serverUrl,
+	    public FormValidation doTestConnection(final @QueryParameter String serverUrl,
 	                                          final @QueryParameter String password,
 	                                          final @QueryParameter String username,
 	                                          final @QueryParameter String timestamp) {
@@ -785,17 +767,16 @@ public class CxScanBuilder extends Builder {
 	        try {
 	            cxWebService = new CxWebService(serverUrl);
 	        } catch (Exception e) {
-	            return FormValidation.warning("Server URL not set");
+	            return FormValidation.error("Invalid system URL");
 	        }
 
 	        try {
 	            cxWebService.login(username,password);
-	            return FormValidation.ok("Login Successful");
+	            return FormValidation.ok("Success");
 
-	        } catch (Exception e)
-	        {
-	            return FormValidation.error(e.getMessage());
-	        }
+			} catch (Exception e) {
+				return FormValidation.error(e.getMessage());
+			}
 	    }
 
 	    // Prepares a this.cxWebService object to be connected and logged in
@@ -902,7 +883,15 @@ public class CxScanBuilder extends Builder {
 	    }
 
 
-	    // Provides a list of presets from checkmarx server for dynamic drop-down list in configuration page
+	    /** Provides a list of presets from Checkmarx server for dynamic drop-down list in configuration page
+	     * 
+	     * @param useOwnServerCredentials
+	     * @param serverUrl
+	     * @param username
+	     * @param password
+	     * @param timestamp
+	     * @return
+	     */
 	    /*
 	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
 	     *  shared state to avoid synchronization issues.
@@ -936,7 +925,11 @@ public class CxScanBuilder extends Builder {
 	        }
 	    }
 
-	    // Provides a list of source encodings from checkmarx server for dynamic drop-down list in configuration page
+	    /** Provides a list of source encodings from Checkmarx server for dynamic drop-down list in configuration page
+	     * 
+	     * @param value
+	     * @return
+	     */
 	    /*
 	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
 	     *  shared state to avoid synchronization issues.
@@ -956,29 +949,25 @@ public class CxScanBuilder extends Builder {
 	                                                                  final @QueryParameter String serverUrl,
 	                                                                  final @QueryParameter String username,
 	                                                                  final @QueryParameter String password,
-	                                                                  final @QueryParameter String timestamp)
-	    {
+	                                                                  final @QueryParameter String timestamp) {
 	        // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 	        ListBoxModel listBoxModel = new ListBoxModel();
 	        try {
 	            final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
 
 	            final List<ConfigurationSet> sourceEncodings = cxWebService.getSourceEncodings();
-	            for(ConfigurationSet cs : sourceEncodings)
-	            {
-	                listBoxModel.add(new ListBoxModel.Option(cs.getConfigSetName(),Long.toString(cs.getID())));
-	            }
+				for (ConfigurationSet cs : sourceEncodings) {
+					listBoxModel.add(new ListBoxModel.Option(cs.getConfigSetName(), Long.toString(cs.getID())));
+				}
 
 	            logger.debug("Source encodings list: " + listBoxModel.size());
-	            return listBoxModel;
-
 	        } catch (Exception e) {
 	            logger.debug("Source encodings list: empty");
 	            String message = "Provide Checkmarx server credentials to see source encodings list";
 	            listBoxModel.add(new ListBoxModel.Option(message,message));
-	            return listBoxModel; // Return empty list of project names
 	        }
-
+	        
+	        return listBoxModel;
 	    }
 
 
@@ -1080,15 +1069,13 @@ public class CxScanBuilder extends Builder {
 	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
 	     *  shared state to avoid synchronization issues.
 	     */
-	    private FormValidation checkNonNegativeValue(final int value)
-	    {
-	        if (value >= 0)
-	        {
-	            return FormValidation.ok();
-	        } else {
-	            return FormValidation.error("Number must be non-negative");
-	        }
-	    }
+		private FormValidation checkNonNegativeValue(final int value) {
+			if (value >= 0) {
+				return FormValidation.ok();
+			} else {
+				return FormValidation.error("Number must be non-negative");
+			}
+		}
 
 	    public String getDefaultProjectName()
 	    {
@@ -1134,9 +1121,6 @@ public class CxScanBuilder extends Builder {
 	        save();
 	        return super.configure(req,formData);
 	    }
-
-
-
 	}
 
 	

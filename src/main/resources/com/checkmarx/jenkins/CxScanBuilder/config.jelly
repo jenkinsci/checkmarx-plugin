@@ -6,6 +6,11 @@
 
       See global.jelly for a general discussion about jelly script.
     -->
+    
+    <f:invisibleEntry>
+        <!-- Used for Internet Explorer cache invalidation -->
+        <f:textbox default="${descriptor.currentTime}" field="timestamp" />
+    </f:invisibleEntry>
 
     <!--
       Creates a text field that shows the value of the "name" property.
@@ -28,6 +33,7 @@
         <f:entry title="Password" field="password">
             <f:password/>
         </f:entry>
+		<f:validateButton title="Test Connection" progress="Testing..." method="testConnection" with="serverUrl,username,password,timestamp" />
     </f:optionalBlock>
 
     <f:entry title="Checkmarx project name"
@@ -139,9 +145,4 @@
             <f:checkbox/>
         </f:entry>
     </j:if>
-
-    <f:invisibleEntry>
-        <!-- Used for Internet Explorer cache invalidation -->
-        <f:textbox default="${descriptor.currentTime}" field="timestamp" />
-    </f:invisibleEntry>
 </j:jelly>
