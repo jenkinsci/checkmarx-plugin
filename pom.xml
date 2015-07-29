@@ -48,7 +48,7 @@
 		<dependency>
 			<groupId>org.jenkins-ci.main</groupId>
 			<artifactId>maven-plugin</artifactId>
-			<version>1.509.3</version>
+			<version>1.509.3</version><!--$NO-MVN-MAN-VER$-->
 		</dependency>
 		<dependency>
 			<groupId>com.checkmarx.components</groupId>
@@ -114,6 +114,8 @@
 	</dependencies>
 
 	<build>
+        <finalName>${project.artifactId}-${project.version}-build-${BUILD_NUMBER}</finalName>
+	
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
