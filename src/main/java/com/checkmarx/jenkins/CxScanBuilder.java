@@ -83,9 +83,13 @@ public class CxScanBuilder extends Builder {
     static {
          BasicConfigurator.configure();  // Set the log4j system to log to console
     }
-    private final static Logger staticLogger = Logger.getLogger(CxScanBuilder.class);
+    
+    // Kept for backward compatibility with old serialized plugin configuration.
+    private static transient Logger staticLogger; 
+    
+    private static final transient Logger LOGGER = Logger.getLogger(CxScanBuilder.class);
     @XStreamOmitField
-    private transient Logger instanceLogger = staticLogger; // Instance logger redirects to static logger until
+    private transient Logger instanceLogger = LOGGER; // Instance logger redirects to static logger until
                                                   // it is initialized in perform method
     @XStreamOmitField
     private transient FileAppender fileAppender;
@@ -404,16 +408,15 @@ public class CxScanBuilder extends Builder {
             parentLogger.addAppender(fileAppender);
         } catch (IOException e)
         {
-            staticLogger.warn("Could not open log file for writing: " + logFileName);
-            staticLogger.debug(e);
+            LOGGER.warn("Could not open log file for writing: " + logFileName);
+            LOGGER.debug(e);
         }
     }
 
-    private void closeLogger()
-    {
+    private void closeLogger() {
         instanceLogger.removeAppender(fileAppender);
         fileAppender.close();
-        instanceLogger = staticLogger; // Redirect all logs back to static logger
+        instanceLogger = LOGGER; // Redirect all logs back to static logger
     }
 
     private CxWSResponseRunID submitScan(final AbstractBuild<?, ?> build, final CxWebService cxWebService, final BuildListener listener) throws IOException
