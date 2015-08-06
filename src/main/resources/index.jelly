@@ -3,5 +3,5 @@
   This view is used to render the installed plugins page.
 -->
 <div>
-  This plugin allows scanning the source code in Checkmarx static code analysis engine. See <a href="https://checkmarx.atlassian.net/wiki/display/KC/CxSuite+Jenkins+Plugin">https://checkmarx.atlassian.net/wiki/display/KC/CxSuite+Jenkins+Plugin</a>.
+  This plugin allows scanning the source code in Checkmarx static code analysis engine. See <a href="https://checkmarx.atlassian.net/wiki/display/KC/CxSAST+Jenkins+Plugin">https://checkmarx.atlassian.net/wiki/display/KC/CxSAST+Jenkins+Plugin</a>.
 </div>

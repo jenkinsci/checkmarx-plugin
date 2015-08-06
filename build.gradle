@@ -76,7 +76,7 @@ jenkinsPlugin {
     displayName = 'Hello World plugin built with Gradle'
 
     // URL for plugin on Jenkins wiki or elsewhere
-    url = 'https://checkmarx.atlassian.net/wiki/display/KC/CxSuite+Jenkins+Plugin'
+    url = 'https://checkmarx.atlassian.net/wiki/display/KC/CxSAST+Jenkins+Plugin'
 
     // plugin URL on GitHub, optional
    // gitHubUrl = 'https://github.com/jenkinsci/some-plugin'              

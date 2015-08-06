@@ -15,7 +15,7 @@
         FH is the minimum required hot fix number of server version X
         V is the version of the Jenkins plugin, where V2 is optional
         V version sequence is independent of X.HF version sequence -->
-	<version>7.2.2-29</version>
+	<version>7.2.2-30</version>
 	<packaging>hpi</packaging>
 
 	<!-- The URL and name below are used by Jenkins for help dialogues -->
@@ -23,7 +23,7 @@
 	<description>
         Provides automatic scan of code by Checkmarx server and shows results summary and trend in Jenkins interface.
 	</description>
-	<url>https://checkmarx.atlassian.net/wiki/display/KC/CxSuite+Jenkins+Plugin</url>
+	<url>https://checkmarx.atlassian.net/wiki/display/KC/CxSAST+Jenkins+Plugin</url>
 
 
 	<properties>
@@ -126,7 +126,7 @@
 						<manifestEntries>
 							<Plugin-Class>com.checkmarx.jenkins.CxPlugin</Plugin-Class>
 							<Long-Name>Jenkins Checkmarx Plugin</Long-Name>
-							<Url>https://checkmarx.atlassian.net/wiki/display/KC/CxSuite+Jenkins+Plugin</Url>
+							<Url>https://checkmarx.atlassian.net/wiki/display/KC/CxSAST+Jenkins+Plugin</Url>
 							<Repository-Version>${env.GIT_COMMIT}</Repository-Version>
 							<Implementation-Build>${env.BUILD_NUMBER}</Implementation-Build>
 						</manifestEntries>
