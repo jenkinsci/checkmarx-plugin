@@ -142,7 +142,7 @@ public class CxWebService {
         CxWSResponseScanStatus cxWSResponseScanStatus = cxJenkinsWebServiceSoap.getStatusOfSingleScan(sessionId,cxWSResponseRunID.getRunId());
         if (!cxWSResponseScanStatus.isIsSuccesfull())
         {
-            String message = "Error communicating with Checkmarx server: \n" + cxWSResponseScanStatus.getErrorMessage();
+            String message = "Error received from Checkmarx server: " + cxWSResponseScanStatus.getErrorMessage();
             logger.error(message);
             throw new AbortException(message);
         }
