@@ -25,6 +25,7 @@ import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import net.sf.json.JSONObject;
 
@@ -656,6 +657,7 @@ public class CxScanBuilder extends Builder {
 	    private int highThresholdEnforcement;
 	    private int mediumThresholdEnforcement;
 	    private int lowThresholdEnforcement;
+        private final Pattern msGuid = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
 
 	    @Nullable
 	    public String getServerUrl() {
@@ -874,43 +876,38 @@ public class CxScanBuilder extends Builder {
 	                                             final @QueryParameter String username,
 	                                             final @QueryParameter String password,
 	                                             final @QueryParameter String groupId,
-	                                             final @QueryParameter String timestamp)
-	    {
-	        // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
-	        try {
-	            final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
-	            CxWSBasicRepsonse cxWSBasicRepsonse = cxWebService.validateProjectName(projectName,groupId);
-	            if (cxWSBasicRepsonse.isIsSuccesfull())
-	            {
-	                return FormValidation.ok("Project Name Validated Successfully");
-	            }
-	            else {
-	                if (cxWSBasicRepsonse.getErrorMessage().startsWith("project name validation failed: duplicate name, project name") ||
-	                    cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("Project name already exists"))
-	                {
-	                    return FormValidation.ok("Scan will be added to existing project");
-	                }
-	                else if (cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("project name validation failed: unauthorized user") ||
-	                         cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("Unauthorized user"))
-	                {
-	                    return FormValidation.error("The user is not authorized to create/run Checkmarx projects");
-	                }
-	                else if (cxWSBasicRepsonse.getErrorMessage().startsWith("Exception occurred at IsValidProjectCreationRequest:"))
-	                {
-	                    logger.warn("Couldn't validate project name with Checkmarx sever:\n" + cxWSBasicRepsonse.getErrorMessage());
-	                    return FormValidation.warning(cxWSBasicRepsonse.getErrorMessage());
-	                }
-	                else {
-	                    return FormValidation.error(cxWSBasicRepsonse.getErrorMessage());
-	                }
-	            }
-	        } catch (Exception e)
-	        {
-	            logger.warn("Couldn't validate project name with Checkmarx sever:\n" + e.getLocalizedMessage());
-	            return FormValidation.warning("Can't reach server to validate project name");
-	        }
+	                                             final @QueryParameter String timestamp) {
+            // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 
-	    }
+            try {
+                final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials, serverUrl, username, password);
+
+                if (msGuid.matcher(groupId).matches()) {
+                    CxWSBasicRepsonse cxWSBasicRepsonse = cxWebService.validateProjectName(projectName, groupId);
+                    if (cxWSBasicRepsonse.isIsSuccesfull()) {
+                        return FormValidation.ok("Project Name Validated Successfully");
+                    } else {
+                        if (cxWSBasicRepsonse.getErrorMessage().startsWith("project name validation failed: duplicate name, project name") ||
+                                cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("Project name already exists")) {
+                            return FormValidation.ok("Scan will be added to existing project");
+                        } else if (cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("project name validation failed: unauthorized user") ||
+                                cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("Unauthorized user")) {
+                            return FormValidation.error("The user is not authorized to create/run Checkmarx projects");
+                        } else if (cxWSBasicRepsonse.getErrorMessage().startsWith("Exception occurred at IsValidProjectCreationRequest:")) {
+                            logger.warn("Couldn't validate project name with Checkmarx sever:\n" + cxWSBasicRepsonse.getErrorMessage());
+                            return FormValidation.warning(cxWSBasicRepsonse.getErrorMessage());
+                        } else {
+                            return FormValidation.error(cxWSBasicRepsonse.getErrorMessage());
+                        }
+                    }
+                } else {
+                    return FormValidation.ok();
+                }
+            } catch (Exception e) {
+                logger.warn("Couldn't validate project name with Checkmarx sever:\n" + e.getLocalizedMessage());
+                return FormValidation.warning("Can't reach server to validate project name");
+            }
+        }
 
 
 	    /** Provides a list of presets from Checkmarx server for dynamic drop-down list in configuration page
