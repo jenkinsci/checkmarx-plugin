@@ -1,13 +1,28 @@
 package com.checkmarx.jenkins;
 
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
+import static com.checkmarx.jenkins.CxResultSeverity.HIGH;
+import static com.checkmarx.jenkins.CxResultSeverity.INFO;
+import static com.checkmarx.jenkins.CxResultSeverity.LOW;
+import static com.checkmarx.jenkins.CxResultSeverity.MEDIUM;
 import hudson.PluginWrapper;
-import hudson.model.*;
+import hudson.model.Action;
+import hudson.model.AbstractBuild;
+import hudson.model.Hudson;
 import hudson.util.IOUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.LinkedList;
+
+import javax.servlet.ServletOutputStream;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
 import jenkins.model.Jenkins;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.StaplerRequest;
@@ -16,408 +31,376 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import javax.servlet.ServletOutputStream;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-import java.io.File;
-import java.io.IOException;
-import java.util.LinkedList;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
- * Created with IntelliJ IDEA.
- * User: denis
- * Date: 3/11/13
- * Time: 11:47
- * Description:
+ * Created with IntelliJ IDEA. User: denis Date: 3/11/13 Time: 11:47 Description:
  */
 
 // One option is to inherit from AbstractTestResultAction<CxScanResult>
 
-
 public class CxScanResult implements Action {
 
-    @XStreamOmitField
-    private final Logger logger;
+	@XStreamOmitField
+	private final Logger logger;
 
-    public final AbstractBuild<?,?> owner;
-    private String serverUrl;
+	public final AbstractBuild<?, ?> owner;
+	private String serverUrl;
 
-    private int highCount;
-    private int mediumCount;
-    private int lowCount;
-    private int infoCount;
-    private LinkedList<QueryResult> highQueryResultList;
-    private LinkedList<QueryResult> mediumQueryResultList;
-    private LinkedList<QueryResult> lowQueryResultList;
-    private LinkedList<QueryResult> infoQueryResultList;
+	private int highCount;
+	private int mediumCount;
+	private int lowCount;
+	private int infoCount;
+	private LinkedList<QueryResult> highQueryResultList;
+	private LinkedList<QueryResult> mediumQueryResultList;
+	private LinkedList<QueryResult> lowQueryResultList;
+	private LinkedList<QueryResult> infoQueryResultList;
 
-    @NotNull
-    private String resultDeepLink;
-    private File pdfReport;
+	@NotNull
+	private String resultDeepLink;
+	private File pdfReport;
 
-    public final static String PDF_REPORT_NAME = "ScanReport.pdf";
-    @Nullable
-    private String scanStart;
-    @Nullable
-    private String scanTime;
-    @Nullable
-    private String linesOfCodeScanned;
-    @Nullable
-    private String filesScanned;
-    @Nullable
-    private String scanType;
+	public final static String PDF_REPORT_NAME = "ScanReport.pdf";
+	@Nullable
+	private String scanStart;
+	@Nullable
+	private String scanTime;
+	@Nullable
+	private String linesOfCodeScanned;
+	@Nullable
+	private String filesScanned;
+	@Nullable
+	private String scanType;
 
-    private boolean resultIsValid;
-    private String errorMessage;
+	private boolean resultIsValid;
+	private String errorMessage;
 
+	public CxScanResult(final AbstractBuild owner, final String loggerSuffix, String serverUrl) {
+		logger = CxLogUtils.loggerWithSuffix(getClass(), loggerSuffix);
+		this.owner = owner;
+		this.serverUrl = serverUrl;
+		this.resultIsValid = false;
+		this.errorMessage = "No Scan Results"; // error message to appear if results were not parsed
+		this.highQueryResultList = new LinkedList<>();
+		this.mediumQueryResultList = new LinkedList<>();
+		this.lowQueryResultList = new LinkedList<>();
+		this.infoQueryResultList = new LinkedList<>();
+	}
 
-    public CxScanResult(final AbstractBuild owner, final String loggerSuffix, String serverUrl)
-    {
-        logger = CxLogUtils.loggerWithSuffix(getClass(),loggerSuffix);
-        this.owner = owner;
-        this.serverUrl = serverUrl;
-        this.resultIsValid=false;
-        this.errorMessage = "No Scan Results"; // error message to appear if results were not parsed
-        this.highQueryResultList   = new LinkedList<QueryResult>();
-        this.mediumQueryResultList = new LinkedList<QueryResult>();
-        this.lowQueryResultList    = new LinkedList<QueryResult>();
-        this.infoQueryResultList   = new LinkedList<QueryResult>();
-    }
+	@Override
+	public String getIconFileName() {
+		if (isShowResults()) {
+			return getIconPath() + "CxIcon24x24.png";
+		} else {
+			return null;
+		}
+	}
 
+	@Override
+	public String getDisplayName() {
+		if (isShowResults()) {
+			return "Checkmarx Scan Results";
+		} else {
+			return null;
+		}
+	}
 
-    @Override
-    public String getIconFileName() {
-        if (isShowResults())
-        {
-            return getIconPath() + "CxIcon24x24.png";
-        } else {
-            return null;
-        }
-    }
+	@Override
+	public String getUrlName() {
+		if (isShowResults()) {
+			return "checkmarx";
+		} else {
+			return null;
+		}
+	}
 
-    @Override
-    public String getDisplayName() {
-        if (isShowResults())
-        {
-            return "Checkmarx Scan Results";
-        } else {
-            return null;
-        }
-    }
+	@NotNull
+	public String getIconPath() {
+		PluginWrapper wrapper = Hudson.getInstance().getPluginManager().getPlugin(CxPlugin.class);
+		return "/plugin/" + wrapper.getShortName() + "/";
 
-    @Override
-    public String getUrlName() {
-        if (isShowResults())
-        {
-            return "checkmarx";
-        } else {
-            return null;
-        }
-    }
+	}
 
-    @NotNull
-    public String getIconPath() {
-        PluginWrapper wrapper = Hudson.getInstance().getPluginManager().getPlugin(CxPlugin.class);
-        return "/plugin/"+ wrapper.getShortName()+"/";
+	public boolean isShowResults() {
+		@Nullable
+		CxScanBuilder.DescriptorImpl descriptor = (CxScanBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(CxScanBuilder.class);
+		return (descriptor != null && !descriptor.isHideResults());
+	}
 
-    }
+	public int getHighCount() {
+		return highCount;
+	}
 
-    public boolean isShowResults()
-    {
-        @Nullable
-        CxScanBuilder.DescriptorImpl descriptor = (CxScanBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(CxScanBuilder.class);
-        return (descriptor != null && !descriptor.isHideResults());
-    }
+	public int getMediumCount() {
+		return mediumCount;
+	}
 
-    public int getHighCount()
-    {
-        return highCount;
-    }
+	public int getLowCount() {
+		return lowCount;
+	}
 
-    public int getMediumCount()
-    {
-        return mediumCount;
-    }
+	public int getInfoCount() {
+		return infoCount;
+	}
 
-    public int getLowCount()
-    {
-        return lowCount;
-    }
+	@NotNull
+	public String getResultDeepLink() {
+		return resultDeepLink;
+	}
 
-    public int getInfoCount()
-    {
-        return infoCount;
-    }
+	@Nullable
+	public String getScanStart() {
+		return scanStart;
+	}
 
-    @NotNull
-    public String getResultDeepLink() {
-        return resultDeepLink;
-    }
-    @Nullable
-    public String getScanStart() {
-        return scanStart;
-    }
-    @Nullable
-    public String getScanTime() {
-        return scanTime;
-    }
-    @Nullable
-    public String getLinesOfCodeScanned() {
-        return linesOfCodeScanned;
-    }
-    @Nullable
-    public String getFilesScanned() {
-        return filesScanned;
-    }
-    @Nullable
-    public String getScanType() {
-        return scanType;
-    }
+	@Nullable
+	public String getScanTime() {
+		return scanTime;
+	}
 
-    public String getErrorMessage() {
-        return errorMessage;
-    }
+	@Nullable
+	public String getLinesOfCodeScanned() {
+		return linesOfCodeScanned;
+	}
 
-    public boolean isResultIsValid() {
-        return resultIsValid;
-    }
+	@Nullable
+	public String getFilesScanned() {
+		return filesScanned;
+	}
 
-    public LinkedList<QueryResult> getHighQueryResultList() {
-        return highQueryResultList;
-    }
+	@Nullable
+	public String getScanType() {
+		return scanType;
+	}
 
-    public LinkedList<QueryResult> getMediumQueryResultList() {
-        return mediumQueryResultList;
-    }
+	public String getErrorMessage() {
+		return errorMessage;
+	}
 
-    public LinkedList<QueryResult> getLowQueryResultList() {
-        return lowQueryResultList;
-    }
+	public boolean isResultIsValid() {
+		return resultIsValid;
+	}
 
-    public LinkedList<QueryResult> getInfoQueryResultList() {
-        return infoQueryResultList;
-    }
+	public LinkedList<QueryResult> getHighQueryResultList() {
+		return highQueryResultList;
+	}
 
-    public boolean isPdfReportReady() {
-        File buildDirectory = owner.getRootDir();
-        pdfReport = new File(buildDirectory, "/checkmarx/" + PDF_REPORT_NAME);
-        return pdfReport.exists();
-    }
+	public LinkedList<QueryResult> getMediumQueryResultList() {
+		return mediumQueryResultList;
+	}
 
-    public String getPdfReportUrl(){
-        return "/pdfReport";
-    }
+	public LinkedList<QueryResult> getLowQueryResultList() {
+		return lowQueryResultList;
+	}
 
-    public void doPdfReport(StaplerRequest req, StaplerResponse rsp) throws IOException {
-        rsp.setContentType("application/pdf");
-        ServletOutputStream outputStream = rsp.getOutputStream();
-        IOUtils.copy(pdfReport, outputStream);
+	public LinkedList<QueryResult> getInfoQueryResultList() {
+		return infoQueryResultList;
+	}
 
-        outputStream.flush();
-        outputStream.close();
-    }
+	public boolean isPdfReportReady() {
+		File buildDirectory = owner.getRootDir();
+		pdfReport = new File(buildDirectory, "/checkmarx/" + PDF_REPORT_NAME);
+		return pdfReport.exists();
+	}
 
-    /**
-     * Gets the test result of the previous build, if it's recorded, or null.
-     */
+	public String getPdfReportUrl() {
+		return "/pdfReport";
+	}
 
-    public CxScanResult getPreviousResult() {
-        AbstractBuild<?,?> b = owner;
-        while(true) {
-            b = b.getPreviousBuild();
-            if(b==null)
-                return null;
-            CxScanResult r = b.getAction(CxScanResult.class);
-            if(r!=null)
-                return r;
-        }
-    }
+	public void doPdfReport(StaplerRequest req, StaplerResponse rsp) throws IOException {
+		rsp.setContentType("application/pdf");
+		ServletOutputStream outputStream = rsp.getOutputStream();
+		IOUtils.copy(pdfReport, outputStream);
 
-    public void readScanXMLReport(File scanXMLReport)
-    {
-        ResultsParseHandler handler = new ResultsParseHandler();
+		outputStream.flush();
+		outputStream.close();
+	}
 
-        try {
-            SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
+	/**
+	 * Gets the test result of the previous build, if it's recorded, or null.
+	 */
 
-            CxScanResult.this.highCount=0;
-            CxScanResult.this.mediumCount=0;
-            CxScanResult.this.lowCount=0;
-            CxScanResult.this.infoCount=0;
+	public CxScanResult getPreviousResult() {
+		AbstractBuild<?, ?> b = owner;
+		while (true) {
+			b = b.getPreviousBuild();
+			if (b == null)
+				return null;
+			CxScanResult r = b.getAction(CxScanResult.class);
+			if (r != null)
+				return r;
+		}
+	}
 
-            saxParser.parse(scanXMLReport,handler);
+	public void readScanXMLReport(File scanXMLReport) {
+		ResultsParseHandler handler = new ResultsParseHandler();
 
-            CxScanResult.this.resultIsValid = true;
-            CxScanResult.this.errorMessage=null;
+		try {
+			SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
 
-        } catch (ParserConfigurationException e)
-        {
-            logger.fatal(e);
-        } catch (SAXException e)
-        {
-            CxScanResult.this.resultIsValid = false;
-            CxScanResult.this.errorMessage = e.getMessage();
-            logger.warn(e);
-        } catch (IOException e)
-        {
-            CxScanResult.this.resultIsValid = false;
-            CxScanResult.this.errorMessage = e.getMessage();
-            logger.warn(e);
-        }
-    }
+			highCount = 0;
+			mediumCount = 0;
+			lowCount = 0;
+			infoCount = 0;
 
-    private class ResultsParseHandler extends DefaultHandler {
+			saxParser.parse(scanXMLReport, handler);
 
-        @Nullable
-        private String currentQueryName;
-        @Nullable
-        private String currentQuerySeverity;
-        private int    currentQueryNumOfResults;
+			resultIsValid = true;
+			errorMessage = null;
 
-        @Override
-        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-            super.startElement(uri, localName, qName, attributes);
+		} catch (ParserConfigurationException e) {
+			logger.fatal(e);
+		} catch (SAXException | IOException e) {
+			resultIsValid = false;
+			errorMessage = e.getMessage();
+			logger.warn(e);
+		}
+	}
 
-            if ("Result".equals(qName))
-            {
-                @Nullable
-                String falsePositive = attributes.getValue("FalsePositive");
-                if (!"True".equals(falsePositive))
-                {
-                    currentQueryNumOfResults++;
-                    @Nullable
-                    String severity = attributes.getValue("SeverityIndex");
-                    if (severity!=null) {
-                        if (severity.equals(CxResultSeverity.HIGH.xmlParseString)) {
-                            CxScanResult.this.highCount++;
+	private class ResultsParseHandler extends DefaultHandler {
 
-                        } else if (severity.equals(CxResultSeverity.MEDIUM.xmlParseString)) {
-                            CxScanResult.this.mediumCount++;
+		@Nullable
+		private String currentQueryName;
+		@Nullable
+		private String currentQuerySeverity;
+		private int currentQueryNumOfResults;
 
-                        } else if (severity.equals(CxResultSeverity.LOW.xmlParseString)) {
-                            CxScanResult.this.lowCount++;
+		@Override
+		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+			super.startElement(uri, localName, qName, attributes);
 
-                        } else if (severity.equals(CxResultSeverity.INFO.xmlParseString)) {
-                            CxScanResult.this.infoCount++;
-                        }
-                    } else {
-                        logger.warn("\"SeverityIndex\" attribute was not found in element \"Result\" in XML report. " +
-                                "Make sure you are working with Checkmarx server version 7.1.6 HF3 or above.");
-                    }
-                }
-            } else if ("Query".equals(qName)) {
-                currentQueryName = attributes.getValue("name");
-                if (currentQueryName==null)
-                {
-                    logger.warn("\"name\" attribute was not found in element \"Query\" in XML report");
-                }
-                currentQuerySeverity = attributes.getValue("SeverityIndex");
-                if (currentQuerySeverity==null)
-                {
-                    logger.warn("\"SeverityIndex\" attribute was not found in element \"Query\" in XML report. " +
-                            "Make sure you are working with Checkmarx server version 7.1.6 HF3 or above.");
-                }
-                currentQueryNumOfResults = 0;
+			switch (qName) {
+			case "Result":
+				@Nullable
+				String falsePositive = attributes.getValue("FalsePositive");
+				if (!"True".equals(falsePositive)) {
+					currentQueryNumOfResults++;
+					@Nullable
+					String severity = attributes.getValue("SeverityIndex");
+					if (severity != null) {
+						if (severity.equals(HIGH.xmlParseString)) {
+							highCount++;
 
+						} else if (severity.equals(MEDIUM.xmlParseString)) {
+							mediumCount++;
 
-            } else {
-                if ("CxXMLResults".equals(qName))
-                {
-                    CxScanResult.this.resultDeepLink    = constructDeepLink(attributes.getValue("DeepLink"));
-                    CxScanResult.this.scanStart         = attributes.getValue("ScanStart");
-                    CxScanResult.this.scanTime          = attributes.getValue("ScanTime");
-                    CxScanResult.this.linesOfCodeScanned= attributes.getValue("LinesOfCodeScanned");
-                    CxScanResult.this.filesScanned      = attributes.getValue("FilesScanned");
-                    CxScanResult.this.scanType          = attributes.getValue("ScanType");
-                }
-            }
-        }
+						} else if (severity.equals(LOW.xmlParseString)) {
+							lowCount++;
 
-        @Override
-        public void endElement(String uri, String localName, String qName) throws SAXException {
-            super.endElement(uri, localName, qName);
-            if ("Query".equals(qName)) {
-                QueryResult qr = new QueryResult();
-                qr.setName(currentQueryName);
-                qr.setSeverity(currentQuerySeverity);
-                qr.setCount(currentQueryNumOfResults);
+						} else if (severity.equals(INFO.xmlParseString)) {
+							infoCount++;
+						}
+					} else {
+						logger.warn("\"SeverityIndex\" attribute was not found in element \"Result\" in XML report. "
+								+ "Make sure you are working with Checkmarx server version 7.1.6 HF3 or above.");
+					}
+				}
+				break;
+			case "Query":
+				currentQueryName = attributes.getValue("name");
+				if (currentQueryName == null) {
+					logger.warn("\"name\" attribute was not found in element \"Query\" in XML report");
+				}
+				currentQuerySeverity = attributes.getValue("SeverityIndex");
+				if (currentQuerySeverity == null) {
+					logger.warn("\"SeverityIndex\" attribute was not found in element \"Query\" in XML report. "
+							+ "Make sure you are working with Checkmarx server version 7.1.6 HF3 or above.");
+				}
+				currentQueryNumOfResults = 0;
 
-                if (StringUtils.equals(qr.getSeverity(),CxResultSeverity.HIGH.xmlParseString))
-                {
-                    CxScanResult.this.highQueryResultList.add(qr);
-                } else if(StringUtils.equals(qr.getSeverity(),CxResultSeverity.MEDIUM.xmlParseString))
-                {
-                    CxScanResult.this.mediumQueryResultList.add(qr);
-                } else if(StringUtils.equals(qr.getSeverity(),CxResultSeverity.LOW.xmlParseString))
-                {
-                    CxScanResult.this.lowQueryResultList.add(qr);
-                } else if(StringUtils.equals(qr.getSeverity(),CxResultSeverity.INFO.xmlParseString))
-                {
-                    CxScanResult.this.infoQueryResultList.add(qr);
-                } else {
-                    logger.warn("Encountered a result query with unknown severity: " + qr.getSeverity());
-                }
-            }
-        }
+				break;
+			default:
+				if ("CxXMLResults".equals(qName)) {
+					resultDeepLink = constructDeepLink(attributes.getValue("DeepLink"));
+					scanStart = attributes.getValue("ScanStart");
+					scanTime = attributes.getValue("ScanTime");
+					linesOfCodeScanned = attributes.getValue("LinesOfCodeScanned");
+					filesScanned = attributes.getValue("FilesScanned");
+					scanType = attributes.getValue("ScanType");
+				}
+				break;
+			}
+		}
 
-        @NotNull
-        private String constructDeepLink(@Nullable String rawDeepLink){
-            if (rawDeepLink==null)
-            {
-                logger.warn("\"DeepLink\" attribute was not found in element \"CxXMLResults\" in XML report");
-                return "";
-            }
-            String token = "CxWebClient";
-            String [] tokens = rawDeepLink.split(token);
-            if (tokens.length < 1)
-            {
-                logger.warn("DeepLink value found in XML report is of unexpected format: " + rawDeepLink + "\n"
-                + "\"Open Code Viewer\" button will not be functional");
-            }
-            return CxScanResult.this.serverUrl + "/" + token + tokens[1];
-        }
-    }
+		@Override
+		public void endElement(String uri, String localName, String qName) throws SAXException {
+			super.endElement(uri, localName, qName);
+			if ("Query".equals(qName)) {
+				QueryResult qr = new QueryResult();
+				qr.setName(currentQueryName);
+				qr.setSeverity(currentQuerySeverity);
+				qr.setCount(currentQueryNumOfResults);
 
-    public static class QueryResult {
-        @Nullable
-        private String name;
-        @Nullable
-        private String severity;
-        private int count;
-        @Nullable
-        public String getName() {
-            return name;
-        }
+				if (StringUtils.equals(qr.getSeverity(), HIGH.xmlParseString)) {
+					highQueryResultList.add(qr);
+				} else if (StringUtils.equals(qr.getSeverity(), MEDIUM.xmlParseString)) {
+					mediumQueryResultList.add(qr);
+				} else if (StringUtils.equals(qr.getSeverity(), LOW.xmlParseString)) {
+					lowQueryResultList.add(qr);
+				} else if (StringUtils.equals(qr.getSeverity(), INFO.xmlParseString)) {
+					infoQueryResultList.add(qr);
+				} else {
+					logger.warn("Encountered a result query with unknown severity: " + qr.getSeverity());
+				}
+			}
+		}
 
-        public void setName(@Nullable String name) {
-            this.name = name;
-        }
-        @Nullable
-        public String getSeverity() {
-            return severity;
-        }
+		@NotNull
+		private String constructDeepLink(@Nullable String rawDeepLink) {
+			if (rawDeepLink == null) {
+				logger.warn("\"DeepLink\" attribute was not found in element \"CxXMLResults\" in XML report");
+				return "";
+			}
+			String token = "CxWebClient";
+			String[] tokens = rawDeepLink.split(token);
+			if (tokens.length < 1) {
+				logger.warn("DeepLink value found in XML report is of unexpected format: " + rawDeepLink + "\n"
+						+ "\"Open Code Viewer\" button will not be functional");
+			}
+			return serverUrl + "/" + token + tokens[1];
+		}
+	}
 
-        public void setSeverity(@Nullable String severity) {
-            this.severity = severity;
-        }
+	public static class QueryResult {
+		@Nullable
+		private String name;
+		@Nullable
+		private String severity;
+		private int count;
 
-        public int getCount() {
-            return count;
-        }
+		@Nullable
+		public String getName() {
+			return name;
+		}
 
-        public void setCount(int count) {
-            this.count = count;
-        }
+		public void setName(@Nullable String name) {
+			this.name = name;
+		}
 
-        @NotNull
-        public String getPrettyName()
-        {
-            if (this.name!=null) {
-                return this.name.replace('_', ' ');
-            } else {
-                return "";
-            }
-        }
-    }
+		@Nullable
+		public String getSeverity() {
+			return severity;
+		}
+
+		public void setSeverity(@Nullable String severity) {
+			this.severity = severity;
+		}
+
+		public int getCount() {
+			return count;
+		}
+
+		public void setCount(int count) {
+			this.count = count;
+		}
+
+		@NotNull
+		public String getPrettyName() {
+			if (this.name != null) {
+				return this.name.replace('_', ' ');
+			} else {
+				return "";
+			}
+		}
+	}
 }
