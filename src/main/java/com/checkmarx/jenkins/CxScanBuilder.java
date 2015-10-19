@@ -304,7 +304,7 @@ public class CxScanBuilder extends Builder {
             }
 
             @Nullable
-            final DescriptorImpl descriptor = (DescriptorImpl) getDescriptor();
+            final DescriptorImpl descriptor = getDescriptor();
             
             final String serverUrlToUse = isUseOwnServerCredentials() ? getServerUrl() : descriptor.getServerUrl();
             final String usernameToUse = isUseOwnServerCredentials() ? getUsername() : descriptor.getUsername();
@@ -458,12 +458,12 @@ public class CxScanBuilder extends Builder {
             // hudson.FilePath will work in distributed Jenkins installation
             FilePath baseDir = build.getWorkspace();
 
+			EnvVars env = build.getEnvironment(listener);
 
-
-            String combinedFilterPattern = this.getFilterPattern() + "," + processExcludeFolders(this.getExcludeFolders());
+			String combinedFilterPattern = env.expand(getFilterPattern()) + "," + processExcludeFolders(env.expand(getExcludeFolders()));
             // Implementation of FilePath.FileCallable allows extracting a java.io.File from
             // hudson.FilePath and still working with it in remote mode
-            CxZipperCallable zipperCallable = new CxZipperCallable(combinedFilterPattern);
+			CxZipperCallable zipperCallable = new CxZipperCallable(combinedFilterPattern);
 
             final CxZipResult zipResult = baseDir.act(zipperCallable);
             instanceLogger.info(zipResult.getLogMessage());
@@ -477,7 +477,7 @@ public class CxScanBuilder extends Builder {
             // Create cliScanArgs object with dummy byte array for zippedFile field
             // Streaming scan web service will nullify zippedFile filed and use tempFile
             // instead
-            EnvVars env = build.getEnvironment(listener);
+
             final CliScanArgs cliScanArgs = createCliScanArgs(new byte[]{}, env);
             final CxWSResponseRunID cxWSResponseRunID = cxWebService.scan(cliScanArgs, tempFile);
             tempFile.delete();
@@ -748,7 +748,8 @@ public class CxScanBuilder extends Builder {
 	        this.lowThresholdEnforcement = lowThresholdEnforcement;
 	    }
 
-	    public boolean isApplicable(Class<? extends AbstractProject> aClass) {
+	    @Override
+		public boolean isApplicable(Class<? extends AbstractProject> aClass) {
 	        return true;
 	    }
 
@@ -1132,7 +1133,8 @@ public class CxScanBuilder extends Builder {
 	    /**
 	     * This human readable name is used in the configuration screen.
 	     */
-	    public String getDisplayName() {
+	    @Override
+		public String getDisplayName() {
 	        return "Execute Checkmarx Scan";
 	    }
 
