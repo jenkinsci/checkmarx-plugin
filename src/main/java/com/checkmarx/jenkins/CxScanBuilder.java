@@ -1,5 +1,6 @@
 package com.checkmarx.jenkins;
 
+import com.thoughtworks.xstream.mapper.Mapper;
 import hudson.AbortException;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -80,6 +81,7 @@ public class CxScanBuilder extends Builder {
     @Nullable private String password;
     @Nullable private String projectName;
     @Nullable private String groupId;
+    @Nullable private long projectId;
 
     @Nullable private String preset;
     private boolean presetSpecified;
@@ -131,6 +133,7 @@ public class CxScanBuilder extends Builder {
                          @Nullable String username,
                          @Nullable String password,
                          String projectName,
+                         long projectId,
                          String buildStep,
                          @Nullable String groupId,
                          @Nullable String preset,
@@ -155,6 +158,7 @@ public class CxScanBuilder extends Builder {
         this.password = Secret.fromString(password).getEncryptedValue();
         // Workaround for compatibility with Conditional BuildStep Plugin
         this.projectName = (projectName==null)? buildStep:projectName;
+        this.projectId = projectId;
         this.groupId = groupId;
         this.preset = preset;
         this.presetSpecified = presetSpecified;
@@ -479,7 +483,26 @@ public class CxScanBuilder extends Builder {
             // instead
 
             final CliScanArgs cliScanArgs = createCliScanArgs(new byte[]{}, env);
-            final CxWSResponseRunID cxWSResponseRunID = cxWebService.scan(cliScanArgs, tempFile);
+			
+			// Check if the project already exists
+            final CxWSBasicRepsonse validateProjectRespnse = cxWebService.validateProjectName(projectName, groupId);						
+            CxWSResponseRunID cxWSResponseRunID = null;			
+            if (validateProjectRespnse.isIsSuccesfull()){
+                cxWSResponseRunID = cxWebService.CreateAndRunProject(cliScanArgs.getPrjSettings(), cliScanArgs.getSrcCodeSettings().getPackagedCode(), true, true, tempFile);
+            } else {
+                if (projectId == 0) {
+                    projectId = cxWebService.getProjectId(cliScanArgs.getPrjSettings());
+                }
+
+                cliScanArgs.getPrjSettings().setProjectID(projectId);
+
+                if (incremental) {
+                    cxWSResponseRunID = cxWebService.RunIncrementalScan(cliScanArgs.getPrjSettings(), cliScanArgs.getSrcCodeSettings().getPackagedCode(), true, true, tempFile);
+                } else {
+                    cxWSResponseRunID = cxWebService.RunScanAndAddToProject(cliScanArgs.getPrjSettings(), cliScanArgs.getSrcCodeSettings().getPackagedCode(), true, true, tempFile);
+                }
+            }
+
             tempFile.delete();
             instanceLogger.info("Temporary file deleted");
 

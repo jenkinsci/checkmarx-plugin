@@ -1,9 +1,11 @@
 package com.checkmarx.jenkins;
 
 
-import static ch.lambdaj.Lambda.filter;
-import static ch.lambdaj.Lambda.having;
-import static ch.lambdaj.Lambda.on;
+import com.checkmarx.jenkins.xmlresponseparser.CreateAndRunProjectXmlResponseParser;
+import com.checkmarx.jenkins.xmlresponseparser.RunIncrementalScanXmlResponseParser;
+import com.checkmarx.jenkins.xmlresponseparser.RunScanAndAddToProjectXmlResponseParser;
+import com.checkmarx.jenkins.xmlresponseparser.XmlResponseParser;
+import com.checkmarx.ws.CxJenkinsWebService.*;
 import hudson.AbortException;
 import hudson.FilePath;
 import hudson.util.IOUtils;
@@ -25,6 +27,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.soap.SOAPMessage;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -38,33 +41,12 @@ import org.hamcrest.Matchers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.checkmarx.ws.CxJenkinsWebService.CliScanArgs;
-import com.checkmarx.ws.CxJenkinsWebService.ConfigurationSet;
-import com.checkmarx.ws.CxJenkinsWebService.Credentials;
-import com.checkmarx.ws.CxJenkinsWebService.CxJenkinsWebService;
-import com.checkmarx.ws.CxJenkinsWebService.CxJenkinsWebServiceSoap;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSBasicRepsonse;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSCreateReportResponse;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSReportRequest;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSReportStatusResponse;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSReportType;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseConfigSetList;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseGroupList;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseLoginData;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSResponsePresetList;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseProjectsDisplayData;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseRunID;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseScanResults;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseScanStatus;
-import com.checkmarx.ws.CxJenkinsWebService.Group;
-import com.checkmarx.ws.CxJenkinsWebService.Preset;
-import com.checkmarx.ws.CxJenkinsWebService.ProjectDisplayData;
-import com.checkmarx.ws.CxJenkinsWebService.Scan;
-import com.checkmarx.ws.CxJenkinsWebService.ScanResponse;
 import com.checkmarx.ws.CxWSResolver.CxClientType;
 import com.checkmarx.ws.CxWSResolver.CxWSResolver;
 import com.checkmarx.ws.CxWSResolver.CxWSResolverSoap;
 import com.checkmarx.ws.CxWSResolver.CxWSResponseDiscovery;
+
+import static ch.lambdaj.Lambda.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -83,7 +65,6 @@ public class CxWebService {
     private String sessionId;
     private CxJenkinsWebServiceSoap cxJenkinsWebServiceSoap;
     private final URL webServiceUrl;
-
 
     public CxWebService(String serverUrl) throws MalformedURLException, AbortException
     {
@@ -155,22 +136,6 @@ public class CxWebService {
         logger.debug("Login successful, sessionId: " + sessionId);
     }
 
-    public CxWSResponseRunID scanWithByteArray(CliScanArgs args) throws AbortException
-    {
-        assert sessionId!=null : "Trying to scan before login";
-
-        CxWSResponseRunID cxWSResponseRunID = cxJenkinsWebServiceSoap.scan(sessionId, args);
-        if (!cxWSResponseRunID.isIsSuccesfull())
-        {
-            String message = "Submission of sources for scan failed: \n" + cxWSResponseRunID.getErrorMessage();
-            logger.error(message);
-            throw new AbortException(message);
-        }
-
-        return cxWSResponseRunID;
-    }
-
-
     private CxWSResponseScanStatus getScanStatus(CxWSResponseRunID cxWSResponseRunID) throws AbortException
     {
         assert sessionId!=null : "Trying to get scan status before login";
@@ -183,8 +148,6 @@ public class CxWebService {
         }
         return cxWSResponseScanStatus;
     }
-
-
 
     public long trackScanProgress(final CxWSResponseRunID cxWSResponseRunID,
                                   final String username,
@@ -398,10 +361,8 @@ public class CxWebService {
         return this.cxJenkinsWebServiceSoap.isValidProjectName(sessionId,cxProjectName,groupId);
     }
 
-
-    private Pair<byte[],byte[]> createScanSoapMessage(CliScanArgs args)
+    private Pair<byte[],byte[]> createScanSoapMessage(Object request, Class inputType, ProjectSettings projectSettings, LocalCodeContainer localCodeContainer, boolean visibleToOtherUsers, boolean isPublicScan)
     {
-
         final String soapMessageHead = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
                 "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
                 "xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" " +
@@ -413,21 +374,19 @@ public class CxWebService {
         final String zippedFileCloseTag = "</ZippedFile>";
 
         try {
-            final JAXBContext context = JAXBContext.newInstance(Scan.class);
+            final JAXBContext context = JAXBContext.newInstance(inputType);
             final Marshaller marshaller = context.createMarshaller();
 
             StringWriter scanMessage = new StringWriter();
             scanMessage.write(soapMessageHead);
 
             // Nullify the zippedFile field, and save its old value for restoring later
-            final byte[] oldZippedFileValue = args.getSrcCodeSettings().getPackagedCode().getZippedFile();
-            args.getSrcCodeSettings().getPackagedCode().setZippedFile(new byte[]{});
-            Scan scan = new Scan();
-            scan.setArgs(args);
-            scan.setSessionId(sessionId);
+            final byte[] oldZippedFileValue = localCodeContainer.getZippedFile();
+            localCodeContainer.setZippedFile(new byte[]{});
+
             marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
-            marshaller.marshal(scan, scanMessage);
-            args.getSrcCodeSettings().getPackagedCode().setZippedFile(oldZippedFileValue); // Restore the old value
+            marshaller.marshal(request, scanMessage);
+            localCodeContainer.setZippedFile(oldZippedFileValue); // Restore the old value
 
 
             scanMessage.write(soapMessageTail);
@@ -440,37 +399,12 @@ public class CxWebService {
             Pair<byte[],byte[]> result = Pair.of(startPart.getBytes("UTF-8"), endPart.getBytes("UTF-8"));
 
             return result;
-        } catch (JAXBException e)
-        {
-            // Getting here indicates a bug
-            logger.error(e.getMessage(),e);
-            throw new Error(e);
-        } catch (UnsupportedEncodingException e)
-        {
+        } catch (JAXBException | UnsupportedEncodingException e) {
+
             // Getting here indicates a bug
             logger.error(e.getMessage(),e);
             throw new Error(e);
         }
-    }
-
-    private CxWSResponseRunID parseXmlResponse(InputStream inputStream) throws XMLStreamException, JAXBException
-    {
-        XMLInputFactory xif = XMLInputFactory.newFactory();
-        XMLStreamReader xsr = xif.createXMLStreamReader(inputStream);
-        xsr.nextTag();
-        // We now consume all tags before the first occurrence of ScanResponse,
-        // which constitute the soap message envelope header
-        while(!xsr.getLocalName().equals("ScanResponse")) {
-            xsr.nextTag();
-        }
-
-        final JAXBContext context = JAXBContext.newInstance(ScanResponse.class);
-        final Unmarshaller unmarshaller = context.createUnmarshaller();
-        final ScanResponse scanResponse = (ScanResponse)unmarshaller.unmarshal(xsr);
-        // We neglect the consumption of soap envelope tail, since it is not used anywhere
-        xsr.close();
-
-        return scanResponse.getScanResult();
     }
 
     public List<Group> getAssociatedGroups() throws AbortException
@@ -488,68 +422,111 @@ public class CxWebService {
         return associatedGroupsList.getGroupList().getGroup();
     }
 
+    public CxWSResponseRunID RunScanAndAddToProject(ProjectSettings projectSettings, LocalCodeContainer localCodeContainer, boolean visibleToOtherUsers, boolean isPublicScan, final FilePath base64ZipFile) throws AbortException {
+        assert sessionId != null;
+
+        RunScanAndAddToProject scan = new RunScanAndAddToProject();
+        scan.setLocalCodeContainer(localCodeContainer);
+        scan.setSessionId(sessionId);
+        scan.setProjectSettings(projectSettings);
+        scan.setVisibleToUtherUsers(visibleToOtherUsers);
+        scan.setIsPublicScan(isPublicScan);
+
+        Pair<byte[],byte[]> soapMeassage = createScanSoapMessage(scan, RunScanAndAddToProject.class, projectSettings, localCodeContainer, visibleToOtherUsers, isPublicScan);
+
+        return scan(projectSettings, localCodeContainer, visibleToOtherUsers, isPublicScan, base64ZipFile, "RunScanAndAddToProject",
+                soapMeassage, new RunScanAndAddToProjectXmlResponseParser());
+    }
+
+    public CxWSResponseRunID RunIncrementalScan(ProjectSettings projectSettings, LocalCodeContainer localCodeContainer, boolean visibleToOtherUsers, boolean isPublicScan, final FilePath base64ZipFile) throws AbortException {
+        assert sessionId != null;
+
+        RunIncrementalScan scan = new RunIncrementalScan();
+        scan.setLocalCodeContainer(localCodeContainer);
+        scan.setSessionId(sessionId);
+        scan.setProjectSettings(projectSettings);
+        scan.setVisibleToUtherUsers(visibleToOtherUsers);
+        scan.setIsPublicScan(isPublicScan);
+
+        Pair<byte[],byte[]> soapMeassage = createScanSoapMessage(scan, RunIncrementalScan.class, projectSettings, localCodeContainer, visibleToOtherUsers, isPublicScan);
+
+        return scan(projectSettings, localCodeContainer, visibleToOtherUsers, isPublicScan, base64ZipFile, "RunIncrementalScan",
+                soapMeassage, new RunIncrementalScanXmlResponseParser());
+    }
+
+    public CxWSResponseRunID CreateAndRunProject(ProjectSettings projectSettings, LocalCodeContainer localCodeContainer, boolean visibleToOtherUsers, boolean isPublicScan, final FilePath base64ZipFile) throws AbortException {
+        assert sessionId != null;
+
+        CreateAndRunProject scan = new CreateAndRunProject();
+        scan.setLocalCodeContainer(localCodeContainer);
+        scan.setSessionID(sessionId);
+        scan.setProjectSettings(projectSettings);
+        scan.setVisibleToOtherUsers(visibleToOtherUsers);
+        scan.setIsPublicScan(isPublicScan);
+
+        Pair<byte[], byte[]> soapMessage = createScanSoapMessage(scan, CreateAndRunProject.class, projectSettings, localCodeContainer, visibleToOtherUsers, isPublicScan);
+
+        return scan(projectSettings, localCodeContainer, visibleToOtherUsers, isPublicScan, base64ZipFile, "CreateAndRunProject",
+                soapMessage, new CreateAndRunProjectXmlResponseParser());
+    }
+
+    public long getProjectId(ProjectSettings projectSettings) throws AbortException {
+        CxWSResponseProjectsDisplayData projects = cxJenkinsWebServiceSoap.getProjectsDisplayData(sessionId);
+
+        final String groupId = projectSettings.getAssociatedGroupID();
+        final List<Group> groups = getAssociatedGroups();
+        final List<Group> selected = filter(having(on(Group.class).getID(), Matchers.equalTo(groupId)), groups);
+
+        if (selected.size() == 0) {
+            final String message = "Could not translate group (team) id: " + groupId + " to group name\n" +
+                    "Open the Job configuration page, and select a team.\n";
+            logger.error(message);
+            throw new AbortException(message);
+
+        } else if (selected.size() > 1) {
+            logger.warn("Server returned more than one group with id: " + groupId);
+            for (Group g : selected) {
+                logger.warn("Group Id: " + g.getID() + " groupName: " + g.getGroupName());
+            }
+        }
+
+        long projectId = 0;
+        if (projects != null && projects.isIsSuccesfull()) {
+            for(ProjectDisplayData projectDisplayData:projects.getProjectList().getProjectDisplayData()){
+                if (projectDisplayData.getProjectName().equals(projectSettings.getProjectName()) &&
+                        projectDisplayData.getGroup().equals(selected.get(0).getGroupName())) {
+                    projectId = projectDisplayData.getProjectID();
+                    break;
+                }
+            }
+        }
+
+        if (projectId == 0) {
+            throw new AbortException("Can't find exsiting project to scan");
+        }
+
+        return projectId;
+    }
 
     /**
      * Same as "scan" method, but works by streaming the LocalCodeContainer.zippedFile contents.
      * NOTE: The attribute LocalCodeContainer.zippedFile inside args is REPLACED by empty byte array,
      * and base64ZipFile temp file is used instead.
-     * @param args - CliScanArgs instance initialized with all the required parameters for submitting a scan
      * @param base64ZipFile - Temp file used instead of LocalCodeContainer.zippedFile attribute, should
      *                      contain zipped sources encoded with base 64 encoding
      * @return CxWSResponseRunID object which is similar to the return value of scan web service method
      * @throws AbortException
      */
-
-    public CxWSResponseRunID scan(final CliScanArgs args, final FilePath base64ZipFile) throws AbortException
-    {
+    private CxWSResponseRunID scan(ProjectSettings projectSettings, LocalCodeContainer localCodeContainer, boolean visibleToOtherUsers, boolean isPublicScan, final FilePath base64ZipFile, String soapActionName, Pair<byte[],byte[]> soapMessage, XmlResponseParser xmlResponseParser) throws AbortException{
         assert sessionId!=null;
 
         try {
-
-            ////////////////////////////////////////////////////////////////////////////////////////////
-            // Server bug work around
-            // Server fails to read the group id from associatedGroupID field of prjSettings. The work
-            // around is to prefix the project name with the group name.
-            ///////////////////////////////////////////////////////////////////////////////////////////
-
-            final String groupId = args.getPrjSettings().getAssociatedGroupID();
-            final String originalProjectName = args.getPrjSettings().getProjectName();
-            final List<Group> groups = getAssociatedGroups();
-            final List<Group> selected = filter(having(on(Group.class).getID(), Matchers.equalTo(groupId)), groups);
-
-            if (selected.size()>=1)
-            {
-                final String fullyQualifiedProjectName = selected.get(0).getGroupName() + "\\" + args.getPrjSettings().getProjectName();
-                args.getPrjSettings().setProjectName(fullyQualifiedProjectName);
-            }
-
-            if (selected.size()==0)
-            {
-                final String message = "Could not translate group (team) id: " + groupId + " to group name\n" +
-                        "Open the Job configuration page, and select a team.\n";
-                logger.error(message);
-                throw new AbortException(message);
-
-            } else if (selected.size() > 1) {
-                logger.warn("Server returned more than one group with id: " + groupId);
-                for(Group g : selected)
-                {
-                    logger.warn("Group Id: " + g.getID() + " groupName: " + g.getGroupName());
-                }
-            }
-
-            ////////////////////////////////////////////////////////////////////////////////////////////
-            // Work around end
-            ////////////////////////////////////////////////////////////////////////////////////////////
-
-            Pair<byte[],byte[]> soapMessage = createScanSoapMessage(args);
-            args.getPrjSettings().setProjectName(originalProjectName);
 
             // Create HTTP connection
 
             final HttpURLConnection streamingUrlConnection = (HttpURLConnection)webServiceUrl.openConnection();
             streamingUrlConnection.addRequestProperty("Content-Type","text/xml; charset=utf-8");
-            streamingUrlConnection.addRequestProperty("SOAPAction","\"http://Checkmarx.com/v7/Scan\"");
+            streamingUrlConnection.addRequestProperty("SOAPAction",String.format("\"http://Checkmarx.com/v7/%s\"", soapActionName));
             streamingUrlConnection.setDoOutput(true);
             // Calculate the length of the soap message
             final long length = soapMessage.getLeft().length + soapMessage.getRight().length + base64ZipFile.length();
@@ -568,12 +545,11 @@ public class CxWebService {
             logger.info("Finished uploading sources to Checkmarx server");
 
 
-            CxWSResponseRunID cxWSResponseRunID = parseXmlResponse(streamingUrlConnection.getInputStream());
+            CxWSResponseRunID cxWSResponseRunID =  xmlResponseParser.parse(streamingUrlConnection.getInputStream());
 
             if (!cxWSResponseRunID.isIsSuccesfull())
             {
                 String message = "Submission of sources for scan failed: \n" + cxWSResponseRunID.getErrorMessage();
-                //logger.error(message); // Logging will be done in a catch (IOException e) statement below
                 throw new AbortException(message);
             }
 
@@ -584,25 +560,9 @@ public class CxWebService {
                     "\nPlease, configure Checkmarx server to work in Anonymous authentication mode.\n";
             logger.error(consoleMessage);
             throw new AbortException(e.getMessage());
-        } catch (IOException e) {
-            logger.error(e.getMessage(),e);
-            throw new AbortException(e.getMessage());
-        } catch (JAXBException e) {
-            logger.error(e.getMessage(), e);
-            throw new AbortException(e.getMessage());
-        } catch (XMLStreamException e) {
-            logger.error(e.getMessage(), e);
-            throw new AbortException(e.getMessage());
-        } catch (InterruptedException e) {
+        } catch (IOException | JAXBException | XMLStreamException | InterruptedException e) {
             logger.error(e.getMessage(), e);
             throw new AbortException(e.getMessage());
         }
     }
-
-
-    public boolean isLoggedIn()
-    {
-        return this.sessionId!=null;
-    }
-
 }

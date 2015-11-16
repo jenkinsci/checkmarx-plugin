@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.jvnet.hudson:htmlunit-core-js:2.6-hudson-1">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jvnet/hudson/htmlunit-core-js/2.6-hudson-1/htmlunit-core-js-2.6-hudson-1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jvnet/hudson/htmlunit-core-js/2.6-hudson-1/htmlunit-core-js-2.6-hudson-1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jvnet/hudson/htmlunit-core-js/2.6-hudson-1/htmlunit-core-js-2.6-hudson-1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

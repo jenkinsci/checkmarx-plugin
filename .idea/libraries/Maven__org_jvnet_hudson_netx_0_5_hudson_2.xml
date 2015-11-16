@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.jvnet.hudson:netx:0.5-hudson-2">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jvnet/hudson/netx/0.5-hudson-2/netx-0.5-hudson-2.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jvnet/hudson/netx/0.5-hudson-2/netx-0.5-hudson-2-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jvnet/hudson/netx/0.5-hudson-2/netx-0.5-hudson-2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
