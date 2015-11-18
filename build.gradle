@@ -1,3 +1,22 @@
+buildscript {
+    repositories {
+        // The plugin is currently only available via the Jenkins
+        // Maven repository, but has dependencies in Maven Central.
+        mavenCentral()
+        maven {
+            url 'http://repo.jenkins-ci.org/releases/'
+        }
+    }
+    dependencies {
+        classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.12.1',
+				  'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.+'
+    }
+}
+
+plugins {
+ 	id "no.nils.wsdl2java" version "0.8"
+}
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
@@ -48,20 +67,17 @@ dependencies {
 			'org.jmockit:jmockit:1.16'
 }
 
-buildscript {
-    repositories {
-        // The plugin is currently only available via the Jenkins
-        // Maven repository, but has dependencies in Maven Central.
-        mavenCentral()
-        maven {
-            url 'http://repo.jenkins-ci.org/releases/'
-        }
-    }
-    dependencies {
-        classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.12.1',
-				  'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.+'
-    }
+wsdl2java {
+    generatedWsdlDir = file("build/generated-sources")  // target directory for generated source code
+    wsdlDir = file("src/main/config/com/checkmarx/jenkins/CxWebService") // define to support incremental build
+    wsdlsToGenerate = [ 
+                ['-p', 'com.checkmarx.ws.resolver', '-client', "${wsdlDir}"+'/cxwsresolver.wsdl'],
+                ['-p', 'com.checkmarx.ws.generated', '-client', 'src/main/config/com/checkmarx/cxcviewer/ws/CxJenkinsWebService.wsdl']
+        ]
+    cxfVersion = "3.1.1"
 }
+
+
 
 
 
