@@ -1,0 +1,9 @@
+<div>
+	Determines how to act when a triggered Checkmarx scan in synchronous mode fails and returns an error message (i.e. no scan results, not to be confused with
+	valid scan results that exceed the threshold).
+	<ul>
+		<li>FAILURE is equivalent to a Job error that fails the entire build.</li>
+		<li>UNSTABLE is equivalent to a Job warning that allows the build to proceed normally but provides an unstable status upon completion.</li>
+		<li>Use the global setting implies that this project uses the value either FAILURE or UNSTABLE defined globally by the CxSAST Jenkins plugin.</li>
+	</ul>
+</div>

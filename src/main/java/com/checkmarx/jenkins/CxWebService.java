@@ -1,11 +1,9 @@
 package com.checkmarx.jenkins;
 
 
-import com.checkmarx.jenkins.xmlresponseparser.CreateAndRunProjectXmlResponseParser;
-import com.checkmarx.jenkins.xmlresponseparser.RunIncrementalScanXmlResponseParser;
-import com.checkmarx.jenkins.xmlresponseparser.RunScanAndAddToProjectXmlResponseParser;
-import com.checkmarx.jenkins.xmlresponseparser.XmlResponseParser;
-import com.checkmarx.ws.CxJenkinsWebService.*;
+import static ch.lambdaj.Lambda.filter;
+import static ch.lambdaj.Lambda.having;
+import static ch.lambdaj.Lambda.on;
 import hudson.AbortException;
 import hudson.FilePath;
 import hudson.util.IOUtils;
@@ -26,11 +24,7 @@ import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import javax.xml.ws.WebServiceException;
 
 import jenkins.model.Jenkins;
@@ -41,12 +35,39 @@ import org.hamcrest.Matchers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.checkmarx.jenkins.xmlresponseparser.CreateAndRunProjectXmlResponseParser;
+import com.checkmarx.jenkins.xmlresponseparser.RunIncrementalScanXmlResponseParser;
+import com.checkmarx.jenkins.xmlresponseparser.RunScanAndAddToProjectXmlResponseParser;
+import com.checkmarx.jenkins.xmlresponseparser.XmlResponseParser;
+import com.checkmarx.ws.CxJenkinsWebService.ConfigurationSet;
+import com.checkmarx.ws.CxJenkinsWebService.CreateAndRunProject;
+import com.checkmarx.ws.CxJenkinsWebService.Credentials;
+import com.checkmarx.ws.CxJenkinsWebService.CxJenkinsWebService;
+import com.checkmarx.ws.CxJenkinsWebService.CxJenkinsWebServiceSoap;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSBasicRepsonse;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSCreateReportResponse;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSReportRequest;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSReportStatusResponse;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSReportType;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseConfigSetList;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseGroupList;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseLoginData;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponsePresetList;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseProjectsDisplayData;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseRunID;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseScanResults;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseScanStatus;
+import com.checkmarx.ws.CxJenkinsWebService.Group;
+import com.checkmarx.ws.CxJenkinsWebService.LocalCodeContainer;
+import com.checkmarx.ws.CxJenkinsWebService.Preset;
+import com.checkmarx.ws.CxJenkinsWebService.ProjectDisplayData;
+import com.checkmarx.ws.CxJenkinsWebService.ProjectSettings;
+import com.checkmarx.ws.CxJenkinsWebService.RunIncrementalScan;
+import com.checkmarx.ws.CxJenkinsWebService.RunScanAndAddToProject;
 import com.checkmarx.ws.CxWSResolver.CxClientType;
 import com.checkmarx.ws.CxWSResolver.CxWSResolver;
 import com.checkmarx.ws.CxWSResolver.CxWSResolverSoap;
 import com.checkmarx.ws.CxWSResolver.CxWSResponseDiscovery;
-
-import static ch.lambdaj.Lambda.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -396,15 +417,14 @@ public class CxWebService {
             assert parts.length == 2;
             final String startPart = parts[0] + zippedFileOpenTag;
             final String endPart   = zippedFileCloseTag + parts[1];
-            Pair<byte[],byte[]> result = Pair.of(startPart.getBytes("UTF-8"), endPart.getBytes("UTF-8"));
 
-            return result;
+			return Pair.of(startPart.getBytes("UTF-8"), endPart.getBytes("UTF-8"));
         } catch (JAXBException | UnsupportedEncodingException e) {
 
-            // Getting here indicates a bug
-            logger.error(e.getMessage(),e);
-            throw new Error(e);
-        }
+			// Getting here indicates a bug
+			logger.error(e.getMessage(), e);
+			throw new RuntimeException("Eror creating SOAP message", e);
+		}
     }
 
     public List<Group> getAssociatedGroups() throws AbortException
