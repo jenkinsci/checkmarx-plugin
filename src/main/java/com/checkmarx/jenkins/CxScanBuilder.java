@@ -1,6 +1,5 @@
 package com.checkmarx.jenkins;
 
-import com.thoughtworks.xstream.mapper.Mapper;
 import hudson.AbortException;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -362,9 +361,6 @@ public class CxScanBuilder extends Builder {
 
             listener.finished(Result.SUCCESS);
             return true;
-		} catch (AbortException e) {
-			instanceLogger.error(e.getMessage(), e);
-			throw e;
 		} catch (IOException e) {
 			instanceLogger.error(e.getMessage(), e);
 			if (useUnstableOnError(descriptor)) {
