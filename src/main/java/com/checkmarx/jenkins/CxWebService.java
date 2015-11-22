@@ -1,35 +1,69 @@
 package com.checkmarx.jenkins;
 
 
-import com.checkmarx.ws.CxJenkinsWebService.*;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSBasicRepsonse;
-import com.checkmarx.ws.CxWSResolver.*;
+import static ch.lambdaj.Lambda.filter;
+import static ch.lambdaj.Lambda.having;
+import static ch.lambdaj.Lambda.on;
 import hudson.AbortException;
 import hudson.FilePath;
 import hudson.util.IOUtils;
-import jenkins.model.Jenkins;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.log4j.Logger;
-import org.hamcrest.Matchers;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpRetryException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
-import static ch.lambdaj.Lambda.*;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
+import jenkins.model.Jenkins;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.log4j.Logger;
+import org.hamcrest.Matchers;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import com.checkmarx.ws.CxJenkinsWebService.CliScanArgs;
+import com.checkmarx.ws.CxJenkinsWebService.ConfigurationSet;
+import com.checkmarx.ws.CxJenkinsWebService.Credentials;
+import com.checkmarx.ws.CxJenkinsWebService.CxJenkinsWebService;
+import com.checkmarx.ws.CxJenkinsWebService.CxJenkinsWebServiceSoap;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSBasicRepsonse;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSCreateReportResponse;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSReportRequest;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSReportStatusResponse;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSReportType;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseConfigSetList;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseGroupList;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseLoginData;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponsePresetList;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseProjectsDisplayData;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseRunID;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseScanResults;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseScanStatus;
+import com.checkmarx.ws.CxJenkinsWebService.Group;
+import com.checkmarx.ws.CxJenkinsWebService.Preset;
+import com.checkmarx.ws.CxJenkinsWebService.ProjectDisplayData;
+import com.checkmarx.ws.CxJenkinsWebService.Scan;
+import com.checkmarx.ws.CxJenkinsWebService.ScanResponse;
+import com.checkmarx.ws.CxWSResolver.CxClientType;
+import com.checkmarx.ws.CxWSResolver.CxWSResolver;
+import com.checkmarx.ws.CxWSResolver.CxWSResolverSoap;
+import com.checkmarx.ws.CxWSResolver.CxWSResponseDiscovery;
 
 /**
  * Created with IntelliJ IDEA.
@@ -402,20 +436,13 @@ public class CxWebService {
             assert parts.length == 2;
             final String startPart = parts[0] + zippedFileOpenTag;
             final String endPart   = zippedFileCloseTag + parts[1];
-            Pair<byte[],byte[]> result = Pair.of(startPart.getBytes("UTF-8"), endPart.getBytes("UTF-8"));
 
-            return result;
-        } catch (JAXBException e)
-        {
-            // Getting here indicates a bug
-            logger.error(e.getMessage(),e);
-            throw new Error(e);
-        } catch (UnsupportedEncodingException e)
-        {
-            // Getting here indicates a bug
-            logger.error(e.getMessage(),e);
-            throw new Error(e);
-        }
+			return Pair.of(startPart.getBytes("UTF-8"), endPart.getBytes("UTF-8"));
+		} catch (JAXBException | UnsupportedEncodingException e) {
+			// Getting here indicates a bug
+			logger.error(e.getMessage(), e);
+			throw new RuntimeException("Eror creating SOAP message", e);
+		}
     }
 
     private CxWSResponseRunID parseXmlResponse(InputStream inputStream) throws XMLStreamException, JAXBException

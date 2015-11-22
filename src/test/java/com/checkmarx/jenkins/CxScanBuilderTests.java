@@ -1,14 +1,14 @@
 package com.checkmarx.jenkins;
 
+import static org.junit.Assert.assertEquals;
 import hudson.util.Secret;
 import mockit.Expectations;
 import mockit.Mocked;
 import mockit.integration.junit4.JMockit;
+
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Sergey Kadaner
@@ -77,6 +77,7 @@ public class CxScanBuilderTests {
 
 	@NotNull
 	private CxScanBuilder createCxScanBuilder(String projectName, String buildStep, String password) {
-		return new CxScanBuilder(false, null, null, password, projectName, buildStep, null, null, false, null, null, false, false, 0, null, null, false, false, false, 0, 0, 0, false);
+		return new CxScanBuilder(false, null, null, password, projectName, buildStep, null, null, null, false, null, null, false, false, 0, null,
+				null, false, false, false, 0, 0, 0, false);
 	}
 }

@@ -109,6 +109,11 @@
         <f:checkbox default="false"/>
     </f:entry>
 
+	<f:entry name="jobStatusOnError" title="Job status when CxSAST scan returns an error:"
+		field="jobStatusOnError">
+		<f:enum field="jobStatusOnError">${it.displayName}</f:enum>
+	</f:entry>
+
     <j:if test="${!descriptor.forcingVulnerabilityThresholdEnabled}">
 
 	<f:optionalBlock title="Enable synchronous mode"
