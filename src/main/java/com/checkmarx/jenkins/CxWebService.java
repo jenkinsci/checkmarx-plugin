@@ -28,7 +28,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.ws.WebServiceException;
 
 import jenkins.model.Jenkins;
 
@@ -437,20 +436,13 @@ public class CxWebService {
             assert parts.length == 2;
             final String startPart = parts[0] + zippedFileOpenTag;
             final String endPart   = zippedFileCloseTag + parts[1];
-            Pair<byte[],byte[]> result = Pair.of(startPart.getBytes("UTF-8"), endPart.getBytes("UTF-8"));
 
-            return result;
-        } catch (JAXBException e)
-        {
-            // Getting here indicates a bug
-            logger.error(e.getMessage(),e);
-            throw new Error(e);
-        } catch (UnsupportedEncodingException e)
-        {
-            // Getting here indicates a bug
-            logger.error(e.getMessage(),e);
-            throw new Error(e);
-        }
+			return Pair.of(startPart.getBytes("UTF-8"), endPart.getBytes("UTF-8"));
+		} catch (JAXBException | UnsupportedEncodingException e) {
+			// Getting here indicates a bug
+			logger.error(e.getMessage(), e);
+			throw new RuntimeException("Eror creating SOAP message", e);
+		}
     }
 
     private CxWSResponseRunID parseXmlResponse(InputStream inputStream) throws XMLStreamException, JAXBException

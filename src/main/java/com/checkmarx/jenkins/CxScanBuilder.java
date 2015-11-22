@@ -110,16 +110,18 @@ public class CxScanBuilder extends Builder {
     static {
          BasicConfigurator.configure();  // Set the log4j system to log to console
     }
-    
+
     // Kept for backward compatibility with old serialized plugin configuration.
-    private static transient Logger staticLogger; 
-    
+    private static transient Logger staticLogger;
+
     private static final transient Logger LOGGER = Logger.getLogger(CxScanBuilder.class);
     @XStreamOmitField
     private transient Logger instanceLogger = LOGGER; // Instance logger redirects to static logger until
                                                   // it is initialized in perform method
     @XStreamOmitField
     private transient FileAppender fileAppender;
+
+	private JobStatusOnError jobStatusOnError;
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Constructors
@@ -134,6 +136,7 @@ public class CxScanBuilder extends Builder {
                          String buildStep,
                          @Nullable String groupId,
                          @Nullable String preset,
+ JobStatusOnError jobStatusOnError,
                          boolean presetSpecified,
                          @Nullable String excludeFolders,
                          @Nullable String filterPattern,
@@ -157,6 +160,7 @@ public class CxScanBuilder extends Builder {
         this.projectName = (projectName==null)? buildStep:projectName;
         this.groupId = groupId;
         this.preset = preset;
+		this.jobStatusOnError = jobStatusOnError;
         this.presetSpecified = presetSpecified;
         this.excludeFolders = excludeFolders;
         this.filterPattern = filterPattern;
@@ -254,6 +258,10 @@ public class CxScanBuilder extends Builder {
         return comment;
     }
 
+	public JobStatusOnError getJobStatusOnError() {
+		return (null == jobStatusOnError) ? JobStatusOnError.GLOBAL : jobStatusOnError;
+	}
+
     public boolean isSkipSCMTriggers() {
         return skipSCMTriggers;
     }
@@ -286,11 +294,12 @@ public class CxScanBuilder extends Builder {
     public boolean perform(final AbstractBuild<?, ?> build,
                            final Launcher launcher,
                            final BuildListener listener) throws InterruptedException, IOException {
+    	final DescriptorImpl descriptor = (DescriptorImpl) getDescriptor();
 
         try {
             File checkmarxBuildDir = new File(build.getRootDir(), "checkmarx");
             checkmarxBuildDir.mkdir();
-            
+
             initLogger(checkmarxBuildDir, listener, instanceLoggerSuffix(build));
 
             listener.started(null);
@@ -320,7 +329,7 @@ public class CxScanBuilder extends Builder {
             CxWSResponseRunID cxWSResponseRunID = submitScan(build, cxWebService, listener);
             instanceLogger.info("\nScan job submitted successfully\n");
 
-            
+
 
             if (!isWaitForResultsEnabled() && !descriptor.isForcingVulnerabilityThresholdEnabled()) {
                 listener.finished(Result.SUCCESS);
@@ -344,37 +353,51 @@ public class CxScanBuilder extends Builder {
             cxScanResult.readScanXMLReport(xmlReportFile);
             build.addAction(cxScanResult);
 
-            if (descriptor.isForcingVulnerabilityThresholdEnabled() || this.isVulnerabilityThresholdEnabled()) {
-                if (isThresholdCrossed(cxScanResult)) {
+			if ((descriptor.isForcingVulnerabilityThresholdEnabled() || isVulnerabilityThresholdEnabled()) && isThresholdCrossed(cxScanResult)) {
                     build.setResult(Result.UNSTABLE); // Marks the build result as UNSTABLE
                     listener.finished(Result.UNSTABLE);
                     return true;
-                }
             }
 
             listener.finished(Result.SUCCESS);
             return true;
-        } catch (AbortException e) {
-            instanceLogger.error(e.getMessage(), e);
-            throw e;
-        } catch (MalformedURLException e) {
-            instanceLogger.error(e.getMessage(), e);
-            throw e;
-        } catch (IOException e) {
-            instanceLogger.error(e.getMessage(), e);
-            throw e;
+		} catch (AbortException e) {
+			instanceLogger.error(e.getMessage(), e);
+			throw e;
+		} catch (IOException e) {
+			instanceLogger.error(e.getMessage(), e);
+			if (useUnstableOnError(descriptor)) {
+				build.setResult(Result.UNSTABLE);
+				listener.finished(Result.UNSTABLE);
+				return true;
+			} else {
+				throw e;
+			}
         } finally {
             closeLogger();
         }
+	}
+
+	/**
+	 * Checks if job should fail with <code>UNSTABLE</code> status instead of <code>FAILED</code>
+	 *
+	 * @param descriptor
+	 *            Descriptor of the current build step
+	 * @return if job should fail with <code>UNSTABLE</code> status instead of <code>FAILED</code>
+	 */
+	private boolean useUnstableOnError(final DescriptorImpl descriptor) {
+		return JobStatusOnError.UNSTABLE.equals(getJobStatusOnError())
+				|| (JobStatusOnError.GLOBAL.equals(getJobStatusOnError()) && JobGlobalStatusOnError.UNSTABLE.equals(descriptor
+						.getJobGlobalStatusOnError()));
 	}
 
     private boolean isThresholdCrossed(@NotNull final CxScanResult cxScanResult)
     {
         @Nullable
         final DescriptorImpl descriptor = getDescriptor();
-        boolean highThresholdCrossed = false;
-        boolean mediumThresholdCrossed = false;
-        boolean lowThresholdCrossed = false;
+		boolean highThresholdCrossed;
+		boolean mediumThresholdCrossed;
+		boolean lowThresholdCrossed;
 
         if (descriptor!=null && descriptor.isForcingVulnerabilityThresholdEnabled())
         {
@@ -387,9 +410,9 @@ public class CxScanBuilder extends Builder {
             instanceLogger.info("Number of low severity vulnerabilities: " +
                     cxScanResult.getLowCount() + " stability threshold: " + descriptor.getLowThresholdEnforcement());
 
-			highThresholdCrossed = (cxScanResult.getHighCount() > descriptor.getHighThresholdEnforcement() );
-			mediumThresholdCrossed = (cxScanResult.getMediumCount() > descriptor.getMediumThresholdEnforcement());
-			lowThresholdCrossed = (cxScanResult.getLowCount() > descriptor.getLowThresholdEnforcement() );
+			highThresholdCrossed = cxScanResult.getHighCount() > descriptor.getHighThresholdEnforcement();
+			mediumThresholdCrossed = cxScanResult.getMediumCount() > descriptor.getMediumThresholdEnforcement();
+			lowThresholdCrossed = cxScanResult.getLowCount() > descriptor.getLowThresholdEnforcement();
 
 		} else {
             instanceLogger.info("Number of high severity vulnerabilities: " +
@@ -401,10 +424,10 @@ public class CxScanBuilder extends Builder {
             instanceLogger.info("Number of low severity vulnerabilities: " +
                     cxScanResult.getLowCount() + " stability threshold: " + this.getLowThreshold());
 
-			highThresholdCrossed = (cxScanResult.getHighCount() > getHighThreshold());
-			mediumThresholdCrossed = (cxScanResult.getMediumCount() > getMediumThreshold());
-			lowThresholdCrossed = (cxScanResult.getLowCount() > getLowThreshold());
-			
+			highThresholdCrossed = cxScanResult.getHighCount() > getHighThreshold();
+			mediumThresholdCrossed = cxScanResult.getMediumCount() > getMediumThreshold();
+			lowThresholdCrossed = cxScanResult.getLowCount() > getLowThreshold();
+
 		}
         return highThresholdCrossed || mediumThresholdCrossed || lowThresholdCrossed;
     }
@@ -586,7 +609,7 @@ public class CxScanBuilder extends Builder {
         // If user asked to perform full scan after every 9 incremental scans -
         // it means that every 10th scan should be full,
         // that is the ordinal numbers of full scans will be "1", "11", "21" and so on...
-        boolean shouldBeFullScan = (buildNumber % (fullScanCycle+1) == 1);
+		boolean shouldBeFullScan = buildNumber % (fullScanCycle + 1) == 1;
 
         return !shouldBeFullScan;
     }
@@ -636,11 +659,11 @@ public class CxScanBuilder extends Builder {
 	@Extension
 	public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
-	    public final static String DEFAULT_FILTER_PATTERNS = CxConfig.defaultFilterPattern();
-	    public final static int FULL_SCAN_CYCLE_MIN = 1;
-	    public final static int FULL_SCAN_CYCLE_MAX = 99;
+		public static final String DEFAULT_FILTER_PATTERNS = CxConfig.defaultFilterPattern();
+		public static final int FULL_SCAN_CYCLE_MIN = 1;
+		public static final int FULL_SCAN_CYCLE_MAX = 99;
 
-	    private final static Logger logger = Logger.getLogger(DescriptorImpl.class);
+		private static final Logger logger = Logger.getLogger(DescriptorImpl.class);
 
 	    //////////////////////////////////////////////////////////////////////////////////////
 	    //  Persistent plugin global configuration parameters
@@ -657,6 +680,7 @@ public class CxScanBuilder extends Builder {
 	    private int highThresholdEnforcement;
 	    private int mediumThresholdEnforcement;
 	    private int lowThresholdEnforcement;
+		private JobGlobalStatusOnError jobGlobalStatusOnError;
         private final Pattern msGuid = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
 
 	    @Nullable
@@ -912,7 +936,7 @@ public class CxScanBuilder extends Builder {
 
 
 	    /** Provides a list of presets from Checkmarx server for dynamic drop-down list in configuration page
-	     * 
+	     *
 	     * @param useOwnServerCredentials
 	     * @param serverUrl
 	     * @param username
@@ -954,7 +978,7 @@ public class CxScanBuilder extends Builder {
 	    }
 
 	    /** Provides a list of source encodings from Checkmarx server for dynamic drop-down list in configuration page
-	     * 
+	     *
 	     * @param value
 	     * @return
 	     */
@@ -994,7 +1018,7 @@ public class CxScanBuilder extends Builder {
 	            String message = "Provide Checkmarx server credentials to see source encodings list";
 	            listBoxModel.add(new ListBoxModel.Option(message,message));
 	        }
-	        
+
 	        return listBoxModel;
 	    }
 
@@ -1150,7 +1174,15 @@ public class CxScanBuilder extends Builder {
 	        save();
 	        return super.configure(req,formData);
 	    }
+
+		public JobGlobalStatusOnError getJobGlobalStatusOnError() {
+			return jobGlobalStatusOnError;
+		}
+
+		public void setJobGlobalStatusOnError(JobGlobalStatusOnError jobGlobalStatusOnError) {
+			this.jobGlobalStatusOnError = (null == jobGlobalStatusOnError) ? JobGlobalStatusOnError.FAILURE : jobGlobalStatusOnError;
+		}
+
 	}
 
-	
 }

@@ -42,6 +42,11 @@
             <f:checkbox default="false"/>
         </f:entry>
 
+	<f:entry name="jobGlobalStatusOnError" title="Job status when CxSAST scan returns an error:"
+		field="jobGlobalStatusOnError">
+		  <f:enum field="jobGlobalStatusOnError">${it.displayName}</f:enum>
+	</f:entry>
+
         <f:optionalBlock title="Set vulnerability threshold enforcement values for all jobs" inline="true" field="forcingVulnerabilityThresholdEnabled">
             <f:entry title="High severity vulnerabilities threshold" field="highThresholdEnforcement">
                 <f:number clazz="positive-number" min="0" step="1" default="0"/>
