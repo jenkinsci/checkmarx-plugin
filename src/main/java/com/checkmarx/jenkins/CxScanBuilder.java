@@ -790,7 +790,9 @@ public class CxScanBuilder extends Builder {
         }
 
         public void setScanTimeoutDuration(int scanTimeoutDuration) {
-            this.scanTimeoutDuration = scanTimeoutDuration;
+            if (scanTimeoutDuration >= 1) {
+                this.scanTimeoutDuration = scanTimeoutDuration;
+            }
         }
 
 	    @Override
