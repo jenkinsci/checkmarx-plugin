@@ -333,7 +333,7 @@ public class CxScanBuilder extends Builder {
                 return true;
             }
 
-            long scanId = cxWebService.trackScanProgress(cxWSResponseRunID, usernameToUse, passwordToUse, descriptor.getScanTimeOutEnabled(), descriptor.getsSanTimeoutDuration());
+            long scanId = cxWebService.trackScanProgress(cxWSResponseRunID, usernameToUse, passwordToUse, descriptor.getScanTimeOutEnabled(), descriptor.getScanTimeoutDuration());
 
             if (scanId == 0) {
                 build.setResult(Result.UNSTABLE);
@@ -782,7 +782,7 @@ public class CxScanBuilder extends Builder {
             this.scanTimeOutEnabled = scanTimeOutEnabled;
         }
 
-        public int getsSanTimeoutDuration() {
+        public int getScanTimeoutDuration() {
             return scanTimeoutDuration;
         }
 
