@@ -1168,9 +1168,9 @@ public class CxScanBuilder extends Builder {
 	        if (urlComponents.length > 0)
 	        {
 	            final String jobName = urlComponents[urlComponents.length-1];
-	            final String cleanJobName = jobName.replaceAll("[\\s\\\\/]", "");
-	            return cleanJobName;
+	            return jobName;
 	        }
+
 	        // This is a fallback if the above code fails
 	        return "";
 	    }
