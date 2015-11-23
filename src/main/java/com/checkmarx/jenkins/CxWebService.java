@@ -81,6 +81,7 @@ public class CxWebService {
     private final static int WEBSERVICE_API_VERSION = 1;
     private final static String CXWSRESOLVER_PATH = "/cxwebinterface/cxwsresolver.asmx";
     private final static int LCID = 1033; // English
+    private static final int MILISEOUNDS_IN_HOUR = 1000 * 60 * 60;
 
     private final Logger logger;
     private String sessionId;
@@ -172,14 +173,24 @@ public class CxWebService {
 
     public long trackScanProgress(final CxWSResponseRunID cxWSResponseRunID,
                                   final String username,
-                                  final String password) throws AbortException
+                                  final String password,
+                                  final boolean scanTimeOutEnabled,
+                                  final long scanTimeoutDuration) throws AbortException
     {
         assert sessionId!=null : "Trying to track scan progress before login";
+
+        final long jobStartTime = System.currentTimeMillis();
 
         boolean locReported = false;
         while (true)
         {
             try {
+
+                if (scanTimeOutEnabled && jobStartTime + scanTimeoutDuration * MILISEOUNDS_IN_HOUR < System.currentTimeMillis()){
+                    logger.info("Scan duration exceeded timeout threshold");
+                    return 0;
+                }
+
                 CxWSResponseScanStatus status = this.getScanStatus(cxWSResponseRunID);
 
                 switch (status.getCurrentStatus())
