@@ -11,3 +11,4 @@ sonar-project.properties
 .settings/org.eclipse.m2e.core.prefs
 build/
 .gradle/
+.idea/workspace.xml
