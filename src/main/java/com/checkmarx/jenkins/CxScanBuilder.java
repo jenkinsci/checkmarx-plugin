@@ -333,7 +333,13 @@ public class CxScanBuilder extends Builder {
                 return true;
             }
 
-            long scanId = cxWebService.trackScanProgress(cxWSResponseRunID, usernameToUse, passwordToUse);
+            long scanId = cxWebService.trackScanProgress(cxWSResponseRunID, usernameToUse, passwordToUse, descriptor.getScanTimeOutEnabled(), descriptor.getsSanTimeoutDuration());
+
+            if (scanId == 0) {
+                build.setResult(Result.UNSTABLE);
+                listener.finished(Result.UNSTABLE);
+                return true;
+            }
 
             File xmlReportFile = new File(checkmarxBuildDir, "ScanReport.xml");
             cxWebService.retrieveScanReport(scanId, xmlReportFile, CxWSReportType.XML);
@@ -675,6 +681,8 @@ public class CxScanBuilder extends Builder {
 	    private int mediumThresholdEnforcement;
 	    private int lowThresholdEnforcement;
 		private JobGlobalStatusOnError jobGlobalStatusOnError;
+        private boolean scanTimeOutEnabled;
+        private int scanTimeoutDuration;
         private final Pattern msGuid = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
 
 	    @Nullable
@@ -765,6 +773,22 @@ public class CxScanBuilder extends Builder {
 	    public void setLowThresholdEnforcement(int lowThresholdEnforcement) {
 	        this.lowThresholdEnforcement = lowThresholdEnforcement;
 	    }
+
+        public boolean getScanTimeOutEnabled() {
+            return scanTimeOutEnabled;
+        }
+
+        public void setScanTimeOutEnabled(boolean scanTimeOutEnabled) {
+            this.scanTimeOutEnabled = scanTimeOutEnabled;
+        }
+
+        public int getsSanTimeoutDuration() {
+            return scanTimeoutDuration;
+        }
+
+        public void setScanTimeoutDuration(int scanTimeoutDuration) {
+            this.scanTimeoutDuration = scanTimeoutDuration;
+        }
 
 	    @Override
 		public boolean isApplicable(Class<? extends AbstractProject> aClass) {
