@@ -786,6 +786,10 @@ public class CxScanBuilder extends Builder {
         }
 
         public int getScanTimeoutDuration() {
+            if (scanTimeoutDuration < 1) {
+                scanTimeoutDuration  = 1;
+            }
+
             return scanTimeoutDuration;
         }
 
