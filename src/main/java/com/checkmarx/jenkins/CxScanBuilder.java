@@ -27,6 +27,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import javax.xml.ws.WebServiceException;
+
 import net.sf.json.JSONObject;
 
 import org.apache.commons.io.FileUtils;
@@ -367,7 +369,7 @@ public class CxScanBuilder extends Builder {
 
             listener.finished(Result.SUCCESS);
             return true;
-		} catch (IOException e) {
+		} catch (IOException | WebServiceException e) {
 			instanceLogger.error(e.getMessage(), e);
 			if (useUnstableOnError(descriptor)) {
 				build.setResult(Result.UNSTABLE);
@@ -707,6 +709,10 @@ public class CxScanBuilder extends Builder {
         private int scanTimeoutDuration;
         private final Pattern msGuid = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
 
+		public DescriptorImpl() {
+			load();
+		}
+
 	    @Nullable
 	    public String getServerUrl() {
 	        return serverUrl;
@@ -821,10 +827,6 @@ public class CxScanBuilder extends Builder {
 	    @Override
 		public boolean isApplicable(Class<? extends AbstractProject> aClass) {
 	        return true;
-	    }
-
-	    public DescriptorImpl() {
-	        load();
 	    }
 
 	    //////////////////////////////////////////////////////////////////////////////////////
