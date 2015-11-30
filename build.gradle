@@ -1,80 +1,71 @@
 buildscript {
-    repositories {
-        // The plugin is currently only available via the Jenkins
-        // Maven repository, but has dependencies in Maven Central.
-        mavenCentral()
-        maven {
-            url 'http://repo.jenkins-ci.org/releases/'
-        }
-    }
-    dependencies {
-        classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.12.1',
-				  'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.+'
-    }
+	repositories {
+		// The plugin is currently only available via the Jenkins
+		// Maven repository, but has dependencies in Maven Central.
+		mavenCentral()
+		maven { url 'http://repo.jenkins-ci.org/releases/' }
+	}
+	dependencies { classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.12.2', 'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.+' }
 }
 
-plugins {
- 	id "no.nils.wsdl2java" version "0.8"
-}
+plugins { id "no.nils.wsdl2java" version "0.8" }
 
 apply plugin: 'java'
-apply plugin: 'eclipse'
 apply plugin: 'idea'
+apply plugin: 'eclipse'
 apply plugin: 'maven'
 apply plugin: 'project-report'
 apply plugin: 'org.jenkins-ci.jpi'
 apply plugin: 'provided-base'
 
-
+repositories { maven {  url 'http://10.31.1.81:8081/artifactory/libs-release' } }
 
 group = 'com.checkmarx.jenkins'
-version = '7.2.1-26'
+version = '7.5.0'
 
 description = "Provides automatic scan of code by Checkmarx server and shows results summary and trend in Jenkins interface."
 
 sourceCompatibility = 7
 targetCompatibility = 7
 
-if (project.hasProperty('buildNumber')) {
-	project.version=project.version + "-" + buildNumber
-} else {
-	project.version=project.version + "-" +"SNAPSHOT"
-}
+version = version + "-" + getDate()
 
 jar {
 	manifest {
-		attributes	'Implementation-Title': project.description,
-					'Implementation-Version': project.version,
-					'Repository-Version': repositoryVersion				
+		attributes	'Implementation-Title': description,
+		'Implementation-Version': version,
+		'Repository-Version': repositoryVersion
 	}
 }
 
-project.ext {
-  mavenRepo = "http://10.31.1.81:8081/artifactory"
-}
-
-repositories {       
-     maven { url "${project.mavenRepo}/libs-release" } 
+test {
+	maxParallelForks = Runtime.getRuntime().availableProcessors()
 }
 
 dependencies {
 	provided 'com.intellij:annotations:12.0'
-    compile 'org.apache.ant:ant:1.9.2',
-		'log4j:log4j:1.2.17',
-		'org.apache.commons:commons-lang3:3.1',
-		'commons-io:commons-io:2.4'
-    testCompile 'junit:junit:4.12',
+
+	compile 'com.checkmarx.components:zipper:1.2.1-26',
+			'org.apache.ant:ant:1.9.2',
+			'log4j:log4j:1.2.17',
+			'org.apache.commons:commons-lang3:3.1',
+			'commons-io:commons-io:2.4',
+			'com.googlecode.lambdaj:lambdaj:2.3.3'
+
+	optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.3@jar'
+
+	testCompile 'junit:junit:4.12',
 			'org.jmockit:jmockit:1.16'
 }
 
 wsdl2java {
-    generatedWsdlDir = file("build/generated-sources")  // target directory for generated source code
-    wsdlDir = file("src/main/config/com/checkmarx/jenkins/CxWebService") // define to support incremental build
-    wsdlsToGenerate = [ 
-                ['-p', 'com.checkmarx.ws.resolver', '-client', "${wsdlDir}"+'/cxwsresolver.wsdl'],
-                ['-p', 'com.checkmarx.ws.generated', '-client', 'src/main/config/com/checkmarx/cxcviewer/ws/CxJenkinsWebService.wsdl']
-        ]
-    cxfVersion = "3.1.1"
+	generatedWsdlDir = file("build/generated-sources")  // target directory for generated source code
+	wsdlDir = file("src/main/config/com/checkmarx/jenkins/CxWebService") // define to support incremental build
+	wsdlsToGenerate = [
+		['-p', 'com.checkmarx.ws.CxWSResolver', '-client', "${wsdlDir}" + '/cxwsresolver.wsdl'],
+		['-p', 'com.checkmarx.ws.CxJenkinsWebService', '-client', "${wsdlDir}" + '/CxJenkinsWebService.wsdl']
+	]
+	cxfVersion = "3.1.4"
 }
 
 
@@ -82,60 +73,57 @@ wsdl2java {
 
 
 jenkinsPlugin {
-    // version of Jenkins core this plugin depends on, must be 1.420 or later
-    coreVersion = '1.509.3'
+	// version of Jenkins core this plugin depends on, must be 1.420 or later
+	coreVersion = '1.509.3'
 
-    // short name of the plugin, defaults to the project name without trailing '-plugin'
-    shortName = 'checkmarx'
+	// short name of the plugin, defaults to the project name without trailing '-plugin'
+	shortName = 'checkmarx'
 
-    // human-readable name of plugin                                               
-    displayName = 'Hello World plugin built with Gradle'
+	// human-readable name of plugin
+	displayName = 'Jenkins Checkmarx Plugin'
 
-    // URL for plugin on Jenkins wiki or elsewhere
-    url = 'https://checkmarx.atlassian.net/wiki/display/KC/CxSAST+Jenkins+Plugin'
+	// URL for plugin on Jenkins wiki or elsewhere
+	url = 'https://checkmarx.atlassian.net/wiki/display/KC/CxSAST+Jenkins+Plugin'
 
-    // plugin URL on GitHub, optional
-   // gitHubUrl = 'https://github.com/jenkinsci/some-plugin'              
+	// plugin URL on GitHub, optional
+	// gitHubUrl = 'https://github.com/jenkinsci/some-plugin'
 
-    // use the plugin class loader before the core class loader, defaults to false
-    pluginFirstClassLoader = true
+	// use the plugin class loader before the core class loader, defaults to false
+	pluginFirstClassLoader = true
 
-    // optional list of package prefixes that your plugin doesn't want to see from core 
-  //  maskClasses = 'groovy.grape org.apache.commons.codec'
+	// optional list of package prefixes that your plugin doesn't want to see from core
+	//  maskClasses = 'groovy.grape org.apache.commons.codec'
 
-    // optional version number from which this plugin release is configuration-compatible
-    // compatibleSinceVersion = '1.1.0'
+	// optional version number from which this plugin release is configuration-compatible
+	// compatibleSinceVersion = '1.1.0'
 
-    // set the directory from which the development server will run, defaults to 'work'
-    // workDir = file('/tmp/jenkins')
+	// set the directory from which the development server will run, defaults to 'work'
+	// workDir = file('/tmp/jenkins')
 
-    // URL used to deploy the plugin, defaults to the value shown
-    // repoUrl = 'http://maven.jenkins-ci.org:8081/content/repositories/releases'
+	// URL used to deploy the plugin, defaults to the value shown
+	// repoUrl = 'http://maven.jenkins-ci.org:8081/content/repositories/releases'
 
-    // URL used to deploy snapshots of the plugin, defaults to the value shown
-    // snapshotRepoUrl = 'http://maven.jenkins-ci.org:8081/content/repositories/snapshots'
+	// URL used to deploy snapshots of the plugin, defaults to the value shown
+	// snapshotRepoUrl = 'http://maven.jenkins-ci.org:8081/content/repositories/snapshots'
 
-    // enable injection of additional tests for checking the syntax of Jelly and other things
-    disabledTestInjection = false
+	// enable injection of additional tests for checking the syntax of Jelly and other things
+	disabledTestInjection = false
 
-    // the output directory for the localizer task relative to the project root, defaults to the value shown
-    localizerOutputDir = "${project.buildDir}/generated-src/localizer"
+	// the output directory for the localizer task relative to the project root, defaults to the value shown
+	localizerOutputDir = "${project.buildDir}/generated-src/localizer"
 
-    // disable configuration of Maven Central, the local Maven cache and the Jenkins Maven repository, defaults to true
-    configureRepositories = false
+	// disable configuration of Maven Central, the local Maven cache and the Jenkins Maven repository, defaults to true
+	configureRepositories = false
 
-    // skip configuration of publications and repositories for the Maven Publishing plugin, defaults to true
-    configurePublishing = false
+	// skip configuration of publications and repositories for the Maven Publishing plugin, defaults to true
+	configurePublishing = false
 
-    // plugin file extension, either 'jpi' or 'hpi', defaults to 'hpi'
-    fileExtension = 'hpi'
+	// plugin file extension, either 'jpi' or 'hpi', defaults to 'hpi'
+	fileExtension = 'hpi'
+}
 
-    // the developers section is optional, and corresponds to the POM developers section
-   /* developers {
-        developer {
-            id 'abayer'
-            name 'Andrew Bayer'
-            email 'andrew.bayer@gmail.com'
-        }
-    }                            */
+def getDate() {
+	def date = new Date()
+	def formattedDate = date.format('yyyyMMdd-HHmm')
+	return formattedDate
 }

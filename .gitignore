@@ -11,3 +11,5 @@ sonar-project.properties
 .settings/org.eclipse.m2e.core.prefs
 build/
 .gradle/
+/bin/
+.settings/
