@@ -314,9 +314,6 @@ public class CxScanBuilder extends Builder {
                 return true;
             }
 
-            @Nullable
-            final DescriptorImpl descriptor = getDescriptor();
-            
             final String serverUrlToUse = isUseOwnServerCredentials() ? getServerUrl() : descriptor.getServerUrl();
             final String usernameToUse = isUseOwnServerCredentials() ? getUsername() : descriptor.getUsername();
             final String passwordToUse = isUseOwnServerCredentials() ? getPassword() : descriptor.getPassword();

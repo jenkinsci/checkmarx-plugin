@@ -14,9 +14,9 @@
       <profile default="true" name="Default" enabled="false">
         <processorPath useClasspath="true" />
       </profile>
-      <profile default="false" name="Maven default annotation processors profile" enabled="true">
+      <profile default="false" name="Annotation profile for jenkins" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <sourceTestOutputDir name="target\generated-test-sources\test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
         <module name="jenkins" />
@@ -232,31 +232,31 @@
     </modules>
   </component>
   <component name="ProjectResources">
-    <resource url="jelly:email" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/email.xsd" />
-    <resource url="jelly:ant" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/ant.xsd" />
-    <resource url="jelly:dynabean" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/dynabean.xsd" />
-    <resource url="jelly:jface" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/jface.xsd" />
-    <resource url="jelly:betwixt" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/betwixt.xsd" />
-    <resource url="jelly:core" location="$USER_HOME$/Downloads/maven-jellydoc-plugin-master/maven-jellydoc-plugin/schemas/core.xsd" />
-    <resource url="jelly:stapler" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/stapler.xsd" />
-    <resource url="jelly:bsf" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/bsf.xsd" />
-    <resource url="jelly:util" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/util.xsd" />
-    <resource url="jelly:beanshell" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/beanshell.xsd" />
-    <resource url="jelly:antlr" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/antlr.xsd" />
-    <resource url="jelly:html" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/html.xsd" />
-    <resource url="jelly:interaction" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/interaction.xsd" />
-    <resource url="jelly:jms" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/jms.xsd" />
-    <resource url="jelly:define" location="$USER_HOME$/Downloads/maven-jellydoc-plugin-master/annotation/schemas/define.xsd" />
-    <resource url="jelly:ojb" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/ojb.xsd" />
-    <resource url="jelly:log" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/log.xsd" />
-    <resource url="jelly:http" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/http.xsd" />
-    <resource url="jelly:fmt" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/fmt.xsd" />
-    <resource url="jelly:bean" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/bean.xsd" />
-    <resource url="jelly:quartz" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/quartz.xsd" />
-    <resource url="jelly:xml" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/xml.xsd" />
     <resource url="/lib/form" location="$USER_HOME$/Downloads/taglib-form.xsd" />
-    <resource url="jelly:jetty" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/jetty.xsd" />
+    <resource url="jelly:ant" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/ant.xsd" />
+    <resource url="jelly:antlr" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/antlr.xsd" />
+    <resource url="jelly:bean" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/bean.xsd" />
+    <resource url="jelly:beanshell" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/beanshell.xsd" />
+    <resource url="jelly:betwixt" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/betwixt.xsd" />
+    <resource url="jelly:bsf" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/bsf.xsd" />
+    <resource url="jelly:core" location="$USER_HOME$/Downloads/maven-jellydoc-plugin-master/maven-jellydoc-plugin/schemas/core.xsd" />
+    <resource url="jelly:define" location="$USER_HOME$/Downloads/maven-jellydoc-plugin-master/annotation/schemas/define.xsd" />
+    <resource url="jelly:dynabean" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/dynabean.xsd" />
+    <resource url="jelly:email" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/email.xsd" />
+    <resource url="jelly:fmt" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/fmt.xsd" />
+    <resource url="jelly:html" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/html.xsd" />
+    <resource url="jelly:http" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/http.xsd" />
+    <resource url="jelly:interaction" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/interaction.xsd" />
     <resource url="jelly:jaxme" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/jaxme.xsd" />
+    <resource url="jelly:jetty" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/jetty.xsd" />
+    <resource url="jelly:jface" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/jface.xsd" />
+    <resource url="jelly:jms" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/jms.xsd" />
+    <resource url="jelly:log" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/log.xsd" />
+    <resource url="jelly:ojb" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/ojb.xsd" />
+    <resource url="jelly:quartz" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/quartz.xsd" />
+    <resource url="jelly:stapler" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/stapler.xsd" />
+    <resource url="jelly:util" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/util.xsd" />
+    <resource url="jelly:xml" location="jar:file:/C:/Users/sergeyk/.IntelliJIdea13/config/plugins/idea-stapler-plugin/lib/idea-stapler-plugin.jar!/org/kohsuke/stapler/idea/resources/schemas/xml.xsd" />
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_7" assert-keyword="true" jdk-15="true" project-jdk-name="1.7" project-jdk-type="JavaSDK" />
   <component name="SvnBranchConfigurationManager">
@@ -420,15 +420,15 @@
         <root url="jar://$MAVEN_REPOSITORY$/com/sun/solaris/embedded_su4j/1.1/embedded_su4j-1.1-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: com.sun.xml.bind:jaxb-impl:2.2.6">
+    <library name="Maven: com.sun.xml.bind:jaxb-impl:2.1.13">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/sun/xml/bind/jaxb-impl/2.2.6/jaxb-impl-2.2.6.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/sun/xml/bind/jaxb-impl/2.1.13/jaxb-impl-2.1.13.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/com/sun/xml/bind/jaxb-impl/2.2.6/jaxb-impl-2.2.6-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/sun/xml/bind/jaxb-impl/2.1.13/jaxb-impl-2.1.13-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/sun/xml/bind/jaxb-impl/2.2.6/jaxb-impl-2.2.6-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/com/sun/xml/bind/jaxb-impl/2.1.13/jaxb-impl-2.1.13-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: com.sun.xml.txw2:txw2:20110809">
@@ -913,17 +913,6 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$MAVEN_REPOSITORY$/org/apache/cxf/cxf-rt-frontend-simple/2.7.10/cxf-rt-frontend-simple-2.7.10-sources.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="Maven: org.apache.cxf:cxf-rt-transports-http:2.7.10">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/cxf/cxf-rt-transports-http/2.7.10/cxf-rt-transports-http-2.7.10.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/cxf/cxf-rt-transports-http/2.7.10/cxf-rt-transports-http-2.7.10-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/apache/cxf/cxf-rt-transports-http/2.7.10/cxf-rt-transports-http-2.7.10-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: org.apache.cxf:cxf-rt-ws-addr:2.7.10">
@@ -2765,4 +2754,3 @@
     </library>
   </component>
 </project>
-
