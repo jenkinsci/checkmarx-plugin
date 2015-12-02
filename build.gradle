@@ -18,7 +18,10 @@ apply plugin: 'project-report'
 apply plugin: 'org.jenkins-ci.jpi'
 apply plugin: 'provided-base'
 
-repositories { maven {  url 'http://10.31.1.81:8081/artifactory/libs-release' } }
+repositories {
+	maven { url 'http://10.31.1.81:8081/artifactory/libs-release' } 	
+	maven { url 'http://repo.jenkins-ci.org/releases/' }
+}
 
 group = 'com.checkmarx.jenkins'
 version = '7.5.0'
