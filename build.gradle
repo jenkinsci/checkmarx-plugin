@@ -84,10 +84,10 @@ jenkinsPlugin {
 	displayName = 'Jenkins Checkmarx Plugin'
 
 	// URL for plugin on Jenkins wiki or elsewhere
-	url = 'https://checkmarx.atlassian.net/wiki/display/KC/CxSAST+Jenkins+Plugin'
+	url = 'https://wiki.jenkins-ci.org/display/JENKINS/Checkmarx+SAST+Plugin'
 
 	// plugin URL on GitHub, optional
-	// gitHubUrl = 'https://github.com/jenkinsci/some-plugin'
+	gitHubUrl = 'https://github.com/jenkinsci/checkmarx-plugin.git'
 
 	// use the plugin class loader before the core class loader, defaults to false
 	pluginFirstClassLoader = true
@@ -121,6 +121,14 @@ jenkinsPlugin {
 
 	// plugin file extension, either 'jpi' or 'hpi', defaults to 'hpi'
 	fileExtension = 'hpi'
+
+	// the developers section is optional, and corresponds to the POM developers section
+	developers {
+		developer {
+			id 'sergeyk'
+			name 'Sergey Kadaner'
+		}
+	}
 }
 
 def getDate() {
