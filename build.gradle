@@ -11,7 +11,6 @@ plugins { id "no.nils.wsdl2java" version "0.8" }
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'eclipse'
-apply plugin: 'maven'
 apply plugin: 'project-report'
 apply plugin: 'org.jenkins-ci.jpi'
 apply plugin: 'provided-base'
@@ -21,23 +20,9 @@ repositories {
 	maven { url 'http://repo.jenkins-ci.org/releases/' }
 }
 
-group = 'com.checkmarx.jenkins'
-version = '7.5.0'
-
-description = "Provides automatic scan of code by Checkmarx server and shows results summary and trend in Jenkins interface."
-
 sourceCompatibility = 7
 targetCompatibility = 7
 
-version = version + "-" + getDate()
-
-jar {
-	manifest {
-		attributes	'Implementation-Title': description,
-		'Implementation-Version': version,
-		'Repository-Version': repositoryVersion
-	}
-}
 
 test {
 	maxParallelForks = Runtime.getRuntime().availableProcessors()
@@ -70,9 +55,6 @@ wsdl2java {
 }
 
 
-
-
-
 jenkinsPlugin {
 	// version of Jenkins core this plugin depends on, must be 1.420 or later
 	coreVersion = '1.509.3'
@@ -92,15 +74,6 @@ jenkinsPlugin {
 	// use the plugin class loader before the core class loader, defaults to false
 	pluginFirstClassLoader = true
 
-	// optional list of package prefixes that your plugin doesn't want to see from core
-	//  maskClasses = 'groovy.grape org.apache.commons.codec'
-
-	// optional version number from which this plugin release is configuration-compatible
-	// compatibleSinceVersion = '1.1.0'
-
-	// set the directory from which the development server will run, defaults to 'work'
-	// workDir = file('/tmp/jenkins')
-
 	// URL used to deploy the plugin, defaults to the value shown
 	// repoUrl = 'http://maven.jenkins-ci.org:8081/content/repositories/releases'
 
@@ -113,26 +86,10 @@ jenkinsPlugin {
 	// the output directory for the localizer task relative to the project root, defaults to the value shown
 	localizerOutputDir = "${project.buildDir}/generated-src/localizer"
 
-	// disable configuration of Maven Central, the local Maven cache and the Jenkins Maven repository, defaults to true
-	configureRepositories = false
-
-	// skip configuration of publications and repositories for the Maven Publishing plugin, defaults to true
-	configurePublishing = false
-
-	// plugin file extension, either 'jpi' or 'hpi', defaults to 'hpi'
-	fileExtension = 'hpi'
-
-	// the developers section is optional, and corresponds to the POM developers section
 	developers {
 		developer {
 			id 'sergeyk'
 			name 'Sergey Kadaner'
 		}
 	}
-}
-
-def getDate() {
-	def date = new Date()
-	def formattedDate = date.format('yyyyMMdd-HHmm')
-	return formattedDate
 }
