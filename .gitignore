@@ -12,3 +12,4 @@ sonar-project.properties
 build/
 .gradle/
 /bin/
+.settings/
