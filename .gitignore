@@ -14,3 +14,4 @@ build/
 /bin/
 .settings/
 .idea/libraries/
+.idea/workspace.xml
