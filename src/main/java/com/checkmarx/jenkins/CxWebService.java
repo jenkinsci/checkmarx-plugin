@@ -78,9 +78,9 @@ import com.checkmarx.ws.CxWSResolver.CxWSResponseDiscovery;
  */
 public class CxWebService {
 
-    private final static int WEBSERVICE_API_VERSION = 1;
-    private final static String CXWSRESOLVER_PATH = "/cxwebinterface/cxwsresolver.asmx";
-    private final static int LCID = 1033; // English
+	private static final int WEBSERVICE_API_VERSION = 1;
+	private static final String CXWSRESOLVER_PATH = "/cxwebinterface/cxwsresolver.asmx";
+	private static final int LCID = 1033; // English
     private static final int MILISEOUNDS_IN_HOUR = 1000 * 60 * 60;
 
     private final Logger logger;
@@ -119,8 +119,7 @@ public class CxWebService {
         try {
             cxWSResolver = new CxWSResolver(resolverUrl);
         } catch (javax.xml.ws.WebServiceException e){
-            logger.error("Failed to resolve Checkmarx webservice url with resolver at: " + resolverUrl);
-            logger.error(e);
+			logger.error("Failed to resolve Checkmarx webservice url with resolver at: " + resolverUrl, e);
             throw new AbortException("Checkmarx server was not found on url: " + serverUrl);
         }
         CxWSResolverSoap cxWSResolverSoap =  cxWSResolver.getCxWSResolverSoap();
@@ -175,175 +174,149 @@ public class CxWebService {
                                   final String username,
                                   final String password,
                                   final boolean scanTimeOutEnabled,
-                                  final long scanTimeoutDuration) throws AbortException
+ final long scanTimeoutDuration) throws AbortException, InterruptedException
     {
-        assert sessionId!=null : "Trying to track scan progress before login";
+		assert sessionId != null : "Trying to track scan progress before login";
 
-        final long jobStartTime = System.currentTimeMillis();
+		final long jobStartTime = System.currentTimeMillis();
 
-        boolean locReported = false;
+		boolean locReported = false;
         while (true)
         {
-            try {
+			try {
 
-                if (scanTimeOutEnabled && jobStartTime + scanTimeoutDuration * MILISEOUNDS_IN_HOUR < System.currentTimeMillis()){
-                    logger.info("Scan duration exceeded timeout threshold");
-                    return 0;
-                }
+				if (scanTimeOutEnabled && jobStartTime + scanTimeoutDuration * MILISEOUNDS_IN_HOUR < System.currentTimeMillis()) {
+					logger.info("Scan duration exceeded timeout threshold");
+					return 0;
+				}
 
-                CxWSResponseScanStatus status = this.getScanStatus(cxWSResponseRunID);
+				CxWSResponseScanStatus status = this.getScanStatus(cxWSResponseRunID);
 
-                switch (status.getCurrentStatus())
-                {
-                    // In progress states
-                    case WAITING_TO_PROCESS:
-                        logger.info("Scan job waiting for processing");
-                        break ;
+				switch (status.getCurrentStatus()) {
+				// In progress states
+				case WAITING_TO_PROCESS:
+					logger.info("Scan job waiting for processing");
+					break;
 
-                    case QUEUED:
-                        if (!locReported)
-                        {
-                            logger.info("Source contains: " + status.getLOC() + " lines of code.");
-                            locReported = true;
-                        }
-                        logger.info("Scan job queued at position: " + status.getQueuePosition());
-                        break ;
+				case QUEUED:
+					if (!locReported) {
+						logger.info("Source contains: " + status.getLOC() + " lines of code.");
+						locReported = true;
+					}
+					logger.info("Scan job queued at position: " + status.getQueuePosition());
+					break;
 
-                    case UNZIPPING:
-                        logger.info("Unzipping: " + status.getCurrentStagePercent() + "% finished");
-                        logger.info("LOC: " + status.getLOC());
-                        logger.info("StageMessage: " + status.getStageMessage());
-                        logger.info("StepMessage: " + status.getStepMessage());
-                        logger.info("StepDetails: " + status.getStepDetails());
+				case UNZIPPING:
+					logger.info("Unzipping: " + status.getCurrentStagePercent() + "% finished");
+					logger.info("LOC: " + status.getLOC());
+					logger.info("StageMessage: " + status.getStageMessage());
+					logger.info("StepMessage: " + status.getStepMessage());
+					logger.info("StepDetails: " + status.getStepDetails());
+					break;
 
-                        break ;
-
-                    case WORKING:
-                        logger.info("Scanning: " + status.getStageMessage() + " " + status.getStepDetails() +
-                                " (Current stage progress: " + status.getCurrentStagePercent() + "%, Total progress: "+ status.getTotalPercent() + "%)");
-                        break ;
+				case WORKING:
+					logger.info("Scanning: " + status.getStageMessage() + " " + status.getStepDetails() + " (Current stage progress: "
+							+ status.getCurrentStagePercent() + "%, Total progress: " + status.getTotalPercent() + "%)");
+					break;
 
 
-                    // End of progress states
-                    case FINISHED:
-                        logger.info("Scan Finished Successfully -  RunID: " + status.getRunId() + " ScanID:" + status.getScanId());
-                        return status.getScanId();
+				// End of progress states
+				case FINISHED:
+					logger.info("Scan Finished Successfully -  RunID: " + status.getRunId() + " ScanID:" + status.getScanId());
+					return status.getScanId();
 
-                    case FAILED:
-                    case DELETED:
-                    case UNKNOWN:
-                    case CANCELED:
+				case FAILED:
+				case DELETED:
+				case UNKNOWN:
+				case CANCELED:
                         String message = "Scan " + status.getStageName() + " -  RunID: " + status.getRunId() + " ScanID: " + status.getScanId() + " Server scan status: " +  status.getStageMessage();
-                        logger.info(message);
-                        throw new AbortException(message);
-                }
+					logger.info(message);
+					throw new AbortException(message);
+				}
+
+				Thread.sleep(10L * 1000);
 
 			} catch (AbortException | WebServiceException e) {
 
-                // Here we handle a case where the sessionId was timed out in the server
-                // and we need to re-login to continue working. The default sessionId
-                // timeout in the server is 24 hours.
+				// Here we handle a case where the sessionId was timed out in the server
+				// and we need to re-login to continue working. The default sessionId
+				// timeout in the server is 24 hours.
 				if (e.getMessage().contains("Unauthorized")) {
 					logger.info("Session was rejected by the Checkmarx server, trying to re-login");
-                    this.login(username,password);
-                    continue;
-                } else {
-                    throw e;
-                }
-            }
+					this.login(username, password);
+					continue;
+				} else {
+					throw e;
+				}
+			}
+		}
+	}
 
-            try {
-                Thread.sleep(10*1000);
-            } catch (InterruptedException e)
-            {
-                String err = "Process interrupted while waiting for scan results";
-                logger.error(err);
-                logger.error(e);
-                throw new AbortException(err);
-            }
-        }
+	public CxWSCreateReportResponse generateScanReport(long scanId, CxWSReportType reportType) throws AbortException {
+		assert sessionId != null : "Trying to retrieve scan report before login";
 
+		CxWSReportRequest cxWSReportRequest = new CxWSReportRequest();
+		cxWSReportRequest.setScanID(scanId);
+		cxWSReportRequest.setType(reportType);
+		logger.info("Requesting " + reportType.toString().toUpperCase() + " Scan Report Generation");
+		CxWSCreateReportResponse cxWSCreateReportResponse = cxJenkinsWebServiceSoap.createScanReport(sessionId, cxWSReportRequest);
+		if (!cxWSCreateReportResponse.isIsSuccesfull()) {
+			String message = "Error requesting scan report generation: " + cxWSCreateReportResponse.getErrorMessage();
+			logger.error(message);
+			throw new AbortException(message);
+		}
 
+		return cxWSCreateReportResponse;
+	}
 
-    }
+	public void retrieveScanReport(long reportId, File reportFile, CxWSReportType reportType) throws AbortException, InterruptedException {
+		// Wait for the report to become ready
 
-    public void retrieveScanReport(long scanId, File reportFile, CxWSReportType reportType) throws AbortException
-    {
-        assert sessionId!=null : "Trying to retrieve scan report before login";
+		while (true) {
+			CxWSReportStatusResponse cxWSReportStatusResponse = cxJenkinsWebServiceSoap.getScanReportStatus(sessionId, reportId);
+			if (!cxWSReportStatusResponse.isIsSuccesfull()) {
+				String message = "Error retrieving scan report status: " + cxWSReportStatusResponse.getErrorMessage();
+				logger.error(message);
+				throw new AbortException(message);
+			}
+			if (cxWSReportStatusResponse.isIsFailed()) {
+				String message = "Failed to create scan report";
+				logger.error("Web method getScanReportStatus returned status response with isFailed field set to true");
+				logger.error(message);
+				throw new AbortException(message);
+			}
 
-        CxWSReportRequest cxWSReportRequest = new CxWSReportRequest();
-        cxWSReportRequest.setScanID(scanId);
-        cxWSReportRequest.setType(reportType);
-        logger.info("Requesting " + reportType.toString().toUpperCase() + " Scan Report Generation");
-        CxWSCreateReportResponse cxWSCreateReportResponse = cxJenkinsWebServiceSoap.createScanReport(sessionId,cxWSReportRequest);
-        if (!cxWSCreateReportResponse.isIsSuccesfull())
-        {
-            String message = "Error requesting scan report generation: " + cxWSCreateReportResponse.getErrorMessage();
-            logger.error(message);
-            throw new AbortException(message);
-        }
+			if (cxWSReportStatusResponse.isIsReady()) {
+				logger.info("Scan report generated on Checkmarx server");
+				break;
+			}
 
+			logger.info(reportType.toString().toUpperCase() + " Report generation in progress");
 
+			Thread.sleep(5L * 1000);
+		}
 
-        // Wait for the report to become ready
+		CxWSResponseScanResults cxWSResponseScanResults = cxJenkinsWebServiceSoap.getScanReport(sessionId, reportId);
+		if (!cxWSResponseScanResults.isIsSuccesfull()) {
+			String message = "Error retrieving scan report: " + cxWSResponseScanResults.getErrorMessage();
+			logger.error(message);
+			throw new AbortException(message);
+		}
 
-        while (true)
-        {
-            CxWSReportStatusResponse cxWSReportStatusResponse = cxJenkinsWebServiceSoap.getScanReportStatus(sessionId,cxWSCreateReportResponse.getID());
-            if (!cxWSReportStatusResponse.isIsSuccesfull())
-            {
-                String message = "Error retrieving scan report status: " + cxWSReportStatusResponse.getErrorMessage();
-                logger.error(message);
-                throw new AbortException(message);
-            }
-            if (cxWSReportStatusResponse.isIsFailed())
-            {
-                String message = "Failed to create scan report";
-                logger.error("Web method getScanReportStatus returned status response with isFailed field set to true");
-                logger.error(message);
-                throw new AbortException(message);
-            }
+		// Save results on disk
+		try {
+			FileOutputStream fileOutputStream = new FileOutputStream(reportFile);
+			IOUtils.write(cxWSResponseScanResults.getScanResults(), fileOutputStream);
+			fileOutputStream.close();
 
-            if (cxWSReportStatusResponse.isIsReady())
-            {
-                logger.info("Scan report generated on Checkmarx server");
-                break;
-            }
-
-            logger.info(reportType.toString().toUpperCase() + " Report generation in progress");
-            try {
-                Thread.sleep(5*1000);
-            } catch (InterruptedException e)
-            {
-                String err = "Process interrupted while waiting for scan results";
-                logger.error(err);
-                logger.error(e);
-                throw new AbortException(err);
-            }
-        }
-
-        CxWSResponseScanResults cxWSResponseScanResults = cxJenkinsWebServiceSoap.getScanReport(sessionId,cxWSCreateReportResponse.getID());
-        if (!cxWSResponseScanResults.isIsSuccesfull()) {
-            String message = "Error retrieving scan report: " + cxWSResponseScanResults.getErrorMessage();
-            logger.error(message);
-            throw new AbortException(message);
-        }
-
-        // Save results on disk
-        try {
-            FileOutputStream fileOutputStream = new FileOutputStream(reportFile);
-            IOUtils.write(cxWSResponseScanResults.getScanResults(),fileOutputStream);
-            fileOutputStream.close();
-
-        } catch (IOException e)
-        {
-            logger.debug(e);
-            String message = "Can't create report file: " + reportFile.getAbsolutePath();
-            logger.info(message);
-            throw new AbortException(message);
-        }
-        logger.info("Scan report written to: " + reportFile.getAbsolutePath());
-    }
+		} catch (IOException e) {
+			logger.debug(e);
+			String message = "Can't create report file: " + reportFile.getAbsolutePath();
+			logger.info(message);
+			throw new AbortException(message);
+		}
+		logger.info("Scan report written to: " + reportFile.getAbsolutePath());
+	}
 
     public List<ProjectDisplayData> getProjectsDisplayData() throws AbortException
     {
@@ -453,7 +426,7 @@ public class CxWebService {
         return associatedGroupsList.getGroupList().getGroup();
     }
 
-    public CxWSResponseRunID RunScanAndAddToProject(ProjectSettings projectSettings, LocalCodeContainer localCodeContainer, boolean visibleToOtherUsers, boolean isPublicScan, final FilePath base64ZipFile) throws AbortException {
+    public CxWSResponseRunID runScanAndAddToProject(ProjectSettings projectSettings, LocalCodeContainer localCodeContainer, boolean visibleToOtherUsers, boolean isPublicScan, final FilePath base64ZipFile) throws AbortException {
         assert sessionId != null;
 
         RunScanAndAddToProject scan = new RunScanAndAddToProject();
@@ -469,7 +442,8 @@ public class CxWebService {
                 soapMeassage, new RunScanAndAddToProjectXmlResponseParser());
     }
 
-    public CxWSResponseRunID RunIncrementalScan(ProjectSettings projectSettings, LocalCodeContainer localCodeContainer, boolean visibleToOtherUsers, boolean isPublicScan, final FilePath base64ZipFile) throws AbortException {
+	public CxWSResponseRunID runIncrementalScan(ProjectSettings projectSettings, LocalCodeContainer localCodeContainer, boolean visibleToOtherUsers,
+			boolean isPublicScan, final FilePath base64ZipFile) throws AbortException {
         assert sessionId != null;
 
         RunIncrementalScan scan = new RunIncrementalScan();
@@ -485,7 +459,8 @@ public class CxWebService {
                 soapMeassage, new RunIncrementalScanXmlResponseParser());
     }
 
-    public CxWSResponseRunID CreateAndRunProject(ProjectSettings projectSettings, LocalCodeContainer localCodeContainer, boolean visibleToOtherUsers, boolean isPublicScan, final FilePath base64ZipFile) throws AbortException {
+	public CxWSResponseRunID createAndRunProject(ProjectSettings projectSettings, LocalCodeContainer localCodeContainer, boolean visibleToOtherUsers,
+			boolean isPublicScan, final FilePath base64ZipFile) throws AbortException {
         assert sessionId != null;
 
         CreateAndRunProject scan = new CreateAndRunProject();
@@ -501,43 +476,43 @@ public class CxWebService {
                 soapMessage, new CreateAndRunProjectXmlResponseParser());
     }
 
-    public long getProjectId(ProjectSettings projectSettings) throws AbortException {
-        CxWSResponseProjectsDisplayData projects = cxJenkinsWebServiceSoap.getProjectsDisplayData(sessionId);
+	public long getProjectId(ProjectSettings projectSettings) throws AbortException {
+		CxWSResponseProjectsDisplayData projects = cxJenkinsWebServiceSoap.getProjectsDisplayData(sessionId);
 
-        final String groupId = projectSettings.getAssociatedGroupID();
-        final List<Group> groups = getAssociatedGroups();
-        final List<Group> selected = filter(having(on(Group.class).getID(), Matchers.equalTo(groupId)), groups);
+		final String groupId = projectSettings.getAssociatedGroupID();
+		final List<Group> groups = getAssociatedGroups();
+		final List<Group> selected = filter(having(on(Group.class).getID(), Matchers.equalTo(groupId)), groups);
 
-        if (selected.size() == 0) {
-            final String message = "Could not translate group (team) id: " + groupId + " to group name\n" +
-                    "Open the Job configuration page, and select a team.\n";
-            logger.error(message);
-            throw new AbortException(message);
+		if (selected.isEmpty()) {
+			final String message = "Could not translate group (team) id: " + groupId + " to group name\n"
+					+ "Open the Job configuration page, and select a team.\n";
+			logger.error(message);
+			throw new AbortException(message);
 
-        } else if (selected.size() > 1) {
-            logger.warn("Server returned more than one group with id: " + groupId);
-            for (Group g : selected) {
-                logger.warn("Group Id: " + g.getID() + " groupName: " + g.getGroupName());
-            }
-        }
+		} else if (selected.size() > 1) {
+			logger.warn("Server returned more than one group with id: " + groupId);
+			for (Group g : selected) {
+				logger.warn("Group Id: " + g.getID() + " groupName: " + g.getGroupName());
+			}
+		}
 
-        long projectId = 0;
-        if (projects != null && projects.isIsSuccesfull()) {
-            for(ProjectDisplayData projectDisplayData:projects.getProjectList().getProjectDisplayData()){
-                if (projectDisplayData.getProjectName().equals(projectSettings.getProjectName()) &&
-                        projectDisplayData.getGroup().equals(selected.get(0).getGroupName())) {
-                    projectId = projectDisplayData.getProjectID();
-                    break;
-                }
-            }
-        }
+		long projectId = 0;
+		if (projects != null && projects.isIsSuccesfull()) {
+			for (ProjectDisplayData projectDisplayData : projects.getProjectList().getProjectDisplayData()) {
+				if (projectDisplayData.getProjectName().equals(projectSettings.getProjectName())
+						&& projectDisplayData.getGroup().equals(selected.get(0).getGroupName())) {
+					projectId = projectDisplayData.getProjectID();
+					break;
+				}
+			}
+		}
 
-        if (projectId == 0) {
-            throw new AbortException("Can't find exsiting project to scan");
-        }
+		if (projectId == 0) {
+			throw new AbortException("Can't find exsiting project to scan");
+		}
 
-        return projectId;
-    }
+		return projectId;
+	}
 
     /**
      * Same as "scan" method, but works by streaming the LocalCodeContainer.zippedFile contents.
@@ -596,4 +571,26 @@ public class CxWebService {
             throw new AbortException(e.getMessage());
         }
     }
+
+	/**
+	 * Cancel scan on Checkmarx server
+	 *
+	 * @param runId
+	 *            run ID of the scan
+	 * @return server response
+	 */
+	public CxWSBasicRepsonse cancelScan(String runId) {
+		return cxJenkinsWebServiceSoap.cancelScan(sessionId, runId);
+	}
+
+	/**
+	 * Cancel report generation on Checkmarx server
+	 *
+	 * @param runId
+	 *            run ID of the scan
+	 * @return server response
+	 */
+	public CxWSBasicRepsonse cancelScanReport(long reportId) {
+		return cxJenkinsWebServiceSoap.cancelScanReport(sessionId, reportId);
+	}
 }

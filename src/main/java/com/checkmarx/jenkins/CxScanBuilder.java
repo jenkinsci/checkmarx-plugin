@@ -49,6 +49,7 @@ import com.checkmarx.components.zipper.Zipper;
 import com.checkmarx.ws.CxJenkinsWebService.CliScanArgs;
 import com.checkmarx.ws.CxJenkinsWebService.ConfigurationSet;
 import com.checkmarx.ws.CxJenkinsWebService.CxWSBasicRepsonse;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSCreateReportResponse;
 import com.checkmarx.ws.CxJenkinsWebService.CxWSReportType;
 import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseRunID;
 import com.checkmarx.ws.CxJenkinsWebService.Group;
@@ -131,7 +132,8 @@ public class CxScanBuilder extends Builder {
     //////////////////////////////////////////////////////////////////////////////////////
 
     @DataBoundConstructor
-    public CxScanBuilder(boolean useOwnServerCredentials,
+	public CxScanBuilder(
+			boolean useOwnServerCredentials, // NOSONAR
                          @Nullable String serverUrl,
                          @Nullable String username,
                          @Nullable String password,
@@ -299,7 +301,11 @@ public class CxScanBuilder extends Builder {
     public boolean perform(final AbstractBuild<?, ?> build,
                            final Launcher launcher,
                            final BuildListener listener) throws InterruptedException, IOException {
-    	final DescriptorImpl descriptor = (DescriptorImpl) getDescriptor();
+		final DescriptorImpl descriptor = getDescriptor();
+
+		CxWSResponseRunID cxWSResponseRunID = null;
+		CxWebService cxWebService = null;
+		CxWSCreateReportResponse reportResponse = null;
 
         try {
             File checkmarxBuildDir = new File(build.getRootDir(), "checkmarx");
@@ -322,13 +328,13 @@ public class CxScanBuilder extends Builder {
             final String passwordToUse = isUseOwnServerCredentials() ? getPassword() : descriptor.getPassword();
 
             String serverUrlToUseNotNull = serverUrlToUse != null ? serverUrlToUse : "";
-            CxWebService cxWebService = new CxWebService(serverUrlToUseNotNull, instanceLoggerSuffix(build));
+			cxWebService = new CxWebService(serverUrlToUseNotNull, instanceLoggerSuffix(build));
             cxWebService.login(usernameToUse, passwordToUse);
 
 
             instanceLogger.info("Checkmarx server login successful");
 
-            CxWSResponseRunID cxWSResponseRunID = submitScan(build, cxWebService, listener);
+			cxWSResponseRunID = submitScan(build, cxWebService, listener);
             instanceLogger.info("\nScan job submitted successfully\n");
 
 
@@ -346,17 +352,17 @@ public class CxScanBuilder extends Builder {
                 return true;
             }
 
+			reportResponse = cxWebService.generateScanReport(scanId, CxWSReportType.XML);
             File xmlReportFile = new File(checkmarxBuildDir, "ScanReport.xml");
-            cxWebService.retrieveScanReport(scanId, xmlReportFile, CxWSReportType.XML);
+            cxWebService.retrieveScanReport(reportResponse.getID(), xmlReportFile, CxWSReportType.XML);
 
-            if (this.generatePdfReport) {
+            if (generatePdfReport) {
+				reportResponse = cxWebService.generateScanReport(scanId, CxWSReportType.XML);
                 File pdfReportFile = new File(checkmarxBuildDir, CxScanResult.PDF_REPORT_NAME);
-                cxWebService.retrieveScanReport(scanId, pdfReportFile, CxWSReportType.PDF);
+				cxWebService.retrieveScanReport(reportResponse.getID(), pdfReportFile, CxWSReportType.PDF);
             }
 
-
             // Parse scan report and present results in Jenkins
-
             CxScanResult cxScanResult = new CxScanResult(build, instanceLoggerSuffix(build), serverUrlToUse);
             cxScanResult.readScanXMLReport(xmlReportFile);
             build.addAction(cxScanResult);
@@ -378,7 +384,16 @@ public class CxScanBuilder extends Builder {
 			} else {
 				throw e;
 			}
-        } finally {
+		} catch (InterruptedException e) {
+			if (reportResponse != null) {
+				instanceLogger.error("Cancelling report generation on the Checkmarx server...");
+				cxWebService.cancelScanReport(reportResponse.getID());
+			} else if (cxWSResponseRunID != null) {
+				instanceLogger.error("Cancelling scan on the Checkmarx server...");
+				cxWebService.cancelScan(cxWSResponseRunID.getRunId());
+			}
+			throw e;
+		} finally {
             closeLogger();
         }
 	}
@@ -475,8 +490,7 @@ public class CxScanBuilder extends Builder {
 
         if(isThisBuildIncremental){
             instanceLogger.info("\nScan job started in incremental scan mode\n");
-        }
-        else{
+		} else {
             instanceLogger.info("\nScan job started in full scan mode\n");
         }
 
@@ -485,7 +499,10 @@ public class CxScanBuilder extends Builder {
         try {
             // hudson.FilePath will work in distributed Jenkins installation
             FilePath baseDir = build.getWorkspace();
-
+			if (baseDir == null) {
+				throw new AbortException(
+						"Checkmarx Scan Failed: cannot acquire Jenkins workspace location. It can be due to workspace residing on a disconnected slave.");
+			}
 			EnvVars env = build.getEnvironment(listener);
 
 			String combinedFilterPattern = env.expand(getFilterPattern()) + "," + processExcludeFolders(env.expand(getExcludeFolders()));
@@ -507,12 +524,13 @@ public class CxScanBuilder extends Builder {
             // instead
 
             final CliScanArgs cliScanArgs = createCliScanArgs(new byte[]{}, env);
-			
+
 			// Check if the project already exists
-            final CxWSBasicRepsonse validateProjectRespnse = cxWebService.validateProjectName(projectName, groupId);						
-            CxWSResponseRunID cxWSResponseRunID = null;			
+            final CxWSBasicRepsonse validateProjectRespnse = cxWebService.validateProjectName(projectName, groupId);
+			CxWSResponseRunID cxWSResponseRunID;
             if (validateProjectRespnse.isIsSuccesfull()){
-                cxWSResponseRunID = cxWebService.CreateAndRunProject(cliScanArgs.getPrjSettings(), cliScanArgs.getSrcCodeSettings().getPackagedCode(), true, true, tempFile);
+				cxWSResponseRunID = cxWebService.createAndRunProject(cliScanArgs.getPrjSettings(),
+						cliScanArgs.getSrcCodeSettings().getPackagedCode(), true, true, tempFile);
             } else {
                 if (projectId == 0) {
                     projectId = cxWebService.getProjectId(cliScanArgs.getPrjSettings());
@@ -521,9 +539,10 @@ public class CxScanBuilder extends Builder {
                 cliScanArgs.getPrjSettings().setProjectID(projectId);
 
                 if (incremental) {
-                    cxWSResponseRunID = cxWebService.RunIncrementalScan(cliScanArgs.getPrjSettings(), cliScanArgs.getSrcCodeSettings().getPackagedCode(), true, true, tempFile);
+					cxWSResponseRunID = cxWebService.runIncrementalScan(cliScanArgs.getPrjSettings(), cliScanArgs.getSrcCodeSettings()
+							.getPackagedCode(), true, true, tempFile);
                 } else {
-                    cxWSResponseRunID = cxWebService.RunScanAndAddToProject(cliScanArgs.getPrjSettings(), cliScanArgs.getSrcCodeSettings().getPackagedCode(), true, true, tempFile);
+                    cxWSResponseRunID = cxWebService.runScanAndAddToProject(cliScanArgs.getPrjSettings(), cliScanArgs.getSrcCodeSettings().getPackagedCode(), true, true, tempFile);
                 }
             }
 
@@ -531,15 +550,12 @@ public class CxScanBuilder extends Builder {
             instanceLogger.info("Temporary file deleted");
 
             return cxWSResponseRunID;
-        }
-        catch (Zipper.MaxZipSizeReached e)
-        {
-            throw new AbortException("Checkmarx Scan Failed: Reached maximum upload size limit of " + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()));
-        }
-        catch (Zipper.NoFilesToZip e)
-        {
-            throw new AbortException("Checkmarx Scan Failed: No files to scan");
-        }
+		} catch (Zipper.MaxZipSizeReached e) {
+			throw new AbortException("Checkmarx Scan Failed: Reached maximum upload size limit of "
+					+ FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()));
+		} catch (Zipper.NoFilesToZip e) {
+			throw new AbortException("Checkmarx Scan Failed: No files to scan");
+		}
         catch (InterruptedException e) {
             throw new AbortException("Remote operation failed on slave node: " + e.getMessage());
         }
@@ -649,7 +665,7 @@ public class CxScanBuilder extends Builder {
         }
 
         final List<Cause> causes = build.getCauses();
-        final List<Cause> allowedCauses = new LinkedList<Cause>();
+		final List<Cause> allowedCauses = new LinkedList<>();
 
         for(Cause c : causes)
         {
@@ -672,13 +688,6 @@ public class CxScanBuilder extends Builder {
     public DescriptorImpl getDescriptor() {
         return (DescriptorImpl)super.getDescriptor();
     }
-
-
-    /*public String getIconPath() {
-        PluginWrapper wrapper = Hudson.getInstance().getPluginManager().getPlugin([YOUR-PLUGIN-MAIN-CLASS].class);
-        return Hudson.getInstance().getRootUrl() + "plugin/"+ wrapper.getShortName()+"/";
-    }*/
-
 
 	@Extension
 	public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
@@ -863,15 +872,14 @@ public class CxScanBuilder extends Builder {
 	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
 	     *  shared state to avoid synchronization issues.
 	     */
-	    public FormValidation doTestConnection(final @QueryParameter String serverUrl,
-	                                          final @QueryParameter String password,
-	                                          final @QueryParameter String username,
-	                                          final @QueryParameter String timestamp) {
-	        // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
+		public FormValidation doTestConnection(@QueryParameter final String serverUrl, @QueryParameter final String password,
+				@QueryParameter final String username, @QueryParameter final String timestamp) {
+			// timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 	        CxWebService cxWebService = null;
 	        try {
 	            cxWebService = new CxWebService(serverUrl);
 	        } catch (Exception e) {
+				logger.debug(e);
 	            return FormValidation.error("Invalid system URL");
 	        }
 
@@ -1039,8 +1047,7 @@ public class CxScanBuilder extends Builder {
 	    {
 	        if(value >= FULL_SCAN_CYCLE_MIN && value <= FULL_SCAN_CYCLE_MAX){
 	            return FormValidation.ok();
-	        }
-	        else{
+			} else {
 	            return FormValidation.error("Number must be in the range " + FULL_SCAN_CYCLE_MIN + "-" + FULL_SCAN_CYCLE_MAX);
 	        }
 	    }
@@ -1105,65 +1112,59 @@ public class CxScanBuilder extends Builder {
 
 	    }
 
-	    /*
-	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-	     *  shared state to avoid synchronization issues.
-	     */
+		/*
+		 * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
+		 * avoid synchronization issues.
+		 */
 
-	    public FormValidation doCheckHighThreshold(final @QueryParameter int value)
-	    {
-	        return checkNonNegativeValue(value);
-	    }
+		public FormValidation doCheckHighThreshold(@QueryParameter final int value) {
+			return checkNonNegativeValue(value);
+		}
 
-	    /*
-	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-	     *  shared state to avoid synchronization issues.
-	     */
+		/*
+		 * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
+		 * avoid synchronization issues.
+		 */
 
-	    public FormValidation doCheckMediumThreshold(final @QueryParameter int value)
-	    {
-	        return checkNonNegativeValue(value);
-	    }
+		public FormValidation doCheckMediumThreshold(@QueryParameter final int value) {
+			return checkNonNegativeValue(value);
+		}
 
-	    /*
-	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-	     *  shared state to avoid synchronization issues.
-	     */
+		/*
+		 * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
+		 * avoid synchronization issues.
+		 */
 
-	    public FormValidation doCheckLowThreshold(final @QueryParameter int value)
-	    {
-	        return checkNonNegativeValue(value);
-	    }
+		public FormValidation doCheckLowThreshold(@QueryParameter final int value) {
+			return checkNonNegativeValue(value);
+		}
 
-	    /*
-	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-	     *  shared state to avoid synchronization issues.
-	     */
+		/*
+		 * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
+		 * avoid synchronization issues.
+		 */
 
-	    public FormValidation doCheckHighThresholdEnforcement(final @QueryParameter int value)
-	    {
-	        return checkNonNegativeValue(value);
-	    }
+		public FormValidation doCheckHighThresholdEnforcement(@QueryParameter final int value) {
+			return checkNonNegativeValue(value);
+		}
 
-	    /*
-	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-	     *  shared state to avoid synchronization issues.
-	     */
+		/*
+		 * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
+		 * avoid synchronization issues.
+		 */
 
-	    public FormValidation doCheckMediumThresholdEnforcement(final @QueryParameter int value)
-	    {
-	        return checkNonNegativeValue(value);
-	    }
+		public FormValidation doCheckMediumThresholdEnforcement(@QueryParameter final int value) {
+			return checkNonNegativeValue(value);
+		}
 
-	    /*
-	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-	     *  shared state to avoid synchronization issues.
-	     */
+		/*
+		 * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
+		 * avoid synchronization issues.
+		 */
 
-	    public FormValidation doCheckLowThresholdEnforcement(final @QueryParameter int value)
-	    {
-	        return checkNonNegativeValue(value);
-	    }
+		public FormValidation doCheckLowThresholdEnforcement(@QueryParameter final int value) {
+			return checkNonNegativeValue(value);
+		}
 
 	    /*
 	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
@@ -1192,11 +1193,9 @@ public class CxScanBuilder extends Builder {
 	        }
 
 	        final String[] urlComponents = decodedUrl.split("/");
-	        if (urlComponents.length > 0)
-	        {
-	            final String jobName = urlComponents[urlComponents.length-1];
-	            return jobName;
-	        }
+			if (urlComponents.length > 0) {
+				return urlComponents[urlComponents.length - 1];
+			}
 
 	        // This is a fallback if the above code fails
 	        return "";
