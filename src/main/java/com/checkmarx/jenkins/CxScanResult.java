@@ -13,6 +13,7 @@ import hudson.util.IOUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.List;
 
 import javax.servlet.ServletOutputStream;
 import javax.xml.parsers.ParserConfigurationException;
@@ -34,11 +35,9 @@ import org.xml.sax.helpers.DefaultHandler;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 /**
- * Created with IntelliJ IDEA. User: denis Date: 3/11/13 Time: 11:47 Description:
+ * @author denis
+ * @since 3/11/13
  */
-
-// One option is to inherit from AbstractTestResultAction<CxScanResult>
-
 public class CxScanResult implements Action {
 
 	@XStreamOmitField
@@ -60,7 +59,7 @@ public class CxScanResult implements Action {
 	private String resultDeepLink;
 	private File pdfReport;
 
-	public final static String PDF_REPORT_NAME = "ScanReport.pdf";
+	public static final String PDF_REPORT_NAME = "ScanReport.pdf";
 	@Nullable
 	private String scanStart;
 	@Nullable
@@ -124,7 +123,7 @@ public class CxScanResult implements Action {
 	public boolean isShowResults() {
 		@Nullable
 		CxScanBuilder.DescriptorImpl descriptor = (CxScanBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(CxScanBuilder.class);
-		return (descriptor != null && !descriptor.isHideResults());
+		return descriptor != null && !descriptor.isHideResults();
 	}
 
 	public int getHighCount() {
@@ -181,19 +180,19 @@ public class CxScanResult implements Action {
 		return resultIsValid;
 	}
 
-	public LinkedList<QueryResult> getHighQueryResultList() {
+	public List<QueryResult> getHighQueryResultList() {
 		return highQueryResultList;
 	}
 
-	public LinkedList<QueryResult> getMediumQueryResultList() {
+	public List<QueryResult> getMediumQueryResultList() {
 		return mediumQueryResultList;
 	}
 
-	public LinkedList<QueryResult> getLowQueryResultList() {
+	public List<QueryResult> getLowQueryResultList() {
 		return lowQueryResultList;
 	}
 
-	public LinkedList<QueryResult> getInfoQueryResultList() {
+	public List<QueryResult> getInfoQueryResultList() {
 		return infoQueryResultList;
 	}
 
@@ -224,11 +223,13 @@ public class CxScanResult implements Action {
 		AbstractBuild<?, ?> b = owner;
 		while (true) {
 			b = b.getPreviousBuild();
-			if (b == null)
+			if (b == null) {
 				return null;
+			}
 			CxScanResult r = b.getAction(CxScanResult.class);
-			if (r != null)
+			if (r != null) {
 				return r;
+			}
 		}
 	}
 

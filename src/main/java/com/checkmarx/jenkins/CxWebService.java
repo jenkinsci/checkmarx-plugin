@@ -70,11 +70,10 @@ import com.checkmarx.ws.CxWSResolver.CxWSResolverSoap;
 import com.checkmarx.ws.CxWSResolver.CxWSResponseDiscovery;
 
 /**
- * Created with IntelliJ IDEA.
- * User: denis
- * Date: 13/11/2013
- * Time: 18:12
- * Description:
+ * Wraps all Web services invocations
+ *
+ * @author denis
+ * @since 13/11/2013
  */
 public class CxWebService {
 

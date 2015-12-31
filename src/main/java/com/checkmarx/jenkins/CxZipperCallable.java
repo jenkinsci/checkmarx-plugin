@@ -16,11 +16,11 @@ import com.checkmarx.components.zipper.ZipListener;
 import com.checkmarx.components.zipper.Zipper;
 
 /**
- * Created with IntelliJ IDEA.
- * User: yevgenib
- * Date: 11/03/14
- * Time: 11:46
- * To change this template use File | Settings | File Templates.
+ * Creates zip file with source files.
+ *
+ * @author yevgenib
+ * @since 11/03/14
+ *
  */
 public class CxZipperCallable implements FilePath.FileCallable<CxZipResult> {
     private static final long serialVersionUID = 1L;
