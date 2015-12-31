@@ -585,8 +585,8 @@ public class CxWebService {
 	/**
 	 * Cancel report generation on Checkmarx server
 	 *
-	 * @param runId
-	 *            run ID of the scan
+	 * @param reportId
+	 *            ID of the report
 	 * @return server response
 	 */
 	public CxWSBasicRepsonse cancelScanReport(long reportId) {

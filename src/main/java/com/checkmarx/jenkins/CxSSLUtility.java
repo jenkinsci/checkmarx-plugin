@@ -1,18 +1,26 @@
 package com.checkmarx.jenkins;
 
-import org.apache.log4j.Logger;
-import org.jetbrains.annotations.Nullable;
-
-import javax.net.ssl.*;
-import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
+import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
+
 /**
- * Created by denis on 23/3/14.
+ * Allows skipping SSL certificate validation
+ * 
+ * @author denis
+ * @since 23/3/14
  */
 public class CxSSLUtility{
     private static final Logger logger = Logger.getLogger(CxSSLUtility.class);
@@ -20,6 +28,13 @@ public class CxSSLUtility{
     private static HostnameVerifier originalHostnameVerifier = null;
     @Nullable
     private static SSLSocketFactory originalSSLSocketFactory = null;
+
+	/*
+	 * Prevents instantiation
+	 */
+	private CxSSLUtility() {
+
+	}
 
     public static void enableSSLCertificateVerification()
     {

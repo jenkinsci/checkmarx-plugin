@@ -919,12 +919,8 @@ public class CxScanBuilder extends Builder {
 	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
 	     *  shared state to avoid synchronization issues.
 	     */
-	    public  ComboBoxModel doFillProjectNameItems(   final @QueryParameter boolean useOwnServerCredentials,
-	                                                                final @QueryParameter String serverUrl,
-	                                                                final @QueryParameter String username,
-	                                                                final @QueryParameter String password,
-	                                                                final @QueryParameter String timestamp)
-	    {
+		public ComboBoxModel doFillProjectNameItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
+				@QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String timestamp) {
 	        // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 	        ComboBoxModel projectNames = new ComboBoxModel();
 
@@ -951,13 +947,9 @@ public class CxScanBuilder extends Builder {
 	     *  shared state to avoid synchronization issues.
 	     */
 
-	    public FormValidation doCheckProjectName(final @QueryParameter String projectName,
-	                                             final @QueryParameter boolean useOwnServerCredentials,
-	                                             final @QueryParameter String serverUrl,
-	                                             final @QueryParameter String username,
-	                                             final @QueryParameter String password,
-	                                             final @QueryParameter String groupId,
-	                                             final @QueryParameter String timestamp) {
+		public FormValidation doCheckProjectName(@QueryParameter final String projectName, @QueryParameter final boolean useOwnServerCredentials,
+				@QueryParameter final String serverUrl, @QueryParameter final String username, @QueryParameter final String password,
+				@QueryParameter final String groupId, @QueryParameter final String timestamp) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 
             try {
@@ -991,25 +983,23 @@ public class CxScanBuilder extends Builder {
         }
 
 
-	    /** Provides a list of presets from Checkmarx server for dynamic drop-down list in configuration page
-	     *
-	     * @param useOwnServerCredentials
-	     * @param serverUrl
-	     * @param username
-	     * @param password
-	     * @param timestamp
-	     * @return
-	     */
+		/**
+		 * Provides a list of presets from Checkmarx server for dynamic drop-down list in configuration page
+		 *
+		 * @param useOwnServerCredentials
+		 * @param serverUrl
+		 * @param username
+		 * @param password
+		 * @param timestamp
+		 * @return list of presets
+		 */
 	    /*
 	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
 	     *  shared state to avoid synchronization issues.
 	     */
 
-	    public ListBoxModel doFillPresetItems(   final @QueryParameter boolean useOwnServerCredentials,
-	                                                          final @QueryParameter String serverUrl,
-	                                                          final @QueryParameter String username,
-	                                                          final @QueryParameter String password,
-	                                                          final @QueryParameter String timestamp)
+		public ListBoxModel doFillPresetItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
+				@QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String timestamp)
 	    {
 	        // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 	        ListBoxModel listBoxModel = new ListBoxModel();
@@ -1033,17 +1023,18 @@ public class CxScanBuilder extends Builder {
 	        }
 	    }
 
-	    /** Provides a list of source encodings from Checkmarx server for dynamic drop-down list in configuration page
-	     *
-	     * @param value
-	     * @return
-	     */
+		/**
+		 * Validates frequency of full scans
+		 *
+		 * @param value
+		 * @return if frequency is valid
+		 */
 	    /*
 	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
 	     *  shared state to avoid synchronization issues.
 	     */
 
-	    public FormValidation doCheckFullScanCycle( final @QueryParameter int value)
+		public FormValidation doCheckFullScanCycle(@QueryParameter final int value)
 	    {
 	        if(value >= FULL_SCAN_CYCLE_MIN && value <= FULL_SCAN_CYCLE_MAX){
 	            return FormValidation.ok();
@@ -1052,11 +1043,8 @@ public class CxScanBuilder extends Builder {
 	        }
 	    }
 
-	    public ListBoxModel doFillSourceEncodingItems(   final @QueryParameter boolean useOwnServerCredentials,
-	                                                                  final @QueryParameter String serverUrl,
-	                                                                  final @QueryParameter String username,
-	                                                                  final @QueryParameter String password,
-	                                                                  final @QueryParameter String timestamp) {
+		public ListBoxModel doFillSourceEncodingItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
+				@QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String timestamp) {
 	        // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 	        ListBoxModel listBoxModel = new ListBoxModel();
 	        try {
@@ -1084,11 +1072,8 @@ public class CxScanBuilder extends Builder {
 	     *  shared state to avoid synchronization issues.
 	     */
 
-	    public ListBoxModel doFillGroupIdItems(   final @QueryParameter boolean useOwnServerCredentials,
-	                                                     final @QueryParameter String serverUrl,
-	                                                     final @QueryParameter String username,
-	                                                     final @QueryParameter String password,
-	                                                     final @QueryParameter String timestamp)
+		public ListBoxModel doFillGroupIdItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
+				@QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String timestamp)
 	    {
 	        // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 	        ListBoxModel listBoxModel = new ListBoxModel();
