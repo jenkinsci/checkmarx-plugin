@@ -357,7 +357,7 @@ public class CxScanBuilder extends Builder {
             cxWebService.retrieveScanReport(reportResponse.getID(), xmlReportFile, CxWSReportType.XML);
 
             if (generatePdfReport) {
-				reportResponse = cxWebService.generateScanReport(scanId, CxWSReportType.XML);
+				reportResponse = cxWebService.generateScanReport(scanId, CxWSReportType.PDF);
                 File pdfReportFile = new File(checkmarxBuildDir, CxScanResult.PDF_REPORT_NAME);
 				cxWebService.retrieveScanReport(reportResponse.getID(), pdfReportFile, CxWSReportType.PDF);
             }
