@@ -66,7 +66,7 @@ jenkinsPlugin {
 	displayName = 'Jenkins Checkmarx Plugin'
 
 	// URL for plugin on Jenkins wiki or elsewhere
-	url = 'https://wiki.jenkins-ci.org/display/JENKINS/Checkmarx+SAST+Plugin'
+	url = 'https://wiki.jenkins-ci.org/display/JENKINS/Checkmarx+CxSAST+Plugin'
 
 	// plugin URL on GitHub, optional
 	gitHubUrl = 'https://github.com/jenkinsci/checkmarx-plugin.git'
