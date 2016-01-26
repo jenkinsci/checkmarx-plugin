@@ -31,8 +31,6 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
-
 /**
  * Created with IntelliJ IDEA. User: denis Date: 3/11/13 Time: 11:47 Description:
  */
@@ -41,8 +39,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 public class CxScanResult implements Action {
 
-	@XStreamOmitField
-	private final Logger logger;
+	private final transient Logger logger; // NOSONAR
 
 	public final AbstractBuild<?, ?> owner;
 	private String serverUrl;
@@ -224,11 +221,13 @@ public class CxScanResult implements Action {
 		AbstractBuild<?, ?> b = owner;
 		while (true) {
 			b = b.getPreviousBuild();
-			if (b == null)
+			if (b == null) {
 				return null;
+			}
 			CxScanResult r = b.getAction(CxScanResult.class);
-			if (r != null)
+			if (r != null) {
 				return r;
+			}
 		}
 	}
 
