@@ -14,7 +14,6 @@ public class CxConfig {
 	private static Properties configuration;
 	private static final String CONFIGURATION_MAX_ZIP_SIZE_KEY = "MaxZipSizeBytes";
 	private static final String CONFIGURATION_DEFAULT_FILTER_PATTERN_KEY = "DefaultFilterPattern";
-    private static final String CONFIGURATION_PLUGIN_VERSION_KEY = "PluginVersion";
 
 	static {
 		configuration = new Properties();
@@ -39,10 +38,9 @@ public class CxConfig {
 		return configuration.getProperty(CONFIGURATION_DEFAULT_FILTER_PATTERN_KEY);
 	}
 
-    public static String version()
-    {
-        return configuration.getProperty(CONFIGURATION_PLUGIN_VERSION_KEY);
-    }
+	public static String version() {
+		return Jenkins.getInstance().getPluginManager().getPlugin(CxPlugin.class).getVersion();
+	}
 
 	public static int getServerCallRetryNumber() {
 		return Integer.parseInt(configuration.getProperty(SERVER_CALL_RETRY_NUMBER));
