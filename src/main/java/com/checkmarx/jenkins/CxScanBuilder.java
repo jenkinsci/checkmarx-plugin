@@ -1,15 +1,15 @@
 package com.checkmarx.jenkins;
 
+import com.checkmarx.jenkins.opensourceanalysis.DependencyFolder;
+import com.checkmarx.jenkins.opensourceanalysis.OpenSourceAnalyzerService;
+import com.checkmarx.jenkins.web.client.RestClient;
+import com.checkmarx.jenkins.web.model.AuthenticationRequest;
 import hudson.AbortException;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.BuildListener;
-import hudson.model.Result;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Cause;
+import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.triggers.SCMTrigger;
@@ -26,8 +26,6 @@ import java.net.URLDecoder;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
-
-import javax.xml.ws.WebServiceException;
 
 import net.sf.json.JSONObject;
 
@@ -60,6 +58,8 @@ import com.checkmarx.ws.CxJenkinsWebService.ProjectSettings;
 import com.checkmarx.ws.CxJenkinsWebService.SourceCodeSettings;
 import com.checkmarx.ws.CxJenkinsWebService.SourceLocationType;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
+
+import javax.xml.ws.WebServiceException;
 
 /**
  * The main entry point for Checkmarx plugin. This class implements the Builder
@@ -107,6 +107,8 @@ public class CxScanBuilder extends Builder {
     private int mediumThreshold;
     private int lowThreshold;
     private boolean generatePdfReport;
+    @Nullable private String includeOpenSourceFolders;
+    @Nullable private String excludeOpenSourceFolders;
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Private variables
@@ -157,7 +159,10 @@ public class CxScanBuilder extends Builder {
                          int highThreshold,
                          int mediumThreshold,
                          int lowThreshold,
-                         boolean generatePdfReport) {
+                         boolean generatePdfReport,
+                         @Nullable String includeOpenSourceFolders,
+                         @Nullable String excludeOpenSourceFolders
+                         ) {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
         this.username = username;
@@ -183,6 +188,8 @@ public class CxScanBuilder extends Builder {
         this.mediumThreshold = mediumThreshold;
         this.lowThreshold = lowThreshold;
         this.generatePdfReport =  generatePdfReport;
+        this.includeOpenSourceFolders = includeOpenSourceFolders;
+        this.excludeOpenSourceFolders = excludeOpenSourceFolders;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -293,6 +300,16 @@ public class CxScanBuilder extends Builder {
         return lowThreshold;
     }
 
+    @Nullable
+    public String getExcludeOpenSourceFolders() {
+        return excludeOpenSourceFolders;
+    }
+
+    @Nullable
+    public String getIncludeOpenSourceFolders() {
+        return includeOpenSourceFolders;
+    }
+
     public boolean isGeneratePdfReport() {
         return generatePdfReport;
     }
@@ -301,7 +318,8 @@ public class CxScanBuilder extends Builder {
     public boolean perform(final AbstractBuild<?, ?> build,
                            final Launcher launcher,
                            final BuildListener listener) throws InterruptedException, IOException {
-		final DescriptorImpl descriptor = getDescriptor();
+
+        final DescriptorImpl descriptor = getDescriptor();
 
 		CxWSResponseRunID cxWSResponseRunID = null;
 		CxWebService cxWebService = null;
@@ -328,6 +346,7 @@ public class CxScanBuilder extends Builder {
             final String passwordToUse = isUseOwnServerCredentials() ? getPassword() : descriptor.getPassword();
 
             String serverUrlToUseNotNull = serverUrlToUse != null ? serverUrlToUse : "";
+
 			cxWebService = new CxWebService(serverUrlToUseNotNull, instanceLoggerSuffix(build));
             cxWebService.login(usernameToUse, passwordToUse);
 
@@ -373,6 +392,8 @@ public class CxScanBuilder extends Builder {
                     return true;
             }
 
+            analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId);
+
             listener.finished(Result.SUCCESS);
             return true;
 		} catch (IOException | WebServiceException e) {
@@ -398,7 +419,15 @@ public class CxScanBuilder extends Builder {
         }
 	}
 
-	/**
+    private void analyzeOpenSources(AbstractBuild<?, ?> build, String baseUri, String user, String password, long projectId) throws IOException, InterruptedException {
+        DependencyFolder folders = new DependencyFolder(includeOpenSourceFolders, excludeOpenSourceFolders);
+        AuthenticationRequest authReq = new AuthenticationRequest(user, password);
+        RestClient restClient = new RestClient(baseUri, authReq);
+        OpenSourceAnalyzerService osaService = new OpenSourceAnalyzerService(build, folders, restClient, projectId, instanceLogger);
+        osaService.analyze();
+    }
+
+    /**
 	 * Checks if job should fail with <code>UNSTABLE</code> status instead of <code>FAILED</code>
 	 *
 	 * @param descriptor

@@ -150,4 +150,14 @@
             <f:checkbox/>
         </f:entry>
     </j:if>
+
+    <f:section title="Open source analysis">
+    </f:section>
+    <f:entry title="Includes" field="includeOpenSourceFolders">
+            <f:textbox/>
+     </f:entry>
+
+     <f:entry title="Excludes" field="excludeOpenSourceFolders">
+             <f:textbox/>
+      </f:entry>
 </j:jelly>
