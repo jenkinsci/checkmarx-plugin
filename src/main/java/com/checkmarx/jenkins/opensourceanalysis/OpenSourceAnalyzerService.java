@@ -4,7 +4,8 @@ import com.checkmarx.jenkins.cryptography.CryptographicCallable;
 import com.checkmarx.jenkins.folder.FoldersScanner;
 import com.checkmarx.jenkins.web.client.RestClient;
 import com.checkmarx.jenkins.web.model.AnalyzeRequest;
-import com.checkmarx.jenkins.web.model.AnalyzeResponse;
+import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryRequest;
+import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
 import hudson.model.AbstractBuild;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -49,8 +50,9 @@ public class OpenSourceAnalyzerService {
             }
 
             List<String> hashValues = calculateHash(dependencies);
-            AnalyzeResponse anaResponse = callAnalyzeApi(hashValues);
-            printResultsToOutput(anaResponse);
+            callAnalyzeApi(hashValues);
+            GetOpenSourceSummaryResponse summaryResponse = getOpenSourceSummary();
+            printResultsToOutput(summaryResponse);
 
         }catch (Exception e){
             logger.error("Open Source Analysis failed:", e);
@@ -70,14 +72,19 @@ public class OpenSourceAnalyzerService {
         return build.getWorkspace().act(foldersScanner);
     }
 
-    private AnalyzeResponse callAnalyzeApi(List<String> hashValues) {
+    private void callAnalyzeApi(List<String> hashValues) {
         AnalyzeRequest anaReq = new AnalyzeRequest(projectId, hashValues);
-        return restClient.analyzeOpenSources(anaReq);
+        restClient.analyzeOpenSources(anaReq);
     }
 
-    private void printResultsToOutput(AnalyzeResponse results) {
+    private GetOpenSourceSummaryResponse getOpenSourceSummary() {
+        GetOpenSourceSummaryRequest summaryRequest = new GetOpenSourceSummaryRequest(projectId);
+        return restClient.getOpenSourceSummary(summaryRequest);
+    }
+
+    private void printResultsToOutput(GetOpenSourceSummaryResponse results) {
         StringBuilder sb = new StringBuilder();
-        sb.append("open source libraries: ").append(results.getTotal()).append("\n");
+        sb.append("\n").append("open source libraries: ").append(results.getTotal()).append("\n");
         sb.append("vulnerable and outdated: ").append(results.getVulnerableAndOutdated()).append("\n");
         sb.append("vulnerable and updated: ").append(results.getVulnerableAndUpdate()).append("\n");
         sb.append("with no known vulnerabilities: ").append(results.getNoKnownVulnerabilities()).append("\n");

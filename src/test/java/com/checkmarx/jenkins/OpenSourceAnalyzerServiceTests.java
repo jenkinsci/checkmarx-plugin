@@ -5,7 +5,6 @@ import com.checkmarx.jenkins.folder.FoldersScanner;
 import com.checkmarx.jenkins.opensourceanalysis.*;
 import com.checkmarx.jenkins.web.client.RestClient;
 import com.checkmarx.jenkins.web.model.AnalyzeRequest;
-import com.checkmarx.jenkins.web.model.AnalyzeResponse;
 import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
 import mockit.Invocation;
@@ -95,8 +94,7 @@ public class OpenSourceAnalyzerServiceTests {
         };
         new MockUp<RestClient>() {
             @Mock
-            AnalyzeResponse analyzeOpenSources(AnalyzeRequest request) {
-                return null;
+            void analyzeOpenSources(AnalyzeRequest request) {
             }
         };
 

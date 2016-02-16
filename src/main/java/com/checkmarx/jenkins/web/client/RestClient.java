@@ -1,8 +1,9 @@
 package com.checkmarx.jenkins.web.client;
 
 import com.checkmarx.jenkins.web.model.AnalyzeRequest;
-import com.checkmarx.jenkins.web.model.AnalyzeResponse;
 import com.checkmarx.jenkins.web.model.AuthenticationRequest;
+import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryRequest;
+import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
 import org.apache.log4j.Logger;
 import org.kohsuke.stapler.HttpResponses;
 
@@ -24,7 +25,8 @@ import java.util.Map;
 public class RestClient {
     private static final String REST_BASE_URI = "/CxRestAPI/api/";
     private static final String REST_AUTHENTICATION_URI = REST_BASE_URI + "auth/login";
-    private static final String REST_ANALYZE_URI = REST_BASE_URI + "projects/{projectId}/analyze";
+    private static final String REST_ANALYZE_URI = REST_BASE_URI + "projects/{projectId}/opensourcesummary";
+
     private String serverUri;
     private AuthenticationRequest authenticationRequest;
     private Client client = ClientBuilder.newClient();
@@ -34,14 +36,26 @@ public class RestClient {
         this.authenticationRequest = authenticationRequest;
     }
 
-    public AnalyzeResponse analyzeOpenSources(AnalyzeRequest request) {
+    public void analyzeOpenSources(AnalyzeRequest request) {
         Cookie cookie = authenticate();
-        String analyzeUri =  REST_ANALYZE_URI.replace("{projectId}", String.valueOf(request.getProjectId()));
-        AnalyzeResponse response = client
+        String analyzeUri =  REST_ANALYZE_URI.replace("{projectId}", "");
+        Response response = client
                 .target(serverUri + analyzeUri)
                 .request()
                 .cookie(cookie)
-                .post(Entity.entity(request, MediaType.APPLICATION_JSON), AnalyzeResponse.class);
+                .post(Entity.entity(request, MediaType.APPLICATION_JSON));
+
+        validateResponse(response);
+    }
+
+    public GetOpenSourceSummaryResponse getOpenSourceSummary(GetOpenSourceSummaryRequest request) {
+        Cookie cookie = authenticate();
+        String analyzeUri =  REST_ANALYZE_URI.replace("{projectId}", String.valueOf(request.getProjectId())) + "?format=summary";
+        GetOpenSourceSummaryResponse response = client
+                .target(serverUri + analyzeUri)
+                .request()
+                .cookie(cookie)
+                .get(GetOpenSourceSummaryResponse.class);
 
         return response;
     }

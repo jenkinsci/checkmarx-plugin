@@ -1,5 +1,6 @@
 package com.checkmarx.jenkins.web.model;
 
+import javax.xml.bind.annotation.XmlElement;
 import java.util.List;
 
 
@@ -12,7 +13,8 @@ public class AnalyzeRequest {
 
     private long projectId;
     private List<String> hashValues;
-    private static final int ORIGIN = 1;
+    @XmlElement(name="Origin")
+    private final int ORIGIN = 1;
 
     public AnalyzeRequest(long projectId, List<String> hashValues){
         this.projectId = projectId;
