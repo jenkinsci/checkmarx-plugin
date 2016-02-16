@@ -14,7 +14,7 @@ public class AnalyzeRequest {
     private long projectId;
     private List<String> hashValues;
     @XmlElement(name="Origin")
-    private final int ORIGIN = 1;
+    private final int JENKINS_ORIGIN = 1;
 
     public AnalyzeRequest(long projectId, List<String> hashValues){
         this.projectId = projectId;
