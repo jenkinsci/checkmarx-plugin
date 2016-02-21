@@ -4,12 +4,12 @@ import com.checkmarx.jenkins.cryptography.CryptographicCallable;
 import com.checkmarx.jenkins.folder.FoldersScanner;
 import com.checkmarx.jenkins.web.client.RestClient;
 import com.checkmarx.jenkins.web.model.AnalyzeRequest;
+import com.checkmarx.jenkins.web.model.CxException;
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryRequest;
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
 import hudson.model.AbstractBuild;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,7 +54,8 @@ public class OpenSourceAnalyzerService {
             GetOpenSourceSummaryResponse summaryResponse = getOpenSourceSummary();
             printResultsToOutput(summaryResponse);
 
-        }catch (Exception e){
+        }
+        catch (Exception e){
             logger.error("Open Source Analysis failed:", e);
         }
     }
@@ -72,12 +73,12 @@ public class OpenSourceAnalyzerService {
         return build.getWorkspace().act(foldersScanner);
     }
 
-    private void callAnalyzeApi(List<String> hashValues) {
+    private void callAnalyzeApi(List<String> hashValues) throws Exception {
         AnalyzeRequest anaReq = new AnalyzeRequest(projectId, hashValues);
         restClient.analyzeOpenSources(anaReq);
     }
 
-    private GetOpenSourceSummaryResponse getOpenSourceSummary() {
+    private GetOpenSourceSummaryResponse getOpenSourceSummary() throws Exception {
         GetOpenSourceSummaryRequest summaryRequest = new GetOpenSourceSummaryRequest(projectId);
         return restClient.getOpenSourceSummary(summaryRequest);
     }

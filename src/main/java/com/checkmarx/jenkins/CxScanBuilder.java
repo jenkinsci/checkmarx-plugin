@@ -359,6 +359,7 @@ public class CxScanBuilder extends Builder {
 
 
             if (!isWaitForResultsEnabled() && !descriptor.isForcingVulnerabilityThresholdEnabled()) {
+                analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId);
                 listener.finished(Result.SUCCESS);
                 return true;
             }

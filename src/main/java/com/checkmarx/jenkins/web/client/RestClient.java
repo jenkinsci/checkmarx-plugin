@@ -1,9 +1,6 @@
 package com.checkmarx.jenkins.web.client;
 
-import com.checkmarx.jenkins.web.model.AnalyzeRequest;
-import com.checkmarx.jenkins.web.model.AuthenticationRequest;
-import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryRequest;
-import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
+import com.checkmarx.jenkins.web.model.*;
 import org.apache.log4j.Logger;
 import org.kohsuke.stapler.HttpResponses;
 
@@ -36,7 +33,7 @@ public class RestClient {
         this.authenticationRequest = authenticationRequest;
     }
 
-    public void analyzeOpenSources(AnalyzeRequest request) {
+    public void analyzeOpenSources(AnalyzeRequest request) throws Exception {
         Cookie cookie = authenticate();
         String analyzeUri =  REST_ANALYZE_URI.replace("{projectId}", "");
         Response response = client
@@ -48,7 +45,7 @@ public class RestClient {
         validateResponse(response);
     }
 
-    public GetOpenSourceSummaryResponse getOpenSourceSummary(GetOpenSourceSummaryRequest request) {
+    public GetOpenSourceSummaryResponse getOpenSourceSummary(GetOpenSourceSummaryRequest request) throws Exception {
         Cookie cookie = authenticate();
         String analyzeUri =  REST_ANALYZE_URI.replace("{projectId}", String.valueOf(request.getProjectId())) + "?format=summary";
         GetOpenSourceSummaryResponse response = client
@@ -60,7 +57,7 @@ public class RestClient {
         return response;
     }
 
-    private Cookie authenticate() {
+    private Cookie authenticate() throws Exception {
         Response response = client
                 .target(serverUri + REST_AUTHENTICATION_URI)
                 .request()
@@ -73,9 +70,10 @@ public class RestClient {
         return (Cookie) cookieEntry.getValue();
     }
 
-    private void validateResponse(Response response) {
+    private void validateResponse(Response response) throws Exception {
         if (response.getStatus() >= 400) {
-            throw new WebApplicationException(response);
+            CxException cxException = response.readEntity(CxException.class);
+            throw new Exception(cxException.getMessage() + "\n" + cxException.getMessageDetails());
         }
     }
 }
