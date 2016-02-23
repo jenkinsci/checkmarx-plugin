@@ -1,43 +1,48 @@
 package com.checkmarx.jenkins.web.client;
 
-import com.checkmarx.jenkins.web.model.*;
-import org.apache.log4j.Logger;
-import org.kohsuke.stapler.HttpResponses;
+import java.io.Closeable;
+import java.util.Map;
 
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
-import java.util.Map;
+import javax.ws.rs.core.Response.Status;
+
+import com.checkmarx.jenkins.web.model.AnalyzeRequest;
+import com.checkmarx.jenkins.web.model.AuthenticationRequest;
+import com.checkmarx.jenkins.web.model.CxException;
+import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryRequest;
+import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
 
 
 /**
  * @author tsahi
  * @since 02/02/16
  */
-public class RestClient {
-    private static final String REST_BASE_URI = "/CxRestAPI/api/";
-    private static final String REST_AUTHENTICATION_URI = REST_BASE_URI + "auth/login";
-    private static final String REST_ANALYZE_URI = REST_BASE_URI + "projects/{projectId}/opensourcesummary";
+public class RestClient implements Closeable {
+	private static final String ROOT_PATH = "CxRestAPI/api";
+	private static final String AUTHENTICATION_PATH = "auth/login";
+	private static final String ANALYZE_SUMMARY_PATH = "projects/{projectId}/opensourcesummary";
+	private static final String ANALYZE_PATH = "projects/opensourcesummary";
 
-    private String serverUri;
     private AuthenticationRequest authenticationRequest;
-    private Client client = ClientBuilder.newClient();
+	private Client client;
+	private WebTarget root;
 
     public RestClient(String serverUri, AuthenticationRequest authenticationRequest) {
-        this.serverUri = serverUri;
         this.authenticationRequest = authenticationRequest;
+		client = ClientBuilder.newClient();
+		root = client.target(serverUri).path(ROOT_PATH);
     }
 
     public void analyzeOpenSources(AnalyzeRequest request) throws Exception {
         Cookie cookie = authenticate();
-        String analyzeUri =  REST_ANALYZE_URI.replace("{projectId}", "");
-        Response response = client
-                .target(serverUri + analyzeUri)
+		Response response = root.path(ANALYZE_PATH)
                 .request()
                 .cookie(cookie)
                 .post(Entity.entity(request, MediaType.APPLICATION_JSON));
@@ -45,35 +50,38 @@ public class RestClient {
         validateResponse(response);
     }
 
-    public GetOpenSourceSummaryResponse getOpenSourceSummary(GetOpenSourceSummaryRequest request) throws Exception {
+	public GetOpenSourceSummaryResponse getOpenSourceSummary(GetOpenSourceSummaryRequest request) throws Exception {
         Cookie cookie = authenticate();
-        String analyzeUri =  REST_ANALYZE_URI.replace("{projectId}", String.valueOf(request.getProjectId())) + "?format=summary";
-        GetOpenSourceSummaryResponse response = client
-                .target(serverUri + analyzeUri)
+		return root.path(ANALYZE_SUMMARY_PATH)
+				.resolveTemplate("projectId", request.getProjectId())
+				.queryParam("format", "summary")
                 .request()
                 .cookie(cookie)
                 .get(GetOpenSourceSummaryResponse.class);
-
-        return response;
     }
 
     private Cookie authenticate() throws Exception {
-        Response response = client
-                .target(serverUri + REST_AUTHENTICATION_URI)
+		Response response = root.path(AUTHENTICATION_PATH)
                 .request()
                 .post(Entity.entity(authenticationRequest, MediaType.APPLICATION_JSON));
 
         validateResponse(response);
 
         Map<String, NewCookie> cookiesMap = response.getCookies();
-        Map.Entry cookieEntry = (Map.Entry) cookiesMap.entrySet().toArray()[0];
-        return (Cookie) cookieEntry.getValue();
+		@SuppressWarnings("unchecked")
+		Map.Entry<String, NewCookie> cookieEntry = (Map.Entry<String, NewCookie>) cookiesMap.entrySet().toArray()[0];
+        return cookieEntry.getValue();
     }
 
     private void validateResponse(Response response) throws Exception {
-        if (response.getStatus() >= 400) {
+		if (response.getStatus() >= Status.BAD_REQUEST.getStatusCode()) {
             CxException cxException = response.readEntity(CxException.class);
             throw new Exception(cxException.getMessage() + "\n" + cxException.getMessageDetails());
         }
     }
+
+	@Override
+	public void close() {
+		client.close();
+	}
 }

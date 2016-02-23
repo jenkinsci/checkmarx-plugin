@@ -423,9 +423,11 @@ public class CxScanBuilder extends Builder {
     private void analyzeOpenSources(AbstractBuild<?, ?> build, String baseUri, String user, String password, long projectId) throws IOException, InterruptedException {
         DependencyFolder folders = new DependencyFolder(includeOpenSourceFolders, excludeOpenSourceFolders);
         AuthenticationRequest authReq = new AuthenticationRequest(user, password);
-        RestClient restClient = new RestClient(baseUri, authReq);
-        OpenSourceAnalyzerService osaService = new OpenSourceAnalyzerService(build, folders, restClient, projectId, instanceLogger);
-        osaService.analyze();
+		try (RestClient restClient = new RestClient(baseUri, authReq)) {
+			OpenSourceAnalyzerService osaService = new OpenSourceAnalyzerService(build, folders, restClient, projectId,
+					instanceLogger);
+			osaService.analyze();
+		}
     }
 
     /**
