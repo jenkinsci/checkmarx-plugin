@@ -39,7 +39,7 @@ public class OpenSourceAnalyzerService {
 
     public void analyze() throws IOException, InterruptedException {
         try{
-            if (dependencyFolder.getInclude().isEmpty()) {
+            if (StringUtils.isEmpty(dependencyFolder.getInclude())) {
                 return;
             }
 

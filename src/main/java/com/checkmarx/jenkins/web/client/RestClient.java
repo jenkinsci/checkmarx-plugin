@@ -27,7 +27,7 @@ import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
 public class RestClient implements Closeable {
 	private static final String ROOT_PATH = "CxRestAPI/api";
 	private static final String AUTHENTICATION_PATH = "auth/login";
-	private static final String ANALYZE_SUMMARY_PATH = "projects/{projectId}/opensourcesummary";
+	private static final String ANALYZE_SUMMARY_PATH = "projects/{projectId}/opensourceanalysis/summaryresults";
 	private static final String ANALYZE_PATH = "projects/opensourcesummary";
 
     private AuthenticationRequest authenticationRequest;
@@ -54,7 +54,6 @@ public class RestClient implements Closeable {
         Cookie cookie = authenticate();
 		return root.path(ANALYZE_SUMMARY_PATH)
 				.resolveTemplate("projectId", request.getProjectId())
-				.queryParam("format", "summary")
                 .request()
                 .cookie(cookie)
                 .get(GetOpenSourceSummaryResponse.class);

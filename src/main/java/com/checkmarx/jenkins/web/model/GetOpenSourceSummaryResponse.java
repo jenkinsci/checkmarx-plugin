@@ -27,6 +27,8 @@ public class GetOpenSourceSummaryResponse {
     private String lowVulnerabilityLibraries;
     @XmlElement(name="analyzeTime")
     private String analyzeTime;
+    @XmlElement(name="vulnerabilityScore")
+    private String vulnerabilityScore;
 
     public String getNoKnownVulnerabilities() {
         return noKnownVulnerabilities;
