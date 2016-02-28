@@ -3,6 +3,7 @@ package com.checkmarx.jenkins.web.client;
 import java.io.Closeable;
 import java.util.Map;
 
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -11,7 +12,6 @@ import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import com.checkmarx.jenkins.web.model.AnalyzeRequest;
 import com.checkmarx.jenkins.web.model.AuthenticationRequest;
@@ -40,7 +40,7 @@ public class RestClient implements Closeable {
 		root = client.target(serverUri).path(ROOT_PATH);
     }
 
-    public void analyzeOpenSources(AnalyzeRequest request) throws Exception {
+    public void analyzeOpenSources(AnalyzeRequest request) {
         Cookie cookie = authenticate();
 		Response response = root.path(ANALYZE_PATH)
                 .request()
@@ -50,7 +50,7 @@ public class RestClient implements Closeable {
         validateResponse(response);
     }
 
-	public GetOpenSourceSummaryResponse getOpenSourceSummary(GetOpenSourceSummaryRequest request) throws Exception {
+	public GetOpenSourceSummaryResponse getOpenSourceSummary(GetOpenSourceSummaryRequest request) {
         Cookie cookie = authenticate();
 		return root.path(ANALYZE_SUMMARY_PATH)
 				.resolveTemplate("projectId", request.getProjectId())
@@ -59,7 +59,7 @@ public class RestClient implements Closeable {
                 .get(GetOpenSourceSummaryResponse.class);
     }
 
-    private Cookie authenticate() throws Exception {
+    private Cookie authenticate() {
 		Response response = root.path(AUTHENTICATION_PATH)
                 .request()
                 .post(Entity.entity(authenticationRequest, MediaType.APPLICATION_JSON));
@@ -72,10 +72,10 @@ public class RestClient implements Closeable {
         return cookieEntry.getValue();
     }
 
-    private void validateResponse(Response response) throws Exception {
-		if (response.getStatus() >= Status.BAD_REQUEST.getStatusCode()) {
+    private void validateResponse(Response response) {
+		if (response.getStatus() >= 400) {
             CxException cxException = response.readEntity(CxException.class);
-            throw new Exception(cxException.getMessage() + "\n" + cxException.getMessageDetails());
+            throw new WebApplicationException(cxException.getMessage() + "\n" + cxException.getMessageDetails(), response);
         }
     }
 
