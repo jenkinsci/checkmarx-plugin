@@ -19,11 +19,13 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.ws.BindingProvider;
 import javax.xml.ws.WebServiceException;
 
 import jenkins.model.Jenkins;
@@ -90,6 +92,15 @@ public class CxWebService {
 		this(serverUrl, null);
 	}
 
+	public CxWebService(String serverUrl, int requestTimeoutDuration) throws MalformedURLException, AbortException {
+		this(serverUrl, requestTimeoutDuration, null);
+	}
+	
+	public CxWebService(String serverUrl, int requestTimeoutDuration, final String loggerSuffix) throws MalformedURLException, AbortException {
+		this(serverUrl, loggerSuffix);
+		setClientTimeout(requestTimeoutDuration);
+	}
+
 	public CxWebService(@NotNull final String serverUrl, @Nullable final String loggerSuffix)
 			throws MalformedURLException, AbortException {
 		logger = CxLogUtils.loggerWithSuffix(getClass(), loggerSuffix);
@@ -131,8 +142,14 @@ public class CxWebService {
 		webServiceUrl = new URL(cxWSResponseDiscovery.getServiceURL());
 		logger.debug("Webservice url: " + webServiceUrl);
 		CxJenkinsWebService cxJenkinsWebService = new CxJenkinsWebService(webServiceUrl);
+		
 		cxJenkinsWebServiceSoap = cxJenkinsWebService.getCxJenkinsWebServiceSoap();
+	}
 
+	public void setClientTimeout(int milliseconds) {
+		Map<String, Object> requestContext = ((BindingProvider)cxJenkinsWebServiceSoap).getRequestContext();
+		requestContext.put("com.sun.xml.internal.ws.connect.timeout", milliseconds);
+		requestContext.put("com.sun.xml.internal.ws.request.timeout", milliseconds);
 	}
 
 	public void login(@Nullable String username, @Nullable String password) throws AbortException {

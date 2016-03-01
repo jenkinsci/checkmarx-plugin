@@ -328,7 +328,12 @@ public class CxScanBuilder extends Builder {
             final String passwordToUse = isUseOwnServerCredentials() ? getPassword() : descriptor.getPassword();
 
             String serverUrlToUseNotNull = serverUrlToUse != null ? serverUrlToUse : "";
-			cxWebService = new CxWebService(serverUrlToUseNotNull, instanceLoggerSuffix(build));
+			if (getDescriptor().requestTimeOutEnabled) {
+				cxWebService = new CxWebService(serverUrlToUseNotNull,
+						secondsToMillis(getDescriptor().getRequestTimeoutDuration()) , instanceLoggerSuffix(build));
+			} else {
+				cxWebService = new CxWebService(serverUrlToUseNotNull, instanceLoggerSuffix(build));
+			}
             cxWebService.login(usernameToUse, passwordToUse);
 
 
@@ -396,6 +401,10 @@ public class CxScanBuilder extends Builder {
 		} finally {
             closeLogger();
         }
+	}
+
+	private static int secondsToMillis(int requestTimeoutDuration) {
+		return requestTimeoutDuration * 1000;
 	}
 
 	/**
@@ -716,6 +725,8 @@ public class CxScanBuilder extends Builder {
 		private JobGlobalStatusOnError jobGlobalStatusOnError;
         private boolean scanTimeOutEnabled;
         private int scanTimeoutDuration;
+        private int requestTimeoutDuration = 30; // Assigning default value
+		private boolean requestTimeOutEnabled = true;  // Assigning default value
         private final Pattern msGuid = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
 
 		public DescriptorImpl() {
@@ -832,6 +843,22 @@ public class CxScanBuilder extends Builder {
                 this.scanTimeoutDuration = scanTimeoutDuration;
             }
         }
+        
+        public int getRequestTimeoutDuration() {         
+            return requestTimeoutDuration;
+        }
+
+        public void setRequestTimeoutDuration(int requestTimeoutDuration) {
+        	this.requestTimeoutDuration = requestTimeoutDuration;
+        }
+		        
+        public boolean getRequestTimeOutEnabled() {         
+            return requestTimeOutEnabled;
+        }
+
+        public void setRequestTimeOutEnabled(boolean requestTimeOutEnabled) {
+        	this.requestTimeOutEnabled = requestTimeOutEnabled;
+        }
 
 	    @Override
 		public boolean isApplicable(Class<? extends AbstractProject> aClass) {
@@ -877,7 +904,11 @@ public class CxScanBuilder extends Builder {
 			// timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 	        CxWebService cxWebService = null;
 	        try {
-	            cxWebService = new CxWebService(serverUrl);
+				if (requestTimeOutEnabled) {
+					cxWebService = new CxWebService(serverUrl, secondsToMillis(getRequestTimeoutDuration()));
+				} else {
+					cxWebService = new CxWebService(serverUrl);
+				}
 	        } catch (Exception e) {
 				logger.debug(e);
 	            return FormValidation.error("Invalid system URL");
@@ -1080,8 +1111,7 @@ public class CxScanBuilder extends Builder {
 	        try {
 	            final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
 	            final List<Group> groups = cxWebService.getAssociatedGroups();
-	            for(Group group : groups)
-	            {
+	            for(Group group : groups) {
 	                listBoxModel.add(new ListBoxModel.Option(group.getGroupName(),group.getID()));
 	            }
 
