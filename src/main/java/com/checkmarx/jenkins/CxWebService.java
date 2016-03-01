@@ -242,7 +242,6 @@ public class CxWebService {
 					continue;
 				} else if (retryAttempts > 0) {
 					retryAttempts--;
-					logger.warn(e.getMessage() + " - Retrying");
 				} else {
 					throw e;
 				}
@@ -556,7 +555,6 @@ public class CxWebService {
 			} catch (AbortException abort) {
 				if (retryAttemptsLeft > 0) {
 					retryAttemptsLeft--;
-					logger.warn(abort.getMessage() + " - Retrying");
 				} else {
 					throw abort;
 				}
