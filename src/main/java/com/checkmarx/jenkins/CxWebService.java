@@ -4,6 +4,8 @@ package com.checkmarx.jenkins;
 import static ch.lambdaj.Lambda.filter;
 import static ch.lambdaj.Lambda.having;
 import static ch.lambdaj.Lambda.on;
+
+import com.checkmarx.ws.CxJenkinsWebService.*;
 import hudson.AbortException;
 import hudson.FilePath;
 import hudson.util.IOUtils;
@@ -39,31 +41,6 @@ import com.checkmarx.jenkins.xmlresponseparser.CreateAndRunProjectXmlResponsePar
 import com.checkmarx.jenkins.xmlresponseparser.RunIncrementalScanXmlResponseParser;
 import com.checkmarx.jenkins.xmlresponseparser.RunScanAndAddToProjectXmlResponseParser;
 import com.checkmarx.jenkins.xmlresponseparser.XmlResponseParser;
-import com.checkmarx.ws.CxJenkinsWebService.ConfigurationSet;
-import com.checkmarx.ws.CxJenkinsWebService.CreateAndRunProject;
-import com.checkmarx.ws.CxJenkinsWebService.Credentials;
-import com.checkmarx.ws.CxJenkinsWebService.CxJenkinsWebService;
-import com.checkmarx.ws.CxJenkinsWebService.CxJenkinsWebServiceSoap;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSBasicRepsonse;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSCreateReportResponse;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSReportRequest;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSReportStatusResponse;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSReportType;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseConfigSetList;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseGroupList;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseLoginData;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSResponsePresetList;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseProjectsDisplayData;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseRunID;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseScanResults;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseScanStatus;
-import com.checkmarx.ws.CxJenkinsWebService.Group;
-import com.checkmarx.ws.CxJenkinsWebService.LocalCodeContainer;
-import com.checkmarx.ws.CxJenkinsWebService.Preset;
-import com.checkmarx.ws.CxJenkinsWebService.ProjectDisplayData;
-import com.checkmarx.ws.CxJenkinsWebService.ProjectSettings;
-import com.checkmarx.ws.CxJenkinsWebService.RunIncrementalScan;
-import com.checkmarx.ws.CxJenkinsWebService.RunScanAndAddToProject;
 import com.checkmarx.ws.CxWSResolver.CxClientType;
 import com.checkmarx.ws.CxWSResolver.CxWSResolver;
 import com.checkmarx.ws.CxWSResolver.CxWSResolverSoap;
@@ -473,6 +450,11 @@ public class CxWebService {
 
         return scan(projectSettings, localCodeContainer, visibleToOtherUsers, isPublicScan, base64ZipFile, "CreateAndRunProject",
                 soapMessage, new CreateAndRunProjectXmlResponseParser());
+    }
+
+    public Boolean isOsaLicenseValid(){
+        CxWSResponseServerLicenseData response = cxJenkinsWebServiceSoap.getServerLicenseData(sessionId);
+        return response.isIsOsaEnabled();
     }
 
 	public long getProjectId(ProjectSettings projectSettings) throws AbortException {

@@ -5,6 +5,8 @@ import com.checkmarx.jenkins.folder.FoldersScanner;
 import com.checkmarx.jenkins.opensourceanalysis.*;
 import com.checkmarx.jenkins.web.client.RestClient;
 import com.checkmarx.jenkins.web.model.AnalyzeRequest;
+import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryRequest;
+import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
 import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
 import mockit.Invocation;
@@ -41,7 +43,7 @@ public class OpenSourceAnalyzerServiceTests {
         };
 
         DependencyFolder folders = new DependencyFolder("", "test");
-        OpenSourceAnalyzerService service = new OpenSourceAnalyzerService(null, folders, null, 0, Logger.getLogger(getClass()));
+        OpenSourceAnalyzerService service = new OpenSourceAnalyzerService(null, folders, null, 0, Logger.getLogger(getClass()), null);
         service.analyze();
     }
 
@@ -62,9 +64,18 @@ public class OpenSourceAnalyzerServiceTests {
                 assertEquals("No dependencies found", message);
             }
         };
+        new MockUp<CxWebService>() {
+            @Mock
+            void $init(String serverUrl) {
+            }
+            @Mock
+            Boolean isOsaLicenseValid(){
+                return true;
+            }
+        };
 
         DependencyFolder folders = new DependencyFolder("test2", "");
-        OpenSourceAnalyzerService service = new OpenSourceAnalyzerService(null, folders, null, 0, Logger.getLogger(getClass()));
+        OpenSourceAnalyzerService service = new OpenSourceAnalyzerService(null, folders, null, 0, Logger.getLogger(getClass()), new CxWebService(null));
 
         service.analyze();
     }
@@ -96,11 +107,56 @@ public class OpenSourceAnalyzerServiceTests {
             @Mock
             void analyzeOpenSources(AnalyzeRequest request) {
             }
+            @Mock
+            GetOpenSourceSummaryResponse getOpenSourceSummary(GetOpenSourceSummaryRequest request){
+                return new GetOpenSourceSummaryResponse();
+            }
+        };
+        new MockUp<CxWebService>() {
+            @Mock
+            void $init(String serverUrl) {
+            }
+            @Mock
+            Boolean isOsaLicenseValid(){
+                return true;
+            }
         };
 
 
         DependencyFolder folders = new DependencyFolder("test2", "");
-        OpenSourceAnalyzerService service = new OpenSourceAnalyzerService(null, folders, new RestClient("", null), 0, Logger.getLogger(getClass()));
+        OpenSourceAnalyzerService service = new OpenSourceAnalyzerService(null, folders, new RestClient("", null), 0, Logger.getLogger(getClass()), new CxWebService(null));
+
+        service.analyze();
+    }
+
+    @Test
+    public void openSourceAnalyzerServiceTests_noLicense_logNoLicense() throws IOException, InterruptedException {
+
+        new MockUp<OpenSourceAnalyzerService>() {
+            @Mock
+            Collection<DependencyInfo> getDependenciesFromFolders(Invocation invocation) throws IOException, InterruptedException {
+                DependencyInfo info = new DependencyInfo();
+                info.setFilePath(new FilePath(new File("test")));
+                return new ArrayList<DependencyInfo>(Arrays.asList(info));
+            }
+        };
+        new MockUp<Logger>() {
+            void error(Object message) {
+                assertTrue(message.toString().contains(OpenSourceAnalyzerService.NO_LICENSE_ERROR));
+            }
+        };
+        new MockUp<CxWebService>() {
+            @Mock
+            void $init(String serverUrl) {
+            }
+            @Mock
+            Boolean isOsaLicenseValid(){
+                return false;
+            }
+        };
+
+        DependencyFolder folders = new DependencyFolder("test2", "");
+        OpenSourceAnalyzerService service = new OpenSourceAnalyzerService(null, folders, null, 0, Logger.getLogger(getClass()), new CxWebService(null));
 
         service.analyze();
     }

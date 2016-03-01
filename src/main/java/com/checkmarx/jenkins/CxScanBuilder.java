@@ -359,7 +359,7 @@ public class CxScanBuilder extends Builder {
 
 
             if (!isWaitForResultsEnabled() && !descriptor.isForcingVulnerabilityThresholdEnabled()) {
-                analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId);
+                analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService);
                 listener.finished(Result.SUCCESS);
                 return true;
             }
@@ -393,7 +393,7 @@ public class CxScanBuilder extends Builder {
                     return true;
             }
 
-            analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId);
+            analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService);
 
             listener.finished(Result.SUCCESS);
             return true;
@@ -420,12 +420,12 @@ public class CxScanBuilder extends Builder {
         }
 	}
 
-    private void analyzeOpenSources(AbstractBuild<?, ?> build, String baseUri, String user, String password, long projectId) throws IOException, InterruptedException {
+    private void analyzeOpenSources(AbstractBuild<?, ?> build, String baseUri, String user, String password, long projectId, CxWebService webServiceClient) throws IOException, InterruptedException {
         DependencyFolder folders = new DependencyFolder(includeOpenSourceFolders, excludeOpenSourceFolders);
         AuthenticationRequest authReq = new AuthenticationRequest(user, password);
 		try (RestClient restClient = new RestClient(baseUri, authReq)) {
 			OpenSourceAnalyzerService osaService = new OpenSourceAnalyzerService(build, folders, restClient, projectId,
-					instanceLogger);
+					instanceLogger, webServiceClient);
 			osaService.analyze();
 		}
     }
@@ -900,7 +900,37 @@ public class CxScanBuilder extends Builder {
 	    // Field value validators
 	    //////////////////////////////////////////////////////////////////////////////////////
 
-	    /*
+
+        /*
+	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+	     *  shared state to avoid synchronization issues.
+	     */
+        public FormValidation doCheckIncludeOpenSourceFolders(@QueryParameter final boolean useOwnServerCredentials,@QueryParameter final String serverUrl, @QueryParameter final String password,
+                                               @QueryParameter final String username,@QueryParameter final String includeOpenSourceFolders, @QueryParameter final String timestamp) {
+            // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
+            CxWebService cxWebService = null;
+
+            try {
+                cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
+            } catch (Exception e) {
+                logger.debug(e);
+                return FormValidation.ok();
+            }
+
+            try {
+                Boolean isOsaLicenseValid = cxWebService.isOsaLicenseValid();
+                if (!isOsaLicenseValid){
+                    return FormValidation.error(OpenSourceAnalyzerService.NO_LICENSE_ERROR);
+                }
+                return FormValidation.ok();
+
+            } catch (Exception e) {
+                return FormValidation.error(e.getMessage());
+            }
+        }
+
+
+        /*
 	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
 	     *  shared state to avoid synchronization issues.
 	     */

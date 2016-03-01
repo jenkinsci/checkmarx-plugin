@@ -1,5 +1,6 @@
 package com.checkmarx.jenkins.opensourceanalysis;
 
+import com.checkmarx.jenkins.CxWebService;
 import com.checkmarx.jenkins.cryptography.CryptographicCallable;
 import com.checkmarx.jenkins.folder.FoldersScanner;
 import com.checkmarx.jenkins.web.client.RestClient;
@@ -28,18 +29,26 @@ public class OpenSourceAnalyzerService {
     private long projectId;
     private transient Logger logger;
     private static final Pattern PARAM_LIST_SPLIT_PATTERN = Pattern.compile(",|$", Pattern.MULTILINE);
+    private CxWebService webServiceClient;
+    public static final String NO_LICENSE_ERROR = "Open Source Analysis License is not enabled for this project.Please contact your CxSAST Administrator";
 
-    public OpenSourceAnalyzerService(final AbstractBuild<?, ?> build, DependencyFolder dependencyFolder, RestClient restClient, long projectId, Logger logger) {
+    public OpenSourceAnalyzerService(final AbstractBuild<?, ?> build, DependencyFolder dependencyFolder, RestClient restClient, long projectId, Logger logger, CxWebService webServiceClient) {
         this.dependencyFolder = dependencyFolder;
         this.build = build;
         this.restClient = restClient;
         this.projectId = projectId;
         this.logger = logger;
+        this.webServiceClient = webServiceClient;
     }
 
     public void analyze() throws IOException, InterruptedException {
         try{
             if (StringUtils.isEmpty(dependencyFolder.getInclude())) {
+                return;
+            }
+
+            if (!validLicense()){
+                logger.error(NO_LICENSE_ERROR);
                 return;
             }
 
@@ -58,6 +67,10 @@ public class OpenSourceAnalyzerService {
         catch (Exception e){
             logger.error("Open Source Analysis failed:", e);
         }
+    }
+
+    private boolean validLicense() {
+        return webServiceClient.isOsaLicenseValid();
     }
 
     private List<String> calculateHash(Collection<DependencyInfo> dependencies) throws IOException, InterruptedException {
