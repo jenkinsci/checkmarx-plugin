@@ -910,6 +910,10 @@ public class CxScanBuilder extends Builder {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             CxWebService cxWebService = null;
 
+            if (!osaConfigured(includeOpenSourceFolders)){
+                return FormValidation.ok();
+            }
+
             try {
                 cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
             } catch (Exception e) {
@@ -927,6 +931,10 @@ public class CxScanBuilder extends Builder {
             } catch (Exception e) {
                 return FormValidation.error(e.getMessage());
             }
+        }
+
+        private boolean osaConfigured(String includeOpenSourceFolders) {
+            return !org.apache.commons.lang.StringUtils.isEmpty(includeOpenSourceFolders);
         }
 
 
