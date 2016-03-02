@@ -146,10 +146,18 @@ public class CxWebService {
 		cxJenkinsWebServiceSoap = cxJenkinsWebService.getCxJenkinsWebServiceSoap();
 	}
 
-	public void setClientTimeout(int milliseconds) {
+	public void setClientTimeout(int seconds) {
+		logger.debug("Setting connection timeout to " + seconds + " seconds");
+		int milliseconds = seconds * 1000;
 		Map<String, Object> requestContext = ((BindingProvider)cxJenkinsWebServiceSoap).getRequestContext();
+		// see https://java.net/jira/browse/JAX_WS-1166
 		requestContext.put("com.sun.xml.internal.ws.connect.timeout", milliseconds);
 		requestContext.put("com.sun.xml.internal.ws.request.timeout", milliseconds);
+		requestContext.put("com.sun.xml.ws.request.timeout", milliseconds);
+		requestContext.put("com.sun.xml.ws.connect.timeout", milliseconds);
+		requestContext.put("javax.xml.ws.client.connectionTimeout", milliseconds);
+		requestContext.put("javax.xml.ws.client.receiveTimeout", milliseconds);
+		requestContext.put("timeout", milliseconds); // IBM
 	}
 
 	public void login(@Nullable String username, @Nullable String password) throws AbortException {

@@ -329,8 +329,8 @@ public class CxScanBuilder extends Builder {
 
             String serverUrlToUseNotNull = serverUrlToUse != null ? serverUrlToUse : "";
 			if (getDescriptor().requestTimeOutEnabled) {
-				cxWebService = new CxWebService(serverUrlToUseNotNull,
-						secondsToMillis(getDescriptor().getRequestTimeoutDuration()) , instanceLoggerSuffix(build));
+				cxWebService = new CxWebService(serverUrlToUseNotNull, getDescriptor().getRequestTimeoutDuration(),
+						instanceLoggerSuffix(build));
 			} else {
 				cxWebService = new CxWebService(serverUrlToUseNotNull, instanceLoggerSuffix(build));
 			}
@@ -401,10 +401,6 @@ public class CxScanBuilder extends Builder {
 		} finally {
             closeLogger();
         }
-	}
-
-	private static int secondsToMillis(int requestTimeoutDuration) {
-		return requestTimeoutDuration * 1000;
 	}
 
 	/**
@@ -905,7 +901,7 @@ public class CxScanBuilder extends Builder {
 	        CxWebService cxWebService = null;
 	        try {
 				if (requestTimeOutEnabled) {
-					cxWebService = new CxWebService(serverUrl, secondsToMillis(getRequestTimeoutDuration()));
+					cxWebService = new CxWebService(serverUrl, getRequestTimeoutDuration());
 				} else {
 					cxWebService = new CxWebService(serverUrl);
 				}
