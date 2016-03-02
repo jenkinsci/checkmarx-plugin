@@ -381,10 +381,10 @@ public class CxScanBuilder extends Builder {
             listener.finished(Result.SUCCESS);
             return true;
 		} catch (IOException | WebServiceException e) {
-			instanceLogger.error(e.getMessage(), e);
 			if (useUnstableOnError(descriptor)) {
 				build.setResult(Result.UNSTABLE);
 				listener.finished(Result.UNSTABLE);
+				instanceLogger.error(e.getMessage(), e);
 				return true;
 			} else {
 				throw e;
