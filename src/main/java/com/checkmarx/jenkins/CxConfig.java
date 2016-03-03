@@ -10,6 +10,7 @@ import jenkins.model.Jenkins;
  */
 public class CxConfig {
 
+	private static final String REQUEST_TIME_OUT_DURATION_SEC = "RequestTimeOutDurationSec";
 	private static final String SERVER_CALL_RETRY_NUMBER = "ServerCallRetryNumber";
 	private static Properties configuration;
 	private static final String CONFIGURATION_MAX_ZIP_SIZE_KEY = "MaxZipSizeBytes";
@@ -44,5 +45,9 @@ public class CxConfig {
 
 	public static int getServerCallRetryNumber() {
 		return Integer.parseInt(configuration.getProperty(SERVER_CALL_RETRY_NUMBER));
+	}
+	
+	public static int getRequestTimeOutDuration() {
+		return Integer.parseInt(configuration.getProperty(REQUEST_TIME_OUT_DURATION_SEC));
 	}
 }

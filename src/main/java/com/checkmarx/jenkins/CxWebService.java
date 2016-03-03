@@ -91,16 +91,7 @@ public class CxWebService {
 	public CxWebService(String serverUrl) throws MalformedURLException, AbortException {
 		this(serverUrl, null);
 	}
-
-	public CxWebService(String serverUrl, int requestTimeoutDuration) throws MalformedURLException, AbortException {
-		this(serverUrl, requestTimeoutDuration, null);
-	}
 	
-	public CxWebService(String serverUrl, int requestTimeoutDuration, final String loggerSuffix) throws MalformedURLException, AbortException {
-		this(serverUrl, loggerSuffix);
-		setClientTimeout(requestTimeoutDuration);
-	}
-
 	public CxWebService(@NotNull final String serverUrl, @Nullable final String loggerSuffix)
 			throws MalformedURLException, AbortException {
 		logger = CxLogUtils.loggerWithSuffix(getClass(), loggerSuffix);
@@ -144,9 +135,11 @@ public class CxWebService {
 		CxJenkinsWebService cxJenkinsWebService = new CxJenkinsWebService(webServiceUrl);
 		
 		cxJenkinsWebServiceSoap = cxJenkinsWebService.getCxJenkinsWebServiceSoap();
+		
+		setClientTimeout(CxConfig.getRequestTimeOutDuration());
 	}
 
-	public void setClientTimeout(int seconds) {
+	private void setClientTimeout(int seconds) {
 		logger.debug("Setting connection timeout to " + seconds + " seconds");
 		int milliseconds = seconds * 1000;
 		Map<String, Object> requestContext = ((BindingProvider)cxJenkinsWebServiceSoap).getRequestContext();

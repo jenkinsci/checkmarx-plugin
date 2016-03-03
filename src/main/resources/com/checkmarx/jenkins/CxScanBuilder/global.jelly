@@ -64,12 +64,7 @@
                         <f:number clazz="positive-number" min="0" step="1" default="1"/>
                     </f:entry>
         </f:optionalBlock>
-        
-        <f:optionalBlock title="Set timeout for CxSAST server response" default="true" inline="true" field="requestTimeOutEnabled">
-                    <f:entry title="Scan timeout (seconds)" field="requestTimeoutDuration">
-                        <f:number clazz="positive-number required" min="1" step="1" default="30"/>
-                    </f:entry>
-        </f:optionalBlock>
+
     </f:section>
 
 </j:jelly>

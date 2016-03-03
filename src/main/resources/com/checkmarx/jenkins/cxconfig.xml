@@ -16,4 +16,6 @@
 !**/*.stml,    !**/*.ttml,      !**/*.txn,      !**/*.xhtm,     !**/*.xhtml,   !**/*.class, !**/*.iml
     </entry>
     <entry key="ServerCallRetryNumber">5</entry>
+    <!-- requestTimeOutDuration is in seconds -->
+    <entry key="RequestTimeOutDurationSec">30</entry>
 </properties>

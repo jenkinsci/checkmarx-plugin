@@ -328,14 +328,8 @@ public class CxScanBuilder extends Builder {
             final String passwordToUse = isUseOwnServerCredentials() ? getPassword() : descriptor.getPassword();
 
             String serverUrlToUseNotNull = serverUrlToUse != null ? serverUrlToUse : "";
-			if (getDescriptor().requestTimeOutEnabled) {
-				cxWebService = new CxWebService(serverUrlToUseNotNull, getDescriptor().getRequestTimeoutDuration(),
-						instanceLoggerSuffix(build));
-			} else {
-				cxWebService = new CxWebService(serverUrlToUseNotNull, instanceLoggerSuffix(build));
-			}
+            cxWebService = new CxWebService(serverUrlToUseNotNull, instanceLoggerSuffix(build));	
             cxWebService.login(usernameToUse, passwordToUse);
-
 
             instanceLogger.info("Checkmarx server login successful");
 
@@ -721,8 +715,6 @@ public class CxScanBuilder extends Builder {
 		private JobGlobalStatusOnError jobGlobalStatusOnError;
         private boolean scanTimeOutEnabled;
         private int scanTimeoutDuration;
-        private int requestTimeoutDuration = 30; // Assigning default value
-		private boolean requestTimeOutEnabled = true;  // Assigning default value
         private final Pattern msGuid = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
 
 		public DescriptorImpl() {
@@ -839,22 +831,6 @@ public class CxScanBuilder extends Builder {
                 this.scanTimeoutDuration = scanTimeoutDuration;
             }
         }
-        
-        public int getRequestTimeoutDuration() {         
-            return requestTimeoutDuration;
-        }
-
-        public void setRequestTimeoutDuration(int requestTimeoutDuration) {
-        	this.requestTimeoutDuration = requestTimeoutDuration;
-        }
-		        
-        public boolean getRequestTimeOutEnabled() {         
-            return requestTimeOutEnabled;
-        }
-
-        public void setRequestTimeOutEnabled(boolean requestTimeOutEnabled) {
-        	this.requestTimeOutEnabled = requestTimeOutEnabled;
-        }
 
 	    @Override
 		public boolean isApplicable(Class<? extends AbstractProject> aClass) {
@@ -900,11 +876,7 @@ public class CxScanBuilder extends Builder {
 			// timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 	        CxWebService cxWebService = null;
 	        try {
-				if (requestTimeOutEnabled) {
-					cxWebService = new CxWebService(serverUrl, getRequestTimeoutDuration());
-				} else {
-					cxWebService = new CxWebService(serverUrl);
-				}
+	        	cxWebService = new CxWebService(serverUrl);
 	        } catch (Exception e) {
 				logger.debug(e);
 	            return FormValidation.error("Invalid system URL");
