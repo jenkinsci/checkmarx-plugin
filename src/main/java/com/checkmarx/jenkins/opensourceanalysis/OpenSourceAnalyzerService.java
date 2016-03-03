@@ -58,6 +58,12 @@ public class OpenSourceAnalyzerService {
             if (!isOsaConfigured()) {
                 return;
             }
+
+            if (!validLicense()){
+                logger.error(NO_LICENSE_ERROR);
+                return;
+            }
+
             logger.info(OSA_RUN_STARTED);
             Collection<DependencyInfo> dependencies = getDependenciesFromFolders();
             if (dependencies.isEmpty()){
@@ -79,6 +85,11 @@ public class OpenSourceAnalyzerService {
     private boolean isOsaConfigured() {
         return ! StringUtils.isEmpty(dependencyFolder.getInclude());
     }
+
+    private boolean validLicense() {
+        return webServiceClient.isOsaLicenseValid();
+    }
+
 
     private List<String> calculateHash(Collection<DependencyInfo> dependencies) throws IOException, InterruptedException {
         List<String> hashValues = new ArrayList<>();
