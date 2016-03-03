@@ -5,11 +5,7 @@ import com.checkmarx.jenkins.folder.FoldersScanner;
 import com.checkmarx.jenkins.opensourceanalysis.*;
 import com.checkmarx.jenkins.web.client.RestClient;
 import com.checkmarx.jenkins.web.model.AnalyzeRequest;
-<<<<<<< Updated upstream
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryRequest;
-=======
-
->>>>>>> Stashed changes
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
 import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
@@ -68,7 +64,6 @@ public class OpenSourceAnalyzerServiceTests {
                 infoMessages.add(message);
             }
         };
-<<<<<<< Updated upstream
         new MockUp<CxWebService>() {
             @Mock
             void $init(String serverUrl) {
@@ -79,8 +74,6 @@ public class OpenSourceAnalyzerServiceTests {
             }
         };
 
-=======
->>>>>>> Stashed changes
         DependencyFolder folders = new DependencyFolder("test2", "");
         OpenSourceAnalyzerService service = new OpenSourceAnalyzerService(null, folders, null, 0, Logger.getLogger(getClass()), new CxWebService(null));
 
@@ -117,10 +110,18 @@ public class OpenSourceAnalyzerServiceTests {
             void analyzeOpenSources(AnalyzeRequest request) {
             }
         };
-
+        new MockUp<CxWebService>() {
+            @Mock
+            void $init(String serverUrl) {
+            }
+            @Mock
+            Boolean isOsaLicenseValid(){
+                return true;
+            }
+        };
 
         DependencyFolder folders = new DependencyFolder("test2", "");
-        OpenSourceAnalyzerService service = new OpenSourceAnalyzerService(null, folders, new RestClient("", null), 0, Logger.getLogger(getClass()));
+        OpenSourceAnalyzerService service = new OpenSourceAnalyzerService(null, folders, new RestClient("", null), 0, Logger.getLogger(getClass()), new CxWebService(null));
 
         service.analyze();
     }
@@ -180,6 +181,9 @@ public class OpenSourceAnalyzerServiceTests {
         OpenSourceAnalyzerService service = new OpenSourceAnalyzerService(null, folders, new RestClient("", null), 0, Logger.getLogger(getClass()), new CxWebService(null));
 
         service.analyze();
+
+        assertTrue(infoMessages.contains("OSA (open source analysis) Run has started"));
+        assertTrue(infoMessages.contains("OSA (open source analysis) Run has finished successfully"));
     }
 
     @Test
@@ -212,8 +216,6 @@ public class OpenSourceAnalyzerServiceTests {
         OpenSourceAnalyzerService service = new OpenSourceAnalyzerService(null, folders, null, 0, Logger.getLogger(getClass()), new CxWebService(null));
 
         service.analyze();
-        
-        assertTrue(infoMessages.contains("OSA (open source analysis) Run has started"));
-        assertTrue(infoMessages.contains("OSA (open source analysis) Run has finished successfully"));
+
     }
 }
