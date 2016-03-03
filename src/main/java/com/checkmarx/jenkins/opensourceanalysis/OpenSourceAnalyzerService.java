@@ -17,12 +17,24 @@ import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+
+import com.checkmarx.jenkins.cryptography.CryptographicCallable;
+import com.checkmarx.jenkins.folder.FoldersScanner;
+import com.checkmarx.jenkins.web.client.RestClient;
+import com.checkmarx.jenkins.web.model.AnalyzeRequest;
+import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryRequest;
+import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
+
 /**
  * @author tsahi
  * @since 02/02/16
  */
 public class OpenSourceAnalyzerService {
 
+    private static final String OSA_RUN_STARTED="OSA (open source analysis) Run has started";
+    private static final String OSA_RUN_ENDED="OSA (open source analysis) Run has finished successfully";
     private DependencyFolder dependencyFolder;
     private AbstractBuild<?, ?> build;
     private RestClient restClient;
@@ -43,15 +55,10 @@ public class OpenSourceAnalyzerService {
 
     public void analyze() throws IOException, InterruptedException {
         try{
-            if (StringUtils.isEmpty(dependencyFolder.getInclude())) {
+            if (!isOsaConfigured()) {
                 return;
             }
-
-            if (!validLicense()){
-                logger.error(NO_LICENSE_ERROR);
-                return;
-            }
-
+            logger.info(OSA_RUN_STARTED);
             Collection<DependencyInfo> dependencies = getDependenciesFromFolders();
             if (dependencies.isEmpty()){
                 logger.info("No dependencies found");
@@ -62,15 +69,15 @@ public class OpenSourceAnalyzerService {
             callAnalyzeApi(hashValues);
             GetOpenSourceSummaryResponse summaryResponse = getOpenSourceSummary();
             printResultsToOutput(summaryResponse);
-
+            logger.info(OSA_RUN_ENDED);
         }
         catch (Exception e){
             logger.error("Open Source Analysis failed:", e);
         }
     }
 
-    private boolean validLicense() {
-        return webServiceClient.isOsaLicenseValid();
+    private boolean isOsaConfigured() {
+        return ! StringUtils.isEmpty(dependencyFolder.getInclude());
     }
 
     private List<String> calculateHash(Collection<DependencyInfo> dependencies) throws IOException, InterruptedException {
@@ -102,6 +109,7 @@ public class OpenSourceAnalyzerService {
         sb.append("vulnerable and outdated: ").append(results.getVulnerableAndOutdated()).append("\n");
         sb.append("vulnerable and updated: ").append(results.getVulnerableAndUpdate()).append("\n");
         sb.append("with no known vulnerabilities: ").append(results.getNoKnownVulnerabilities()).append("\n");
+        sb.append("vulnerability score: ").append(results.getVulnerabilityScore()).append("\n");
         logger.info(sb.toString());
     }
 
@@ -118,9 +126,6 @@ public class OpenSourceAnalyzerService {
                 params.add(param.trim());
             }
         }
-
         return params;
     }
-
-
 }

@@ -1,13 +1,13 @@
 package com.checkmarx.jenkins.web.client;
 
 import java.io.Closeable;
+import java.rmi.ConnectException;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.client.*;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
@@ -18,6 +18,7 @@ import com.checkmarx.jenkins.web.model.AuthenticationRequest;
 import com.checkmarx.jenkins.web.model.CxException;
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryRequest;
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
+import com.sun.mail.iap.ConnectionException;
 
 
 /**
@@ -42,28 +43,31 @@ public class RestClient implements Closeable {
 
     public void analyzeOpenSources(AnalyzeRequest request) {
         Cookie cookie = authenticate();
-		Response response = root.path(ANALYZE_PATH)
+        Invocation invocation = root.path(ANALYZE_PATH)
                 .request()
                 .cookie(cookie)
-                .post(Entity.entity(request, MediaType.APPLICATION_JSON));
-
+                .buildPost(Entity.entity(request, MediaType.APPLICATION_JSON));
+        Response response = invokeRequet(invocation);
         validateResponse(response);
     }
 
 	public GetOpenSourceSummaryResponse getOpenSourceSummary(GetOpenSourceSummaryRequest request) {
         Cookie cookie = authenticate();
-		return root.path(ANALYZE_SUMMARY_PATH)
+        Invocation invocation =  root.path(ANALYZE_SUMMARY_PATH)
 				.resolveTemplate("projectId", request.getProjectId())
                 .request()
                 .cookie(cookie)
-                .get(GetOpenSourceSummaryResponse.class);
+                .buildGet();
+        Response response = invokeRequet(invocation);
+        validateResponse(response);
+        return response.readEntity(GetOpenSourceSummaryResponse.class);
     }
 
     private Cookie authenticate() {
-		Response response = root.path(AUTHENTICATION_PATH)
-                .request()
-                .post(Entity.entity(authenticationRequest, MediaType.APPLICATION_JSON));
-
+        Invocation invocation =  root.path(AUTHENTICATION_PATH)
+                                     .request()
+                                     .buildPost(Entity.entity(authenticationRequest, MediaType.APPLICATION_JSON));
+        Response response = invokeRequet(invocation);
         validateResponse(response);
 
         Map<String, NewCookie> cookiesMap = response.getCookies();
@@ -71,7 +75,16 @@ public class RestClient implements Closeable {
 		Map.Entry<String, NewCookie> cookieEntry = (Map.Entry<String, NewCookie>) cookiesMap.entrySet().toArray()[0];
         return cookieEntry.getValue();
     }
-
+    private Response invokeRequet(Invocation invocation )  {
+        try
+        {
+            return invocation.invoke();
+        }
+        catch (ProcessingException exc)
+        {
+           throw  new WebApplicationException("connection to checkmarx server failed");
+        }
+    }
     private void validateResponse(Response response) {
 		if (response.getStatus() >= 400) {
             CxException cxException = response.readEntity(CxException.class);

@@ -77,4 +77,9 @@ public class GetOpenSourceSummaryResponse {
     public void setMediumVulnerabilityLibraries(String mediumVulnerabilityLibraries) {
         this.mediumVulnerabilityLibraries = mediumVulnerabilityLibraries;
     }
+
+    public String getVulnerabilityScore()
+    {
+        return vulnerabilityScore;
+    }
 }
