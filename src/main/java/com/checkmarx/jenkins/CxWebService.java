@@ -122,6 +122,8 @@ public class CxWebService {
 			throw new AbortException("Checkmarx server was not found on url: " + serverUrl);
 		}
 		CxWSResolverSoap cxWSResolverSoap = cxWSResolver.getCxWSResolverSoap();
+		setClientTimeout((BindingProvider) cxWSResolverSoap, CxConfig.getRequestTimeOutDuration());
+		
 		CxWSResponseDiscovery cxWSResponseDiscovery = cxWSResolverSoap.getWebServiceUrl(CxClientType.JENKINS,
 				WEBSERVICE_API_VERSION);
 		if (!cxWSResponseDiscovery.isIsSuccesfull()) {
@@ -136,13 +138,13 @@ public class CxWebService {
 		
 		cxJenkinsWebServiceSoap = cxJenkinsWebService.getCxJenkinsWebServiceSoap();
 		
-		setClientTimeout(CxConfig.getRequestTimeOutDuration());
+		setClientTimeout((BindingProvider) cxJenkinsWebServiceSoap, CxConfig.getRequestTimeOutDuration());
 	}
 
-	private void setClientTimeout(int seconds) {
+	private void setClientTimeout(BindingProvider provider, int seconds) {
 		logger.debug("Setting connection timeout to " + seconds + " seconds");
 		int milliseconds = seconds * 1000;
-		Map<String, Object> requestContext = ((BindingProvider)cxJenkinsWebServiceSoap).getRequestContext();
+		Map<String, Object> requestContext = provider.getRequestContext();
 		// see https://java.net/jira/browse/JAX_WS-1166
 		requestContext.put("com.sun.xml.internal.ws.connect.timeout", milliseconds);
 		requestContext.put("com.sun.xml.internal.ws.request.timeout", milliseconds);
