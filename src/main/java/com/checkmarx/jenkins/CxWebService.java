@@ -78,6 +78,7 @@ import com.checkmarx.ws.CxWSResolver.CxWSResponseDiscovery;
  */
 public class CxWebService {
 
+	private static final String CHECKMARX_SERVER_WAS_NOT_FOUND_ON_THE_SPECIFIED_ADRESS = "Checkmarx server was not found on the specified adress";
 	private static final int WEBSERVICE_API_VERSION = 1;
 	private static final String CXWSRESOLVER_PATH = "/cxwebinterface/cxwsresolver.asmx";
 	private static final int LCID = 1033; // English
@@ -112,6 +113,8 @@ public class CxWebService {
 			throw new AbortException(message);
 		}
 		URL resolverUrl = new URL(serverUrl + CXWSRESOLVER_PATH);
+		
+		checkServerConnectivity(resolverUrl); 
 
 		logger.debug("Resolver url: " + resolverUrl);
 		CxWSResolver cxWSResolver;
@@ -139,6 +142,25 @@ public class CxWebService {
 		cxJenkinsWebServiceSoap = cxJenkinsWebService.getCxJenkinsWebServiceSoap();
 		
 		setClientTimeout((BindingProvider) cxJenkinsWebServiceSoap, CxConfig.getRequestTimeOutDuration());
+	}
+
+	private void checkServerConnectivity(URL url) throws AbortException {
+		int seconds = CxConfig.getRequestTimeOutDuration();
+		int milliseconds = seconds * 1000;
+		
+		try {
+			HttpURLConnection urlConn;
+			urlConn = (HttpURLConnection) url.openConnection();
+			urlConn.setConnectTimeout(milliseconds);
+			urlConn.setReadTimeout(milliseconds);
+			urlConn.connect();
+			if (urlConn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+				throw new AbortException(CHECKMARX_SERVER_WAS_NOT_FOUND_ON_THE_SPECIFIED_ADRESS);
+			}
+		} catch (IOException e) {
+			logger.debug(CHECKMARX_SERVER_WAS_NOT_FOUND_ON_THE_SPECIFIED_ADRESS , e);
+			throw new AbortException(CHECKMARX_SERVER_WAS_NOT_FOUND_ON_THE_SPECIFIED_ADRESS);
+		}
 	}
 
 	private void setClientTimeout(BindingProvider provider, int seconds) {
