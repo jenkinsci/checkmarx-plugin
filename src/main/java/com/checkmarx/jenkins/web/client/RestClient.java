@@ -72,8 +72,8 @@ public class RestClient implements Closeable {
 
         Map<String, NewCookie> cookiesMap = response.getCookies();
 		@SuppressWarnings("unchecked")
-		Map.Entry<String, NewCookie> cookieEntry = (Map.Entry<String, NewCookie>) cookiesMap.entrySet().toArray()[0];
-        return cookieEntry.getValue();
+        NewCookie cookieEntry =  cookiesMap.get("cxCookie");
+        return cookieEntry;
     }
     private Response invokeRequet(Invocation invocation )  {
         try
