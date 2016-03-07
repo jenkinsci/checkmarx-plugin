@@ -17,5 +17,5 @@
     </entry>
     <entry key="ServerCallRetryNumber">5</entry>
     <!-- requestTimeOutDuration is in seconds -->
-    <entry key="RequestTimeOutDurationSec">30</entry>
+    <entry key="RequestTimeOutDurationSec">60</entry>
 </properties>
