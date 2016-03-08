@@ -40,7 +40,7 @@ public class OpenSourceAnalyzerService {
     private RestClient restClient;
     private long projectId;
     private transient Logger logger;
-    private static final Pattern PARAM_LIST_SPLIT_PATTERN = Pattern.compile(",|$", Pattern.MULTILINE);
+    private static final Pattern PARAM_LIST_SPLIT_PATTERN = Pattern.compile(",|$| ", Pattern.MULTILINE);
     private CxWebService webServiceClient;
     public static final String NO_LICENSE_ERROR = "Open Source Analysis License is not enabled for this project.Please contact your CxSAST Administrator";
 
