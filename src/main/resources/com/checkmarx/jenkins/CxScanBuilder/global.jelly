@@ -1,69 +1,75 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-  <!--
-    This Jelly script is used to produce the global configuration option.
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
+	xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+	<!-- This Jelly script is used to produce the global configuration option. Jenkins uses a set of tag libraries 
+		to provide uniformity in forms. To determine where this tag is defined, first check the namespace URI, and then 
+		look under $JENKINS/views/. For example, <f:section> is defined in $JENKINS/views/lib/form/section.jelly. It's 
+		also often useful to just check other similar scripts to see what tags they use. Views are always organized according 
+		to its owner class, so it should be straightforward to find them. -->
 
-    Jenkins uses a set of tag libraries to provide uniformity in forms.
-    To determine where this tag is defined, first check the namespace URI,
-    and then look under $JENKINS/views/. For example, <f:section> is defined
-    in $JENKINS/views/lib/form/section.jelly.
+	<f:section title="Checkmarx" name="checkmarx">
 
-    It's also often useful to just check other similar scripts to see what
-    tags they use. Views are always organized according to its owner class,
-    so it should be straightforward to find them.
-  -->
+		<f:invisibleEntry>
+			<!-- Used for Internet Explorer cache invalidation -->
+			<f:textbox default="${descriptor.currentTime}" field="timestamp" />
+		</f:invisibleEntry>
 
-    <f:section title="Checkmarx" name="checkmarx">
-    
-    	<f:invisibleEntry>
-            <!-- Used for Internet Explorer cache invalidation -->
-            <f:textbox default="${descriptor.currentTime}" field="timestamp" />
-        </f:invisibleEntry>
+		<f:entry title="Enable TLS/SSL Server Certificate Validation" field="enableCertificateValidation">
+			<f:checkbox default="false" />
+		</f:entry>
 
-        <f:entry title="Enable TLS/SSL Server Certificate Validation" field="enableCertificateValidation">
-            <f:checkbox default="false"/>
-        </f:entry>
+		<f:entry title="Default Server URL" field="serverUrl">
+			<f:textbox />
+		</f:entry>
 
-        <f:entry title="Default Server URL" field="serverUrl">
-            <f:textbox/>
-        </f:entry>
+		<f:entry title="Default Username" field="username">
+			<f:textbox />
+		</f:entry>
 
-        <f:entry title="Default Username" field="username">
-            <f:textbox/>
-        </f:entry>
+		<f:entry title="Default Password" field="password">
+			<f:password />
+		</f:entry>
 
-        <f:entry title="Default Password" field="password">
-            <f:password/>
-        </f:entry>
+		<f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
+			with="serverUrl,username,password,timestamp" />
 
-		<f:validateButton title="Test Connection" progress="Testing..." method="testConnection" with="serverUrl,username,password,timestamp" />
+		<f:entry title="Hide results" field="hideResults">
+			<f:checkbox default="false" />
+		</f:entry>
 
-        <f:entry title="Hide results" field="hideResults">
-            <f:checkbox default="false"/>
-        </f:entry>
+		<f:entry name="jobGlobalStatusOnError" title="Job status when CxSAST scan returns an error:" field="jobGlobalStatusOnError">
+			<f:enum field="jobGlobalStatusOnError">${it.displayName}</f:enum>
+		</f:entry>
 
-	<f:entry name="jobGlobalStatusOnError" title="Job status when CxSAST scan returns an error:"
-		field="jobGlobalStatusOnError">
-		  <f:enum field="jobGlobalStatusOnError">${it.displayName}</f:enum>
-	</f:entry>
+		<f:optionalBlock title="Set vulnerability settings for all jobs" inline="true"
+			field="forcingVulnerabilityThresholdEnabled">
 
-        <f:optionalBlock title="Set vulnerability threshold enforcement values for all jobs" inline="true" field="forcingVulnerabilityThresholdEnabled">
-            <f:entry title="High severity vulnerabilities threshold" field="highThresholdEnforcement">
-                <f:number clazz="positive-number" min="0" step="1" default="0"/>
-            </f:entry>
-            <f:entry title="Medium severity vulnerabilities threshold" field="mediumThresholdEnforcement">
-                <f:number clazz="positive-number" min="0" step="1" default="0"/>
-            </f:entry>
-            <f:entry title="Low severity vulnerabilities threshold" field="lowThresholdEnforcement">
-                <f:number clazz="positive-number" min="0" step="1" default="0"/>
-            </f:entry>
-        </f:optionalBlock>
+			<f:entry title="Lock global vulnerability settings for all scans / jobs" field="lockVulnerabilitySettings">
+				<f:checkbox default="false" />
+			</f:entry>
 
-        <f:optionalBlock title="Set job scan timeout threshold" inline="true" field="scanTimeOutEnabled">
-                    <f:entry title="Scan timeout (hours)" field="scanTimeoutDuration">
-                        <f:number clazz="positive-number" min="0" step="1" default="1"/>
-                    </f:entry>
-        </f:optionalBlock>
-    </f:section>
+			<f:entry title="Build status when results exceed threshold:" field="jobGlobalStatusOnThresholdViolation">
+				<f:enum>${it.displayName}</f:enum>
+			</f:entry>
 
+			<f:entry title="High severity vulnerabilities threshold" field="highThresholdEnforcement">
+				<f:number clazz="positive-number" min="0" step="1" default="0" />
+			</f:entry>
+
+			<f:entry title="Medium severity vulnerabilities threshold" field="mediumThresholdEnforcement">
+				<f:number clazz="positive-number" min="0" step="1" default="0" />
+			</f:entry>
+			<f:entry title="Low severity vulnerabilities threshold" field="lowThresholdEnforcement">
+				<f:number clazz="positive-number" min="0" step="1" default="0" />
+			</f:entry>
+		</f:optionalBlock>
+
+		<f:optionalBlock title="Set job scan timeout threshold" inline="true" field="scanTimeOutEnabled">
+			<f:entry title="Scan timeout (hours)" field="scanTimeoutDuration">
+				<f:number clazz="positive-number" min="0" step="1" default="1" />
+			</f:entry>
+		</f:optionalBlock>
+
+	</f:section>
+	
 </j:jelly>

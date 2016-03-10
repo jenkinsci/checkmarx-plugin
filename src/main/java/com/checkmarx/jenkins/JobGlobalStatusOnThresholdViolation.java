@@ -1,11 +1,12 @@
 package com.checkmarx.jenkins;
 
-public enum JobStatusOnError {
-	GLOBAL("Use Global Settings"), FAILURE("Failure"), UNSTABLE("Unstable");
+public enum JobGlobalStatusOnThresholdViolation {
+
+	FAILURE("Failure"), UNSTABLE("Unstable");
 
 	private final String displayName;
 
-	JobStatusOnError(String displayName) {
+	JobGlobalStatusOnThresholdViolation(String displayName) {
 		this.displayName = displayName;
 	}
 
