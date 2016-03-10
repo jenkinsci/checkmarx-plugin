@@ -191,9 +191,21 @@ public class CxScanBuilder extends Builder {
         this.generatePdfReport =  generatePdfReport;
         this.thresholdSettings = thresholdSettings;
         this.vulnerabilityThresholdResult = vulnerabilityThresholdResult;
+        
+        init();
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////
+    private void init() {
+		updateJobOnGlobalConfigChange();
+	}
+
+	private void updateJobOnGlobalConfigChange() {
+		if(!getDescriptor().isForcingVulnerabilityThresholdEnabled() && shouldUseGlobalThreshold()){
+			vulnerabilityThresholdEnabled = false;
+		}
+	}
+
+	//////////////////////////////////////////////////////////////////////////////////////
     // Configuration fields getters
     //////////////////////////////////////////////////////////////////////////////////////
 
