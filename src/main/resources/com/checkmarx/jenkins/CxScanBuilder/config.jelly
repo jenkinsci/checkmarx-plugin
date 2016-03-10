@@ -105,60 +105,7 @@
 	<!-- -= Synchronous Mode =- -->
 
 	<j:choose>
-		<j:when test="${!descriptor.forcingVulnerabilityThresholdEnabled || !descriptor.lockVulnerabilitySettings}">
-
-			<f:optionalBlock title="Enable synchronous mode" inline="true" field="waitForResultsEnabled"
-				checked="${instance==null?true:instance.waitForResultsEnabled}">
-				<f:nested>
-					<f:optionalBlock title="Enable vulnerability threshold" inline="true"
-						field="vulnerabilityThresholdEnabled">
-						<f:radioBlock checked="${instance.getThresholdSettings().equals('global')}" inline="true" name="thresholdSettings"
-							title="Use Global Settings (${descriptor.JobGlobalStatusOnThresholdViolation.displayName})" value="global">
-							<f:nested>
-								<f:entry title="Build status when results exceed threshold:">
-									<f:readOnlyTextbox value="${descriptor.JobGlobalStatusOnThresholdViolation.displayName}" />
-								</f:entry>
-
-								<f:entry title="High severity vulnerabilities threshold">
-									<f:readOnlyTextbox value="${descriptor.highThresholdEnforcement}" />
-								</f:entry>
-								<f:entry title="Medium severity vulnerabilities threshold">
-									<f:readOnlyTextbox value="${descriptor.mediumThresholdEnforcement}" />
-								</f:entry>
-								<f:entry title="Low severity vulnerabilities threshold">
-									<f:readOnlyTextbox value="${descriptor.lowThresholdEnforcement}" />
-								</f:entry>
-							</f:nested>
-						</f:radioBlock>
-						<f:radioBlock checked="${instance.getThresholdSettings().equals('job')}" inline="true" name="thresholdSettings"
-							title="Specific Scan settings" value="job">
-							<f:nested>
-								<f:entry title="Build status when results exceed threshold:" field="vulnerabilityThresholdResult">
-									<f:select />
-								</f:entry>
-								<f:entry title="High severity vulnerabilities threshold" field="highThreshold">
-									<f:number clazz="positive-number" min="0" step="1" default="0" />
-								</f:entry>
-								<f:entry title="Medium severity vulnerabilities threshold" field="mediumThreshold">
-									<f:number clazz="positive-number" min="0" step="1" default="0" />
-								</f:entry>
-								<f:entry title="Low severity vulnerabilities threshold" field="lowThreshold">
-									<f:number clazz="positive-number" min="0" step="1" default="0" />
-								</f:entry>
-							</f:nested>
-						</f:radioBlock>
-					</f:optionalBlock>
-
-					<f:entry title="Generate PDF report" field="generatePdfReport">
-						<f:checkbox />
-					</f:entry>
-				</f:nested>
-			</f:optionalBlock>
-			<f:description>Synchronous mode allows viewing scan results in Jenkins and setting thresholds
-			</f:description>
-		</j:when>
-
-		<j:otherwise>
+		<j:when test="${descriptor.forcingVulnerabilityThresholdEnabled and descriptor.lockVulnerabilitySettings}">
 			<f:entry title="Build status when results exceed threshold:">
 				<f:readOnlyTextbox value="Setting Locked by Administrator (${descriptor.JobGlobalStatusOnThresholdViolation})" />
 			</f:entry>
@@ -176,6 +123,78 @@
 			<f:entry title="Generate PDF report" field="generatePdfReport">
 				<f:checkbox />
 			</f:entry>
+		</j:when>
+
+		<j:otherwise>
+			<f:optionalBlock title="Enable synchronous mode" inline="true" field="waitForResultsEnabled"
+				checked="${instance==null?true:instance.waitForResultsEnabled}">
+				<f:description>Synchronous mode allows viewing scan results in Jenkins and setting thresholds
+				</f:description>
+
+				<f:optionalBlock title="Enable vulnerability threshold" inline="true"
+					field="vulnerabilityThresholdEnabled">
+
+					<j:choose>
+						<j:when test="${descriptor.forcingVulnerabilityThresholdEnabled}">
+
+							<f:radioBlock checked="${instance.getThresholdSettings() == null || instance.getThresholdSettings().equals('global')}" inline="true"
+								name="thresholdSettings" title="Use Global Settings (${descriptor.JobGlobalStatusOnThresholdViolation.displayName})"
+								value="global">
+								<f:nested>
+									<f:entry title="Build status when results exceed threshold:">
+										<f:readOnlyTextbox value="${descriptor.JobGlobalStatusOnThresholdViolation.displayName}" />
+									</f:entry>
+
+									<f:entry title="High severity vulnerabilities threshold">
+										<f:readOnlyTextbox value="${descriptor.highThresholdEnforcement}" />
+									</f:entry>
+									<f:entry title="Medium severity vulnerabilities threshold">
+										<f:readOnlyTextbox value="${descriptor.mediumThresholdEnforcement}" />
+									</f:entry>
+									<f:entry title="Low severity vulnerabilities threshold">
+										<f:readOnlyTextbox value="${descriptor.lowThresholdEnforcement}" />
+									</f:entry>
+								</f:nested>
+							</f:radioBlock>
+							<f:radioBlock checked="${instance.getThresholdSettings().equals('job')}" inline="true"
+								name="thresholdSettings" title="Specific Scan settings" value="job">
+								<f:nested>
+									<f:entry title="Build status when results exceed threshold:" field="vulnerabilityThresholdResult">
+										<f:select />
+									</f:entry>
+									<f:entry title="High severity vulnerabilities threshold" field="highThreshold">
+										<f:number clazz="positive-number" min="0" step="1" default="0" />
+									</f:entry>
+									<f:entry title="Medium severity vulnerabilities threshold" field="mediumThreshold">
+										<f:number clazz="positive-number" min="0" step="1" default="0" />
+									</f:entry>
+									<f:entry title="Low severity vulnerabilities threshold" field="lowThreshold">
+										<f:number clazz="positive-number" min="0" step="1" default="0" />
+									</f:entry>
+								</f:nested>
+							</f:radioBlock>
+						</j:when>
+						<j:otherwise>
+							<f:description>Global settings option is disabled</f:description>
+							<f:entry title="Build status when results exceed threshold:" field="vulnerabilityThresholdResult">
+								<f:select />
+							</f:entry>
+							<f:entry title="High severity vulnerabilities threshold" field="highThreshold">
+								<f:number clazz="positive-number" min="0" step="1" default="0" />
+							</f:entry>
+							<f:entry title="Medium severity vulnerabilities threshold" field="mediumThreshold">
+								<f:number clazz="positive-number" min="0" step="1" default="0" />
+							</f:entry>
+							<f:entry title="Low severity vulnerabilities threshold" field="lowThreshold">
+								<f:number clazz="positive-number" min="0" step="1" default="0" />
+							</f:entry>
+						</j:otherwise>
+					</j:choose>
+				</f:optionalBlock>
+				<f:entry title="Generate PDF report" field="generatePdfReport">
+					<f:checkbox />
+				</f:entry>
+			</f:optionalBlock>
 		</j:otherwise>
 
 	</j:choose>
