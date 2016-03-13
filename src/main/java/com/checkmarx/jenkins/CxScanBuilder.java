@@ -129,6 +129,10 @@ public class CxScanBuilder extends Builder {
 
 	private JobStatusOnError jobStatusOnError;
 
+	private String thresholdSettings;
+
+	private Result vulnerabilityThresholdResult;
+
     //////////////////////////////////////////////////////////////////////////////////////
     // Constructors
     //////////////////////////////////////////////////////////////////////////////////////
@@ -160,9 +164,10 @@ public class CxScanBuilder extends Builder {
                          int mediumThreshold,
                          int lowThreshold,
                          boolean generatePdfReport,
-                         @Nullable String includeOpenSourceFolders,
-                         @Nullable String excludeOpenSourceFolders
-                         ) {
+                         String thresholdSettings,
+                         Result vulnerabilityThresholdResult,
+						 @Nullable String includeOpenSourceFolders,
+                         @Nullable String excludeOpenSourceFolders) {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
         this.username = username;
@@ -190,9 +195,23 @@ public class CxScanBuilder extends Builder {
         this.generatePdfReport =  generatePdfReport;
         this.includeOpenSourceFolders = includeOpenSourceFolders;
         this.excludeOpenSourceFolders = excludeOpenSourceFolders;
+        this.thresholdSettings = thresholdSettings;
+        this.vulnerabilityThresholdResult = vulnerabilityThresholdResult;
+        
+        init();
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////
+    private void init() {
+		updateJobOnGlobalConfigChange();
+	}
+
+	private void updateJobOnGlobalConfigChange() {
+		if(!getDescriptor().isForcingVulnerabilityThresholdEnabled() && shouldUseGlobalThreshold()){
+			vulnerabilityThresholdEnabled = false;
+		}
+	}
+
+	//////////////////////////////////////////////////////////////////////////////////////
     // Configuration fields getters
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -313,7 +332,24 @@ public class CxScanBuilder extends Builder {
     public boolean isGeneratePdfReport() {
         return generatePdfReport;
     }
+    
 
+	public void setThresholdSettings(String thresholdSettings) {
+		this.thresholdSettings = thresholdSettings;
+	}
+	
+	public String getThresholdSettings(){
+		return thresholdSettings;
+	}
+
+	public void setVulnerabilityThresholdResult(Result result){
+		this.vulnerabilityThresholdResult = result;
+	}
+	
+	public Result getVulnerabilityThresholdResult(){
+		return vulnerabilityThresholdResult;
+	}
+	
     @Override
     public boolean perform(final AbstractBuild<?, ?> build,
                            final Launcher launcher,
@@ -331,13 +367,11 @@ public class CxScanBuilder extends Builder {
 
             initLogger(checkmarxBuildDir, listener, instanceLoggerSuffix(build));
 
-            listener.started(null);
             instanceLogger.info("Checkmarx Jenkins plugin version: " + CxConfig.version());
 
             if (isSkipScan(build)) {
                 instanceLogger.info("Checkmarx scan skipped since the build was triggered by SCM. " +
                         "Visit plugin configuration page to disable this skip.");
-                listener.finished(Result.SUCCESS);
                 return true;
             }
 
@@ -347,20 +381,16 @@ public class CxScanBuilder extends Builder {
 
             String serverUrlToUseNotNull = serverUrlToUse != null ? serverUrlToUse : "";
 
-			cxWebService = new CxWebService(serverUrlToUseNotNull, instanceLoggerSuffix(build));
+            cxWebService = new CxWebService(serverUrlToUseNotNull, instanceLoggerSuffix(build));	
             cxWebService.login(usernameToUse, passwordToUse);
-
 
             instanceLogger.info("Checkmarx server login successful");
 
 			cxWSResponseRunID = submitScan(build, cxWebService, listener);
             instanceLogger.info("\nScan job submitted successfully\n");
 
-
-
             if (!isWaitForResultsEnabled() && !descriptor.isForcingVulnerabilityThresholdEnabled()) {
                 analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService);
-                listener.finished(Result.SUCCESS);
                 return true;
             }
 
@@ -368,7 +398,6 @@ public class CxScanBuilder extends Builder {
 
             if (scanId == 0) {
                 build.setResult(Result.UNSTABLE);
-                listener.finished(Result.UNSTABLE);
                 return true;
             }
 
@@ -386,22 +415,23 @@ public class CxScanBuilder extends Builder {
             CxScanResult cxScanResult = new CxScanResult(build, instanceLoggerSuffix(build), serverUrlToUse);
             cxScanResult.readScanXMLReport(xmlReportFile);
             build.addAction(cxScanResult);
+            
+            ThresholdConfig thresholdConfig = createThresholdConfig();
 
-			if ((descriptor.isForcingVulnerabilityThresholdEnabled() || isVulnerabilityThresholdEnabled()) && isThresholdCrossed(cxScanResult)) {
-                    build.setResult(Result.UNSTABLE); // Marks the build result as UNSTABLE
-                    listener.finished(Result.UNSTABLE);
-                    return true;
-            }
+			if ((descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings() || isVulnerabilityThresholdEnabled())
+					&& isThresholdCrossed(thresholdConfig, cxScanResult)) {
+
+				build.setResult(thresholdConfig.getBuildStatus());
+				return true;
+			}
 
             analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService);
 
-            listener.finished(Result.SUCCESS);
             return true;
 		} catch (IOException | WebServiceException e) {
-			instanceLogger.error(e.getMessage(), e);
 			if (useUnstableOnError(descriptor)) {
 				build.setResult(Result.UNSTABLE);
-				listener.finished(Result.UNSTABLE);
+				instanceLogger.error(e.getMessage(), e);
 				return true;
 			} else {
 				throw e;
@@ -430,6 +460,30 @@ public class CxScanBuilder extends Builder {
 		}
     }
 
+	private ThresholdConfig createThresholdConfig() {
+		ThresholdConfig config = new ThresholdConfig();
+		
+		if (shouldUseGlobalThreshold()) {
+			final DescriptorImpl descriptor = getDescriptor();
+			config.setHighSeverity( descriptor.getHighThresholdEnforcement());
+			config.setMediumSeverity( descriptor.getMediumThresholdEnforcement());
+			config.setLowSeverity( descriptor.getLowThresholdEnforcement());
+			config.setBuildStatus(Result.fromString(descriptor.getJobGlobalStatusOnThresholdViolation().name()));
+		} else {
+			config.setHighSeverity(getHighThreshold());
+			config.setMediumSeverity(getMediumThreshold());
+			config.setLowSeverity (getLowThreshold());
+			config.setBuildStatus(getVulnerabilityThresholdResult());
+		}
+
+		return config;
+	}
+
+	private boolean shouldUseGlobalThreshold() {
+		final DescriptorImpl descriptor = getDescriptor();
+		return descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings() || "global".equals(getThresholdSettings());
+	}
+
     /**
 	 * Checks if job should fail with <code>UNSTABLE</code> status instead of <code>FAILED</code>
 	 *
@@ -443,55 +497,26 @@ public class CxScanBuilder extends Builder {
 						.getJobGlobalStatusOnError()));
 	}
 
-    private boolean isThresholdCrossed(@NotNull final CxScanResult cxScanResult)
-    {
-        @Nullable
-        final DescriptorImpl descriptor = getDescriptor();
-		boolean highThresholdCrossed;
-		boolean mediumThresholdCrossed;
-		boolean lowThresholdCrossed;
+	private boolean isThresholdCrossed(ThresholdConfig thresholdConfig, @NotNull final CxScanResult cxScanResult) {
+		logFoundVulnerabilities("high", cxScanResult.getHighCount(), thresholdConfig.getHighSeverity());
+		logFoundVulnerabilities("medium", cxScanResult.getMediumCount(), thresholdConfig.getMediumSeverity());
+		logFoundVulnerabilities("low", cxScanResult.getLowCount(), thresholdConfig.getLowSeverity());
 
-        if (descriptor!=null && descriptor.isForcingVulnerabilityThresholdEnabled())
-        {
-            instanceLogger.info("Number of high severity vulnerabilities: " +
-                    cxScanResult.getHighCount() + " stability threshold: " + descriptor.getHighThresholdEnforcement());
+		return cxScanResult.getHighCount() > thresholdConfig.getHighSeverity()
+				|| cxScanResult.getMediumCount() > thresholdConfig.getMediumSeverity()
+				|| cxScanResult.getLowCount() > thresholdConfig.getLowSeverity();
+	}
 
-            instanceLogger.info("Number of medium severity vulnerabilities: " +
-                    cxScanResult.getMediumCount() + " stability threshold: " + descriptor.getMediumThresholdEnforcement());
+	private void logFoundVulnerabilities(String severity, int actualNumber, int configuredHighThreshold) {
+		instanceLogger.info("Number of " + severity + " severity vulnerabilities: " + actualNumber + " stability threshold: "
+				+ configuredHighThreshold);
+	}
 
-            instanceLogger.info("Number of low severity vulnerabilities: " +
-                    cxScanResult.getLowCount() + " stability threshold: " + descriptor.getLowThresholdEnforcement());
-
-			highThresholdCrossed = cxScanResult.getHighCount() > descriptor.getHighThresholdEnforcement();
-			mediumThresholdCrossed = cxScanResult.getMediumCount() > descriptor.getMediumThresholdEnforcement();
-			lowThresholdCrossed = cxScanResult.getLowCount() > descriptor.getLowThresholdEnforcement();
-
-		} else {
-            instanceLogger.info("Number of high severity vulnerabilities: " +
-                    cxScanResult.getHighCount() + " stability threshold: " + this.getHighThreshold());
-
-            instanceLogger.info("Number of medium severity vulnerabilities: " +
-                    cxScanResult.getMediumCount() + " stability threshold: " + this.getMediumThreshold());
-
-            instanceLogger.info("Number of low severity vulnerabilities: " +
-                    cxScanResult.getLowCount() + " stability threshold: " + this.getLowThreshold());
-
-			highThresholdCrossed = cxScanResult.getHighCount() > getHighThreshold();
-			mediumThresholdCrossed = cxScanResult.getMediumCount() > getMediumThreshold();
-			lowThresholdCrossed = cxScanResult.getLowCount() > getLowThreshold();
-
-		}
-        return highThresholdCrossed || mediumThresholdCrossed || lowThresholdCrossed;
-    }
-
-
-    private String instanceLoggerSuffix(final AbstractBuild<?, ?> build)
-    {
+    private String instanceLoggerSuffix(final AbstractBuild<?, ?> build) {
         return build.getProject().getDisplayName() + "-" + build.getDisplayName();
     }
 
-    private void initLogger(final File checkmarxBuildDir, final BuildListener listener, final String loggerSuffix)
-    {
+    private void initLogger(final File checkmarxBuildDir, final BuildListener listener, final String loggerSuffix) {
         instanceLogger = CxLogUtils.loggerWithSuffix(getClass(), loggerSuffix);
         final WriterAppender writerAppender = new WriterAppender(new PatternLayout("%m%n"),listener.getLogger());
         writerAppender.setThreshold(Level.INFO);
@@ -503,8 +528,7 @@ public class CxScanBuilder extends Builder {
             fileAppender = new FileAppender(new PatternLayout("%C: [%d] %-5p: %m%n"),logFileName);
             fileAppender.setThreshold(Level.DEBUG);
             parentLogger.addAppender(fileAppender);
-        } catch (IOException e)
-        {
+        } catch (IOException e) {
             LOGGER.warn("Could not open log file for writing: " + logFileName);
             LOGGER.debug(e);
         }
@@ -746,8 +770,11 @@ public class CxScanBuilder extends Builder {
 	    private int mediumThresholdEnforcement;
 	    private int lowThresholdEnforcement;
 		private JobGlobalStatusOnError jobGlobalStatusOnError;
+		private JobGlobalStatusOnError jobGlobalStatusOnThresholdViolation = JobGlobalStatusOnError.FAILURE;
         private boolean scanTimeOutEnabled;
         private int scanTimeoutDuration;
+        private boolean lockVulnerabilitySettings = true;
+        
         private final Pattern msGuid = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
 
 		public DescriptorImpl() {
@@ -789,8 +816,6 @@ public class CxScanBuilder extends Builder {
 	    public void setHideResults(boolean hideResults) {
 	        this.hideResults = hideResults;
 	    }
-
-
 
 	    public boolean isEnableCertificateValidation() {
 	        return enableCertificateValidation;
@@ -947,7 +972,7 @@ public class CxScanBuilder extends Builder {
 			// timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 	        CxWebService cxWebService = null;
 	        try {
-	            cxWebService = new CxWebService(serverUrl);
+	        	cxWebService = new CxWebService(serverUrl);
 	        } catch (Exception e) {
 				logger.debug(e);
 	            return FormValidation.error("Invalid system URL");
@@ -1143,15 +1168,13 @@ public class CxScanBuilder extends Builder {
 	     */
 
 		public ListBoxModel doFillGroupIdItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
-				@QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String timestamp)
-	    {
+				@QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String timestamp) {
 	        // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 	        ListBoxModel listBoxModel = new ListBoxModel();
 	        try {
 	            final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
 	            final List<Group> groups = cxWebService.getAssociatedGroups();
-	            for(Group group : groups)
-	            {
+	            for(Group group : groups) {
 	                listBoxModel.add(new ListBoxModel.Option(group.getGroupName(),group.getID()));
 	            }
 
@@ -1166,6 +1189,20 @@ public class CxScanBuilder extends Builder {
 	        }
 
 	    }
+		
+		public ListBoxModel doFillVulnerabilityThresholdResultItems() {
+			ListBoxModel listBoxModel = new ListBoxModel();
+
+			for (JobStatusOnError status : JobStatusOnError.values()) {
+				if (status != JobStatusOnError.GLOBAL) {
+					listBoxModel.add(new ListBoxModel.Option(status.getDisplayName(), status.name()));
+				}
+			}
+
+			return listBoxModel;
+		}
+		
+		
 
 		/*
 		 * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
@@ -1284,7 +1321,22 @@ public class CxScanBuilder extends Builder {
 		public void setJobGlobalStatusOnError(JobGlobalStatusOnError jobGlobalStatusOnError) {
 			this.jobGlobalStatusOnError = (null == jobGlobalStatusOnError) ? JobGlobalStatusOnError.FAILURE : jobGlobalStatusOnError;
 		}
+		
+		public JobGlobalStatusOnError getJobGlobalStatusOnThresholdViolation() {
+			return jobGlobalStatusOnThresholdViolation;
+		}
 
+		public void setJobGlobalStatusOnThresholdViolation(JobGlobalStatusOnError jobGlobalStatusOnThresholdViolation) {
+			this.jobGlobalStatusOnThresholdViolation = jobGlobalStatusOnThresholdViolation;
+		}
+
+		public boolean isLockVulnerabilitySettings() {
+			return lockVulnerabilitySettings;
+		}
+
+		public void setLockVulnerabilitySettings(boolean lockVulnerabilitySettings) {
+			this.lockVulnerabilitySettings = lockVulnerabilitySettings;
+		}
 	}
 
 }

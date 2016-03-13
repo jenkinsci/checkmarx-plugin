@@ -6,10 +6,13 @@ import java.util.Properties;
 import jenkins.model.Jenkins;
 
 /**
- * Configuration class that loads its values from cxconfig.xml file located in the classpath
+ * Configuration class that loads its values from cxconfig.xml file located in
+ * the classpath
  */
 public class CxConfig {
 
+	private static final String REQUEST_TIME_OUT_DURATION_SEC = "RequestTimeOutDurationSec";
+	private static final String SERVER_CALL_RETRY_NUMBER = "ServerCallRetryNumber";
 	private static Properties configuration;
 	private static final String CONFIGURATION_MAX_ZIP_SIZE_KEY = "MaxZipSizeBytes";
 	private static final String CONFIGURATION_DEFAULT_FILTER_PATTERN_KEY = "DefaultFilterPattern";
@@ -41,4 +44,11 @@ public class CxConfig {
 		return Jenkins.getInstance().getPluginManager().getPlugin(CxPlugin.class).getVersion();
 	}
 
+	public static int getServerCallRetryNumber() {
+		return Integer.parseInt(configuration.getProperty(SERVER_CALL_RETRY_NUMBER));
+	}
+
+	public static int getRequestTimeOutDuration() {
+		return Integer.parseInt(configuration.getProperty(REQUEST_TIME_OUT_DURATION_SEC));
+	}
 }
