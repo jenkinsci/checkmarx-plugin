@@ -304,6 +304,7 @@ public class CxScanBuilder extends Builder {
     }
 
     public boolean isVulnerabilityThresholdEnabled() {
+    	updateJobOnGlobalConfigChange();
         return vulnerabilityThresholdEnabled;
     }
 
@@ -775,7 +776,7 @@ public class CxScanBuilder extends Builder {
         private int scanTimeoutDuration;
         private boolean lockVulnerabilitySettings = true;
         
-        private final Pattern msGuid = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
+        private final transient Pattern msGuid = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
 
 		public DescriptorImpl() {
 			load();
