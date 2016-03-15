@@ -372,7 +372,7 @@ public class CxScanBuilder extends Builder {
 			cxWSResponseRunID = submitScan(build, cxWebService, listener);
             instanceLogger.info("\nScan job submitted successfully\n");
 
-            if (!isWaitForResultsEnabled() && !descriptor.isForcingVulnerabilityThresholdEnabled()) {
+            if (!isWaitForResultsEnabled() && !(descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings())) {
                 return true;
             }
 
