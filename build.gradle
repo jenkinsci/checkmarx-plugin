@@ -86,7 +86,11 @@ jenkinsPlugin {
 	// the output directory for the localizer task relative to the project root, defaults to the value shown
 	localizerOutputDir = "${project.buildDir}/generated-src/localizer"
 
-	developers {
+	developers {	
+		developer {
+			id 'checkmarxsupport'
+			name 'Checkmarx Support'
+		}
 		developer {
 			id 'sergeyk'
 			name 'Sergey Kadaner'
