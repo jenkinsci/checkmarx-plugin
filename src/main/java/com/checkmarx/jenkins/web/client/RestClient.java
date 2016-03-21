@@ -29,7 +29,7 @@ public class RestClient implements Closeable {
     private static final String ROOT_PATH = "CxRestAPI/api";
     private static final String AUTHENTICATION_PATH = "auth/login";
     private static final String ANALYZE_SUMMARY_PATH = "projects/{projectId}/opensourceanalysis/summaryresults";
-    private static final String ANALYZE_PATH = "projects/opensourcesummary";
+    private static final String ANALYZE_PATH = "projects/{projectId}/opensourcesummary";
     private static final String FAILED_TO_CONNECT_CX_SERVER_ERROR = "connection to checkmarx server failed";
 
     private AuthenticationRequest authenticationRequest;
@@ -45,6 +45,7 @@ public class RestClient implements Closeable {
     public void analyzeOpenSources(AnalyzeRequest request) {
         Cookie cookie = authenticate();
         Invocation invocation = root.path(ANALYZE_PATH)
+                .resolveTemplate("projectId", request.getProjectId())
                 .request()
                 .cookie(cookie)
                 .buildPost(Entity.entity(request, MediaType.APPLICATION_JSON));
