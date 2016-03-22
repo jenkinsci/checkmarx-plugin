@@ -35,7 +35,7 @@ public class RestClientTests {
             }
             @Mock
             Map<String, NewCookie> getCookies(){
-                return ImmutableMap.of("cxCookie",new NewCookie("",""));
+                return ImmutableMap.of("cxCookie",new NewCookie("",""), "CXCSRFToken",new NewCookie("",""));
             }
 
         };

@@ -2,6 +2,7 @@ package com.checkmarx.jenkins.web.client;
 
 import java.io.Closeable;
 import java.rmi.ConnectException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -31,6 +32,8 @@ public class RestClient implements Closeable {
     private static final String ANALYZE_SUMMARY_PATH = "projects/{projectId}/opensourceanalysis/summaryresults";
     private static final String ANALYZE_PATH = "projects/{projectId}/opensourcesummary";
     private static final String FAILED_TO_CONNECT_CX_SERVER_ERROR = "connection to checkmarx server failed";
+    private static final String CX_COOKIE = "cxCookie";
+    private static final String CSRF_COOKIE = "CXCSRFToken";
 
     private AuthenticationRequest authenticationRequest;
     private Client client;
@@ -43,39 +46,40 @@ public class RestClient implements Closeable {
     }
 
     public void analyzeOpenSources(AnalyzeRequest request) {
-        Cookie cookie = authenticate();
+        Map<String, NewCookie> cookies = authenticate();
         Invocation invocation = root.path(ANALYZE_PATH)
                 .resolveTemplate("projectId", request.getProjectId())
                 .request()
-                .cookie(cookie)
+                .cookie(cookies.get(CX_COOKIE))
+                .cookie(CSRF_COOKIE, cookies.get(CSRF_COOKIE).getValue())
+                .header(CSRF_COOKIE, cookies.get(CSRF_COOKIE).getValue())
                 .buildPost(Entity.entity(request, MediaType.APPLICATION_JSON));
         Response response = invokeRequet(invocation);
         validateResponse(response);
     }
 
     public GetOpenSourceSummaryResponse getOpenSourceSummary(GetOpenSourceSummaryRequest request) {
-        Cookie cookie = authenticate();
+        Map<String, NewCookie> cookies = authenticate();
         Invocation invocation = root.path(ANALYZE_SUMMARY_PATH)
                 .resolveTemplate("projectId", request.getProjectId())
                 .request()
-                .cookie(cookie)
+                .cookie(cookies.get(CX_COOKIE))
+                .cookie(CSRF_COOKIE, cookies.get(CSRF_COOKIE).getValue())
+                .header(CSRF_COOKIE, cookies.get(CSRF_COOKIE).getValue())
                 .buildGet();
         Response response = invokeRequet(invocation);
         validateResponse(response);
         return response.readEntity(GetOpenSourceSummaryResponse.class);
     }
 
-    private Cookie authenticate() {
+    private Map<String, NewCookie> authenticate() {
         Invocation invocation = root.path(AUTHENTICATION_PATH)
                 .request()
                 .buildPost(Entity.entity(authenticationRequest, MediaType.APPLICATION_JSON));
         Response response = invokeRequet(invocation);
         validateResponse(response);
 
-        Map<String, NewCookie> cookiesMap = response.getCookies();
-        @SuppressWarnings("unchecked")
-        NewCookie cookieEntry = cookiesMap.get("cxCookie");
-        return cookieEntry;
+        return response.getCookies();
     }
 
     private Response invokeRequet(Invocation invocation) {
