@@ -33,6 +33,7 @@ import javax.xml.ws.WebServiceException;
 import jenkins.model.Jenkins;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.hamcrest.Matchers;
 import org.jetbrains.annotations.NotNull;
@@ -183,6 +184,29 @@ public class CxWebService {
 		return cxWSResponseScanStatus;
 	}
 
+/**
+ * Simple convenience method to avoid spamming the console with duplicate messages.
+ * This method will only log a new message if it does not equal the previous message.
+ * This method is not responsible for tracking the messages, and expects them to
+ * be passed in as parameters.
+ * 
+ * @param level - configurable Logger level
+ * @param prevMsg - The message to compare the new message against.
+ * @param newMsg - The message to log, if new
+ * @return - When new, the message that was just logged.  Otherwise, the single message is returned (new=old)
+ * 
+ */
+	private String cleanLogger(Level level, String prevMsg, String newMsg) {
+		//only log if new != old
+		if (!newMsg.equals(prevMsg)) {
+			logger.log(level, newMsg);
+		}
+
+		//if new, return the message logged
+		//otherwise, just returns the msg (because new=old)
+		return newMsg;
+	}
+
 	public long trackScanProgress(final CxWSResponseRunID cxWSResponseRunID, final String username,
 			final String password, final boolean scanTimeOutEnabled, final long scanTimeoutDuration)
 			throws AbortException, InterruptedException {
@@ -192,7 +216,9 @@ public class CxWebService {
 		int retryAttempts = CxConfig.getServerCallRetryNumber();
 
 		boolean locReported = false;
+		String previousMessage = "";
 		while (true) {
+			String newMessage = "";
 			try {
 				Thread.sleep(10L * 1000);
 
@@ -207,7 +233,8 @@ public class CxWebService {
 				switch (status.getCurrentStatus()) {
 				// In progress states
 				case WAITING_TO_PROCESS:
-					logger.info("Scan job waiting for processing");
+					newMessage = "Scan job waiting for processing";
+					previousMessage = cleanLogger(Level.INFO, previousMessage, newMessage);
 					break;
 
 				case QUEUED:
@@ -215,7 +242,8 @@ public class CxWebService {
 						logger.info("Source contains: " + status.getLOC() + " lines of code.");
 						locReported = true;
 					}
-					logger.info("Scan job queued at position: " + status.getQueuePosition());
+					newMessage = "Scan job queued at position: " + status.getQueuePosition();
+					previousMessage = cleanLogger(Level.INFO, previousMessage, newMessage);
 					break;
 
 				case UNZIPPING:
@@ -227,9 +255,12 @@ public class CxWebService {
 					break;
 
 				case WORKING:
-					logger.info("Scanning: " + status.getStageMessage() + " " + status.getStepDetails()
+
+					newMessage = "Scanning: " + status.getStageMessage() + " " + status.getStepDetails()
 							+ " (Current stage progress: " + status.getCurrentStagePercent() + "%, Total progress: "
-							+ status.getTotalPercent() + "%)");
+							+ status.getTotalPercent() + "%)";
+
+					previousMessage = cleanLogger(Level.INFO, previousMessage, newMessage);
 					break;
 
 				// End of progress states
@@ -299,6 +330,7 @@ public class CxWebService {
 			InterruptedException {
 		// Wait for the report to become ready
 
+		String previousMessage = "";
 		while (true) {
 			CxWSReportStatusResponse cxWSReportStatusResponse = cxJenkinsWebServiceSoap.getScanReportStatus(sessionId,
 					reportId);
@@ -319,7 +351,7 @@ public class CxWebService {
 				break;
 			}
 
-			logger.info(reportType.toString().toUpperCase() + " Report generation in progress");
+			previousMessage = cleanLogger(Level.INFO, previousMessage, reportType.toString().toUpperCase() + " Report generation in progress");
 
 			Thread.sleep(5L * 1000);
 		}
