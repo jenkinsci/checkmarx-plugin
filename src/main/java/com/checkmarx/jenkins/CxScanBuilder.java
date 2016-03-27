@@ -391,6 +391,9 @@ public class CxScanBuilder extends Builder {
             instanceLogger.info("\nScan job submitted successfully\n");
 
             if (!isWaitForResultsEnabled() && !(descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings())) {
+                if (projectId == 0) {
+                    projectId = getProjectId(build, listener, cxWebService);
+                }
                 analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService);
                 return true;
             }
@@ -450,6 +453,12 @@ public class CxScanBuilder extends Builder {
             closeLogger();
         }
 	}
+
+    private long getProjectId(AbstractBuild<?, ?> build, BuildListener listener, CxWebService cxWebService) throws IOException, InterruptedException {
+        EnvVars env = build.getEnvironment(listener);
+        final CliScanArgs cliScanArgs = createCliScanArgs(new byte[]{}, env);
+        return cxWebService.getProjectId(cliScanArgs.getPrjSettings());
+    }
 
     private void analyzeOpenSources(AbstractBuild<?, ?> build, String baseUri, String user, String password, long projectId, CxWebService webServiceClient) throws IOException, InterruptedException {
         DependencyFolder folders = new DependencyFolder(includeOpenSourceFolders, excludeOpenSourceFolders);
