@@ -12,11 +12,11 @@ import java.util.List;
 public class AnalyzeRequest {
 
     private long projectId;
-    private List<String> hashValues;
+    private List<FileData> hashValues;
     @XmlElement(name="Origin")
     private final int JENKINS_ORIGIN = 1;
 
-    public AnalyzeRequest(long projectId, List<String> hashValues){
+    public AnalyzeRequest(long projectId, List<FileData> hashValues){
         this.projectId = projectId;
         this.hashValues = hashValues;
     }
@@ -25,7 +25,7 @@ public class AnalyzeRequest {
         return this.projectId;
     }
 
-    public List<String> getHashValues(){
+    public List<FileData> getHashValues(){
         return this.hashValues;
     }
 }
