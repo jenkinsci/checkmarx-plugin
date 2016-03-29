@@ -564,7 +564,7 @@ public class CxScanBuilder extends Builder {
 
                 cliScanArgs.getPrjSettings().setProjectID(projectId);
 
-                if (incremental) {
+                if (isThisBuildIncremental) {
 					cxWSResponseRunID = cxWebService.runIncrementalScan(cliScanArgs.getPrjSettings(), cliScanArgs.getSrcCodeSettings()
 							.getPackagedCode(), true, true, tempFile);
                 } else {
