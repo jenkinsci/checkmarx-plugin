@@ -4,10 +4,8 @@ import com.checkmarx.jenkins.CxWebService;
 import com.checkmarx.jenkins.cryptography.CryptographicCallable;
 import com.checkmarx.jenkins.folder.FoldersScanner;
 import com.checkmarx.jenkins.web.client.RestClient;
-import com.checkmarx.jenkins.web.model.AnalyzeRequest;
-import com.checkmarx.jenkins.web.model.CxException;
-import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryRequest;
-import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
+import com.checkmarx.jenkins.web.model.*;
+import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -17,12 +15,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-
-import com.checkmarx.jenkins.cryptography.CryptographicCallable;
-import com.checkmarx.jenkins.folder.FoldersScanner;
-import com.checkmarx.jenkins.web.client.RestClient;
 import com.checkmarx.jenkins.web.model.AnalyzeRequest;
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryRequest;
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
@@ -71,7 +63,7 @@ public class OpenSourceAnalyzerService {
                 return;
             }
 
-            List<String> hashValues = calculateHash(dependencies);
+            List<FileData> hashValues = calculateHash(dependencies);
             callAnalyzeApi(hashValues);
             GetOpenSourceSummaryResponse summaryResponse = getOpenSourceSummary();
             printResultsToOutput(summaryResponse);
@@ -91,10 +83,12 @@ public class OpenSourceAnalyzerService {
     }
 
 
-    private List<String> calculateHash(Collection<DependencyInfo> dependencies) throws IOException, InterruptedException {
-        List<String> hashValues = new ArrayList<>();
+    private List<FileData> calculateHash(Collection<DependencyInfo> dependencies) throws IOException, InterruptedException {
+        List<FileData> hashValues = new ArrayList();
+
         for (DependencyInfo dependency : dependencies) {
-            hashValues.add(dependency.getFilePath().act(new CryptographicCallable()));
+            FilePath filePath = dependency.getFilePath();
+            hashValues.add(new FileData(filePath.act(new CryptographicCallable()), filePath.getName()));
         }
         return hashValues;
     }
@@ -104,7 +98,7 @@ public class OpenSourceAnalyzerService {
         return build.getWorkspace().act(foldersScanner);
     }
 
-    private void callAnalyzeApi(List<String> hashValues) throws Exception {
+    private void callAnalyzeApi(List<FileData> hashValues) throws Exception {
         AnalyzeRequest anaReq = new AnalyzeRequest(projectId, hashValues);
         restClient.analyzeOpenSources(anaReq);
     }
