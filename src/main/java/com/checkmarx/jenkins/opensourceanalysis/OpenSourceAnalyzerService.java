@@ -34,7 +34,7 @@ public class OpenSourceAnalyzerService {
     private transient Logger logger;
     private static final Pattern PARAM_LIST_SPLIT_PATTERN = Pattern.compile(",|$", Pattern.MULTILINE);
     private CxWebService webServiceClient;
-    public static final String NO_LICENSE_ERROR = "Open Source Analysis License is not enabled for this project.Please contact your CxSAST Administrator";
+    public static final String NO_LICENSE_ERROR = "Open Source Analysis License is not enabled for this project. Please contact your CxSAST Administrator";
 
     public OpenSourceAnalyzerService(final AbstractBuild<?, ?> build, DependencyFolder dependencyFolder, RestClient restClient, long projectId, Logger logger, CxWebService webServiceClient) {
         this.dependencyFolder = dependencyFolder;
