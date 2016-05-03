@@ -57,7 +57,6 @@ import com.checkmarx.ws.CxJenkinsWebService.ProjectDisplayData;
 import com.checkmarx.ws.CxJenkinsWebService.ProjectSettings;
 import com.checkmarx.ws.CxJenkinsWebService.SourceCodeSettings;
 import com.checkmarx.ws.CxJenkinsWebService.SourceLocationType;
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import javax.xml.ws.WebServiceException;
 
@@ -121,10 +120,9 @@ public class CxScanBuilder extends Builder {
     private static transient Logger staticLogger;
 
     private static final transient Logger LOGGER = Logger.getLogger(CxScanBuilder.class);
-    @XStreamOmitField
+
     private transient Logger instanceLogger = LOGGER; // Instance logger redirects to static logger until
                                                   // it is initialized in perform method
-    @XStreamOmitField
     private transient FileAppender fileAppender;
 
 	private JobStatusOnError jobStatusOnError;
