@@ -105,7 +105,7 @@ public class RestClient implements Closeable {
 
     private void ThrowCxException(Response response) {
         CxException cxException = response.readEntity(CxException.class);
-        throw new WebApplicationException(cxException.getMessage() + "\n" + cxException.getMessageDetails(), response);
+        throw new WebApplicationException(cxException.getMessageCode() + "\n" + cxException.getMessageDetails(), response);
     }
 
     @Override

@@ -5,15 +5,15 @@ package com.checkmarx.jenkins.web.model;
  * @since 21/02/16
  */
 public class CxException {
-    private String message;
+    private String messageCode;
     private String messageDetails;
 
-    public String getMessage() {
-        return message;
+    public String getMessageCode() {
+        return messageCode;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setMessageCode(String message) {
+        this.messageCode = message;
     }
 
     public String getMessageDetails() {
