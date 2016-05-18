@@ -32,16 +32,13 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
-
 /**
  * @author denis
  * @since 3/11/13
  */
 public class CxScanResult implements Action {
 
-	@XStreamOmitField
-	private final Logger logger;
+	private final transient Logger logger; // NOSONAR
 
 	public final AbstractBuild<?, ?> owner;
 	private String serverUrl;
