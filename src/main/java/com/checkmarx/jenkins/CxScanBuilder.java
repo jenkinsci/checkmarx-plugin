@@ -590,7 +590,7 @@ public class CxScanBuilder extends Builder {
             final CliScanArgs cliScanArgs = createCliScanArgs(new byte[]{}, env);
 
 			// Check if the project already exists
-            final CxWSBasicRepsonse validateProjectRespnse = cxWebService.validateProjectName(projectName, groupId);
+            final CxWSBasicRepsonse validateProjectRespnse = cxWebService.validateProjectName(cliScanArgs.getPrjSettings().getProjectName(), groupId);
 			CxWSResponseRunID cxWSResponseRunID;
             if (validateProjectRespnse.isIsSuccesfull()){
 				cxWSResponseRunID = cxWebService.createAndRunProject(cliScanArgs.getPrjSettings(),
