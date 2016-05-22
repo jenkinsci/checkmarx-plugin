@@ -417,7 +417,12 @@ public class CxScanBuilder extends Builder {
             CxScanResult cxScanResult = new CxScanResult(build, instanceLoggerSuffix(build), serverUrlToUse);
             cxScanResult.readScanXMLReport(xmlReportFile);
             build.addAction(cxScanResult);
-            
+
+            // Set scan results to environment
+            EnvVarAction envVarAction = new EnvVarAction();
+            envVarAction.setCxSastResults(cxScanResult);
+            build.addAction(envVarAction);
+
             ThresholdConfig thresholdConfig = createThresholdConfig();
 
 			if ((descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings() || isVulnerabilityThresholdEnabled())
@@ -1346,5 +1351,4 @@ public class CxScanBuilder extends Builder {
 			this.lockVulnerabilitySettings = lockVulnerabilitySettings;
 		}
 	}
-
 }
