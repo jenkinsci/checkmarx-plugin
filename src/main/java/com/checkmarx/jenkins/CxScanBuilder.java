@@ -599,7 +599,7 @@ public class CxScanBuilder extends Builder {
 			CxWSResponseRunID cxWSResponseRunID;
             if (validateProjectRespnse.isIsSuccesfull()){
 				cxWSResponseRunID = cxWebService.createAndRunProject(cliScanArgs.getPrjSettings(),
-						cliScanArgs.getSrcCodeSettings().getPackagedCode(), true, true, tempFile);
+						cliScanArgs.getSrcCodeSettings().getPackagedCode(), true, true, tempFile, cliScanArgs.getComment());
             } else {
                 if (projectId == 0) {
                     projectId = cxWebService.getProjectId(cliScanArgs.getPrjSettings());
@@ -609,9 +609,9 @@ public class CxScanBuilder extends Builder {
 
                 if (isThisBuildIncremental) {
 					cxWSResponseRunID = cxWebService.runIncrementalScan(cliScanArgs.getPrjSettings(), cliScanArgs.getSrcCodeSettings()
-							.getPackagedCode(), true, true, tempFile);
+							.getPackagedCode(), true, true, tempFile, cliScanArgs.getComment());
                 } else {
-                    cxWSResponseRunID = cxWebService.runScanAndAddToProject(cliScanArgs.getPrjSettings(), cliScanArgs.getSrcCodeSettings().getPackagedCode(), true, true, tempFile);
+                    cxWSResponseRunID = cxWebService.runScanAndAddToProject(cliScanArgs.getPrjSettings(), cliScanArgs.getSrcCodeSettings().getPackagedCode(), true, true, tempFile, cliScanArgs.getComment());
                 }
             }
 

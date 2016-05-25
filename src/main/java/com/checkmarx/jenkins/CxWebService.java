@@ -488,7 +488,7 @@ public class CxWebService {
 
 	public CxWSResponseRunID runScanAndAddToProject(ProjectSettings projectSettings,
 			LocalCodeContainer localCodeContainer, boolean visibleToOtherUsers, boolean isPublicScan,
-			final FilePath base64ZipFile) throws AbortException {
+			final FilePath base64ZipFile, String comment) throws AbortException {
 		assert sessionId != null;
 
 		RunScanAndAddToProject scan = new RunScanAndAddToProject();
@@ -497,6 +497,7 @@ public class CxWebService {
 		scan.setProjectSettings(projectSettings);
 		scan.setVisibleToUtherUsers(visibleToOtherUsers);
 		scan.setIsPublicScan(isPublicScan);
+		scan.setComment(comment);
 
 		Pair<byte[], byte[]> soapMeassage = createScanSoapMessage(scan, RunScanAndAddToProject.class, projectSettings,
 				localCodeContainer, visibleToOtherUsers, isPublicScan);
@@ -506,7 +507,7 @@ public class CxWebService {
 	}
 
 	public CxWSResponseRunID runIncrementalScan(ProjectSettings projectSettings, LocalCodeContainer localCodeContainer,
-			boolean visibleToOtherUsers, boolean isPublicScan, final FilePath base64ZipFile) throws AbortException {
+			boolean visibleToOtherUsers, boolean isPublicScan, final FilePath base64ZipFile, String comment) throws AbortException {
 		assert sessionId != null;
 
 		RunIncrementalScan scan = new RunIncrementalScan();
@@ -515,6 +516,7 @@ public class CxWebService {
 		scan.setProjectSettings(projectSettings);
 		scan.setVisibleToUtherUsers(visibleToOtherUsers);
 		scan.setIsPublicScan(isPublicScan);
+		scan.setComment(comment);
 
 		Pair<byte[], byte[]> soapMeassage = createScanSoapMessage(scan, RunIncrementalScan.class, projectSettings,
 				localCodeContainer, visibleToOtherUsers, isPublicScan);
@@ -525,7 +527,7 @@ public class CxWebService {
 
 	public CxWSResponseRunID createAndRunProject(ProjectSettings projectSettings,
 			LocalCodeContainer localCodeContainer, boolean visibleToOtherUsers, boolean isPublicScan,
-			final FilePath base64ZipFile) throws AbortException {
+			final FilePath base64ZipFile, String comment) throws AbortException {
 		assert sessionId != null;
 
 		CreateAndRunProject scan = new CreateAndRunProject();
@@ -534,6 +536,7 @@ public class CxWebService {
 		scan.setProjectSettings(projectSettings);
 		scan.setVisibleToOtherUsers(visibleToOtherUsers);
 		scan.setIsPublicScan(isPublicScan);
+		scan.setComment(comment);
 
 		Pair<byte[], byte[]> soapMessage = createScanSoapMessage(scan, CreateAndRunProject.class, projectSettings,
 				localCodeContainer, visibleToOtherUsers, isPublicScan);
