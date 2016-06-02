@@ -59,8 +59,8 @@ wsdl2java {
 
 
 jenkinsPlugin {
-	// version of Jenkins core this plugin depends on, must be 1.420 or later
-	coreVersion = '1.509.3'
+	// version of Jenkins core this plugin depends on, must be 1.554.2 or later
+	coreVersion = '1.554.2'
 
 	// short name of the plugin, defaults to the project name without trailing '-plugin'
 	shortName = 'checkmarx'
