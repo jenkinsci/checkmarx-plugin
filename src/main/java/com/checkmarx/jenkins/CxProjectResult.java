@@ -3,7 +3,6 @@ package com.checkmarx.jenkins;
 import hudson.Extension;
 import hudson.Functions;
 import hudson.PluginWrapper;
-import hudson.maven.MavenModuleSet;
 import hudson.model.Action;
 import hudson.model.TransientProjectActionFactory;
 import hudson.model.AbstractBuild;
@@ -284,15 +283,19 @@ public class CxProjectResult implements Action {
 				}
 			}
 
-			if (project instanceof MavenModuleSet) {
-				if (((MavenModuleSet) project).getPrebuilders().get(CxScanBuilder.class) != null
-						|| ((MavenModuleSet) project).getPostbuilders().get(CxScanBuilder.class) != null) {
-					LinkedList<Action> list = new LinkedList<Action>();
-					list.add(new CxProjectResult(project));
+			if (mavenPluginActive()) {
+				MavenProjectResult mavenProjectResult = new MavenProjectResult(project);
+				LinkedList<Action> list = mavenProjectResult.getMavenProjectResult();
+				if (list != null){
 					return list;
 				}
 			}
 			return null;
+		}
+
+		private boolean mavenPluginActive(){
+			PluginWrapper mavenPlugin = Jenkins.getInstance().getPluginManager().getPlugin("maven-plugin");
+			return mavenPlugin != null && mavenPlugin.isActive();
 		}
 	}
 }
