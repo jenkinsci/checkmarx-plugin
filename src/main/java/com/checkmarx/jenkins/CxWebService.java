@@ -280,16 +280,8 @@ public class CxWebService {
 				}
 
 			} catch (AbortException | WebServiceException e) {
-
-				// Here we handle a case where the sessionId was timed out in
-				// the server
-				// and we need to re-login to continue working. The default
-				// sessionId
-				// timeout in the server is 24 hours.
-				if (e.getMessage().contains("Unauthorized")) {
-					logger.info("Session was rejected by the Checkmarx server, trying to re-login");
-					this.login(username, password);
-					continue;
+				if (e.getMessage().contains("Unauthorized") || e.getMessage().contains("ReConnect")) {
+					RestoreSession(username, password);
 				} else if (retryAttempts > 0) {
 					retryAttempts--;
 				} else {
@@ -297,6 +289,11 @@ public class CxWebService {
 				}
 			}
 		}
+	}
+
+	private void RestoreSession(String username, String password) throws AbortException {
+		logger.info("Session was rejected by the Checkmarx server, trying to re-login");
+		this.login(username, password);
 	}
 
 	public CxWSCreateReportResponse generateScanReport(long scanId, CxWSReportType reportType) throws AbortException {
