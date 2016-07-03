@@ -27,7 +27,7 @@ import com.sun.mail.iap.ConnectionException;
  * @since 02/02/16
  */
 public class RestClient implements Closeable {
-    private static final String ROOT_PATH = "CxRestAPI/api";
+    private static final String ROOT_PATH = "CxRestAPI/";
     private static final String AUTHENTICATION_PATH = "auth/login";
     private static final String ANALYZE_SUMMARY_PATH = "projects/{projectId}/opensourceanalysis/summaryresults";
     private static final String ANALYZE_PATH = "projects/{projectId}/opensourcesummary";
