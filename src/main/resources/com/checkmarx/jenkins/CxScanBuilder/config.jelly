@@ -198,6 +198,9 @@
 		</j:otherwise>
 
 	</j:choose>
+
+    <f:optionalBlock title="Avoid duplicate project scans in queue." inline="true" field="avoidDuplicateProjectScans" />
+
     <f:section title="Open source analysis">
     </f:section>
     <f:entry title="Includes" field="includeOpenSourceFolders">

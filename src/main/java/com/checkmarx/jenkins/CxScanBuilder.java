@@ -1,8 +1,10 @@
 package com.checkmarx.jenkins;
 
+import com.checkmarx.jenkins.folder.FolderPattern;
 import com.checkmarx.jenkins.opensourceanalysis.DependencyFolder;
 import com.checkmarx.jenkins.opensourceanalysis.OpenSourceAnalyzerService;
 import com.checkmarx.jenkins.web.client.RestClient;
+import com.checkmarx.jenkins.web.contracts.ProjectContract;
 import com.checkmarx.jenkins.web.model.AuthenticationRequest;
 import hudson.AbortException;
 import hudson.EnvVars;
@@ -29,6 +31,7 @@ import java.util.regex.Pattern;
 
 import net.sf.json.JSONObject;
 
+import org.apache.commons.io.DirectoryWalker;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.BasicConfigurator;
@@ -131,6 +134,8 @@ public class CxScanBuilder extends Builder {
 
 	private Result vulnerabilityThresholdResult;
 
+    private boolean avoidDuplicateProjectScans;
+
     //////////////////////////////////////////////////////////////////////////////////////
     // Constructors
     //////////////////////////////////////////////////////////////////////////////////////
@@ -165,7 +170,8 @@ public class CxScanBuilder extends Builder {
                          String thresholdSettings,
                          Result vulnerabilityThresholdResult,
 						 @Nullable String includeOpenSourceFolders,
-                         @Nullable String excludeOpenSourceFolders) {
+                         @Nullable String excludeOpenSourceFolders,
+                         boolean avoidDuplicateProjectScans) {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
         this.username = username;
@@ -195,7 +201,7 @@ public class CxScanBuilder extends Builder {
         this.excludeOpenSourceFolders = excludeOpenSourceFolders;
         this.thresholdSettings = thresholdSettings;
         this.vulnerabilityThresholdResult = vulnerabilityThresholdResult;
-        
+        this.avoidDuplicateProjectScans = avoidDuplicateProjectScans;
         init();
     }
 
@@ -331,7 +337,10 @@ public class CxScanBuilder extends Builder {
     public boolean isGeneratePdfReport() {
         return generatePdfReport;
     }
-    
+
+    public boolean isAvoidDuplicateProjectScans(){
+        return avoidDuplicateProjectScans;
+    }
 
 	public void setThresholdSettings(String thresholdSettings) {
 		this.thresholdSettings = thresholdSettings;
@@ -380,10 +389,15 @@ public class CxScanBuilder extends Builder {
 
             String serverUrlToUseNotNull = serverUrlToUse != null ? serverUrlToUse : "";
 
-            cxWebService = new CxWebService(serverUrlToUseNotNull, instanceLoggerSuffix(build));	
+            cxWebService = new CxWebService(serverUrlToUseNotNull, instanceLoggerSuffix(build));
             cxWebService.login(usernameToUse, passwordToUse);
 
             instanceLogger.info("Checkmarx server login successful");
+
+            if (needToAvoidDuplicateProjectScans(cxWebService)){
+                instanceLogger.info("\nAvoid duplicate project scans in queue\n");
+                return true;
+            }
 
 			cxWSResponseRunID = submitScan(build, cxWebService, listener);
             instanceLogger.info("\nScan job submitted successfully\n");
@@ -553,72 +567,18 @@ public class CxScanBuilder extends Builder {
         instanceLogger = LOGGER; // Redirect all logs back to static logger
     }
 
-    private CxWSResponseRunID submitScan(final AbstractBuild<?, ?> build, final CxWebService cxWebService, final BuildListener listener) throws IOException
-    {
-        isThisBuildIncremental = isThisBuildIncremental(build.getNumber());
-
-        if(isThisBuildIncremental){
-            instanceLogger.info("\nScan job started in incremental scan mode\n");
-		} else {
-            instanceLogger.info("\nScan job started in full scan mode\n");
-        }
-
-        instanceLogger.info("Started zipping the workspace");
+    private CxWSResponseRunID submitScan(final AbstractBuild<?, ?> build, final CxWebService cxWebService, final BuildListener listener) throws IOException {
 
         try {
-            // hudson.FilePath will work in distributed Jenkins installation
-            FilePath baseDir = build.getWorkspace();
-			if (baseDir == null) {
-				throw new AbortException(
-						"Checkmarx Scan Failed: cannot acquire Jenkins workspace location. It can be due to workspace residing on a disconnected slave.");
-			}
-			EnvVars env = build.getEnvironment(listener);
-
-			String combinedFilterPattern = env.expand(getFilterPattern()) + "," + processExcludeFolders(env.expand(getExcludeFolders()));
-            // Implementation of FilePath.FileCallable allows extracting a java.io.File from
-            // hudson.FilePath and still working with it in remote mode
-			CxZipperCallable zipperCallable = new CxZipperCallable(combinedFilterPattern);
-
-            final CxZipResult zipResult = baseDir.act(zipperCallable);
-            instanceLogger.info(zipResult.getLogMessage());
-            final FilePath tempFile = zipResult.getTempFile();
-            final int numOfZippedFiles = zipResult.getNumOfZippedFiles();
-
-            instanceLogger.info("Zipping complete with " + numOfZippedFiles + " files, total compressed size: " +
-                    FileUtils.byteCountToDisplaySize(tempFile.length() / 8 * 6)); // We print here the size of compressed sources before encoding to base 64
-            instanceLogger.info("Temporary file with zipped and base64 encoded sources was created at: " + tempFile.getRemote());
-            listener.getLogger().flush();
-            // Create cliScanArgs object with dummy byte array for zippedFile field
-            // Streaming scan web service will nullify zippedFile filed and use tempFile
-            // instead
-
+            EnvVars env = build.getEnvironment(listener);
             final CliScanArgs cliScanArgs = createCliScanArgs(new byte[]{}, env);
-
-			// Check if the project already exists
-            final CxWSBasicRepsonse validateProjectRespnse = cxWebService.validateProjectName(cliScanArgs.getPrjSettings().getProjectName(), groupId);
-			CxWSResponseRunID cxWSResponseRunID;
-            if (validateProjectRespnse.isIsSuccesfull()){
-				cxWSResponseRunID = cxWebService.createAndRunProject(cliScanArgs.getPrjSettings(),
-						cliScanArgs.getSrcCodeSettings().getPackagedCode(), true, true, tempFile, cliScanArgs.getComment());
-            } else {
-                if (projectId == 0) {
-                    projectId = cxWebService.getProjectId(cliScanArgs.getPrjSettings());
-                }
-
-                cliScanArgs.getPrjSettings().setProjectID(projectId);
-
-                if (isThisBuildIncremental) {
-					cxWSResponseRunID = cxWebService.runIncrementalScan(cliScanArgs.getPrjSettings(), cliScanArgs.getSrcCodeSettings()
-							.getPackagedCode(), true, true, tempFile, cliScanArgs.getComment());
-                } else {
-                    cxWSResponseRunID = cxWebService.runScanAndAddToProject(cliScanArgs.getPrjSettings(), cliScanArgs.getSrcCodeSettings().getPackagedCode(), true, true, tempFile, cliScanArgs.getComment());
-                }
-            }
-
-            tempFile.delete();
+            checkIncrementalScan(build);
+            FilePath zipFile = zipWorkspaceFolder(build, listener);
+            SastScan sastScan = new SastScan(cxWebService, cliScanArgs, new ProjectContract(cxWebService));
+            CxWSResponseRunID cxWSResponseRunId = sastScan.scan(getGroupId(), zipFile, isThisBuildIncremental);
+            zipFile.delete();
             instanceLogger.info("Temporary file deleted");
-
-            return cxWSResponseRunID;
+            return cxWSResponseRunId;
 		} catch (Zipper.MaxZipSizeReached e) {
 			throw new AbortException("Checkmarx Scan Failed: Reached maximum upload size limit of "
 					+ FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()));
@@ -630,72 +590,42 @@ public class CxScanBuilder extends Builder {
         }
     }
 
-    @NotNull
-    private String processExcludeFolders(String excludeFolders)
-    {
-        if (excludeFolders==null)
-        {
-            return "";
-        }
-        StringBuilder result = new StringBuilder();
-        String[] patterns = StringUtils.split(excludeFolders, ",\n");
-        for(String p : patterns)
-        {
-            p = p.trim();
-            if (p.length()>0)
-            {
-                result.append("!**/");
-                result.append(p);
-                result.append("/**/*, ");
-            }
-        }
-        instanceLogger.debug("Exclude folders converted to: " +result.toString());
-        return result.toString();
+
+
+
+
+    private boolean needToAvoidDuplicateProjectScans(CxWebService cxWebService) throws AbortException {
+        return avoidDuplicateProjectScans && projectHasQueuedScans(cxWebService);
     }
 
+    private void checkIncrementalScan(AbstractBuild<?, ?> build) {
+        isThisBuildIncremental = isThisBuildIncremental(build.getNumber());
+
+        if(isThisBuildIncremental){
+            instanceLogger.info("\nScan job started in incremental scan mode\n");
+        } else {
+            instanceLogger.info("\nScan job started in full scan mode\n");
+        }
+    }
+
+    private FilePath zipWorkspaceFolder(AbstractBuild<?, ?> build, BuildListener listener) throws IOException, InterruptedException {
+        FolderPattern folderPattern = new FolderPattern(instanceLogger, build, listener);
+        String combinedFilterPattern = folderPattern.generatePattern(getFilterPattern(), getExcludeFolders());
+
+        CxZip cxZip = new CxZip(instanceLogger, build, listener);
+        return cxZip.ZipWorkspaceFolder(combinedFilterPattern);
+    }
+
+    private boolean projectHasQueuedScans(final CxWebService cxWebService) throws AbortException {
+        ProjectContract projectContract = new ProjectContract(cxWebService);
+        return projectContract.projectHasQueuedScans(projectId);
+    }
+
+
+
     private CliScanArgs createCliScanArgs(byte[] compressedSources, EnvVars env) {
-
-        ProjectSettings projectSettings = new ProjectSettings();
-
-        long presetLong = 0; // Default value to use in case of exception
-        try {
-            presetLong = Long.parseLong(getPreset());
-        } catch (Exception e) {
-            instanceLogger.error("Encountered illegal preset value: " + getPreset() + ". Using default preset.");
-        }
-
-        projectSettings.setPresetID(presetLong);
-        projectSettings.setProjectName(env.expand(getProjectName()));
-        projectSettings.setAssociatedGroupID(getGroupId());
-
-        long configuration = 0; // Default value to use in case of exception
-        try {
-            configuration = Long.parseLong(getSourceEncoding());
-        } catch (Exception e) {
-            instanceLogger.error("Encountered illegal source encoding (configuration) value: " + getSourceEncoding() + ". Using default configuration.");
-        }
-        projectSettings.setScanConfigurationID(configuration);
-
-        LocalCodeContainer localCodeContainer = new LocalCodeContainer();
-        localCodeContainer.setFileName("src.zip");
-        localCodeContainer.setZippedFile(compressedSources);
-
-        SourceCodeSettings sourceCodeSettings = new SourceCodeSettings();
-        sourceCodeSettings.setSourceOrigin(SourceLocationType.LOCAL);
-        sourceCodeSettings.setPackagedCode(localCodeContainer);
-
-        String commentText = getComment()!=null ? env.expand(getComment()) : "";
-        commentText = commentText.trim();
-
-
-        CliScanArgs args = new CliScanArgs();
-        args.setIsIncremental(isThisBuildIncremental);
-        args.setIsPrivateScan(false);
-        args.setPrjSettings(projectSettings);
-        args.setSrcCodeSettings(sourceCodeSettings);
-        args.setComment(commentText);
-
-        return args;
+        CliScanArgsFactory cliScanArgsFactory = new CliScanArgsFactory(instanceLogger, getPreset(), getProjectName(), getGroupId(), getSourceEncoding(), getComment(), isThisBuildIncremental, compressedSources, env);
+        return cliScanArgsFactory.create();
     }
 
     private boolean isThisBuildIncremental(int buildNumber) {

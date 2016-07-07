@@ -75,36 +75,24 @@ public class CxWebService {
 			throws MalformedURLException, AbortException {
 		logger = CxLogUtils.loggerWithSuffix(getClass(), loggerSuffix);
 
-		@Nullable
-		CxScanBuilder.DescriptorImpl descriptor = (CxScanBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(
-				CxScanBuilder.class);
-		if (descriptor != null && !descriptor.isEnableCertificateValidation()) {
-			logger.info("SSL/TLS Certificate Validation Disabled");
-			CxSSLUtility.disableSSLCertificateVerification();
-		}
+		disableCertificateValidation();
 
-		logger.info("Establishing connection with Checkmarx server at: " + serverUrl);
-		URL serverUrlUrl = new URL(serverUrl);
-		if (serverUrlUrl.getPath().length() > 0) {
-			String message = "Checkmarx server url must not contain path: " + serverUrl;
-			logger.debug(message);
-			throw new AbortException(message);
-		}
-		URL resolverUrl = new URL(serverUrl + CXWSRESOLVER_PATH);
-		
-		checkServerConnectivity(resolverUrl); 
+		validateServerUrl(serverUrl);
 
-		logger.debug("Resolver url: " + resolverUrl);
-		CxWSResolver cxWSResolver;
-		try {
-			cxWSResolver = new CxWSResolver(resolverUrl);
-		} catch (javax.xml.ws.WebServiceException e) {
-			logger.error("Failed to resolve Checkmarx webservice url with resolver at: " + resolverUrl, e);
-			throw new AbortException("Checkmarx server was not found on url: " + serverUrl);
-		}
-		CxWSResolverSoap cxWSResolverSoap = cxWSResolver.getCxWSResolverSoap();
-		setClientTimeout((BindingProvider) cxWSResolverSoap, CxConfig.getRequestTimeOutDuration());
-		
+		CxWSResolverSoap cxWSResolverSoap = getCxWSResolverSoap(serverUrl);
+		webServiceUrl = getWebServiceUrl(cxWSResolverSoap);
+
+		CxJenkinsWebService cxJenkinsWebService = new CxJenkinsWebService(webServiceUrl);
+		cxJenkinsWebServiceSoap = getJenkinsWebServiceSoap(cxJenkinsWebService);
+	}
+
+	private CxJenkinsWebServiceSoap getJenkinsWebServiceSoap(CxJenkinsWebService cxJenkinsWebService) {
+		CxJenkinsWebServiceSoap jenkinsWebServiceSoap = cxJenkinsWebService.getCxJenkinsWebServiceSoap();
+		setClientTimeout((BindingProvider) jenkinsWebServiceSoap, CxConfig.getRequestTimeOutDuration());
+		return jenkinsWebServiceSoap;
+	}
+
+	private URL getWebServiceUrl(CxWSResolverSoap cxWSResolverSoap) throws AbortException, MalformedURLException {
 		CxWSResponseDiscovery cxWSResponseDiscovery = cxWSResolverSoap.getWebServiceUrl(CxClientType.JENKINS,
 				WEBSERVICE_API_VERSION);
 		if (!cxWSResponseDiscovery.isIsSuccesfull()) {
@@ -112,14 +100,47 @@ public class CxWebService {
 			logger.error(message);
 			throw new AbortException(message);
 		}
-
-		webServiceUrl = new URL(cxWSResponseDiscovery.getServiceURL());
+		URL webServiceUrl =  new URL(cxWSResponseDiscovery.getServiceURL());
 		logger.debug("Webservice url: " + webServiceUrl);
-		CxJenkinsWebService cxJenkinsWebService = new CxJenkinsWebService(webServiceUrl);
-		
-		cxJenkinsWebServiceSoap = cxJenkinsWebService.getCxJenkinsWebServiceSoap();
-		
-		setClientTimeout((BindingProvider) cxJenkinsWebServiceSoap, CxConfig.getRequestTimeOutDuration());
+		return webServiceUrl;
+	}
+
+	private CxWSResolverSoap getCxWSResolverSoap(@NotNull String serverUrl) throws MalformedURLException, AbortException {
+		URL resolverUrl = new URL(serverUrl + CXWSRESOLVER_PATH);
+
+		checkServerConnectivity(resolverUrl);
+
+		logger.debug("Resolver url: " + resolverUrl);
+		CxWSResolver cxWSResolver;
+		try {
+			cxWSResolver = new CxWSResolver(resolverUrl);
+		} catch (WebServiceException e) {
+			logger.error("Failed to resolve Checkmarx webservice url with resolver at: " + resolverUrl, e);
+			throw new AbortException("Checkmarx server was not found on url: " + serverUrl);
+		}
+		CxWSResolverSoap resolverSoap = cxWSResolver.getCxWSResolverSoap();
+		setClientTimeout((BindingProvider) resolverSoap, CxConfig.getRequestTimeOutDuration());
+		return resolverSoap;
+	}
+
+	private void validateServerUrl(@NotNull final String serverUrl) throws AbortException, MalformedURLException {
+		logger.info("Establishing connection with Checkmarx server at: " + serverUrl);
+		UrlValidations urlValidations = new UrlValidations();
+		if (urlValidations.urlHasPaths(serverUrl)) {
+			String message = "Checkmarx server url must not contain path: " + serverUrl;
+			logger.debug(message);
+			throw new AbortException(message);
+		}
+	}
+
+	private void disableCertificateValidation() {
+		@Nullable
+		CxScanBuilder.DescriptorImpl descriptor = (CxScanBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(
+				CxScanBuilder.class);
+		if (descriptor != null && !descriptor.isEnableCertificateValidation()) {
+			logger.info("SSL/TLS Certificate Validation Disabled");
+			CxSSLUtility.disableSSLCertificateVerification();
+		}
 	}
 
 	private void checkServerConnectivity(URL url) throws AbortException {
@@ -686,5 +707,9 @@ public class CxWebService {
 	 */
 	public CxWSBasicRepsonse cancelScanReport(long reportId) {
 		return cxJenkinsWebServiceSoap.cancelScanReport(sessionId, reportId);
+	}
+
+	public CxWSResponseScanStatusArray getQueuedScans(){
+		return cxJenkinsWebServiceSoap.getScansStatuses(sessionId);
 	}
 }
