@@ -20,6 +20,7 @@ public class ProjectContract {
     }
 
     public boolean projectHasQueuedScans(long projectId) throws AbortException {
+        if (projectId == 0) return false;
         CxWSResponseScanStatusArray res = cxWebService.getQueuedScans();
         if (!res.isIsSuccesfull()){
             String message = "Checking if project has queued scans failed: \n" + res.getErrorMessage();

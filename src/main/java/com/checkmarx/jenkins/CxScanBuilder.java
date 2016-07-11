@@ -11,6 +11,7 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.console.HyperlinkNote;
 import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
@@ -135,6 +136,9 @@ public class CxScanBuilder extends Builder {
 	private Result vulnerabilityThresholdResult;
 
     private boolean avoidDuplicateProjectScans;
+
+    public static final String PROJECT_STATE_URL_TEMPLATE = "/CxWebClient/portal#/projectState/{0}/Summary";
+    public static final String ASYNC_MESSAGE = "CxSAST scan was run in asynchronous mode.\nRefer to the {0} for the scan results\n";
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Constructors
@@ -394,6 +398,8 @@ public class CxScanBuilder extends Builder {
 
             instanceLogger.info("Checkmarx server login successful");
 
+            updateProjectId(build, listener, cxWebService);
+
             if (needToAvoidDuplicateProjectScans(cxWebService)){
                 instanceLogger.info("\nAvoid duplicate project scans in queue\n");
                 return true;
@@ -402,10 +408,8 @@ public class CxScanBuilder extends Builder {
 			cxWSResponseRunID = submitScan(build, cxWebService, listener);
             instanceLogger.info("\nScan job submitted successfully\n");
 
-            if (!isWaitForResultsEnabled() && !(descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings())) {
-                if (projectId == 0) {
-                    projectId = getProjectId(build, listener, cxWebService);
-                }
+            if (scanShouldRunAsynchronous(descriptor)) {
+                logAsyncMessage(serverUrlToUse);
                 analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService);
                 return true;
             }
@@ -470,6 +474,23 @@ public class CxScanBuilder extends Builder {
             closeLogger();
         }
 	}
+
+    private void updateProjectId(AbstractBuild<?, ?> build, BuildListener listener, CxWebService cxWebService) throws IOException, InterruptedException {
+        ProjectContract projectContract = new ProjectContract(cxWebService);
+        if (!projectContract.newProject(getProjectName(), getGroupId())) {
+            projectId = getProjectId(build, listener, cxWebService);
+        }
+    }
+
+    private void logAsyncMessage(String serverUrlToUse) {
+        String projectStateUrl = serverUrlToUse + PROJECT_STATE_URL_TEMPLATE.replace("{0}", Long.toString(projectId));
+        String projectStateLink = HyperlinkNote.encodeTo(projectStateUrl , "CxSAST Web");
+        instanceLogger.info(ASYNC_MESSAGE.replace("{0}", projectStateLink));
+    }
+
+    private boolean scanShouldRunAsynchronous(DescriptorImpl descriptor) {
+        return !isWaitForResultsEnabled() && !(descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings());
+    }
 
     private long getProjectId(AbstractBuild<?, ?> build, BuildListener listener, CxWebService cxWebService) throws IOException, InterruptedException {
         EnvVars env = build.getEnvironment(listener);
