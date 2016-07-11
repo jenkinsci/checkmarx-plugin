@@ -37,7 +37,7 @@ public class ProjectContractTests {
             }
         };
         ProjectContract projectContract = new ProjectContract(new CxWebService(""));
-        boolean result = projectContract.projectHasQueuedScans(0);
+        boolean result = projectContract.projectHasQueuedScans(2);
         assertFalse(result);
     }
 
@@ -55,7 +55,7 @@ public class ProjectContractTests {
             }
         };
         ProjectContract projectContract = new ProjectContract(new CxWebService(""));
-        boolean result = projectContract.projectHasQueuedScans(0);
+        boolean result = projectContract.projectHasQueuedScans(1);
     }
 
     @Test
@@ -80,12 +80,38 @@ public class ProjectContractTests {
         };
 
         ProjectContract projectContract = new ProjectContract(new CxWebService(""));
-        boolean result = projectContract.projectHasQueuedScans(0);
+        boolean result = projectContract.projectHasQueuedScans(2);
         assertTrue(result);
     }
 
     @Test
     public void projectHasQueuedScans_noQueuedScans_returnFalse() throws AbortException, MalformedURLException {
+        new MockUp<CxWebService>() {
+            @Mock
+            void $init(String serverUrl){
+            }
+            @Mock
+            CxWSResponseScanStatusArray getQueuedScans() {
+                CxWSResponseScanStatusArray arr = new CxWSResponseScanStatusArray();
+                arr.setIsSuccesfull(true);
+                arr.setStatusArr(new ArrayOfCxWSResponseScanStatus());
+                return arr;
+            }
+        };
+        new MockUp<ProjectContract>() {
+            @Mock
+            boolean projectHasQueuedScans(long projectId, List<CxWSResponseScanStatus> scanStatuses) {
+                return false;
+            }
+        };
+
+        ProjectContract projectContract = new ProjectContract(new CxWebService(""));
+        boolean result = projectContract.projectHasQueuedScans(3);
+        assertFalse(result);
+    }
+
+    @Test
+    public void projectHasQueuedScans_newProject_returnFalse() throws AbortException, MalformedURLException {
         new MockUp<CxWebService>() {
             @Mock
             void $init(String serverUrl){
