@@ -18,8 +18,9 @@ public class CliScanArgsFactory {
     private final boolean isThisBuildIncremental;
     private final byte[] compressedSources;
     private final EnvVars env;
+    private long projectId;
 
-    public CliScanArgsFactory(Logger logger, String preset, String projectName, String groupId, String sourceEncoding, String comment, boolean isThisBuildIncremental, byte[] compressedSources, EnvVars env) {
+    public CliScanArgsFactory(Logger logger, String preset, String projectName, String groupId, String sourceEncoding, String comment, boolean isThisBuildIncremental, byte[] compressedSources, EnvVars env, long projectId) {
         this.logger = logger;
         this.preset = preset;
         this.projectName = projectName;
@@ -29,6 +30,7 @@ public class CliScanArgsFactory {
         this.isThisBuildIncremental = isThisBuildIncremental;
         this.compressedSources = compressedSources;
         this.env = env;
+        this.projectId = projectId;
     }
 
     public CliScanArgs create() {
@@ -45,7 +47,7 @@ public class CliScanArgsFactory {
         projectSettings.setPresetID(presetLong);
         projectSettings.setProjectName(env.expand(projectName));
         projectSettings.setAssociatedGroupID(groupId);
-
+        projectSettings.setProjectID(projectId);
         long configuration = 0; // Default value to use in case of exception
         try {
             configuration = Long.parseLong(sourceEncoding);

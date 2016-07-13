@@ -32,9 +32,7 @@ import java.util.regex.Pattern;
 
 import net.sf.json.JSONObject;
 
-import org.apache.commons.io.DirectoryWalker;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
@@ -55,12 +53,8 @@ import com.checkmarx.ws.CxJenkinsWebService.CxWSCreateReportResponse;
 import com.checkmarx.ws.CxJenkinsWebService.CxWSReportType;
 import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseRunID;
 import com.checkmarx.ws.CxJenkinsWebService.Group;
-import com.checkmarx.ws.CxJenkinsWebService.LocalCodeContainer;
 import com.checkmarx.ws.CxJenkinsWebService.Preset;
 import com.checkmarx.ws.CxJenkinsWebService.ProjectDisplayData;
-import com.checkmarx.ws.CxJenkinsWebService.ProjectSettings;
-import com.checkmarx.ws.CxJenkinsWebService.SourceCodeSettings;
-import com.checkmarx.ws.CxJenkinsWebService.SourceLocationType;
 
 import javax.xml.ws.WebServiceException;
 
@@ -398,7 +392,7 @@ public class CxScanBuilder extends Builder {
 
             instanceLogger.info("Checkmarx server login successful");
 
-            updateProjectId(build, listener, cxWebService);
+            setProjectId(build, listener, cxWebService);
 
             if (needToAvoidDuplicateProjectScans(cxWebService)){
                 instanceLogger.info("\nAvoid duplicate project scans in queue\n");
@@ -406,10 +400,12 @@ public class CxScanBuilder extends Builder {
             }
 
 			cxWSResponseRunID = submitScan(build, cxWebService, listener);
-            instanceLogger.info("\nScan job submitted successfully\n");
+            setProjectId(build, listener, cxWebService);
 
-            if (scanShouldRunAsynchronous(descriptor)) {
+            boolean shouldRunAsynchronous = scanShouldRunAsynchronous(descriptor);
+            if (shouldRunAsynchronous) {
                 logAsyncMessage(serverUrlToUse);
+                addScanResultAction(build, serverUrlToUse, shouldRunAsynchronous, null);
                 analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService);
                 return true;
             }
@@ -431,15 +427,7 @@ public class CxScanBuilder extends Builder {
 				cxWebService.retrieveScanReport(reportResponse.getID(), pdfReportFile, CxWSReportType.PDF);
             }
 
-            // Parse scan report and present results in Jenkins
-            CxScanResult cxScanResult = new CxScanResult(build, instanceLoggerSuffix(build), serverUrlToUse);
-            cxScanResult.readScanXMLReport(xmlReportFile);
-            build.addAction(cxScanResult);
-
-            // Set scan results to environment
-            EnvVarAction envVarAction = new EnvVarAction();
-            envVarAction.setCxSastResults(cxScanResult);
-            build.addAction(envVarAction);
+            CxScanResult cxScanResult = addScanResultAction(build, serverUrlToUse, shouldRunAsynchronous, xmlReportFile);
 
             ThresholdConfig thresholdConfig = createThresholdConfig();
 
@@ -475,10 +463,22 @@ public class CxScanBuilder extends Builder {
         }
 	}
 
-    private void updateProjectId(AbstractBuild<?, ?> build, BuildListener listener, CxWebService cxWebService) throws IOException, InterruptedException {
-        ProjectContract projectContract = new ProjectContract(cxWebService);
-        if (!projectContract.newProject(getProjectName(), getGroupId())) {
-            projectId = getProjectId(build, listener, cxWebService);
+    @NotNull
+    private CxScanResult addScanResultAction(AbstractBuild<?, ?> build, String serverUrlToUse, boolean shouldRunAsynchronous, File xmlReportFile) {
+        CxScanResult cxScanResult = new CxScanResult(build, instanceLoggerSuffix(build), serverUrlToUse, projectId, shouldRunAsynchronous);
+        if (xmlReportFile != null){
+            cxScanResult.readScanXMLReport(xmlReportFile);
+        }
+        build.addAction(cxScanResult);
+        return cxScanResult;
+    }
+
+    private void setProjectId(AbstractBuild<?, ?> build, BuildListener listener, CxWebService cxWebService) throws IOException, InterruptedException {
+        if (projectId == 0) {
+            ProjectContract projectContract = new ProjectContract(cxWebService);
+            if (!projectContract.newProject(getProjectName(), getGroupId())) {
+                projectId = getProjectId(build, listener, cxWebService);
+            }
         }
     }
 
@@ -599,6 +599,7 @@ public class CxScanBuilder extends Builder {
             CxWSResponseRunID cxWSResponseRunId = sastScan.scan(getGroupId(), zipFile, isThisBuildIncremental);
             zipFile.delete();
             instanceLogger.info("Temporary file deleted");
+            instanceLogger.info("\nScan job submitted successfully\n");
             return cxWSResponseRunId;
 		} catch (Zipper.MaxZipSizeReached e) {
 			throw new AbortException("Checkmarx Scan Failed: Reached maximum upload size limit of "
@@ -645,7 +646,7 @@ public class CxScanBuilder extends Builder {
 
 
     private CliScanArgs createCliScanArgs(byte[] compressedSources, EnvVars env) {
-        CliScanArgsFactory cliScanArgsFactory = new CliScanArgsFactory(instanceLogger, getPreset(), getProjectName(), getGroupId(), getSourceEncoding(), getComment(), isThisBuildIncremental, compressedSources, env);
+        CliScanArgsFactory cliScanArgsFactory = new CliScanArgsFactory(instanceLogger, getPreset(), getProjectName(), getGroupId(), getSourceEncoding(), getComment(), isThisBuildIncremental, compressedSources, env, projectId);
         return cliScanArgsFactory.create();
     }
 

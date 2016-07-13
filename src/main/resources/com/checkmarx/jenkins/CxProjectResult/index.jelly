@@ -4,8 +4,8 @@
     <j:if test="${it.showResults}">
 
         <j:if test="${it.resultAvailable}">
-            <st:redirect url="${app.rootUrl}${it.lastBuildAction.owner.url}${it.lastBuildAction.urlName}"/>
-            ${it.lastBuildAction.owner.url}
+            <st:redirect url="${app.rootUrl}${it.lastSynchronousBuildAction.owner.url}${it.lastSynchronousBuildAction.urlName}"/>
+            ${it.lastSynchronousBuildAction.owner.url}
             <p>${app.rootUrl}</p>
 
         </j:if>

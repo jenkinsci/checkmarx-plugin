@@ -29,7 +29,6 @@ public class SastScan {
             cxWSResponseRunId = cxWebService.createAndRunProject(cliScanArgs.getPrjSettings(),
                     cliScanArgs.getSrcCodeSettings().getPackagedCode(), true, true, zipFile, cliScanArgs.getComment());
         } else {
-            updateProjectId();
             if (isThisBuildIncremental) {
                 cxWSResponseRunId = cxWebService.runIncrementalScan(cliScanArgs.getPrjSettings(), cliScanArgs.getSrcCodeSettings()
                         .getPackagedCode(), true, true, zipFile, cliScanArgs.getComment());
@@ -38,13 +37,5 @@ public class SastScan {
             }
         }
         return  cxWSResponseRunId;
-    }
-
-
-    private void updateProjectId() throws AbortException {
-        if (cliScanArgs.getPrjSettings().getProjectID() == 0){
-            long projectId = cxWebService.getProjectId(cliScanArgs.getPrjSettings());
-            cliScanArgs.getPrjSettings().setProjectID(projectId);
-        }
     }
 }

@@ -4,13 +4,16 @@
 
     <j:if test="${it.showResults}">
         <h2>Checkmarx</h2>
+        <j:if test="${it.lastBuildAsynchronous}">
+             <div>CxSAST scan was run in asynchronous mode. <br/> Refer to the <a target="_blank" href="${it.projectStateUrl}">CxSAST Web</a> for the scan results</div>
+        </j:if>
         <j:if test="${it.resultAvailable}">
-            <p>Last build vulnerabilities summary: </p>
+            <p>Last synchronous build vulnerabilities summary: </p>
             <ul>
-                <li>High: ${it.lastBuildAction.highCount} </li>
-                <li>Medium: ${it.lastBuildAction.mediumCount} </li>
-                <li>Low: ${it.lastBuildAction.lowCount} </li>
-                <li>Info: ${it.lastBuildAction.infoCount} </li>
+                <li>High: ${it.lastSynchronousBuildAction.highCount} </li>
+                <li>Medium: ${it.lastSynchronousBuildAction.mediumCount} </li>
+                <li>Low: ${it.lastSynchronousBuildAction.lowCount} </li>
+                <li>Info: ${it.lastSynchronousBuildAction.infoCount} </li>
             </ul>
             <p><a href="${it.urlName}">Detailed report</a></p>
         </j:if>

@@ -41,6 +41,8 @@ public class CxScanResult implements Action {
 	private final transient Logger logger; // NOSONAR
 
 	public final AbstractBuild<?, ?> owner;
+	private final long projectId;
+	private final boolean scanRanAsynchronous;
 	private String serverUrl;
 
 	private int highCount;
@@ -71,7 +73,9 @@ public class CxScanResult implements Action {
 	private boolean resultIsValid;
 	private String errorMessage;
 
-	public CxScanResult(final AbstractBuild owner, final String loggerSuffix, String serverUrl) {
+	public CxScanResult(final AbstractBuild owner, final String loggerSuffix, String serverUrl, long projectId, boolean scanRanAsynchronous) {
+		this.projectId = projectId;
+		this.scanRanAsynchronous = scanRanAsynchronous;
 		logger = CxLogUtils.loggerWithSuffix(getClass(), loggerSuffix);
 		this.owner = owner;
 		this.serverUrl = serverUrl;
@@ -253,6 +257,18 @@ public class CxScanResult implements Action {
 			errorMessage = e.getMessage();
 			logger.warn(e);
 		}
+	}
+
+	public long getProjectId() {
+		return projectId;
+	}
+
+	public boolean isScanRanAsynchronous() {
+		return scanRanAsynchronous;
+	}
+
+	public String getProjectStateUrl(){
+		return serverUrl + "/CxWebClient/portal#/projectState/" + projectId + "/Summary";
 	}
 
 	private class ResultsParseHandler extends DefaultHandler {
