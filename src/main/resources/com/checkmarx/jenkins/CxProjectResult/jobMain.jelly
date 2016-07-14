@@ -8,7 +8,7 @@
              <div>CxSAST scan was run in asynchronous mode. <br/> Refer to the <a target="_blank" href="${it.projectStateUrl}">CxSAST Web</a> for the scan results</div>
         </j:if>
         <j:if test="${it.resultAvailable}">
-            <p>Last synchronous build vulnerabilities summary: </p>
+            <p>Last successful synchronous build vulnerability results: </p>
             <ul>
                 <li>High: ${it.lastSynchronousBuildAction.highCount} </li>
                 <li>Medium: ${it.lastSynchronousBuildAction.mediumCount} </li>
