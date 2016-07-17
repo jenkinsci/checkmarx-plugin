@@ -42,6 +42,7 @@ dependencies {
 
 
 	optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.3@jar'
+	jenkinsPlugins 'org.jenkins-ci.plugins:junit:1.6@jar'
 
 	testCompile 'junit:junit:4.12',
 			'org.jmockit:jmockit:1.16'
@@ -60,7 +61,7 @@ wsdl2java {
 
 jenkinsPlugin {
 	// version of Jenkins core this plugin depends on, must be 1.554.2 or later
-	coreVersion = '1.509.3'
+	coreVersion = '1.579'
 
 	// short name of the plugin, defaults to the project name without trailing '-plugin'
 	shortName = 'checkmarx'
