@@ -3,12 +3,7 @@ package com.checkmarx.jenkins;
 import hudson.Extension;
 import hudson.Functions;
 import hudson.PluginWrapper;
-import hudson.model.Action;
-import hudson.model.TransientProjectActionFactory;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Hudson;
-import hudson.model.Project;
+import hudson.model.*;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.util.Area;
 import hudson.util.ChartUtil;
@@ -189,9 +184,9 @@ public class CxProjectResult implements Action {
             DataSetBuilder<CxResultSeverity, ChartUtil.NumberOnlyBuildLabel> dsb = new DataSetBuilder<CxResultSeverity, ChartUtil.NumberOnlyBuildLabel>();
 
             for (CxScanResult a = lastBuildAction; a != null; a = a.getPreviousResult()) {
-                dsb.add(a.getHighCount(), CxResultSeverity.HIGH, new ChartUtil.NumberOnlyBuildLabel(a.owner));
-                dsb.add(a.getMediumCount(), CxResultSeverity.MEDIUM, new ChartUtil.NumberOnlyBuildLabel(a.owner));
-                dsb.add(a.getLowCount(), CxResultSeverity.LOW, new ChartUtil.NumberOnlyBuildLabel(a.owner));
+                dsb.add(a.getHighCount(), CxResultSeverity.HIGH, new ChartUtil.NumberOnlyBuildLabel((Run<?, ?>) a.owner));
+                dsb.add(a.getMediumCount(), CxResultSeverity.MEDIUM, new ChartUtil.NumberOnlyBuildLabel((Run<?, ?>) a.owner));
+                dsb.add(a.getLowCount(), CxResultSeverity.LOW, new ChartUtil.NumberOnlyBuildLabel((Run<?, ?>) a.owner));
             }
             return dsb.build();
         }
