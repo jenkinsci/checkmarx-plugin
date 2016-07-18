@@ -3,7 +3,10 @@ buildscript {
 		jcenter()
 		maven { url 'http://repo.jenkins-ci.org/releases/' }
 	}
-	dependencies { classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.18.1',  'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.+'  }
+	dependencies {
+		classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.18.1',
+				'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.+'
+	}
 }
 
 plugins { id "no.nils.wsdl2java" version "0.8" }
@@ -47,7 +50,11 @@ dependencies {
 	testCompile 'junit:junit:4.12',
 			'org.jmockit:jmockit:1.16'
 
-	jenkinsTest 'org.jenkins-ci.plugins:matrix-project:1.4@jar'
+	// Fails with Gradle 2.12 and up without it. Related to https://issues.jenkins-ci.org/browse/JENKINS-17129
+	jenkinsTest 'org.jenkins-ci.plugins:ant:1.2@jar',
+			'org.jenkins-ci.plugins:mailer:1.1@jar',
+			'org.jenkins-ci.plugins:matrix-project:1.4@jar'
+
 }
 
 wsdl2java {
