@@ -18,3 +18,4 @@ bin/
 *.iws
 #Jenkins specific out
 *.hpi
+classes/

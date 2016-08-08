@@ -3,7 +3,10 @@ buildscript {
 		jcenter()
 		maven { url 'http://repo.jenkins-ci.org/releases/' }
 	}
-	dependencies { classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.14.1',  'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.+'  }
+	dependencies {
+		classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.18.1',
+				'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.+'
+	}
 }
 
 plugins { id "no.nils.wsdl2java" version "0.8" }
@@ -42,10 +45,16 @@ dependencies {
 
 
 	optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.3@jar'
-	jenkinsPlugins 'org.jenkins-ci.plugins:junit:1.6@jar'
+
 
 	testCompile 'junit:junit:4.12',
 			'org.jmockit:jmockit:1.16'
+
+	// Fails with Gradle 2.12 and up without it. Related to https://issues.jenkins-ci.org/browse/JENKINS-17129
+	jenkinsTest 'org.jenkins-ci.plugins:ant:1.2@jar',
+			'org.jenkins-ci.plugins:mailer:1.1@jar',
+			'org.jenkins-ci.plugins:matrix-project:1.4@jar'
+
 }
 
 wsdl2java {
@@ -60,7 +69,7 @@ wsdl2java {
 
 
 jenkinsPlugin {
-	// version of Jenkins core this plugin depends on, must be 1.554.2 or later
+	// version of Jenkins core this plugin depends on
 	coreVersion = '1.579'
 
 	// short name of the plugin, defaults to the project name without trailing '-plugin'
