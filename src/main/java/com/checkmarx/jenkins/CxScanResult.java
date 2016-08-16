@@ -79,7 +79,7 @@ public class CxScanResult implements Action {
 		logger = CxLogUtils.loggerWithSuffix(getClass(), loggerSuffix);
 		this.owner = owner;
 		this.serverUrl = serverUrl;
-		this.resultIsValid = false;
+		this.resultIsValid = true;
 		this.errorMessage = "No Scan Results"; // error message to appear if results were not parsed
 		this.highQueryResultList = new LinkedList<>();
 		this.mediumQueryResultList = new LinkedList<>();
@@ -124,7 +124,7 @@ public class CxScanResult implements Action {
 	public boolean isShowResults() {
 		@Nullable
 		CxScanBuilder.DescriptorImpl descriptor = (CxScanBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(CxScanBuilder.class);
-		return descriptor != null && !descriptor.isHideResults();
+		return descriptor != null && !descriptor.isHideResults() && !isScanRanAsynchronous();
 	}
 
 	public int getHighCount() {
