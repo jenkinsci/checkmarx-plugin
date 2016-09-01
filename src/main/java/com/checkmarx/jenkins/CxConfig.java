@@ -24,7 +24,7 @@ public class CxConfig {
 			configuration.loadFromXML(inputStream);
 			inputStream.close();
 		} catch (Exception e) {
-			configuration.setProperty(CONFIGURATION_MAX_ZIP_SIZE_KEY, "209715200");
+			configuration.setProperty(CONFIGURATION_MAX_ZIP_SIZE_KEY, "2147483647");
 		}
 	}
 
