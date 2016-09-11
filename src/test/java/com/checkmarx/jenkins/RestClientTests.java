@@ -1,21 +1,19 @@
 package com.checkmarx.jenkins;
 
 import com.checkmarx.jenkins.web.client.RestClient;
-import com.checkmarx.jenkins.web.model.AnalyzeRequest;
+import com.checkmarx.jenkins.web.model.ScanRequest;
 import com.checkmarx.jenkins.web.model.AuthenticationRequest;
 import com.checkmarx.jenkins.web.model.CxException;
 import com.google.common.collect.ImmutableMap;
 import mockit.Mock;
 import mockit.MockUp;
+import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.junit.Test;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Invocation;
-import javax.ws.rs.core.NewCookie;
-import javax.ws.rs.core.Response;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import javax.ws.rs.core.*;
+import java.io.File;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -37,16 +35,24 @@ public class RestClientTests {
             Map<String, NewCookie> getCookies(){
                 return ImmutableMap.of("cxCookie",new NewCookie("",""), "CXCSRFToken",new NewCookie("",""));
             }
-
         };
         new MockUp<RestClient>() {
             @Mock
             Response invokeRequet(Invocation invocation) {
                 return responseMockUp.getMockInstance();
             }
+            @Mock
+            File getFileFromRequest(ScanRequest request) {
+                return null;
+            }
         };
-    RestClient client = new RestClient("", new AuthenticationRequest("", ""));
-    client.analyzeOpenSources(new AnalyzeRequest(0,Collections.EMPTY_LIST));
+        new MockUp<FileDataBodyPart>(){
+            @Mock
+            void $init(final String name, final File fileEntity) { }
+        };
+
+        RestClient client = new RestClient("", new AuthenticationRequest("", ""));
+        client.createScan(new ScanRequest(0, null));
     }
 
     @Test(expected=WebApplicationException.class)
@@ -71,9 +77,18 @@ public class RestClientTests {
             Response invokeRequet(Invocation invocation) {
                 return responseMockUp.getMockInstance();
             }
+            @Mock
+            File getFileFromRequest(ScanRequest request) {
+                return null;
+            }
         };
+        new MockUp<FileDataBodyPart>(){
+            @Mock
+            void $init(final String name, final File fileEntity) { }
+        };
+
         RestClient client = new RestClient("", new AuthenticationRequest("", ""));
-        client.analyzeOpenSources(new AnalyzeRequest(0,Collections.EMPTY_LIST));
+        client.createScan(new ScanRequest(0, null));
     }
 
     @Test
@@ -98,10 +113,19 @@ public class RestClientTests {
             Response invokeRequet(Invocation invocation) {
                 return responseMockUp.getMockInstance();
             }
+            @Mock
+            File getFileFromRequest(ScanRequest request) {
+                return null;
+            }
         };
+        new MockUp<FileDataBodyPart>(){
+            @Mock
+            void $init(final String name, final File fileEntity) { }
+        };
+
         RestClient client = new RestClient("", new AuthenticationRequest("", ""));
         try {
-            client.analyzeOpenSources(new AnalyzeRequest(0, Collections.EMPTY_LIST));
+            client.createScan(new ScanRequest(0, null));
         }
         catch (Exception ex)
         {

@@ -1,7 +1,7 @@
 package com.checkmarx.jenkins;
 
 import com.checkmarx.jenkins.opensourceanalysis.DependencyInfo;
-import com.checkmarx.jenkins.folder.FoldersScanner;
+import com.checkmarx.jenkins.filesystem.FoldersScanner;
 import hudson.FilePath;
 import mockit.Mock;
 import mockit.MockUp;

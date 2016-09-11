@@ -1,5 +1,6 @@
-package com.checkmarx.jenkins;
+package com.checkmarx.jenkins.filesystem.zip;
 
+import com.checkmarx.jenkins.CxConfig;
 import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
 

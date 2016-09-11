@@ -1,4 +1,4 @@
-package com.checkmarx.jenkins.folder;
+package com.checkmarx.jenkins.filesystem;
 
 import hudson.EnvVars;
 import hudson.model.AbstractBuild;

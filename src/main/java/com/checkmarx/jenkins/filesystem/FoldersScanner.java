@@ -1,4 +1,4 @@
-package com.checkmarx.jenkins.folder;
+package com.checkmarx.jenkins.filesystem;
 
 import com.checkmarx.jenkins.opensourceanalysis.DependencyInfo;
 import hudson.FilePath;

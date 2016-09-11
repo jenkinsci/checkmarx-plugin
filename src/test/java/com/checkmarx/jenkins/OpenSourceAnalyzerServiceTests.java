@@ -1,15 +1,16 @@
 package com.checkmarx.jenkins;
 
 import com.checkmarx.jenkins.cryptography.CryptographicCallable;
-import com.checkmarx.jenkins.folder.FoldersScanner;
+import com.checkmarx.jenkins.filesystem.FolderPattern;
+import com.checkmarx.jenkins.filesystem.FoldersScanner;
+import com.checkmarx.jenkins.filesystem.zip.CxZip;
 import com.checkmarx.jenkins.opensourceanalysis.*;
 import com.checkmarx.jenkins.web.client.RestClient;
-import com.checkmarx.jenkins.web.model.AnalyzeRequest;
+import com.checkmarx.jenkins.web.model.ScanRequest;
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryRequest;
-import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
+import com.checkmarx.jenkins.web.model.getOpenSourceSummaryResponse;
 import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
-import mockit.Invocation;
 import mockit.Mock;
 import mockit.MockUp;
 import mockit.integration.junit4.JMockit;
@@ -20,6 +21,7 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -41,58 +43,13 @@ public class OpenSourceAnalyzerServiceTests {
         };
 
         DependencyFolder folders = new DependencyFolder("", "test");
-        OpenSourceAnalyzerService service = new OpenSourceAnalyzerService(null, folders, null, 0, Logger.getLogger(getClass()), null);
+        OpenSourceAnalyzerService service = new OpenSourceAnalyzerService(null, folders, null, 0, Logger.getLogger(getClass()), null, null, null);
         service.analyze();
     }
-
-    @Test
-    public void analyze_emptyDependencies_logNoDependencies() throws IOException, InterruptedException {
-
-        new MockUp<OpenSourceAnalyzerService>() {
-            @Mock
-            Collection<DependencyInfo> getDependenciesFromFolders(Invocation invocation) throws IOException, InterruptedException {
-                return new ArrayList<>();
-            }
-        };
-        new MockUp<FoldersScanner>() {
-        };
-
-        final Set infoMessages= new HashSet();
-        new MockUp<Logger>() {
-            @Mock
-            void info(Object message) {
-                infoMessages.add(message);
-            }
-        };
-        new MockUp<CxWebService>() {
-            @Mock
-            void $init(String serverUrl) {
-            }
-            @Mock
-            Boolean isOsaLicenseValid(){
-                return true;
-            }
-        };
-
-        DependencyFolder folders = new DependencyFolder("test2", "");
-        OpenSourceAnalyzerService service = new OpenSourceAnalyzerService(null, folders, null, 0, Logger.getLogger(getClass()), new CxWebService(null));
-
-        service.analyze();
-
-        assertTrue(infoMessages.contains("No dependencies found"));
-    }
-
+    
     @Test
     public void analyze_withDependencies_NoError() throws IOException, InterruptedException {
 
-        new MockUp<OpenSourceAnalyzerService>() {
-            @Mock
-            Collection<DependencyInfo> getDependenciesFromFolders(Invocation invocation) throws IOException, InterruptedException {
-                DependencyInfo info = new DependencyInfo();
-                info.setFilePath(new FilePath(new File("test")));
-                return new ArrayList<DependencyInfo>(Arrays.asList(info));
-            }
-        };
         new MockUp<FoldersScanner>() {
         };
         new MockUp<Logger>() {
@@ -107,7 +64,11 @@ public class OpenSourceAnalyzerServiceTests {
         };
         new MockUp<RestClient>() {
             @Mock
-            void analyzeOpenSources(AnalyzeRequest request) {
+            URI createScan(ScanRequest request) {
+                return null;
+            }
+            @Mock
+            void waitForScanToFinish(URI uri){
             }
         };
         new MockUp<CxWebService>() {
@@ -119,9 +80,17 @@ public class OpenSourceAnalyzerServiceTests {
                 return true;
             }
         };
+        new MockUp<FolderPattern>() {
+            @Mock
+            String generatePattern(String filterPattern, String excludeFolders) { return ""; }
+        };
+        new MockUp<CxZip>() {
+            @Mock
+            FilePath zipSourceCode(String filterPattern) { return null; }
+        };
 
         DependencyFolder folders = new DependencyFolder("test2", "");
-        OpenSourceAnalyzerService service = new OpenSourceAnalyzerService(null, folders, new RestClient("", null), 0, Logger.getLogger(getClass()), new CxWebService(null));
+        OpenSourceAnalyzerService service = new OpenSourceAnalyzerService(null, folders, new RestClient("", null), 0, Logger.getLogger(getClass()), new CxWebService(null), new CxZip(null, null, null), new FolderPattern(null, null, null));
 
         service.analyze();
     }
@@ -131,15 +100,9 @@ public class OpenSourceAnalyzerServiceTests {
 
         new MockUp<OpenSourceAnalyzerService>() {
             @Mock
-            Collection<DependencyInfo> getDependenciesFromFolders(Invocation invocation) throws IOException, InterruptedException {
-                DependencyInfo info = new DependencyInfo();
-                info.setFilePath(new FilePath(new File("test")));
-                return new ArrayList<DependencyInfo>(Arrays.asList(info));
-            }
-            @Mock
-            GetOpenSourceSummaryResponse getOpenSourceSummary()
+            getOpenSourceSummaryResponse getOpenSourceSummary()
             {
-                return new GetOpenSourceSummaryResponse();
+                return new getOpenSourceSummaryResponse();
             }
         };
         new MockUp<FoldersScanner>() {
@@ -159,11 +122,16 @@ public class OpenSourceAnalyzerServiceTests {
         };
         new MockUp<RestClient>() {
             @Mock
-            void analyzeOpenSources(AnalyzeRequest request) {
+            URI createScan(ScanRequest request) {
+                return null;
             }
             @Mock
-            GetOpenSourceSummaryResponse getOpenSourceSummary(GetOpenSourceSummaryRequest request){
-                return new GetOpenSourceSummaryResponse();
+            getOpenSourceSummaryResponse getOpenSourceSummary(GetOpenSourceSummaryRequest request){
+                return new getOpenSourceSummaryResponse();
+            }
+            @Mock
+            void waitForScanToFinish(URI uri){
+
             }
         };
         new MockUp<CxWebService>() {
@@ -175,10 +143,17 @@ public class OpenSourceAnalyzerServiceTests {
                 return true;
             }
         };
-
+        new MockUp<FolderPattern>() {
+            @Mock
+            String generatePattern(String filterPattern, String excludeFolders) { return ""; }
+        };
+        new MockUp<CxZip>() {
+            @Mock
+            FilePath zipSourceCode(String filterPattern) { return null; }
+        };
 
         DependencyFolder folders = new DependencyFolder("test2", "");
-        OpenSourceAnalyzerService service = new OpenSourceAnalyzerService(null, folders, new RestClient("", null), 0, Logger.getLogger(getClass()), new CxWebService(null));
+        OpenSourceAnalyzerService service = new OpenSourceAnalyzerService(null, folders, new RestClient("", null), 0, Logger.getLogger(getClass()), new CxWebService(null), new CxZip(null, null, null), new FolderPattern(null, null, null));
 
         service.analyze();
 
@@ -189,14 +164,6 @@ public class OpenSourceAnalyzerServiceTests {
     @Test
     public void openSourceAnalyzerServiceTests_noLicense_logNoLicense() throws IOException, InterruptedException {
 
-        new MockUp<OpenSourceAnalyzerService>() {
-            @Mock
-            Collection<DependencyInfo> getDependenciesFromFolders(Invocation invocation) throws IOException, InterruptedException {
-                DependencyInfo info = new DependencyInfo();
-                info.setFilePath(new FilePath(new File("test")));
-                return new ArrayList<DependencyInfo>(Arrays.asList(info));
-            }
-        };
         new MockUp<Logger>() {
             void error(Object message) {
                 assertTrue(message.toString().contains(OpenSourceAnalyzerService.NO_LICENSE_ERROR));
@@ -211,9 +178,17 @@ public class OpenSourceAnalyzerServiceTests {
                 return false;
             }
         };
+        new MockUp<FolderPattern>() {
+            @Mock
+            String generatePattern(String filterPattern, String excludeFolders) { return ""; }
+        };
+        new MockUp<CxZip>() {
+            @Mock
+            FilePath zipSourceCode(String filterPattern) { return null; }
+        };
 
         DependencyFolder folders = new DependencyFolder("test2", "");
-        OpenSourceAnalyzerService service = new OpenSourceAnalyzerService(null, folders, null, 0, Logger.getLogger(getClass()), new CxWebService(null));
+        OpenSourceAnalyzerService service = new OpenSourceAnalyzerService(null, folders, null, 0, Logger.getLogger(getClass()), new CxWebService(null), new CxZip(null, null, null), new FolderPattern(null, null, null));
 
         service.analyze();
 

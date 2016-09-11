@@ -1,11 +1,13 @@
 package com.checkmarx.jenkins;
 
-import com.checkmarx.jenkins.folder.FolderPattern;
+import com.checkmarx.jenkins.filesystem.FolderPattern;
+import com.checkmarx.jenkins.filesystem.zip.CxZip;
 import com.checkmarx.jenkins.opensourceanalysis.DependencyFolder;
 import com.checkmarx.jenkins.opensourceanalysis.OpenSourceAnalyzerService;
 import com.checkmarx.jenkins.web.client.RestClient;
 import com.checkmarx.jenkins.web.contracts.ProjectContract;
 import com.checkmarx.jenkins.web.model.AuthenticationRequest;
+import com.checkmarx.ws.CxJenkinsWebService.*;
 import hudson.AbortException;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -46,15 +48,6 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import com.checkmarx.components.zipper.Zipper;
-import com.checkmarx.ws.CxJenkinsWebService.CliScanArgs;
-import com.checkmarx.ws.CxJenkinsWebService.ConfigurationSet;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSBasicRepsonse;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSCreateReportResponse;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSReportType;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseRunID;
-import com.checkmarx.ws.CxJenkinsWebService.Group;
-import com.checkmarx.ws.CxJenkinsWebService.Preset;
-import com.checkmarx.ws.CxJenkinsWebService.ProjectDisplayData;
 
 import javax.xml.ws.WebServiceException;
 
@@ -406,7 +399,7 @@ public class CxScanBuilder extends Builder {
             if (shouldRunAsynchronous) {
                 logAsyncMessage(serverUrlToUse);
                 addScanResultAction(build, serverUrlToUse, shouldRunAsynchronous, null);
-                analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService);
+                analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService, listener);
                 return true;
             }
 
@@ -443,7 +436,7 @@ public class CxScanBuilder extends Builder {
 				return true;
 			}
 
-            analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService);
+            analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService, listener);
 
             return true;
 		} catch (IOException | WebServiceException e) {
@@ -503,12 +496,12 @@ public class CxScanBuilder extends Builder {
         return cxWebService.getProjectId(cliScanArgs.getPrjSettings());
     }
 
-    private void analyzeOpenSources(AbstractBuild<?, ?> build, String baseUri, String user, String password, long projectId, CxWebService webServiceClient) throws IOException, InterruptedException {
+    private void analyzeOpenSources(AbstractBuild<?, ?> build, String baseUri, String user, String password, long projectId, CxWebService webServiceClient, BuildListener listener) throws IOException, InterruptedException {
         DependencyFolder folders = new DependencyFolder(includeOpenSourceFolders, excludeOpenSourceFolders);
         AuthenticationRequest authReq = new AuthenticationRequest(user, password);
 		try (RestClient restClient = new RestClient(baseUri, authReq)) {
 			OpenSourceAnalyzerService osaService = new OpenSourceAnalyzerService(build, folders, restClient, projectId,
-					instanceLogger, webServiceClient);
+					instanceLogger, webServiceClient, new CxZip(instanceLogger, build, listener), new FolderPattern(instanceLogger, build, listener));
 			osaService.analyze();
 		}
     }

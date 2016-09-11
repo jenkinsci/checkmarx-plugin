@@ -1,4 +1,4 @@
-package com.checkmarx.jenkins;
+package com.checkmarx.jenkins.filesystem.zip;
 
 import hudson.FilePath;
 

@@ -1,4 +1,4 @@
-package com.checkmarx.jenkins;
+package com.checkmarx.jenkins.filesystem.zip;
 
 import hudson.AbortException;
 import hudson.FilePath;
@@ -44,6 +44,14 @@ public class CxZip {
         logger.info("Temporary file with zipped and base64 encoded sources was created at: " + tempFile.getRemote());
         listener.getLogger().flush();
 
+        return tempFile;
+    }
+
+    public FilePath zipSourceCode(String filterPattern) throws IOException, InterruptedException {
+        ZipperCallable zipperCallable = new ZipperCallable(filterPattern);
+        FilePath baseDir = build.getWorkspace();
+        final CxZipResult zipResult = baseDir.act(zipperCallable);
+        final FilePath tempFile = zipResult.getTempFile();
         return tempFile;
     }
 }
