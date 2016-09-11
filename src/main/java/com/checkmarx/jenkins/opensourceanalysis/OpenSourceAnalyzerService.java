@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 
 import com.checkmarx.jenkins.web.model.ScanRequest;
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryRequest;
-import com.checkmarx.jenkins.web.model.getOpenSourceSummaryResponse;
+import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
 
 /**
  * @author tsahi
@@ -61,7 +61,7 @@ public class OpenSourceAnalyzerService {
             FilePath zipFile = zipOpenSourceCode();
             URI scanStatusUri = createScan(zipFile);
             waitForScanToFinish(scanStatusUri);
-            getOpenSourceSummaryResponse summaryResponse = getOpenSourceSummary();
+            GetOpenSourceSummaryResponse summaryResponse = getOpenSourceSummary();
             printResultsToOutput(summaryResponse);
             logger.info(OSA_RUN_ENDED);
         }
@@ -92,12 +92,12 @@ public class OpenSourceAnalyzerService {
         restClient.waitForScanToFinish(uri);
     }
 
-    private getOpenSourceSummaryResponse getOpenSourceSummary() throws Exception {
+    private GetOpenSourceSummaryResponse getOpenSourceSummary() throws Exception {
         GetOpenSourceSummaryRequest summaryRequest = new GetOpenSourceSummaryRequest(projectId);
         return restClient.getOpenSourceSummary(summaryRequest);
     }
 
-    private void printResultsToOutput(getOpenSourceSummaryResponse results) {
+    private void printResultsToOutput(GetOpenSourceSummaryResponse results) {
         StringBuilder sb = new StringBuilder();
         sb.append("\n").append("open source libraries: ").append(results.getTotal()).append("\n");
         sb.append("vulnerable and outdated: ").append(results.getVulnerableAndOutdated()).append("\n");

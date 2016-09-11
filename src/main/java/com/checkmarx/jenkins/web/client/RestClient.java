@@ -95,7 +95,7 @@ public class RestClient implements Closeable {
         return response.getStatus() != Response.Status.NO_CONTENT.getStatusCode();
     }
 
-    public getOpenSourceSummaryResponse getOpenSourceSummary(GetOpenSourceSummaryRequest request) {
+    public GetOpenSourceSummaryResponse getOpenSourceSummary(GetOpenSourceSummaryRequest request) {
         Map<String, NewCookie> cookies = authenticate();
         Invocation invocation = root.path(ANALYZE_SUMMARY_PATH)
                 .resolveTemplate("projectId", request.getProjectId())
@@ -106,7 +106,7 @@ public class RestClient implements Closeable {
                 .buildGet();
         Response response = invokeRequet(invocation);
         validateResponse(response);
-        return response.readEntity(getOpenSourceSummaryResponse.class);
+        return response.readEntity(GetOpenSourceSummaryResponse.class);
     }
 
     private Map<String, NewCookie> authenticate() {

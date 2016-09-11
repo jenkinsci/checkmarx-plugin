@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @since 02/02/16
  */
 @XmlRootElement
-public class getOpenSourceSummaryResponse {
+public class GetOpenSourceSummaryResponse {
     @XmlElement(name="nonVulnerableLibraries")
     private String noKnownVulnerabilities;
     @XmlElement(name="vulnerableAndUpdated")

@@ -8,7 +8,7 @@ import com.checkmarx.jenkins.opensourceanalysis.*;
 import com.checkmarx.jenkins.web.client.RestClient;
 import com.checkmarx.jenkins.web.model.ScanRequest;
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryRequest;
-import com.checkmarx.jenkins.web.model.getOpenSourceSummaryResponse;
+import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
 import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
 import mockit.Mock;
@@ -46,7 +46,7 @@ public class OpenSourceAnalyzerServiceTests {
         OpenSourceAnalyzerService service = new OpenSourceAnalyzerService(null, folders, null, 0, Logger.getLogger(getClass()), null, null, null);
         service.analyze();
     }
-    
+
     @Test
     public void analyze_withDependencies_NoError() throws IOException, InterruptedException {
 
@@ -100,9 +100,9 @@ public class OpenSourceAnalyzerServiceTests {
 
         new MockUp<OpenSourceAnalyzerService>() {
             @Mock
-            getOpenSourceSummaryResponse getOpenSourceSummary()
+            GetOpenSourceSummaryResponse getOpenSourceSummary()
             {
-                return new getOpenSourceSummaryResponse();
+                return new GetOpenSourceSummaryResponse();
             }
         };
         new MockUp<FoldersScanner>() {
@@ -126,8 +126,8 @@ public class OpenSourceAnalyzerServiceTests {
                 return null;
             }
             @Mock
-            getOpenSourceSummaryResponse getOpenSourceSummary(GetOpenSourceSummaryRequest request){
-                return new getOpenSourceSummaryResponse();
+            GetOpenSourceSummaryResponse getOpenSourceSummary(GetOpenSourceSummaryRequest request){
+                return new GetOpenSourceSummaryResponse();
             }
             @Mock
             void waitForScanToFinish(URI uri){
