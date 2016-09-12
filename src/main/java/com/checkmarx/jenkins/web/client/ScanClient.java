@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
  * @author tsahi
  * @since 02/02/16
  */
-public class RestClient implements Closeable {
+public class ScanClient implements Closeable {
     private static final String ROOT_PATH = "CxRestAPI/";
     private static final String AUTHENTICATION_PATH = "auth/login";
     private static final String ANALYZE_SUMMARY_PATH = "projects/{projectId}/opensourceanalysis/summaryresults";
@@ -33,7 +33,7 @@ public class RestClient implements Closeable {
     private Client client;
     private WebTarget root;
 
-    public RestClient(String serverUri, AuthenticationRequest authenticationRequest) {
+    public ScanClient(String serverUri, AuthenticationRequest authenticationRequest) {
         this.authenticationRequest = authenticationRequest;
         client = ClientBuilder.newBuilder().register(MultiPartFeature.class).build();
         root = client.target(serverUri).path(ROOT_PATH);
