@@ -29,6 +29,13 @@ public class GetOpenSourceSummaryResponse {
     private String analyzeTime;
     @XmlElement(name="vulnerabilityScore")
     private String vulnerabilityScore;
+    @XmlElement(name="highVulnerabilities")
+    private String highVulnerabilities;
+    @XmlElement(name="mediumVulnerabilities")
+    private String mediumVulnerabilities;
+    @XmlElement(name="lowVulnerabilities")
+    private String lowVulnerabilities;
+
 
     public String getNoKnownVulnerabilities() {
         return noKnownVulnerabilities;
@@ -82,4 +89,32 @@ public class GetOpenSourceSummaryResponse {
     {
         return vulnerabilityScore;
     }
+
+    public String getHighVulnerabilities()
+    {
+        return highVulnerabilities;
+    }
+
+    public void setHighVulnerabilities(String highVulnerabilities) {
+        this.highVulnerabilities = highVulnerabilities;
+    }
+
+    public String getMediumVulnerabilities()
+    {
+        return mediumVulnerabilities;
+    }
+
+    public void setMediumVulnerabilities(String mediumVulnerabilities) {
+        this.mediumVulnerabilities = mediumVulnerabilities;
+    }
+
+    public String getLowVulnerabilities()
+    {
+        return lowVulnerabilities;
+    }
+
+    public void setLowVulnerabilities(String lowVulnerabilities) {
+        this.lowVulnerabilities = lowVulnerabilities;
+    }
+
 }

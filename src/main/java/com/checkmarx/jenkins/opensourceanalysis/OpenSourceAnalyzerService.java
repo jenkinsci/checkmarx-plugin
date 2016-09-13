@@ -102,6 +102,9 @@ public class OpenSourceAnalyzerService {
         sb.append("\n").append("open source libraries: ").append(results.getTotal()).append("\n");
         sb.append("vulnerable and outdated: ").append(results.getVulnerableAndOutdated()).append("\n");
         sb.append("vulnerable and updated: ").append(results.getVulnerableAndUpdate()).append("\n");
+        sb.append("high vulnerabilities: ").append(results.getHighVulnerabilities()).append("\n");
+        sb.append("medium vulnerabilities: ").append(results.getMediumVulnerabilities()).append("\n");
+        sb.append("low vulnerabilities: ").append(results.getLowVulnerabilities()).append("\n");
         sb.append("with no known vulnerabilities: ").append(results.getNoKnownVulnerabilities()).append("\n");
         sb.append("vulnerability score: ").append(results.getVulnerabilityScore()).append("\n");
         logger.info(sb.toString());
