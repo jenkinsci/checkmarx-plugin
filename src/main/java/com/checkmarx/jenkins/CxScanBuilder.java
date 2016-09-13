@@ -501,9 +501,9 @@ public class CxScanBuilder extends Builder {
 		try (ScanClient scanClient = new ScanClient(baseUri, authReq)) {
 			ScanService scanService = new ScanService(folders,
 					instanceLogger, webServiceClient, new CxZip(instanceLogger, build, listener), new FolderPattern(instanceLogger, build, listener));
-            ScanFactory scanFactory = new ScanFactory(scanClient, projectId, instanceLogger);
-            Scanner scanner = scanFactory.create(shouldRunAsynchronous);
-			scanService.scan(scanner);
+            ScanSenderFactory scanSenderFactory = new ScanSenderFactory(scanClient, projectId, instanceLogger);
+            ScanSender scanSender = scanSenderFactory.create(shouldRunAsynchronous);
+			scanService.scan(scanSender);
 		}
     }
 

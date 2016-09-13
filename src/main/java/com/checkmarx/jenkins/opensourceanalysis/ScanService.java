@@ -3,6 +3,7 @@ package com.checkmarx.jenkins.opensourceanalysis;
 import com.checkmarx.jenkins.CxWebService;
 import com.checkmarx.jenkins.filesystem.zip.CxZip;
 import com.checkmarx.jenkins.filesystem.FolderPattern;
+import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
 import hudson.FilePath;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -31,7 +32,7 @@ public class ScanService {
         this.folderPattern = folderPattern;
     }
 
-    public void scan(Scanner scanner) {
+    public void scan(ScanSender scanSender) {
         try{
             if (!isOsaConfigured()) {
                 return;
@@ -44,7 +45,11 @@ public class ScanService {
 
             logger.info(OSA_RUN_STARTED);
             FilePath sourceCodeZip = zipOpenSourceCode();
-            scanner.scan(sourceCodeZip);
+            scanSender.send(sourceCodeZip);
+            if (scanSender instanceof SynchronousScanSender ){
+                GetOpenSourceSummaryResponse scanResults = ((SynchronousScanSender) scanSender).getScanResults();
+                printResultsToOutput(scanResults);
+            }
             logger.info(OSA_RUN_ENDED);
         }
         catch (Exception e){
@@ -63,6 +68,16 @@ public class ScanService {
     private FilePath zipOpenSourceCode() throws IOException, InterruptedException {
         String combinedFilterPattern = folderPattern.generatePattern(dependencyFolder.getInclude(), dependencyFolder.getExclude());
         return cxZip.zipSourceCode(combinedFilterPattern);
+    }
+
+    private void printResultsToOutput(GetOpenSourceSummaryResponse results) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n").append("open source libraries: ").append(results.getTotal()).append("\n");
+        sb.append("vulnerable and outdated: ").append(results.getVulnerableAndOutdated()).append("\n");
+        sb.append("vulnerable and updated: ").append(results.getVulnerableAndUpdate()).append("\n");
+        sb.append("with no known vulnerabilities: ").append(results.getNoKnownVulnerabilities()).append("\n");
+        sb.append("vulnerability score: ").append(results.getVulnerabilityScore()).append("\n");
+        logger.info(sb.toString());
     }
 
 }

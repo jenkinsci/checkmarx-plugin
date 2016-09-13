@@ -3,7 +3,6 @@ package com.checkmarx.jenkins;
 import com.checkmarx.jenkins.filesystem.FolderPattern;
 import com.checkmarx.jenkins.filesystem.zip.CxZip;
 import com.checkmarx.jenkins.opensourceanalysis.*;
-import com.checkmarx.jenkins.opensourceanalysis.Scanner;
 import com.checkmarx.jenkins.web.client.ScanClient;
 import com.checkmarx.jenkins.web.model.ScanRequest;
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryRequest;
@@ -72,7 +71,7 @@ public class OpenSourceAnalyzerServiceTests {
 
         DependencyFolder folders = new DependencyFolder("test2", "");
         ScanService service = new ScanService(folders, Logger.getLogger(getClass()), new CxWebService(null), new CxZip(null, null, null), new FolderPattern(null, null, null));
-        Scanner scanner = new ScannerInitiator(new ScanClient("", null), 0);
+        ScanSender scanner = new ScanSender(new ScanClient("", null), 0);
         service.scan(scanner);
     }
 
@@ -120,7 +119,7 @@ public class OpenSourceAnalyzerServiceTests {
         DependencyFolder folders = new DependencyFolder("test2", "");
         ScanService service = new ScanService(folders, Logger.getLogger(getClass()), new CxWebService(null), new CxZip(null, null, null), new FolderPattern(null, null, null));
 
-        Scanner scanner = new ScannerInitiator(new ScanClient("", null), 0);
+        ScanSender scanner = new ScanSender(new ScanClient("", null), 0);
         service.scan(scanner);
 
         assertTrue(infoMessages.contains("OSA (open source analysis) Run has started"));
@@ -156,7 +155,7 @@ public class OpenSourceAnalyzerServiceTests {
         DependencyFolder folders = new DependencyFolder("test2", "");
         ScanService service = new ScanService(folders, Logger.getLogger(getClass()), new CxWebService(null), new CxZip(null, null, null), new FolderPattern(null, null, null));
 
-        Scanner scanner = new ScannerInitiator(new ScanClient("", null), 0);
+        ScanSender scanner = new ScanSender(new ScanClient("", null), 0);
         service.scan(scanner);
 
     }
