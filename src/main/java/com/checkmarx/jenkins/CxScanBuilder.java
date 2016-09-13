@@ -2,9 +2,8 @@ package com.checkmarx.jenkins;
 
 import com.checkmarx.jenkins.filesystem.FolderPattern;
 import com.checkmarx.jenkins.filesystem.zip.CxZip;
-import com.checkmarx.jenkins.opensourceanalysis.DependencyFolder;
-import com.checkmarx.jenkins.opensourceanalysis.OpenSourceAnalyzerService;
-import com.checkmarx.jenkins.web.client.RestClient;
+import com.checkmarx.jenkins.opensourceanalysis.*;
+import com.checkmarx.jenkins.web.client.ScanClient;
 import com.checkmarx.jenkins.web.contracts.ProjectContract;
 import com.checkmarx.jenkins.web.model.AuthenticationRequest;
 import com.checkmarx.ws.CxJenkinsWebService.*;
@@ -399,7 +398,7 @@ public class CxScanBuilder extends Builder {
             if (shouldRunAsynchronous) {
                 logAsyncMessage(serverUrlToUse);
                 addScanResultAction(build, serverUrlToUse, shouldRunAsynchronous, null);
-                analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService, listener);
+                analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService, listener, shouldRunAsynchronous);
                 return true;
             }
 
@@ -436,7 +435,7 @@ public class CxScanBuilder extends Builder {
 				return true;
 			}
 
-            analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService, listener);
+            analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService, listener, shouldRunAsynchronous);
 
             return true;
 		} catch (IOException | WebServiceException e) {
@@ -496,13 +495,15 @@ public class CxScanBuilder extends Builder {
         return cxWebService.getProjectId(cliScanArgs.getPrjSettings());
     }
 
-    private void analyzeOpenSources(AbstractBuild<?, ?> build, String baseUri, String user, String password, long projectId, CxWebService webServiceClient, BuildListener listener) throws IOException, InterruptedException {
+    private void analyzeOpenSources(AbstractBuild<?, ?> build, String baseUri, String user, String password, long projectId, CxWebService webServiceClient, BuildListener listener, boolean shouldRunAsynchronous) throws IOException, InterruptedException {
         DependencyFolder folders = new DependencyFolder(includeOpenSourceFolders, excludeOpenSourceFolders);
         AuthenticationRequest authReq = new AuthenticationRequest(user, password);
-		try (RestClient restClient = new RestClient(baseUri, authReq)) {
-			OpenSourceAnalyzerService osaService = new OpenSourceAnalyzerService(build, folders, restClient, projectId,
+		try (ScanClient scanClient = new ScanClient(baseUri, authReq)) {
+			ScanService scanService = new ScanService(folders,
 					instanceLogger, webServiceClient, new CxZip(instanceLogger, build, listener), new FolderPattern(instanceLogger, build, listener));
-			osaService.analyze();
+            ScanSenderFactory scanSenderFactory = new ScanSenderFactory(scanClient, projectId, instanceLogger);
+            ScanSender scanSender = scanSenderFactory.create(shouldRunAsynchronous);
+			scanService.scan(scanSender);
 		}
     }
 
@@ -912,7 +913,7 @@ public class CxScanBuilder extends Builder {
             try {
                 Boolean isOsaLicenseValid = cxWebService.isOsaLicenseValid();
                 if (!isOsaLicenseValid){
-                    return FormValidation.error(OpenSourceAnalyzerService.NO_LICENSE_ERROR);
+                    return FormValidation.error(ScanService.NO_LICENSE_ERROR);
                 }
                 return FormValidation.ok();
 

@@ -1,5 +1,6 @@
 package com.checkmarx.jenkins.web.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -9,6 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author tsahi
  * @since 02/02/16
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 @XmlRootElement
 public class GetOpenSourceSummaryResponse {
     @XmlElement(name="nonVulnerableLibraries")

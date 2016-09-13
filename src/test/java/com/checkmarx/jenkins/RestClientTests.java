@@ -1,6 +1,6 @@
 package com.checkmarx.jenkins;
 
-import com.checkmarx.jenkins.web.client.RestClient;
+import com.checkmarx.jenkins.web.client.ScanClient;
 import com.checkmarx.jenkins.web.model.ScanRequest;
 import com.checkmarx.jenkins.web.model.AuthenticationRequest;
 import com.checkmarx.jenkins.web.model.CxException;
@@ -36,7 +36,7 @@ public class RestClientTests {
                 return ImmutableMap.of("cxCookie",new NewCookie("",""), "CXCSRFToken",new NewCookie("",""));
             }
         };
-        new MockUp<RestClient>() {
+        new MockUp<ScanClient>() {
             @Mock
             Response invokeRequet(Invocation invocation) {
                 return responseMockUp.getMockInstance();
@@ -51,7 +51,7 @@ public class RestClientTests {
             void $init(final String name, final File fileEntity) { }
         };
 
-        RestClient client = new RestClient("", new AuthenticationRequest("", ""));
+        ScanClient client = new ScanClient("", new AuthenticationRequest("", ""));
         client.createScan(new ScanRequest(0, null));
     }
 
@@ -72,7 +72,7 @@ public class RestClientTests {
               return (T)new CxException();
             };
         };
-        new MockUp<RestClient>() {
+        new MockUp<ScanClient>() {
             @Mock
             Response invokeRequet(Invocation invocation) {
                 return responseMockUp.getMockInstance();
@@ -87,7 +87,7 @@ public class RestClientTests {
             void $init(final String name, final File fileEntity) { }
         };
 
-        RestClient client = new RestClient("", new AuthenticationRequest("", ""));
+        ScanClient client = new ScanClient("", new AuthenticationRequest("", ""));
         client.createScan(new ScanRequest(0, null));
     }
 
@@ -108,7 +108,7 @@ public class RestClientTests {
                 return (T)new CxException();
             };
         };
-        new MockUp<RestClient>() {
+        new MockUp<ScanClient>() {
             @Mock
             Response invokeRequet(Invocation invocation) {
                 return responseMockUp.getMockInstance();
@@ -123,7 +123,7 @@ public class RestClientTests {
             void $init(final String name, final File fileEntity) { }
         };
 
-        RestClient client = new RestClient("", new AuthenticationRequest("", ""));
+        ScanClient client = new ScanClient("", new AuthenticationRequest("", ""));
         try {
             client.createScan(new ScanRequest(0, null));
         }
