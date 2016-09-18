@@ -32,7 +32,7 @@ public class OpenSourceAnalyzerServiceTests {
     @Test
     public void analyze_noIncludes_nothingShouldHappen() throws IOException, InterruptedException {
         DependencyFolder folders = new DependencyFolder("", "test");
-        ScanService service = new ScanService(folders, Logger.getLogger(getClass()), null, null, null);
+        ScanService service = new ScanService(folders, Logger.getLogger(getClass()), null, null, null, null);
         service.scan(null);
     }
 
@@ -70,7 +70,7 @@ public class OpenSourceAnalyzerServiceTests {
         };
 
         DependencyFolder folders = new DependencyFolder("test2", "");
-        ScanService service = new ScanService(folders, Logger.getLogger(getClass()), new CxWebService(null), new CxZip(null, null, null), new FolderPattern(null, null, null));
+        ScanService service = new ScanService(folders, Logger.getLogger(getClass()), new CxWebService(null), new CxZip(null, null, null), new FolderPattern(null, null, null), null);
         ScanSender scanner = new ScanSender(new ScanClient("", null), 0);
         service.scan(scanner);
     }
@@ -117,7 +117,7 @@ public class OpenSourceAnalyzerServiceTests {
         };
 
         DependencyFolder folders = new DependencyFolder("test2", "");
-        ScanService service = new ScanService(folders, Logger.getLogger(getClass()), new CxWebService(null), new CxZip(null, null, null), new FolderPattern(null, null, null));
+        ScanService service = new ScanService(folders, Logger.getLogger(getClass()), new CxWebService(null), new CxZip(null, null, null), new FolderPattern(null, null, null), null);
 
         ScanSender scanner = new ScanSender(new ScanClient("", null), 0);
         service.scan(scanner);
@@ -153,7 +153,7 @@ public class OpenSourceAnalyzerServiceTests {
         };
 
         DependencyFolder folders = new DependencyFolder("test2", "");
-        ScanService service = new ScanService(folders, Logger.getLogger(getClass()), new CxWebService(null), new CxZip(null, null, null), new FolderPattern(null, null, null));
+        ScanService service = new ScanService(folders, Logger.getLogger(getClass()), new CxWebService(null), new CxZip(null, null, null), new FolderPattern(null, null, null), null);
 
         ScanSender scanner = new ScanSender(new ScanClient("", null), 0);
         service.scan(scanner);

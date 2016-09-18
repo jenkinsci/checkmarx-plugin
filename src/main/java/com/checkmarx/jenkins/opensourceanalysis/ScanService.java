@@ -17,19 +17,21 @@ public class ScanService {
 
     private static final String OSA_RUN_STARTED="OSA (open source analysis) Run has started";
     private static final String OSA_RUN_ENDED="OSA (open source analysis) Run has finished successfully";
+    public static final String NO_LICENSE_ERROR = "Open Source Analysis License is not enabled for this project. Please contact your CxSAST Administrator";
     private DependencyFolder dependencyFolder;
     private transient Logger logger;
     private CxWebService webServiceClient;
     private final CxZip cxZip;
     private final FolderPattern folderPattern;
-    public static final String NO_LICENSE_ERROR = "Open Source Analysis License is not enabled for this project. Please contact your CxSAST Administrator";
+    private ScanResultsPresenter scanResultsPresenter;
 
-    public ScanService(DependencyFolder dependencyFolder, Logger logger, CxWebService webServiceClient, CxZip cxZip, FolderPattern folderPattern) {
+    public ScanService(DependencyFolder dependencyFolder, Logger logger, CxWebService webServiceClient, CxZip cxZip, FolderPattern folderPattern, ScanResultsPresenter scanResultsPresenter) {
         this.dependencyFolder = dependencyFolder;
         this.logger = logger;
         this.webServiceClient = webServiceClient;
         this.cxZip = cxZip;
         this.folderPattern = folderPattern;
+        this.scanResultsPresenter = scanResultsPresenter;
     }
 
     public void scan(ScanSender scanSender) {
@@ -49,6 +51,7 @@ public class ScanService {
             if (scanSender instanceof SynchronousScanSender ){
                 GetOpenSourceSummaryResponse scanResults = ((SynchronousScanSender) scanSender).getScanResults();
                 printResultsToOutput(scanResults);
+                scanResultsPresenter.printResultsToOutput(scanResults);
             }
             logger.info(OSA_RUN_ENDED);
         }

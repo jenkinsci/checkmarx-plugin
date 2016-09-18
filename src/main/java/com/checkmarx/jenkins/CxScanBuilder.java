@@ -502,7 +502,7 @@ public class CxScanBuilder extends Builder {
         AuthenticationRequest authReq = new AuthenticationRequest(user, password);
 		try (ScanClient scanClient = new ScanClient(baseUri, authReq)) {
 			ScanService scanService = new ScanService(folders,
-					instanceLogger, webServiceClient, new CxZip(instanceLogger, build, listener), new FolderPattern(instanceLogger, build, listener));
+					instanceLogger, webServiceClient, new CxZip(instanceLogger, build, listener), new FolderPattern(instanceLogger, build, listener), new ScanResultsPresenter(instanceLogger));
             ScanSenderFactory scanSenderFactory = new ScanSenderFactory(scanClient, projectId, instanceLogger);
             ScanSender scanSender = scanSenderFactory.create(shouldRunAsynchronous);
 			scanService.scan(scanSender);
