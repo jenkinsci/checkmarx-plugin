@@ -60,7 +60,7 @@ public class CxWebService {
 	private static final int WEBSERVICE_API_VERSION = 1;
 	private static final String CXWSRESOLVER_PATH = "/cxwebinterface/cxwsresolver.asmx";
 	private static final int LCID = 1033; // English
-	private static final int MILISEOUNDS_IN_HOUR = 1000 * 60 * 60;
+	private static final int MILISECONDS_IN_MINUTE = 1000 * 60;
 
 	private final Logger logger;
 	private String sessionId;
@@ -244,7 +244,7 @@ public class CxWebService {
 				Thread.sleep(10L * 1000);
 
 				if (scanTimeOutEnabled
-						&& jobStartTime + scanTimeoutDuration * MILISEOUNDS_IN_HOUR < System.currentTimeMillis()) {
+						&& jobStartTime + scanTimeoutDuration * MILISECONDS_IN_MINUTE < System.currentTimeMillis()) {
 					logger.info("Scan duration exceeded timeout threshold");
 					return 0;
 				}
