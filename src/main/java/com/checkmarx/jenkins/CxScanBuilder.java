@@ -126,6 +126,8 @@ public class CxScanBuilder extends Builder {
     public static final String PROJECT_STATE_URL_TEMPLATE = "/CxWebClient/portal#/projectState/{0}/Summary";
     public static final String ASYNC_MESSAGE = "CxSAST scan was run in asynchronous mode.\nRefer to the {0} for the scan results\n";
 
+    public static final int MINIMUM_TIMEOUT_IN_MINUTES = 1;
+
     //////////////////////////////////////////////////////////////////////////////////////
     // Constructors
     //////////////////////////////////////////////////////////////////////////////////////
@@ -736,7 +738,7 @@ public class CxScanBuilder extends Builder {
 		private JobGlobalStatusOnError jobGlobalStatusOnError;
 		private JobGlobalStatusOnError jobGlobalStatusOnThresholdViolation = JobGlobalStatusOnError.FAILURE;
         private boolean scanTimeOutEnabled;
-        private int scanTimeoutDuration;
+        private int scanTimeoutDurationInMinutes;
         private boolean lockVulnerabilitySettings = true;
         
         private final transient Pattern msGuid = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
@@ -841,16 +843,16 @@ public class CxScanBuilder extends Builder {
         }
 
         public int getScanTimeoutDuration() {
-            if (scanTimeoutDuration < 1) {
-                scanTimeoutDuration  = 1;
+            if (!timeoutValid(scanTimeoutDurationInMinutes)) {
+                scanTimeoutDurationInMinutes = 60;
             }
 
-            return scanTimeoutDuration;
+            return scanTimeoutDurationInMinutes;
         }
 
-        public void setScanTimeoutDuration(int scanTimeoutDuration) {
-            if (scanTimeoutDuration >= 1) {
-                this.scanTimeoutDuration = scanTimeoutDuration;
+        public void setScanTimeoutDuration(int scanTimeoutDurationInMinutes) {
+            if (timeoutValid(scanTimeoutDurationInMinutes)) {
+                this.scanTimeoutDurationInMinutes = scanTimeoutDurationInMinutes;
             }
         }
 
@@ -920,6 +922,11 @@ public class CxScanBuilder extends Builder {
             } catch (Exception e) {
                 return FormValidation.error(e.getMessage());
             }
+        }
+
+        private boolean timeoutValid(int timeInput)
+        {
+            return timeInput >= MINIMUM_TIMEOUT_IN_MINUTES;
         }
 
         private boolean osaConfigured(String includeOpenSourceFolders) {

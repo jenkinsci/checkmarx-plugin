@@ -65,7 +65,7 @@
 		</f:optionalBlock>
 
 		<f:optionalBlock title="Set job scan timeout threshold" inline="true" field="scanTimeOutEnabled">
-			<f:entry title="Scan timeout (hours)" field="scanTimeoutDuration">
+			<f:entry title="Scan timeout (minutes)" field="scanTimeoutDuration">
 				<f:number clazz="positive-number" min="0" step="1" default="1" />
 			</f:entry>
 		</f:optionalBlock>
