@@ -50,7 +50,6 @@ public class ScanService {
             scanSender.send(sourceCodeZip);
             if (scanSender instanceof SynchronousScanSender ){
                 GetOpenSourceSummaryResponse scanResults = ((SynchronousScanSender) scanSender).getScanResults();
-                printResultsToOutput(scanResults);
                 scanResultsPresenter.printResultsToOutput(scanResults);
             }
             logger.info(OSA_RUN_ENDED);
@@ -72,18 +71,4 @@ public class ScanService {
         String combinedFilterPattern = folderPattern.generatePattern(dependencyFolder.getInclude(), dependencyFolder.getExclude());
         return cxZip.zipSourceCode(combinedFilterPattern);
     }
-
-    private void printResultsToOutput(GetOpenSourceSummaryResponse results) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("\n").append("open source libraries: ").append(results.getTotal()).append("\n");
-        sb.append("vulnerable and outdated: ").append(results.getVulnerableAndOutdated()).append("\n");
-        sb.append("vulnerable and updated: ").append(results.getVulnerableAndUpdate()).append("\n");
-        sb.append("high vulnerabilities: ").append(results.getHighVulnerabilities()).append("\n");
-        sb.append("medium vulnerabilities: ").append(results.getMediumVulnerabilities()).append("\n");
-        sb.append("low vulnerabilities: ").append(results.getLowVulnerabilities()).append("\n");
-        sb.append("with no known vulnerabilities: ").append(results.getNoKnownVulnerabilities()).append("\n");
-        sb.append("vulnerability score: ").append(results.getVulnerabilityScore()).append("\n");
-        logger.info(sb.toString());
-    }
-
 }
