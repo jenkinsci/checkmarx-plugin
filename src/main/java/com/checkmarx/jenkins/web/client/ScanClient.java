@@ -142,7 +142,11 @@ public class ScanClient implements Closeable {
 
     private void ThrowCxException(Response response) {
         CxException cxException = response.readEntity(CxException.class);
-        throw new WebApplicationException(cxException.getMessageCode() + "\n" + cxException.getMessageDetails(), response);
+        if (cxException != null) {
+            throw new WebApplicationException(cxException.getMessageCode() + "\n" + cxException.getMessageDetails(), response);
+        }else {
+            throw new WebApplicationException(response);
+        }
     }
 
     @Override
