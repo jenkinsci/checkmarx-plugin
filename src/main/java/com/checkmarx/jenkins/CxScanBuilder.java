@@ -738,7 +738,7 @@ public class CxScanBuilder extends Builder {
 		private JobGlobalStatusOnError jobGlobalStatusOnError;
 		private JobGlobalStatusOnError jobGlobalStatusOnThresholdViolation = JobGlobalStatusOnError.FAILURE;
         private boolean scanTimeOutEnabled;
-        private int scanTimeoutDurationInMinutes;
+        private double scanTimeoutDuration; // In Hours.
         private boolean lockVulnerabilitySettings = true;
         
         private final transient Pattern msGuid = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
@@ -843,16 +843,16 @@ public class CxScanBuilder extends Builder {
         }
 
         public int getScanTimeoutDuration() {
-            if (!timeoutValid(scanTimeoutDurationInMinutes)) {
-                scanTimeoutDurationInMinutes = 60;
+            if (!timeoutValid(scanTimeoutDuration)) {
+                scanTimeoutDuration = 1;
             }
 
-            return scanTimeoutDurationInMinutes;
+            return (int)Math.round(scanTimeoutDuration * 60);
         }
 
         public void setScanTimeoutDuration(int scanTimeoutDurationInMinutes) {
             if (timeoutValid(scanTimeoutDurationInMinutes)) {
-                this.scanTimeoutDurationInMinutes = scanTimeoutDurationInMinutes;
+                this.scanTimeoutDuration = scanTimeoutDurationInMinutes / (double)60;
             }
         }
 
@@ -924,7 +924,7 @@ public class CxScanBuilder extends Builder {
             }
         }
 
-        private boolean timeoutValid(int timeInput)
+        private boolean timeoutValid(double timeInput)
         {
             return timeInput >= MINIMUM_TIMEOUT_IN_MINUTES;
         }
