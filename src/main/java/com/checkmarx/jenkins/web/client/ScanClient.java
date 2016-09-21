@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 public class ScanClient implements Closeable {
     private static final String ROOT_PATH = "CxRestAPI/";
     private static final String AUTHENTICATION_PATH = "auth/login";
-    private static final String ANALYZE_SUMMARY_PATH = "projects/{projectId}/opensourceanalysis/summaryresults";
+    private static final String ANALYZE_SUMMARY_PATH = "projects/{projectId}/summaryresults";
     private static final String ANALYZE_PATH = "projects/{projectId}/scans";
     private static final String FAILED_TO_CONNECT_CX_SERVER_ERROR = "connection to checkmarx server failed";
     private static final String CX_COOKIE = "cxCookie";
