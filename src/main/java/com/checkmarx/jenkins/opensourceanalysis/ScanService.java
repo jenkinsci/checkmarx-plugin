@@ -24,17 +24,19 @@ public class ScanService {
     private final CxZip cxZip;
     private final FolderPattern folderPattern;
     private ScanResultsPresenter scanResultsPresenter;
+    private ScanSender scanSender;
 
-    public ScanService(DependencyFolder dependencyFolder, Logger logger, CxWebService webServiceClient, CxZip cxZip, FolderPattern folderPattern, ScanResultsPresenter scanResultsPresenter) {
+    public ScanService(DependencyFolder dependencyFolder, Logger logger, CxWebService webServiceClient, CxZip cxZip, FolderPattern folderPattern, ScanResultsPresenter scanResultsPresenter, ScanSender scanSender) {
         this.dependencyFolder = dependencyFolder;
         this.logger = logger;
         this.webServiceClient = webServiceClient;
         this.cxZip = cxZip;
         this.folderPattern = folderPattern;
         this.scanResultsPresenter = scanResultsPresenter;
+        this.scanSender = scanSender;
     }
 
-    public void scan(ScanSender scanSender) {
+    public void scan(boolean asynchronousScan) {
         try{
             if (!isOsaConfigured()) {
                 return;
@@ -47,9 +49,10 @@ public class ScanService {
 
             logger.info(OSA_RUN_STARTED);
             FilePath sourceCodeZip = zipOpenSourceCode();
-            scanSender.send(sourceCodeZip);
-            if (scanSender instanceof SynchronousScanSender ){
-                GetOpenSourceSummaryResponse scanResults = ((SynchronousScanSender) scanSender).getScanResults();
+            if (asynchronousScan ){
+                scanSender.sendAsync(sourceCodeZip);
+            }else {
+                GetOpenSourceSummaryResponse scanResults = scanSender.send(sourceCodeZip);;
                 scanResultsPresenter.printResultsToOutput(scanResults);
             }
             logger.info(OSA_RUN_ENDED);
