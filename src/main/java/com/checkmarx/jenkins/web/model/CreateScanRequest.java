@@ -8,13 +8,13 @@ import java.util.List;
 
 /**
  */
-public class ScanRequest {
+public class CreateScanRequest {
 
     private long projectId;
     private FilePath zipFile;
     public static final int JENKINS_ORIGIN = 1;
 
-    public ScanRequest(long projectId, FilePath zipFile){
+    public CreateScanRequest(long projectId, FilePath zipFile){
         this.projectId = projectId;
         this.zipFile = zipFile;
     }

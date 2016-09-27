@@ -2,7 +2,7 @@ package com.checkmarx.jenkins.opensourceanalysis;
 import com.checkmarx.jenkins.web.client.ScanClient;
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryRequest;
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
-import com.checkmarx.jenkins.web.model.ScanRequest;
+import com.checkmarx.jenkins.web.model.CreateScanRequest;
 import hudson.FilePath;
 
 import java.net.URI;
@@ -32,7 +32,7 @@ public class ScanSender {
     }
 
     private URI createScan(FilePath zipFile) throws Exception {
-        ScanRequest anaReq = new ScanRequest(projectId, zipFile);
+        CreateScanRequest anaReq = new CreateScanRequest(projectId, zipFile);
         return scanClient.createScan(anaReq);
     }
 

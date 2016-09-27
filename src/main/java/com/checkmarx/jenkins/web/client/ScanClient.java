@@ -39,7 +39,7 @@ public class ScanClient implements Closeable {
         root = client.target(serverUri).path(ROOT_PATH);
     }
 
-    public URI createScan(ScanRequest request) {
+    public URI createScan(CreateScanRequest request) {
         final MultiPart multipart = createScanMultiPartRequest(request);
         Map<String, NewCookie> cookies = authenticate();
         Invocation invocation = root.path(ANALYZE_PATH)
@@ -51,18 +51,19 @@ public class ScanClient implements Closeable {
                 .buildPost(Entity.entity(multipart, multipart.getMediaType()));
         Response response = invokeRequet(invocation);
         validateResponse(response);
-        return response.getLocation();
+        CreateScanResponse scanResponse = response.readEntity(CreateScanResponse.class);
+        return scanResponse.getLink();
     }
 
-    private MultiPart createScanMultiPartRequest(ScanRequest request) {
+    private MultiPart createScanMultiPartRequest(CreateScanRequest request) {
         final FileDataBodyPart filePart = new FileDataBodyPart (OSA_ZIPPED_FILE_KEY_NAME, getFileFromRequest(request));
         return new FormDataMultiPart()
-                .bodyPart(new FormDataBodyPart("origin", Integer.toString(ScanRequest.JENKINS_ORIGIN)))
+                .bodyPart(new FormDataBodyPart("origin", Integer.toString(CreateScanRequest.JENKINS_ORIGIN)))
                 .bodyPart(filePart);
     }
 
     @NotNull
-    private File getFileFromRequest(ScanRequest request) {
+    private File getFileFromRequest(CreateScanRequest request) {
         return new File(request.getZipFile().getRemote());
     }
 
@@ -92,7 +93,18 @@ public class ScanClient implements Closeable {
     }
 
     private boolean scanFinished(Response response) {
-        return response.getStatus() != Response.Status.NO_CONTENT.getStatusCode();
+        GetScanStatusResponse scanStatusResponse = response.readEntity(GetScanStatusResponse.class);
+        ScanStatus scanStatus = ScanStatus.fromId(scanStatusResponse.getStatus());
+        switch (scanStatus){
+            case InProgress:
+                return false;
+            case Finished:
+                return true;
+            case Failed:
+                throw new WebApplicationException(scanStatusResponse.getMessage());
+            default:
+                throw new WebApplicationException("Scan Status invalid: " + scanStatus);
+        }
     }
 
     public GetOpenSourceSummaryResponse getOpenSourceSummary(GetOpenSourceSummaryRequest request) {

@@ -1,9 +1,12 @@
 package com.checkmarx.jenkins.web.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * @author tsahi
  * @since 21/02/16
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CxException {
     private String messageCode;
     private String messageDetails;

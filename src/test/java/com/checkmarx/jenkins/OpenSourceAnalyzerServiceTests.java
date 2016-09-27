@@ -4,7 +4,7 @@ import com.checkmarx.jenkins.filesystem.FolderPattern;
 import com.checkmarx.jenkins.filesystem.zip.CxZip;
 import com.checkmarx.jenkins.opensourceanalysis.*;
 import com.checkmarx.jenkins.web.client.ScanClient;
-import com.checkmarx.jenkins.web.model.ScanRequest;
+import com.checkmarx.jenkins.web.model.CreateScanRequest;
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryRequest;
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
 import hudson.FilePath;
@@ -44,7 +44,7 @@ public class OpenSourceAnalyzerServiceTests {
         };
         new MockUp<ScanClient>() {
             @Mock
-            URI createScan(ScanRequest request) {
+            URI createScan(CreateScanRequest request) {
                 return null;
             }
             @Mock
@@ -85,7 +85,7 @@ public class OpenSourceAnalyzerServiceTests {
         };
         new MockUp<ScanClient>() {
             @Mock
-            URI createScan(ScanRequest request) {
+            URI createScan(CreateScanRequest request) {
                 return null;
             }
             @Mock

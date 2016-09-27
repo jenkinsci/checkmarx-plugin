@@ -1,7 +1,8 @@
 package com.checkmarx.jenkins;
 
 import com.checkmarx.jenkins.web.client.ScanClient;
-import com.checkmarx.jenkins.web.model.ScanRequest;
+import com.checkmarx.jenkins.web.model.CreateScanResponse;
+import com.checkmarx.jenkins.web.model.CreateScanRequest;
 import com.checkmarx.jenkins.web.model.AuthenticationRequest;
 import com.checkmarx.jenkins.web.model.CxException;
 import com.google.common.collect.ImmutableMap;
@@ -35,6 +36,11 @@ public class RestClientTests {
             Map<String, NewCookie> getCookies(){
                 return ImmutableMap.of("cxCookie",new NewCookie("",""), "CXCSRFToken",new NewCookie("",""));
             }
+            @Mock
+            Object readEntity(Class<?> entityType){
+                return new CreateScanResponse(null, null);
+            }
+
         };
         new MockUp<ScanClient>() {
             @Mock
@@ -42,7 +48,7 @@ public class RestClientTests {
                 return responseMockUp.getMockInstance();
             }
             @Mock
-            File getFileFromRequest(ScanRequest request) {
+            File getFileFromRequest(CreateScanRequest request) {
                 return null;
             }
         };
@@ -52,7 +58,7 @@ public class RestClientTests {
         };
 
         ScanClient client = new ScanClient("", new AuthenticationRequest("", ""));
-        client.createScan(new ScanRequest(0, null));
+        client.createScan(new CreateScanRequest(0, null));
     }
 
     @Test(expected=WebApplicationException.class)
@@ -78,7 +84,7 @@ public class RestClientTests {
                 return responseMockUp.getMockInstance();
             }
             @Mock
-            File getFileFromRequest(ScanRequest request) {
+            File getFileFromRequest(CreateScanRequest request) {
                 return null;
             }
         };
@@ -88,7 +94,7 @@ public class RestClientTests {
         };
 
         ScanClient client = new ScanClient("", new AuthenticationRequest("", ""));
-        client.createScan(new ScanRequest(0, null));
+        client.createScan(new CreateScanRequest(0, null));
     }
 
     @Test
@@ -114,7 +120,7 @@ public class RestClientTests {
                 return responseMockUp.getMockInstance();
             }
             @Mock
-            File getFileFromRequest(ScanRequest request) {
+            File getFileFromRequest(CreateScanRequest request) {
                 return null;
             }
         };
@@ -125,7 +131,7 @@ public class RestClientTests {
 
         ScanClient client = new ScanClient("", new AuthenticationRequest("", ""));
         try {
-            client.createScan(new ScanRequest(0, null));
+            client.createScan(new CreateScanRequest(0, null));
         }
         catch (Exception ex)
         {
