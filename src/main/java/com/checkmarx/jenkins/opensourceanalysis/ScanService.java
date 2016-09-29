@@ -7,6 +7,7 @@ import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
 import hudson.FilePath;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+
 import java.io.IOException;
 
 /**
@@ -15,8 +16,9 @@ import java.io.IOException;
  */
 public class ScanService {
 
-    private static final String OSA_RUN_STARTED="OSA (open source analysis) Run has started";
-    private static final String OSA_RUN_ENDED="OSA (open source analysis) Run has finished successfully";
+    private static final String OSA_RUN_STARTED = "OSA (open source analysis) Run has started";
+    private static final String OSA_RUN_ENDED = "OSA (open source analysis) Run has finished successfully";
+    private static final String OSA_RUN_SUBMITTED = "OSA (open source analysis) submitted successfully";
     public static final String NO_LICENSE_ERROR = "Open Source Analysis License is not enabled for this project. Please contact your CxSAST Administrator";
     private DependencyFolder dependencyFolder;
     private transient Logger logger;
@@ -37,33 +39,33 @@ public class ScanService {
     }
 
     public void scan(boolean asynchronousScan) {
-        try{
+        try {
             if (!isOsaConfigured()) {
                 return;
             }
 
-            if (!validLicense()){
+            if (!validLicense()) {
                 logger.error(NO_LICENSE_ERROR);
                 return;
             }
 
-            logger.info(OSA_RUN_STARTED);
             FilePath sourceCodeZip = zipOpenSourceCode();
-            if (asynchronousScan ){
+            if (asynchronousScan) {
+                logger.info(OSA_RUN_SUBMITTED);
                 scanSender.sendAsync(sourceCodeZip);
-            }else {
-                GetOpenSourceSummaryResponse scanResults = scanSender.send(sourceCodeZip);;
+            } else {
+                logger.info(OSA_RUN_STARTED);
+                GetOpenSourceSummaryResponse scanResults = scanSender.send(sourceCodeZip);
                 scanResultsPresenter.printResultsToOutput(scanResults);
+                logger.info(OSA_RUN_ENDED);
             }
-            logger.info(OSA_RUN_ENDED);
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             logger.error("Open Source Analysis failed:", e);
         }
     }
 
     private boolean isOsaConfigured() {
-        return ! StringUtils.isEmpty(dependencyFolder.getInclude());
+        return !StringUtils.isEmpty(dependencyFolder.getInclude());
     }
 
     private boolean validLicense() {

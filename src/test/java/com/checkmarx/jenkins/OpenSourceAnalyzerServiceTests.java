@@ -114,10 +114,21 @@ public class OpenSourceAnalyzerServiceTests {
             @Mock
             FilePath zipSourceCode(String filterPattern) { return null; }
         };
+        new MockUp<ScanSender>() {
+            @Mock
+            GetOpenSourceSummaryResponse send(FilePath sourceCodeZip) {
+                return null;
+            }
+        };
+        new MockUp<ScanResultsPresenter>() {
+            @Mock
+            void printResultsToOutput(GetOpenSourceSummaryResponse results) {
+            }
+        };
 
         DependencyFolder folders = new DependencyFolder("test2", "");
-        ScanService service = new ScanService(folders, Logger.getLogger(getClass()), new CxWebService(null), new CxZip(null, null, null), new FolderPattern(null, null, null), null, new ScanSender(new ScanClient("", null), 0));
-        service.scan(true);
+        ScanService service = new ScanService(folders, Logger.getLogger(getClass()), new CxWebService(null), new CxZip(null, null, null), new FolderPattern(null, null, null), new ScanResultsPresenter(null), new ScanSender(new ScanClient("", null), 0));
+        service.scan(false);
 
         assertTrue(infoMessages.contains("OSA (open source analysis) Run has started"));
         assertTrue(infoMessages.contains("OSA (open source analysis) Run has finished successfully"));
