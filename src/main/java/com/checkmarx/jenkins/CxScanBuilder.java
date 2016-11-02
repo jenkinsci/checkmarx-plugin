@@ -22,10 +22,12 @@ import hudson.util.Secret;
 import hudson.util.ListBoxModel;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -33,6 +35,7 @@ import java.util.regex.Pattern;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
@@ -133,6 +136,7 @@ public class CxScanBuilder extends Builder {
 
     public static final String PROJECT_STATE_URL_TEMPLATE = "/CxWebClient/portal#/projectState/{0}/Summary";
     public static final String ASYNC_MESSAGE = "CxSAST scan was run in asynchronous mode.\nRefer to the {0} for the scan results\n";
+    public static final String REPORTS_FOLDER = "Checkmarx\\Reports";
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Constructors
@@ -450,6 +454,9 @@ public class CxScanBuilder extends Builder {
 
             analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService);
 
+            instanceLogger.info("Copying reports to workspace");
+            copyReportsToWorkspace(build, checkmarxBuildDir);
+
             return true;
 		} catch (IOException | WebServiceException e) {
 			if (useUnstableOnError(descriptor)) {
@@ -472,6 +479,29 @@ public class CxScanBuilder extends Builder {
             closeLogger();
         }
 	}
+
+    private void copyReportsToWorkspace(AbstractBuild<?, ?> build, File checkmarxBuildDir) {
+
+        String remoteDirPath = build.getWorkspace().getRemote() + "\\" + REPORTS_FOLDER;
+
+        Collection<File> files = FileUtils.listFiles(checkmarxBuildDir, null, true);
+        FileInputStream fileInputStream = null;
+
+        for(File file : files) {
+            try {
+                instanceLogger.debug("copying file ["+file.getName()+"] to workspace");
+                FilePath remoteFile = new FilePath(build.getWorkspace().getChannel(), remoteDirPath + "\\" + file.getName());
+                fileInputStream = new FileInputStream(file);
+                remoteFile.copyFrom(fileInputStream);
+
+            } catch (Exception e) {
+                instanceLogger.warn("fail to copy file ["+file.getName()+"] to workspace", e);
+
+            } finally {
+                IOUtils.closeQuietly(fileInputStream);
+            }
+        }
+    }
 
     @NotNull
     private CxScanResult addScanResultAction(AbstractBuild<?, ?> build, String serverUrlToUse, boolean shouldRunAsynchronous, File xmlReportFile) {
