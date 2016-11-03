@@ -489,7 +489,8 @@ public class CxScanBuilder extends Builder {
 
         for(File file : files) {
             try {
-                instanceLogger.debug("copying file ["+file.getName()+"] to workspace");
+                String remoteFilePath = remoteDirPath + "\\" + file.getName();
+                instanceLogger.info("Copying file ["+file.getName()+"] to workspace ["+remoteDirPath + "\\" + file.getName()+"]");
                 FilePath remoteFile = new FilePath(build.getWorkspace().getChannel(), remoteDirPath + "\\" + file.getName());
                 fileInputStream = new FileInputStream(file);
                 remoteFile.copyFrom(fileInputStream);
