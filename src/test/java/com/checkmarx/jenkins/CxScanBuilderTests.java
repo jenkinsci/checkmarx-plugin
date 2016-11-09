@@ -74,7 +74,7 @@ public class CxScanBuilderTests {
 
 		CxScanBuilder cxScanBuilder = createCxScanBuilder(null, null, password);
 
-		assertEquals(password, cxScanBuilder.getPassword());
+		assertEquals(password, cxScanBuilder.getPasswordPlainText());
 	}
 
 	@NotNull

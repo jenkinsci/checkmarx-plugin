@@ -229,6 +229,11 @@ public class CxScanBuilder extends Builder {
 
     @Nullable
     public String getPassword() {
+        return password;
+    }
+
+    @Nullable
+    public String getPasswordPlainText() {
         return Secret.fromString(password).getPlainText();
     }
 
@@ -378,7 +383,7 @@ public class CxScanBuilder extends Builder {
 
             final String serverUrlToUse = isUseOwnServerCredentials() ? getServerUrl() : descriptor.getServerUrl();
             final String usernameToUse = isUseOwnServerCredentials() ? getUsername() : descriptor.getUsername();
-            final String passwordToUse = isUseOwnServerCredentials() ? getPassword() : descriptor.getPassword();
+            final String passwordToUse = isUseOwnServerCredentials() ? getPasswordPlainText() : descriptor.getPasswordPlainText();
 
             String serverUrlToUseNotNull = serverUrlToUse != null ? serverUrlToUse : "";
 
@@ -773,12 +778,22 @@ public class CxScanBuilder extends Builder {
 
 	    @Nullable
 	    public String getPassword() {
-	        return Secret.fromString(password).getPlainText();
+	        return password;
 	    }
+
+        @Nullable
+        public String getPasswordPlainText() {
+            return Secret.fromString(password).getPlainText();
+        }
 
 	    public void setPassword(@Nullable String password) {
 	        this.password = Secret.fromString(password).getEncryptedValue();
 	    }
+
+        @Nullable
+        public String getPasswordPlainText(String password) {
+            return Secret.fromString(password).getPlainText();
+        }
 
 	    public boolean isHideResults() {
 	        return hideResults;
@@ -930,7 +945,7 @@ public class CxScanBuilder extends Builder {
             }
 
             try {
-                cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
+                cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,getPasswordPlainText(password));
             } catch (Exception e) {
                 logger.debug(e);
                 return FormValidation.ok();
@@ -974,7 +989,7 @@ public class CxScanBuilder extends Builder {
 	        }
 
 	        try {
-	            cxWebService.login(username,password);
+	            cxWebService.login(username,getPasswordPlainText(password));
 	            return FormValidation.ok("Success");
 
 			} catch (Exception e) {
@@ -995,7 +1010,7 @@ public class CxScanBuilder extends Builder {
 	    {
 	        String serverUrlToUse = !useOwnServerCredentials ? serverUrl : getServerUrl();
 	        String usernameToUse  = !useOwnServerCredentials ? username  : getUsername();
-	        String passwordToUse  = !useOwnServerCredentials ? password  : getPassword();
+	        String passwordToUse  = !useOwnServerCredentials ? getPasswordPlainText(password)  : getPasswordPlainText();
 	        logger.debug("prepareLoggedInWebservice: server: " + serverUrlToUse + " user: " + usernameToUse);
 
 	        CxWebService cxWebService = new CxWebService(serverUrlToUse);
@@ -1015,7 +1030,7 @@ public class CxScanBuilder extends Builder {
 	        ComboBoxModel projectNames = new ComboBoxModel();
 
 	        try {
-	            final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
+	            final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,getPasswordPlainText(password));
 
 	            List<ProjectDisplayData> projectsDisplayData = cxWebService.getProjectsDisplayData();
 	            for(ProjectDisplayData pd : projectsDisplayData)
@@ -1043,7 +1058,7 @@ public class CxScanBuilder extends Builder {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 
             try {
-                final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials, serverUrl, username, password);
+                final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password));
 
                 if (msGuid.matcher(groupId).matches()) {
                     CxWSBasicRepsonse cxWSBasicRepsonse = cxWebService.validateProjectName(projectName, groupId);
@@ -1094,7 +1109,7 @@ public class CxScanBuilder extends Builder {
 	        // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 	        ListBoxModel listBoxModel = new ListBoxModel();
 	        try {
-	            final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
+	            final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,getPasswordPlainText(password));
 
 	            final List<Preset> presets = cxWebService.getPresets();
 	            for(Preset p : presets)
@@ -1138,7 +1153,7 @@ public class CxScanBuilder extends Builder {
 	        // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 	        ListBoxModel listBoxModel = new ListBoxModel();
 	        try {
-	            final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
+	            final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,getPasswordPlainText(password));
 
 	            final List<ConfigurationSet> sourceEncodings = cxWebService.getSourceEncodings();
 				for (ConfigurationSet cs : sourceEncodings) {
@@ -1167,7 +1182,7 @@ public class CxScanBuilder extends Builder {
 	        // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 	        ListBoxModel listBoxModel = new ListBoxModel();
 	        try {
-	            final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,password);
+	            final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials,serverUrl,username,getPasswordPlainText(password));
 	            final List<Group> groups = cxWebService.getAssociatedGroups();
 	            for(Group group : groups) {
 	                listBoxModel.add(new ListBoxModel.Option(group.getGroupName(),group.getID()));
