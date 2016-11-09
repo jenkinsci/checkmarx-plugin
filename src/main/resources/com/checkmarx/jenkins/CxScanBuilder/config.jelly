@@ -68,7 +68,7 @@
 
 	<f:advanced title="Advanced exclude/include settings">
 		<f:entry title="Include/Exclude wildcard patterns" field="filterPattern">
-			<f:textarea default="${descriptor.DEFAULT_FILTER_PATTERNS}" />
+			<f:textarea />
 		</f:entry>
 	</f:advanced>
 

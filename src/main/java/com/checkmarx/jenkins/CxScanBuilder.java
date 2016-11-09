@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
@@ -631,7 +632,11 @@ public class CxScanBuilder extends Builder {
 
     private FilePath zipWorkspaceFolder(AbstractBuild<?, ?> build, BuildListener listener) throws IOException, InterruptedException {
         FolderPattern folderPattern = new FolderPattern(instanceLogger, build, listener);
-        String combinedFilterPattern = folderPattern.generatePattern(getFilterPattern(), getExcludeFolders());
+        DescriptorImpl descriptor = getDescriptor();
+        String excludeFolders =  StringUtils.isNotEmpty(getExcludeFolders()) ? getExcludeFolders() :  descriptor.getExcludeFolders();
+        String filterPattern =  StringUtils.isNotEmpty(getFilterPattern()) ? getFilterPattern() :  descriptor.getFilterPattern();
+
+        String combinedFilterPattern = folderPattern.generatePattern(filterPattern, excludeFolders);
 
         CxZip cxZip = new CxZip(instanceLogger, build, listener);
         return cxZip.ZipWorkspaceFolder(combinedFilterPattern);
@@ -727,6 +732,8 @@ public class CxScanBuilder extends Builder {
 	    @Nullable private String password;
 	    private boolean hideResults;
 	    private boolean enableCertificateValidation;
+        @Nullable private String excludeFolders;
+        @Nullable private String filterPattern;
 
 
 	    private boolean forcingVulnerabilityThresholdEnabled;
@@ -800,7 +807,26 @@ public class CxScanBuilder extends Builder {
 	        }
 	        this.enableCertificateValidation = enableCertificateValidation;
 	    }
-	    public boolean isForcingVulnerabilityThresholdEnabled() {
+
+        @Nullable
+        public String getExcludeFolders() {
+            return excludeFolders;
+        }
+
+        public void setExcludeFolders(@Nullable String excludeFolders) {
+            this.excludeFolders = excludeFolders;
+        }
+
+        @Nullable
+        public String getFilterPattern() {
+            return filterPattern;
+        }
+
+        public void setFilterPattern(@Nullable String filterPattern) {
+            this.filterPattern = filterPattern;
+        }
+
+        public boolean isForcingVulnerabilityThresholdEnabled() {
 	        return forcingVulnerabilityThresholdEnabled;
 	    }
 

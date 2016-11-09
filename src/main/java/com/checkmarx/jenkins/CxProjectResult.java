@@ -109,7 +109,7 @@ public class CxProjectResult implements Action {
 
     private CxScanResult getLastBuildAction() {
         AbstractBuild<?, ?> r = this.owner.getLastBuild();
-        return r.getAction(CxScanResult.class);
+        return r != null ? r.getAction(CxScanResult.class) : null;
     }
 
     public String getProjectStateUrl() {
