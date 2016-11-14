@@ -1,17 +1,17 @@
 package com.checkmarx.jenkins;
 
+import com.checkmarx.components.zipper.Zipper;
 import com.checkmarx.jenkins.filesystem.FolderPattern;
 import com.checkmarx.jenkins.filesystem.zip.CxZip;
-import com.checkmarx.jenkins.opensourceanalysis.*;
+import com.checkmarx.jenkins.opensourceanalysis.DependencyFolder;
+import com.checkmarx.jenkins.opensourceanalysis.ScanResultsPresenter;
+import com.checkmarx.jenkins.opensourceanalysis.ScanSender;
+import com.checkmarx.jenkins.opensourceanalysis.ScanService;
 import com.checkmarx.jenkins.web.client.ScanClient;
 import com.checkmarx.jenkins.web.contracts.ProjectContract;
 import com.checkmarx.jenkins.web.model.AuthenticationRequest;
 import com.checkmarx.ws.CxJenkinsWebService.*;
-import hudson.AbortException;
-import hudson.EnvVars;
-import hudson.Extension;
-import hudson.FilePath;
-import hudson.Launcher;
+import hudson.*;
 import hudson.console.HyperlinkNote;
 import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
@@ -19,37 +19,30 @@ import hudson.tasks.Builder;
 import hudson.triggers.SCMTrigger;
 import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
-import hudson.util.Secret;
 import hudson.util.ListBoxModel;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URLDecoder;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.regex.Pattern;
-
+import hudson.util.Secret;
 import net.sf.json.JSONObject;
-
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.WriterAppender;
+import org.apache.log4j.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
-import com.checkmarx.components.zipper.Zipper;
-
 import javax.xml.ws.WebServiceException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URLDecoder;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * The main entry point for Checkmarx plugin. This class implements the Builder
@@ -128,6 +121,7 @@ public class CxScanBuilder extends Builder {
     public static final String ASYNC_MESSAGE = "CxSAST scan was run in asynchronous mode.\nRefer to the {0} for the scan results\n";
 
     public static final int MINIMUM_TIMEOUT_IN_MINUTES = 1;
+    public static final String REPORTS_FOLDER = "Checkmarx\\Reports";
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Constructors
@@ -445,6 +439,9 @@ public class CxScanBuilder extends Builder {
 
             analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService, listener, shouldRunAsynchronous);
 
+            instanceLogger.info("Copying reports to workspace");
+            copyReportsToWorkspace(build, checkmarxBuildDir);
+
             return true;
 		} catch (IOException | WebServiceException e) {
 			if (useUnstableOnError(descriptor)) {
@@ -467,6 +464,30 @@ public class CxScanBuilder extends Builder {
             closeLogger();
         }
 	}
+
+    private void copyReportsToWorkspace(AbstractBuild<?, ?> build, File checkmarxBuildDir) {
+
+        String remoteDirPath = build.getWorkspace().getRemote() + "\\" + REPORTS_FOLDER;
+
+        Collection<File> files = FileUtils.listFiles(checkmarxBuildDir, null, true);
+        FileInputStream fileInputStream = null;
+
+        for(File file : files) {
+            try {
+                String remoteFilePath = remoteDirPath + "\\" + file.getName();
+                instanceLogger.info("Copying file ["+file.getName()+"] to workspace ["+remoteFilePath+"]");
+                FilePath remoteFile = new FilePath(build.getWorkspace().getChannel(), remoteFilePath);
+                fileInputStream = new FileInputStream(file);
+                remoteFile.copyFrom(fileInputStream);
+
+            } catch (Exception e) {
+                instanceLogger.warn("fail to copy file ["+file.getName()+"] to workspace", e);
+
+            } finally {
+                IOUtils.closeQuietly(fileInputStream);
+            }
+        }
+    }
 
     @NotNull
     private CxScanResult addScanResultAction(AbstractBuild<?, ?> build, String serverUrlToUse, boolean shouldRunAsynchronous, File xmlReportFile) {
