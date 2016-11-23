@@ -1,17 +1,101 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+
+         <style type="text/css">
+             .summary-section {
+                 width:100%;
+             //position:absolute;
+             //margin:15px;
+             }
+             .title-column, .main-column {
+                 line-height:25px;
+                 display:inline-block;
+             }
+             .main-column {
+             //width:70%;
+             }
+             .title-column {
+                 margin-right:10px;
+                 vertical-align: top;
+                 height:100%;
+             //width:30%;
+             }
+             .sum1 {
+                 font-weight:bold;
+                 font-size:20px;
+             }
+             .sum2 {
+                 font-size:16px;
+             }
+             .font15 {
+                 font-size:15px;
+             }
+             .float-left {
+                 float:left;
+             }
+             .legend {
+                 display:inline-flex;
+             }
+             .legend1, .legend2 {
+             //float:left;
+                 display:inline-block;
+                 margin-right:15px;
+             }
+             .legendBox1, .legendBox2 {
+                 width:10px;
+                 height:10px;
+                 background-color:grey;
+                 display:inline-block;
+             //float:left;
+                 margin:0 7.5px;
+             }
+             .legendBox2 {
+                 background-color:rgba(0, 0, 0, 0.2);
+             }
+             .legendTitle1, .legendTitle2 {
+                 display:inline-block;
+             }
+             .graph {
+             //width: 100%;
+                 background-color: grey;
+                 height: 300px;
+                 width:500px;
+             }
+             .detailed-report-link {
+                 line-height: 160px;
+             }
+         </style>
+
     <j:if test="${it.showResults}">
         <t:summary icon="/plugin/checkmarx/CxIcon48x48.png">
             <j:if test="${it.resultIsValid}">
-                <p>Found vulnerabilities summary: </p>
-                <ul>
-                    <li>High: ${it.highCount} </li>
-                    <li>Medium: ${it.mediumCount} </li>
-                    <li>Low: ${it.lowCount} </li>
-                    <li>Info: ${it.infoCount} </li>
-                </ul>
-                <p><a href="${it.urlName}">Detailed report</a></p>
+            <table class="summary-section">
+                <td class="title-column">
+                    <div class="sum1">CxSAST</div>
+                    <div class="sum2">Summary</div>
+                    <a class="detailed-report-link" href="http://www.w3schools.com">Detailed Checkmarx Report</a>
+                </td>
+                <td class="main-column">
+                    <div class="font15">Vulnerabilities Status</div>
+                    <div class="legend">
+                        <div class="legend1">
+                            <div class="legendBox1"></div>
+                            <div class="legendTitle1">Recurrent</div>
+                        </div>
+
+                        <div class="legend2">
+                            <div class="legendBox2"></div>
+                            <div class="legendTitle2">New</div>
+                        </div>
+                    </div>
+                    <div class="graph">
+                        <p>High: ${it.highCount}</p>
+                        <p>Medium: ${it.mediumCount}</p>
+                        <p>Low: ${it.lowCount}</p>
+                    </div>
+                </td>
+            </table>
             </j:if>
             <j:if test="${!it.resultIsValid}">
                 <p>Scan finished with the following error:</p>

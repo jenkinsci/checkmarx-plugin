@@ -1,0 +1,220 @@
+.summary-section {
+  width: 100%;
+  font-family: 'Roboto', sans-serif;
+
+  // position: absolute;
+// margin: 15 px;
+}
+
+tr.cxsast {
+  height: 386px;
+}
+.title-column, .main-column {
+  padding: 3px;
+  line-height: 25px;
+  display: inline-block;
+}
+
+.main-column {
+// width: 70 %;
+}
+
+.title-column {
+  margin-right: 10px;
+  vertical-align: top;
+  height: 100%;
+  letter-spacing: -0.8px;
+// width: 30 %;
+  color: #373050;
+}
+
+//CxSAST
+.sum1 {
+  font-size: 24px;
+  //todo - install weight 500
+  font-weight: 500;
+}
+
+//Summary
+.sum2 {
+  font-size: 16px;
+}
+
+//Vulnerabilities Status
+.graph-title{
+  .font15;
+  margin-bottom: 32px;
+  font-weight: 500;
+
+}
+.font15 {
+  font-size: 15px;
+}
+
+.float-left {
+  float: left;
+}
+
+.legend {
+  display: inline-flex;
+  position: absolute;
+  vertical-align: middle;
+  transform: translate(0,-50%);
+  background-color: white;
+  z-index: 5;
+}
+
+.legend1, .legend2 {
+// float: left;
+  display: inline-block;
+  margin-right: 15px;
+}
+
+.legendBox1, .legendBox2 {
+  width: 18px;
+  height: 18px;
+  background-color: grey;
+  display: inline-block;
+// float: left;
+  margin: 0 7.5px;
+  vertical-align: middle;
+
+}
+
+.legendBox2 {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.legendTitle1, .legendTitle2 {
+  display: inline-block;
+  font-size: 16px;
+  letter-spacing: -0.53px;
+}
+
+@graph-height: 386px;
+@graph-width: 709px;
+
+.graph {
+// width: 100 %;
+// background-color: grey;
+//  position: relative;
+  height: @graph-height;
+  width: @graph-width;
+}
+
+.detailed-report {
+  //line-height: 160px;
+  margin-top: 50%;
+}
+.download-detailed-report {
+  color: #9b9b9b;
+  font-size: 14px;
+  letter-spacing: -0.47px;
+}
+//body {
+//  padding: 50px;
+//}
+
+@grid-height: 272px;
+@number-of-grids: 4;
+//@spaces-between-grids: (@grid-height - (@number-of-grids * 1px) - 2px) / @number-of-grids;
+@spaces-between-grids: (@grid-height - 1px) / @number-of-grids;
+@grid-line1-from-bottom: 1px + @spaces-between-grids;
+
+.graph-grids {
+  height: @grid-height;
+  width: @graph-width;
+  position: absolute;
+
+  .grid-line {
+    width: 100%;
+    height: 1px;
+    background-color: #d5d5d5;
+    position: absolute;
+
+    &.grid-line-main {
+      width: 100%;
+      height: 2px;
+      background-color: #373050;
+      bottom:0;
+    }
+
+    &.grid-line1 {
+        bottom:@grid-line1-from-bottom;
+    }
+
+    &.grid-line2 {
+      bottom:@grid-line1-from-bottom + @spaces-between-grids;
+    }
+
+    &.grid-line3 {
+      bottom:@grid-line1-from-bottom + (@spaces-between-grids * 2);
+    }
+
+    &.grid-line4 {
+      bottom:@grid-line1-from-bottom + (@spaces-between-grids * 3);
+    }
+  }
+}
+@bar-width: 53px;
+@space-between-bars: (@graph-width - (@bar-width * 3)) / 2;
+
+.graph-bars {
+
+  height: @grid-height - 2px;
+  width: 100%;
+  display: inline-flex;
+
+  .bar-container {
+    display: inline-block;
+    width: 33%;
+    height: 100%;
+    vertical-align: bottom;
+    text-align: center;
+  }
+
+  .bar {
+    width: @bar-width;
+    margin: auto;
+    //position: absolute;
+    //bottom: 0;
+
+    //&.bar-inner {
+    //  left:0;
+    //}
+
+    &.bar-1 {
+      background-color: #da2945;
+      //background-image:
+      //repeating-linear-gradient(45deg, transparent, transparent 0px, rgba(255, 255, 255, 0) 1px, rgba(255, 255, 255, 0.5) 2px),
+      //repeating-linear-gradient(-45deg, transparent, transparent 0px, rgba(255, 255, 255, 0.5) 1px, rgba(255, 255, 255, 0.5) 2px);      &.bar-inner {
+      //  background-color: rgba(218,41,69,1);
+      //  background-image:none;
+        //left:0;
+      }
+    }
+    &.bar-2 {
+      background-color: rgba(255,180,0,0.5);
+      &.bar-inner {
+        background-color: rgba(255,180,0,1);
+      }
+    }
+    &.bar-3 {
+      background-color: rgba(239,212,18,0.5);
+      &.bar-inner {
+        background-color: rgba(239,212,18,1);
+      }
+    }
+  }
+
+  //.bar-1 {
+  //  left: 0;
+  //}
+  //.bar-2 {
+  //  left: ~"calc(50% - 26px)";
+  //}
+  //.bar-3 {
+  //  left: ~"calc(100% - 53px)";
+  //}
+
+
