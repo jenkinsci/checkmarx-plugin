@@ -109,16 +109,22 @@ tr.cxsast {
   bottom: 272px;
 }
 .graph-bars {
-  height: 270px;
+  height: calc(100% - 55px);
   width: 100%;
   display: inline-flex;
 }
 .graph-bars .bar-container {
+  position: relative;
   display: inline-block;
   width: 33%;
   height: 100%;
-  vertical-align: bottom;
   text-align: center;
+}
+.graph-bars .bar-wrapper {
+  position: absolute;
+  height: 100%;
+  left: 50%;
+  transform: translate(-50%);
 }
 .graph-bars .bar {
   width: 53px;

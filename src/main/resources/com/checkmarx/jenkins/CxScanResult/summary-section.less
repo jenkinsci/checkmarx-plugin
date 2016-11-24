@@ -1,9 +1,6 @@
 .summary-section {
   width: 100%;
   font-family: 'Roboto', sans-serif;
-
-  // position: absolute;
-// margin: 15 px;
 }
 
 tr.cxsast {
@@ -16,7 +13,6 @@ tr.cxsast {
 }
 
 .main-column {
-// width: 70 %;
 }
 
 .title-column {
@@ -65,7 +61,6 @@ tr.cxsast {
 }
 
 .legend1, .legend2 {
-// float: left;
   display: inline-block;
   margin-right: 15px;
 }
@@ -95,15 +90,11 @@ tr.cxsast {
 @graph-width: 709px;
 
 .graph {
-// width: 100 %;
-// background-color: grey;
-//  position: relative;
   height: @graph-height;
   width: @graph-width;
 }
 
 .detailed-report {
-  //line-height: 160px;
   margin-top: 50%;
 }
 .download-detailed-report {
@@ -111,13 +102,9 @@ tr.cxsast {
   font-size: 14px;
   letter-spacing: -0.47px;
 }
-//body {
-//  padding: 50px;
-//}
 
 @grid-height: 272px;
 @number-of-grids: 4;
-//@spaces-between-grids: (@grid-height - (@number-of-grids * 1px) - 2px) / @number-of-grids;
 @spaces-between-grids: (@grid-height - 1px) / @number-of-grids;
 @grid-line1-from-bottom: 1px + @spaces-between-grids;
 
@@ -161,36 +148,32 @@ tr.cxsast {
 
 .graph-bars {
 
-  height: @grid-height - 2px;
+  height: ~"calc(100% - 55px)";
   width: 100%;
   display: inline-flex;
 
   .bar-container {
+    position: relative;
     display: inline-block;
     width: 33%;
     height: 100%;
-    vertical-align: bottom;
+    //vertical-align: bottom;
     text-align: center;
+  }
+
+  .bar-wrapper {
+    position: absolute;
+    height: 100%;
+    left: 50%;
+    transform: translate(-50%);
   }
 
   .bar {
     width: @bar-width;
     margin: auto;
-    //position: absolute;
-    //bottom: 0;
-
-    //&.bar-inner {
-    //  left:0;
-    //}
 
     &.bar-1 {
       background-color: #da2945;
-      //background-image:
-      //repeating-linear-gradient(45deg, transparent, transparent 0px, rgba(255, 255, 255, 0) 1px, rgba(255, 255, 255, 0.5) 2px),
-      //repeating-linear-gradient(-45deg, transparent, transparent 0px, rgba(255, 255, 255, 0.5) 1px, rgba(255, 255, 255, 0.5) 2px);      &.bar-inner {
-      //  background-color: rgba(218,41,69,1);
-      //  background-image:none;
-        //left:0;
       }
     }
     &.bar-2 {
@@ -207,14 +190,7 @@ tr.cxsast {
     }
   }
 
-  //.bar-1 {
-  //  left: 0;
-  //}
-  //.bar-2 {
-  //  left: ~"calc(50% - 26px)";
-  //}
-  //.bar-3 {
-  //  left: ~"calc(100% - 53px)";
-  //}
+.bar-name.bar-1 {
 
+}
 
