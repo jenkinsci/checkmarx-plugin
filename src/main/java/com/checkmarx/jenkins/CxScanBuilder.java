@@ -375,8 +375,6 @@ public class CxScanBuilder extends Builder {
                         "Visit plugin configuration page to disable this skip.");
                 return true;
             }
-            updateEnvVar(build, listener);
-
             final String serverUrlToUse = isUseOwnServerCredentials() ? getServerUrl() : descriptor.getServerUrl();
             final String usernameToUse = isUseOwnServerCredentials() ? getUsername() : descriptor.getUsername();
             final String passwordToUse = isUseOwnServerCredentials() ? getPasswordPlainText() : descriptor.getPasswordPlainText();
@@ -467,18 +465,6 @@ public class CxScanBuilder extends Builder {
         }
 	}
 
-    private void updateEnvVar(final AbstractBuild<?, ?> build, final BuildListener listener) throws InterruptedException, IOException {
-        EnvVars env = build.getEnvironment(listener);
-
-        this.serverUrl = env.expand(serverUrl);
-        this.username = env.expand(username);
-        this.projectName = env.expand(projectName);
-        this.excludeFolders = env.expand(excludeFolders);
-        this.filterPattern = env.expand(filterPattern);
-        this.includeOpenSourceFolders = env.expand(includeOpenSourceFolders);
-        this.excludeOpenSourceFolders = env.expand(excludeOpenSourceFolders);
-    }
-
     private void copyReportsToWorkspace(AbstractBuild<?, ?> build, File checkmarxBuildDir) {
 
         String remoteDirPath = build.getWorkspace().getRemote() + "\\" + REPORTS_FOLDER;
@@ -515,8 +501,9 @@ public class CxScanBuilder extends Builder {
 
     private void setProjectId(AbstractBuild<?, ?> build, BuildListener listener, CxWebService cxWebService) throws IOException, InterruptedException {
         if (projectId == 0) {
+            EnvVars env = build.getEnvironment(listener);
             ProjectContract projectContract = new ProjectContract(cxWebService);
-            if (!projectContract.newProject(getProjectName(), getGroupId())) {
+            if (!projectContract.newProject(env.expand(getProjectName()), getGroupId())) {
                 projectId = getProjectId(build, listener, cxWebService);
             }
         }
@@ -1096,8 +1083,15 @@ public class CxScanBuilder extends Builder {
                 final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password));
 
                 if (msGuid.matcher(groupId).matches()) {
-                    EnvVars ev = new EnvVars(project.getSomeBuildWithWorkspace().getEnvironment(null));
-                    String resolvedProjectName =  ev.expand(projectName);
+                    String resolvedProjectName = projectName;
+                    if (project.getSomeBuildWithWorkspace() == null) { //is it the first build of a new project
+                        if (projectName.equals("${JOB_NAME}")) {
+                            resolvedProjectName = project.getName();
+                        }
+                    } else {
+                        EnvVars ev = new EnvVars(project.getSomeBuildWithWorkspace().getEnvironment(null));
+                        resolvedProjectName = ev.expand(projectName);
+                    }
                     CxWSBasicRepsonse cxWSBasicRepsonse = cxWebService.validateProjectName(resolvedProjectName, groupId);
                     if (cxWSBasicRepsonse.isIsSuccesfull()) {
                         return FormValidation.ok("Project Name Validated Successfully");
