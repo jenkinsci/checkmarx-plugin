@@ -15,14 +15,18 @@ public class ScanResultsPresenter {
 
     public void printResultsToOutput(GetOpenSourceSummaryResponse results) {
         StringBuilder sb = new StringBuilder();
-        sb.append("\n").append("open source libraries: ").append(results.getTotal()).append("\n");
-        sb.append("vulnerable and outdated: ").append(results.getVulnerableAndOutdated()).append("\n");
-        sb.append("vulnerable and updated: ").append(results.getVulnerableAndUpdate()).append("\n");
-        sb.append("high vulnerabilities: ").append(results.getHighVulnerabilities()).append("\n");
-        sb.append("medium vulnerabilities: ").append(results.getMediumVulnerabilities()).append("\n");
-        sb.append("low vulnerabilities: ").append(results.getLowVulnerabilities()).append("\n");
-        sb.append("with no known vulnerabilities: ").append(results.getNoKnownVulnerabilities()).append("\n");
+        sb.append("-----------------------OSA Scan Results:------------------------------").append("\n");
+        sb.append("OSA High Severity Results: ").append(results.getHighCount()).append("\n");
+        sb.append("OSA Medium Severity Results: ").append(results.getMediumCount()).append("\n");
+        sb.append("OSA Low Severity Results: ").append(results.getLowCount()).append("\n");
+        sb.append("\n");
+        sb.append("Open Source Libraries: ").append(results.getTotal()).append("\n");
+        sb.append("Vulnerable And Outdated: ").append(results.getVulnerableAndOutdated()).append("\n");
+        sb.append("Vulnerable And Updated: ").append(results.getVulnerableAndUpdate()).append("\n");
+        sb.append("Non Vulnerable Libraries: ").append(results.getNoKnownVulnerabilities()).append("\n");
         sb.append("vulnerability score: ").append(results.getVulnerabilityScore()).append("\n");
+        sb.append(" ---------------------------------------------------------------------").append("\n");
+
         logger.info(sb.toString());
     }
 }

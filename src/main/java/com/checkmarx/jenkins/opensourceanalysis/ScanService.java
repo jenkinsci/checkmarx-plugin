@@ -38,15 +38,14 @@ public class ScanService {
         this.scanSender = scanSender;
     }
 
-    public void scan(boolean asynchronousScan) {
-        try {
-            if (!isOsaConfigured()) {
-                return;
-            }
+    public GetOpenSourceSummaryResponse scan(boolean asynchronousScan) {
 
+        GetOpenSourceSummaryResponse scanResults = null;
+
+        try {
             if (!validLicense()) {
                 logger.error(NO_LICENSE_ERROR);
-                return;
+                return scanResults;
             }
 
             FilePath sourceCodeZip = zipOpenSourceCode();
@@ -55,17 +54,14 @@ public class ScanService {
                 scanSender.sendAsync(sourceCodeZip);
             } else {
                 logger.info(OSA_RUN_STARTED);
-                GetOpenSourceSummaryResponse scanResults = scanSender.send(sourceCodeZip);
-                scanResultsPresenter.printResultsToOutput(scanResults);
+                scanResults = scanSender.send(sourceCodeZip);
                 logger.info(OSA_RUN_ENDED);
+                scanResultsPresenter.printResultsToOutput(scanResults);
             }
         } catch (Exception e) {
             logger.error("Open Source Analysis failed:", e);
         }
-    }
-
-    private boolean isOsaConfigured() {
-        return !StringUtils.isEmpty(dependencyFolder.getInclude());
+        return scanResults;
     }
 
     private boolean validLicense() {
