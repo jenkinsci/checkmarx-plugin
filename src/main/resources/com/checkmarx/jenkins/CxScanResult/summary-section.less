@@ -5,6 +5,8 @@
 
 tr.cxsast {
   height: 386px;
+  border-bottom: grey solid 1px;
+  margin-bottom: 30px;
 }
 .title-column, .main-column {
   padding: 3px;
@@ -13,6 +15,8 @@ tr.cxsast {
 }
 
 .main-column {
+  width: 70%;
+
 }
 
 .title-column {
@@ -20,7 +24,7 @@ tr.cxsast {
   vertical-align: top;
   height: 100%;
   letter-spacing: -0.8px;
-// width: 30 %;
+ width: ~"calc(20% - 10px)";
   color: #373050;
 }
 
@@ -38,52 +42,10 @@ tr.cxsast {
 
 //Vulnerabilities Status
 .graph-title{
-  .font15;
   margin-bottom: 32px;
   font-weight: 500;
-
-}
-.font15 {
-  font-size: 15px;
-}
-
-.float-left {
-  float: left;
-}
-
-.legend {
-  display: inline-flex;
-  position: absolute;
-  vertical-align: middle;
-  transform: translate(0,-50%);
-  background-color: white;
-  z-index: 5;
-}
-
-.legend1, .legend2 {
-  display: inline-block;
-  margin-right: 15px;
-}
-
-.legendBox1, .legendBox2 {
-  width: 18px;
-  height: 18px;
-  background-color: grey;
-  display: inline-block;
-// float: left;
-  margin: 0 7.5px;
-  vertical-align: middle;
-
-}
-
-.legendBox2 {
-  background-color: rgba(0, 0, 0, 0.2);
-}
-
-.legendTitle1, .legendTitle2 {
-  display: inline-block;
   font-size: 16px;
-  letter-spacing: -0.53px;
+
 }
 
 @graph-height: 386px;
@@ -97,100 +59,87 @@ tr.cxsast {
 .detailed-report {
   margin-top: 50%;
 }
+
+.detailed-report-ttl {
+  font-size: 16px;
+}
+
 .download-detailed-report {
   color: #9b9b9b;
   font-size: 14px;
   letter-spacing: -0.47px;
 }
 
-@grid-height: 272px;
-@number-of-grids: 4;
-@spaces-between-grids: (@grid-height - 1px) / @number-of-grids;
-@grid-line1-from-bottom: 1px + @spaces-between-grids;
-
-.graph-grids {
-  height: @grid-height;
-  width: @graph-width;
-  position: absolute;
-
-  .grid-line {
-    width: 100%;
-    height: 1px;
-    background-color: #d5d5d5;
-    position: absolute;
-
-    &.grid-line-main {
-      width: 100%;
-      height: 2px;
-      background-color: #373050;
-      bottom:0;
-    }
-
-    &.grid-line1 {
-        bottom:@grid-line1-from-bottom;
-    }
-
-    &.grid-line2 {
-      bottom:@grid-line1-from-bottom + @spaces-between-grids;
-    }
-
-    &.grid-line3 {
-      bottom:@grid-line1-from-bottom + (@spaces-between-grids * 2);
-    }
-
-    &.grid-line4 {
-      bottom:@grid-line1-from-bottom + (@spaces-between-grids * 3);
-    }
-  }
+.download-icon, .download-icon, .download-txt {
+  display: inline-block;
 }
-@bar-width: 53px;
-@space-between-bars: (@graph-width - (@bar-width * 3)) / 2;
 
-.graph-bars {
 
-  height: ~"calc(100% - 55px)";
-  width: 100%;
-  display: inline-flex;
+.download-icon {
+  margin-right: 9px;
+}
 
-  .bar-container {
-    position: relative;
-    display: inline-block;
-    width: 33%;
-    height: 100%;
-    //vertical-align: bottom;
-    text-align: center;
+body{
+  font:13px/1.3 'Lucida Grande',sans-serif;
+  color:#666;
+}
+
+.chart{
+  display:table;
+  table-layout: fixed;
+
+  //width:60%;
+  width:709px;
+  height:288px;
+  margin:0 auto;
+  padding:0;
+
+  background-image:linear-gradient(to top, rgba(0, 0, 0, 0.1) 2%, rgba(0, 0, 0, 0) 2%);
+  background-size: 100% 70px;
+  background-position: left bottom;
+
+  li{
+    position:relative;
+    display:table-cell;
+    vertical-align:bottom;
+    height:200px;
   }
 
-  .bar-wrapper {
-    position: absolute;
-    height: 100%;
-    left: 50%;
-    transform: translate(-50%);
-  }
-
-  .bar {
-    width: @bar-width;
+  span {
     margin: auto;
+    display: block;
+    background: #d1ecfa;
+    animation: draw 1s ease-in-out;
 
-    &.bar-1 {
-      background-color: #da2945;
-      }
+    &:before{
+      position:absolute;
+      left:0;right:0;top:100%;
+      padding:5px 1em 0;
+      display:block;
+      text-align:center;
+      content:attr(title);
+      word-wrap: break-word;
     }
-    &.bar-2 {
-      background-color: rgba(255,180,0,0.5);
-      &.bar-inner {
-        background-color: rgba(255,180,0,1);
-      }
-    }
-    &.bar-3 {
-      background-color: rgba(239,212,18,0.5);
-      &.bar-inner {
-        background-color: rgba(239,212,18,1);
-      }
-    }
+
   }
 
-.bar-name.bar-1 {
+  .bar-1 {
+    background-color: #da2945;
+  }
 
+  .bar-2 {
+    background-color: #ffb400;
+  }
+
+  .bar-3 {
+    background-color: #efd412;
+  }
+
+  li span {
+    width:53px;
+  }
 }
 
+//@keyframes draw{
+//  0%{height:0;}
+//}
