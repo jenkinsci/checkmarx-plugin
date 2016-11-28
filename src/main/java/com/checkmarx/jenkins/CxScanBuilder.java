@@ -592,12 +592,12 @@ public class CxScanBuilder extends Builder {
 
     private void printScanResult(CxScanResult scanResult) {
         StringBuilder sb = new StringBuilder();
-        sb.append("\n-----------------------CxSAST Scan Results:--------------------------").append("\n");
+        sb.append("\n---------------------Checkmarx Scan Results(CxSAST)-------------------------").append("\n");
         sb.append("High Severity Results: ").append(scanResult.getHighCount()).append("\n");
         sb.append("Medium Severity Results: ").append(scanResult.getMediumCount()).append("\n");
         sb.append("Low Severity Results: ").append(scanResult.getLowCount()).append("\n");
         sb.append("Info Severity Results: ").append(scanResult.getInfoCount()).append("\n");
-        sb.append("---------------------------------------------------------------------").append("\n");
+        sb.append("----------------------------------------------------------------------------").append("\n");
 
         instanceLogger.info(sb.toString());
     }
@@ -794,9 +794,6 @@ public class CxScanBuilder extends Builder {
             throw new AbortException("Remote operation failed on slave node: " + e.getMessage());
         }
     }
-
-
-
 
 
     private boolean needToAvoidDuplicateProjectScans(CxWebService cxWebService) throws AbortException {

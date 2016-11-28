@@ -106,9 +106,8 @@
 
 
 	<!-- -= OSA SCAN =- -->
+	  <f:section title="CxOSA Scan">
     	<f:optionalBlock title="Enable OSA" inline="true" field="osaEnabled">
-
-          <f:section title="OSA Scan">
 
             <f:entry title="Includes" field="includeOpenSourceFolders">
                     <f:textbox/>
@@ -118,8 +117,8 @@
                      <f:textbox/>
               </f:entry>
 
+            </f:optionalBlock>
           </f:section>
-        </f:optionalBlock>
 
 
 	<!-- -= Build Control =- -->
