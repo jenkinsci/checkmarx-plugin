@@ -63,6 +63,7 @@ tr.cxsast {
 }
 .detailed-report {
   margin-top: 24px;
+  display: block;
 }
 .detailed-report-ttl {
   font-size: 16px;
