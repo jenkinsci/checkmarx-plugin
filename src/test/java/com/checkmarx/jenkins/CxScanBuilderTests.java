@@ -85,6 +85,6 @@ public class CxScanBuilderTests {
 			}
 		};
 		return new CxScanBuilder(false, null, null, password, projectName, 0, buildStep, null, null, null, false, null, null, false, false, 0, null,
-				null, false, false, false, 0, 0, 0, false, false, 0, 0, 0, false, null, null, null, null, false);
+				null, false, false, false, 0, 0, 0, false, 0, 0, 0, false, null, null, null, null, false);
 	}
 }

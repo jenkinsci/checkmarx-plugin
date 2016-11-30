@@ -15,7 +15,7 @@ public class ScanResultsPresenter {
 
     public void printResultsToOutput(GetOpenSourceSummaryResponse results) {
         StringBuilder sb = new StringBuilder();
-        sb.append("---------------------Checkmarx Scan Results(CxOSA):-------------------------").append("\n");
+        sb.append('\n' + "---------------------Checkmarx Scan Results(CxOSA):-------------------------").append("\n");
         sb.append("OSA High Severity Results: ").append(results.getHighCount()).append("\n");
         sb.append("OSA Medium Severity Results: ").append(results.getMediumCount()).append("\n");
         sb.append("OSA Low Severity Results: ").append(results.getLowCount()).append("\n");

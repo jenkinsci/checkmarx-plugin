@@ -203,13 +203,22 @@
                                                 <f:select />
                                             </f:entry>
                                             <f:entry title="High severity vulnerabilities threshold" field="highThreshold">
-                                                <f:number clazz="positive-number" min="0" step="1" default="0" />
+                                                <f:number clazz="positive-number" min="0" step="1" default="" />
                                             </f:entry>
                                             <f:entry title="Medium severity vulnerabilities threshold" field="mediumThreshold">
-                                                <f:number clazz="positive-number" min="0" step="1" default="0" />
+                                                <f:number clazz="positive-number" min="0" step="1" default="" />
                                             </f:entry>
                                             <f:entry title="Low severity vulnerabilities threshold" field="lowThreshold">
-                                                <f:number clazz="positive-number" min="0" step="1" default="0" />
+                                                <f:number clazz="positive-number" min="0" step="1" default="" />
+                                            </f:entry>
+                                            <f:entry title="OSA high severity vulnerabilities threshold" field="osaHighThreshold">
+                                                <f:number clazz="positive-number" min="0" step="1" default="" />
+                                            </f:entry>
+                                            <f:entry title="OSA medium severity vulnerabilities threshold" field="osaMediumThreshold">
+                                                <f:number clazz="positive-number" min="0" step="1" default="" />
+                                            </f:entry>
+                                            <f:entry title="OSA low severity vulnerabilities threshold" field="osaLowThreshold">
+                                                <f:number clazz="positive-number" min="0" step="1" default="" />
                                             </f:entry>
                                         </f:nested>
                                     </f:radioBlock>
@@ -220,71 +229,25 @@
                                         <f:select />
                                     </f:entry>
                                     <f:entry title="High severity vulnerabilities threshold" field="highThreshold">
-                                        <f:number clazz="positive-number" min="0" step="1" default="0" />
+                                        <f:number clazz="positive-number" min="0" step="1" default="" />
                                     </f:entry>
                                     <f:entry title="Medium severity vulnerabilities threshold" field="mediumThreshold">
-                                        <f:number clazz="positive-number" min="0" step="1" default="0" />
+                                        <f:number clazz="positive-number" min="0" step="1" default="" />
                                     </f:entry>
                                     <f:entry title="Low severity vulnerabilities threshold" field="lowThreshold">
-                                        <f:number clazz="positive-number" min="0" step="1" default="0" />
+                                        <f:number clazz="positive-number" min="0" step="1" default="" />
+                                    </f:entry>
+                                    <f:entry title="OSA high severity vulnerabilities threshold" field="osaHighThreshold">
+                                        <f:number clazz="positive-number" min="0" step="1" default="" />
+                                    </f:entry>
+                                    <f:entry title="OSA medium severity vulnerabilities threshold" field="osaMediumThreshold">
+                                        <f:number clazz="positive-number" min="0" step="1" default="" />
+                                    </f:entry>
+                                    <f:entry title="OSA low severity vulnerabilities threshold" field="osaLowThreshold">
+                                        <f:number clazz="positive-number" min="0" step="1" default="" />
                                     </f:entry>
                                 </j:otherwise>
                             </j:choose>
-
-                    <!-- ** Enable OSA vulnerability threshold ** -->
-
-                                    <f:optionalBlock title="Enable OSA vulnerability threshold" inline="true"
-                                        field="osaThresholdEnabled"  default="false">
-
-                                        <j:choose>
-                                            <j:when test="${descriptor.forcingOsaVulnerabilityThresholdEnabled}">
-
-                                                <!-- ** Error OSA vulnerability threshold ??** -->
-                                                <f:radioBlock checked="${instance.getThresholdSettings() == null || instance.getThresholdSettings().equals('global')}" inline="true"
-                                                    name="thresholdSettings" title="Use Global Settings (${descriptor.JobGlobalStatusOnThresholdViolation.displayName})"
-                                                    value="global">
-                                                    <f:nested>
-                                                        <f:entry title="OSA high severity vulnerabilities threshold">
-                                                            <f:readOnlyTextbox value="${descriptor.osaHighThresholdEnforcement}" />
-                                                        </f:entry>
-                                                        <f:entry title="Medium severity vulnerabilities threshold">
-                                                            <f:readOnlyTextbox value="${descriptor.osaMediumThresholdEnforcement}" />
-                                                        </f:entry>
-                                                        <f:entry title="Low severity vulnerabilities threshold">
-                                                            <f:readOnlyTextbox value="${descriptor.osaLowThresholdEnforcement}" />
-                                                        </f:entry>
-                                                    </f:nested>
-                                                </f:radioBlock>
-
-                                                <f:radioBlock checked="${instance.getOsaThresholdSettings().equals('job')}" inline="true"
-                                                    name="osaThresholdSettings" title="Specific Scan settings" value="job">
-                                                    <f:nested>
-                                                        <f:entry title="OSA high severity vulnerabilities threshold" field="osaHighThreshold">
-                                                            <f:number clazz="positive-number" min="0" step="1" default="0" />
-                                                        </f:entry>
-                                                        <f:entry title="OSA medium severity vulnerabilities threshold" field="osaMediumThreshold">
-                                                            <f:number clazz="positive-number" min="0" step="1" default="0" />
-                                                        </f:entry>
-                                                        <f:entry title="OSA low severity vulnerabilities threshold" field="osaLowThreshold">
-                                                            <f:number clazz="positive-number" min="0" step="1" default="0" />
-                                                        </f:entry>
-                                                    </f:nested>
-                                                </f:radioBlock>
-                                            </j:when>
-                                            <j:otherwise>
-                                                <f:description>Global settings option is disabled</f:description>
-                                                <f:entry title="OSA high severity vulnerabilities threshold" field="osaHighThreshold">
-                                                    <f:number clazz="positive-number" min="0" step="1" default="0" />
-                                                </f:entry>
-                                                <f:entry title="OSA medium severity vulnerabilities threshold" field="osaMediumThreshold">
-                                                    <f:number clazz="positive-number" min="0" step="1" default="0" />
-                                                </f:entry>
-                                                <f:entry title="OSA low severity vulnerabilities threshold" field="osaLowThreshold">
-                                                    <f:number clazz="positive-number" min="0" step="1" default="0" />
-                                                </f:entry>
-                                            </j:otherwise>
-                                        </j:choose>
-                                    </f:optionalBlock>
 
                         </f:optionalBlock>
 
