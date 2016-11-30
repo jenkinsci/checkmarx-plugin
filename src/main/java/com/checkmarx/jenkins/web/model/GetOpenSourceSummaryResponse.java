@@ -39,6 +39,16 @@ public class GetOpenSourceSummaryResponse {
     private String lowVulnerabilities;
 
 
+    public int getHighCount() {
+        return Integer.parseInt(highVulnerabilities);
+    }
+    public int getMediumCount() {
+        return Integer.parseInt(mediumVulnerabilities);
+    }
+    public int getLowCount() {
+        return Integer.parseInt(lowVulnerabilities);
+    }
+
     public String getNoKnownVulnerabilities() {
         return noKnownVulnerabilities;
     }

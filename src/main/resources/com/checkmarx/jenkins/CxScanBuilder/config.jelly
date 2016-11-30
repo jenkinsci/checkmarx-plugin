@@ -8,206 +8,293 @@
 		<f:textbox default="${descriptor.currentTime}" field="timestamp" />
 	</f:invisibleEntry>
 
-	<!-- Creates a text field that shows the value of the "name" property. When submitted, it will be passed to the 
-		corresponding constructor parameter. -->
-	<f:optionalBlock title="Use default server credentials (${descriptor.credentialsDescription})"
-		inline="true" field="useOwnServerCredentials" negative="true"
-		checked="${instance==null?true:!instance.useOwnServerCredentials}">
-
-		<f:entry title="Checkmarx server URL" field="serverUrl">
-			<f:textbox default="${descriptor.serverUrl}" />
-		</f:entry>
-
-		<f:entry title="Username" field="username">
-			<f:textbox default="${descriptor.username}" />
-		</f:entry>
-
-		<f:entry title="Password" field="password">
-			<f:password />
-		</f:entry>
-		<f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
-			with="serverUrl,username,password,timestamp" />
-	</f:optionalBlock>
-
-	<f:entry title="Checkmarx project name" field="projectName"
-		description="Existing projects appear in a completion list when server url is provided (up to 20)">
-
-		<!--The below code is a reimplementation of f:combobox with support of default value -->
-		<j:set var="attrs.field" value="projectName" />
-		<j:set var="attrs.default" value="${descriptor.defaultProjectName}" />
-		<j:set var="value" value="${attrs.value ?: instance[attrs.field] ?: attrs.default}" />
-
-		<st:once>
-			<script type="text/javascript" src="${request.contextPath}/scripts/utilities.js" />
-			<script type="text/javascript" src="${request.contextPath}/scripts/combobox.js" />
-		</st:once>
-		<st:adjunct includes="lib.form.combobox.combobox" />
-
-		<f:prepareDatabinding />
-		${descriptor.calcFillSettings(field,attrs)}
-
-		<m:input xmlns:m="jelly:hudson.util.jelly.MorphTagLibrary" ATTRIBUTES="${attrs}" EXCEPT="field items clazz"
-			autocomplete="off" class="combobox2 setting-input ${attrs.clazz}${attrs.checkUrl!=null ? ' validated' : ''}"
-			name="${attrs.name ?: '_.'+attrs.field}" value="${value}" />
+      <f:section title="">
+          </f:section>
 
 
-	</f:entry>
+          <f:section title="CxSAST Scan">
+          </f:section>
 
-	<f:entry title="Team" field="groupId">
-		<f:select />
-	</f:entry>
+            <!-- Creates a text field that shows the value of the "name" property. When submitted, it will be passed to the
+                corresponding constructor parameter. -->
+            <f:optionalBlock title="Use default server credentials (${descriptor.credentialsDescription})"
+                inline="true" field="useOwnServerCredentials" negative="true"
+                checked="${instance==null?true:!instance.useOwnServerCredentials}">
 
-	<f:entry title="Preset" field="preset">
-		<f:select />
-	</f:entry>
+                <f:entry title="Checkmarx server URL" field="serverUrl">
+                    <f:textbox default="${descriptor.serverUrl}" />
+                </f:entry>
+
+                <f:entry title="Username" field="username">
+                    <f:textbox default="${descriptor.username}" />
+                </f:entry>
+
+                <f:entry title="Password" field="password">
+                    <f:password />
+                </f:entry>
+                <f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
+                    with="serverUrl,username,password,timestamp" />
+            </f:optionalBlock>
+
+            <f:entry title="Checkmarx project name" field="projectName"
+                description="Existing projects appear in a completion list when server url is provided (up to 20)">
+
+                <!--The below code is a reimplementation of f:combobox with support of default value -->
+                <j:set var="attrs.field" value="projectName" />
+                <j:set var="attrs.default" value="${descriptor.defaultProjectName}" />
+                <j:set var="value" value="${attrs.value ?: instance[attrs.field] ?: attrs.default}" />
+
+                <st:once>
+                    <script type="text/javascript" src="${request.contextPath}/scripts/utilities.js" />
+                    <script type="text/javascript" src="${request.contextPath}/scripts/combobox.js" />
+                </st:once>
+                <st:adjunct includes="lib.form.combobox.combobox" />
+
+                <f:prepareDatabinding />
+                ${descriptor.calcFillSettings(field,attrs)}
+
+                <m:input xmlns:m="jelly:hudson.util.jelly.MorphTagLibrary" ATTRIBUTES="${attrs}" EXCEPT="field items clazz"
+                    autocomplete="off" class="combobox2 setting-input ${attrs.clazz}${attrs.checkUrl!=null ? ' validated' : ''}"
+                    name="${attrs.name ?: '_.'+attrs.field}" value="${value}" />
 
 
-	<f:entry title="Exclude folders" field="excludeFolders">
-		<f:textbox />
-	</f:entry>
+            </f:entry>
 
-	<f:advanced title="Advanced exclude/include settings">
-		<f:entry title="Include/Exclude wildcard patterns" field="filterPattern">
-			<f:textarea />
-		</f:entry>
-	</f:advanced>
+            <f:entry title="Team" field="groupId">
+                <f:select />
+            </f:entry>
 
-	<f:optionalBlock title="Incremental" field="incremental" inline="true" checked="${instance.incremental}">
-
-		<f:optionalBlock title="Schedule periodic full scans" field="fullScansScheduled" inline="true"
-			checked="${instance.fullScansScheduled}">
-			<f:entry
-				title="Number of incremental scans between full scans (${descriptor.FULL_SCAN_CYCLE_MIN}-${descriptor.FULL_SCAN_CYCLE_MAX})"
-				field="fullScanCycle">
-				<f:number clazz="positive-number" min="${descriptor.FULL_SCAN_CYCLE_MIN}" max="${descriptor.FULL_SCAN_CYCLE_MAX}"
-					step="1" default="10" />
-			</f:entry>
-		</f:optionalBlock>
-	</f:optionalBlock>
+            <f:entry title="Preset" field="preset">
+                <f:select />
+            </f:entry>
 
 
-	<f:entry title="Source character encoding (configuration)" field="sourceEncoding" description="Default Configuration uses UTF-8">
-		<f:select />
-	</f:entry>
+            <f:entry title="Exclude folders" field="excludeFolders">
+                <f:textbox />
+            </f:entry>
 
-	<f:entry title="Comment" field="comment">
-		<f:textarea />
-	</f:entry>
+            <f:advanced title="Advanced exclude/include settings">
+                <f:entry title="Include/Exclude wildcard patterns" field="filterPattern">
+                    <f:textarea />
+                </f:entry>
+            </f:advanced>
 
-	<f:entry title="Skip scan if triggered by SCM Changes" field="skipSCMTriggers">
-		<f:checkbox default="false" />
-	</f:entry>
+            <f:optionalBlock title="Incremental" field="incremental" inline="true" checked="${instance.incremental}">
 
-	<f:entry name="jobStatusOnError" title="Job status when CxSAST scan returns an error:" field="jobStatusOnError">
-		<f:enum field="jobStatusOnError">${it.displayName}</f:enum>
-	</f:entry>
+                <f:optionalBlock title="Schedule periodic full scans" field="fullScansScheduled" inline="true"
+                    checked="${instance.fullScansScheduled}">
+                    <f:entry
+                        title="Number of incremental scans between full scans (${descriptor.FULL_SCAN_CYCLE_MIN}-${descriptor.FULL_SCAN_CYCLE_MAX})"
+                        field="fullScanCycle">
+                        <f:number clazz="positive-number" min="${descriptor.FULL_SCAN_CYCLE_MIN}" max="${descriptor.FULL_SCAN_CYCLE_MAX}"
+                            step="1" default="10" />
+                    </f:entry>
+                </f:optionalBlock>
+            </f:optionalBlock>
 
-	<!-- -= Synchronous Mode =- -->
 
-	<j:choose>
-		<j:when test="${descriptor.forcingVulnerabilityThresholdEnabled and descriptor.lockVulnerabilitySettings}">
-			<f:entry title="Build status when results exceed threshold:">
-				<f:readOnlyTextbox value="Setting Locked by Administrator (${descriptor.JobGlobalStatusOnThresholdViolation})" />
-			</f:entry>
+            <f:entry title="Source character encoding (configuration)" field="sourceEncoding" description="Default Configuration uses UTF-8">
+                <f:select />
+            </f:entry>
 
-			<f:entry title="High severity vulnerabilities threshold">
-				<f:readOnlyTextbox value="${descriptor.highThresholdEnforcement}" />
-			</f:entry>
-			<f:entry title="Medium severity vulnerabilities threshold">
-				<f:readOnlyTextbox value="${descriptor.mediumThresholdEnforcement}" />
-			</f:entry>
-			<f:entry title="Low severity vulnerabilities threshold">
-				<f:readOnlyTextbox value="${descriptor.lowThresholdEnforcement}" />
-			</f:entry>
+            <f:entry title="Comment" field="comment">
+                <f:textarea />
+            </f:entry>
 
-			<f:entry title="Generate PDF report" field="generatePdfReport">
-				<f:checkbox />
-			</f:entry>
-		</j:when>
+            <f:optionalBlock title="Skip scan if triggered by SCM Changes" inline="true" field="skipSCMTriggers" />
+            <f:optionalBlock title="Avoid duplicate project scans in queue" inline="true" field="avoidDuplicateProjectScans" />
 
-		<j:otherwise>
-			<f:optionalBlock title="Enable synchronous mode" inline="true" field="waitForResultsEnabled"
-				checked="${instance==null?true:instance.waitForResultsEnabled}">
-				<f:description>Synchronous mode allows viewing scan results in Jenkins and setting thresholds
-				</f:description>
 
-				<f:optionalBlock title="Enable vulnerability threshold" inline="true"
-					field="vulnerabilityThresholdEnabled">
+	<!-- -= OSA SCAN =- -->
+	  <f:section title="CxOSA Scan">
+    	<f:optionalBlock title="Enable OSA" inline="true" field="osaEnabled">
 
-					<j:choose>
-						<j:when test="${descriptor.forcingVulnerabilityThresholdEnabled}">
+            <f:entry title="Includes" field="includeOpenSourceFolders">
+                    <f:textbox/>
+             </f:entry>
 
-							<f:radioBlock checked="${instance.getThresholdSettings() == null || instance.getThresholdSettings().equals('global')}" inline="true"
-								name="thresholdSettings" title="Use Global Settings (${descriptor.JobGlobalStatusOnThresholdViolation.displayName})"
-								value="global">
-								<f:nested>
-									<f:entry title="Build status when results exceed threshold:">
-										<f:readOnlyTextbox value="${descriptor.JobGlobalStatusOnThresholdViolation.displayName}" />
-									</f:entry>
+             <f:entry title="Excludes" field="excludeOpenSourceFolders">
+                     <f:textbox/>
+              </f:entry>
 
-									<f:entry title="High severity vulnerabilities threshold">
-										<f:readOnlyTextbox value="${descriptor.highThresholdEnforcement}" />
-									</f:entry>
-									<f:entry title="Medium severity vulnerabilities threshold">
-										<f:readOnlyTextbox value="${descriptor.mediumThresholdEnforcement}" />
-									</f:entry>
-									<f:entry title="Low severity vulnerabilities threshold">
-										<f:readOnlyTextbox value="${descriptor.lowThresholdEnforcement}" />
-									</f:entry>
-								</f:nested>
-							</f:radioBlock>
-							<f:radioBlock checked="${instance.getThresholdSettings().equals('job')}" inline="true"
-								name="thresholdSettings" title="Specific Scan settings" value="job">
-								<f:nested>
-									<f:entry title="Build status when results exceed threshold:" field="vulnerabilityThresholdResult">
-										<f:select />
-									</f:entry>
-									<f:entry title="High severity vulnerabilities threshold" field="highThreshold">
-										<f:number clazz="positive-number" min="0" step="1" default="0" />
-									</f:entry>
-									<f:entry title="Medium severity vulnerabilities threshold" field="mediumThreshold">
-										<f:number clazz="positive-number" min="0" step="1" default="0" />
-									</f:entry>
-									<f:entry title="Low severity vulnerabilities threshold" field="lowThreshold">
-										<f:number clazz="positive-number" min="0" step="1" default="0" />
-									</f:entry>
-								</f:nested>
-							</f:radioBlock>
-						</j:when>
-						<j:otherwise>
-							<f:description>Global settings option is disabled</f:description>
-							<f:entry title="Build status when results exceed threshold:" field="vulnerabilityThresholdResult">
-								<f:select />
-							</f:entry>
-							<f:entry title="High severity vulnerabilities threshold" field="highThreshold">
-								<f:number clazz="positive-number" min="0" step="1" default="0" />
-							</f:entry>
-							<f:entry title="Medium severity vulnerabilities threshold" field="mediumThreshold">
-								<f:number clazz="positive-number" min="0" step="1" default="0" />
-							</f:entry>
-							<f:entry title="Low severity vulnerabilities threshold" field="lowThreshold">
-								<f:number clazz="positive-number" min="0" step="1" default="0" />
-							</f:entry>
-						</j:otherwise>
-					</j:choose>
-				</f:optionalBlock>
-				<f:entry title="Generate PDF report" field="generatePdfReport">
-					<f:checkbox />
-				</f:entry>
-			</f:optionalBlock>
-		</j:otherwise>
+            </f:optionalBlock>
+          </f:section>
 
-	</j:choose>
 
-    <f:optionalBlock title="Avoid duplicate project scans in queue." inline="true" field="avoidDuplicateProjectScans" />
+	<!-- -= Build Control =- -->
 
-    <f:section title="Open source analysis">
+
+
+    <f:section title="Build Control">
+
+
+
+
+            <f:entry name="jobStatusOnError" title="Job status when CxSAST scan returns an error:" field="jobStatusOnError">
+                    <f:enum field="jobStatusOnError">${it.displayName}</f:enum>
+                </f:entry>
+
+
+
+            <j:choose>
+                <!-- -=use only global configuration setting =- -->
+                <j:when test="${descriptor.forcingVulnerabilityThresholdEnabled and descriptor.lockVulnerabilitySettings}">
+                    <f:entry title="Build status when results exceed threshold:">
+                        <f:readOnlyTextbox value="Setting Locked by Administrator (${descriptor.JobGlobalStatusOnThresholdViolation})" />
+                    </f:entry>
+
+                    <f:entry title="High severity vulnerabilities threshold">
+                        <f:readOnlyTextbox value="${descriptor.highThresholdEnforcement}" />
+                    </f:entry>
+                    <f:entry title="Medium severity vulnerabilities threshold">
+                        <f:readOnlyTextbox value="${descriptor.mediumThresholdEnforcement}" />
+                    </f:entry>
+                    <f:entry title="Low severity vulnerabilities threshold">
+                        <f:readOnlyTextbox value="${descriptor.lowThresholdEnforcement}" />
+                    </f:entry>
+
+                    <f:optionalBlock title="Generate CxSAST PDF report" inline="true" field="generatePdfReport" />
+                </j:when>
+
+                <!-- ** use specific configuration setting ** -->
+                <j:otherwise>
+                    <f:optionalBlock title="Enable synchronous mode" inline="true" field="waitForResultsEnabled"
+                        checked="${instance==null?true:instance.waitForResultsEnabled}">
+
+                        <!-- -= Enable Synchronous Mode =- -->
+
+                        <f:description>Synchronous mode allows viewing scan results in Jenkins and setting thresholds
+                        </f:description>
+
+                        <!-- -= Generate PDF report =- -->
+                        <f:optionalBlock title="Generate CxSAST PDF report" inline="true" field="generatePdfReport" />
+
+                       <!-- ** Enable CxSAST vulnerability threshold ** -->
+                        <f:optionalBlock title="Enable CxSAST vulnerability threshold" inline="true"
+                            field="vulnerabilityThresholdEnabled">
+
+                            <j:choose>
+                                <j:when test="${descriptor.forcingVulnerabilityThresholdEnabled}">
+
+                                    <f:radioBlock checked="${instance.getThresholdSettings() == null || instance.getThresholdSettings().equals('global')}" inline="true"
+                                        name="thresholdSettings" title="Use Global Settings (${descriptor.JobGlobalStatusOnThresholdViolation.displayName})"
+                                        value="global">
+                                        <f:nested>
+                                            <f:entry title="Build status when results exceed threshold:">
+                                                <f:readOnlyTextbox value="${descriptor.JobGlobalStatusOnThresholdViolation.displayName}" />
+                                            </f:entry>
+
+                                            <f:entry title="High severity vulnerabilities threshold">
+                                                <f:readOnlyTextbox value="${descriptor.highThresholdEnforcement}" />
+                                            </f:entry>
+                                            <f:entry title="Medium severity vulnerabilities threshold">
+                                                <f:readOnlyTextbox value="${descriptor.mediumThresholdEnforcement}" />
+                                            </f:entry>
+                                            <f:entry title="Low severity vulnerabilities threshold">
+                                                <f:readOnlyTextbox value="${descriptor.lowThresholdEnforcement}" />
+                                            </f:entry>
+                                        </f:nested>
+                                    </f:radioBlock>
+
+                                    <f:radioBlock checked="${instance.getThresholdSettings().equals('job')}" inline="true"
+                                        name="thresholdSettings" title="Specific Scan settings" value="job">
+                                        <f:nested>
+                                            <f:entry title="Build status when results exceed threshold:" field="vulnerabilityThresholdResult">
+                                                <f:select />
+                                            </f:entry>
+                                            <f:entry title="High severity vulnerabilities threshold" field="highThreshold">
+                                                <f:number clazz="positive-number" min="0" step="1" default="0" />
+                                            </f:entry>
+                                            <f:entry title="Medium severity vulnerabilities threshold" field="mediumThreshold">
+                                                <f:number clazz="positive-number" min="0" step="1" default="0" />
+                                            </f:entry>
+                                            <f:entry title="Low severity vulnerabilities threshold" field="lowThreshold">
+                                                <f:number clazz="positive-number" min="0" step="1" default="0" />
+                                            </f:entry>
+                                        </f:nested>
+                                    </f:radioBlock>
+                                </j:when>
+                                <j:otherwise>
+                                    <f:description>Global settings option is disabled</f:description>
+                                    <f:entry title="Build status when results exceed threshold:" field="vulnerabilityThresholdResult">
+                                        <f:select />
+                                    </f:entry>
+                                    <f:entry title="High severity vulnerabilities threshold" field="highThreshold">
+                                        <f:number clazz="positive-number" min="0" step="1" default="0" />
+                                    </f:entry>
+                                    <f:entry title="Medium severity vulnerabilities threshold" field="mediumThreshold">
+                                        <f:number clazz="positive-number" min="0" step="1" default="0" />
+                                    </f:entry>
+                                    <f:entry title="Low severity vulnerabilities threshold" field="lowThreshold">
+                                        <f:number clazz="positive-number" min="0" step="1" default="0" />
+                                    </f:entry>
+                                </j:otherwise>
+                            </j:choose>
+
+                    <!-- ** Enable OSA vulnerability threshold ** -->
+
+                                    <f:optionalBlock title="Enable OSA vulnerability threshold" inline="true"
+                                        field="osaThresholdEnabled"  default="false">
+
+                                        <j:choose>
+                                            <j:when test="${descriptor.forcingOsaVulnerabilityThresholdEnabled}">
+
+                                                <!-- ** Error OSA vulnerability threshold ??** -->
+                                                <f:radioBlock checked="${instance.getThresholdSettings() == null || instance.getThresholdSettings().equals('global')}" inline="true"
+                                                    name="thresholdSettings" title="Use Global Settings (${descriptor.JobGlobalStatusOnThresholdViolation.displayName})"
+                                                    value="global">
+                                                    <f:nested>
+                                                        <f:entry title="OSA high severity vulnerabilities threshold">
+                                                            <f:readOnlyTextbox value="${descriptor.osaHighThresholdEnforcement}" />
+                                                        </f:entry>
+                                                        <f:entry title="Medium severity vulnerabilities threshold">
+                                                            <f:readOnlyTextbox value="${descriptor.osaMediumThresholdEnforcement}" />
+                                                        </f:entry>
+                                                        <f:entry title="Low severity vulnerabilities threshold">
+                                                            <f:readOnlyTextbox value="${descriptor.osaLowThresholdEnforcement}" />
+                                                        </f:entry>
+                                                    </f:nested>
+                                                </f:radioBlock>
+
+                                                <f:radioBlock checked="${instance.getOsaThresholdSettings().equals('job')}" inline="true"
+                                                    name="osaThresholdSettings" title="Specific Scan settings" value="job">
+                                                    <f:nested>
+                                                        <f:entry title="OSA high severity vulnerabilities threshold" field="osaHighThreshold">
+                                                            <f:number clazz="positive-number" min="0" step="1" default="0" />
+                                                        </f:entry>
+                                                        <f:entry title="OSA medium severity vulnerabilities threshold" field="osaMediumThreshold">
+                                                            <f:number clazz="positive-number" min="0" step="1" default="0" />
+                                                        </f:entry>
+                                                        <f:entry title="OSA low severity vulnerabilities threshold" field="osaLowThreshold">
+                                                            <f:number clazz="positive-number" min="0" step="1" default="0" />
+                                                        </f:entry>
+                                                    </f:nested>
+                                                </f:radioBlock>
+                                            </j:when>
+                                            <j:otherwise>
+                                                <f:description>Global settings option is disabled</f:description>
+                                                <f:entry title="OSA high severity vulnerabilities threshold" field="osaHighThreshold">
+                                                    <f:number clazz="positive-number" min="0" step="1" default="0" />
+                                                </f:entry>
+                                                <f:entry title="OSA medium severity vulnerabilities threshold" field="osaMediumThreshold">
+                                                    <f:number clazz="positive-number" min="0" step="1" default="0" />
+                                                </f:entry>
+                                                <f:entry title="OSA low severity vulnerabilities threshold" field="osaLowThreshold">
+                                                    <f:number clazz="positive-number" min="0" step="1" default="0" />
+                                                </f:entry>
+                                            </j:otherwise>
+                                        </j:choose>
+                                    </f:optionalBlock>
+
+                        </f:optionalBlock>
+
+                    </f:optionalBlock>
+                </j:otherwise>
+
+            </j:choose>
     </f:section>
-    <f:entry title="Includes" field="includeOpenSourceFolders">
-            <f:textbox/>
-     </f:entry>
 
-     <f:entry title="Excludes" field="excludeOpenSourceFolders">
-             <f:textbox/>
-      </f:entry>
+
+
+
 </j:jelly>
