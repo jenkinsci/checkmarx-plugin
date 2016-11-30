@@ -152,6 +152,15 @@
                     <f:entry title="Low severity vulnerabilities threshold">
                         <f:readOnlyTextbox value="${descriptor.lowThresholdEnforcement}" />
                     </f:entry>
+                    <f:entry title="OSA high severity vulnerabilities threshold">
+                        <f:readOnlyTextbox value="${descriptor.osaHighThresholdEnforcement}" />
+                    </f:entry>
+                    <f:entry title="OSA medium severity vulnerabilities threshold">
+                        <f:readOnlyTextbox value="${descriptor.osaMediumThresholdEnforcement}" />
+                    </f:entry>
+                    <f:entry title="OSA low severity vulnerabilities threshold">
+                        <f:readOnlyTextbox value="${descriptor.osaLowThresholdEnforcement}" />
+                    </f:entry>
 
                     <f:optionalBlock title="Generate CxSAST PDF report" inline="true" field="generatePdfReport" />
                 </j:when>
@@ -170,7 +179,7 @@
                         <f:optionalBlock title="Generate CxSAST PDF report" inline="true" field="generatePdfReport" />
 
                        <!-- ** Enable CxSAST vulnerability threshold ** -->
-                        <f:optionalBlock title="Enable CxSAST vulnerability threshold" inline="true"
+                        <f:optionalBlock title="Enable vulnerability threshold" inline="true"
                             field="vulnerabilityThresholdEnabled">
 
                             <j:choose>
@@ -192,6 +201,15 @@
                                             </f:entry>
                                             <f:entry title="Low severity vulnerabilities threshold">
                                                 <f:readOnlyTextbox value="${descriptor.lowThresholdEnforcement}" />
+                                            </f:entry>
+                                            <f:entry title="OSA high severity vulnerabilities threshold">
+                                                <f:readOnlyTextbox value="${descriptor.osaHighThresholdEnforcement}" />
+                                            </f:entry>
+                                            <f:entry title="OSA medium severity vulnerabilities threshold">
+                                                <f:readOnlyTextbox value="${descriptor.osaMediumThresholdEnforcement}" />
+                                            </f:entry>
+                                            <f:entry title="OSA low severity vulnerabilities threshold">
+                                                <f:readOnlyTextbox value="${descriptor.osaLowThresholdEnforcement}" />
                                             </f:entry>
                                         </f:nested>
                                     </f:radioBlock>

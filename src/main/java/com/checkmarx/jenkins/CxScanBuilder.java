@@ -520,7 +520,7 @@ public class CxScanBuilder extends Builder {
                 ThresholdConfig osaThresholdConfig = createOsaThresholdConfig();
 
                 //OSA Threshold
-                isOSAThresholdFailedTheBuild = osaResults != null && isOsaThresholdEnabled()
+                isOSAThresholdFailedTheBuild = osaResults != null && ((descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || isVulnerabilityThresholdEnabled())
                         && isThresholdCrossed(osaThresholdConfig, osaResults.getHighCount(), osaResults.getMediumCount(), osaResults.getLowCount(), "OSA ");
             }
             //If one of the scan's threshold was crossed - fail the build
@@ -583,7 +583,11 @@ public class CxScanBuilder extends Builder {
         sb.append("osaEnabled: ").append(isOsaEnabled()).append("\n");
         if (osaEnabled) {
             sb.append("osaExclusions: ").append(getExcludeOpenSourceFolders()).append("\n");
-            if (isOsaThresholdEnabled()) {
+            if (useGlobalThreshold) {
+                sb.append("osaHighSeveritiesThreshold: ").append(descriptor.getOsaHighThresholdEnforcement()).append("\n");
+                sb.append("osaMediumSeveritiesThreshold: ").append(descriptor.getOsaMediumThresholdEnforcement()).append("\n");
+                sb.append("osaLowSeveritiesThreshold: ").append(descriptor.getOsaLowThresholdEnforcement()).append("\n");
+            } else if (isOsaThresholdEnabled()) {
                 sb.append("osaHighSeveritiesThreshold: ").append(getOsaHighThreshold()).append("\n");
                 sb.append("osaMediumSeveritiesThreshold: ").append(getOsaMediumThreshold()).append("\n");
                 sb.append("osaLowSeveritiesThreshold: ").append(getOsaLowThreshold()).append("\n");
@@ -704,10 +708,16 @@ public class CxScanBuilder extends Builder {
 
     private ThresholdConfig createOsaThresholdConfig() {
         ThresholdConfig config = new ThresholdConfig();
+        if (shouldUseGlobalThreshold()) {
+            final DescriptorImpl descriptor = getDescriptor();
+            config.setHighSeverity(descriptor.getOsaHighThresholdEnforcement());
+            config.setMediumSeverity(descriptor.getOsaMediumThresholdEnforcement());
+            config.setLowSeverity(descriptor.getOsaLowThresholdEnforcement());
+        } else {
         config.setHighSeverity(getOsaHighThreshold());
         config.setMediumSeverity(getOsaMediumThreshold());
         config.setLowSeverity(getOsaLowThreshold());
-
+    }
         return config;
     }
 
@@ -918,15 +928,23 @@ public class CxScanBuilder extends Builder {
 
 
         private boolean forcingVulnerabilityThresholdEnabled;
+        @Nullable
         private Integer highThresholdEnforcement;
+        @Nullable
         private Integer mediumThresholdEnforcement;
+        @Nullable
         private Integer lowThresholdEnforcement;
+        @Nullable
+        private Integer osaHighThresholdEnforcement;
+        @Nullable
+        private Integer osaMediumThresholdEnforcement;
+        @Nullable
+        private Integer osaLowThresholdEnforcement;
         private JobGlobalStatusOnError jobGlobalStatusOnError;
         private JobGlobalStatusOnError jobGlobalStatusOnThresholdViolation = JobGlobalStatusOnError.FAILURE;
         private boolean scanTimeOutEnabled;
         private double scanTimeoutDuration; // In Hours.
         private boolean lockVulnerabilitySettings = true;
-        private boolean lockOsaVulnerabilitySettings = true;
 
         private final transient Pattern msGuid = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
 
@@ -1049,6 +1067,32 @@ public class CxScanBuilder extends Builder {
             this.lowThresholdEnforcement = lowThresholdEnforcement;
         }
 
+        @Nullable
+        public Integer getOsaHighThresholdEnforcement() {
+            return osaHighThresholdEnforcement;
+        }
+
+        public void setOsaHighThresholdEnforcement(@Nullable Integer osaHighThresholdEnforcement) {
+            this.osaHighThresholdEnforcement = osaHighThresholdEnforcement;
+        }
+
+        @Nullable
+        public Integer getOsaMediumThresholdEnforcement() {
+            return osaMediumThresholdEnforcement;
+        }
+
+        public void setOsaMediumThresholdEnforcement(@Nullable Integer osaMediumThresholdEnforcement) {
+            this.osaMediumThresholdEnforcement = osaMediumThresholdEnforcement;
+        }
+
+        @Nullable
+        public Integer getOsaLowThresholdEnforcement() {
+            return osaLowThresholdEnforcement;
+        }
+
+        public void setOsaLowThresholdEnforcement(@Nullable Integer osaLowThresholdEnforcement) {
+            this.osaLowThresholdEnforcement = osaLowThresholdEnforcement;
+        }
 
         public boolean getScanTimeOutEnabled() {
             return scanTimeOutEnabled;
@@ -1469,6 +1513,30 @@ public class CxScanBuilder extends Builder {
 		 */
 
         public FormValidation doCheckOsaLowThreshold(@QueryParameter final Integer value) {
+            return checkNonNegativeValue(value);
+        }
+
+
+
+        public FormValidation doCheckOsaHighThresholdEnforcement(@QueryParameter final Integer value) {
+            return checkNonNegativeValue(value);
+        }
+
+		/*
+		 * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
+		 * avoid synchronization issues.
+		 */
+
+        public FormValidation doCheckOsaMediumThresholdEnforcement(@QueryParameter final Integer value) {
+            return checkNonNegativeValue(value);
+        }
+
+		/*
+		 * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
+		 * avoid synchronization issues.
+		 */
+
+        public FormValidation doCheckOsaLowThresholdEnforcement(@QueryParameter final Integer value) {
             return checkNonNegativeValue(value);
         }
 
