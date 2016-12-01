@@ -4,153 +4,165 @@
 
       <style>
 
-         .summary-section {
-           width: 100%;
-           font-family: 'Roboto', sans-serif;
-         }
-         table {
-           border-collapse: collapse;
-         }
-         table td,
-         table th {
-           border: solid transparent;
-         }
-         .top-padding td {
-           padding-top: 42px;
-         }
-         td {
-           border-color: transparent;
-         }
-         tr.cxsast {
-           border-bottom: solid 2px #d5d5d5;
-         }
-         .title-column,
-         .main-column {
-           padding: 3px;
-           line-height: 25px;
-           display: inline-block;
-         }
-         .cxsast .main-column {
-           padding-bottom: 45px;
-           margin-bottom: 42px;
-         }
-         .title-column {
-           margin-right: 10px;
-           vertical-align: top;
-           height: 100%;
-           letter-spacing: -0.8px;
-           width: 222px;
-           color: #373050;
-         }
-         .summary-title {
-           padding-bottom: 21px;
-           border-bottom: solid #979797 1px;
-         }
-         .sum1 {
-           font-size: 24px;
-           font-weight: 500;
-         }
-         .sum2 {
-           font-size: 16px;
-         }
-         .sum-line1 {
-           width: 100%;
-           height: 1px;
-           background-color: #979797;
-         }
-         .graph-title {
-           margin-bottom: 38px;
-           font-weight: 500;
-           font-size: 16px;
-         }
-         .graph {
-           height: 386px;
-           width: 709px;
-         }
-         .detailed-report {
-           margin-top: 24px;
-           display:block;
-         }
-         .detailed-report-ttl {
-           font-size: 16px;
-           line-height: 16px;
-           letter-spacing: -0.53px;
-         }
-         .download-detailed-report {
-           color: #9b9b9b;
-           font-size: 14px;
-           letter-spacing: -0.47px;
-         }
-         .download-icon,
-         .download-icon,
-         .download-txt {
-           display: inline-block;
-         }
-         .download-icon {
-           margin-right: 9px;
-         }
-         body {
-           font: 13px/1.3 'Lucida Grande', sans-serif;
-           color: #666;
-         }
-         .chart {
-           display: table;
-           table-layout: fixed;
-           width: 709px;
-           height: 288px;
-           margin: 0 auto;
-           padding: 0;
-           background-image: linear-gradient(to top, #d5d5d5, #ffffff 2%);
-           background-size: 100% 70px;
-           background-position: left bottom;
-           border-bottom: solid #979797 2px;
-         }
-         .chart li {
-           position: relative;
-           display: table-cell;
-           vertical-align: bottom;
-           height: 200px;
-         }
-         .chart span {
-           margin: auto;
-           display: block;
-           background: #d1ecfa;
-           animation: draw 1s ease-in-out;
-         }
-         .chart .bar-title {
-           font-size: 16px;
-           padding: 0 18px;
-           color: #525055;
-         }
-         .chart .bar-title-container {
-           position: absolute;
-           padding-top: 21px;
-           display: inline-flex;
-           text-align: center;
-           word-wrap: break-word;
-           left: 50%;
-           transform: translate(-50%);
-         }
-         .chart .bar-1 {
-           background-color: #da2945;
-         }
-         .chart .bar-2 {
-           background-color: #ffb400;
-         }
-         .chart .bar-3 {
-           background-color: #efd412;
-         }
-         .chart li span {
-           width: 53px;
-         }
-         .download-cx-report {
-           font-size: 16px;
-           padding-bottom: 5px;
-         }
-         .pdf-report.download-icon,
-         .html-report.download-icon {
-           margin-right: 6px;
-         }
+        .summary-section {
+          width: 100%;
+          font-family: 'Roboto', sans-serif;
+        }
+        tr.summary-table-row {
+          white-space: nowrap;
+        }
+        table {
+          border-collapse: collapse;
+        }
+        table td,
+        table th {
+          border: solid transparent;
+        }
+        .top-padding td {
+          padding-top: 42px;
+        }
+        td {
+          border-color: transparent;
+        }
+        tr.cxsast {
+          border-bottom: solid 2px #d5d5d5;
+        }
+        .title-column,
+        .main-column {
+          padding: 3px;
+          line-height: 25px;
+          display: inline-block;
+        }
+        .cxsast .main-column {
+          padding-bottom: 45px;
+          margin-bottom: 42px;
+        }
+        .title-column {
+          margin-right: 10px;
+          vertical-align: top;
+          height: 100%;
+          letter-spacing: -0.8px;
+          width: 222px;
+          color: #373050;
+        }
+        .summary-title {
+          padding-bottom: 21px;
+          border-bottom: solid #979797 1px;
+        }
+        .sum1 {
+          font-size: 24px;
+          font-weight: 500;
+        }
+        .sum2 {
+          font-size: 16px;
+        }
+        .sum-line1 {
+          width: 100%;
+          height: 1px;
+          background-color: #979797;
+        }
+        .graph-title {
+          margin-bottom: 38px;
+          font-weight: 500;
+          font-size: 16px;
+        }
+        .graph {
+          height: 386px;
+          width: 709px;
+        }
+        .detailed-report {
+          margin-top: 24px;
+          display: block;
+        }
+        .detailed-report-ttl {
+          font-size: 16px;
+          line-height: 16px;
+          letter-spacing: -0.53px;
+        }
+        .download-detailed-report {
+          color: #9b9b9b;
+          font-size: 14px;
+          letter-spacing: -0.47px;
+        }
+        .download-icon,
+        .download-icon,
+        .download-txt {
+          display: inline-block;
+        }
+        .download-icon {
+          margin-right: 9px;
+        }
+        body {
+          font: 13px/1.3 'Lucida Grande', sans-serif;
+          color: #666;
+        }
+        .chart {
+          display: table;
+          table-layout: fixed;
+          width: 709px;
+          height: 288px;
+          margin: 0 auto;
+          padding: 0;
+          background-image: linear-gradient(to top, #d5d5d5, #ffffff 2%);
+          background-size: 100% 70px;
+          background-position: left bottom;
+          border-bottom: solid #979797 2px;
+        }
+        .chart tr {
+          white-space: nowrap;
+        }
+        .chart li {
+          position: relative;
+          display: table-cell;
+          vertical-align: bottom;
+          height: 200px;
+        }
+        .chart span {
+          margin: auto;
+          display: block;
+          background: #d1ecfa;
+          animation: draw 1s ease-in-out;
+        }
+        .chart .bar-count {
+          text-align: center;
+          font-size: 14px;
+          letter-spacing: -0.47px;
+          line-height: 40px;
+        }
+        .chart .bar-title {
+          font-size: 16px;
+          padding: 0 18px;
+          color: #525055;
+        }
+        .chart .bar-title-container {
+          position: absolute;
+          padding-top: 21px;
+          display: inline-flex;
+          text-align: center;
+          word-wrap: break-word;
+          left: 50%;
+          transform: translate(-50%);
+        }
+        .chart .bar-1 {
+          background-color: #da2945;
+        }
+        .chart .bar-2 {
+          background-color: #ffb400;
+        }
+        .chart .bar-3 {
+          background-color: #efd412;
+        }
+        .chart li span {
+          width: 53px;
+        }
+        .download-cx-report {
+          font-size: 16px;
+          padding-bottom: 5px;
+        }
+        .pdf-report.download-icon,
+        .html-report.download-icon {
+          margin-right: 6px;
+        }
 
          </style>
 
@@ -158,289 +170,319 @@
         <t:summary icon="/plugin/checkmarx/CxIcon48x48.png">
             <j:if test="${it.resultIsValid}">
 
-
 <table class="summary-section">
-    <tr class="cxsast">
-        <td class="title-column">
-            <div class="summary-title">
-                <div class="sum1">CxSAST</div>
-                <div class="sum2">Summary</div>
+<tr class="summary-table-row cxsast">
+    <td class="title-column">
+        <div class="summary-title">
+            <div class="sum1">CxSAST</div>
+            <div class="sum2">Summary</div>
+        </div>
+
+        <a class="detailed-report" href="${it.urlName}">
+            <div class="download-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1000" version="1.1" width="23" height="29" viewBox="0 0 23 29"><title>Download icon</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1001"><clipPath id="SvgjsClipPath1010"><path id="SvgjsPath1009" d="M275 272L293.1 272L298 277L298 301L275 301Z " fill="#ffffff"/></clipPath></defs><path id="SvgjsPath1007" d="M275 272L293.1 272L298 277L298 301L275 301Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-275,-272)"/><path id="SvgjsPath1008" d="M275 272L293.1 272L298 277L298 301L275 301Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="4" clip-path="url(&quot;#SvgjsClipPath1010&quot;)" transform="matrix(1,0,0,1,-275,-272)"/><path id="SvgjsPath1011" d="M292 278L292 272L293.1 272L298 277L298 278Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-275,-272)"/><path id="SvgjsPath1012" d="M286.5 282.5L286.5 289.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1" transform="matrix(1,0,0,1,-275,-272)"/><path id="SvgjsPath1013" d="M286.5 290.5L283.95 287.95 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1" transform="matrix(1,0,0,1,-275,-272)"/><path id="SvgjsPath1014" d="M286.95 290.5L289.5 287.95 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1" transform="matrix(1,0,0,1,-275,-272)"/></svg>
             </div>
-            <!--<div class="sum-line1"></div>-->
-
-
-            <!--todo: link to report-->
-            <a class="detailed-report" href="${it.urlName}">
-                <div class="download-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1028" version="1.1"
-                         width="23" height="29" viewBox="0 0 23 29" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://svgjs.com/svgjs "><title>
-                        Download icon</title>
-                        <desc>Created with Avocode.</desc>
-                        <defs id="SvgjsDefs1029">
-                            <clipPath id="SvgjsClipPath1033">
-                                <path id="SvgjsPath1032" d="M275 272L293.1 272L298 277L298 301L275 301Z " fill="#ffffff"/>
-                            </clipPath>
-                        </defs>
-                        <path id="SvgjsPath1030" d="M275 272L293.1 272L298 277L298 301L275 301Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-275,-272)"/>
-                        <path id="SvgjsPath1031" d="M275 272L293.1 272L298 277L298 301L275 301Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                              stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="4" clip-path="url(&quot;#SvgjsClipPath1033&quot;)"
-                              transform="matrix(1,0,0,1,-275,-272)"/>
-                        <path id="SvgjsPath1034" d="M286.5 282.5L286.5 289.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square"
-                              stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1" transform="matrix(1,0,0,1,-275,-272)"/>
-                        <path id="SvgjsPath1035" d="M286.5 290.5L283.95 287.95 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                              stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1" transform="matrix(1,0,0,1,-275,-272)"/>
-                        <path id="SvgjsPath1036" d="M286.95 290.5L289.5 287.95 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                              stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1" transform="matrix(1,0,0,1,-275,-272)"/>
-                        <path id="SvgjsPath1037" d="M292 278L292 272L298 272L298 278Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-275,-272)"/>
-                    </svg>
-                </div>
-                <div class="download-txt">
-                    <div class="detailed-report-ttl">Checkmarx Report</div>
-                    <div class="download-detailed-report">Download detailed report</div>
-                </div>
-            </a>
-        </td>
-        <td class="main-column">
-            <div class="graph">
-                <div class="graph-title">Vulnerabilities Status</div>
-
-                <ul class="chart">
-                    <li>
-                        <span class="bar-1" style="height:50%"></span>
-                        <div class="bar-title-container">
-                            <div class="bar-title">High</div>
-                            <div class="severity-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1027"
-                                     version="1.1" width="31.617761306477178" height="31.967526558993086" viewBox="0 0 31.617761306477178 31.967526558993086"><title>Icon</title>
-                                    <desc>Created with Avocode.</desc>
-                                    <defs id="SvgjsDefs1028"/>
-                                    <path id="SvgjsPath1029"
-                                          d="M621.16 555.59L620.7199999999999 535L610.7199999999999 536.33C610.7199999999999 536.33 609.0999999999999 542.13 610.7199999999999 547.99C612.0199999999999 552.66 615.9699999999999 557.35 617.79 559.34Z "
-                                          fill="#e3e3e3" fill-opacity="1" transform="matrix(1,0,0,1,-609.3822386935228,-531.5162367205035)"/>
-                                    <path id="SvgjsPath1030"
-                                          d="M617.81 559.37C616.01 557.4 612.03 552.68 610.7199999999999 547.99C609.0999999999999 542.13 610.7199999999999 536.33 610.7199999999999 536.33L610.7199999999999 536.33L620.7199999999999 535L630.7099999999999 536.33C630.7099999999999 536.33 631.6399999999999 539.6500000000001 631.3899999999999 543.8100000000001 "
-                                          fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#6c6c6c"
-                                          stroke-miterlimit="50" stroke-width="2" transform="matrix(1,0,0,1,-609.3822386935228,-531.5162367205035)"/>
-                                    <path id="SvgjsPath1031" d="M630.02 543.99L640.8 562.32L619.2299999999999 562.32Z " fill="#ee3f37" fill-opacity="1"
-                                          transform="matrix(1,0,0,1,-609.3822386935228,-531.5162367205035)"/>
-                                    <path id="SvgjsPath1032" d="M628 556L628 551L631 551L631 556Z " fill="#ffffff" fill-opacity="1"
-                                          transform="matrix(1,0,0,1,-609.3822386935228,-531.5162367205035)"/>
-                                    <path id="SvgjsPath1033" d="M628 561L628 558L631 558L631 561Z " fill="#ffffff" fill-opacity="1"
-                                          transform="matrix(1,0,0,1,-609.3822386935228,-531.5162367205035)"/>
-                                </svg>
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-                        <span class="bar-2" style="height:70%"></span>
-                        <div class="bar-title-container">
-                            <div class="bar-title">Med</div>
-                            <div class="severity-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1034"
-                                     version="1.1" width="31.617761306477178" height="31.967526558993086" viewBox="0 0 31.617761306477178 31.967526558993086"><title>Icon
-                                    high</title>
-                                    <desc>Created with Avocode.</desc>
-                                    <defs id="SvgjsDefs1035"/>
-                                    <path id="SvgjsPath1036"
-                                          d="M884.16 555.59L883.7199999999999 535L873.7199999999999 536.33C873.7199999999999 536.33 872.0999999999999 542.13 873.7199999999999 547.99C875.0199999999999 552.66 878.9699999999999 557.35 880.79 559.34Z "
-                                          fill="#e3e3e3" fill-opacity="1" transform="matrix(1,0,0,1,-872.3822386935228,-531.5162367205035)"/>
-                                    <path id="SvgjsPath1037"
-                                          d="M880.81 559.37C879.01 557.4 875.03 552.68 873.7199999999999 547.99C872.0999999999999 542.13 873.7199999999999 536.33 873.7199999999999 536.33L873.7199999999999 536.33L883.7199999999999 535L893.7099999999999 536.33C893.7099999999999 536.33 894.6399999999999 539.6500000000001 894.3899999999999 543.8100000000001 "
-                                          fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#6c6c6c"
-                                          stroke-miterlimit="50" stroke-width="2" transform="matrix(1,0,0,1,-872.3822386935228,-531.5162367205035)"/>
-                                    <path id="SvgjsPath1038" d="M893.02 543.99L903.8 562.32L882.2299999999999 562.32Z " fill="#ffb400" fill-opacity="1"
-                                          transform="matrix(1,0,0,1,-872.3822386935228,-531.5162367205035)"/>
-                                    <path id="SvgjsPath1039" d="M892 556L892 551L895 551L895 556Z " fill="#ffffff" fill-opacity="1"
-                                          transform="matrix(1,0,0,1,-872.3822386935228,-531.5162367205035)"/>
-                                    <path id="SvgjsPath1040" d="M892 561L892 558L895 558L895 561Z " fill="#ffffff" fill-opacity="1"
-                                          transform="matrix(1,0,0,1,-872.3822386935228,-531.5162367205035)"/>
-                                </svg>
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-                        <span class="bar-3" style="height:10%"></span>
-                        <div class="bar-title-container">
-                            <div class="bar-title">Low</div>
-                            <div class="severity-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1041"
-                                     version="1.1" width="31.617761306477178" height="31.96752655899354" viewBox="0 0 31.617761306477178 31.96752655899354"><title>Icon</title>
-                                    <desc>Created with Avocode.</desc>
-                                    <defs id="SvgjsDefs1042"/>
-                                    <path id="SvgjsPath1043"
-                                          d="M1110.16 557.59L1109.72 537L1099.72 538.33C1099.72 538.33 1098.1000000000001 544.13 1099.72 549.99C1101.02 554.66 1104.97 559.35 1106.79 561.34Z "
-                                          fill="#e3e3e3" fill-opacity="1" transform="matrix(1,0,0,1,-1098.3822386935228,-533.5162367205032)"/>
-                                    <path id="SvgjsPath1044"
-                                          d="M1106.81 561.37C1105.01 559.4 1101.03 554.68 1099.72 549.99C1098.1000000000001 544.13 1099.72 538.33 1099.72 538.33L1099.72 538.33L1109.72 537L1119.71 538.33C1119.71 538.33 1120.64 541.6500000000001 1120.39 545.8100000000001 "
-                                          fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#6c6c6c"
-                                          stroke-miterlimit="50" stroke-width="2" transform="matrix(1,0,0,1,-1098.3822386935228,-533.5162367205032)"/>
-                                    <path id="SvgjsPath1045" d="M1119.02 545.99L1129.8 564.32L1108.23 564.32Z " fill="#efd412" fill-opacity="1"
-                                          transform="matrix(1,0,0,1,-1098.3822386935228,-533.5162367205032)"/>
-                                    <path id="SvgjsPath1046" d="M1118 558L1118 553L1121 553L1121 558Z " fill="#ffffff" fill-opacity="1"
-                                          transform="matrix(1,0,0,1,-1098.3822386935228,-533.5162367205032)"/>
-                                    <path id="SvgjsPath1047" d="M1118 562L1118 559L1121 559L1121 562Z " fill="#ffffff" fill-opacity="1"
-                                          transform="matrix(1,0,0,1,-1098.3822386935228,-533.5162367205032)"/>
-                                </svg>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
+            <div class="download-txt">
+                <div class="detailed-report-ttl">Checkmarx Report</div>
+                <div class="download-detailed-report">Download detailed report</div>
             </div>
-        </td>
-    </tr>
-    <tr class="cxosa top-padding">
-        <td class="title-column">
-            <div class="summary-title">
-                <div class="sum1">CxOSA</div>
-                <div class="sum2">Summary</div>
-            </div>
-            <!--<div class="sum-line1"></div>-->
+        </a>
+    </td>
+    <td class="main-column">
+        <div class="graph">
+            <div class="graph-title">Vulnerabilities Status</div>
 
-
-            <!--todo: link to report-->
-            <div class="detailed-report" href="">
-                <div class="download-cx-report">Download Checkmarx Report</div>
-
-                <div class="osa-downloads">
-                    <div class="pdf-report">
-                        <div class="pdf-report download-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1048" version="1.1"
-                                 width="13" height="16" viewBox="0 0 13 16"><title>Rectangle 7</title>
-                                <desc>Created with Avocode.</desc>
-                                <defs id="SvgjsDefs1049">
-                                    <clipPath id="SvgjsClipPath1052">
-                                        <path id="SvgjsPath1051" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill="#ffffff"/>
-                                    </clipPath>
+            <ul class="chart">
+                <li>
+                    <div class="bar-count">${it.highCount}</div>
+                    <span class="bar-1" style="height:${it.highCount*100/(it.highCount + it.mediumCount + it.lowCount)}%"></span>
+                    <div class="bar-title-container">
+                        <div class="bar-title">High</div>
+                        <div class="severity-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="21px" viewBox="0 0 23 21" version="1.1">
+                                <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
+                                <title>high</title>
+                                <desc>Created with Sketch.</desc>
+                                <defs>
+                                    <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733" id="path-1"/>
+                                    <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884" height="19" fill="white">
+                                        <use xlink:href="#path-1"/>
+                                    </mask>
                                 </defs>
-                                <path id="SvgjsPath1050" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                      stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2"
-                                      clip-path="url(&quot;#SvgjsClipPath1052&quot;)" transform="matrix(1,0,0,1,-271,-763)"/>
-                                <path id="SvgjsPath1053" d="M279 768L279 763L284 763L284 768Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-271,-763)"/>
+                                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                    <g id="Jenkins" transform="translate(-602.000000, -537.000000)">
+                                        <g id="SAST" transform="translate(272.000000, 180.000000)">
+                                            <g id="Vulnerabilities-Stat" transform="translate(246.082552, 0.000000)">
+                                                <g id="High" transform="translate(22.425880, 105.921935)">
+                                                    <g id="high" transform="translate(62.000000, 252.000000)">
+                                                        <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z" id="Combined-Shape" fill="#F5F5F5"/>
+                                                        <use id="Rectangle-40-Copy" stroke="#666666" mask="url(#mask-2)" stroke-width="4" xlink:href="#path-1"/>
+                                                        <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z" id="Page-1" fill="#DA2945"/>
+                                                        <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12" width="2" height="4"/>
+                                                        <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17" width="2" height="2"/>
+                                                    </g>
+                                                </g>
+                                            </g>
+                                        </g>
+                                    </g>
+                                </g>
                             </svg>
-                        </div>
-                        <div class="pdf-report download-txt">
-                            <div class="pdf-report detailed-report-ttl">PDF format</div>
                         </div>
                     </div>
-
-                    <div class="html-report">
-                        <div class="html-report download-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1054" version="1.1"
-                                 width="14" height="17.20710678118644" viewBox="0 0 14 17.20710678118644"><title>HTML Icon</title>
-                                <desc>Created with Avocode.</desc>
-                                <defs id="SvgjsDefs1055"/>
-                                <path id="SvgjsPath1056" d="M279.12 796L284 796L284 806L271 806L271 796L271 796L275.92 796 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                      stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                      transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                <path id="SvgjsPath1057" d="M277.5 790.5L277.5 797.57 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                      stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                      transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                <path id="SvgjsPath1058" d="M277.5 790.5L280.5 793.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                      stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                      transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                <path id="SvgjsPath1059" d="M277.5 790.5L274.5 793.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                      stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                      transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
+                </li>
+                <li>
+                    <div class="bar-count">${it.mediumCount}</div>
+                    <span class="bar-2" style="height:${it.mediumCount*100/(it.highCount + it.mediumCount + it.lowCount)}%"></span>
+                    <div class="bar-title-container">
+                        <div class="bar-title">Med</div>
+                        <div class="severity-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="21px" viewBox="0 0 23 21" version="1.1">
+                                <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
+                                <title>med</title>
+                                <desc>Created with Sketch.</desc>
+                                <defs>
+                                    <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733" id="path-1"/>
+                                    <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884" height="19" fill="white">
+                                        <use xlink:href="#path-1"/>
+                                    </mask>
+                                </defs>
+                                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                    <g id="Jenkins" transform="translate(-680.000000, -537.000000)">
+                                        <g id="SAST" transform="translate(272.000000, 180.000000)">
+                                            <g id="Vulnerabilities-Stat" transform="translate(246.082552, 0.000000)">
+                                                <g id="High" transform="translate(22.425880, 105.921935)">
+                                                    <g id="med" transform="translate(140.000000, 252.000000)">
+                                                        <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z" id="Combined-Shape" fill="#F5F5F5"/>
+                                                        <use id="Rectangle-40-Copy" stroke="#666666" mask="url(#mask-2)" stroke-width="4" xlink:href="#path-1"/>
+                                                        <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z" id="Page-1" fill="#FFB400"/>
+                                                        <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12" width="2" height="4"/>
+                                                        <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17" width="2" height="2"/>
+                                                    </g>
+                                                </g>
+                                            </g>
+                                        </g>
+                                    </g>
+                                </g>
                             </svg>
                         </div>
-                        <div class="html-report download-txt">
-                            <div class="detailed-report-ttl">html format</div>
+                    </div>
+                </li>
+                <li>
+                    <div class="bar-count">${it.lowCount}</div>
+                    <span class="bar-3" style="height:${it.lowCount*100/(it.highCount + it.mediumCount + it.lowCount)}%"></span>
+                    <div class="bar-title-container">
+                        <div class="bar-title">Low</div>
+                        <div class="severity-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="21px" viewBox="0 0 23 21" version="1.1">
+                                <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
+                                <title>low</title>
+                                <desc>Created with Sketch.</desc>
+                                <defs>
+                                    <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733" id="path-1"/>
+                                    <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884" height="19" fill="white">
+                                        <use xlink:href="#path-1"/>
+                                    </mask>
+                                </defs>
+                                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                    <g id="Jenkins" transform="translate(-641.000000, -537.000000)">
+                                        <g id="SAST" transform="translate(272.000000, 180.000000)">
+                                            <g id="Vulnerabilities-Stat" transform="translate(246.082552, 0.000000)">
+                                                <g id="High" transform="translate(22.425880, 105.921935)">
+                                                    <g id="low" transform="translate(101.000000, 252.000000)">
+                                                        <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z" id="Combined-Shape" fill="#F5F5F5"/>
+                                                        <use id="Rectangle-40-Copy" stroke="#666666" mask="url(#mask-2)" stroke-width="4" xlink:href="#path-1"/>
+                                                        <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z" id="Page-1" fill="#EFD412"/>
+                                                        <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12" width="2" height="4"/>
+                                                        <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17" width="2" height="2"/>
+                                                    </g>
+                                                </g>
+                                            </g>
+                                        </g>
+                                    </g>
+                                </g>
+                            </svg>
                         </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </td>
+</tr>
+
+<!--osa row-->
+<tr class="summary-table-row cxosa top-padding">
+    <td class="title-column">
+        <div class="summary-title">
+            <div class="sum1">CxOSA</div>
+            <div class="sum2">Summary</div>
+        </div>
+
+        <!--todo: link to report-->
+        <div class="detailed-report" href="">
+            <div class="download-cx-report">Download Checkmarx Report</div>
+
+            <div class="osa-downloads">
+                <div class="pdf-report">
+                    <div class="pdf-report download-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1022" version="1.1" width="13" height="16" viewBox="0 0 13 16"><title>PDF icon</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1023"><clipPath id="SvgjsClipPath1027"><path id="SvgjsPath1026" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill="#ffffff"/></clipPath></defs><path id="SvgjsPath1024" d="M279 768L279 763L280.1 763L284 767L284 768Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-271,-763)"/><path id="SvgjsPath1025" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2" clip-path="url(&quot;#SvgjsClipPath1027&quot;)" transform="matrix(1,0,0,1,-271,-763)"/></svg>
+                    </div>
+                    <div class="pdf-report download-txt">
+                        <div class="pdf-report detailed-report-ttl">PDF format</div>
                     </div>
                 </div>
 
+                <div class="html-report">
+                    <div class="html-report download-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1054" version="1.1"
+                             width="14" height="17.20710678118644" viewBox="0 0 14 17.20710678118644"><title>HTML Icon</title>
+                            <desc>Created with Avocode.</desc>
+                            <defs id="SvgjsDefs1055"/>
+                            <path id="SvgjsPath1056" d="M279.12 796L284 796L284 806L271 806L271 796L271 796L275.92 796 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
+                                  stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
+                                  transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
+                            <path id="SvgjsPath1057" d="M277.5 790.5L277.5 797.57 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
+                                  stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
+                                  transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
+                            <path id="SvgjsPath1058" d="M277.5 790.5L280.5 793.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
+                                  stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
+                                  transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
+                            <path id="SvgjsPath1059" d="M277.5 790.5L274.5 793.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
+                                  stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
+                                  transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
+                        </svg>
+                    </div>
+                    <div class="html-report download-txt">
+                        <div class="detailed-report-ttl">html format</div>
+                    </div>
+                </div>
             </div>
 
-        </td>
-        <td class="main-column">
-            <div class="graph">
-                <div class="graph-title">Vulnerabilities Status</div>
+        </div>
 
-                <ul class="chart">
-                    <li>
-                        <span class="bar-1" style="height:50%"></span>
-                        <div class="bar-title-container">
-                            <div class="bar-title">High</div>
-                            <div class="severity-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1027"
-                                     version="1.1" width="31.617761306477178" height="31.967526558993086" viewBox="0 0 31.617761306477178 31.967526558993086"><title>Icon</title>
-                                    <desc>Created with Avocode.</desc>
-                                    <defs id="SvgjsDefs1028"/>
-                                    <path id="SvgjsPath1029"
-                                          d="M621.16 555.59L620.7199999999999 535L610.7199999999999 536.33C610.7199999999999 536.33 609.0999999999999 542.13 610.7199999999999 547.99C612.0199999999999 552.66 615.9699999999999 557.35 617.79 559.34Z "
-                                          fill="#e3e3e3" fill-opacity="1" transform="matrix(1,0,0,1,-609.3822386935228,-531.5162367205035)"/>
-                                    <path id="SvgjsPath1030"
-                                          d="M617.81 559.37C616.01 557.4 612.03 552.68 610.7199999999999 547.99C609.0999999999999 542.13 610.7199999999999 536.33 610.7199999999999 536.33L610.7199999999999 536.33L620.7199999999999 535L630.7099999999999 536.33C630.7099999999999 536.33 631.6399999999999 539.6500000000001 631.3899999999999 543.8100000000001 "
-                                          fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#6c6c6c"
-                                          stroke-miterlimit="50" stroke-width="2" transform="matrix(1,0,0,1,-609.3822386935228,-531.5162367205035)"/>
-                                    <path id="SvgjsPath1031" d="M630.02 543.99L640.8 562.32L619.2299999999999 562.32Z " fill="#ee3f37" fill-opacity="1"
-                                          transform="matrix(1,0,0,1,-609.3822386935228,-531.5162367205035)"/>
-                                    <path id="SvgjsPath1032" d="M628 556L628 551L631 551L631 556Z " fill="#ffffff" fill-opacity="1"
-                                          transform="matrix(1,0,0,1,-609.3822386935228,-531.5162367205035)"/>
-                                    <path id="SvgjsPath1033" d="M628 561L628 558L631 558L631 561Z " fill="#ffffff" fill-opacity="1"
-                                          transform="matrix(1,0,0,1,-609.3822386935228,-531.5162367205035)"/>
-                                </svg>
-                            </div>
+    </td>
+    <td class="main-column">
+        <div class="graph">
+            <div class="graph-title">Vulnerabilities Status</div>
+
+            <ul class="chart">
+                <li>
+                    <div class="bar-count">${it.osaHighCount}</div>
+                    <span class="bar-1" style="height:${it.osaHighCount*100/(it.osaHighCount + it.osaMediumCount + it.osaLowCount)}%"></span>
+                    <div class="bar-title-container">
+                        <div class="bar-title">High</div>
+                        <div class="severity-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="21px" viewBox="0 0 23 21" version="1.1">
+                                <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
+                                <title>high</title>
+                                <desc>Created with Sketch.</desc>
+                                <defs>
+                                    <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733" id="path-1"/>
+                                    <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884" height="19" fill="white">
+                                        <use xlink:href="#path-1"/>
+                                    </mask>
+                                </defs>
+                                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                    <g id="Jenkins" transform="translate(-602.000000, -537.000000)">
+                                        <g id="SAST" transform="translate(272.000000, 180.000000)">
+                                            <g id="Vulnerabilities-Stat" transform="translate(246.082552, 0.000000)">
+                                                <g id="High" transform="translate(22.425880, 105.921935)">
+                                                    <g id="high" transform="translate(62.000000, 252.000000)">
+                                                        <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z" id="Combined-Shape" fill="#F5F5F5"/>
+                                                        <use id="Rectangle-40-Copy" stroke="#666666" mask="url(#mask-2)" stroke-width="4" xlink:href="#path-1"/>
+                                                        <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z" id="Page-1" fill="#DA2945"/>
+                                                        <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12" width="2" height="4"/>
+                                                        <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17" width="2" height="2"/>
+                                                    </g>
+                                                </g>
+                                            </g>
+                                        </g>
+                                    </g>
+                                </g>
+                            </svg>
                         </div>
-                    </li>
-                    <li>
-                        <span class="bar-2" style="height:70%"></span>
-                        <div class="bar-title-container">
-                            <div class="bar-title">Med</div>
-                            <div class="severity-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1034"
-                                     version="1.1" width="31.617761306477178" height="31.967526558993086" viewBox="0 0 31.617761306477178 31.967526558993086"><title>Icon
-                                    high</title>
-                                    <desc>Created with Avocode.</desc>
-                                    <defs id="SvgjsDefs1035"/>
-                                    <path id="SvgjsPath1036"
-                                          d="M884.16 555.59L883.7199999999999 535L873.7199999999999 536.33C873.7199999999999 536.33 872.0999999999999 542.13 873.7199999999999 547.99C875.0199999999999 552.66 878.9699999999999 557.35 880.79 559.34Z "
-                                          fill="#e3e3e3" fill-opacity="1" transform="matrix(1,0,0,1,-872.3822386935228,-531.5162367205035)"/>
-                                    <path id="SvgjsPath1037"
-                                          d="M880.81 559.37C879.01 557.4 875.03 552.68 873.7199999999999 547.99C872.0999999999999 542.13 873.7199999999999 536.33 873.7199999999999 536.33L873.7199999999999 536.33L883.7199999999999 535L893.7099999999999 536.33C893.7099999999999 536.33 894.6399999999999 539.6500000000001 894.3899999999999 543.8100000000001 "
-                                          fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#6c6c6c"
-                                          stroke-miterlimit="50" stroke-width="2" transform="matrix(1,0,0,1,-872.3822386935228,-531.5162367205035)"/>
-                                    <path id="SvgjsPath1038" d="M893.02 543.99L903.8 562.32L882.2299999999999 562.32Z " fill="#ffb400" fill-opacity="1"
-                                          transform="matrix(1,0,0,1,-872.3822386935228,-531.5162367205035)"/>
-                                    <path id="SvgjsPath1039" d="M892 556L892 551L895 551L895 556Z " fill="#ffffff" fill-opacity="1"
-                                          transform="matrix(1,0,0,1,-872.3822386935228,-531.5162367205035)"/>
-                                    <path id="SvgjsPath1040" d="M892 561L892 558L895 558L895 561Z " fill="#ffffff" fill-opacity="1"
-                                          transform="matrix(1,0,0,1,-872.3822386935228,-531.5162367205035)"/>
-                                </svg>
-                            </div>
+                    </div>
+                </li>
+                <li>
+
+                    <div class="bar-count">${it.osaMediumCount}</div>
+                    <span class="bar-2" style="height:${it.osaMediumCount*100/(it.osaHighCount + it.osaMediumCount + it.osaLowCount)}%"></span>
+                    <div class="bar-title-container">
+                        <div class="bar-title">Med</div>
+                        <div class="severity-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="21px" viewBox="0 0 23 21" version="1.1">
+                                <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
+                                <title>med</title>
+                                <desc>Created with Sketch.</desc>
+                                <defs>
+                                    <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733" id="path-1"/>
+                                    <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884" height="19" fill="white">
+                                        <use xlink:href="#path-1"/>
+                                    </mask>
+                                </defs>
+                                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                    <g id="Jenkins" transform="translate(-680.000000, -537.000000)">
+                                        <g id="SAST" transform="translate(272.000000, 180.000000)">
+                                            <g id="Vulnerabilities-Stat" transform="translate(246.082552, 0.000000)">
+                                                <g id="High" transform="translate(22.425880, 105.921935)">
+                                                    <g id="med" transform="translate(140.000000, 252.000000)">
+                                                        <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z" id="Combined-Shape" fill="#F5F5F5"/>
+                                                        <use id="Rectangle-40-Copy" stroke="#666666" mask="url(#mask-2)" stroke-width="4" xlink:href="#path-1"/>
+                                                        <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z" id="Page-1" fill="#FFB400"/>
+                                                        <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12" width="2" height="4"/>
+                                                        <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17" width="2" height="2"/>
+                                                    </g>
+                                                </g>
+                                            </g>
+                                        </g>
+                                    </g>
+                                </g>
+                            </svg>
                         </div>
-                    </li>
-                    <li>
-                        <span class="bar-3" style="height:10%"></span>
-                        <div class="bar-title-container">
-                            <div class="bar-title">Low</div>
-                            <div class="severity-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1041"
-                                     version="1.1" width="31.617761306477178" height="31.96752655899354" viewBox="0 0 31.617761306477178 31.96752655899354"><title>Icon</title>
-                                    <desc>Created with Avocode.</desc>
-                                    <defs id="SvgjsDefs1042"/>
-                                    <path id="SvgjsPath1043"
-                                          d="M1110.16 557.59L1109.72 537L1099.72 538.33C1099.72 538.33 1098.1000000000001 544.13 1099.72 549.99C1101.02 554.66 1104.97 559.35 1106.79 561.34Z "
-                                          fill="#e3e3e3" fill-opacity="1" transform="matrix(1,0,0,1,-1098.3822386935228,-533.5162367205032)"/>
-                                    <path id="SvgjsPath1044"
-                                          d="M1106.81 561.37C1105.01 559.4 1101.03 554.68 1099.72 549.99C1098.1000000000001 544.13 1099.72 538.33 1099.72 538.33L1099.72 538.33L1109.72 537L1119.71 538.33C1119.71 538.33 1120.64 541.6500000000001 1120.39 545.8100000000001 "
-                                          fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#6c6c6c"
-                                          stroke-miterlimit="50" stroke-width="2" transform="matrix(1,0,0,1,-1098.3822386935228,-533.5162367205032)"/>
-                                    <path id="SvgjsPath1045" d="M1119.02 545.99L1129.8 564.32L1108.23 564.32Z " fill="#efd412" fill-opacity="1"
-                                          transform="matrix(1,0,0,1,-1098.3822386935228,-533.5162367205032)"/>
-                                    <path id="SvgjsPath1046" d="M1118 558L1118 553L1121 553L1121 558Z " fill="#ffffff" fill-opacity="1"
-                                          transform="matrix(1,0,0,1,-1098.3822386935228,-533.5162367205032)"/>
-                                    <path id="SvgjsPath1047" d="M1118 562L1118 559L1121 559L1121 562Z " fill="#ffffff" fill-opacity="1"
-                                          transform="matrix(1,0,0,1,-1098.3822386935228,-533.5162367205032)"/>
-                                </svg>
-                            </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="bar-count">${it.osaLowCount}</div>
+                    <span class="bar-3" style="height:${it.osaLowCount*100/(it.osaHighCount + it.osaMediumCount + it.osaLowCount)}%"></span>
+                    <div class="bar-title-container">
+                        <div class="bar-title">Low</div>
+                        <div class="severity-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="21px" viewBox="0 0 23 21" version="1.1">
+                                <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
+                                <title>low</title>
+                                <desc>Created with Sketch.</desc>
+                                <defs>
+                                    <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733" id="path-1"/>
+                                    <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884" height="19" fill="white">
+                                        <use xlink:href="#path-1"/>
+                                    </mask>
+                                </defs>
+                                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                    <g id="Jenkins" transform="translate(-641.000000, -537.000000)">
+                                        <g id="SAST" transform="translate(272.000000, 180.000000)">
+                                            <g id="Vulnerabilities-Stat" transform="translate(246.082552, 0.000000)">
+                                                <g id="High" transform="translate(22.425880, 105.921935)">
+                                                    <g id="low" transform="translate(101.000000, 252.000000)">
+                                                        <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z" id="Combined-Shape" fill="#F5F5F5"/>
+                                                        <use id="Rectangle-40-Copy" stroke="#666666" mask="url(#mask-2)" stroke-width="4" xlink:href="#path-1"/>
+                                                        <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z" id="Page-1" fill="#EFD412"/>
+                                                        <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12" width="2" height="4"/>
+                                                        <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17" width="2" height="2"/>
+                                                    </g>
+                                                </g>
+                                            </g>
+                                        </g>
+                                    </g>
+                                </g>
+                            </svg>
                         </div>
-                    </li>
-                </ul>
-            </div>
-        </td>
-    </tr>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </td>
+</tr>
 </table>
+
 
             </j:if>
             <j:if test="${!it.resultIsValid}">

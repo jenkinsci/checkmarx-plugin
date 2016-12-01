@@ -1,6 +1,12 @@
 .summary-section {
   width: 100%;
   font-family: 'Roboto', sans-serif;
+  }
+
+.summary-table-row {
+  tr& {
+    white-space: nowrap;
+  }
 }
 
 table {
@@ -131,6 +137,10 @@ body {
 
   border-bottom: solid #979797 2px;
 
+  tr {
+    white-space: nowrap;
+  }
+
   li {
     position: relative;
     display: table-cell;
@@ -143,6 +153,13 @@ body {
     display: block;
     background: #d1ecfa;
     animation: draw 1s ease-in-out;
+  }
+
+  .bar-count {
+    text-align:center;
+    font-size: 14px;
+    letter-spacing: -0.47px;
+    line-height:40px;
   }
 
   .bar-title {

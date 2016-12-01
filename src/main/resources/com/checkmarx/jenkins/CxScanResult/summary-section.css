@@ -2,6 +2,9 @@
   width: 100%;
   font-family: 'Roboto', sans-serif;
 }
+tr.summary-table-row {
+  white-space: nowrap;
+}
 table {
   border-collapse: collapse;
 }
@@ -99,6 +102,9 @@ body {
   background-position: left bottom;
   border-bottom: solid #979797 2px;
 }
+.chart tr {
+  white-space: nowrap;
+}
 .chart li {
   position: relative;
   display: table-cell;
@@ -110,6 +116,12 @@ body {
   display: block;
   background: #d1ecfa;
   animation: draw 1s ease-in-out;
+}
+.chart .bar-count {
+  text-align: center;
+  font-size: 14px;
+  letter-spacing: -0.47px;
+  line-height: 40px;
 }
 .chart .bar-title {
   font-size: 16px;
