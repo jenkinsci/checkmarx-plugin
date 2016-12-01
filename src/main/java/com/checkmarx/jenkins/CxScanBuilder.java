@@ -474,7 +474,9 @@ public class CxScanBuilder extends Builder {
             if (shouldRunAsynchronous) {
                 logAsyncMessage(serverUrlToUse);
                 addScanResultAction(build, serverUrlToUse, shouldRunAsynchronous, null);
-                analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService, listener, shouldRunAsynchronous);
+                if (osaEnabled) {
+                    analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService, listener, shouldRunAsynchronous);
+                }
                 return true;
             }
 
