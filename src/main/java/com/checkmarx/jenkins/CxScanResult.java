@@ -210,7 +210,36 @@ public class CxScanResult implements Action {
 	public void doPdfReport(StaplerRequest req, StaplerResponse rsp) throws IOException {
 		rsp.setContentType("application/pdf");
 		ServletOutputStream outputStream = rsp.getOutputStream();
-		IOUtils.copy(pdfReport, outputStream);
+		File buildDirectory = owner.getRootDir();
+		File a = new File(buildDirectory, "/checkmarx/" + PDF_REPORT_NAME);
+
+		IOUtils.copy(a, outputStream);
+
+		outputStream.flush();
+		outputStream.close();
+	}
+
+	public void doOsaPdfReport(StaplerRequest req, StaplerResponse rsp) throws IOException {
+
+		rsp.setContentType("application/pdf");
+		ServletOutputStream outputStream = rsp.getOutputStream();
+		File buildDirectory = owner.getRootDir();
+		File a = new File(buildDirectory, "/checkmarx/" + "OSAReport.pdf");
+
+		IOUtils.copy(a, outputStream);
+
+		outputStream.flush();
+		outputStream.close();
+	}
+
+
+	public void doOsaHtmlReport(StaplerRequest req, StaplerResponse rsp) throws IOException {
+		rsp.setContentType("text/html");
+		ServletOutputStream outputStream = rsp.getOutputStream();
+		File buildDirectory = owner.getRootDir();
+		File a = new File(buildDirectory, "/checkmarx/" + "OSAReport.html");
+
+		IOUtils.copy(a, outputStream);
 
 		outputStream.flush();
 		outputStream.close();

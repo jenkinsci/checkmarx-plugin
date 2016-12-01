@@ -495,8 +495,7 @@ public class CxScanBuilder extends Builder {
                 cxWebService.retrieveScanReport(reportResponse.getID(), pdfReportFile, CxWSReportType.PDF);
             }
 
-            instanceLogger.info("Copying reports to workspace");
-            copyReportsToWorkspace(build, checkmarxBuildDir);
+
 
             CxScanResult cxScanResult = addScanResultAction(build, serverUrlToUse, shouldRunAsynchronous, xmlReportFile);
 
@@ -518,11 +517,20 @@ public class CxScanBuilder extends Builder {
             if (osaEnabled) {
                 GetOpenSourceSummaryResponse osaResults = analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService, listener, shouldRunAsynchronous);
                 ThresholdConfig osaThresholdConfig = createOsaThresholdConfig();
+                //retrieve osa scan results pdf + html
+                getOSAReports(serverUrlToUseNotNull, usernameToUse, passwordToUse, checkmarxBuildDir);
+
 
                 //OSA Threshold
                 isOSAThresholdFailedTheBuild = osaResults != null && ((descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || isVulnerabilityThresholdEnabled())
                         && isThresholdCrossed(osaThresholdConfig, osaResults.getHighCount(), osaResults.getMediumCount(), osaResults.getLowCount(), "OSA ");
             }
+
+
+//            generateHtmlReport(build, checkmarxBuildDir);
+            instanceLogger.info("Copying reports to workspace");
+            copyReportsToWorkspace(build, checkmarxBuildDir);
+
             //If one of the scan's threshold was crossed - fail the build
             if (isSASTThresholdFailedTheBuild || isOSAThresholdFailedTheBuild) {
                 build.setResult(thresholdConfig.getBuildStatus());
@@ -557,6 +565,48 @@ public class CxScanBuilder extends Builder {
         } finally {
             closeLogger();
         }
+    }
+
+//    private void generateHtmlReport(AbstractBuild<?, ?> build, File checkmarxBuildDir) {
+//
+//        String linkToResults = Jenkins.getInstance().getRootUrl() +  build.getUrl() + "checkmarx/";
+//        String linkToPDF = Jenkins.getInstance().getRootUrl() + build.getUrl() + "checkmarx/pdfReport";
+//        String html = null;
+//        try {
+//            html = IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream("com/checkmarx/jenkins/CxScanResult/summary-section.html"));
+//            html = html.replace("#RESULTS_LINK#", linkToResults).replace("#PDF_REPORT_LINK#", linkToPDF);
+//            FileUtils.writeStringToFile(new File(checkmarxBuildDir, "report.html"), html);
+//        } catch (IOException e) {
+//            instanceLogger.warn("fail to generate html report", e);
+//
+//        }
+//
+//    }
+
+    private void getOSAReports(String serverUrl, String username, String password, File checkmarxBuildDir) {
+        instanceLogger.info("retrieving osa report files");
+        AuthenticationRequest authReq = new AuthenticationRequest(username, password);
+        ScanClient scanClient = new ScanClient(serverUrl, authReq);
+        String osaScanHtmlResults = scanClient.getOSAScanHtmlResults(projectId);
+        File osaHtmlReport = new File(checkmarxBuildDir, "OSAReport.html");
+        try {
+            FileUtils.writeStringToFile(osaHtmlReport, osaScanHtmlResults);
+        } catch (IOException e) {
+            instanceLogger.warn("fail to write osa html report to ["+osaHtmlReport.getAbsolutePath()+"]");
+        }
+        instanceLogger.info("osa report file ["+osaHtmlReport.getAbsolutePath()+"] generated successfully");
+
+        byte[] osaScanPdfResults = scanClient.getOSAScanPdfResults(projectId);
+        File osaPdfReport = new File(checkmarxBuildDir, "OSAReport.pdf");
+        try {
+            FileUtils.writeByteArrayToFile(osaPdfReport, osaScanPdfResults);
+        } catch (IOException e) {
+            instanceLogger.warn("fail to write osa pdf report to ["+osaHtmlReport.getAbsolutePath()+"]");
+        }
+        instanceLogger.info("osa report file ["+osaHtmlReport.getAbsolutePath()+"] generated successfully");
+
+
+
     }
 
     private void printConfiguration(DescriptorImpl descriptor) {
