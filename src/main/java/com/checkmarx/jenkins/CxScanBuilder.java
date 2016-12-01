@@ -1315,6 +1315,23 @@ public class CxScanBuilder extends Builder {
             }
         }
 
+        public boolean hasOSALicense(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
+                                     @QueryParameter final String username, @QueryParameter final String password) {
+
+            boolean hasOSALicense = false;
+
+            try {
+                final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password));
+
+                hasOSALicense = cxWebService.isOsaLicenseValid();
+
+            } catch (Exception e) {
+                logger.debug("fail to check OSA license", e);
+            }
+
+            return hasOSALicense;
+        }
+
 	    /*
 	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
 	     *  shared state to avoid synchronization issues.
