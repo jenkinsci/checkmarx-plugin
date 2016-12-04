@@ -1315,13 +1315,25 @@ public class CxScanBuilder extends Builder {
             }
         }
 
-        public boolean hasOSALicense(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
-                                     @QueryParameter final String username, @QueryParameter final String password) {
+        public boolean hasOSALicense(@QueryParameter boolean useOwnServerCredentials, @QueryParameter String serverUrl,
+                                     @QueryParameter String username, @QueryParameter String password) {
 
             boolean hasOSALicense = false;
 
             try {
-                final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password));
+
+                if(!useOwnServerCredentials) {
+                    serverUrl = getServerUrl();
+                    username = getUsername();
+                    password = getPassword();
+                }
+
+                password = getPasswordPlainText(password);
+
+                CxWebService cxWebService = new CxWebService(serverUrl);
+                logger.debug("prepareLoggedInWebservice: created cxWebService");
+                cxWebService.login(username, password);
+                logger.debug("prepareLoggedInWebservice: logged in");
 
                 hasOSALicense = cxWebService.isOsaLicenseValid();
 

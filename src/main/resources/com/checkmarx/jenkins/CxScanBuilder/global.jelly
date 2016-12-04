@@ -73,7 +73,7 @@
 				<f:number clazz="positive-number" min="0" step="1" default="" />
 			</f:entry>
 			<j:choose>
-                <j:when test="${descriptor.hasOSALicense(false, descriptor.serverUrl, descriptor.username, descriptor.password)}">
+                <j:when test="${descriptor.hasOSALicense(true, descriptor.serverUrl, descriptor.username, descriptor.password)}">
                     <f:entry title="OSA high severity vulnerabilities threshold" field="osaHighThresholdEnforcement">
                         <f:number clazz="positive-number" min="0" step="1" default="" />
                     </f:entry>
