@@ -1315,33 +1315,25 @@ public class CxScanBuilder extends Builder {
             }
         }
 
-        public boolean hasOSALicense(@QueryParameter boolean useOwnServerCredentials, @QueryParameter String serverUrl,
-                                     @QueryParameter String username, @QueryParameter String password) {
-
+        public FormValidation doCheckOsaEnabled(@QueryParameter boolean useOwnServerCredentials,
+                                                @QueryParameter String serverUrl,
+                                                @QueryParameter String username,
+                                                @QueryParameter String password) {
             boolean hasOSALicense = false;
-
             try {
 
-                if(!useOwnServerCredentials) {
-                    serverUrl = getServerUrl();
-                    username = getUsername();
-                    password = getPassword();
-                }
-
-                password = getPasswordPlainText(password);
-
-                CxWebService cxWebService = new CxWebService(serverUrl);
-                logger.debug("prepareLoggedInWebservice: created cxWebService");
-                cxWebService.login(username, password);
-                logger.debug("prepareLoggedInWebservice: logged in");
-
+                final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password));
                 hasOSALicense = cxWebService.isOsaLicenseValid();
 
             } catch (Exception e) {
                 logger.debug("fail to check OSA license", e);
             }
 
-            return hasOSALicense;
+            if(!hasOSALicense) {
+                return FormValidation.error("Open Source Analysis license is not enabled for this project. Please contact your CxSAST Administrator");
+            }
+
+            return FormValidation.ok();
         }
 
 	    /*

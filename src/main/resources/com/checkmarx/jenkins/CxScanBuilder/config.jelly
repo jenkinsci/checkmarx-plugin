@@ -108,27 +108,17 @@
 	<!-- -= OSA SCAN =- -->
 	  <f:section title="CxOSA Scan">
 
-          <j:choose>
-              <j:when test="${descriptor.hasOSALicense(instance.useOwnServerCredentials, instance.serverUrl, instance.username, instance.password)}">
-                <f:optionalBlock title="Enable OSA" inline="true" field="osaEnabled">
+        <f:optionalBlock title="Enable OSA" inline="true" field="osaEnabled">
+            <f:entry/>
+            <f:entry title="Includes" field="includeOpenSourceFolders">
+                <f:textbox/>
+            </f:entry>
+            <f:entry title="Excludes" field="excludeOpenSourceFolders">
+                <f:textbox/>
+            </f:entry>
 
-                    <f:entry title="Includes" field="includeOpenSourceFolders">
-                        <f:textbox/>
-                    </f:entry>
-
-                    <f:entry title="Excludes" field="excludeOpenSourceFolders">
-                        <f:textbox/>
-                    </f:entry>
-
-                </f:optionalBlock>
-              </j:when>
-              <j:otherwise>
-                <f:entry title="No OSA License">
-                </f:entry>
-              </j:otherwise>
-
-          </j:choose>
-          </f:section>
+        </f:optionalBlock>
+      </f:section>
 
 
 	<!-- -= Build Control =- -->
@@ -162,19 +152,15 @@
                     <f:entry title="Low severity vulnerabilities threshold">
                         <f:readOnlyTextbox value="${descriptor.lowThresholdEnforcement}" />
                     </f:entry>
-                    <j:choose>
-                        <j:when test="${descriptor.hasOSALicense(instance.useOwnServerCredentials, instance.serverUrl, instance.username, instance.password)}">
-                            <f:entry title="OSA high severity vulnerabilities threshold">
-                                <f:readOnlyTextbox value="${descriptor.osaHighThresholdEnforcement}" />
-                            </f:entry>
-                            <f:entry title="OSA medium severity vulnerabilities threshold">
-                                <f:readOnlyTextbox value="${descriptor.osaMediumThresholdEnforcement}" />
-                            </f:entry>
-                            <f:entry title="OSA low severity vulnerabilities threshold">
-                                <f:readOnlyTextbox value="${descriptor.osaLowThresholdEnforcement}" />
-                            </f:entry>
-                        </j:when>
-                    </j:choose>
+                    <f:entry title="OSA high severity vulnerabilities threshold">
+                        <f:readOnlyTextbox value="${descriptor.osaHighThresholdEnforcement}" />
+                    </f:entry>
+                    <f:entry title="OSA medium severity vulnerabilities threshold">
+                        <f:readOnlyTextbox value="${descriptor.osaMediumThresholdEnforcement}" />
+                    </f:entry>
+                    <f:entry title="OSA low severity vulnerabilities threshold">
+                        <f:readOnlyTextbox value="${descriptor.osaLowThresholdEnforcement}" />
+                    </f:entry>
 
                     <f:optionalBlock title="Generate CxSAST PDF report" inline="true" field="generatePdfReport" />
                 </j:when>
@@ -216,19 +202,15 @@
                                             <f:entry title="Low severity vulnerabilities threshold">
                                                 <f:readOnlyTextbox value="${descriptor.lowThresholdEnforcement}" />
                                             </f:entry>
-                                            <j:choose>
-                                                <j:when test="${descriptor.hasOSALicense(instance.useOwnServerCredentials, instance.serverUrl, instance.username, instance.password)}">
-                                                    <f:entry title="OSA high severity vulnerabilities threshold">
-                                                        <f:readOnlyTextbox value="${descriptor.osaHighThresholdEnforcement}" />
-                                                    </f:entry>
-                                                    <f:entry title="OSA medium severity vulnerabilities threshold">
-                                                        <f:readOnlyTextbox value="${descriptor.osaMediumThresholdEnforcement}" />
-                                                    </f:entry>
-                                                    <f:entry title="OSA low severity vulnerabilities threshold">
-                                                        <f:readOnlyTextbox value="${descriptor.osaLowThresholdEnforcement}" />
-                                                    </f:entry>
-                                                </j:when>
-                                            </j:choose>
+                                            <f:entry title="OSA high severity vulnerabilities threshold">
+                                                <f:readOnlyTextbox value="${descriptor.osaHighThresholdEnforcement}" />
+                                            </f:entry>
+                                            <f:entry title="OSA medium severity vulnerabilities threshold">
+                                                <f:readOnlyTextbox value="${descriptor.osaMediumThresholdEnforcement}" />
+                                            </f:entry>
+                                            <f:entry title="OSA low severity vulnerabilities threshold">
+                                                <f:readOnlyTextbox value="${descriptor.osaLowThresholdEnforcement}" />
+                                            </f:entry>
                                         </f:nested>
                                     </f:radioBlock>
 
@@ -247,19 +229,15 @@
                                             <f:entry title="Low severity vulnerabilities threshold" field="lowThreshold">
                                                 <f:number clazz="positive-number" min="0" step="1" default="" />
                                             </f:entry>
-                                            <j:choose>
-                                                <j:when test="${descriptor.hasOSALicense(instance.useOwnServerCredentials, instance.serverUrl, instance.username, instance.password)}">
-                                                    <f:entry title="OSA high severity vulnerabilities threshold" field="osaHighThreshold">
-                                                        <f:number clazz="positive-number" min="0" step="1" default="" />
-                                                    </f:entry>
-                                                    <f:entry title="OSA medium severity vulnerabilities threshold" field="osaMediumThreshold">
-                                                        <f:number clazz="positive-number" min="0" step="1" default="" />
-                                                    </f:entry>
-                                                    <f:entry title="OSA low severity vulnerabilities threshold" field="osaLowThreshold">
-                                                        <f:number clazz="positive-number" min="0" step="1" default="" />
-                                                    </f:entry>
-                                                </j:when>
-                                            </j:choose>
+                                            <f:entry title="OSA high severity vulnerabilities threshold" field="osaHighThreshold">
+                                                <f:number clazz="positive-number" min="0" step="1" default="" />
+                                            </f:entry>
+                                            <f:entry title="OSA medium severity vulnerabilities threshold" field="osaMediumThreshold">
+                                                <f:number clazz="positive-number" min="0" step="1" default="" />
+                                            </f:entry>
+                                            <f:entry title="OSA low severity vulnerabilities threshold" field="osaLowThreshold">
+                                                <f:number clazz="positive-number" min="0" step="1" default="" />
+                                            </f:entry>
                                         </f:nested>
                                     </f:radioBlock>
                                 </j:when>
@@ -277,19 +255,15 @@
                                     <f:entry title="Low severity vulnerabilities threshold" field="lowThreshold">
                                         <f:number clazz="positive-number" min="0" step="1" default="" />
                                     </f:entry>
-                                    <j:choose>
-                                        <j:when test="${descriptor.hasOSALicense(instance.useOwnServerCredentials, instance.serverUrl, instance.username, instance.password)}">
-                                            <f:entry title="OSA high severity vulnerabilities threshold" field="osaHighThreshold">
-                                                <f:number clazz="positive-number" min="0" step="1" default="" />
-                                            </f:entry>
-                                            <f:entry title="OSA medium severity vulnerabilities threshold" field="osaMediumThreshold">
-                                                <f:number clazz="positive-number" min="0" step="1" default="" />
-                                            </f:entry>
-                                            <f:entry title="OSA low severity vulnerabilities threshold" field="osaLowThreshold">
-                                                <f:number clazz="positive-number" min="0" step="1" default="" />
-                                            </f:entry>
-                                        </j:when>
-                                    </j:choose>
+                                    <f:entry title="OSA high severity vulnerabilities threshold" field="osaHighThreshold">
+                                        <f:number clazz="positive-number" min="0" step="1" default="" />
+                                    </f:entry>
+                                    <f:entry title="OSA medium severity vulnerabilities threshold" field="osaMediumThreshold">
+                                        <f:number clazz="positive-number" min="0" step="1" default="" />
+                                    </f:entry>
+                                    <f:entry title="OSA low severity vulnerabilities threshold" field="osaLowThreshold">
+                                        <f:number clazz="positive-number" min="0" step="1" default="" />
+                                    </f:entry>
                                 </j:otherwise>
                             </j:choose>
 

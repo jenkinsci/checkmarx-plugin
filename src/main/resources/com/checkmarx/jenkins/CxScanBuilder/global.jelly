@@ -72,20 +72,16 @@
 			<f:entry title="Low severity vulnerabilities threshold" field="lowThresholdEnforcement">
 				<f:number clazz="positive-number" min="0" step="1" default="" />
 			</f:entry>
-			<j:choose>
-                <j:when test="${descriptor.hasOSALicense(true, descriptor.serverUrl, descriptor.username, descriptor.password)}">
-                    <f:entry title="OSA high severity vulnerabilities threshold" field="osaHighThresholdEnforcement">
-                        <f:number clazz="positive-number" min="0" step="1" default="" />
-                    </f:entry>
+            <f:entry title="OSA high severity vulnerabilities threshold" field="osaHighThresholdEnforcement">
+                <f:number clazz="positive-number" min="0" step="1" default="" />
+            </f:entry>
 
-                    <f:entry title="OSA medium severity vulnerabilities threshold" field="osaMediumThresholdEnforcement">
-                        <f:number clazz="positive-number" min="0" step="1" default="" />
-                    </f:entry>
-                    <f:entry title="OSA low severity vulnerabilities threshold" field="osaLowThresholdEnforcement">
-                        <f:number clazz="positive-number" min="0" step="1" default="" />
-                    </f:entry>
-                </j:when>
-            </j:choose>
+            <f:entry title="OSA medium severity vulnerabilities threshold" field="osaMediumThresholdEnforcement">
+                <f:number clazz="positive-number" min="0" step="1" default="" />
+            </f:entry>
+            <f:entry title="OSA low severity vulnerabilities threshold" field="osaLowThresholdEnforcement">
+                <f:number clazz="positive-number" min="0" step="1" default="" />
+            </f:entry>
 		</f:optionalBlock>
 
 		<f:optionalBlock title="Set job scan timeout threshold" inline="true" field="scanTimeOutEnabled">
