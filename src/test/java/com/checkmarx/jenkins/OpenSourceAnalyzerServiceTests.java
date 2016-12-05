@@ -70,7 +70,7 @@ public class OpenSourceAnalyzerServiceTests {
         };
 
         DependencyFolder folders = new DependencyFolder("test2", "");
-        ScanService service = new ScanService(folders, Logger.getLogger(getClass()), new CxWebService(null), new CxZip(null, null, null), new FolderPattern(null, null, null), null, new ScanSender(new ScanClient("", null), 0));
+        ScanService service = new ScanService(folders, Logger.getLogger(getClass()), new CxWebService(null), new CxZip(null, null, null, null), new FolderPattern(null, null, null), null, new ScanSender(new ScanClient("", null), 0));
         service.scan(true);
     }
 
@@ -127,7 +127,7 @@ public class OpenSourceAnalyzerServiceTests {
         };
 
         DependencyFolder folders = new DependencyFolder("test2", "");
-        ScanService service = new ScanService(folders, Logger.getLogger(getClass()), new CxWebService(null), new CxZip(null, null, null), new FolderPattern(null, null, null), new ScanResultsPresenter(null), new ScanSender(new ScanClient("", null), 0));
+        ScanService service = new ScanService(folders, Logger.getLogger(getClass()), new CxWebService(null), new CxZip(null, null, null, null), new FolderPattern(null, null, null), new ScanResultsPresenter(null), new ScanSender(new ScanClient("", null), 0));
         service.scan(false);
 
         assertTrue(infoMessages.contains("OSA (open source analysis) Run has started"));
@@ -161,7 +161,7 @@ public class OpenSourceAnalyzerServiceTests {
         };
 
         DependencyFolder folders = new DependencyFolder("test2", "");
-        ScanService service = new ScanService(folders, Logger.getLogger(getClass()), new CxWebService(null), new CxZip(null, null, null), new FolderPattern(null, null, null), null, new ScanSender(new ScanClient("", null), 0));
+        ScanService service = new ScanService(folders, Logger.getLogger(getClass()), new CxWebService(null), new CxZip(null, null, null, null), new FolderPattern(null, null, null), null, new ScanSender(new ScanClient("", null), 0));
         service.scan(true);
 
     }

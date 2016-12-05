@@ -1,8 +1,10 @@
 package com.checkmarx.jenkins.filesystem;
 
 import hudson.EnvVars;
-import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -15,10 +17,10 @@ import java.io.IOException;
 public class FolderPattern {
 
     private Logger logger;
-    private AbstractBuild<?, ?> build;
-    private BuildListener listener;
+    private Run<?, ?> build;
+    private TaskListener listener;
 
-    public FolderPattern(Logger logger, final AbstractBuild<?, ?> build, final BuildListener listener) {
+    public FolderPattern(Logger logger, final Run<?, ?> build, final TaskListener listener) {
         this.logger = logger;
         this.build = build;
         this.listener = listener;

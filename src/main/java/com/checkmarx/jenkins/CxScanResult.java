@@ -7,7 +7,7 @@ import static com.checkmarx.jenkins.CxResultSeverity.MEDIUM;
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
 import hudson.PluginWrapper;
 import hudson.model.Action;
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.model.Hudson;
 import hudson.util.IOUtils;
 
@@ -41,7 +41,7 @@ public class CxScanResult implements Action {
 
 	private final transient Logger logger; // NOSONAR
 
-	public final AbstractBuild<?, ?> owner;
+	public final Run<?, ?> owner;
 	private final long projectId;
 	private final boolean scanRanAsynchronous;
 	private String serverUrl;
@@ -94,7 +94,7 @@ public class CxScanResult implements Action {
     private int osaNoVulnerabilityLibs;
 
 
-    public CxScanResult(final AbstractBuild owner, final String loggerSuffix, String serverUrl, long projectId, boolean scanRanAsynchronous) {
+    public CxScanResult(final Run<?, ?> owner, final String loggerSuffix, String serverUrl, long projectId, boolean scanRanAsynchronous) {
         this.projectId = projectId;
         this.scanRanAsynchronous = scanRanAsynchronous;
         logger = CxLogUtils.loggerWithSuffix(getClass(), loggerSuffix);
@@ -282,7 +282,7 @@ public class CxScanResult implements Action {
 	 */
 
 	public CxScanResult getPreviousResult() {
-		AbstractBuild<?, ?> b = owner;
+		Run<?, ?> b = owner;
 		while (true) {
 			b = b.getPreviousBuild();
 			if (b == null) {
