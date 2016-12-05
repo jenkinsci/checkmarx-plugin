@@ -3,27 +3,27 @@ package com.checkmarx.jenkins;
 import hudson.model.Result;
 
 public class ThresholdConfig {
-    private int highSeverity;
-    private int mediumSeverity;
-    private int lowSeverity;
+    private Integer highSeverity;
+    private Integer mediumSeverity;
+    private Integer lowSeverity;
     private Result buildStatus;
     
-	public int getHighSeverity() {
+	public Integer getHighSeverity() {
 		return highSeverity;
 	}
-	public void setHighSeverity(int highSeverity) {
+	public void setHighSeverity(Integer highSeverity) {
 		this.highSeverity = highSeverity;
 	}
-	public int getMediumSeverity() {
+	public Integer getMediumSeverity() {
 		return mediumSeverity;
 	}
-	public void setMediumSeverity(int mediumSeverity) {
+	public void setMediumSeverity(Integer mediumSeverity) {
 		this.mediumSeverity = mediumSeverity;
 	}
-	public int getLowSeverity() {
+	public Integer getLowSeverity() {
 		return lowSeverity;
 	}
-	public void setLowSeverity(int lowSeverity) {
+	public void setLowSeverity(Integer lowSeverity) {
 		this.lowSeverity = lowSeverity;
 	}
 	public Result getBuildStatus() {
