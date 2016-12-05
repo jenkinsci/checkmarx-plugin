@@ -1319,7 +1319,7 @@ public class CxScanBuilder extends Builder {
                                                 @QueryParameter String serverUrl,
                                                 @QueryParameter String username,
                                                 @QueryParameter String password) {
-            boolean hasOSALicense = false;
+            boolean hasOSALicense = true;
             try {
 
                 final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password));
