@@ -1,7 +1,10 @@
 .summary-section {
   width: 100%;
   font-family: 'Roboto', sans-serif;
+  td {
+    font-family: 'Roboto', sans-serif;
   }
+}
 
 .summary-table-row {
   tr& {
@@ -17,7 +20,7 @@ table {
 }
 
 .top-padding td {
-  padding-top: 42px;
+  padding-top: 43px;
 }
 
 td {
@@ -35,13 +38,12 @@ tr.cxsast {
   display: inline-block;
 }
 
-.cxsast {
   .main-column {
     //border-bottom: solid 2px #d5d5d5;
     padding-bottom: 45px;
     margin-bottom: 42px;
   }
-}
+
 
 .title-column {
   margin-right: 10px;
@@ -87,7 +89,7 @@ tr.cxsast {
 @graph-width: 709px;
 
 .graph {
-  height: @graph-height;
+  //height: @graph-height;
   width: @graph-width;
 }
 
@@ -206,6 +208,84 @@ body {
   &.download-icon {
     margin-right: 6px;
   }
+}
+
+//osa libraries
+.libraries {
+  display: inline-flex;
+
+  &-vulnerable, &-ok {
+    width: 200px;
+    overflow: hidden;
+    margin-bottom: 54px;
+    margin-right: 122px;
+
+    &-number {
+      display: inline-block;
+      font-size: 28px;
+      letter-spacing: -0.93px;
+    }
+    &-icon {
+      display: inline-block;
+      margin-right: 9px;
+    }
+    &-text {
+      white-space: normal;
+      font-size: 16px;
+      letter-spacing: -0.53px;
+    }
+  }
+}
+
+//threshold
+.threshold-tooltip {
+  position: absolute;
+  padding-right: 15px;
+}
+
+.threshold-tooltip-background {
+  position: absolute;
+  display: inline-flex;
+}
+
+.threshold-icon-white {
+  position: relative;
+  top: 2px;
+  display: inline-block;
+  padding-left: 16px;
+  vertical-align: top;
+}
+
+.threshold-text {
+  position: relative;
+  color: white;
+  display: inline-block;
+  padding-right: 6px;
+  padding-left: 7px;
+  vertical-align: top;
+}
+
+.threshold-number {
+  position: relative;
+  color: white;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.threshold-tooltip {
+  position: absolute;
+  padding-right: 15px;
+  padding-left: 65%;
+  transform: translate(0, 50%);
+}
+
+.threshold-line {
+  width: 53px;
+  border-bottom: dashed white 1px;
+  position: absolute;
+  left: 50%;
+  bottom: 1px;
+  transform: translate(-50%, 50%);
 }
 
 //@keyframes draw{
