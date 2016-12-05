@@ -612,7 +612,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             //OSA scan
             boolean isOSAThresholdFailedTheBuild = false;
             if (osaEnabled) {
+<<<<<<< HEAD
                 GetOpenSourceSummaryResponse osaResults = analyzeOpenSources(build, workspace, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService, listener, shouldRunAsynchronous);
+=======
+                GetOpenSourceSummaryResponse osaResults = analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService, listener, shouldRunAsynchronous);
+>>>>>>> branch 'master' of https://github.com/fordperfect78/checkmarx-plugin.git
                 cxScanResult.addOsaResults(osaResults);
                 ThresholdConfig osaThresholdConfig = createOsaThresholdConfig();
                 //retrieve osa scan results pdf + html

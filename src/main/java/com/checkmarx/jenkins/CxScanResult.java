@@ -94,7 +94,11 @@ public class CxScanResult implements Action {
     private int osaNoVulnerabilityLibs;
 
 
+<<<<<<< HEAD
     public CxScanResult(final Run<?, ?> owner, final String loggerSuffix, String serverUrl, long projectId, boolean scanRanAsynchronous) {
+=======
+    public CxScanResult(final AbstractBuild owner, final String loggerSuffix, String serverUrl, long projectId, boolean scanRanAsynchronous) {
+>>>>>>> branch 'master' of https://github.com/fordperfect78/checkmarx-plugin.git
         this.projectId = projectId;
         this.scanRanAsynchronous = scanRanAsynchronous;
         logger = CxLogUtils.loggerWithSuffix(getClass(), loggerSuffix);
