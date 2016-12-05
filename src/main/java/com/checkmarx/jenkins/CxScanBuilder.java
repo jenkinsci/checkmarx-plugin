@@ -7,6 +7,8 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.BuildListener;
 import hudson.model.Result;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Cause;
@@ -16,6 +18,7 @@ import hudson.triggers.SCMTrigger;
 import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
+import jenkins.tasks.SimpleBuildStep;
 import hudson.util.ListBoxModel;
 
 import java.io.File;
@@ -42,6 +45,7 @@ import org.apache.log4j.WriterAppender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -68,14 +72,14 @@ import com.checkmarx.ws.CxJenkinsWebService.SourceLocationType;
  * @since 3/10/13
  */
 
-public class CxScanBuilder extends Builder {
+public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Persistent plugin configuration parameters
     //////////////////////////////////////////////////////////////////////////////////////
 
-    private boolean useOwnServerCredentials;
+    final private boolean useOwnServerCredentials;
 
     @Nullable private String serverUrl;
     @Nullable private String username;
@@ -85,7 +89,7 @@ public class CxScanBuilder extends Builder {
     @Nullable private long projectId;
 
     @Nullable private String preset;
-    private boolean presetSpecified;
+    final private boolean presetSpecified;
     @Nullable private String excludeFolders;
     @Nullable private String filterPattern;
 
@@ -102,9 +106,9 @@ public class CxScanBuilder extends Builder {
     private boolean waitForResultsEnabled;
 
     private boolean vulnerabilityThresholdEnabled;
-    private int highThreshold;
-    private int mediumThreshold;
-    private int lowThreshold;
+    final private int highThreshold;
+    final private int mediumThreshold;
+    final private int lowThreshold;
     private boolean generatePdfReport;
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -119,7 +123,7 @@ public class CxScanBuilder extends Builder {
 
     private static final transient Logger LOGGER = Logger.getLogger(CxScanBuilder.class);
 
-    private transient Logger instanceLogger = LOGGER; // Instance logger redirects to static logger until
+	private transient Logger instanceLogger = LOGGER; // Instance logger redirects to static logger until
                                                   // it is initialized in perform method
     private transient FileAppender fileAppender;
 
@@ -133,35 +137,105 @@ public class CxScanBuilder extends Builder {
     // Constructors
     //////////////////////////////////////////////////////////////////////////////////////
 
-    @DataBoundConstructor
+	@DataBoundConstructor
 	public CxScanBuilder(
-			boolean useOwnServerCredentials, // NOSONAR
-                         @Nullable String serverUrl,
-                         @Nullable String username,
-                         @Nullable String password,
-                         String projectName,
-                         long projectId,
-                         String buildStep,
-                         @Nullable String groupId,
-                         @Nullable String preset,
- JobStatusOnError jobStatusOnError,
-                         boolean presetSpecified,
-                         @Nullable String excludeFolders,
-                         @Nullable String filterPattern,
-                         boolean incremental,
-                         boolean fullScansScheduled,
-                         int fullScanCycle,
-                         @Nullable String sourceEncoding,
-                         @Nullable String comment,
-                         boolean skipSCMTriggers,
-                         boolean waitForResultsEnabled,
-                         boolean vulnerabilityThresholdEnabled,
-                         int highThreshold,
-                         int mediumThreshold,
-                         int lowThreshold,
-                         boolean generatePdfReport,
-                         String thresholdSettings,
-                         Result vulnerabilityThresholdResult) {
+			 boolean useOwnServerCredentials,
+             @Nullable String serverUrl,
+             @Nullable String username,
+             @Nullable String password,
+             String projectName,
+             long projectId,
+             String buildStep,
+             String groupId,
+             @Nullable String preset,
+             String jobStatusOnError,
+             boolean presetSpecified,
+             String excludeFolders,
+             String filterPattern,
+             boolean incremental,
+             boolean fullScansScheduled,
+             int fullScanCycle,
+             @Nullable String sourceEncoding,
+             @Nullable String comment,
+             boolean skipSCMTriggers,
+             boolean waitForResultsEnabled,
+             boolean vulnerabilityThresholdEnabled,
+             int highThreshold,
+             int mediumThreshold,
+             int lowThreshold,
+             boolean generatePdfReport,
+             String vulnerabilityThresholdResult) {
+        this.useOwnServerCredentials = useOwnServerCredentials;
+        this.serverUrl = serverUrl;
+        this.username = username;
+        this.password = password;
+        this.projectName = projectName;
+        this.projectId = projectId;
+        this.groupId = groupId;
+        this.preset = preset;
+        
+        if(!StringUtils.isEmpty(jobStatusOnError))
+        {
+        	this.jobStatusOnError = JobStatusOnError.valueOf(jobStatusOnError);
+        }
+        
+        this.presetSpecified = presetSpecified;
+        this.excludeFolders = excludeFolders;
+        this.filterPattern = filterPattern;
+        this.incremental = incremental;
+        this.fullScansScheduled = fullScansScheduled;
+        this.fullScanCycle = fullScanCycle;
+        this.sourceEncoding = sourceEncoding;
+        this.comment = comment;
+        this.skipSCMTriggers = skipSCMTriggers;
+        this.waitForResultsEnabled = waitForResultsEnabled;
+        this.vulnerabilityThresholdEnabled = vulnerabilityThresholdEnabled;
+        this.highThreshold = highThreshold;
+        this.mediumThreshold = mediumThreshold;
+        this.lowThreshold = lowThreshold;
+        this.generatePdfReport =  generatePdfReport;
+        this.thresholdSettings = null;
+        if(!StringUtils.isEmpty(vulnerabilityThresholdResult))
+        {
+        	this.vulnerabilityThresholdResult=Result.fromString(vulnerabilityThresholdResult);
+        }
+        
+        if(null == this.jobStatusOnError)
+        {
+        	this.jobStatusOnError = JobStatusOnError.FAILURE;
+        }
+        
+        init();
+    }
+
+	public CxScanBuilder(
+			 boolean useOwnServerCredentials, // NOSONAR
+             @Nullable String serverUrl,
+             @Nullable String username,
+             @Nullable String password,
+             String projectName,
+             long projectId,
+             String buildStep,
+             @Nullable String groupId,
+             @Nullable String preset,
+             JobStatusOnError jobStatusOnError,
+             boolean presetSpecified,
+             @Nullable String excludeFolders,
+             @Nullable String filterPattern,
+             boolean incremental,
+             boolean fullScansScheduled,
+             int fullScanCycle,
+             @Nullable String sourceEncoding,
+             @Nullable String comment,
+             boolean skipSCMTriggers,
+             boolean waitForResultsEnabled,
+             boolean vulnerabilityThresholdEnabled,
+             int highThreshold,
+             int mediumThreshold,
+             int lowThreshold,
+             boolean generatePdfReport,
+             String thresholdSettings,
+             Result vulnerabilityThresholdResult) {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
         this.username = username;
@@ -231,7 +305,12 @@ public class CxScanBuilder extends Builder {
     public String getProjectName() {
         return projectName;
     }
-    // Workaround for compatibility with Conditional BuildStep Plugin
+    
+    public long getProjectId() {
+		return projectId;
+	}
+
+	// Workaround for compatibility with Conditional BuildStep Plugin
     @Nullable
     public String getBuildStep() {
         return projectName;
@@ -333,10 +412,95 @@ public class CxScanBuilder extends Builder {
 		return vulnerabilityThresholdResult;
 	}
 	
-    @Override
+	@DataBoundSetter
+	public void setServerUrl(String serverUrl) {
+		this.serverUrl = serverUrl;
+	}
+	@DataBoundSetter
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	@DataBoundSetter
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	@DataBoundSetter
+	public void setProjectName(String projectName) {
+		this.projectName = projectName;
+	}
+	@DataBoundSetter
+	public void setGroupId(String groupId) {
+		this.groupId = groupId;
+	}
+	@DataBoundSetter
+	public void setProjectId(long projectId) {
+		this.projectId = projectId;
+	}
+	@DataBoundSetter
+	public void setPreset(String preset) {
+		this.preset = preset;
+	}
+	@DataBoundSetter
+	public void setExcludeFolders(String excludeFolders) {
+		this.excludeFolders = excludeFolders;
+	}
+	@DataBoundSetter
+	public void setFilterPattern(String filterPattern) {
+		this.filterPattern = filterPattern;
+	}
+	@DataBoundSetter
+	public void setIncremental(boolean incremental) {
+		this.incremental = incremental;
+	}
+	@DataBoundSetter
+	public void setFullScansScheduled(boolean fullScansScheduled) {
+		this.fullScansScheduled = fullScansScheduled;
+	}
+	@DataBoundSetter
+	public void setFullScanCycle(int fullScanCycle) {
+		this.fullScanCycle = fullScanCycle;
+	}
+	@DataBoundSetter
+	public void setSourceEncoding(String sourceEncoding) {
+		this.sourceEncoding = sourceEncoding;
+	}
+	@DataBoundSetter
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+	@DataBoundSetter
+	public void setSkipSCMTriggers(boolean skipSCMTriggers) {
+		this.skipSCMTriggers = skipSCMTriggers;
+	}
+	@DataBoundSetter
+	public void setWaitForResultsEnabled(boolean waitForResultsEnabled) {
+		this.waitForResultsEnabled = waitForResultsEnabled;
+	}
+	@DataBoundSetter
+	public void setVulnerabilityThresholdEnabled(boolean vulnerabilityThresholdEnabled) {
+		this.vulnerabilityThresholdEnabled = vulnerabilityThresholdEnabled;
+	}
+	@DataBoundSetter
+	public void setGeneratePdfReport(boolean generatePdfReport) {
+		this.generatePdfReport = generatePdfReport;
+	}
+	@DataBoundSetter
+	public void setJobStatusOnError(JobStatusOnError jobStatusOnError) {
+		this.jobStatusOnError = jobStatusOnError;
+	}
+
+	@Override
     public boolean perform(final AbstractBuild<?, ?> build,
                            final Launcher launcher,
                            final BuildListener listener) throws InterruptedException, IOException {
+    	this.perform(build, build.getWorkspace(), launcher, listener);
+    	return true;
+    }
+    	
+    @Override
+    public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
+    														throws InterruptedException, IOException {
+
 		final DescriptorImpl descriptor = getDescriptor();
 
 		CxWSResponseRunID cxWSResponseRunID = null;
@@ -354,7 +518,7 @@ public class CxScanBuilder extends Builder {
             if (isSkipScan(build)) {
                 instanceLogger.info("Checkmarx scan skipped since the build was triggered by SCM. " +
                         "Visit plugin configuration page to disable this skip.");
-                return true;
+                return;
             }
 
             final String serverUrlToUse = isUseOwnServerCredentials() ? getServerUrl() : descriptor.getServerUrl();
@@ -367,18 +531,18 @@ public class CxScanBuilder extends Builder {
 
             instanceLogger.info("Checkmarx server login successful");
 
-			cxWSResponseRunID = submitScan(build, cxWebService, listener);
+			cxWSResponseRunID = submitScan(build, workspace, cxWebService, listener);
             instanceLogger.info("\nScan job submitted successfully\n");
 
             if (!isWaitForResultsEnabled() && !(descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings())) {
-                return true;
+                return;
             }
 
             long scanId = cxWebService.trackScanProgress(cxWSResponseRunID, usernameToUse, passwordToUse, descriptor.getScanTimeOutEnabled(), descriptor.getScanTimeoutDuration());
 
             if (scanId == 0) {
                 build.setResult(Result.UNSTABLE);
-                return true;
+                return;
             }
 
 			reportResponse = cxWebService.generateScanReport(scanId, CxWSReportType.XML);
@@ -402,15 +566,15 @@ public class CxScanBuilder extends Builder {
 					&& isThresholdCrossed(thresholdConfig, cxScanResult)) {
 
 				build.setResult(thresholdConfig.getBuildStatus());
-				return true;
+				return;
 			}
 
-            return true;
+            return;
 		} catch (IOException | WebServiceException e) {
 			if (useUnstableOnError(descriptor)) {
 				build.setResult(Result.UNSTABLE);
 				instanceLogger.error(e.getMessage(), e);
-				return true;
+				return;
 			} else {
 				throw e;
 			}
@@ -480,11 +644,11 @@ public class CxScanBuilder extends Builder {
 				+ configuredHighThreshold);
 	}
 
-    private String instanceLoggerSuffix(final AbstractBuild<?, ?> build) {
-        return build.getProject().getDisplayName() + "-" + build.getDisplayName();
+    private String instanceLoggerSuffix(final Run<?, ?> build) {
+        return build.getParent().getDisplayName() + "-" + build.getDisplayName();
     }
 
-    private void initLogger(final File checkmarxBuildDir, final BuildListener listener, final String loggerSuffix) {
+    private void initLogger(final File checkmarxBuildDir, final TaskListener listener, final String loggerSuffix) {
         instanceLogger = CxLogUtils.loggerWithSuffix(getClass(), loggerSuffix);
         final WriterAppender writerAppender = new WriterAppender(new PatternLayout("%m%n"),listener.getLogger());
         writerAppender.setThreshold(Level.INFO);
@@ -508,7 +672,7 @@ public class CxScanBuilder extends Builder {
         instanceLogger = LOGGER; // Redirect all logs back to static logger
     }
 
-    private CxWSResponseRunID submitScan(final AbstractBuild<?, ?> build, final CxWebService cxWebService, final BuildListener listener) throws IOException
+    private CxWSResponseRunID submitScan(final Run<?, ?> build, final FilePath workspace, final CxWebService cxWebService, final TaskListener listener) throws IOException
     {
         isThisBuildIncremental = isThisBuildIncremental(build.getNumber());
 
@@ -517,12 +681,12 @@ public class CxScanBuilder extends Builder {
 		} else {
             instanceLogger.info("\nScan job started in full scan mode\n");
         }
-
+        
         instanceLogger.info("Started zipping the workspace");
 
         try {
             // hudson.FilePath will work in distributed Jenkins installation
-            FilePath baseDir = build.getWorkspace();
+            FilePath baseDir = workspace;
 			if (baseDir == null) {
 				throw new AbortException(
 						"Checkmarx Scan Failed: cannot acquire Jenkins workspace location. It can be due to workspace residing on a disconnected slave.");
@@ -680,7 +844,7 @@ public class CxScanBuilder extends Builder {
 
     // Check what triggered this build, and in case the trigger was SCM
     // and the build is configured to skip those triggers, return true.
-    private boolean isSkipScan(final AbstractBuild<?, ?> build)
+    private boolean isSkipScan(final Run<?, ?> build)
     {
 
         if (!isSkipSCMTriggers())
@@ -905,7 +1069,7 @@ public class CxScanBuilder extends Builder {
 	        	cxWebService = new CxWebService(serverUrl);
 	        } catch (Exception e) {
 				logger.debug(e);
-	            return FormValidation.error("Invalid system URL");
+	            return FormValidation.error("Invalid system URL " + serverUrl + ": " + e.getMessage());
 	        }
 
 	        try {

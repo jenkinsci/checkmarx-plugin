@@ -10,7 +10,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Hudson;
 import hudson.model.Project;
-import hudson.tasks.test.AbstractTestResultAction;
 import hudson.util.Area;
 import hudson.util.ChartUtil;
 import hudson.util.DataSetBuilder;
@@ -227,20 +226,6 @@ public class CxProjectResult implements Action {
 				ChartUtil.NumberOnlyBuildLabel label = (ChartUtil.NumberOnlyBuildLabel) dataset.getColumnKey(column);
 				return relPath + label.build.getNumber() + "/testReport/"; // TODO: Check if need to change testReport
 																			// to checkmarx
-			}
-
-			@Override
-			public String generateToolTip(CategoryDataset dataset, int row, int column) {
-				ChartUtil.NumberOnlyBuildLabel label = (ChartUtil.NumberOnlyBuildLabel) dataset.getColumnKey(column);
-				AbstractTestResultAction a = label.build.getAction(AbstractTestResultAction.class);
-				switch (row) {
-				case 0:
-					return String.valueOf(hudson.tasks.test.Messages.AbstractTestResultAction_fail(label.build.getDisplayName(), a.getFailCount()));
-				case 1:
-					return String.valueOf(hudson.tasks.test.Messages.AbstractTestResultAction_skip(label.build.getDisplayName(), a.getSkipCount()));
-				default:
-					return String.valueOf(hudson.tasks.test.Messages.AbstractTestResultAction_test(label.build.getDisplayName(), a.getTotalCount()));
-				}
 			}
 		};
 		plot.setRenderer(ar);
