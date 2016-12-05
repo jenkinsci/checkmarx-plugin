@@ -6,8 +6,8 @@ import static com.checkmarx.jenkins.CxResultSeverity.LOW;
 import static com.checkmarx.jenkins.CxResultSeverity.MEDIUM;
 import hudson.PluginWrapper;
 import hudson.model.Action;
-import hudson.model.AbstractBuild;
 import hudson.model.Hudson;
+import hudson.model.Run;
 import hudson.util.IOUtils;
 
 import java.io.File;
@@ -40,7 +40,7 @@ public class CxScanResult implements Action {
 
 	private final transient Logger logger; // NOSONAR
 
-	public final AbstractBuild<?, ?> owner;
+	public final Run<?, ?> owner;
 	private String serverUrl;
 
 	private int highCount;
@@ -71,7 +71,7 @@ public class CxScanResult implements Action {
 	private boolean resultIsValid;
 	private String errorMessage;
 
-	public CxScanResult(final AbstractBuild owner, final String loggerSuffix, String serverUrl) {
+	public CxScanResult(final Run<?, ?> owner, final String loggerSuffix, String serverUrl) {
 		logger = CxLogUtils.loggerWithSuffix(getClass(), loggerSuffix);
 		this.owner = owner;
 		this.serverUrl = serverUrl;
@@ -217,7 +217,7 @@ public class CxScanResult implements Action {
 	 */
 
 	public CxScanResult getPreviousResult() {
-		AbstractBuild<?, ?> b = owner;
+		Run<?, ?> b = owner;
 		while (true) {
 			b = b.getPreviousBuild();
 			if (b == null) {
