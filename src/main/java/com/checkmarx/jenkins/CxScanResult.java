@@ -4,6 +4,7 @@ import static com.checkmarx.jenkins.CxResultSeverity.HIGH;
 import static com.checkmarx.jenkins.CxResultSeverity.INFO;
 import static com.checkmarx.jenkins.CxResultSeverity.LOW;
 import static com.checkmarx.jenkins.CxResultSeverity.MEDIUM;
+import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
 import hudson.PluginWrapper;
 import hudson.model.Action;
 import hudson.model.AbstractBuild;
@@ -45,14 +46,15 @@ public class CxScanResult implements Action {
 	private final boolean scanRanAsynchronous;
 	private String serverUrl;
 
-	private int highCount;
-	private int mediumCount;
-	private int lowCount;
-	private int infoCount;
-	private LinkedList<QueryResult> highQueryResultList;
-	private LinkedList<QueryResult> mediumQueryResultList;
-	private LinkedList<QueryResult> lowQueryResultList;
-	private LinkedList<QueryResult> infoQueryResultList;
+    private int highCount;
+    private int mediumCount;
+    private int lowCount;
+    private int infoCount;
+
+    private LinkedList<QueryResult> highQueryResultList;
+    private LinkedList<QueryResult> mediumQueryResultList;
+    private LinkedList<QueryResult> lowQueryResultList;
+    private LinkedList<QueryResult> infoQueryResultList;
 
 	@NotNull
 	private String resultDeepLink;
@@ -73,28 +75,58 @@ public class CxScanResult implements Action {
 	private boolean resultIsValid;
 	private String errorMessage;
 
-	public CxScanResult(final AbstractBuild owner, final String loggerSuffix, String serverUrl, long projectId, boolean scanRanAsynchronous) {
-		this.projectId = projectId;
-		this.scanRanAsynchronous = scanRanAsynchronous;
-		logger = CxLogUtils.loggerWithSuffix(getClass(), loggerSuffix);
-		this.owner = owner;
-		this.serverUrl = serverUrl;
-		this.resultIsValid = true;
-		this.errorMessage = "No Scan Results"; // error message to appear if results were not parsed
-		this.highQueryResultList = new LinkedList<>();
-		this.mediumQueryResultList = new LinkedList<>();
-		this.lowQueryResultList = new LinkedList<>();
-		this.infoQueryResultList = new LinkedList<>();
-	}
 
-	@Override
-	public String getIconFileName() {
-		if (isShowResults()) {
-			return getIconPath() + "CxIcon24x24.png";
-		} else {
-			return null;
-		}
-	}
+    //osa results
+    private GetOpenSourceSummaryResponse osaResults;
+
+    public void setOsaResults(GetOpenSourceSummaryResponse osaResults) {
+        this.osaResults = osaResults;
+    }
+
+    public GetOpenSourceSummaryResponse getOsaResults() {
+        return osaResults;
+    }
+
+    private int osaHighCount;
+    private int osaMediumCount;
+    private int osaLowCount;
+    private int osaVulnerableAndOutdatedLibs;
+    private int osaNoVulnerabilityLibs;
+
+
+    public CxScanResult(final AbstractBuild owner, final String loggerSuffix, String serverUrl, long projectId, boolean scanRanAsynchronous) {
+        this.projectId = projectId;
+        this.scanRanAsynchronous = scanRanAsynchronous;
+        logger = CxLogUtils.loggerWithSuffix(getClass(), loggerSuffix);
+        this.owner = owner;
+        this.serverUrl = serverUrl;
+        this.resultIsValid = true;
+        this.errorMessage = "No Scan Results"; // error message to appear if results were not parsed
+        this.highQueryResultList = new LinkedList<>();
+        this.mediumQueryResultList = new LinkedList<>();
+        this.lowQueryResultList = new LinkedList<>();
+        this.infoQueryResultList = new LinkedList<>();
+    }
+
+    public void addOsaResults(GetOpenSourceSummaryResponse osaResults) {
+        //osa fields
+        if (osaResults != null) {
+            this.osaHighCount = osaResults.getHighCount();
+            this.osaMediumCount = osaResults.getMediumCount();
+            this.osaLowCount = osaResults.getLowCount();
+            this.osaVulnerableAndOutdatedLibs = Integer.parseInt(osaResults.getVulnerableAndOutdated());
+            this.osaNoVulnerabilityLibs = Integer.parseInt(osaResults.getNoKnownVulnerabilities());
+        }
+    }
+
+    @Override
+    public String getIconFileName() {
+        if (isShowResults()) {
+            return getIconPath() + "CxIcon24x24.png";
+        } else {
+            return null;
+        }
+    }
 
 	@Override
 	public String getDisplayName() {
@@ -300,7 +332,47 @@ public class CxScanResult implements Action {
 		return serverUrl + "/CxWebClient/portal#/projectState/" + projectId + "/Summary";
 	}
 
-	private class ResultsParseHandler extends DefaultHandler {
+    public int getOsaHighCount() {
+        return osaHighCount;
+    }
+
+    public void setOsaHighCount(int osaHighCount) {
+        this.osaHighCount = osaHighCount;
+    }
+
+    public int getOsaMediumCount() {
+        return osaMediumCount;
+    }
+
+    public void setOsaMediumCount(int osaMediumCount) {
+        this.osaMediumCount = osaMediumCount;
+    }
+
+    public int getOsaLowCount() {
+        return osaLowCount;
+    }
+
+    public void setOsaLowCount(int osaLowCount) {
+        this.osaLowCount = osaLowCount;
+    }
+
+    public int getOsaVulnerableAndOutdatedLibs() {
+        return osaVulnerableAndOutdatedLibs;
+    }
+
+    public void setOsaVulnerableAndOutdatedLibs(int osaVulnerableAndOutdatedLibs) {
+        this.osaVulnerableAndOutdatedLibs = osaVulnerableAndOutdatedLibs;
+    }
+
+    public int getOsaNoVulnerabilityLibs() {
+        return osaNoVulnerabilityLibs;
+    }
+
+    public void setOsaNoVulnerabilityLibs(int osaNoVulnerabilityLibs) {
+        this.osaNoVulnerabilityLibs = osaNoVulnerabilityLibs;
+    }
+
+    private class ResultsParseHandler extends DefaultHandler {
 
 		@Nullable
 		private String currentQueryName;

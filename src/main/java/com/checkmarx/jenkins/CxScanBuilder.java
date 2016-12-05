@@ -518,6 +518,7 @@ public class CxScanBuilder extends Builder {
             boolean isOSAThresholdFailedTheBuild = false;
             if (osaEnabled) {
                 GetOpenSourceSummaryResponse osaResults = analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService, listener, shouldRunAsynchronous);
+                cxScanResult.addOsaResults(osaResults);
                 ThresholdConfig osaThresholdConfig = createOsaThresholdConfig();
                 //retrieve osa scan results pdf + html
                 getOSAReports(serverUrlToUseNotNull, usernameToUse, passwordToUse, checkmarxBuildDir);
