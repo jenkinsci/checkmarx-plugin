@@ -140,12 +140,15 @@ body {
   transform: translate(-50%);
 }
 .chart .bar-1 {
+  position: relative;
   background-color: #da2945;
 }
 .chart .bar-2 {
+  position: relative;
   background-color: #ffb400;
 }
 .chart .bar-3 {
+  position: relative;
   background-color: #efd412;
 }
 .chart li span {
@@ -166,7 +169,7 @@ body {
 .libraries-ok {
   width: 200px;
   overflow: hidden;
-  margin-bottom: 54px;
+  margin-bottom: 47px;
   margin-right: 122px;
 }
 .libraries-vulnerable-number,
@@ -185,10 +188,6 @@ body {
   white-space: normal;
   font-size: 16px;
   letter-spacing: -0.53px;
-}
-.threshold-tooltip {
-  position: absolute;
-  padding-right: 15px;
 }
 .threshold-tooltip-background {
   position: absolute;
@@ -215,17 +214,17 @@ body {
   display: inline-block;
   vertical-align: top;
 }
-.threshold-tooltip {
+.tooltip-container {
   position: absolute;
+  display: inline-flex;
+}
+.threshold-tooltip {
   padding-right: 15px;
-  padding-left: 65%;
+  text-align: right;
   transform: translate(0, 50%);
 }
 .threshold-line {
   width: 53px;
   border-bottom: dashed white 1px;
-  position: absolute;
-  left: 50%;
-  bottom: 1px;
-  transform: translate(-50%, 50%);
+  padding-right: 3px;
 }

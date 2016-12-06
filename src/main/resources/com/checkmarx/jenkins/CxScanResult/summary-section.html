@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Summary Section</title>
     <link rel="stylesheet" type="text/css" href="summary-section.css">
+
 </head>
 <body>
 <table class="summary-section">
@@ -50,8 +51,22 @@
 
                 <ul class="chart">
                     <li>
-                        <div class="bar-count">${it.highCount}</div>
-                        <span class="bar-1" style="height:${it.highCount*100/(it.highCount + it.mediumCount + it.lowCount)}%"></span>
+                        <div class="bar-count">100</div>
+                        <span class="bar-1" style="height:50%">
+                            <div class="tooltip-container" style="bottom:calc(100% - 1px)">
+                            <div class="threshold-line"></div>
+                            <div class="threshold-tooltip threshold-high">
+                                <div class="threshold-tooltip-background">
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1041" version="1.1" width="124" height="25" viewBox="0 0 124 25"><title>Combined Shape</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1042"/><path id="SvgjsPath1043" d="M624.48 368.31C624.48 370.28000000000003 626.6800000000001 371.87 629.38 371.87L738 371.87C740.74 371.87 742.91 370.28000000000003 742.91 368.31L742.91 350.56C742.91 348.59 740.7099999999999 347 738 347L629.38 347C626.65 347 624.48 348.6 624.48 350.56L624.48 355.45L619 359.44L624.48 363.42Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-619,-347)"/></svg>
+                                </div>
+                                <div class="threshold-icon-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1044" version="1.1" width="9.400000000000091" height="12.399999999999977" viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold ICON</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1045"/><path id="SvgjsPath1046" d="M638 360L642.29 360L642.29 365.6L638 365.6Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1047" d="M638.71 355.1L641.57 355.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1048" d="M638.71 358.1L641.57 358.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1049" d="M636.42 365.1L643.64 365.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/></svg>
+                                </div>
+                                <div class="threshold-text">Threshold</div>
+                                <div class="threshold-number">50</div>
+                            </div>
+                        </div>
+                        </span>
                         <div class="bar-title-container">
                             <div class="bar-title">High</div>
                             <div class="severity-icon">
@@ -91,24 +106,14 @@
 
 
 
-                        <div class="threshold-line" style="bottom:${it.thresholdHighCount*100/it.highCount}%"></div>
-                        <div class="threshold-tooltip threshold-high" style="bottom:${it.thresholdHighCount*100/it.highCount}%">
-                            <div class="threshold-tooltip-background">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1041" version="1.1" width="124" height="25" viewBox="0 0 124 25"><title>Combined Shape</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1042"/><path id="SvgjsPath1043" d="M624.48 368.31C624.48 370.28000000000003 626.6800000000001 371.87 629.38 371.87L738 371.87C740.74 371.87 742.91 370.28000000000003 742.91 368.31L742.91 350.56C742.91 348.59 740.7099999999999 347 738 347L629.38 347C626.65 347 624.48 348.6 624.48 350.56L624.48 355.45L619 359.44L624.48 363.42Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-619,-347)"/></svg>
-                            </div>
-                            <div class="threshold-icon-white">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1044" version="1.1" width="9.400000000000091" height="12.399999999999977" viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold ICON</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1045"/><path id="SvgjsPath1046" d="M638 360L642.29 360L642.29 365.6L638 365.6Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1047" d="M638.71 355.1L641.57 355.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1048" d="M638.71 358.1L641.57 358.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1049" d="M636.42 365.1L643.64 365.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/></svg>
-                            </div>
-                            <div class="threshold-text">Threshold</div>
-                            <div class="threshold-number">${it.thresholdHighCount}</div>
-                        </div>
+
 
 
 
                     </li>
                     <li>
-                        <div class="bar-count">${it.mediumCount}</div>
-                        <span class="bar-2" style="height:${it.mediumCount*100/(it.highCount + it.mediumCount + it.lowCount)}%"></span>
+                        <div class="bar-count">50</div>
+                        <span class="bar-2" style="height:25%"></span>
                         <div class="bar-title-container">
                             <div class="bar-title">Med</div>
                             <div class="severity-icon">
@@ -147,8 +152,8 @@
                         </div>
                     </li>
                     <li>
-                        <div class="bar-count">${it.lowCount}</div>
-                        <span class="bar-3" style="height:${it.lowCount*100/(it.highCount + it.mediumCount + it.lowCount)}%"></span>
+                        <div class="bar-count">50</div>
+                        <span class="bar-3" style="height:25%"></span>
                         <div class="bar-title-container">
                             <div class="bar-title">Low</div>
                             <div class="severity-icon">
@@ -287,7 +292,7 @@
                             </g>
                         </svg>
                     </div>
-                    <div class="libraries-vulnerable-number">${it.osaVulnerableAndOutdatedLibs}</div>
+                    <div class="libraries-vulnerable-number">4</div>
                     <div class="libraries-vulnerable-text">
                         Libraries with vulnerabilities and outdated
                     </div>
@@ -319,7 +324,7 @@
                             </g>
                         </svg>
                     </div>
-                    <div class="libraries-vulnerable-number">${it.osaVulnerableAndOutdatedLibs}</div>
+                    <div class="libraries-vulnerable-number">2</div>
                     <div class="libraries-ok-text">
                         Libraries with no vulnerabilities
                     </div>
@@ -330,8 +335,8 @@
 
                 <ul class="chart">
                     <li>
-                        <div class="bar-count">${it.osaHighCount}</div>
-                        <span class="bar-1" style="height:${it.osaHighCount*100/(it.osaHighCount + it.osaMediumCount + it.osaLowCount)}%"></span>
+                        <div class="bar-count">50</div>
+                        <span class="bar-1" style="height:25%"></span>
                         <div class="bar-title-container">
                             <div class="bar-title">High</div>
                             <div class="severity-icon">
@@ -371,8 +376,8 @@
                     </li>
                     <li>
 
-                        <div class="bar-count">${it.osaMediumCount}</div>
-                        <span class="bar-2" style="height:${it.osaMediumCount*100/(it.osaHighCount + it.osaMediumCount + it.osaLowCount)}%"></span>
+                        <div class="bar-count">50</div>
+                        <span class="bar-2" style="height:25%"></span>
                         <div class="bar-title-container">
                             <div class="bar-title">Med</div>
                             <div class="severity-icon">
@@ -411,8 +416,8 @@
                         </div>
                     </li>
                     <li>
-                        <div class="bar-count">${it.osaLowCount}</div>
-                        <span class="bar-3" style="height:${it.osaLowCount*100/(it.osaHighCount + it.osaMediumCount + it.osaLowCount)}%"></span>
+                        <div class="bar-count">100</div>
+                        <span class="bar-3" style="height:50%"></span>
                         <div class="bar-title-container">
                             <div class="bar-title">Low</div>
                             <div class="severity-icon">
