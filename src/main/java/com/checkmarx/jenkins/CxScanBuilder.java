@@ -1212,12 +1212,12 @@ public class CxScanBuilder extends Builder {
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
 	     *  shared state to avoid synchronization issues.
 	     */
-        public FormValidation doCheckIncludeOpenSourceFolders(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl, @QueryParameter final String password,
-                                                              @QueryParameter final String username, @QueryParameter final String includeOpenSourceFolders, @QueryParameter final String timestamp) {
+        public FormValidation doCheckOsaEnabled(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl, @QueryParameter final String password,
+                                                @QueryParameter final String username, @QueryParameter final boolean osaEnabled, @QueryParameter final String timestamp) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             CxWebService cxWebService = null;
 
-            if (!osaConfigured(includeOpenSourceFolders)) {
+            if (!osaEnabled) {
                 return FormValidation.ok();
             }
 
@@ -1239,6 +1239,7 @@ public class CxScanBuilder extends Builder {
                 return FormValidation.error(e.getMessage());
             }
         }
+
 
         private boolean timeoutValid(double timeInput) {
             return timeInput >= MINIMUM_TIMEOUT_IN_MINUTES;
@@ -1319,27 +1320,6 @@ public class CxScanBuilder extends Builder {
                 logger.debug("Projects list: empty");
                 return projectNames; // Return empty list of project names
             }
-        }
-
-        public FormValidation doCheckOsaEnabled(@QueryParameter boolean useOwnServerCredentials,
-                                                @QueryParameter String serverUrl,
-                                                @QueryParameter String username,
-                                                @QueryParameter String password) {
-            boolean hasOSALicense = true;
-            try {
-
-                final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password));
-                hasOSALicense = cxWebService.isOsaLicenseValid();
-
-            } catch (Exception e) {
-                logger.debug("fail to check OSA license", e);
-            }
-
-            if(!hasOSALicense) {
-                return FormValidation.error("Open Source Analysis license is not enabled for this project. Please contact your CxSAST Administrator");
-            }
-
-            return FormValidation.ok();
         }
 
 	    /*
