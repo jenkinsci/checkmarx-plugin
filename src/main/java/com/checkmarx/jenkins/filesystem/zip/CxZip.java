@@ -2,8 +2,9 @@ package com.checkmarx.jenkins.filesystem.zip;
 
 import hudson.AbortException;
 import hudson.FilePath;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
@@ -14,18 +15,19 @@ import java.io.IOException;
  */
 public class CxZip {
     private Logger logger;
-    private AbstractBuild<?, ?> build;
-    private BuildListener listener;
+    private Run<?, ?> build;
+    private FilePath workspace;
+    private TaskListener  listener;
 
-    public CxZip(Logger logger, final AbstractBuild<?, ?> build, final BuildListener listener) {
+    public CxZip(Logger logger, final Run<?, ?> build, FilePath workspace, final TaskListener  listener) {
         this.logger = logger;
         this.build = build;
+        this.workspace = workspace;
         this.listener = listener;
     }
 
     public FilePath ZipWorkspaceFolder(String filterPattern) throws IOException, InterruptedException {
-        FilePath baseDir = build.getWorkspace();
-        if (baseDir == null) {
+        if (this.workspace == null) {
             throw new AbortException(
                     "Checkmarx Scan Failed: cannot acquire Jenkins workspace location. It can be due to workspace residing on a disconnected slave.");
         }
@@ -34,7 +36,7 @@ public class CxZip {
 
         CxZipperCallable zipperCallable = new CxZipperCallable(filterPattern);
 
-        final CxZipResult zipResult = baseDir.act(zipperCallable);
+        final CxZipResult zipResult = this.workspace.act(zipperCallable);
         logger.info(zipResult.getLogMessage());
         final FilePath tempFile = zipResult.getTempFile();
         final int numOfZippedFiles = zipResult.getNumOfZippedFiles();
@@ -49,8 +51,7 @@ public class CxZip {
 
     public FilePath zipSourceCode(String filterPattern) throws IOException, InterruptedException {
         ZipperCallable zipperCallable = new ZipperCallable(filterPattern);
-        FilePath baseDir = build.getWorkspace();
-        final CxZipResult zipResult = baseDir.act(zipperCallable);
+        final CxZipResult zipResult = this.workspace.act(zipperCallable);
         final FilePath tempFile = zipResult.getTempFile();
         return tempFile;
     }
