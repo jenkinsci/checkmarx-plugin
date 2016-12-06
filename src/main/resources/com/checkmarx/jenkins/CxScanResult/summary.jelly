@@ -292,7 +292,8 @@ body {
                     <li>
                         <div class="bar-count">${it.highCount}</div>
                         <span class="bar-1" style="height:${it.highCount*100/(it.highCount + it.mediumCount + it.lowCount)}%">
-                            <div class="tooltip-container" style="bottom:${it.thresholdHighCount*100/it.highCount}%">
+                          <j:if test="${it.highThreshold!=null &amp;&amp; it.highCount>it.highThreshold}">
+                                <div class="tooltip-container" style="bottom:${it.highThreshold*100/it.highCount}%">
                                    <div class="threshold-line"></div>
                                    <div class="threshold-tooltip threshold-high">
                                        <div class="threshold-tooltip-background">
@@ -302,9 +303,10 @@ body {
                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1044" version="1.1" width="9.400000000000091" height="12.399999999999977" viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold ICON</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1045"/><path id="SvgjsPath1046" d="M638 360L642.29 360L642.29 365.6L638 365.6Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1047" d="M638.71 355.1L641.57 355.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1048" d="M638.71 358.1L641.57 358.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1049" d="M636.42 365.1L643.64 365.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/></svg>
                                        </div>
                                        <div class="threshold-text">Threshold</div>
-                                       <div class="threshold-number">${it.thresholdHighCount}</div>
+                                       <div class="threshold-number">${it.highThreshold}</div>
                                    </div>
-                            </div>
+                                </div>
+                          </j:if>
                         </span>
                         <div class="bar-title-container">
                             <div class="bar-title">High</div>
@@ -346,7 +348,23 @@ body {
                     </li>
                     <li>
                         <div class="bar-count">${it.mediumCount}</div>
-                        <span class="bar-2" style="height:${it.mediumCount*100/(it.highCount + it.mediumCount + it.lowCount)}%"></span>
+                        <span class="bar-2" style="height:${it.mediumCount*100/(it.highCount + it.mediumCount + it.lowCount)}%">
+                            <j:if test="${it.mediumThreshold!=null &amp;&amp; it.mediumCount>it.mediumThreshold}">
+                                <div class="tooltip-container" style="bottom:${it.mediumThreshold*100/it.mediumCount}%">
+                                   <div class="threshold-line"></div>
+                                   <div class="threshold-tooltip threshold-medium">
+                                       <div class="threshold-tooltip-background">
+                                           <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1041" version="1.1" width="124" height="25" viewBox="0 0 124 25"><title>Combined Shape</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1042"/><path id="SvgjsPath1043" d="M624.48 368.31C624.48 370.28000000000003 626.6800000000001 371.87 629.38 371.87L738 371.87C740.74 371.87 742.91 370.28000000000003 742.91 368.31L742.91 350.56C742.91 348.59 740.7099999999999 347 738 347L629.38 347C626.65 347 624.48 348.6 624.48 350.56L624.48 355.45L619 359.44L624.48 363.42Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-619,-347)"/></svg>
+                                       </div>
+                                       <div class="threshold-icon-white">
+                                           <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1044" version="1.1" width="9.400000000000091" height="12.399999999999977" viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold ICON</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1045"/><path id="SvgjsPath1046" d="M638 360L642.29 360L642.29 365.6L638 365.6Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1047" d="M638.71 355.1L641.57 355.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1048" d="M638.71 358.1L641.57 358.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1049" d="M636.42 365.1L643.64 365.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/></svg>
+                                       </div>
+                                       <div class="threshold-text">Threshold</div>
+                                       <div class="threshold-number">${it.mediumThreshold}</div>
+                                   </div>
+                                </div>
+                            </j:if>
+                        </span>
                         <div class="bar-title-container">
                             <div class="bar-title">Med</div>
                             <div class="severity-icon">
@@ -386,7 +404,23 @@ body {
                     </li>
                     <li>
                         <div class="bar-count">${it.lowCount}</div>
-                        <span class="bar-3" style="height:${it.lowCount*100/(it.highCount + it.mediumCount + it.lowCount)}%"></span>
+                        <span class="bar-3" style="height:${it.lowCount*100/(it.highCount + it.mediumCount + it.lowCount)}%">
+                          <j:if test="${it.lowThreshold!=null &amp;&amp; it.lowCount>it.lowThreshold}">
+                                <div class="tooltip-container" style="bottom:${it.lowThreshold*100/it.lowCount}%">
+                                       <div class="threshold-line"></div>
+                                       <div class="threshold-tooltip threshold-low">
+                                           <div class="threshold-tooltip-background">
+                                               <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1041" version="1.1" width="124" height="25" viewBox="0 0 124 25"><title>Combined Shape</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1042"/><path id="SvgjsPath1043" d="M624.48 368.31C624.48 370.28000000000003 626.6800000000001 371.87 629.38 371.87L738 371.87C740.74 371.87 742.91 370.28000000000003 742.91 368.31L742.91 350.56C742.91 348.59 740.7099999999999 347 738 347L629.38 347C626.65 347 624.48 348.6 624.48 350.56L624.48 355.45L619 359.44L624.48 363.42Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-619,-347)"/></svg>
+                                           </div>
+                                           <div class="threshold-icon-white">
+                                               <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1044" version="1.1" width="9.400000000000091" height="12.399999999999977" viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold ICON</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1045"/><path id="SvgjsPath1046" d="M638 360L642.29 360L642.29 365.6L638 365.6Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1047" d="M638.71 355.1L641.57 355.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1048" d="M638.71 358.1L641.57 358.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1049" d="M636.42 365.1L643.64 365.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/></svg>
+                                           </div>
+                                           <div class="threshold-text">Threshold</div>
+                                           <div class="threshold-number">${it.lowThreshold}</div>
+                                       </div>
+                                </div>
+                         </j:if>
+                        </span>
                         <div class="bar-title-container">
                             <div class="bar-title">Low</div>
                             <div class="severity-icon">
@@ -431,7 +465,7 @@ body {
 
 
 
-            <j:if test="true">
+            <j:if test="${it.isOsaEnabled()}">
     <!--osa row-->
     <tr class="summary-table-row cxosa top-padding">
         <td class="title-column">

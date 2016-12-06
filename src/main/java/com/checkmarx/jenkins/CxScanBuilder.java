@@ -498,7 +498,6 @@ public class CxScanBuilder extends Builder {
             }
 
 
-
             CxScanResult cxScanResult = addScanResultAction(build, serverUrlToUse, shouldRunAsynchronous, xmlReportFile);
 
             // Set scan results to environment
@@ -510,6 +509,10 @@ public class CxScanBuilder extends Builder {
             thresholdsError = new StringBuilder();
             ThresholdConfig thresholdConfig = createThresholdConfig();
 
+            // Set scan thresholds for the summery.jelly
+            cxScanResult.setThresholds(thresholdConfig);
+
+
             boolean isSASTThresholdFailedTheBuild = ((descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || isVulnerabilityThresholdEnabled())
                     && isThresholdCrossed(thresholdConfig, cxScanResult.getHighCount(), cxScanResult.getMediumCount(), cxScanResult.getLowCount(), "CxSAST ");
             printScanResult(cxScanResult);
@@ -520,9 +523,11 @@ public class CxScanBuilder extends Builder {
                 GetOpenSourceSummaryResponse osaResults = analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService, listener, shouldRunAsynchronous);
                 cxScanResult.addOsaResults(osaResults);
                 ThresholdConfig osaThresholdConfig = createOsaThresholdConfig();
+
+                // Set scan thresholds for the summery.jelly
+                cxScanResult.setOsaThresholds(osaThresholdConfig);
                 //retrieve osa scan results pdf + html
                 getOSAReports(serverUrlToUseNotNull, usernameToUse, passwordToUse, checkmarxBuildDir);
-
 
                 //OSA Threshold
                 isOSAThresholdFailedTheBuild = osaResults != null && ((descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || isVulnerabilityThresholdEnabled())
@@ -595,19 +600,18 @@ public class CxScanBuilder extends Builder {
         try {
             FileUtils.writeStringToFile(osaHtmlReport, osaScanHtmlResults);
         } catch (IOException e) {
-            instanceLogger.warn("fail to write osa html report to ["+osaHtmlReport.getAbsolutePath()+"]");
+            instanceLogger.warn("fail to write osa html report to [" + osaHtmlReport.getAbsolutePath() + "]");
         }
-        instanceLogger.info("osa report file ["+osaHtmlReport.getAbsolutePath()+"] generated successfully");
+        instanceLogger.info("osa report file [" + osaHtmlReport.getAbsolutePath() + "] generated successfully");
 
         byte[] osaScanPdfResults = scanClient.getOSAScanPdfResults(projectId);
         File osaPdfReport = new File(checkmarxBuildDir, "OSAReport.pdf");
         try {
             FileUtils.writeByteArrayToFile(osaPdfReport, osaScanPdfResults);
         } catch (IOException e) {
-            instanceLogger.warn("fail to write osa pdf report to ["+osaHtmlReport.getAbsolutePath()+"]");
+            instanceLogger.warn("fail to write osa pdf report to [" + osaHtmlReport.getAbsolutePath() + "]");
         }
-        instanceLogger.info("osa report file ["+osaHtmlReport.getAbsolutePath()+"] generated successfully");
-
+        instanceLogger.info("osa report file [" + osaHtmlReport.getAbsolutePath() + "] generated successfully");
 
 
     }
@@ -654,6 +658,7 @@ public class CxScanBuilder extends Builder {
     private boolean isOsaThresholdEnabled() {
         return isVulnerabilityThresholdEnabled() && (getOsaLowThreshold() != null || getOsaMediumThreshold() != null || getOsaHighThreshold() != null);
     }
+
     private boolean isSASTThresholdEnabled() {
         return isVulnerabilityThresholdEnabled() && (getLowThreshold() != null || getMediumThreshold() != null || getHighThreshold() != null);
     }
@@ -767,10 +772,10 @@ public class CxScanBuilder extends Builder {
             config.setMediumSeverity(descriptor.getOsaMediumThresholdEnforcement());
             config.setLowSeverity(descriptor.getOsaLowThresholdEnforcement());
         } else {
-        config.setHighSeverity(getOsaHighThreshold());
-        config.setMediumSeverity(getOsaMediumThreshold());
-        config.setLowSeverity(getOsaLowThreshold());
-    }
+            config.setHighSeverity(getOsaHighThreshold());
+            config.setMediumSeverity(getOsaMediumThreshold());
+            config.setLowSeverity(getOsaLowThreshold());
+        }
         return config;
     }
 
@@ -1245,7 +1250,7 @@ public class CxScanBuilder extends Builder {
 
 
         /*
-	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
 	     *  shared state to avoid synchronization issues.
 	     */
         public FormValidation doTestConnection(@QueryParameter final String serverUrl, @QueryParameter final String password,
@@ -1589,7 +1594,6 @@ public class CxScanBuilder extends Builder {
         public FormValidation doCheckOsaLowThreshold(@QueryParameter final Integer value) {
             return checkNonNegativeValue(value);
         }
-
 
 
         public FormValidation doCheckOsaHighThresholdEnforcement(@QueryParameter final Integer value) {
