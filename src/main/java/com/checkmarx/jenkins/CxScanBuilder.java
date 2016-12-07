@@ -22,6 +22,7 @@ import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
+import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -539,7 +540,8 @@ public class CxScanBuilder extends Builder {
             }
 
 
-//            generateHtmlReport(build, checkmarxBuildDir);
+
+            generateHtmlReport(build, checkmarxBuildDir, cxScanResult);
             instanceLogger.info("Copying reports to workspace");
             copyReportsToWorkspace(build, checkmarxBuildDir);
 
@@ -579,21 +581,109 @@ public class CxScanBuilder extends Builder {
         }
     }
 
-//    private void generateHtmlReport(AbstractBuild<?, ?> build, File checkmarxBuildDir) {
-//
-//        String linkToResults = Jenkins.getInstance().getRootUrl() +  build.getUrl() + "checkmarx/";
-//        String linkToPDF = Jenkins.getInstance().getRootUrl() + build.getUrl() + "checkmarx/pdfReport";
-//        String html = null;
-//        try {
-//            html = IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream("com/checkmarx/jenkins/CxScanResult/summary-section.html"));
-//            html = html.replace("#RESULTS_LINK#", linkToResults).replace("#PDF_REPORT_LINK#", linkToPDF);
-//            FileUtils.writeStringToFile(new File(checkmarxBuildDir, "report.html"), html);
-//        } catch (IOException e) {
-//            instanceLogger.warn("fail to generate html report", e);
-//
-//        }
-//
-//    }
+
+    private void generateHtmlReport(AbstractBuild<?, ?> build, File checkmarxBuildDir, CxScanResult cxScanResult) {
+
+        String linkToResults = Jenkins.getInstance().getRootUrl() +  build.getUrl() + "checkmarx/";
+        String linkToPDF = Jenkins.getInstance().getRootUrl() + build.getUrl() + "checkmarx/pdfReport";
+        String html;
+
+        try {
+
+            int resultsSum = cxScanResult.getHighCount() + cxScanResult.getMediumCount() + cxScanResult.getLowCount();
+
+            html = IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream("com/checkmarx/jenkins/CxScanResult/summary.html"));
+
+            html = html.replace("#reportUrl#", linkToResults)
+                    .replace("#highResults#", Integer.toString(cxScanResult.getHighCount()))
+                    .replace("#highResultsHeight#", formatHtmlResultsHeight(cxScanResult.getHighCount(), resultsSum))
+                    .replace("#mediumResults#", Integer.toString(cxScanResult.getMediumCount()))
+                    .replace("#mediumResultsHeight#", formatHtmlResultsHeight(cxScanResult.getMediumCount(), resultsSum))
+                    .replace("#lowResults#", Integer.toString(cxScanResult.getLowCount()))
+                    .replace("#lowResultsHeight#", formatHtmlResultsHeight(cxScanResult.getLowCount(), resultsSum));
+
+            if(generatePdfReport) {
+                html = html.replace("#pdfReportUrl#", linkToPDF);
+            } else {
+                html = Pattern.compile("\\<!--pdfStart-->.*\\<!--pdfEnd-->", Pattern.DOTALL).matcher(html).replaceAll("");
+            }
+
+            html = formatHtmlThreshold(html, cxScanResult.getHighCount(), cxScanResult.getHighThreshold(), "<!--highThresholdStart-->", "<!--highThresholdEnd-->", "#highThresholdHeight#", "#highThreshold#");
+            html = formatHtmlThreshold(html, cxScanResult.getMediumCount(), cxScanResult.getMediumThreshold(), "<!--mediumThresholdStart-->", "<!--mediumThresholdEnd-->", "#mediumThresholdHeight#", "#mediumThreshold#");
+            html = formatHtmlThreshold(html, cxScanResult.getLowCount(), cxScanResult.getLowThreshold(), "<!--lowThresholdStart-->", "<!--lowThresholdEnd-->", "#lowThresholdHeight#", "#lowThreshold#");
+
+            if(vulnerabilityThresholdEnabled) {
+                if(cxScanResult.isThresholdExceeded()) {
+                    html = html.replace("<!--thresholdStatus-->", "<div class=\"threshold-exceeded\">Threshold Exceeded</div>");
+                } else {
+                    html = html.replace("<!--thresholdStatus-->", "<div class=\"threshold-compliance\">Threshold Compliance</div>");
+                }
+
+            } else {
+                html = html.replace("<!--thresholdStatus-->", "");
+            }
+
+            if(!cxScanResult.isOsaEnabled()) {
+                html = Pattern.compile("\\<!--osaStart-->.*\\<!--osaEnd-->", Pattern.DOTALL).matcher(html).replaceAll("");
+            } else {
+
+                int osaResultsSum = cxScanResult.getOsaHighCount() + cxScanResult.getOsaMediumCount() + cxScanResult.getOsaLowCount();
+                String linkToOsaPDF = Jenkins.getInstance().getRootUrl() + build.getUrl() + "checkmarx/osaPdfReport";
+                String linkToOsaHtml = Jenkins.getInstance().getRootUrl() + build.getUrl() + "checkmarx/osaHtmlReport";
+
+                html = html.replace("#osaPdfeportUrl#", linkToOsaPDF)
+                        .replace("#osaHtmlReportUrl", linkToOsaHtml)
+                        .replace("#osaHighResults#", Integer.toString(cxScanResult.getOsaHighCount()))
+                        .replace("#osaHighResultsHeight#", formatHtmlResultsHeight(cxScanResult.getOsaHighCount(), osaResultsSum))
+                        .replace("#osaMediumResults#", Integer.toString(cxScanResult.getOsaMediumCount()))
+                        .replace("#osaMediumResultsHeight#", formatHtmlResultsHeight(cxScanResult.getOsaMediumCount(), osaResultsSum))
+                        .replace("#osaLowResults#", Integer.toString(cxScanResult.getOsaLowCount()))
+                        .replace("#osaLowResultsHeight#", formatHtmlResultsHeight(cxScanResult.getOsaLowCount(), osaResultsSum))
+                        .replace("#osaVulnerableAndOutdatedLibs#", Integer.toString(cxScanResult.getOsaVulnerableAndOutdatedLibs()))
+                        .replace("#osaNoVulnerabilityLibs#", Integer.toString(cxScanResult.getOsaNoVulnerabilityLibs()));
+
+                html = formatHtmlThreshold(html, cxScanResult.getOsaHighCount(), cxScanResult.getOsaHighThreshold(), "<!--osaHighThresholdStart-->", "<!--osaHighThresholdEnd-->", "#osaHighThresholdHeight#", "#osaHighThreshold#");
+                html = formatHtmlThreshold(html, cxScanResult.getOsaMediumCount(), cxScanResult.getOsaMediumThreshold(), "<!--osaMediumThresholdStart-->", "<!--osaMediumThresholdEnd-->", "#osaMediumThresholdHeight#", "#osaMediumThreshold#");
+                html = formatHtmlThreshold(html, cxScanResult.getOsaLowCount(), cxScanResult.getOsaLowThreshold(), "<!--osaLowThresholdStart-->", "<!--osaLowThresholdEnd-->", "#osaLowThresholdHeight#", "#osaLowThreshold#");
+
+                if(vulnerabilityThresholdEnabled) {
+                    if(cxScanResult.isOsaThresholdExceeded()) {
+                        html = html.replace("<!--osaThresholdStatus-->", "<div class=\"threshold-exceeded\">Threshold Exceeded</div>");
+                    } else {
+                        html = html.replace("<!--osaThresholdStatus-->", "<div class=\"threshold-compliance\">Threshold Compliance</div>");
+                    }
+
+                } else {
+                    html = html.replace("<!--osaThresholdStatus-->", "");
+                }
+            }
+
+
+            FileUtils.writeStringToFile(new File(checkmarxBuildDir, "report.html"), html);
+
+
+        } catch (Exception e) {
+            instanceLogger.warn("fail to generate html report", e);
+
+        }
+    }
+
+    private String formatHtmlResultsHeight(int results, int resultsSum) {
+        if(resultsSum > 0) {
+            return Integer.toString(results*100/resultsSum);
+        }
+        return "0";
+    }
+
+
+    private String formatHtmlThreshold(String html, int results, Integer threshold, String startTag, String endTag, String heightReplaceTag, String thresholdTag) {
+
+        if(!vulnerabilityThresholdEnabled || threshold == null || results <= threshold) {
+            return Pattern.compile("\\"+startTag+".*\\"+endTag, Pattern.DOTALL).matcher(html).replaceAll("");
+        } else {
+            return html.replace(heightReplaceTag, Integer.toString(threshold*100/results)).replace(thresholdTag, Integer.toString(threshold));
+        }
+    }
 
     private void getOSAReports(String serverUrl, String username, String password, File checkmarxBuildDir) {
         instanceLogger.info("retrieving osa report files");
