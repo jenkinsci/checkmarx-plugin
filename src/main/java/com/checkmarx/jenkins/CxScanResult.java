@@ -84,6 +84,11 @@ public class CxScanResult implements Action {
     private int osaNoVulnerabilityLibs;
     private boolean osaEnabled = false;
 
+
+    //Thresholds
+    private boolean thresholdsEnabled = false;
+    private boolean osaThresholdsEnabled = false;
+
     @Nullable
     private Integer highThreshold;
     @Nullable
@@ -125,12 +130,14 @@ public class CxScanResult implements Action {
     }
 
     public void setOsaThresholds(ThresholdConfig thresholdConfig) {
+        this.setOsaThresholdsEnabled(true);
         this.setOsaHighThreshold(thresholdConfig.getHighSeverity());
         this.setOsaMediumThreshold(thresholdConfig.getMediumSeverity());
         this.setOsaLowThreshold(thresholdConfig.getLowSeverity());
     }
 
     public void setThresholds(ThresholdConfig thresholdConfig) {
+        this.setThresholdsEnabled(true);
         this.setHighThreshold(thresholdConfig.getHighSeverity());
         this.setMediumThreshold(thresholdConfig.getMediumSeverity());
         this.setLowThreshold(thresholdConfig.getLowSeverity());
@@ -182,6 +189,22 @@ public class CxScanResult implements Action {
 
     public void setOsaEnabled(boolean osaEnabled) {
         this.osaEnabled = osaEnabled;
+    }
+
+    public boolean isThresholdsEnabled() {
+        return thresholdsEnabled;
+    }
+
+    public void setThresholdsEnabled(boolean thresholdsEnabled) {
+        this.thresholdsEnabled = thresholdsEnabled;
+    }
+
+    public boolean isOsaThresholdsEnabled() {
+        return osaThresholdsEnabled;
+    }
+
+    public void setOsaThresholdsEnabled(boolean osaThresholdsEnabled) {
+        this.osaThresholdsEnabled = osaThresholdsEnabled;
     }
 
     @Nullable
@@ -553,6 +576,29 @@ public class CxScanResult implements Action {
             }
             return serverUrl + "/" + token + tokens[1];
         }
+    }
+
+
+    public boolean isThresholdExceeded() {
+        boolean ret = isThresholdExceededByLevel(highCount, highThreshold);
+        ret |= isThresholdExceededByLevel(mediumCount, mediumThreshold);
+        ret |= isThresholdExceededByLevel(lowCount, lowThreshold);
+       return ret;
+    }
+
+    public boolean isOsaThresholdExceeded() {
+        boolean ret = isThresholdExceededByLevel(osaHighCount, osaHighThreshold);
+        ret |= isThresholdExceededByLevel(osaMediumCount, osaMediumThreshold);
+        ret |= isThresholdExceededByLevel(osaLowCount, osaLowThreshold);
+       return ret;
+    }
+
+    private boolean isThresholdExceededByLevel(int count, Integer threshold){
+        boolean ret = false;
+        if (threshold != null && count > threshold){
+            ret = true;
+        }
+        return ret;
     }
 
     public static class QueryResult {

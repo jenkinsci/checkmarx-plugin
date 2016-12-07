@@ -510,7 +510,9 @@ public class CxScanBuilder extends Builder {
             ThresholdConfig thresholdConfig = createThresholdConfig();
 
             // Set scan thresholds for the summery.jelly
-            cxScanResult.setThresholds(thresholdConfig);
+            if (isSASTThresholdEnabled()) {
+                cxScanResult.setThresholds(thresholdConfig);
+            }
 
 
             boolean isSASTThresholdFailedTheBuild = ((descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || isVulnerabilityThresholdEnabled())
@@ -525,7 +527,9 @@ public class CxScanBuilder extends Builder {
                 ThresholdConfig osaThresholdConfig = createOsaThresholdConfig();
 
                 // Set scan thresholds for the summery.jelly
-                cxScanResult.setOsaThresholds(osaThresholdConfig);
+                if (isOsaThresholdEnabled()) {
+                    cxScanResult.setOsaThresholds(osaThresholdConfig);
+                }
                 //retrieve osa scan results pdf + html
                 getOSAReports(serverUrlToUseNotNull, usernameToUse, passwordToUse, checkmarxBuildDir);
 
@@ -1275,7 +1279,7 @@ public class CxScanBuilder extends Builder {
         }
 
         // Prepares a this.cxWebService object to be connected and logged in
-	    /*
+        /*
 	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
 	     *  shared state to avoid synchronization issues.
 	     */
@@ -1673,5 +1677,6 @@ public class CxScanBuilder extends Builder {
         public void setLockVulnerabilitySettings(boolean lockVulnerabilitySettings) {
             this.lockVulnerabilitySettings = lockVulnerabilitySettings;
         }
+
     }
 }
