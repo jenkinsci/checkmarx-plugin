@@ -703,9 +703,9 @@ public class CxScanBuilder extends Builder {
         try {
             FileUtils.writeByteArrayToFile(osaPdfReport, osaScanPdfResults);
         } catch (IOException e) {
-            instanceLogger.warn("fail to write osa pdf report to [" + osaHtmlReport.getAbsolutePath() + "]");
+            instanceLogger.warn("fail to write osa pdf report to [" + osaPdfReport.getAbsolutePath() + "]");
         }
-        instanceLogger.info("osa report file [" + osaHtmlReport.getAbsolutePath() + "] generated successfully");
+        instanceLogger.info("osa report file [" + osaPdfReport.getAbsolutePath() + "] generated successfully");
 
 
     }

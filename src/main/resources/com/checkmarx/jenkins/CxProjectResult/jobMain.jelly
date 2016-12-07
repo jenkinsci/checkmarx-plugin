@@ -349,7 +349,7 @@ body {
                                        <li>
                                            <div class="bar-count">${it.lastSynchronousBuildAction.highCount}</div>
                                            <span class="bar-1" style="height:${it.lastSynchronousBuildAction.highCount*100/(it.lastSynchronousBuildAction.highCount + it.lastSynchronousBuildAction.mediumCount + it.lastSynchronousBuildAction.lowCount)}%">
-                                             <j:if test="${it.ThresholdsEnabled &amp;&amp; it.lastSynchronousBuildAction.highThreshold!=null &amp;&amp; it.lastSynchronousBuildAction.highCount>it.lastSynchronousBuildAction.highThreshold}">
+                                             <j:if test="${it.lastSynchronousBuildAction.ThresholdsEnabled &amp;&amp; it.lastSynchronousBuildAction.highThreshold!=null &amp;&amp; it.lastSynchronousBuildAction.highCount>it.lastSynchronousBuildAction.highThreshold}">
 
                                                    <div class="tooltip-container" style="bottom:${it.lastSynchronousBuildAction.highThreshold*100/it.lastSynchronousBuildAction.highCount}%">
                                                       <div class="threshold-line"></div>
@@ -680,7 +680,7 @@ body {
                                            <div class="bar-count">${it.lastSynchronousBuildAction.osaHighCount}</div>
                                            <span class="bar-1" style="height:${it.lastSynchronousBuildAction.osaHighCount*100/(it.lastSynchronousBuildAction.osaHighCount + it.lastSynchronousBuildAction.osaMediumCount + it.lastSynchronousBuildAction.osaLowCount)}%">
                                                <j:if test="${it.lastSynchronousBuildAction.OsaThresholdsEnabled &amp;&amp; it.lastSynchronousBuildAction.osaHighThreshold!=null &amp;&amp; it.lastSynchronousBuildAction.osaHighCount>it.lastSynchronousBuildAction.osaHighThreshold}">
-                                                   <div class="tooltip-container" style="bottom:${it.lastSynchronousBuildAction.osaHighThreshold*100/it.osaHighCount}%">
+                                                   <div class="tooltip-container" style="bottom:${it.lastSynchronousBuildAction.osaHighThreshold*100/it.lastSynchronousBuildAction.osaHighCount}%">
                                                       <div class="threshold-line"></div>
                                                       <div class="threshold-tooltip osa-threshold-high">
                                                           <div class="threshold-tooltip-background">
