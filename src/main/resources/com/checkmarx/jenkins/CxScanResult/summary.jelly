@@ -258,6 +258,7 @@ body {
   padding-right: 3px;
 }
 
+
          </style>
 
     <j:if test="${it.showResults}">
@@ -574,7 +575,7 @@ body {
                                 </svg>
                             </div>
                             <div class="html-report download-txt">
-                                <div class="detailed-report-ttl">Html format</div>
+                                <div class="detailed-report-ttl">html format</div>
                             </div>
                         </a>
                     </div>
