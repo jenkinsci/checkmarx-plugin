@@ -326,14 +326,14 @@ body {
         </td>
         <td class="main-column">
             <div class="graph">
-                <div class="graph-title">Vulnerabilities Status</div>
+                <div class="graph-title">Vulnerability Status</div>
                 <j:if test="${it.ThresholdsEnabled}">
                     <j:choose>
                        <j:when test="${it.ThresholdExceeded}">
                           <div class="threshold-exceeded">Threshold Exceeded</div>
                        </j:when>
                        <j:otherwise>
-                            <div class="threshold-compliance">Threshold Compliance</div>
+                            <div class="threshold-compliance">Threshold Complianced</div>
                        </j:otherwise>
                     </j:choose>
                 </j:if>
@@ -575,7 +575,7 @@ body {
                                 </svg>
                             </div>
                             <div class="html-report download-txt">
-                                <div class="detailed-report-ttl">html format</div>
+                                <div class="detailed-report-ttl">Html format</div>
                             </div>
                         </a>
                     </div>
@@ -619,7 +619,7 @@ body {
                     </div>
                     <div class="libraries-vulnerable-number">${it.osaVulnerableAndOutdatedLibs}</div>
                     <div class="libraries-vulnerable-text">
-                        Libraries with vulnerabilities and outdated
+                        Vulnerable and Outdated Libraries
                     </div>
                 </div>
 
@@ -651,12 +651,12 @@ body {
                     </div>
                     <div class="libraries-vulnerable-number">${it.osaNoVulnerabilityLibs}</div>
                     <div class="libraries-ok-text">
-                        Libraries with no vulnerabilities
+                        No Known Vulnerability Libraries
                     </div>
                 </div>
             </div>
             <div class="graph">
-                <div class="graph-title">Vulnerabilities Status</div>
+                <div class="graph-title">Vulnerability Status</div>
                 <j:if test="${it.OsaThresholdsEnabled}">
                     <j:choose>
                         <j:when test="${it.OsaThresholdExceeded}">
