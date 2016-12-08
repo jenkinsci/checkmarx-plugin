@@ -94,6 +94,7 @@
         color: #d82743;
         font-weight: bold
     }
+
     .threshold-compliance {
         margin-left: 84%;
         font-size: 15px;
@@ -103,6 +104,29 @@
 
     .graph {
         width: 709px;
+        position: relative;
+    }
+
+    .threshold-exceeded-text {
+        color: #da2945;
+    }
+
+    .threshold-compliance-text {
+        color: #21bf3f;
+    }
+
+    .threshold-exceeded,
+    .threshold-compliance {
+        display: inline-flex;
+        font-size: 14px;
+        position: absolute;
+        right: 0;
+    }
+
+    .threshold-exceeded-icon,
+    .threshold-compliance-icon {
+        margin-right: 6px;
+        line-height: 28px;
     }
 
     .detailed-report {
@@ -114,9 +138,6 @@
         font-size: 16px;
         line-height: 16px;
         letter-spacing: -0.53px;
-        text-decoration: underline;
-        color: #0909fe;
-        font-weight: bold;
     }
 
     .download-detailed-report {
@@ -313,79 +334,99 @@
                 <div class="sum2">Summary</div>
             </div>
 
-            <a class="detailed-report" href="#reportUrl#">
-                <div class="download-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                         xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1000" version="1.1"
-                         width="23" height="29" viewBox="0 0 23 29"><title>Download icon</title>
-                        <desc>Created with Avocode.</desc>
-                        <defs id="SvgjsDefs1001">
-                            <clipPath id="SvgjsClipPath1010">
-                                <path id="SvgjsPath1009" d="M275 272L293.1 272L298 277L298 301L275 301Z "
-                                      fill="#ffffff"/>
-                            </clipPath>
-                        </defs>
-                        <path id="SvgjsPath1007" d="M275 272L293.1 272L298 277L298 301L275 301Z " fill="#ffffff"
-                              fill-opacity="1" transform="matrix(1,0,0,1,-275,-272)"/>
-                        <path id="SvgjsPath1008" d="M275 272L293.1 272L298 277L298 301L275 301Z " fill-opacity="0"
-                              fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                              stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50"
-                              stroke-width="4" clip-path="url(&quot;#SvgjsClipPath1010&quot;)"
-                              transform="matrix(1,0,0,1,-275,-272)"/>
-                        <path id="SvgjsPath1011" d="M292 278L292 272L293.1 272L298 277L298 278Z " fill="#373050"
-                              fill-opacity="1" transform="matrix(1,0,0,1,-275,-272)"/>
-                        <path id="SvgjsPath1012" d="M286.5 282.5L286.5 289.5 " fill-opacity="0" fill="#ffffff"
-                              stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square"
-                              stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                              transform="matrix(1,0,0,1,-275,-272)"/>
-                        <path id="SvgjsPath1013" d="M286.5 290.5L283.95 287.95 " fill-opacity="0" fill="#ffffff"
-                              stroke-dasharray="0" stroke-linejoin="miter"
-                              stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50"
-                              stroke-width="1" transform="matrix(1,0,0,1,-275,-272)"/>
-                        <path id="SvgjsPath1014" d="M286.95 290.5L289.5 287.95 " fill-opacity="0" fill="#ffffff"
-                              stroke-dasharray="0" stroke-linejoin="miter"
-                              stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50"
-                              stroke-width="1" transform="matrix(1,0,0,1,-275,-272)"/>
-                    </svg>
+
+            <div class="detailed-report">
+                <div class="download-cx-report">Checkmarx Report</div>
+
+                <div class="osa-downloads sast-downloads">
+                    <!--pdfStart-->
+                    <div>
+                        <a class="pdf-report" href="#pdfReportUrl#">
+                        <div class="pdf-report download-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1022" version="1.1"
+                                 width="13" height="16" viewBox="0 0 13 16"><title>PDF icon</title>
+                                <desc>Created with Avocode.</desc>
+                                <defs id="SvgjsDefs1023">
+                                    <clipPath id="SvgjsClipPath1027">
+                                        <path id="SvgjsPath1026" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill="#ffffff"/>
+                                    </clipPath>
+                                </defs>
+                                <path id="SvgjsPath1024" d="M279 768L279 763L280.1 763L284 767L284 768Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-271,-763)"/>
+                                <path id="SvgjsPath1025" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
+                                      stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2"
+                                      clip-path="url(&quot;#SvgjsClipPath1027&quot;)" transform="matrix(1,0,0,1,-271,-763)"/>
+                            </svg>
+                        </div>
+                        <div class="pdf-report download-txt">
+                            <div class="pdf-report detailed-report-ttl">PDF format</div>
+                        </div>
+                    </a>
+                    </div>
+                    <!--pdfEnd-->
+                    <div>
+                        <a class="html-report" href="#reportUrl#">
+                        <div class="html-report download-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1054" version="1.1"
+                                 width="14" height="17.20710678118644" viewBox="0 0 14 17.20710678118644"><title>HTML Icon</title>
+                                <desc>Created with Avocode.</desc>
+                                <defs id="SvgjsDefs1055"/>
+                                <path id="SvgjsPath1056" d="M279.12 796L284 796L284 806L271 806L271 796L271 796L275.92 796 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
+                                      stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
+                                      transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
+                                <path id="SvgjsPath1057" d="M277.5 790.5L277.5 797.57 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
+                                      stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
+                                      transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
+                                <path id="SvgjsPath1058" d="M277.5 790.5L280.5 793.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
+                                      stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
+                                      transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
+                                <path id="SvgjsPath1059" d="M277.5 790.5L274.5 793.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
+                                      stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
+                                      transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
+                            </svg>
+                        </div>
+                        <div class="html-report download-txt">
+                            <div class="detailed-report-ttl">Html format</div>
+                        </div>
+                    </a>
+                    </div>
                 </div>
-                <div class="download-txt">
-                    <div class="detailed-report-ttl">Checkmarx Report</div>
-                    <div class="download-detailed-report">Detailed report</div>
-                </div>
-            </a>
-            <!--pdfStart-->
-            <a class="pdf-report" href="#pdfReportUrl#">
-                <div class="pdf-report download-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                         xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1022" version="1.1"
-                         width="13" height="16" viewBox="0 0 13 16"><title>PDF icon</title>
-                        <desc>Created with Avocode.</desc>
-                        <defs id="SvgjsDefs1023">
-                            <clipPath id="SvgjsClipPath1027">
-                                <path id="SvgjsPath1026" d="M271 763L280.1 763L284 767L284 779L271 779Z "
-                                      fill="#ffffff"/>
-                            </clipPath>
-                        </defs>
-                        <path id="SvgjsPath1024" d="M279 768L279 763L280.1 763L284 767L284 768Z "
-                              fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-271,-763)"/>
-                        <path id="SvgjsPath1025" d="M271 763L280.1 763L284 767L284 779L271 779Z "
-                              fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                              stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1"
-                              stroke="#373050" stroke-miterlimit="50" stroke-width="2"
-                              clip-path="url(&quot;#SvgjsClipPath1027&quot;)"
-                              transform="matrix(1,0,0,1,-271,-763)"/>
-                    </svg>
-                </div>
-                <div class="pdf-report download-txt">
-                    <div class="pdf-report detailed-report-ttl">PDF format</div>
-                </div>
-            </a>
-            <!--pdfEnd-->
+            </div>
+
         </td>
         <td class="main-column">
             <div class="graph">
+                <!--thresholdStatusStart-->
+                <div class="threshold-exceeded" #sastThresholdExceeded#>
+                    <div class="threshold-exceeded-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1015" version="1.1"
+                             width="9.400000000000091" height="12.399999999999977" viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold ICON</title>
+                            <desc>Created with Avocode.</desc>
+                            <defs id="SvgjsDefs1016"/>
+                            <path id="SvgjsPath1017" d="M1052 190L1056.29 190L1056.29 195.6L1052 195.6Z " fill="#da2945" fill-opacity="1"
+                                  transform="matrix(1,0,0,1,-1049.3,-184.3)"/>
+                            <path id="SvgjsPath1018" d="M1052.71 185.1L1055.57 185.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
+                                  stroke-linecap="square" stroke-opacity="1" stroke="#da2945" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-1049.3,-184.3)"/>
+                            <path id="SvgjsPath1019" d="M1052.71 188.1L1055.57 188.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
+                                  stroke-linecap="square" stroke-opacity="1" stroke="#da2945" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-1049.3,-184.3)"/>
+                            <path id="SvgjsPath1020" d="M1050.42 195.1L1057.64 195.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
+                                  stroke-linecap="square" stroke-opacity="1" stroke="#da2945" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-1049.3,-184.3)"/>
+                        </svg>
+                    </div>
+                    <div class="threshold-exceeded-text">
+                        Threshold Exceeded
+                    </div>
+                </div>
+
+                <div class="threshold-compliance" #sastThresholdCompliance#>
+                    <div class="threshold-compliance-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1050" version="1.1" width="13.99264158479491" height="13" viewBox="0 0 13.99264158479491 13"><title>Icon</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1051"><clipPath id="SvgjsClipPath1056"><path id="SvgjsPath1055" d="M1035.00736 793.9841L1035.00736 784.01589L1046.9926400000002 784.01589L1046.9926400000002 793.9841ZM1038.67 790.72L1036.68 788.72L1036 789.4L1038.67 792.0699999999999L1045.21 785.67L1044.54 785Z " fill="#ffffff"/></clipPath></defs><path id="SvgjsPath1052" d="M1033 789.5C1033 785.91015 1035.91015 783 1039.5 783C1043.08985 783 1046 785.91015 1046 789.5C1046 793.08985 1043.08985 796 1039.5 796C1035.91015 796 1033 793.08985 1033 789.5Z " fill="#21bf3f" fill-opacity="1" transform="matrix(1,0,0,1,-1033,-783)"/><path id="SvgjsPath1053" d="M1038.67 790.72L1036.68 788.72L1036 789.4L1038.67 792.0699999999999L1045.21 785.67L1044.54 785Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-1033,-783)"/><path id="SvgjsPath1054" d="M1038.67 790.72L1036.68 788.72L1036 789.4L1038.67 792.0699999999999L1045.21 785.67L1044.54 785Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" clip-path="url(&quot;#SvgjsClipPath1056&quot;)" transform="matrix(1,0,0,1,-1033,-783)"/></svg>                    </div>
+                    <div class="threshold-compliance-text">
+                        Threshold Compliance
+                    </div>
+                </div>
+                <!--thresholdStatusEnd-->
+
                 <div class="graph-title">Vulnerabilities Status</div>
-                <!--thresholdStatus-->
                 <ul class="chart">
                     <li>
                         <div class="bar-count">#highResults#</div>
@@ -487,6 +528,7 @@
                                 </svg>
                             </div>
                         </div>
+
 
                     </li>
                     <li>
@@ -772,7 +814,7 @@
                                 </svg>
                             </div>
                             <div class="html-report download-txt">
-                                <div class="detailed-report-ttl">html format</div>
+                                <div class="detailed-report-ttl">Html format</div>
                             </div>
                         </a>
                     </div>
@@ -860,13 +902,45 @@
                     </div>
                     <div class="libraries-vulnerable-number">#osaNoVulnerabilityLibs#</div>
                     <div class="libraries-ok-text">
-                        Libraries with no vulnerabilities
+                        No Known Vulnerability Libraries
                     </div>
                 </div>
             </div>
             <div class="graph">
-                <div class="graph-title">Vulnerabilities Status</div>
-                <!--osaThresholdStatus-->
+
+                <!--osaThresholdStatusStart-->
+                <div class="threshold-exceeded" #osaThresholdExceeded#>
+                    <div class="threshold-exceeded-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1015" version="1.1"
+                             width="9.400000000000091" height="12.399999999999977" viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold ICON</title>
+                            <desc>Created with Avocode.</desc>
+                            <defs id="SvgjsDefs1016"/>
+                            <path id="SvgjsPath1017" d="M1052 190L1056.29 190L1056.29 195.6L1052 195.6Z " fill="#da2945" fill-opacity="1"
+                                  transform="matrix(1,0,0,1,-1049.3,-184.3)"/>
+                            <path id="SvgjsPath1018" d="M1052.71 185.1L1055.57 185.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
+                                  stroke-linecap="square" stroke-opacity="1" stroke="#da2945" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-1049.3,-184.3)"/>
+                            <path id="SvgjsPath1019" d="M1052.71 188.1L1055.57 188.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
+                                  stroke-linecap="square" stroke-opacity="1" stroke="#da2945" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-1049.3,-184.3)"/>
+                            <path id="SvgjsPath1020" d="M1050.42 195.1L1057.64 195.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
+                                  stroke-linecap="square" stroke-opacity="1" stroke="#da2945" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-1049.3,-184.3)"/>
+                        </svg>
+                    </div>
+                    <div class="threshold-exceeded-text">
+                        Threshold Exceeded
+                    </div>
+                </div>
+
+                <div class="threshold-compliance" #osaThresholdCompliance#>
+                    <div class="threshold-compliance-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1050" version="1.1" width="13.99264158479491" height="13" viewBox="0 0 13.99264158479491 13"><title>Icon</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1051"><clipPath id="SvgjsClipPath1056"><path id="SvgjsPath1055" d="M1035.00736 793.9841L1035.00736 784.01589L1046.9926400000002 784.01589L1046.9926400000002 793.9841ZM1038.67 790.72L1036.68 788.72L1036 789.4L1038.67 792.0699999999999L1045.21 785.67L1044.54 785Z " fill="#ffffff"/></clipPath></defs><path id="SvgjsPath1052" d="M1033 789.5C1033 785.91015 1035.91015 783 1039.5 783C1043.08985 783 1046 785.91015 1046 789.5C1046 793.08985 1043.08985 796 1039.5 796C1035.91015 796 1033 793.08985 1033 789.5Z " fill="#21bf3f" fill-opacity="1" transform="matrix(1,0,0,1,-1033,-783)"/><path id="SvgjsPath1053" d="M1038.67 790.72L1036.68 788.72L1036 789.4L1038.67 792.0699999999999L1045.21 785.67L1044.54 785Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-1033,-783)"/><path id="SvgjsPath1054" d="M1038.67 790.72L1036.68 788.72L1036 789.4L1038.67 792.0699999999999L1045.21 785.67L1044.54 785Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" clip-path="url(&quot;#SvgjsClipPath1056&quot;)" transform="matrix(1,0,0,1,-1033,-783)"/></svg>                    </div>
+                    <div class="threshold-compliance-text">
+                        Threshold Compliance
+                    </div>
+                </div>
+                <!--osaThresholdStatusEnd-->
+
+                <div class="graph-title">Vulnerability Status</div>
+
                 <ul class="chart">
                     <li>
                         <div class="bar-count">#osaHighResults#</div>

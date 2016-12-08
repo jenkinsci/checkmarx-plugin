@@ -614,13 +614,15 @@ public class CxScanBuilder extends Builder {
 
             if(vulnerabilityThresholdEnabled) {
                 if(cxScanResult.isThresholdExceeded()) {
-                    html = html.replace("<!--thresholdStatus-->", "<div class=\"threshold-exceeded\">Threshold Exceeded</div>");
+                    html = html.replace("#sastThresholdCompliance#", "style=\"visibility: hidden\"");
+                    html = html.replace("#sastThresholdExceeded#", "");
                 } else {
-                    html = html.replace("<!--thresholdStatus-->", "<div class=\"threshold-compliance\">Threshold Compliance</div>");
+                    html = html.replace("#sastThresholdExceeded#", "style=\"visibility: hidden\"");
+                    html = html.replace("#sastThresholdCompliance#", "");
                 }
 
             } else {
-                html = html.replace("<!--thresholdStatus-->", "");
+                html = Pattern.compile("\\<!--thresholdStatusStart-->.*\\<!--thresholdStatusEnd-->", Pattern.DOTALL).matcher(html).replaceAll("");
             }
 
             if(!cxScanResult.isOsaEnabled()) {
@@ -648,13 +650,15 @@ public class CxScanBuilder extends Builder {
 
                 if(vulnerabilityThresholdEnabled) {
                     if(cxScanResult.isOsaThresholdExceeded()) {
-                        html = html.replace("<!--osaThresholdStatus-->", "<div class=\"threshold-exceeded\">Threshold Exceeded</div>");
+                        html = html.replace("#osaThresholdCompliance#", "style=\"visibility: hidden\"");
+                        html = html.replace("#osaThresholdExceeded#", "");
                     } else {
-                        html = html.replace("<!--osaThresholdStatus-->", "<div class=\"threshold-compliance\">Threshold Compliance</div>");
+                        html = html.replace("#osaThresholdExceeded#", "style=\"visibility: hidden\"");
+                        html = html.replace("#osaThresholdCompliance#", "");
                     }
 
                 } else {
-                    html = html.replace("<!--osaThresholdStatus-->", "");
+                    html = Pattern.compile("\\<!--osaThresholdStatusStart-->.*\\<!--osaThresholdStatusEnd-->", Pattern.DOTALL).matcher(html).replaceAll("");
                 }
             }
 
