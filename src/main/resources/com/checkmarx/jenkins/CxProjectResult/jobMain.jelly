@@ -320,7 +320,7 @@ body {
                                                        </svg>
                                                    </div>
                                                    <div class="pdf-report download-txt">
-                                                       <div class="pdf-report detailed-report-ttl">PDF format</div>
+                                                       <div class="pdf-report detailed-report-ttl">PDF</div>
                                                    </div>
                                                </a>
                                            </j:if>
@@ -614,7 +614,7 @@ body {
                                                    </svg>
                                                </div>
                                                <div class="pdf-report download-txt">
-                                                   <div class="pdf-report detailed-report-ttl">PDF format</div>
+                                                   <div class="pdf-report detailed-report-ttl">PDF</div>
                                                </div>
                                            </a>
                                        </div>
