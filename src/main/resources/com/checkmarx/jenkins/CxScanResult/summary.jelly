@@ -277,7 +277,11 @@ body {
   border-bottom: dashed white 1px;
   padding-right: 3px;
 }
+
          </style>
+
+
+
 
     <j:if test="${it.showResults}">
         <t:summary icon="/plugin/checkmarx/CxIcon48x48.png">
@@ -291,32 +295,9 @@ body {
                 <div class="sum2">Summary</div>
             </div>
 
-            <a class="detailed-report" href="${it.urlName}">
-                <div class="download-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1000" version="1.1"
-                         width="23" height="29" viewBox="0 0 23 29"><title>Download icon</title>
-                        <desc>Created with Avocode.</desc>
-                        <defs id="SvgjsDefs1001">
-                            <clipPath id="SvgjsClipPath1010">
-                                <path id="SvgjsPath1009" d="M275 272L293.1 272L298 277L298 301L275 301Z " fill="#ffffff"/>
-                            </clipPath>
-                        </defs>
-                        <path id="SvgjsPath1007" d="M275 272L293.1 272L298 277L298 301L275 301Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-275,-272)"/>
-                        <path id="SvgjsPath1008" d="M275 272L293.1 272L298 277L298 301L275 301Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                              stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="4" clip-path="url(&quot;#SvgjsClipPath1010&quot;)"
-                              transform="matrix(1,0,0,1,-275,-272)"/>
-                        <path id="SvgjsPath1011" d="M292 278L292 272L293.1 272L298 277L298 278Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-275,-272)"/>
-                        <path id="SvgjsPath1012" d="M286.5 282.5L286.5 289.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square"
-                              stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1" transform="matrix(1,0,0,1,-275,-272)"/>
-                        <path id="SvgjsPath1013" d="M286.5 290.5L283.95 287.95 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                              stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1" transform="matrix(1,0,0,1,-275,-272)"/>
-                        <path id="SvgjsPath1014" d="M286.95 290.5L289.5 287.95 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                              stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1" transform="matrix(1,0,0,1,-275,-272)"/>
-                    </svg>
-                </div>
+            <div class="detailed-report">
                 <div class="download-txt">
-                    <div class="detailed-report-ttl">Checkmarx Report</div>
-                    <div class="download-detailed-report">Detailed report</div>
+                    <div class="download-cx-report">Checkmarx Report</div>
                         <j:if test="${it.pdfReportReady}">
                             <a class="pdf-report" href="${app.rootUrl}${it.owner.url}${it.urlName}/pdfReport">
                                 <div class="pdf-report download-icon">
@@ -339,8 +320,35 @@ body {
                                 </div>
                             </a>
                         </j:if>
+
+                        <div>
+                            <a class="html-report"  href="${app.rootUrl}${it.owner.url}${it.urlName}">
+                                <div class="html-report download-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1054" version="1.1"
+                                         width="14" height="17.20710678118644" viewBox="0 0 14 17.20710678118644"><title>HTML Icon</title>
+                                        <desc>Created with Avocode.</desc>
+                                        <defs id="SvgjsDefs1055"/>
+                                        <path id="SvgjsPath1056" d="M279.12 796L284 796L284 806L271 806L271 796L271 796L275.92 796 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
+                                              stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
+                                              transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
+                                        <path id="SvgjsPath1057" d="M277.5 790.5L277.5 797.57 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
+                                              stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
+                                              transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
+                                        <path id="SvgjsPath1058" d="M277.5 790.5L280.5 793.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
+                                              stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
+                                              transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
+                                        <path id="SvgjsPath1059" d="M277.5 790.5L274.5 793.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
+                                              stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
+                                              transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
+                                    </svg>
+                                </div>
+                                <div class="html-report download-txt">
+                                    <div class="detailed-report-ttl">HTML</div>
+                                </div>
+                            </a>
+                        </div>
                 </div>
-            </a>
+            </div>
         </td>
         <td class="main-column">
             <div class="graph">
@@ -388,11 +396,6 @@ body {
                    </j:otherwise>
                 </j:choose>
             </j:if>
-
-
-
-
-
 
 
                 <div class="graph-title">Vulnerabilities Status</div>
@@ -477,11 +480,11 @@ body {
                             </j:if>
                         </span>
                         <div class="bar-title-container">
-                            <div class="bar-title">Med</div>
+                            <div class="bar-title">Medium</div>
                             <div class="severity-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="21px" viewBox="0 0 23 21" version="1.1">
                                     <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
-                                    <title>med</title>
+                                    <title>medium</title>
                                     <desc>Created with Sketch.</desc>
                                     <defs>
                                         <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"
@@ -587,9 +590,9 @@ body {
 
             <!--todo: link to report-->
             <div class="detailed-report" href="">
-                <div class="download-cx-report">Download Checkmarx Report</div>
+                <div class="download-cx-report">Checkmarx Report</div>
 
-                <div class="osa-downloads">
+                <div class="osa-downloads sast-downloads">
                     <div>
                         <a class="pdf-report" href="${app.rootUrl}${it.owner.url}${it.urlName}/osaPdfReport">
                             <div class="pdf-report download-icon">
@@ -634,7 +637,7 @@ body {
                                 </svg>
                             </div>
                             <div class="html-report download-txt">
-                                <div class="detailed-report-ttl">Html format</div>
+                                <div class="detailed-report-ttl">HTML</div>
                             </div>
                         </a>
                     </div>
@@ -678,7 +681,7 @@ body {
                     </div>
                     <div class="libraries-vulnerable-number">${it.osaVulnerableAndOutdatedLibs}</div>
                     <div class="libraries-vulnerable-text">
-                        Vulnerable and Outdated Libraries
+                        Vulnerable and outdated libraries
                     </div>
                 </div>
 
@@ -710,7 +713,7 @@ body {
                     </div>
                     <div class="libraries-vulnerable-number">${it.osaNoVulnerabilityLibs}</div>
                     <div class="libraries-ok-text">
-                        No Known Vulnerability Libraries
+                        Libraries with no vulnerabilities
                     </div>
                 </div>
             </div>
@@ -751,6 +754,7 @@ body {
                             </j:otherwise>
                         </j:choose>
                      </j:if>
+
 
                 <div class="graph-title">Vulnerabilities Status</div>
 
@@ -833,11 +837,11 @@ body {
                             </j:if>
                         </span>
                         <div class="bar-title-container">
-                            <div class="bar-title">Med</div>
+                            <div class="bar-title">Medium</div>
                             <div class="severity-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="21px" viewBox="0 0 23 21" version="1.1">
                                     <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
-                                    <title>med</title>
+                                    <title>medium</title>
                                     <desc>Created with Sketch.</desc>
                                     <defs>
                                         <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"
