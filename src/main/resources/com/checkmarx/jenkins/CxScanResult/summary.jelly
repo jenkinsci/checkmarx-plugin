@@ -69,6 +69,20 @@ tr.cxsast {
   font-weight: 500;
   font-size: 16px;
 }
+
+.threshold-exceeded {
+  margin-left: 84%;
+  font-size: 15px;
+  color: #d82743;
+  font-weight: bold
+}
+.threshold-compliance {
+  margin-left: 84%;
+  font-size: 15px;
+  color: #20be3d;
+  font-weight: bold
+}
+
 .graph {
   width: 709px;
 }
@@ -80,6 +94,9 @@ tr.cxsast {
   font-size: 16px;
   line-height: 16px;
   letter-spacing: -0.53px;
+  text-decoration: underline;
+  color: #0909fe;
+  font-weight: bold;
 }
 .download-detailed-report {
   color: #9b9b9b;
@@ -241,6 +258,7 @@ body {
   padding-right: 3px;
 }
 
+
          </style>
 
     <j:if test="${it.showResults}">
@@ -255,68 +273,78 @@ body {
                 <div class="sum2">Summary</div>
             </div>
 
-            <div class="detailed-report" href="">
-                            <div class="download-cx-report">Download Checkmarx Report</div>
-
-                            <div class="osa-downloads sast-downloads">
-                                <div class="pdf-report">
-                                    <div class="pdf-report download-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1022" version="1.1"
-                                             width="13" height="16" viewBox="0 0 13 16"><title>PDF icon</title>
-                                            <desc>Created with Avocode.</desc>
-                                            <defs id="SvgjsDefs1023">
-                                                <clipPath id="SvgjsClipPath1027">
-                                                    <path id="SvgjsPath1026" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill="#ffffff"/>
-                                                </clipPath>
-                                            </defs>
-                                            <path id="SvgjsPath1024" d="M279 768L279 763L280.1 763L284 767L284 768Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-271,-763)"/>
-                                            <path id="SvgjsPath1025" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                                  stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2"
-                                                  clip-path="url(&quot;#SvgjsClipPath1027&quot;)" transform="matrix(1,0,0,1,-271,-763)"/>
-                                        </svg>
-                                    </div>
-                                    <div class="pdf-report download-txt">
-                                        <div class="pdf-report detailed-report-ttl">PDF format</div>
-                                    </div>
+            <a class="detailed-report" href="${it.urlName}">
+                <div class="download-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1000" version="1.1"
+                         width="23" height="29" viewBox="0 0 23 29"><title>Download icon</title>
+                        <desc>Created with Avocode.</desc>
+                        <defs id="SvgjsDefs1001">
+                            <clipPath id="SvgjsClipPath1010">
+                                <path id="SvgjsPath1009" d="M275 272L293.1 272L298 277L298 301L275 301Z " fill="#ffffff"/>
+                            </clipPath>
+                        </defs>
+                        <path id="SvgjsPath1007" d="M275 272L293.1 272L298 277L298 301L275 301Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-275,-272)"/>
+                        <path id="SvgjsPath1008" d="M275 272L293.1 272L298 277L298 301L275 301Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
+                              stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="4" clip-path="url(&quot;#SvgjsClipPath1010&quot;)"
+                              transform="matrix(1,0,0,1,-275,-272)"/>
+                        <path id="SvgjsPath1011" d="M292 278L292 272L293.1 272L298 277L298 278Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-275,-272)"/>
+                        <path id="SvgjsPath1012" d="M286.5 282.5L286.5 289.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square"
+                              stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1" transform="matrix(1,0,0,1,-275,-272)"/>
+                        <path id="SvgjsPath1013" d="M286.5 290.5L283.95 287.95 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
+                              stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1" transform="matrix(1,0,0,1,-275,-272)"/>
+                        <path id="SvgjsPath1014" d="M286.95 290.5L289.5 287.95 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
+                              stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1" transform="matrix(1,0,0,1,-275,-272)"/>
+                    </svg>
+                </div>
+                <div class="download-txt">
+                    <div class="detailed-report-ttl">Checkmarx Report</div>
+                    <div class="download-detailed-report">Detailed report</div>
+                        <j:if test="${it.pdfReportReady}">
+                            <a class="pdf-report" href="${app.rootUrl}${it.owner.url}${it.urlName}/pdfReport">
+                                <div class="pdf-report download-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1022" version="1.1"
+                                         width="13" height="16" viewBox="0 0 13 16"><title>PDF icon</title>
+                                        <desc>Created with Avocode.</desc>
+                                        <defs id="SvgjsDefs1023">
+                                            <clipPath id="SvgjsClipPath1027">
+                                                <path id="SvgjsPath1026" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill="#ffffff"/>
+                                            </clipPath>
+                                        </defs>
+                                        <path id="SvgjsPath1024" d="M279 768L279 763L280.1 763L284 767L284 768Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-271,-763)"/>
+                                        <path id="SvgjsPath1025" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
+                                              stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2"
+                                              clip-path="url(&quot;#SvgjsClipPath1027&quot;)" transform="matrix(1,0,0,1,-271,-763)"/>
+                                    </svg>
                                 </div>
-
-                                <div class="html-report">
-                                    <div class="html-report download-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1054" version="1.1"
-                                             width="14" height="17.20710678118644" viewBox="0 0 14 17.20710678118644"><title>HTML Icon</title>
-                                            <desc>Created with Avocode.</desc>
-                                            <defs id="SvgjsDefs1055"/>
-                                            <path id="SvgjsPath1056" d="M279.12 796L284 796L284 806L271 806L271 796L271 796L275.92 796 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                                  stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                                  transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                            <path id="SvgjsPath1057" d="M277.5 790.5L277.5 797.57 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                                  stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                                  transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                            <path id="SvgjsPath1058" d="M277.5 790.5L280.5 793.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                                  stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                                  transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                            <path id="SvgjsPath1059" d="M277.5 790.5L274.5 793.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                                  stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                                  transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                        </svg>
-                                    </div>
-                                    <div class="html-report download-txt">
-                                        <div class="detailed-report-ttl">html format</div>
-                                    </div>
+                                <div class="pdf-report download-txt">
+                                    <div class="pdf-report detailed-report-ttl">PDF format</div>
                                 </div>
-                            </div>
-
-                        </div>
+                            </a>
+                        </j:if>
+                </div>
+            </a>
         </td>
         <td class="main-column">
             <div class="graph">
-                <div class="graph-title">Vulnerabilities Status</div>
+                <div class="graph-title">Vulnerability Status</div>
+                <j:if test="${it.ThresholdsEnabled}">
+                    <j:choose>
+                       <j:when test="${it.ThresholdExceeded}">
+                          <div class="threshold-exceeded">Threshold Exceeded</div>
+                       </j:when>
+                       <j:otherwise>
+                            <div class="threshold-compliance">Threshold Complianced</div>
+                       </j:otherwise>
+                    </j:choose>
+                </j:if>
 
                 <ul class="chart">
                     <li>
                         <div class="bar-count">${it.highCount}</div>
                         <span class="bar-1" style="height:${it.highCount*100/(it.highCount + it.mediumCount + it.lowCount)}%">
-                            <div class="tooltip-container" style="bottom:${it.thresholdHighCount*100/it.highCount}%">
+                          <j:if test="${it.ThresholdsEnabled &amp;&amp; it.highThreshold!=null &amp;&amp; it.highCount>it.highThreshold}">
+
+                                <div class="tooltip-container" style="bottom:${it.highThreshold*100/it.highCount}%">
                                    <div class="threshold-line"></div>
                                    <div class="threshold-tooltip threshold-high">
                                        <div class="threshold-tooltip-background">
@@ -326,9 +354,10 @@ body {
                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1044" version="1.1" width="9.400000000000091" height="12.399999999999977" viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold ICON</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1045"/><path id="SvgjsPath1046" d="M638 360L642.29 360L642.29 365.6L638 365.6Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1047" d="M638.71 355.1L641.57 355.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1048" d="M638.71 358.1L641.57 358.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1049" d="M636.42 365.1L643.64 365.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/></svg>
                                        </div>
                                        <div class="threshold-text">Threshold</div>
-                                       <div class="threshold-number">${it.thresholdHighCount}</div>
+                                       <div class="threshold-number">${it.highThreshold}</div>
                                    </div>
-                            </div>
+                                </div>
+                          </j:if>
                         </span>
                         <div class="bar-title-container">
                             <div class="bar-title">High</div>
@@ -370,7 +399,24 @@ body {
                     </li>
                     <li>
                         <div class="bar-count">${it.mediumCount}</div>
-                        <span class="bar-2" style="height:${it.mediumCount*100/(it.highCount + it.mediumCount + it.lowCount)}%"></span>
+                        <span class="bar-2" style="height:${it.mediumCount*100/(it.highCount + it.mediumCount + it.lowCount)}%">
+                            <j:if test="${it.ThresholdsEnabled &amp;&amp; it.mediumThreshold!=null &amp;&amp; it.mediumCount>it.mediumThreshold}">
+
+                                <div class="tooltip-container" style="bottom:${it.mediumThreshold*100/it.mediumCount}%">
+                                   <div class="threshold-line"></div>
+                                   <div class="threshold-tooltip threshold-medium">
+                                       <div class="threshold-tooltip-background">
+                                           <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1041" version="1.1" width="124" height="25" viewBox="0 0 124 25"><title>Combined Shape</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1042"/><path id="SvgjsPath1043" d="M624.48 368.31C624.48 370.28000000000003 626.6800000000001 371.87 629.38 371.87L738 371.87C740.74 371.87 742.91 370.28000000000003 742.91 368.31L742.91 350.56C742.91 348.59 740.7099999999999 347 738 347L629.38 347C626.65 347 624.48 348.6 624.48 350.56L624.48 355.45L619 359.44L624.48 363.42Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-619,-347)"/></svg>
+                                       </div>
+                                       <div class="threshold-icon-white">
+                                           <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1044" version="1.1" width="9.400000000000091" height="12.399999999999977" viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold ICON</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1045"/><path id="SvgjsPath1046" d="M638 360L642.29 360L642.29 365.6L638 365.6Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1047" d="M638.71 355.1L641.57 355.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1048" d="M638.71 358.1L641.57 358.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1049" d="M636.42 365.1L643.64 365.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/></svg>
+                                       </div>
+                                       <div class="threshold-text">Threshold</div>
+                                       <div class="threshold-number">${it.mediumThreshold}</div>
+                                   </div>
+                                </div>
+                            </j:if>
+                        </span>
                         <div class="bar-title-container">
                             <div class="bar-title">Med</div>
                             <div class="severity-icon">
@@ -410,7 +456,23 @@ body {
                     </li>
                     <li>
                         <div class="bar-count">${it.lowCount}</div>
-                        <span class="bar-3" style="height:${it.lowCount*100/(it.highCount + it.mediumCount + it.lowCount)}%"></span>
+                        <span class="bar-3" style="height:${it.lowCount*100/(it.highCount + it.mediumCount + it.lowCount)}%">
+                          <j:if test="${it.ThresholdsEnabled &amp;&amp; it.lowThreshold!=null &amp;&amp; it.lowCount>it.lowThreshold}">
+                                <div class="tooltip-container" style="bottom:${it.lowThreshold*100/it.lowCount}%">
+                                       <div class="threshold-line"></div>
+                                       <div class="threshold-tooltip threshold-low">
+                                           <div class="threshold-tooltip-background">
+                                               <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1041" version="1.1" width="124" height="25" viewBox="0 0 124 25"><title>Combined Shape</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1042"/><path id="SvgjsPath1043" d="M624.48 368.31C624.48 370.28000000000003 626.6800000000001 371.87 629.38 371.87L738 371.87C740.74 371.87 742.91 370.28000000000003 742.91 368.31L742.91 350.56C742.91 348.59 740.7099999999999 347 738 347L629.38 347C626.65 347 624.48 348.6 624.48 350.56L624.48 355.45L619 359.44L624.48 363.42Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-619,-347)"/></svg>
+                                           </div>
+                                           <div class="threshold-icon-white">
+                                               <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1044" version="1.1" width="9.400000000000091" height="12.399999999999977" viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold ICON</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1045"/><path id="SvgjsPath1046" d="M638 360L642.29 360L642.29 365.6L638 365.6Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1047" d="M638.71 355.1L641.57 355.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1048" d="M638.71 358.1L641.57 358.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1049" d="M636.42 365.1L643.64 365.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/></svg>
+                                           </div>
+                                           <div class="threshold-text">Threshold</div>
+                                           <div class="threshold-number">${it.lowThreshold}</div>
+                                       </div>
+                                </div>
+                         </j:if>
+                        </span>
                         <div class="bar-title-container">
                             <div class="bar-title">Low</div>
                             <div class="severity-icon">
@@ -455,7 +517,7 @@ body {
 
 
 
-            <j:if test="true">
+            <j:if test="${it.isOsaEnabled()}">
     <!--osa row-->
     <tr class="summary-table-row cxosa top-padding">
         <td class="title-column">
@@ -469,50 +531,53 @@ body {
                 <div class="download-cx-report">Download Checkmarx Report</div>
 
                 <div class="osa-downloads">
-                    <div class="pdf-report">
-                        <div class="pdf-report download-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1022" version="1.1"
-                                 width="13" height="16" viewBox="0 0 13 16"><title>PDF icon</title>
-                                <desc>Created with Avocode.</desc>
-                                <defs id="SvgjsDefs1023">
-                                    <clipPath id="SvgjsClipPath1027">
-                                        <path id="SvgjsPath1026" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill="#ffffff"/>
-                                    </clipPath>
-                                </defs>
-                                <path id="SvgjsPath1024" d="M279 768L279 763L280.1 763L284 767L284 768Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-271,-763)"/>
-                                <path id="SvgjsPath1025" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                      stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2"
-                                      clip-path="url(&quot;#SvgjsClipPath1027&quot;)" transform="matrix(1,0,0,1,-271,-763)"/>
-                            </svg>
-                        </div>
-                        <div class="pdf-report download-txt">
-                            <div class="pdf-report detailed-report-ttl">PDF format</div>
-                        </div>
+                    <div>
+                        <a class="pdf-report" href="${app.rootUrl}${it.owner.url}${it.urlName}/osaPdfReport">
+                            <div class="pdf-report download-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1022" version="1.1"
+                                     width="13" height="16" viewBox="0 0 13 16"><title>PDF icon</title>
+                                    <desc>Created with Avocode.</desc>
+                                    <defs id="SvgjsDefs1023">
+                                        <clipPath id="SvgjsClipPath1027">
+                                            <path id="SvgjsPath1026" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill="#ffffff"/>
+                                        </clipPath>
+                                    </defs>
+                                    <path id="SvgjsPath1024" d="M279 768L279 763L280.1 763L284 767L284 768Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-271,-763)"/>
+                                    <path id="SvgjsPath1025" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
+                                          stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2"
+                                          clip-path="url(&quot;#SvgjsClipPath1027&quot;)" transform="matrix(1,0,0,1,-271,-763)"/>
+                                </svg>
+                            </div>
+                            <div class="pdf-report download-txt">
+                                <div class="pdf-report detailed-report-ttl">PDF format</div>
+                            </div>
+                        </a>
                     </div>
-
-                    <div class="html-report">
-                        <div class="html-report download-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1054" version="1.1"
-                                 width="14" height="17.20710678118644" viewBox="0 0 14 17.20710678118644"><title>HTML Icon</title>
-                                <desc>Created with Avocode.</desc>
-                                <defs id="SvgjsDefs1055"/>
-                                <path id="SvgjsPath1056" d="M279.12 796L284 796L284 806L271 806L271 796L271 796L275.92 796 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                      stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                      transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                <path id="SvgjsPath1057" d="M277.5 790.5L277.5 797.57 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                      stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                      transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                <path id="SvgjsPath1058" d="M277.5 790.5L280.5 793.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                      stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                      transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                <path id="SvgjsPath1059" d="M277.5 790.5L274.5 793.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                      stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                      transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                            </svg>
-                        </div>
-                        <div class="html-report download-txt">
-                            <div class="detailed-report-ttl">html format</div>
-                        </div>
+                    <div>
+                        <a class="html-report"  href="${app.rootUrl}${it.owner.url}${it.urlName}/osaHtmlReport">
+                            <div class="html-report download-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1054" version="1.1"
+                                     width="14" height="17.20710678118644" viewBox="0 0 14 17.20710678118644"><title>HTML Icon</title>
+                                    <desc>Created with Avocode.</desc>
+                                    <defs id="SvgjsDefs1055"/>
+                                    <path id="SvgjsPath1056" d="M279.12 796L284 796L284 806L271 806L271 796L271 796L275.92 796 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
+                                          stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
+                                          transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
+                                    <path id="SvgjsPath1057" d="M277.5 790.5L277.5 797.57 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
+                                          stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
+                                          transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
+                                    <path id="SvgjsPath1058" d="M277.5 790.5L280.5 793.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
+                                          stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
+                                          transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
+                                    <path id="SvgjsPath1059" d="M277.5 790.5L274.5 793.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
+                                          stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
+                                          transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
+                                </svg>
+                            </div>
+                            <div class="html-report download-txt">
+                                <div class="detailed-report-ttl">Html format</div>
+                            </div>
+                        </a>
                     </div>
                 </div>
 
@@ -554,7 +619,7 @@ body {
                     </div>
                     <div class="libraries-vulnerable-number">${it.osaVulnerableAndOutdatedLibs}</div>
                     <div class="libraries-vulnerable-text">
-                        Libraries with vulnerabilities and outdated
+                        Vulnerable and Outdated Libraries
                     </div>
                 </div>
 
@@ -584,19 +649,45 @@ body {
                             </g>
                         </svg>
                     </div>
-                    <div class="libraries-vulnerable-number">${it.osaVulnerableAndOutdatedLibs}</div>
+                    <div class="libraries-vulnerable-number">${it.osaNoVulnerabilityLibs}</div>
                     <div class="libraries-ok-text">
-                        Libraries with no vulnerabilities
+                        No Known Vulnerability Libraries
                     </div>
                 </div>
             </div>
             <div class="graph">
-                <div class="graph-title">Vulnerabilities Status</div>
+                <div class="graph-title">Vulnerability Status</div>
+                <j:if test="${it.OsaThresholdsEnabled}">
+                    <j:choose>
+                        <j:when test="${it.OsaThresholdExceeded}">
+                           <div class="threshold-exceeded">Threshold Exceeded</div>
+                        </j:when>
+                        <j:otherwise>
+                             <div class="threshold-compliance">Threshold Compliance</div>
+                        </j:otherwise>
+                    </j:choose>
+                 </j:if>
 
                 <ul class="chart">
                     <li>
                         <div class="bar-count">${it.osaHighCount}</div>
-                        <span class="bar-1" style="height:${it.osaHighCount*100/(it.osaHighCount + it.osaMediumCount + it.osaLowCount)}%"></span>
+                        <span class="bar-1" style="height:${it.osaHighCount*100/(it.osaHighCount + it.osaMediumCount + it.osaLowCount)}%">
+                            <j:if test="${it.OsaThresholdsEnabled &amp;&amp; it.osaHighThreshold!=null &amp;&amp; it.osaHighCount>it.osaHighThreshold}">
+                                <div class="tooltip-container" style="bottom:${it.osaHighThreshold*100/it.osaHighCount}%">
+                                   <div class="threshold-line"></div>
+                                   <div class="threshold-tooltip osa-threshold-high">
+                                       <div class="threshold-tooltip-background">
+                                           <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1041" version="1.1" width="124" height="25" viewBox="0 0 124 25"><title>Combined Shape</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1042"/><path id="SvgjsPath1043" d="M624.48 368.31C624.48 370.28000000000003 626.6800000000001 371.87 629.38 371.87L738 371.87C740.74 371.87 742.91 370.28000000000003 742.91 368.31L742.91 350.56C742.91 348.59 740.7099999999999 347 738 347L629.38 347C626.65 347 624.48 348.6 624.48 350.56L624.48 355.45L619 359.44L624.48 363.42Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-619,-347)"/></svg>
+                                       </div>
+                                       <div class="threshold-icon-white">
+                                           <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1044" version="1.1" width="9.400000000000091" height="12.399999999999977" viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold ICON</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1045"/><path id="SvgjsPath1046" d="M638 360L642.29 360L642.29 365.6L638 365.6Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1047" d="M638.71 355.1L641.57 355.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1048" d="M638.71 358.1L641.57 358.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1049" d="M636.42 365.1L643.64 365.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/></svg>
+                                       </div>
+                                       <div class="threshold-text">Threshold</div>
+                                       <div class="threshold-number">${it.osaHighThreshold}</div>
+                                   </div>
+                                </div>
+                            </j:if>
+                        </span>
                         <div class="bar-title-container">
                             <div class="bar-title">High</div>
                             <div class="severity-icon">
@@ -637,7 +728,23 @@ body {
                     <li>
 
                         <div class="bar-count">${it.osaMediumCount}</div>
-                        <span class="bar-2" style="height:${it.osaMediumCount*100/(it.osaHighCount + it.osaMediumCount + it.osaLowCount)}%"></span>
+                        <span class="bar-2" style="height:${it.osaMediumCount*100/(it.osaHighCount + it.osaMediumCount + it.osaLowCount)}%">
+                            <j:if test="${it.OsaThresholdsEnabled &amp;&amp; it.osaMediumThreshold!=null &amp;&amp; it.osaMediumCount>it.osaMediumThreshold}">
+                                <div class="tooltip-container" style="bottom:${it.osaMediumThreshold*100/it.osaMediumCount}%">
+                                   <div class="threshold-line"></div>
+                                   <div class="threshold-tooltip osa-threshold-medium">
+                                       <div class="threshold-tooltip-background">
+                                           <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1041" version="1.1" width="124" height="25" viewBox="0 0 124 25"><title>Combined Shape</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1042"/><path id="SvgjsPath1043" d="M624.48 368.31C624.48 370.28000000000003 626.6800000000001 371.87 629.38 371.87L738 371.87C740.74 371.87 742.91 370.28000000000003 742.91 368.31L742.91 350.56C742.91 348.59 740.7099999999999 347 738 347L629.38 347C626.65 347 624.48 348.6 624.48 350.56L624.48 355.45L619 359.44L624.48 363.42Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-619,-347)"/></svg>
+                                       </div>
+                                       <div class="threshold-icon-white">
+                                           <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1044" version="1.1" width="9.400000000000091" height="12.399999999999977" viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold ICON</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1045"/><path id="SvgjsPath1046" d="M638 360L642.29 360L642.29 365.6L638 365.6Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1047" d="M638.71 355.1L641.57 355.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1048" d="M638.71 358.1L641.57 358.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1049" d="M636.42 365.1L643.64 365.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/></svg>
+                                       </div>
+                                       <div class="threshold-text">Threshold</div>
+                                       <div class="threshold-number">${it.osaMediumThreshold}</div>
+                                   </div>
+                                </div>
+                            </j:if>
+                        </span>
                         <div class="bar-title-container">
                             <div class="bar-title">Med</div>
                             <div class="severity-icon">
@@ -677,7 +784,23 @@ body {
                     </li>
                     <li>
                         <div class="bar-count">${it.osaLowCount}</div>
-                        <span class="bar-3" style="height:${it.osaLowCount*100/(it.osaHighCount + it.osaMediumCount + it.osaLowCount)}%"></span>
+                        <span class="bar-3" style="height:${it.osaLowCount*100/(it.osaHighCount + it.osaMediumCount + it.osaLowCount)}%">
+                            <j:if test="${it.OsaThresholdsEnabled &amp;&amp; it.osaLowThreshold!=null &amp;&amp; it.osaLowCount>it.osaLowThreshold}">
+                                <div class="tooltip-container" style="bottom:${it.osaLowThreshold*100/it.osaLowCount}%">
+                                   <div class="threshold-line"></div>
+                                   <div class="threshold-tooltip osa-threshold-low">
+                                       <div class="threshold-tooltip-background">
+                                           <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1041" version="1.1" width="124" height="25" viewBox="0 0 124 25"><title>Combined Shape</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1042"/><path id="SvgjsPath1043" d="M624.48 368.31C624.48 370.28000000000003 626.6800000000001 371.87 629.38 371.87L738 371.87C740.74 371.87 742.91 370.28000000000003 742.91 368.31L742.91 350.56C742.91 348.59 740.7099999999999 347 738 347L629.38 347C626.65 347 624.48 348.6 624.48 350.56L624.48 355.45L619 359.44L624.48 363.42Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-619,-347)"/></svg>
+                                       </div>
+                                       <div class="threshold-icon-white">
+                                           <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1044" version="1.1" width="9.400000000000091" height="12.399999999999977" viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold ICON</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1045"/><path id="SvgjsPath1046" d="M638 360L642.29 360L642.29 365.6L638 365.6Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1047" d="M638.71 355.1L641.57 355.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1048" d="M638.71 358.1L641.57 358.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1049" d="M636.42 365.1L643.64 365.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/></svg>
+                                       </div>
+                                       <div class="threshold-text">Threshold</div>
+                                       <div class="threshold-number">${it.osaLowThreshold}</div>
+                                   </div>
+                                </div>
+                            </j:if>
+                        </span>
                         <div class="bar-title-container">
                             <div class="bar-title">Low</div>
                             <div class="severity-icon">
