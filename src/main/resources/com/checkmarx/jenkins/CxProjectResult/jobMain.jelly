@@ -117,9 +117,6 @@ tr.cxsast {
   font-size: 16px;
   line-height: 16px;
   letter-spacing: -0.53px;
-  text-decoration: underline;
-  color: #0909fe;
-  font-weight: bold;
 }
 .download-detailed-report {
   color: #9b9b9b;
