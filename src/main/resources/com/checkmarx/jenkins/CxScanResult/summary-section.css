@@ -65,6 +65,25 @@ tr.cxsast {
 }
 .graph {
   width: 709px;
+  position: relative;
+}
+.threshold-exceeded-text {
+  color: #da2945;
+}
+.threshold-compliance-text {
+  color: #21bf3f;
+}
+.threshold-exceeded,
+.threshold-compliance {
+  display: inline-flex;
+  font-size: 14px;
+  position: absolute;
+  right: 0;
+}
+.threshold-exceeded-icon,
+.threshold-compliance-icon {
+  margin-right: 6px;
+  line-height: 28px;
 }
 .detailed-report {
   margin-top: 24px;
@@ -189,15 +208,10 @@ body {
   font-size: 16px;
   letter-spacing: -0.53px;
 }
-.threshold-tooltip-background {
-  position: absolute;
-  display: inline-flex;
-}
 .threshold-icon-white {
   position: relative;
   top: 2px;
   display: inline-block;
-  padding-left: 16px;
   vertical-align: top;
 }
 .threshold-text {
@@ -227,4 +241,21 @@ body {
   width: 53px;
   border-bottom: dashed white 1px;
   padding-right: 3px;
+}
+.threshold-tooltip-background {
+  position: relative;
+  padding: 0 12px;
+  margin: 0;
+  margin-left: 4px;
+  background: #373050;
+  border-radius: 5px;
+}
+.threshold-tooltip-background::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  left: -5px;
+  border: 5px solid transparent;
+  border-right-color: #373050;
 }
