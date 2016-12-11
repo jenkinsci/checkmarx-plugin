@@ -595,6 +595,7 @@ public class CxScanBuilder extends Builder {
             html = IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream("com/checkmarx/jenkins/CxScanResult/summary.html"));
 
             html = html.replace("#reportUrl#", linkToResults)
+                    .replace("#projectName#", StringUtils.defaultString(projectName))
                     .replace("#highResults#", Integer.toString(cxScanResult.getHighCount()))
                     .replace("#highResultsHeight#", formatHtmlResultsHeight(cxScanResult.getHighCount(), resultsSum))
                     .replace("#mediumResults#", Integer.toString(cxScanResult.getMediumCount()))
@@ -633,8 +634,8 @@ public class CxScanBuilder extends Builder {
                 String linkToOsaPDF = Jenkins.getInstance().getRootUrl() + build.getUrl() + "checkmarx/osaPdfReport";
                 String linkToOsaHtml = Jenkins.getInstance().getRootUrl() + build.getUrl() + "checkmarx/osaHtmlReport";
 
-                html = html.replace("#osaPdfeportUrl#", linkToOsaPDF)
-                        .replace("#osaHtmlReportUrl", linkToOsaHtml)
+                html = html.replace("#osaPdfReportUrl#", linkToOsaPDF)
+                        .replace("#osaHtmlReportUrl#", linkToOsaHtml)
                         .replace("#osaHighResults#", Integer.toString(cxScanResult.getOsaHighCount()))
                         .replace("#osaHighResultsHeight#", formatHtmlResultsHeight(cxScanResult.getOsaHighCount(), osaResultsSum))
                         .replace("#osaMediumResults#", Integer.toString(cxScanResult.getOsaMediumCount()))
