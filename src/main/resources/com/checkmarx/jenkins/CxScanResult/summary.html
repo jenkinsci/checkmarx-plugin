@@ -7,6 +7,16 @@
 <body>
 <style>
 
+    .cx-title {
+        font-size: 24px;
+        font-weight: 500;
+        display: inline-flex;
+        padding: 10px 0;
+        width: 100%;
+        border-bottom: solid 2px #d5d5d5;
+        color: #373050;
+    }
+
     .summary-section {
         width: 100%;
         font-family: 'Roboto', sans-serif;
@@ -43,7 +53,7 @@
 
     .title-column,
     .main-column {
-        padding: 3px;
+        padding: 44px 0;
         line-height: 25px;
         display: inline-block;
     }
@@ -53,7 +63,7 @@
         margin-bottom: 42px;
     }
 
-    .title-column {
+    .title-column, .cx-title .cx {
         margin-right: 10px;
         vertical-align: top;
         height: 100%;
@@ -323,8 +333,17 @@
         padding-right: 3px;
     }
 
+    .osa-downloads a, .sast-downloads a {
+        color:black;
+        text-decoration: none;
+    }
+
 </style>
 
+<div class="cx-title">
+    <div class="cx">Checkmarx</div>
+    <div class="project-name">#Project name#</div>
+</div>
 
 <table class="summary-section">
     <tr class="summary-table-row cxsast">
