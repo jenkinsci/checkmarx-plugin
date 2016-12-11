@@ -40,7 +40,7 @@ public class ScanClient implements Closeable {
     public ScanClient(String serverUri, AuthenticationRequest authenticationRequest) {
         this.authenticationRequest = authenticationRequest;
         client = ClientBuilder.newBuilder().register(MultiPartFeature.class).build();
-        root = client.target(serverUri).path(ROOT_PATH);
+        root = client.target(serverUri.trim()).path(ROOT_PATH);
     }
 
     public URI createScan(CreateScanRequest request) throws IOException {
