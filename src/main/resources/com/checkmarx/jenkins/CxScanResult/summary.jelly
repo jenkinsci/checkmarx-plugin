@@ -433,7 +433,7 @@ body {
                         <div class="bar-count">${it.highCount}</div>
                         <span class="bar-1" style="height:${it.highCount*100/(it.highCount + it.mediumCount + it.lowCount)}%">
                           <j:if test="${it.ThresholdsEnabled &amp;&amp; it.highThreshold!=null &amp;&amp; it.highCount>it.highThreshold}">
-                                <div class="tooltip-container" style="bottom:calc(100% - 1px)">
+                                <div class="tooltip-container" style="bottom:calc(${it.highThreshold*100/it.highCount}% - 1px)">
                                    <div class="threshold-line"></div>
                                    <div class="threshold-tooltip">
                                        <div class="threshold-tooltip-background">
@@ -490,7 +490,7 @@ body {
                         <span class="bar-2" style="height:${it.mediumCount*100/(it.highCount + it.mediumCount + it.lowCount)}%">
                             <j:if test="${it.ThresholdsEnabled &amp;&amp; it.mediumThreshold!=null &amp;&amp; it.mediumCount>it.mediumThreshold}">
 
-                               <div class="tooltip-container" style="bottom:calc(100% - 1px)">
+                               <div class="tooltip-container" style="bottom:calc(${it.mediumThreshold*100/it.mediumCount}% - 1px)">
                                  <div class="threshold-line"></div>
                                  <div class="threshold-tooltip">
                                      <div class="threshold-tooltip-background">
@@ -546,7 +546,7 @@ body {
                         <div class="bar-count">${it.lowCount}</div>
                         <span class="bar-3" style="height:${it.lowCount*100/(it.highCount + it.mediumCount + it.lowCount)}%">
                           <j:if test="${it.ThresholdsEnabled &amp;&amp; it.lowThreshold!=null &amp;&amp; it.lowCount>it.lowThreshold}">
-                               <div class="tooltip-container" style="bottom:calc(100% - 1px)">
+                               <div class="tooltip-container" style="bottom:calc(${it.lowThreshold*100/it.lowCount}% - 1px)">
                                  <div class="threshold-line"></div>
                                  <div class="threshold-tooltip">
                                      <div class="threshold-tooltip-background">
@@ -789,7 +789,7 @@ body {
                         <div class="bar-count">${it.osaHighCount}</div>
                         <span class="bar-1" style="height:${it.osaHighCount*100/(it.osaHighCount + it.osaMediumCount + it.osaLowCount)}%">
                             <j:if test="${it.OsaThresholdsEnabled &amp;&amp; it.osaHighThreshold!=null &amp;&amp; it.osaHighCount>it.osaHighThreshold}">
-                                <div class="tooltip-container" style="bottom:calc(100% - 1px)">
+                                <div class="tooltip-container" style="bottom:calc(${it.osaHighThreshold*100/it.osaHighCount}% - 1px)">
                                    <div class="threshold-line"></div>
                                    <div class="threshold-tooltip">
                                        <div class="threshold-tooltip-background">
@@ -845,7 +845,7 @@ body {
                         <div class="bar-count">${it.osaMediumCount}</div>
                         <span class="bar-2" style="height:${it.osaMediumCount*100/(it.osaHighCount + it.osaMediumCount + it.osaLowCount)}%">
                             <j:if test="${it.OsaThresholdsEnabled &amp;&amp; it.osaMediumThreshold!=null &amp;&amp; it.osaMediumCount>it.osaMediumThreshold}">
-                                <div class="tooltip-container" style="bottom:calc(100% - 1px)">
+                                <div class="tooltip-container" style="bottom:calc(${it.osaMediumThreshold*100/it.osaMediumCount}% - 1px)">
                                    <div class="threshold-line"></div>
                                    <div class="threshold-tooltip">
                                        <div class="threshold-tooltip-background">
@@ -900,7 +900,7 @@ body {
                         <div class="bar-count">${it.osaLowCount}</div>
                         <span class="bar-3" style="height:${it.osaLowCount*100/(it.osaHighCount + it.osaMediumCount + it.osaLowCount)}%">
                             <j:if test="${it.OsaThresholdsEnabled &amp;&amp; it.osaLowThreshold!=null &amp;&amp; it.osaLowCount>it.osaLowThreshold}">
-                                <div class="tooltip-container" style="bottom:calc(100% - 1px)">
+                                <div class="tooltip-container" style="bottom:calc(${it.osaLowThreshold*100/it.osaLowCount}% - 1px)">
                                     <div class="threshold-line"></div>
                                     <div class="threshold-tooltip">
                                         <div class="threshold-tooltip-background">
