@@ -2,6 +2,8 @@ package com.checkmarx.jenkins.web.client;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
 
@@ -11,7 +13,7 @@ import javax.ws.rs.client.*;
 import javax.ws.rs.core.*;
 import com.checkmarx.jenkins.web.model.*;
 import org.glassfish.jersey.media.multipart.*;
-import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
+import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
 import org.jetbrains.annotations.NotNull;
 
 
@@ -41,7 +43,7 @@ public class ScanClient implements Closeable {
         root = client.target(serverUri).path(ROOT_PATH);
     }
 
-    public URI createScan(CreateScanRequest request) {
+    public URI createScan(CreateScanRequest request) throws IOException {
         final MultiPart multipart = createScanMultiPartRequest(request);
         Map<String, NewCookie> cookies = authenticate();
         Invocation invocation = root.path(ANALYZE_PATH)
@@ -77,11 +79,14 @@ public class ScanClient implements Closeable {
 
     }
 
-    private MultiPart createScanMultiPartRequest(CreateScanRequest request) {
-        final FileDataBodyPart filePart = new FileDataBodyPart (OSA_ZIPPED_FILE_KEY_NAME, getFileFromRequest(request));
+    private MultiPart createScanMultiPartRequest(CreateScanRequest request) throws IOException {
+        InputStream read = request.getZipFile().read();
+
+        final StreamDataBodyPart filePart = new StreamDataBodyPart (OSA_ZIPPED_FILE_KEY_NAME, read);
         return new FormDataMultiPart()
-                .bodyPart(new FormDataBodyPart("origin", Integer.toString(CreateScanRequest.JENKINS_ORIGIN)))
-                .bodyPart(filePart);
+                    .bodyPart(new FormDataBodyPart("origin", Integer.toString(CreateScanRequest.JENKINS_ORIGIN)))
+                    .bodyPart(filePart);
+
     }
 
     @NotNull
