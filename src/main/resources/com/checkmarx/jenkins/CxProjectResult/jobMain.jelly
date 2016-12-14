@@ -207,7 +207,7 @@ body {
 .libraries {
   display: inline-flex;
   text-align: left;
-  max-width: 709px;
+  //max-width: 709px;
   width: 100%;
 }
 .libraries-vulnerable,
