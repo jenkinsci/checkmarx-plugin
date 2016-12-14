@@ -1,12 +1,12 @@
 .cx-title.job-main-title {
-  width: calc(51%);
+  width: calc(100% - 1em - 48px);
 }
 .cx-title {
   font-size: 24px;
   font-weight: 500;
   display: inline-block;
   padding: 10px 0;
-  width: calc(52%);
+  width: calc(100% - 48px);
   border-bottom: solid 2px #d5d5d5;
   color: #373050;
 }
@@ -187,7 +187,7 @@ body {
   background-color: #efd412;
 }
 .chart li span {
-  width: 53px;
+  max-width: 53px;
 }
 .download-cx-report {
   font-size: 16px;
@@ -253,11 +253,13 @@ body {
 .threshold-tooltip {
   text-align: right;
   transform: translate(0, 50%);
+  flex-shrink: 0;
 }
 .threshold-line {
   width: 53px;
   border-bottom: dashed white 1px;
   padding-right: 3px;
+  flex-shrink: 0;
 }
 .threshold-tooltip-background {
   position: relative;
