@@ -40,15 +40,17 @@ tr.cxsast {
   display: inline-block;
 }
 .main-column {
+  text-align: center;
   padding-bottom: 45px;
   margin-bottom: 42px;
+  width: 73%;
 }
 .title-column {
   margin-right: 10px;
   vertical-align: top;
   height: 100%;
   letter-spacing: -0.8px;
-  width: 222px;
+  width: 20%;
   color: #373050;
 }
 .summary-title {
@@ -68,13 +70,14 @@ tr.cxsast {
   background-color: #979797;
 }
 .graph-title {
-  margin-bottom: 38px;
   font-weight: 500;
   font-size: 16px;
+  display: inline-block;
 }
 .graph {
-  width: 709px;
   position: relative;
+  max-width: 709px;
+  text-align: left;
 }
 .threshold-exceeded-text {
   color: #da2945;
@@ -123,9 +126,10 @@ body {
 .chart {
   display: table;
   table-layout: fixed;
-  width: 709px;
+  max-width: 709px;
+  width: 100%;
   height: 288px;
-  margin: 0 auto;
+  margin: 38px auto 0;
   padding: 0;
   background-image: linear-gradient(to top, #d5d5d5, #ffffff 2%);
   background-size: 100% 70px;
@@ -192,6 +196,9 @@ body {
 }
 .libraries {
   display: inline-flex;
+  text-align: left;
+  max-width: 709px;
+  width: 100%;
 }
 .libraries-vulnerable,
 .libraries-ok {
@@ -242,7 +249,6 @@ body {
   display: inline-flex;
 }
 .threshold-tooltip {
-  padding-right: 15px;
   text-align: right;
   transform: translate(0, 50%);
 }
@@ -267,4 +273,20 @@ body {
   left: -5px;
   border: 5px solid transparent;
   border-right-color: #373050;
+}
+.threshold-exceeded,
+.threshold-compliance {
+  font-size: 15px;
+  font-weight: bold;
+}
+.threshold-exceeded {
+  color: #d82743;
+}
+.threshold-compliance {
+  color: #20be3d;
+}
+.osa-downloads a,
+.sast-downloads a {
+  color: black;
+  text-decoration: none;
 }

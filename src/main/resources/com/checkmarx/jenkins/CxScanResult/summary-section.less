@@ -48,11 +48,12 @@ tr.cxsast {
   display: inline-block;
 }
 
-  .main-column {
-    //border-bottom: solid 2px #d5d5d5;
-    padding-bottom: 45px;
-    margin-bottom: 42px;
-  }
+.main-column {
+  text-align: center;
+  padding-bottom: 45px;
+  margin-bottom: 42px;
+  width: 73%;
+}
 
 
 .title-column {
@@ -60,7 +61,7 @@ tr.cxsast {
   vertical-align: top;
   height: 100%;
   letter-spacing: -0.8px;
-  width: 222px;
+  width: 20%;
   color: #373050;
 }
 
@@ -89,9 +90,10 @@ tr.cxsast {
 
 //Vulnerabilities Status
 .graph-title {
-  margin-bottom: 38px;
+  //margin-bottom: 38px;
   font-weight: 500;
   font-size: 16px;
+  display: inline-block;
 
 }
 
@@ -100,9 +102,11 @@ tr.cxsast {
 
 .graph {
   //height: @graph-height;
-  width: @graph-width;
+  //width: @graph-width;
   position: relative;
-
+  max-width: 709px;
+  //margin: auto;
+  text-align: left;
 }
 
 .threshold-exceeded-text {
@@ -159,11 +163,12 @@ body {
 .chart {
   display: table;
   table-layout: fixed;
+  max-width: 709px;
+  //min-width: 600px;
+  width: 100%;
 
-  //width:60%;
-  width: 709px;
   height: 288px;
-  margin: 0 auto;
+  margin: 38px auto 0;
   padding: 0;
 
   background-image: linear-gradient(to top, #d5d5d5, #fff 2%);
@@ -249,6 +254,9 @@ body {
 //osa libraries
 .libraries {
   display: inline-flex;
+  text-align: left;
+  max-width: 709px;
+  width: 100%;
 
   &-vulnerable, &-ok {
     width: 200px;
@@ -311,10 +319,11 @@ body {
 .tooltip-container {
   position: absolute;
   display: inline-flex;
+
 }
 
 .threshold-tooltip {
-  padding-right: 15px;
+  //padding-right: 15px;
   text-align: right;
   transform: translate(0, 50%);
 }
@@ -343,6 +352,25 @@ body {
     left: -5px;
     border: 5px solid transparent;
     border-right-color: #373050;
+  }
+}
+
+.threshold-exceeded, .threshold-compliance {
+  font-size: 15px;
+  font-weight: bold
+}
+
+.threshold-exceeded {
+  color: #d82743;
+}
+.threshold-compliance {
+  color: #20be3d;
+}
+
+.osa-downloads, .sast-downloads {
+  a {
+    color: black;
+    text-decoration: none;
   }
 }
 //@keyframes draw{

@@ -2,318 +2,313 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
-      <style>
+<style>
 
-.cx-title {
-    font-size: 24px;
-    font-weight: 500;
-    display: inline-block;
-    padding: 10px 0;
-    width: 100%;
-    border-bottom: solid 2px #d5d5d5;
-    color: #373050;
-}
+    .cx-title {
+      font-size: 24px;
+      font-weight: 500;
+      display: inline-block;
+      padding: 10px 0;
+      width: 100%;
+      border-bottom: solid 2px #d5d5d5;
+      color: #373050;
+    }
+    .summary-section {
+      width: 100%;
+      font-family: 'Roboto', sans-serif;
+    }
+    .summary-section td {
+      font-family: 'Roboto', sans-serif;
+    }
+    tr.summary-table-row {
+      white-space: nowrap;
+    }
+    table {
+      border-collapse: collapse;
+    }
+    table td,
+    table th {
+      border: solid transparent;
+    }
+    .top-padding td {
+      padding-top: 43px;
+    }
+    td {
+      border-color: transparent;
+    }
+    tr.cxsast {
+      border-bottom: solid 2px #d5d5d5;
+    }
+    .title-column,
+    .main-column {
+      padding: 44px 0;
+      line-height: 25px;
+      display: inline-block;
+    }
+    .main-column {
+      text-align: center;
+      padding-bottom: 45px;
+      margin-bottom: 42px;
+      width: 73%;
+    }
+    .title-column {
+      margin-right: 10px;
+      vertical-align: top;
+      height: 100%;
+      letter-spacing: -0.8px;
+      width: 20%;
+      color: #373050;
+    }
+    .summary-title {
+      padding-bottom: 21px;
+      border-bottom: solid #979797 1px;
+    }
+    .sum1 {
+      font-size: 24px;
+      font-weight: 500;
+    }
+    .sum2 {
+      font-size: 16px;
+    }
+    .sum-line1 {
+      width: 100%;
+      height: 1px;
+      background-color: #979797;
+    }
+    .graph-title {
+      font-weight: 500;
+      font-size: 16px;
+      display: inline-block;
+    }
+    .graph {
+      position: relative;
+      max-width: 709px;
+      //margin: auto;
+      text-align: left;
+    }
+    .threshold-exceeded-text {
+      color: #da2945;
+    }
+    .threshold-compliance-text {
+      color: #21bf3f;
+    }
+    .threshold-exceeded,
+    .threshold-compliance {
+      display: inline-flex;
+      font-size: 14px;
+      position: absolute;
+      right: 0;
+    }
+    .threshold-exceeded-icon,
+    .threshold-compliance-icon {
+      margin-right: 6px;
+      line-height: 28px;
+    }
+    .detailed-report {
+      margin-top: 24px;
+      display: block;
+    }
+    .detailed-report-ttl {
+      font-size: 16px;
+      line-height: 16px;
+      letter-spacing: -0.53px;
+    }
+    .download-detailed-report {
+      color: #9b9b9b;
+      font-size: 14px;
+      letter-spacing: -0.47px;
+    }
+    .download-icon,
+    .download-icon,
+    .download-txt {
+      display: inline-block;
+    }
+    .download-icon {
+      margin-right: 9px;
+    }
+    body {
+      font: 13px/1.3 'Lucida Grande', sans-serif;
+      color: #666;
+    }
+    .chart {
+      display: table;
+      table-layout: fixed;
+      max-width: 709px;
+      width: 100%;
+      height: 288px;
+      margin: 38px auto 0;
+      padding: 0;
+      background-image: linear-gradient(to top, #d5d5d5, #ffffff 2%);
+      background-size: 100% 70px;
+      background-position: left bottom;
+      border-bottom: solid #979797 2px;
+    }
+    .chart tr {
+      white-space: nowrap;
+    }
+    .chart li {
+      position: relative;
+      display: table-cell;
+      vertical-align: bottom;
+      height: 200px;
+    }
+    .chart span {
+      margin: auto;
+      display: block;
+      background: #d1ecfa;
+      animation: draw 1s ease-in-out;
+    }
+    .chart .bar-count {
+      text-align: center;
+      font-size: 14px;
+      letter-spacing: -0.47px;
+      line-height: 40px;
+    }
+    .chart .bar-title {
+      font-size: 16px;
+      padding: 0 18px;
+      color: #525055;
+    }
+    .chart .bar-title-container {
+      position: absolute;
+      padding-top: 21px;
+      display: inline-flex;
+      text-align: center;
+      word-wrap: break-word;
+      left: 50%;
+      transform: translate(-50%);
+    }
+    .chart .bar-1 {
+      position: relative;
+      background-color: #da2945;
+    }
+    .chart .bar-2 {
+      position: relative;
+      background-color: #ffb400;
+    }
+    .chart .bar-3 {
+      position: relative;
+      background-color: #efd412;
+    }
+    .chart li span {
+      width: 53px;
+    }
+    .download-cx-report {
+      font-size: 16px;
+      padding-bottom: 5px;
+    }
+    .pdf-report.download-icon,
+    .html-report.download-icon {
+      margin-right: 6px;
+    }
+    .libraries {
+      display: inline-flex;
+      text-align: left;
+      max-width: 709px;
+      width: 100%;
+    }
+    .libraries-vulnerable,
+    .libraries-ok {
+      width: 200px;
+      overflow: hidden;
+      margin-bottom: 47px;
+      margin-right: 122px;
+    }
+    .libraries-vulnerable-number,
+    .libraries-ok-number {
+      display: inline-block;
+      font-size: 28px;
+      letter-spacing: -0.93px;
+    }
+    .libraries-vulnerable-icon,
+    .libraries-ok-icon {
+      display: inline-block;
+      margin-right: 9px;
+    }
+    .libraries-vulnerable-text,
+    .libraries-ok-text {
+      white-space: normal;
+      font-size: 16px;
+      letter-spacing: -0.53px;
+    }
+    .threshold-icon-white {
+      position: relative;
+      top: 2px;
+      display: inline-block;
+      vertical-align: top;
+    }
+    .threshold-text {
+      position: relative;
+      color: white;
+      display: inline-block;
+      padding-right: 6px;
+      padding-left: 7px;
+      vertical-align: top;
+    }
+    .threshold-number {
+      position: relative;
+      color: white;
+      display: inline-block;
+      vertical-align: top;
+    }
+    .tooltip-container {
+      position: absolute;
+      display: inline-flex;
+    }
+    .threshold-tooltip {
+      text-align: right;
+      transform: translate(0, 50%);
+    }
+    .threshold-line {
+      width: 53px;
+      border-bottom: dashed white 1px;
+      padding-right: 3px;
+    }
+    .threshold-tooltip-background {
+      position: relative;
+      padding: 0 12px;
+      margin: 0;
+      margin-left: 4px;
+      background: #373050;
+      border-radius: 5px;
+    }
+    .threshold-tooltip-background::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      left: -5px;
+      border: 5px solid transparent;
+      border-right-color: #373050;
+    }
+    .threshold-exceeded,
+    .threshold-compliance {
+      font-size: 15px;
+      font-weight: bold;
+    }
+    .threshold-exceeded {
+      color: #d82743;
+    }
+    .threshold-compliance {
+      color: #20be3d;
+    }
+    .osa-downloads a,
+    .sast-downloads a {
+      color: black;
+      text-decoration: none;
+    }
 
-.summary-section {
-  width: 100%;
-  font-family: 'Roboto', sans-serif;
-}
-.summary-section td {
-  font-family: 'Roboto', sans-serif;
-}
-tr.summary-table-row {
-  white-space: nowrap;
-}
-table {
-  border-collapse: collapse;
-}
-table td,
-table th {
-  border: solid transparent;
-}
-.top-padding td {
-  padding-top: 43px;
-}
-td {
-  border-color: transparent;
-}
-tr.cxsast {
-  border-bottom: solid 2px #d5d5d5;
-}
-.title-column,
-.main-column {
-  padding: 44px 0;
-  line-height: 25px;
-  display: inline-block;
-}
-.main-column {
-  padding-bottom: 45px;
-  margin-bottom: 42px;
-}
-.title-column {
-  margin-right: 10px;
-  vertical-align: top;
-  height: 100%;
-  letter-spacing: -0.8px;
-  width: 222px;
-  color: #373050;
-}
-.summary-title {
-  padding-bottom: 21px;
-  border-bottom: solid #979797 1px;
-}
-.sum1 {
-  font-size: 24px;
-  font-weight: 500;
-}
-.sum2 {
-  font-size: 16px;
-}
-.sum-line1 {
-  width: 100%;
-  height: 1px;
-  background-color: #979797;
-}
-.graph-title {
-  margin-bottom: 38px;
-  font-weight: 500;
-  font-size: 16px;
-}
 
-.threshold-exceeded {
-  margin-left: 84%;
-  font-size: 15px;
-  color: #d82743;
-  font-weight: bold
-}
-.threshold-compliance {
-  margin-left: 84%;
-  font-size: 15px;
-  color: #20be3d;
-  font-weight: bold
-}
-
-.graph {
-  width: 709px;
-  position: relative;
-}
-
-.threshold-exceeded-text {
-  color: #da2945;
-}
-
-.threshold-compliance-text {
-  color: #21bf3f;
-}
-
-.threshold-exceeded,
-.threshold-compliance {
-  display: inline-flex;
-  font-size: 14px;
-  position: absolute;
-  right: 0;
-}
-.threshold-exceeded-icon,
-.threshold-compliance-icon {
-  margin-right: 6px;
-  line-height: 28px;
-}
-
-.detailed-report {
-  margin-top: 24px;
-  display: block;
-}
-.detailed-report-ttl {
-  font-size: 16px;
-  line-height: 16px;
-  letter-spacing: -0.53px;
-}
-.download-detailed-report {
-  color: #9b9b9b;
-  font-size: 14px;
-  letter-spacing: -0.47px;
-}
-.download-icon,
-.download-icon,
-.download-txt {
-  display: inline-block;
-}
-.download-icon {
-  margin-right: 9px;
-}
-body {
-  font: 13px/1.3 'Lucida Grande', sans-serif;
-  color: #666;
-}
-.chart {
-  display: table;
-  table-layout: fixed;
-  width: 709px;
-  height: 288px;
-  margin: 0 auto;
-  padding: 0;
-  background-image: linear-gradient(to top, #d5d5d5, #ffffff 2%);
-  background-size: 100% 70px;
-  background-position: left bottom;
-  border-bottom: solid #979797 2px;
-}
-.chart tr {
-  white-space: nowrap;
-}
-.chart li {
-  position: relative;
-  display: table-cell;
-  vertical-align: bottom;
-  height: 200px;
-}
-.chart span {
-  margin: auto;
-  display: block;
-  background: #d1ecfa;
-  animation: draw 1s ease-in-out;
-}
-.chart .bar-count {
-  text-align: center;
-  font-size: 14px;
-  letter-spacing: -0.47px;
-  line-height: 40px;
-}
-.chart .bar-title {
-  font-size: 16px;
-  padding: 0 18px;
-  color: #525055;
-}
-.chart .bar-title-container {
-  position: absolute;
-  padding-top: 21px;
-  display: inline-flex;
-  text-align: center;
-  word-wrap: break-word;
-  left: 50%;
-  transform: translate(-50%);
-}
-.chart .bar-1 {
-  position: relative;
-  background-color: #da2945;
-}
-.chart .bar-2 {
-  position: relative;
-  background-color: #ffb400;
-}
-.chart .bar-3 {
-  position: relative;
-  background-color: #efd412;
-}
-.chart li span {
-  width: 53px;
-}
-.download-cx-report {
-  font-size: 16px;
-  padding-bottom: 5px;
-}
-.pdf-report.download-icon,
-.html-report.download-icon {
-  margin-right: 6px;
-}
-.libraries {
-  display: inline-flex;
-}
-.libraries-vulnerable,
-.libraries-ok {
-  width: 200px;
-  overflow: hidden;
-
-  margin-bottom: 47px;
-  margin-right: 122px;
-}
-.libraries-vulnerable-number,
-.libraries-ok-number {
-  display: inline-block;
-  font-size: 28px;
-  letter-spacing: -0.93px;
-}
-.libraries-vulnerable-icon,
-.libraries-ok-icon {
-  display: inline-block;
-  margin-right: 9px;
-}
-.libraries-vulnerable-text,
-.libraries-ok-text {
-  white-space: normal;
-  font-size: 16px;
-  letter-spacing: -0.53px;
-}
-
-.threshold-icon-white {
-  position: relative;
-  top: 2px;
-  display: inline-block;
-  //padding-left: 16px;
-  vertical-align: top;
-}
-.threshold-text {
-  position: relative;
-  color: white;
-  display: inline-block;
-  padding-right: 6px;
-  padding-left: 7px;
-  vertical-align: top;
-}
-
-.threshold-number {
-  position: relative;
-  color: white;
-  display: inline-block;
-  vertical-align: top;
-}
-
-.tooltip-container {
-  position: absolute;
-  display: inline-flex;
-}
-
-.threshold-tooltip {
-  padding-right: 15px;
-  text-align: right;
-  transform: translate(0, 50%);
-}
-
-.threshold-line {
-  width: 53px;
-  border-bottom: dashed white 1px;
-  padding-right: 3px;
-}
-
-.threshold-tooltip-background {
-  position: relative;
-  padding: 0 12px;
-  margin: 0;
-  margin-left: 4px;
-  background: #373050;
-  border-radius: 5px;
-  //transform: translate(0%, 50%);
-  }
-
-  .threshold-tooltip-background::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    left: -5px;
-    border: 5px solid transparent;
-    border-right-color: #373050;
-  }
-
-         </style>
+</style>
 
 
 
 
-    <j:if test="${it.showResults}">
-        <t:summary icon="/plugin/checkmarx/CxIcon48x48.png">
-        <div class="cx-title">Checkmarx</div>
+<j:if test="${it.showResults}">
+    <t:summary icon="/plugin/checkmarx/CxIcon48x48.png">
+    <div class="cx-title">Checkmarx</div>
 
-            <j:if test="${it.resultIsValid}">
+        <j:if test="${it.resultIsValid}">
 
 <table class="summary-section">
     <tr class="summary-table-row cxsast">
@@ -323,7 +318,7 @@ body {
                 <div class="sum2">Summary</div>
             </div>
 
-            <div class="detailed-report">
+            <div class="detailed-report sast-downloads">
                 <div class="download-txt">
                     <div class="download-cx-report">Checkmarx Report</div>
                         <j:if test="${it.pdfReportReady}">
@@ -380,50 +375,51 @@ body {
         </td>
         <td class="main-column">
             <div class="graph">
-
-            <j:if test="${it.ThresholdsEnabled}">
-                <j:choose>
-                   <j:when test="${it.ThresholdExceeded}">
-                     <div class="threshold-exceeded">
-                         <div class="threshold-exceeded-icon">
-                             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1015" version="1.1"
-                                  width="9.400000000000091" height="12.399999999999977" viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold ICON</title>
-                                 <desc>Created with Avocode.</desc>
-                                 <defs id="SvgjsDefs1016"/>
-                                 <path id="SvgjsPath1017" d="M1052 190L1056.29 190L1056.29 195.6L1052 195.6Z " fill="#da2945" fill-opacity="1"
-                                       transform="matrix(1,0,0,1,-1049.3,-184.3)"/>
-                                 <path id="SvgjsPath1018" d="M1052.71 185.1L1055.57 185.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                       stroke-linecap="square" stroke-opacity="1" stroke="#da2945" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-1049.3,-184.3)"/>
-                                 <path id="SvgjsPath1019" d="M1052.71 188.1L1055.57 188.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                       stroke-linecap="square" stroke-opacity="1" stroke="#da2945" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-1049.3,-184.3)"/>
-                                 <path id="SvgjsPath1020" d="M1050.42 195.1L1057.64 195.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                       stroke-linecap="square" stroke-opacity="1" stroke="#da2945" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-1049.3,-184.3)"/>
-                             </svg>
-                         </div>
-                         <div class="threshold-exceeded-text">
-                             Threshold Exceeded
-                         </div>
-                     </div>
-                   </j:when>
-                   <j:otherwise>
-                    <div class="threshold-compliance">
-                        <div class="threshold-compliance-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1050" version="1.1" width="13.99264158479491" height="13" viewBox="0 0 13.99264158479491 13">
-                                <title>Icon</title>
-                                <desc>Created with Avocode.</desc>
-                                <defs id="SvgjsDefs1051">
-                                <clipPath id="SvgjsClipPath1056">
-                                <path id="SvgjsPath1055" d="M1035.00736 793.9841L1035.00736 784.01589L1046.9926400000002 784.01589L1046.9926400000002 793.9841ZM1038.67 790.72L1036.68 788.72L1036 789.4L1038.67 792.0699999999999L1045.21 785.67L1044.54 785Z " fill="#ffffff"/>
-                                </clipPath></defs><path id="SvgjsPath1052" d="M1033 789.5C1033 785.91015 1035.91015 783 1039.5 783C1043.08985 783 1046 785.91015 1046 789.5C1046 793.08985 1043.08985 796 1039.5 796C1035.91015 796 1033 793.08985 1033 789.5Z " fill="#21bf3f" fill-opacity="1" transform="matrix(1,0,0,1,-1033,-783)"/><path id="SvgjsPath1053" d="M1038.67 790.72L1036.68 788.72L1036 789.4L1038.67 792.0699999999999L1045.21 785.67L1044.54 785Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-1033,-783)"/><path id="SvgjsPath1054" d="M1038.67 790.72L1036.68 788.72L1036 789.4L1038.67 792.0699999999999L1045.21 785.67L1044.54 785Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" clip-path="url(&quot;#SvgjsClipPath1056&quot;)" transform="matrix(1,0,0,1,-1033,-783)"/>
-                            </svg>
-                        </div>
-                        <div class="threshold-compliance-text">
-                            Threshold Compliance
-                        </div>
-                    </div>
-                   </j:otherwise>
-                </j:choose>
-            </j:if>
+                <div class="graph-top">
+                    <j:if test="${it.ThresholdsEnabled}">
+                        <j:choose>
+                           <j:when test="${it.ThresholdExceeded}">
+                             <div class="threshold-exceeded">
+                                 <div class="threshold-exceeded-icon">
+                                     <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1015" version="1.1"
+                                          width="9.400000000000091" height="12.399999999999977" viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold ICON</title>
+                                         <desc>Created with Avocode.</desc>
+                                         <defs id="SvgjsDefs1016"/>
+                                         <path id="SvgjsPath1017" d="M1052 190L1056.29 190L1056.29 195.6L1052 195.6Z " fill="#da2945" fill-opacity="1"
+                                               transform="matrix(1,0,0,1,-1049.3,-184.3)"/>
+                                         <path id="SvgjsPath1018" d="M1052.71 185.1L1055.57 185.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
+                                               stroke-linecap="square" stroke-opacity="1" stroke="#da2945" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-1049.3,-184.3)"/>
+                                         <path id="SvgjsPath1019" d="M1052.71 188.1L1055.57 188.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
+                                               stroke-linecap="square" stroke-opacity="1" stroke="#da2945" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-1049.3,-184.3)"/>
+                                         <path id="SvgjsPath1020" d="M1050.42 195.1L1057.64 195.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
+                                               stroke-linecap="square" stroke-opacity="1" stroke="#da2945" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-1049.3,-184.3)"/>
+                                     </svg>
+                                 </div>
+                                 <div class="threshold-exceeded-text">
+                                     Threshold Exceeded
+                                 </div>
+                             </div>
+                           </j:when>
+                           <j:otherwise>
+                            <div class="threshold-compliance">
+                                <div class="threshold-compliance-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1050" version="1.1" width="13.99264158479491" height="13" viewBox="0 0 13.99264158479491 13">
+                                        <title>Icon</title>
+                                        <desc>Created with Avocode.</desc>
+                                        <defs id="SvgjsDefs1051">
+                                        <clipPath id="SvgjsClipPath1056">
+                                        <path id="SvgjsPath1055" d="M1035.00736 793.9841L1035.00736 784.01589L1046.9926400000002 784.01589L1046.9926400000002 793.9841ZM1038.67 790.72L1036.68 788.72L1036 789.4L1038.67 792.0699999999999L1045.21 785.67L1044.54 785Z " fill="#ffffff"/>
+                                        </clipPath></defs><path id="SvgjsPath1052" d="M1033 789.5C1033 785.91015 1035.91015 783 1039.5 783C1043.08985 783 1046 785.91015 1046 789.5C1046 793.08985 1043.08985 796 1039.5 796C1035.91015 796 1033 793.08985 1033 789.5Z " fill="#21bf3f" fill-opacity="1" transform="matrix(1,0,0,1,-1033,-783)"/><path id="SvgjsPath1053" d="M1038.67 790.72L1036.68 788.72L1036 789.4L1038.67 792.0699999999999L1045.21 785.67L1044.54 785Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-1033,-783)"/><path id="SvgjsPath1054" d="M1038.67 790.72L1036.68 788.72L1036 789.4L1038.67 792.0699999999999L1045.21 785.67L1044.54 785Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" clip-path="url(&quot;#SvgjsClipPath1056&quot;)" transform="matrix(1,0,0,1,-1033,-783)"/>
+                                    </svg>
+                                </div>
+                                <div class="threshold-compliance-text">
+                                    Threshold Compliance
+                                </div>
+                            </div>
+                           </j:otherwise>
+                        </j:choose>
+                    </j:if>
+                </div>
 
 
                 <div class="graph-title">Vulnerabilities Status</div>
@@ -617,7 +613,7 @@ body {
             <div class="detailed-report" href="">
                 <div class="download-cx-report">Checkmarx Report</div>
 
-                <div class="osa-downloads sast-downloads">
+                <div class="osa-downloads">
                     <div>
                         <a class="pdf-report" href="${app.rootUrl}${it.owner.url}${it.urlName}/osaPdfReport">
                             <div class="pdf-report download-icon">
