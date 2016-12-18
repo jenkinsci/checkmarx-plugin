@@ -49,7 +49,7 @@ public class CxWebService {
 	private static final String CXWSRESOLVER_PATH = "/cxwebinterface/cxwsresolver.asmx";
 	private static final int LCID = 1033; // English
 	private static final int MILISECONDS_IN_MINUTE = 1000 * 60;
-	private static final int XML_WRITING_BUFFER_IN_BYTES = 52428800; //50 MB
+	private static final int XML_WRITING_BUFFER_IN_BYTES = 52428800; // 50 MB
 
 	private final Logger logger;
 	private String sessionId;
