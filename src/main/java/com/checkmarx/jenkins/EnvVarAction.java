@@ -30,7 +30,9 @@ public class EnvVarAction implements EnvironmentContributingAction {
     }
 
     public void buildEnvVars(AbstractBuild<?, ?> build, EnvVars env) {
-        env.putAll(data);
+        if (data != null) {
+            env.putAll(data);
+        }
     }
 
     public String getIconFileName() {
