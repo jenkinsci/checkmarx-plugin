@@ -1,37 +1,18 @@
 package com.checkmarx.jenkins;
 
-import static ch.lambdaj.Lambda.filter;
-import static ch.lambdaj.Lambda.having;
-import static ch.lambdaj.Lambda.on;
-
+import com.checkmarx.jenkins.xmlresponseparser.CreateAndRunProjectXmlResponseParser;
+import com.checkmarx.jenkins.xmlresponseparser.RunIncrementalScanXmlResponseParser;
+import com.checkmarx.jenkins.xmlresponseparser.RunScanAndAddToProjectXmlResponseParser;
+import com.checkmarx.jenkins.xmlresponseparser.XmlResponseParser;
 import com.checkmarx.ws.CxJenkinsWebService.*;
+import com.checkmarx.ws.CxWSResolver.CxClientType;
+import com.checkmarx.ws.CxWSResolver.CxWSResolver;
+import com.checkmarx.ws.CxWSResolver.CxWSResolverSoap;
+import com.checkmarx.ws.CxWSResolver.CxWSResponseDiscovery;
 import hudson.AbortException;
 import hudson.FilePath;
-import hudson.util.IOUtils;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpRetryException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.ws.BindingProvider;
-import javax.xml.ws.WebServiceException;
-
 import jenkins.model.Jenkins;
-
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -39,14 +20,21 @@ import org.hamcrest.Matchers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.checkmarx.jenkins.xmlresponseparser.CreateAndRunProjectXmlResponseParser;
-import com.checkmarx.jenkins.xmlresponseparser.RunIncrementalScanXmlResponseParser;
-import com.checkmarx.jenkins.xmlresponseparser.RunScanAndAddToProjectXmlResponseParser;
-import com.checkmarx.jenkins.xmlresponseparser.XmlResponseParser;
-import com.checkmarx.ws.CxWSResolver.CxClientType;
-import com.checkmarx.ws.CxWSResolver.CxWSResolver;
-import com.checkmarx.ws.CxWSResolver.CxWSResolverSoap;
-import com.checkmarx.ws.CxWSResolver.CxWSResponseDiscovery;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.WebServiceException;
+import java.io.*;
+import java.net.HttpRetryException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
+
+import static ch.lambdaj.Lambda.*;
 
 /**
  * Wraps all Web services invocations
@@ -61,6 +49,7 @@ public class CxWebService {
 	private static final String CXWSRESOLVER_PATH = "/cxwebinterface/cxwsresolver.asmx";
 	private static final int LCID = 1033; // English
 	private static final int MILISECONDS_IN_MINUTE = 1000 * 60;
+	private static final int XML_WRITING_BUFFER_IN_BYTES = 52428800; // 50 MB
 
 	private final Logger logger;
 	private String sessionId;
@@ -384,7 +373,9 @@ public class CxWebService {
 		// Save results on disk
 		try {
 			FileOutputStream fileOutputStream = new FileOutputStream(reportFile);
-			IOUtils.write(cxWSResponseScanResults.getScanResults(), fileOutputStream);
+			ByteArrayInputStream scanResults = new ByteArrayInputStream(cxWSResponseScanResults.getScanResults());
+			byte[] buffer = new byte[XML_WRITING_BUFFER_IN_BYTES];
+			IOUtils.copyLarge(scanResults, fileOutputStream, buffer);
 			fileOutputStream.close();
 
 		} catch (IOException e) {
