@@ -4,8 +4,12 @@
 
 //sast
 var pdfReportReady = true;
+var sastPdfPath = "/dor/bo/rega";
+var sastHtmlPath = "/haha/yissik";
+var osaPdfPath = "/zepointer/mami";
+var osaHtmlPath = "bati/laavod";
+
 var ThresholdsEnabled = true;
-//var osaThresholdExceeded = false; todo - don't need this from server - i do the calc
 var highThreshold = 25;
 var medThreshold = 80;
 var lowThreshold = 10;
@@ -14,16 +18,18 @@ var medCount = 100;
 var lowCount = 30;
 
 //osa
-
 var osaEnabled = true;
+var vulnerableLibraries = 8;
+var okLibraries = 28;
 var osaThresholdsEnabled = true;
-//var OsaThresholdExceeded = false; todo - don't need this from server - i do the calc
 var osaHighThreshold = 1125;
 var osaMedThreshold = 10;
 var osaLowThreshold = 1;
 var osaHighCount = 150;
 var osaMedCount = 30;
 var osaLowCount = 60;
+
+
 
 window.onload = function() {
 
@@ -39,12 +45,20 @@ window.onload = function() {
     document.getElementById("bar-med").setAttribute("style", "height:" + medCount*100/(highCount + medCount + lowCount) + "%");
     document.getElementById("bar-low").setAttribute("style", "height:" + lowCount*100/(highCount + medCount + lowCount) + "%");
 
+    document.getElementById("html-report-link").setAttribute("href", sastHtmlPath);
+
+    document.getElementById("vulnerable-libraries").innerHTML = vulnerableLibraries;
+    document.getElementById("ok-libraries").innerHTML = okLibraries;
+
+    document.getElementById("osa-pdf-report-link").setAttribute("href", osaPdfPath);
+    document.getElementById("osa-html-report-link").setAttribute("href", osaHtmlPath);
+
 
     //if generate pdf report option is chosen
     if (pdfReportReady) {
         document.getElementById("pdf-report-link").innerHTML =
 
-        '<a class="pdf-report" href="">' +
+        '<a class="pdf-report" href="'+ sastPdfPath +'">' +
             '<div class="pdf-report download-icon">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1022" version="1.1" width="13" height="16" viewBox="0 0 13 16"><title>PDF icon</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1023"><clipPath id="SvgjsClipPath1027"><path id="SvgjsPath1026" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill="#ffffff"/></clipPath></defs><path id="SvgjsPath1024" d="M279 768L279 763L280.1 763L284 767L284 768Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-271,-763)"/><path id="SvgjsPath1025" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2" clip-path="url(&quot;#SvgjsClipPath1027&quot;)" transform="matrix(1,0,0,1,-271,-763)"/></svg>' +
             '</div>' +
