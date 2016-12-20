@@ -307,7 +307,12 @@
 <script>
 
 //sast
-var pdfReportReady = ${it.highCount};
+var pdfReportReady = ${it.pdfReportReady};
+var sastPdfPath = "/dor/bo/rega"; //todo - sast pdf path
+var sastHtmlPath = '${app.rootUrl}${it.owner.url}${it.urlName}';
+var osaPdfPath = '${app.rootUrl}${it.owner.url}${it.urlName} + "/osaPdfReport"';
+var osaHtmlPath = '${app.rootUrl}${it.owner.url}${it.urlName} + "/osaHtmlReport"';
+
 var ThresholdsEnabled = ${it.thresholdsEnabled};
 
 var highThreshold = ${it.highThreshold};
@@ -319,6 +324,8 @@ var lowCount = ${it.lowCount};
 
 //osa
 var osaEnabled = ${it.osaEnabled};
+var vulnerableLibraries = ${it.osaVulnerableAndOutdatedLibs};
+var okLibraries = ${it.osaNoVulnerabilityLibs};
 var osaThresholdsEnabled = ${it.osaThresholdsEnabled};
 
 var osaHighThreshold = ${it.osaHighThreshold};
@@ -341,6 +348,13 @@ window.onload = function() {
     document.getElementById("bar-med").setAttribute("style", "height:" + medCount*100/(highCount + medCount + lowCount) + "%");
     document.getElementById("bar-low").setAttribute("style", "height:" + lowCount*100/(highCount + medCount + lowCount) + "%");
 
+    document.getElementById("html-report-link").setAttribute("href", sastHtmlPath);
+
+    document.getElementById("vulnerable-libraries").innerHTML = vulnerableLibraries;
+    document.getElementById("ok-libraries").innerHTML = okLibraries;
+
+    document.getElementById("osa-pdf-report-link").setAttribute("href", osaPdfPath);
+    document.getElementById("osa-html-report-link").setAttribute("href", osaHtmlPath);
 
     //if generate pdf report option is chosen
     if (pdfReportReady) {
@@ -554,7 +568,7 @@ function tooltipGenerator(severity) {
                     <div id="pdf-report-link"></div>
 
                     <div>
-                        <a class="html-report" href="${app.rootUrl}${it.owner.url}${it.urlName}">
+                        <a id="html-report-link" class="html-report">
                             <div class="html-report download-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1054"
                                      version="1.1"
@@ -743,12 +757,12 @@ function tooltipGenerator(severity) {
             </div>
 
             <!--todo: link to report-->
-            <div class="detailed-report" href="">
+            <div class="detailed-report">
                 <div class="download-cx-report">Checkmarx Report</div>
 
                 <div class="osa-downloads">
                     <div>
-                        <a class="pdf-report" href="">
+                        <a id="osa-pdf-report-link" class="pdf-report">
                             <div class="pdf-report download-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1022"
                                      version="1.1"
@@ -772,7 +786,7 @@ function tooltipGenerator(severity) {
                         </a>
                     </div>
                     <div>
-                        <a class="html-report" href="${app.rootUrl}${it.owner.url}${it.urlName}/osaHtmlReport">
+                        <a id="osa-html-report-link" class="html-report">
                             <div class="html-report download-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1054"
                                      version="1.1"
@@ -839,7 +853,7 @@ function tooltipGenerator(severity) {
                             </g>
                         </svg>
                     </div>
-                    <div class="libraries-vulnerable-number">35</div>
+                    <div id="vulnerable-libraries" class="libraries-vulnerable-number"></div>
                     <div class="libraries-vulnerable-text">
                         Vulnerable and outdated libraries
                     </div>
@@ -873,7 +887,7 @@ function tooltipGenerator(severity) {
                             </g>
                         </svg>
                     </div>
-                    <div class="libraries-vulnerable-number">9</div>
+                    <div id="ok-libraries" class="libraries-vulnerable-number"></div>
                     <div class="libraries-ok-text">
                         Libraries with no vulnerabilities
                     </div>
