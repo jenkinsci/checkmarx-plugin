@@ -135,6 +135,7 @@
     .chart {
       display: table;
       table-layout: fixed;
+      min-width: 600px;
       max-width: 709px;
       width: 100%;
       height: 288px;
