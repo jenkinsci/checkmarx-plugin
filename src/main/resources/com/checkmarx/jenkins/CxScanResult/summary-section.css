@@ -7,7 +7,7 @@
   display: inline-block;
   padding: 10px 0;
   width: calc(100% - 48px);
-  border-bottom: solid 2px #d5d5d5;
+  border-bottom: solid 2px #373050;
   color: #373050;
 }
 .summary-section {
@@ -28,17 +28,18 @@ table th {
   border: solid transparent;
 }
 .top-padding td {
-  padding-top: 43px;
+  padding-top: 59px;
 }
 td {
   border-color: transparent;
 }
-tr.cxsast {
-  border-bottom: solid 2px #d5d5d5;
+tr.cxsast,
+tr.cxosa {
+  border-bottom: solid 2px #373050;
 }
 .title-column,
 .main-column {
-  padding: 44px 0;
+  padding: 59px 0;
   line-height: 25px;
   display: inline-block;
 }
@@ -57,8 +58,11 @@ tr.cxsast {
   color: #373050;
 }
 .summary-title {
-  padding-bottom: 21px;
   border-bottom: solid #979797 1px;
+  color: white;
+  background-color: #373050;
+  padding: 9px;
+  padding-bottom: 11px;
 }
 .sum1 {
   font-size: 24px;
@@ -103,6 +107,7 @@ tr.cxsast {
 .detailed-report {
   margin-top: 24px;
   display: block;
+  padding: 11px;
 }
 .detailed-report-ttl {
   font-size: 16px;
@@ -209,6 +214,7 @@ body {
   overflow: hidden;
   margin-bottom: 47px;
   margin-right: 122px;
+  padding: 10px;
 }
 .libraries-vulnerable-number,
 .libraries-ok-number {

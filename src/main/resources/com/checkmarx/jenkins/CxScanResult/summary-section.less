@@ -1,3 +1,4 @@
+@mainBlack: #373050;
 
 .cx-title.job-main-title {
   width: ~"calc(100% - 1em - 48px)";
@@ -9,8 +10,8 @@
   display: inline-block;
   padding: 10px 0;
   width: ~"calc(100% - 48px)";
-  border-bottom: solid 2px #d5d5d5;
-  color: #373050;
+  border-bottom: solid 2px @mainBlack;
+  color: @mainBlack;
 }
 
 .summary-section {
@@ -35,20 +36,21 @@ table {
 }
 
 .top-padding td {
-  padding-top: 43px;
+  padding-top: 59px;
 }
 
 td {
   border-color: transparent;
 }
 
-tr.cxsast {
-  border-bottom: solid 2px #d5d5d5;
-
+tr {
+  &.cxsast, &.cxosa {
+    border-bottom: solid 2px @mainBlack;
+  }
 }
 
 .title-column, .main-column {
-  padding: 44px 0;
+  padding: 59px 0;
   line-height: 25px;
   display: inline-block;
 }
@@ -60,19 +62,21 @@ tr.cxsast {
   width: 73%;
 }
 
-
 .title-column {
   margin-right: 10px;
   vertical-align: top;
   height: 100%;
   letter-spacing: -0.8px;
   width: 20%;
-  color: #373050;
+  color: @mainBlack;
 }
 
 .summary-title {
-  padding-bottom: 21px;
   border-bottom: solid #979797 1px;
+  color: white;
+  background-color: @mainBlack;
+  padding: 9px;
+  padding-bottom: 11px;
 }
 
 //CxSAST
@@ -135,9 +139,11 @@ tr.cxsast {
     }
   }
 }
+
 .detailed-report {
   margin-top: 24px;
-  display:block;
+  display: block;
+  padding: 11px;
 }
 
 .detailed-report-ttl {
@@ -201,10 +207,10 @@ body {
   }
 
   .bar-count {
-    text-align:center;
+    text-align: center;
     font-size: 14px;
     letter-spacing: -0.47px;
-    line-height:40px;
+    line-height: 40px;
   }
 
   .bar-title {
@@ -268,6 +274,7 @@ body {
     overflow: hidden;
     margin-bottom: 47px;
     margin-right: 122px;
+    padding: 10px;
 
     &-number {
       display: inline-block;
@@ -346,10 +353,9 @@ body {
   padding: 0 12px;
   margin: 0;
   margin-left: 4px;
-  background: #373050;
+  background: @mainBlack;
   border-radius: 5px;
   //transform: translate(0%, 50%);
-
 
   &::after {
     content: "";
@@ -358,7 +364,7 @@ body {
     transform: translate(-50%, -50%);
     left: -5px;
     border: 5px solid transparent;
-    border-right-color: #373050;
+    border-right-color: @mainBlack;
   }
 }
 
@@ -370,6 +376,7 @@ body {
 .threshold-exceeded {
   color: #d82743;
 }
+
 .threshold-compliance {
   color: #20be3d;
 }
@@ -380,6 +387,7 @@ body {
     text-decoration: none;
   }
 }
+
 //@keyframes draw{
 //  0%{height:0;}
 //}
