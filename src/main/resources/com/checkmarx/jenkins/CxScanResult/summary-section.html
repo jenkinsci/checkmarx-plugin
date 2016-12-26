@@ -352,10 +352,7 @@
             <div class="graph">
 
                 <div id="osa-threshold-exceeded-compliance"></div>
-
-
                 <div class="graph-title">Vulnerabilities Status</div>
-
 
                 <ul class="osa-chart chart">
 
@@ -501,46 +498,45 @@
     <tr id="sast-full" class="summary-table-row cxsast-full">
         <td class="title-column">
             <div class="summary-title">
-                <div class="sum1">CxOSA</div>
-                <div class="sum2">Full Report</div>
+                <div class="sum1">CxSAST</div>
+                <div class="sum1">Full Report</div>
             </div>
 
             <!--todo: link to report-->
             <div class="detailed-report">
-                <!--<div class="download-cx-report">Checkmarx Report</div>-->
-
                 <div class="sast-downloads">
-                    <div>
-                        <a id="osa-html-report-link" class="html-report">
+                    <div class="report-link">
+                        <a id="sast-full-html-link" class="html-report">
                             <div class="html-report download-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1054"
-                                     version="1.1"
-                                     width="14" height="17.20710678118644" viewBox="0 0 14 17.20710678118644"><title>HTML Icon</title>
-                                    <desc>Created with Avocode.</desc>
-                                    <defs id="SvgjsDefs1055"/>
-                                    <path id="SvgjsPath1056" d="M279.12 796L284 796L284 806L271 806L271 796L271 796L275.92 796 " fill-opacity="0" fill="#ffffff"
-                                          stroke-dasharray="0"
-                                          stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                          transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                    <path id="SvgjsPath1057" d="M277.5 790.5L277.5 797.57 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                          stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                          transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                    <path id="SvgjsPath1058" d="M277.5 790.5L280.5 793.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                          stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                          transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                    <path id="SvgjsPath1059" d="M277.5 790.5L274.5 793.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                          stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                          transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
+                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="13px" height="16px" viewBox="0 0 13 16" version="1.1">
+                                    <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
+                                    <title>Analize</title>
+                                    <desc>Created with Sketch.</desc>
+                                    <defs/>
+                                    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                        <g id="Jenkins" transform="translate(-286.000000, -1439.000000)">
+                                            <g id="CxSAST" transform="translate(272.000000, 1290.000000)">
+                                                <g id="Group" transform="translate(14.000000, 148.000000)">
+                                                    <g id="Analize" transform="translate(1.000000, 2.000000)">
+                                                        <circle id="Oval-3" stroke="#373050" stroke-width="2" cx="5" cy="5" r="5"/>
+                                                        <rect id="Rectangle-9" fill="#373050"
+                                                              transform="translate(8.866025, 11.696152) rotate(-30.000000) translate(-8.866025, -11.696152) " x="7.8660254"
+                                                              y="8.42820323" width="2" height="6.53589838"/>
+                                                    </g>
+                                                </g>
+                                            </g>
+                                        </g>
+                                    </g>
                                 </svg>
                             </div>
                             <div class="html-report download-txt">
-                                <div class="detailed-report-ttl">HTML</div>
+                                <div class="detailed-report-ttl">Analyzed results</div>
                             </div>
                         </a>
                     </div>
 
-                    <div>
-                        <a id="sast-pdf-report-link" class="pdf-report">
+                    <div class="report-link">
+                        <a id="sast-full-pdf-link" class="pdf-report">
                             <div class="pdf-report download-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1022"
                                      version="1.1"
@@ -570,225 +566,174 @@
 
         </td>
         <td class="main-column">
-            <div class="libraries">
+            <div class="full-start-end">
 
-                <div class="libraries-vulnerable">
-                    <div class="libraries-vulnerable-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="47px" height="31px" viewBox="0 0 47 31" version="1.1">
-                            <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
-                            <title>lib Vulnerabilities Icon</title>
-                            <desc>Created with Sketch.</desc>
-                            <defs>
-                                <path d="M25,31 L4,31 C1.94360167,31 0,29.0245324 0,27 L0,8 L0,3 C0,1.48550257 1.46424259,0 3,0 L9,0 C9.88514832,0 11.1635669,0.937415809 12,2 L12,4 L34,4 C36.0604107,4.42857143 38,6.41548071 38,9 L38,11"
-                                      id="path-4"/>
-                                <mask id="mask-4" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="38" height="31" fill="white">
-                                    <use xlink:href="#path-4"/>
-                                </mask>
+                <!--start-->
+                <div class="full-start">
+                    <div class="full-start-end-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1000" version="1.1"
+                             width="23" height="26" viewBox="0 0 23 26"><title>Icon</title>
+                            <desc>Created with Avocode.</desc>
+                            <defs id="SvgjsDefs1001">
+                                <clipPath id="SvgjsClipPath1009">
+                                    <path id="SvgjsPath1008"
+                                          d="M520 1369.6C520 1368.71634 520.71634 1368 521.6 1368H541.4C542.2836599999999 1368 543 1368.71634 543 1369.6V1389.3999999999999C543 1390.2836599999998 542.28366 1390.9999999999998 541.4 1390.9999999999998H521.6C520.7163400000001 1390.9999999999998 520 1390.2836599999998 520 1389.3999999999999Z "
+                                          fill="#ffffff"/>
+                                </clipPath>
                             </defs>
-                            <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                <g id="Jenkins" transform="translate(-518.000000, -646.000000)">
-                                    <g id="OSA" transform="translate(270.000000, 646.000000)">
-                                        <g id="Lib-Vulnerabilities" transform="translate(248.000000, 0.000000)">
-                                            <g id="lib-Vulnerabilities-Icon">
-                                                <use id="Combined-Shape" stroke="#362F53" mask="url(#mask-4)" stroke-width="4" xlink:href="#path-4"/>
-                                                <g id="Alert" transform="translate(26.600000, 14.233021)">
-                                                    <path d="M9.71486676,1.21470909 C10.3018963,0.274949219 11.2197722,0.29932009 11.7612462,1.26246584 L19.4943093,15.0176364 C20.037464,15.9837716 19.5847058,16.7669789 18.4769973,16.7669789 L2.0007805,16.7669789 C0.895779941,16.7669789 0.477014275,16.0033396 1.06291102,15.0653932 L9.71486676,1.21470909 Z"
-                                                          id="Page-1" fill="#DA2945"/>
-                                                    <rect id="Rectangle-5" fill="#FFFFFF" x="9.4" y="5.76697892" width="2" height="5"/>
-                                                    <rect id="Rectangle-6" fill="#FFFFFF" x="9.4" y="11.7669789" width="2" height="2"/>
-                                                </g>
+                            <path id="SvgjsPath1007"
+                                  d="M520 1369.6C520 1368.71634 520.71634 1368 521.6 1368H541.4C542.2836599999999 1368 543 1368.71634 543 1369.6V1389.3999999999999C543 1390.2836599999998 542.28366 1390.9999999999998 541.4 1390.9999999999998H521.6C520.7163400000001 1390.9999999999998 520 1390.2836599999998 520 1389.3999999999999Z "
+                                  fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050"
+                                  stroke-miterlimit="50" stroke-width="4" clip-path="url(&quot;#SvgjsClipPath1009&quot;)" transform="matrix(1,0,0,1,-520,-1365)"/>
+                            <path id="SvgjsPath1010" d="M525 1366V1372 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square"
+                                  stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2" transform="matrix(1,0,0,1,-520,-1365)"/>
+                            <path id="SvgjsPath1011" d="M538 1366V1372 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square"
+                                  stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2" transform="matrix(1,0,0,1,-520,-1365)"/>
+                        </svg>
+                    </div>
+                    <div class="full-start-end-text-date">
+                        <div class="full-start-end-text">
+                            Start:
+                        </div>
+                        <div id="full-start-date" class="full-start-end-date">28/06/2016 08:35</div>
+                    </div>
+                </div>
+
+                <!--end-->
+                <div class="full-end">
+                    <div class="full-start-end-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1000" version="1.1"
+                             width="23" height="26" viewBox="0 0 23 26"><title>Icon</title>
+                            <desc>Created with Avocode.</desc>
+                            <defs id="SvgjsDefs1001">
+                                <clipPath id="SvgjsClipPath1009">
+                                    <path id="SvgjsPath1008"
+                                          d="M520 1369.6C520 1368.71634 520.71634 1368 521.6 1368H541.4C542.2836599999999 1368 543 1368.71634 543 1369.6V1389.3999999999999C543 1390.2836599999998 542.28366 1390.9999999999998 541.4 1390.9999999999998H521.6C520.7163400000001 1390.9999999999998 520 1390.2836599999998 520 1389.3999999999999Z "
+                                          fill="#ffffff"/>
+                                </clipPath>
+                            </defs>
+                            <path id="SvgjsPath1007"
+                                  d="M520 1369.6C520 1368.71634 520.71634 1368 521.6 1368H541.4C542.2836599999999 1368 543 1368.71634 543 1369.6V1389.3999999999999C543 1390.2836599999998 542.28366 1390.9999999999998 541.4 1390.9999999999998H521.6C520.7163400000001 1390.9999999999998 520 1390.2836599999998 520 1389.3999999999999Z "
+                                  fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050"
+                                  stroke-miterlimit="50" stroke-width="4" clip-path="url(&quot;#SvgjsClipPath1009&quot;)" transform="matrix(1,0,0,1,-520,-1365)"/>
+                            <path id="SvgjsPath1010" d="M525 1366V1372 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square"
+                                  stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2" transform="matrix(1,0,0,1,-520,-1365)"/>
+                            <path id="SvgjsPath1011" d="M538 1366V1372 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square"
+                                  stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2" transform="matrix(1,0,0,1,-520,-1365)"/>
+                        </svg>
+                    </div>
+                    <div class="full-start-end-text-date">
+                        <div class="full-start-end-text">
+                            End:
+                        </div>
+                        <div id="full-end-date" class="full-start-end-date">28/06/2016 08:35</div>
+                    </div>
+                </div>
+
+                <!--files-->
+                <div class="full-files">
+                    <div class="full-start-end-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1009" version="1.1"
+                             width="21" height="27" viewBox="0 0 21 27"><title>Group 7</title>
+                            <desc>Created with Avocode.</desc>
+                            <defs id="SvgjsDefs1010">
+                                <clipPath id="SvgjsClipPath1013">
+                                    <path id="SvgjsPath1012"
+                                          d="M847 1368C847 1366.89543 847.89543 1366 849 1366H862.01472L866.23223 1370.21751C866.71305 1370.69833 867.37779 1370.8831599999999 868 1370.77198V1390C868 1391.10457 867.10457 1392 866 1392H849C847.89543 1392 847 1391.10457 847 1390Z "
+                                          fill="#ffffff"/>
+                                </clipPath>
+                            </defs>
+                            <path id="SvgjsPath1011"
+                                  d="M847 1368C847 1366.89543 847.89543 1366 849 1366H862.01472L866.23223 1370.21751C866.71305 1370.69833 867.37779 1370.8831599999999 868 1370.77198V1390C868 1391.10457 867.10457 1392 866 1392H849C847.89543 1392 847 1391.10457 847 1390Z "
+                                  fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050"
+                                  stroke-miterlimit="50" stroke-width="4" clip-path="url(&quot;#SvgjsClipPath1013&quot;)" transform="matrix(1,0,0,1,-847,-1365)"/>
+                            <path id="SvgjsPath1014" d="M860 1374H868C868 1373.36639 868 1373 868 1373L861.78 1366H860Z " fill="#373050" fill-opacity="1"
+                                  transform="matrix(1,0,0,1,-847,-1365)"/>
+                        </svg>
+                    </div>
+                    <div class="full-start-end-text-date">
+                        <div class="full-start-end-text">
+                            Files:
+                        </div>
+                        <div id="full-files" class="full-start-end-date">3,567</div>
+                    </div>
+                </div>
+
+                <!--loc-->
+                <div class="full-loc">
+                    <div class="full-start-end-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1018" version="1.1"
+                             width="29" height="29" viewBox="0 0 29 29"><title>Icon</title>
+                            <desc>Created with Avocode.</desc>
+                            <defs id="SvgjsDefs1019"/>
+                            <path id="SvgjsPath1020" d="M1032 1368L1039.95 1378.76L1032 1389.51 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="round"
+                                  stroke-linecap="round" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2" transform="matrix(1,0,0,1,-1012,-1365)"/>
+                            <path id="SvgjsPath1021" d="M1020.95 1368L1013 1378.76L1020.95 1389.51 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="round"
+                                  stroke-linecap="round" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2" transform="matrix(1,0,0,1,-1012,-1365)"/>
+                            <path id="SvgjsPath1022" d="M1028.86 1366L1022.9999999999999 1392.54 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="round"
+                                  stroke-linecap="round" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2" transform="matrix(1,0,0,1,-1012,-1365)"/>
+                        </svg>
+                    </div>
+                    <div class="full-start-end-text-date">
+                        <div class="full-start-end-text">
+                            Code Lines:
+                        </div>
+                        <div id="full-loc" class="full-start-end-date">2,003,567</div>
+                    </div>
+                </div>
+            </div>
+
+            <!--high table-->
+            <div class="full-severity-title">
+                <div class="severity-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="21px" viewBox="0 0 23 21" version="1.1">
+                        <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
+                        <title>high</title>
+                        <desc>Created with Sketch.</desc>
+                        <defs>
+                            <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"
+                                  id="path-1"/>
+                            <mask id="mask-1" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884" height="19" fill="white">
+                                <use xlink:href="#path-1"/>
+                            </mask>
+                        </defs>
+                        <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                            <g id="Jenkins" transform="translate(-602.000000, -537.000000)">
+                                <g id="SAST" transform="translate(272.000000, 180.000000)">
+                                    <g id="Vulnerabilities-Stat" transform="translate(246.082552, 0.000000)">
+                                        <g id="High" transform="translate(22.425880, 105.921935)">
+                                            <g id="high" transform="translate(62.000000, 252.000000)">
+                                                <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
+                                                      id="Combined-Shape" fill="#F5F5F5"/>
+                                                <use id="Rectangle-40-Copy" stroke="#666666" mask="url(#mask-1)" stroke-width="4" xlink:href="#path-1"/>
+                                                <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
+                                                      id="Page-1" fill="#DA2945"/>
+                                                <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12" width="2" height="4"/>
+                                                <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17" width="2" height="2"/>
                                             </g>
                                         </g>
                                     </g>
                                 </g>
                             </g>
-                        </svg>
-                    </div>
-                    <div id="vulnerable-libraries" class="libraries-vulnerable-number"></div>
-                    <div class="libraries-vulnerable-text">
-                        Vulnerable and outdated libraries
-                    </div>
+                        </g>
+                    </svg>
                 </div>
-
-                <div class="libraries-ok">
-                    <div class="libraries-ok-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="47px" height="31px" viewBox="0 0 47 31" version="1.1">
-                            <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
-                            <title>Icon</title>
-                            <desc>Created with Sketch.</desc>
-                            <defs>
-                                <path d="M28,31 L4,31 C1.99474908,31 0,29.0245324 0,27 L0,8 L0,3 C0,1.48550257 1.50277529,0 3,0 L9,0 C10.1452838,0 11.457345,0.937415809 12,2 L13,4 L35,4 C37.0093689,4.42857143 39,6.41548071 39,9 L39,11"
-                                      id="path-5"/>
-                                <mask id="mask-5" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="39" height="31" fill="white">
-                                    <use xlink:href="#path-5"/>
-                                </mask>
-                            </defs>
-                            <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                <g id="Jenkins" transform="translate(-848.000000, -651.000000)">
-                                    <g id="OSA" transform="translate(270.000000, 646.000000)">
-                                        <g id="Lib-OK" transform="translate(578.000000, 5.000000)">
-                                            <g id="Icon">
-                                                <use id="Combined-Shape-Copy" stroke="#362F53" mask="url(#mask-5)" stroke-width="4" xlink:href="#path-5"/>
-                                                <path d="M46.4529784,18.9030304 C46.8068562,19.8686359 47,20.9117624 47,22 C47,26.9705627 42.9705627,31 38,31 C33.0294373,31 29,26.9705627 29,22 C29,17.0294373 33.0294373,13 38,13 C40.393622,13 42.5689975,13.934425 44.1812437,15.4583924 L37.6904269,21.8965709 L35.079173,19.3040452 L32.1948583,22.1475069 L37.6899611,27.6031981 L46.4529784,18.9030304 Z"
-                                                      id="Combined-Shape" fill="#8EBE15"/>
-                                            </g>
-                                        </g>
-                                    </g>
-                                </g>
-                            </g>
-                        </svg>
-                    </div>
-                    <div id="ok-libraries" class="libraries-vulnerable-number"></div>
-                    <div class="libraries-ok-text">
-                        Libraries with no vulnerabilities
-                    </div>
-                </div>
+                <div class="severity-title">High</div>
             </div>
-            <div class="graph">
 
-                <div id="osa-threshold-exceeded-compliance"></div>
+            <table class="query-table">
+                <tr>
+                    <th>Vulnerability Type</th>
+                    <th>##</th>
+                    <th>Lang</th>
+                </tr>
 
-
-                <div class="graph-title">Vulnerabilities Status</div>
-
-
-                <ul class="osa-chart chart">
-
-                    <!--osa high-->
-                    <li>
-                        <div id="osa-bar-count-high" class="bar-count"></div>
-                        <span id="osa-bar-high" class="bar-1">
-                            <div id="osa-tooltip-high"></div>
-                        </span>
-
-                        <div class="bar-title-container">
-                            <div class="bar-title">High</div>
-                            <div class="severity-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="21px" viewBox="0 0 23 21" version="1.1">
-                                    <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
-                                    <title>high</title>
-                                    <desc>Created with Sketch.</desc>
-                                    <defs>
-                                        <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"
-                                              id="path-1"/>
-                                        <mask id="mask-1" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884" height="19" fill="white">
-                                            <use xlink:href="#path-1"/>
-                                        </mask>
-                                    </defs>
-                                    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                        <g id="Jenkins" transform="translate(-602.000000, -537.000000)">
-                                            <g id="SAST" transform="translate(272.000000, 180.000000)">
-                                                <g id="Vulnerabilities-Stat" transform="translate(246.082552, 0.000000)">
-                                                    <g id="High" transform="translate(22.425880, 105.921935)">
-                                                        <g id="high" transform="translate(62.000000, 252.000000)">
-                                                            <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
-                                                                  id="Combined-Shape" fill="#F5F5F5"/>
-                                                            <use id="Rectangle-40-Copy" stroke="#666666" mask="url(#mask-1)" stroke-width="4" xlink:href="#path-1"/>
-                                                            <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
-                                                                  id="Page-1" fill="#DA2945"/>
-                                                            <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12" width="2" height="4"/>
-                                                            <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17" width="2" height="2"/>
-                                                        </g>
-                                                    </g>
-                                                </g>
-                                            </g>
-                                        </g>
-                                    </g>
-                                </svg>
-                            </div>
-                        </div>
-                    </li>
-
-                    <!--osa medium-->
-                    <li>
-                        <div id="osa-bar-count-med" class="bar-count"></div>
-                        <span id="osa-bar-med" class="bar-2">
-                            <div id="osa-tooltip-med"></div>
-                        </span>
-                        <div class="bar-title-container">
-                            <div class="bar-title">Medium</div>
-                            <div class="severity-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="21px" viewBox="0 0 23 21" version="1.1">
-                                    <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
-                                    <title>medium</title>
-                                    <desc>Created with Sketch.</desc>
-                                    <defs>
-                                        <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"
-                                              id="path-2"/>
-                                        <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884" height="19" fill="white">
-                                            <use xlink:href="#path-2"/>
-                                        </mask>
-                                    </defs>
-                                    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                        <g id="Jenkins" transform="translate(-680.000000, -537.000000)">
-                                            <g id="SAST" transform="translate(272.000000, 180.000000)">
-                                                <g id="Vulnerabilities-Stat" transform="translate(246.082552, 0.000000)">
-                                                    <g id="High" transform="translate(22.425880, 105.921935)">
-                                                        <g id="med" transform="translate(140.000000, 252.000000)">
-                                                            <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
-                                                                  id="Combined-Shape" fill="#F5F5F5"/>
-                                                            <use id="Rectangle-40-Copy" stroke="#666666" mask="url(#mask-2)" stroke-width="4" xlink:href="#path-2"/>
-                                                            <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
-                                                                  id="Page-1" fill="#FFB400"/>
-                                                            <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12" width="2" height="4"/>
-                                                            <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17" width="2" height="2"/>
-                                                        </g>
-                                                    </g>
-                                                </g>
-                                            </g>
-                                        </g>
-                                    </g>
-                                </svg>
-                            </div>
-                        </div>
-                    </li>
-
-                    <!--osa low-->
-                    <li>
-                        <div id="osa-bar-count-low" class="bar-count"></div>
-                        <span id="osa-bar-low" class="bar-3">
-                            <div id="osa-tooltip-low"></div>
-                        </span>
-
-                        <div class="bar-title-container">
-                            <div class="bar-title">Low</div>
-                            <div class="severity-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="21px" viewBox="0 0 23 21" version="1.1">
-                                    <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
-                                    <title>low</title>
-                                    <desc>Created with Sketch.</desc>
-                                    <defs>
-                                        <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"
-                                              id="path-3"/>
-                                        <mask id="mask-3" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884" height="19" fill="white">
-                                            <use xlink:href="#path-3"/>
-                                        </mask>
-                                    </defs>
-                                    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                        <g id="Jenkins" transform="translate(-641.000000, -537.000000)">
-                                            <g id="SAST" transform="translate(272.000000, 180.000000)">
-                                                <g id="Vulnerabilities-Stat" transform="translate(246.082552, 0.000000)">
-                                                    <g id="High" transform="translate(22.425880, 105.921935)">
-                                                        <g id="low" transform="translate(101.000000, 252.000000)">
-                                                            <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
-                                                                  id="Combined-Shape" fill="#F5F5F5"/>
-                                                            <use id="Rectangle-40-Copy" stroke="#666666" mask="url(#mask-3)" stroke-width="4" xlink:href="#path-3"/>
-                                                            <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
-                                                                  id="Page-1" fill="#EFD412"/>
-                                                            <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12" width="2" height="4"/>
-                                                            <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17" width="2" height="2"/>
-                                                        </g>
-                                                    </g>
-                                                </g>
-                                            </g>
-                                        </g>
-                                    </g>
-                                </svg>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
-            </div>
+                <tr>
+                    <td>Trust_Boundary_Violation</td>
+                    <td>78</td>
+                    <td>Java</td>
+                </tr>
+            </table>
         </td>
     </tr>
 </table>
