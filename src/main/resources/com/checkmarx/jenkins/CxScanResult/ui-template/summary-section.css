@@ -47,9 +47,11 @@ tr.cxosa {
   text-align: center;
   padding-bottom: 45px;
   margin-bottom: 42px;
-  margin-left: 16px;
-  width: 73%;
+  padding-left: 16px;
+  width: 79%;
   min-height: 350px;
+  box-sizing: border-box;
+  max-width: 709px;
 }
 .title-column {
   margin-right: 10px;
@@ -58,6 +60,7 @@ tr.cxosa {
   letter-spacing: -0.8px;
   width: 20%;
   color: #373050;
+  max-width: 250px;
 }
 .summary-title {
   border-bottom: solid #979797 1px;
@@ -87,6 +90,7 @@ tr.cxosa {
   position: relative;
   max-width: 709px;
   text-align: left;
+  margin-right: 50px;
 }
 .threshold-exceeded-text {
   color: #da2945;
@@ -340,7 +344,7 @@ body {
   display: block;
   text-align: left;
   margin-top: 45px;
-  margin-bottom: 29px;
+  margin-bottom: 18px;
 }
 .full-severity-title .severity-title {
   display: inline-block;
@@ -349,9 +353,23 @@ body {
 .full-severity-title .severity-icon {
   display: inline-block;
 }
-.query-table th,
-.query-table td {
-  border: 1px solid #ddd;
+table.query-table {
+  width: 100%;
+}
+table.query-table th,
+table.query-table td {
+  border: 1px solid transparent;
   text-align: left;
-  padding: 8px;
+}
+table.query-table th {
+  border-bottom: 1px solid #373050;
+  font-size: 14px;
+  color: #9b9b9b;
+}
+table.query-table td {
+  font-weight: 500;
+  font-size: 16px;
+  color: #373050;
+  border-bottom: 1px solid #979797;
+  padding: 11px 0;
 }

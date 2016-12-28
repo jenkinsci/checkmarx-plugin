@@ -1,5 +1,7 @@
 @mainBlack: #373050;
 @mainGrey: #525055;
+@mainLightGrey: #9b9b9b;
+@mainLightGrey2: #979797;
 
 .cx-title.job-main-title {
   width: ~"calc(100% - 1em - 48px)";
@@ -60,9 +62,11 @@ tr {
   text-align: center;
   padding-bottom: 45px;
   margin-bottom: 42px;
-  margin-left: 16px;
-  width: 73%;
+  padding-left: 16px;
+  width: 79%;
   min-height: 350px;
+  box-sizing: border-box;
+  max-width: 709px;
 }
 
 .title-column {
@@ -72,6 +76,7 @@ tr {
   letter-spacing: -0.8px;
   width: 20%;
   color: @mainBlack;
+  max-width: 250px;
 }
 
 .summary-title {
@@ -119,6 +124,7 @@ tr {
   max-width: 709px;
   //margin: auto;
   text-align: left;
+  margin-right: 50px;
 }
 
 .threshold-exceeded-text {
@@ -155,7 +161,7 @@ tr {
 }
 
 .download-detailed-report {
-  color: #9b9b9b;
+  color: @mainLightGrey;
   font-size: 14px;
   letter-spacing: -0.47px;
 }
@@ -426,7 +432,7 @@ body {
   display: block;
   text-align: left;
   margin-top: 45px;
-  margin-bottom: 29px;
+  margin-bottom: 18px;
 
   .severity-title {
     display: inline-block;
@@ -438,11 +444,25 @@ body {
   }
 }
 
-.query-table {
+table.query-table {
+  width: 100%;
   th, td {
-    border: 1px solid #ddd;
+    border: 1px solid transparent;
     text-align: left;
-    padding: 8px;
+  }
+
+  th {
+    border-bottom: 1px solid @mainBlack;
+    font-size: 14px;
+    color: @mainLightGrey;
+  }
+
+  td {
+    font-weight: 500;
+    font-size: 16px;
+    color: @mainBlack;
+    border-bottom: 1px solid @mainLightGrey2;
+    padding: 11px 0;
   }
 }
 
