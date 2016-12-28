@@ -101,6 +101,7 @@ public class CxScanResult implements Action {
     private Integer osaMediumThreshold;
     @Nullable
     private Integer osaLowThreshold;
+    private long scanId;
 
 
     public CxScanResult(final AbstractBuild owner, final String loggerSuffix, String serverUrl, long projectId, boolean scanRanAsynchronous) {
@@ -472,6 +473,14 @@ public class CxScanResult implements Action {
 
     public void setOsaNoVulnerabilityLibs(int osaNoVulnerabilityLibs) {
         this.osaNoVulnerabilityLibs = osaNoVulnerabilityLibs;
+    }
+
+    public void setScanId(long scanId) {
+        this.scanId = scanId;
+    }
+
+    public long getScanId() {
+        return scanId;
     }
 
     private class ResultsParseHandler extends DefaultHandler {

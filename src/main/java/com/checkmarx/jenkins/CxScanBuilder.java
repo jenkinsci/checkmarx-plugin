@@ -500,7 +500,7 @@ public class CxScanBuilder extends Builder {
 
 
             CxScanResult cxScanResult = addScanResultAction(build, serverUrlToUse, shouldRunAsynchronous, xmlReportFile);
-
+            cxScanResult.setScanId(scanId);
             // Set scan results to environment
             EnvVarAction envVarAction = new EnvVarAction();
             envVarAction.setCxSastResults(cxScanResult);
