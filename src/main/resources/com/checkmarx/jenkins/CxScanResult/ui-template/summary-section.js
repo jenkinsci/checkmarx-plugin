@@ -29,9 +29,7 @@ var osaHighCount = 150;
 var osaMedCount = 30;
 var osaLowCount = 60;
 
-
-
-window.onload = function() {
+window.onload = function () {
 
     //sast
 
@@ -41,9 +39,9 @@ window.onload = function() {
     document.getElementById("bar-count-med").innerHTML = medCount;
     document.getElementById("bar-count-low").innerHTML = lowCount;
 
-    document.getElementById("bar-high").setAttribute("style", "height:" + highCount*100/(highCount + medCount + lowCount) + "%");
-    document.getElementById("bar-med").setAttribute("style", "height:" + medCount*100/(highCount + medCount + lowCount) + "%");
-    document.getElementById("bar-low").setAttribute("style", "height:" + lowCount*100/(highCount + medCount + lowCount) + "%");
+    document.getElementById("bar-high").setAttribute("style", "height:" + highCount * 100 / (highCount + medCount + lowCount) + "%");
+    document.getElementById("bar-med").setAttribute("style", "height:" + medCount * 100 / (highCount + medCount + lowCount) + "%");
+    document.getElementById("bar-low").setAttribute("style", "height:" + lowCount * 100 / (highCount + medCount + lowCount) + "%");
 
     document.getElementById("html-report-link").setAttribute("href", sastHtmlPath);
 
@@ -58,16 +56,15 @@ window.onload = function() {
     if (pdfReportReady) {
         document.getElementById("pdf-report-link").innerHTML =
 
-        '<a class="pdf-report" href="'+ sastPdfPath +'">' +
+            '<a class="pdf-report" href="' + sastPdfPath + '">' +
             '<div class="pdf-report download-icon">' +
-                '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1022" version="1.1" width="13" height="16" viewBox="0 0 13 16"><title>PDF icon</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1023"><clipPath id="SvgjsClipPath1027"><path id="SvgjsPath1026" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill="#ffffff"/></clipPath></defs><path id="SvgjsPath1024" d="M279 768L279 763L280.1 763L284 767L284 768Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-271,-763)"/><path id="SvgjsPath1025" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2" clip-path="url(&quot;#SvgjsClipPath1027&quot;)" transform="matrix(1,0,0,1,-271,-763)"/></svg>' +
+            '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1022" version="1.1" width="13" height="16" viewBox="0 0 13 16"><title>PDF icon</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1023"><clipPath id="SvgjsClipPath1027"><path id="SvgjsPath1026" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill="#ffffff"/></clipPath></defs><path id="SvgjsPath1024" d="M279 768L279 763L280.1 763L284 767L284 768Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-271,-763)"/><path id="SvgjsPath1025" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2" clip-path="url(&quot;#SvgjsClipPath1027&quot;)" transform="matrix(1,0,0,1,-271,-763)"/></svg>' +
             '</div>' +
             '<div class="pdf-report download-txt">' +
-                '<div class="pdf-report detailed-report-ttl">PDF</div>' +
+            '<div class="pdf-report detailed-report-ttl">PDF</div>' +
             '</div>' +
-        '</a>';
+            '</a>';
     }
-
 
     //if threshold is enabled
     if (ThresholdsEnabled) {
@@ -75,17 +72,17 @@ window.onload = function() {
         var thresholdExceededComplianceElement = document.getElementById("threshold-exceeded-compliance");
 
 
-        if(highThreshold != null && highCount > highThreshold) {
+        if (highThreshold != null && highCount > highThreshold) {
             document.getElementById("tooltip-high").innerHTML = tooltipGenerator(SEVERITY.HIGH);
             isThresholdExceeded = true;
         }
 
-        if(medThreshold != null && medCount > medThreshold) {
+        if (medThreshold != null && medCount > medThreshold) {
             document.getElementById("tooltip-med").innerHTML = tooltipGenerator(SEVERITY.MED);
             isThresholdExceeded = true;
         }
 
-        if(lowThreshold != null && lowCount > lowThreshold) {
+        if (lowThreshold != null && lowCount > lowThreshold) {
             document.getElementById("tooltip-low").innerHTML = tooltipGenerator(SEVERITY.LOW);
             isThresholdExceeded = true;
         }
@@ -105,16 +102,16 @@ window.onload = function() {
     }
 
 //osa
-    if(osaEnabled) {
+    if (osaEnabled) {
         //todo - catch exceptions?
         //set bars height and count
         document.getElementById("osa-bar-count-high").innerHTML = osaHighCount;
         document.getElementById("osa-bar-count-med").innerHTML = osaMedCount;
         document.getElementById("osa-bar-count-low").innerHTML = osaLowCount;
 
-        document.getElementById("osa-bar-high").setAttribute("style", "height:" + osaHighCount*100/(osaHighCount + osaMedCount + osaLowCount) + "%");
-        document.getElementById("osa-bar-med").setAttribute("style", "height:" + osaMedCount*100/(osaHighCount + osaMedCount + osaLowCount) + "%");
-        document.getElementById("osa-bar-low").setAttribute("style", "height:" + osaLowCount*100/(osaHighCount + osaMedCount + osaLowCount) + "%");
+        document.getElementById("osa-bar-high").setAttribute("style", "height:" + osaHighCount * 100 / (osaHighCount + osaMedCount + osaLowCount) + "%");
+        document.getElementById("osa-bar-med").setAttribute("style", "height:" + osaMedCount * 100 / (osaHighCount + osaMedCount + osaLowCount) + "%");
+        document.getElementById("osa-bar-low").setAttribute("style", "height:" + osaLowCount * 100 / (osaHighCount + osaMedCount + osaLowCount) + "%");
 
         //if threshold is enabled
         if (osaThresholdsEnabled) {
@@ -122,17 +119,17 @@ window.onload = function() {
             var osaThresholdExceededComplianceElement = document.getElementById("osa-threshold-exceeded-compliance");
 
 
-            if(osaHighThreshold != null && osaHighCount > osaHighThreshold) {
+            if (osaHighThreshold != null && osaHighCount > osaHighThreshold) {
                 document.getElementById("osa-tooltip-high").innerHTML = tooltipGenerator(SEVERITY.OSA_HIGH);
                 isOsaThresholdExceeded = true;
             }
 
-            if(osaMedThreshold != null && osaMedCount > osaMedThreshold) {
+            if (osaMedThreshold != null && osaMedCount > osaMedThreshold) {
                 document.getElementById("osa-tooltip-med").innerHTML = tooltipGenerator(SEVERITY.OSA_MED);
                 isOsaThresholdExceeded = true;
             }
 
-            if(osaLowThreshold != null && osaLowCount > osaLowThreshold) {
+            if (osaLowThreshold != null && osaLowCount > osaLowThreshold) {
                 document.getElementById("osa-tooltip-low").innerHTML = tooltipGenerator(SEVERITY.OSA_LOW);
                 isOsaThresholdExceeded = true;
             }
@@ -155,6 +152,24 @@ window.onload = function() {
     else {
         document.getElementById("osa-info").setAttribute("style", "display:none");
     }
+
+//    full reports
+//    sast full
+//    high
+    if (highCount > 0) {
+        document.getElementById("sast-query-table").innerHTML = generateQueryTable(SEVERITY.HIGH);
+    }
+    if (medCount > 0) {
+        document.getElementById("sast-query-table").innerHTML = generateQueryTable(SEVERITY.MED);
+    }
+    if (lowCount > 0) {
+        document.getElementById("sast-query-table").innerHTML = generateQueryTable(SEVERITY.LOW);
+    }
+
+    for (i = 0; i < highCount; i++) {
+
+    }
+
 };
 
 var thresholdExceededHtml =
@@ -207,7 +222,7 @@ function tooltipGenerator(severity) {
             threshold = lowThreshold;
             count = lowCount;
             break;
-        
+
         case SEVERITY.OSA_HIGH:
             threshold = osaHighThreshold;
             count = osaHighCount;
@@ -229,18 +244,60 @@ function tooltipGenerator(severity) {
     return '' +
 
         '<div class="tooltip-container" style="bottom:calc(' + thresholdHeight + '% - 1px)">' +
-            '<div class="threshold-line"></div>' +
-                '<div class="threshold-tooltip">' +
-                    '<div class="threshold-tooltip-background">' +
-                    '<div class="threshold-icon-white">' +
-                    '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1044" version="1.1" width="9.400000000000091" height="12.399999999999977" viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold ICON</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1045"/><path id="SvgjsPath1046" d="M638 360L642.29 360L642.29 365.6L638 365.6Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1047" d="M638.71 355.1L641.57 355.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1048" d="M638.71 358.1L641.57 358.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1049" d="M636.42 365.1L643.64 365.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/></svg>' +
-                '</div>' +
-                '<div class="threshold-text">Threshold</div>' +
-                '<div class="threshold-number">' + threshold + '</div>' +
-                '</div>' +
-            '</div>' +
+        '<div class="threshold-line"></div>' +
+        '<div class="threshold-tooltip">' +
+        '<div class="threshold-tooltip-background">' +
+        '<div class="threshold-icon-white">' +
+        '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1044" version="1.1" width="9.400000000000091" height="12.399999999999977" viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold ICON</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1045"/><path id="SvgjsPath1046" d="M638 360L642.29 360L642.29 365.6L638 365.6Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1047" d="M638.71 355.1L641.57 355.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1048" d="M638.71 358.1L641.57 358.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/><path id="SvgjsPath1049" d="M636.42 365.1L643.64 365.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-635.3,-354.3)"/></svg>' +
+        '</div>' +
+        '<div class="threshold-text">Threshold</div>' +
+        '<div class="threshold-number">' + threshold + '</div>' +
+        '</div>' +
+        '</div>' +
         '</div>';
 
 }
 
-//
+function generateQueryTable(severity) {
+    var severityTitle = "";
+    var severityCount;
+    var highTitle = "";
+
+    switch (severity) {
+        case SEVERITY.HIGH:
+            severityTitle = highTitle;
+            severityCount = highCount;
+
+            break;
+        case SEVERITY.MED:
+            severityTitle = "Med";
+            severityCount = medCount;
+
+            break;
+        case SEVERITY.LOW:
+            severityTitle = "Low";
+            severityCount = lowCount;
+
+            break;
+
+        case SEVERITY.OSA_HIGH:
+            severityTitle = "High";
+            severityCount = osaHighCount;
+
+            break;
+        case SEVERITY.OSA_MED:
+            severityTitle = "Med";
+            severityCount = osaMedCount;
+
+            break;
+        case SEVERITY.OSA_LOW:
+            severityTitle = "Low";
+            severityCount = osaLowCount;
+
+            break;
+    }
+
+    highTitle = ''; //high icon, "High" and highCount
+
+
+}
