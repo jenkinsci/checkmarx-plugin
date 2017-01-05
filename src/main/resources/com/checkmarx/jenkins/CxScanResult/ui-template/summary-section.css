@@ -353,20 +353,20 @@ body {
 .full-severity-title .severity-icon {
   display: inline-block;
 }
-table.query-table {
+table.cve-table {
   width: 100%;
 }
-table.query-table th,
-table.query-table td {
+table.cve-table th,
+table.cve-table td {
   border: 1px solid transparent;
   text-align: left;
 }
-table.query-table th {
+table.cve-table th {
   border-bottom: 1px solid #373050;
   font-size: 14px;
   color: #9b9b9b;
 }
-table.query-table td {
+table.cve-table td {
   font-weight: 500;
   font-size: 16px;
   color: #373050;

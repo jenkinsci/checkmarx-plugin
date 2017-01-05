@@ -13,9 +13,9 @@ var ThresholdsEnabled = true;
 var highThreshold = 25;
 var medThreshold = 80;
 var lowThreshold = 10;
-var highCount = 50;
-var medCount = 100;
-var lowCount = 30;
+var highCount = 3;
+var medCount = 3;
+var lowCount = 3;
 
 //osa
 var osaEnabled = true;
@@ -155,20 +155,19 @@ window.onload = function () {
 
 //    full reports
 //    sast full
+    var cveListHtml = "";
 //    high
     if (highCount > 0) {
-        document.getElementById("sast-query-table").innerHTML = generateQueryTable(SEVERITY.HIGH);
+        cveListHtml += generateCveTable(SEVERITY.HIGH);
     }
     if (medCount > 0) {
-        document.getElementById("sast-query-table").innerHTML = generateQueryTable(SEVERITY.MED);
+        cveListHtml += generateCveTable(SEVERITY.MED);
     }
     if (lowCount > 0) {
-        document.getElementById("sast-query-table").innerHTML = generateQueryTable(SEVERITY.LOW);
+        cveListHtml += generateCveTable(SEVERITY.LOW);
     }
 
-    for (i = 0; i < highCount; i++) {
-
-    }
+    document.getElementById("sast-cve-table").innerHTML = cveListHtml;
 
 };
 
@@ -200,6 +199,7 @@ var SEVERITY = {
     OSA_MED: {value: 4, name: "medium"},
     OSA_LOW: {value: 5, name: "low"}
 };
+
 
 function tooltipGenerator(severity) {
     var threshold = 0;
@@ -258,46 +258,110 @@ function tooltipGenerator(severity) {
 
 }
 
-function generateQueryTable(severity) {
+function generateCveTable(severity) {
     var severityTitle = "";
     var severityCount;
-    var highTitle = "";
+    var severityCveList;
+    var ret = "";
 
+    // todo - icon, text and count
+    var highTitle = "High";
+    var medTitle = "Med";
+    var lowTitle = "Low";
+
+    //todo - severityCveList should point to the corresponding list
     switch (severity) {
         case SEVERITY.HIGH:
             severityTitle = highTitle;
             severityCount = highCount;
+            severityCveList = highCveList;
 
             break;
         case SEVERITY.MED:
-            severityTitle = "Med";
+            severityTitle = medTitle;
             severityCount = medCount;
+            severityCveList = highCveList;
 
             break;
         case SEVERITY.LOW:
-            severityTitle = "Low";
+            severityTitle = lowTitle;
             severityCount = lowCount;
+            severityCveList = highCveList;
 
             break;
 
         case SEVERITY.OSA_HIGH:
-            severityTitle = "High";
+            severityTitle = highTitle;
             severityCount = osaHighCount;
+            severityCveList = highCveList;
 
             break;
         case SEVERITY.OSA_MED:
-            severityTitle = "Med";
+            severityTitle = medTitle;
             severityCount = osaMedCount;
+            severityCveList = highCveList;
 
             break;
         case SEVERITY.OSA_LOW:
-            severityTitle = "Low";
+            severityTitle = lowTitle;
             severityCount = osaLowCount;
+            severityCveList = highCveList;
 
             break;
     }
 
-    highTitle = ''; //high icon, "High" and highCount
+    for (i = 0; i < severityCount; i++) {
+        ret += "<tr>" +severityCveList[i].cveName + "</tr>";
+    }
 
+    return ret;
 
 }
+
+var highCveList = [
+    {
+        "id": "0",
+        "cveName": "cve-name-1",
+        "score": 100.0,
+        "severity": {
+            "Id": 1,
+            "name": "High"
+        },
+        "publishDate": "2016-11-07T10:16:06.1206743Z",
+        "url": "http://cv1",
+        "description": null,
+        "recommendations": "recommendation 1",
+        "sourceFileName": "SourceFileName 1",
+        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
+    },
+    {
+        "id": "0",
+        "cveName": "cve-name-1",
+        "score": 100.0,
+        "severity": {
+            "Id": 1,
+            "name": "High"
+        },
+        "publishDate": "2016-11-07T10:16:06.1206743Z",
+        "url": "http://cv1",
+        "description": null,
+        "recommendations": "recommendation 1",
+        "sourceFileName": "SourceFileName 1",
+        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
+    },
+    {
+        "id": "0",
+        "cveName": "cve-name-1",
+        "score": 100.0,
+        "severity": {
+            "Id": 1,
+            "name": "High"
+        },
+        "publishDate": "2016-11-07T10:16:06.1206743Z",
+        "url": "http://cv1",
+        "description": null,
+        "recommendations": "recommendation 1",
+        "sourceFileName": "SourceFileName 1",
+        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
+    }
+];
