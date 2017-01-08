@@ -954,8 +954,9 @@ public class CxScanBuilder extends Builder {
             instanceLogger.info("\nScan job submitted successfully\n");
             return cxWSResponseRunId;
         } catch (Zipper.MaxZipSizeReached e) {
-            throw new AbortException("Checkmarx Scan Failed: Reached maximum upload size limit of "
-                    + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()));
+            throw new AbortException("Checkmarx Scan Failed: When zipping file "+ e.getCurrentZippedFileName()+", reached maximum upload size limit of "
+            + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize())+"\n");
+
         } catch (Zipper.NoFilesToZip e) {
             throw new AbortException("Checkmarx Scan Failed: No files to scan");
         } catch (InterruptedException e) {

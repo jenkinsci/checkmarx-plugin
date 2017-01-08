@@ -34,7 +34,7 @@ test {
 dependencies {
 	provided 'com.intellij:annotations:12.0'
 
-	compile 'com.checkmarx.components:zipper:1.2.1',
+	compile 'com.checkmarx.components:zipper:1.2.2',
 			'org.apache.ant:ant:1.9.2',
 			'log4j:log4j:1.2.17',
 			'org.apache.commons:commons-lang3:3.1',

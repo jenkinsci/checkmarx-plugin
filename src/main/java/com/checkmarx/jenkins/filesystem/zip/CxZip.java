@@ -32,10 +32,10 @@ public class CxZip {
 
         logger.info("Started zipping the workspace");
 
-        CxZipperCallable zipperCallable = new CxZipperCallable(filterPattern);
+        CxZipperCallable zipperCallable = new CxZipperCallable(filterPattern, logger);
 
         final CxZipResult zipResult = baseDir.act(zipperCallable);
-        logger.info(zipResult.getLogMessage());
+
         final FilePath tempFile = zipResult.getTempFile();
         final int numOfZippedFiles = zipResult.getNumOfZippedFiles();
 

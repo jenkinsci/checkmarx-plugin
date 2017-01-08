@@ -31,7 +31,7 @@ public class ZipperCallable implements FilePath.FileCallable<CxZipResult>  {
             fileOutputStream = new FileOutputStream(tempFile);
             new Zipper().zip(file, combinedFilterPattern, fileOutputStream, CxConfig.maxZipSize(), null);
             final FilePath remoteTempFile = new FilePath(tempFile);
-            return new CxZipResult(remoteTempFile, 0, null);
+            return new CxZipResult(remoteTempFile, 0);
         }
         finally {
             if(fileOutputStream != null) {
