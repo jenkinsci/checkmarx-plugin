@@ -346,9 +346,13 @@ body {
   margin-top: 45px;
   margin-bottom: 18px;
 }
-.full-severity-title .severity-title {
+.full-severity-title .severity-title-name {
   display: inline-block;
   font-size: 16px;
+  margin: 0 10px;
+}
+.full-severity-title .severity-count {
+  display: inline-block;
 }
 .full-severity-title .severity-icon {
   display: inline-block;

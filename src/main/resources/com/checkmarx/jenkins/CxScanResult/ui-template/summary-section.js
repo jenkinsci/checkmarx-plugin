@@ -158,16 +158,16 @@ window.onload = function () {
     var cveListHtml = "";
 //    high
     if (highCount > 0) {
-        cveListHtml += generateCveTable(SEVERITY.HIGH);
+       generateCveTable(SEVERITY.HIGH);
     }
     if (medCount > 0) {
-        cveListHtml += generateCveTable(SEVERITY.MED);
+        generateCveTable(SEVERITY.MED);
     }
     if (lowCount > 0) {
-        cveListHtml += generateCveTable(SEVERITY.LOW);
+        generateCveTable(SEVERITY.LOW);
     }
 
-    document.getElementById("sast-cve-table").innerHTML = cveListHtml;
+//    document.getElementById("sast-cve-table").innerHTML = cveListHtml;
 
 };
 
@@ -258,38 +258,60 @@ function tooltipGenerator(severity) {
 
 }
 
+function generateCveTableTitle(severity) {
+    switch (severity) {
+        case SEVERITY.HIGH:
+            return '' +
+                '<div class="full-severity-title">' +
+                    '<div class="severity-icon">' +
+                        '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="21px" viewBox="0 0 23 21" version="1.1"> <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch --> <title>high</title> <desc>Created with Sketch.</desc> <defs> <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733" id="path-1"></path> <mask id="mask-1" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884" height="19" fill="white"> <use xlink:href="#path-1"></use> </mask> </defs> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Jenkins" transform="translate(-602.000000, -537.000000)"> <g id="SAST" transform="translate(272.000000, 180.000000)"> <g id="Vulnerabilities-Stat" transform="translate(246.082552, 0.000000)"> <g id="High" transform="translate(22.425880, 105.921935)"> <g id="high" transform="translate(62.000000, 252.000000)"> <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z" id="Combined-Shape" fill="#F5F5F5"></path> <use id="Rectangle-40-Copy" stroke="#666666" mask="url(#mask-1)" stroke-width="4" xlink:href="#path-1"></use> <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z" id="Page-1" fill="#DA2945"></path> <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12" width="2" height="4"></rect> <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17" width="2" height="2"></rect> </g> </g> </g> </g> </g> </g> </svg>' +
+                    '</div>' +
+                    '<div class="severity-title-name">High</div>' +
+                    '<div class="severity-count">' + highCount + '</div>' +
+                '</div>';
+
+        case SEVERITY.MED:
+            return "Med";
+        case SEVERITY.LOW:
+            return "Low";
+
+    }
+}
+
 function generateCveTable(severity) {
     var severityTitle = "";
     var severityCount;
     var severityCveList;
-    var ret = "";
 
     // todo - icon, text and count
-    var highTitle = "High";
-    var medTitle = "Med";
-    var lowTitle = "Low";
+    var highTitle = generateCveTableTitle(SEVERITY.HIGH);
+    var medTitle = generateCveTableTitle(SEVERITY.MED);
+    var lowTitle = generateCveTableTitle(SEVERITY.LOW);
 
-    //todo - severityCveList should point to the corresponding list
     switch (severity) {
         case SEVERITY.HIGH:
             severityTitle = highTitle;
             severityCount = highCount;
             severityCveList = highCveList;
+            tableElementId = "sast-cve-table-high";
 
             break;
         case SEVERITY.MED:
             severityTitle = medTitle;
             severityCount = medCount;
-            severityCveList = highCveList;
+            severityCveList = medCveList;
+            tableElementId = "sast-cve-table-med";
 
             break;
         case SEVERITY.LOW:
             severityTitle = lowTitle;
             severityCount = lowCount;
-            severityCveList = highCveList;
+            severityCveList = lowCveList;
+            tableElementId = "sast-cve-table-low";
 
             break;
 
+    //todo - severityCveList should point to the corresponding list
         case SEVERITY.OSA_HIGH:
             severityTitle = highTitle;
             severityCount = osaHighCount;
@@ -310,18 +332,25 @@ function generateCveTable(severity) {
             break;
     }
 
+    //get container to create table element in
+    document.getElementById(tableElementId + '-container').innerHTML = severityTitle + '<table id="' + tableElementId + '"></table>'
+
+//    get the created table
+    var table = document.getElementById(tableElementId);
+
+    //add rows to table
     for (i = 0; i < severityCount; i++) {
-        ret += "<tr>" +severityCveList[i].cveName + "</tr>";
+        table.insertRow(i).innerHTML = severityCveList[i].cveName;
     }
 
-    return ret;
+//    return ret;
 
 }
 
 var highCveList = [
     {
         "id": "0",
-        "cveName": "cve-name-1",
+        "cveName": "cve-name-high",
         "score": 100.0,
         "severity": {
             "Id": 1,
@@ -336,7 +365,7 @@ var highCveList = [
     },
     {
         "id": "0",
-        "cveName": "cve-name-1",
+        "cveName": "cve-name-high",
         "score": 100.0,
         "severity": {
             "Id": 1,
@@ -351,7 +380,7 @@ var highCveList = [
     },
     {
         "id": "0",
-        "cveName": "cve-name-1",
+        "cveName": "cve-name-high",
         "score": 100.0,
         "severity": {
             "Id": 1,
@@ -362,6 +391,101 @@ var highCveList = [
         "description": null,
         "recommendations": "recommendation 1",
         "sourceFileName": "SourceFileName 1",
+        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
+    }
+];
+var medCveList = [
+    {
+        "id": "0",
+        "cveName": "cve-name-med",
+        "score": 50.0,
+        "severity": {
+            "Id": 2,
+            "name": "Med"
+        },
+        "publishDate": "2016-11-07T10:16:06.1206743Z",
+        "url": "http://cv1",
+        "description": null,
+        "recommendations": "recommendation 2",
+        "sourceFileName": "SourceFileName 2",
+        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
+    },
+    {
+        "id": "0",
+        "cveName": "cve-name-med",
+        "score": 50.0,
+        "severity": {
+            "Id": 2,
+            "name": "Med"
+        },
+        "publishDate": "2016-11-07T10:16:06.1206743Z",
+        "url": "http://cv1",
+        "description": null,
+        "recommendations": "recommendation 2",
+        "sourceFileName": "SourceFileName 2",
+        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
+    },
+    {
+        "id": "0",
+        "cveName": "cve-name-med",
+        "score": 50.0,
+        "severity": {
+            "Id": 2,
+            "name": "Med"
+        },
+        "publishDate": "2016-11-07T10:16:06.1206743Z",
+        "url": "http://cv1",
+        "description": null,
+        "recommendations": "recommendation 2",
+        "sourceFileName": "SourceFileName 2",
+        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
+    }
+];
+
+var lowCveList = [
+    {
+        "id": "0",
+        "cveName": "cve-name-low",
+        "score": 1.0,
+        "severity": {
+            "Id": 3,
+            "name": "Low"
+        },
+        "publishDate": "2016-11-07T10:16:06.1206743Z",
+        "url": "http://cv1",
+        "description": null,
+        "recommendations": "recommendation 3",
+        "sourceFileName": "SourceFileName 3",
+        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
+    },
+    {
+        "id": "0",
+        "cveName": "cve-name-low",
+        "score": 1.0,
+        "severity": {
+            "Id": 3,
+            "name": "Low"
+        },
+        "publishDate": "2016-11-07T10:16:06.1206743Z",
+        "url": "http://cv1",
+        "description": null,
+        "recommendations": "recommendation 3",
+        "sourceFileName": "SourceFileName 3",
+        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
+    },
+    {
+        "id": "0",
+        "cveName": "cve-name-low",
+        "score": 1.0,
+        "severity": {
+            "Id": 3,
+            "name": "Low"
+        },
+        "publishDate": "2016-11-07T10:16:06.1206743Z",
+        "url": "http://cv1",
+        "description": null,
+        "recommendations": "recommendation 3",
+        "sourceFileName": "SourceFileName 3",
         "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
     }
 ];
