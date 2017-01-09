@@ -25,9 +25,9 @@ var osaThresholdsEnabled = true;
 var osaHighThreshold = 1125;
 var osaMedThreshold = 10;
 var osaLowThreshold = 1;
-var osaHighCount = 150;
-var osaMedCount = 30;
-var osaLowCount = 60;
+var osaHighCount = 3;
+var osaMedCount = 3;
+var osaLowCount = 3;
 
 window.onload = function () {
 
@@ -153,12 +153,11 @@ window.onload = function () {
         document.getElementById("osa-info").setAttribute("style", "display:none");
     }
 
+
+
 //    full reports
-//    sast full
-    var cveListHtml = "";
-//    high
     if (highCount > 0) {
-       generateCveTable(SEVERITY.HIGH);
+        generateCveTable(SEVERITY.HIGH);
     }
     if (medCount > 0) {
         generateCveTable(SEVERITY.MED);
@@ -166,8 +165,17 @@ window.onload = function () {
     if (lowCount > 0) {
         generateCveTable(SEVERITY.LOW);
     }
+    if (osaHighCount > 0) {
+        generateCveTable(SEVERITY.OSA_HIGH);
+    }
+    if (osaMedCount > 0) {
+        generateCveTable(SEVERITY.OSA_MED);
+    }
+    if (osaLowCount > 0) {
+        generateCveTable(SEVERITY.OSA_LOW);
+    }
 
-//    document.getElementById("sast-cve-table").innerHTML = cveListHtml;
+//    document.getElementById("osa-cve-table").innerHTML = cveListHtml;
 
 };
 
@@ -261,6 +269,7 @@ function tooltipGenerator(severity) {
 function generateCveTableTitle(severity) {
     switch (severity) {
         case SEVERITY.HIGH:
+        case SEVERITY.OSA_HIGH:
             return '' +
                 '<div class="full-severity-title">' +
                     '<div class="severity-icon">' +
@@ -271,10 +280,26 @@ function generateCveTableTitle(severity) {
                 '</div>';
 
         case SEVERITY.MED:
-            return "Med";
-        case SEVERITY.LOW:
-            return "Low";
+        case SEVERITY.OSA_MED:
+            return '' +
+                '<div class="full-severity-title">' +
+                '<div class="severity-icon">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="21px" viewBox="0 0 23 21" version="1.1"> <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch --> <title>medium</title> <desc>Created with Sketch.</desc> <defs> <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733" id="path-2"/> <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884" height="19" fill="white"> <use xlink:href="#path-2"/> </mask> </defs> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Jenkins" transform="translate(-680.000000, -537.000000)"> <g id="SAST" transform="translate(272.000000, 180.000000)"> <g id="Vulnerabilities-Stat" transform="translate(246.082552, 0.000000)"> <g id="High" transform="translate(22.425880, 105.921935)"> <g id="med" transform="translate(140.000000, 252.000000)"> <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z" id="Combined-Shape" fill="#F5F5F5"/> <use id="Rectangle-40-Copy" stroke="#666666" mask="url(#mask-2)" stroke-width="4" xlink:href="#path-2"/> <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z" id="Page-1" fill="#FFB400"/> <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12" width="2" height="4"/> <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17" width="2" height="2"/> </g> </g> </g> </g> </g> </g> </svg>' +
+                '</div>' +
+                '<div class="severity-title-name">Med</div>' +
+                '<div class="severity-count">' + medCount + '</div>' +
+                '</div>';
 
+        case SEVERITY.LOW:
+        case SEVERITY.OSA_LOW:
+            return '' +
+                '<div class="full-severity-title">' +
+                '<div class="severity-icon">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="21px" viewBox="0 0 23 21" version="1.1"> <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch --> <title>low</title> <desc>Created with Sketch.</desc> <defs> <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733" id="path-3"></path> <mask id="mask-3" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884" height="19" fill="white"> <use xlink:href="#path-3"></use> </mask> </defs> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Jenkins" transform="translate(-641.000000, -537.000000)"> <g id="SAST" transform="translate(272.000000, 180.000000)"> <g id="Vulnerabilities-Stat" transform="translate(246.082552, 0.000000)"> <g id="High" transform="translate(22.425880, 105.921935)"> <g id="low" transform="translate(101.000000, 252.000000)"> <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z" id="Combined-Shape" fill="#F5F5F5"></path> <use id="Rectangle-40-Copy" stroke="#666666" mask="url(#mask-3)" stroke-width="4" xlink:href="#path-3"></use> <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z" id="Page-1" fill="#EFD412"></path> <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12" width="2" height="4"></rect> <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17" width="2" height="2"></rect> </g> </g> </g> </g> </g> </g> </svg>' +
+                '</div>' +
+                '<div class="severity-title-name">Low</div>' +
+                '<div class="severity-count">' + lowCount + '</div>' +
+                '</div>';
     }
 }
 
@@ -287,6 +312,9 @@ function generateCveTable(severity) {
     var highTitle = generateCveTableTitle(SEVERITY.HIGH);
     var medTitle = generateCveTableTitle(SEVERITY.MED);
     var lowTitle = generateCveTableTitle(SEVERITY.LOW);
+    var osaHighTitle = generateCveTableTitle(SEVERITY.OSA_HIGH);
+    var osaMedTitle = generateCveTableTitle(SEVERITY.OSA_MED);
+    var osaLowTitle = generateCveTableTitle(SEVERITY.OSA_LOW);
 
     switch (severity) {
         case SEVERITY.HIGH:
@@ -311,40 +339,50 @@ function generateCveTable(severity) {
 
             break;
 
-    //todo - severityCveList should point to the corresponding list
         case SEVERITY.OSA_HIGH:
-            severityTitle = highTitle;
+            severityTitle = osaHighTitle;
             severityCount = osaHighCount;
             severityCveList = highCveList;
+            tableElementId = "osa-cve-table-high";
 
             break;
         case SEVERITY.OSA_MED:
-            severityTitle = medTitle;
+            severityTitle = osaMedTitle;
             severityCount = osaMedCount;
-            severityCveList = highCveList;
+            severityCveList = medCveList;
+            tableElementId = "osa-cve-table-med";
 
             break;
         case SEVERITY.OSA_LOW:
-            severityTitle = lowTitle;
+            severityTitle = osaLowTitle;
             severityCount = osaLowCount;
-            severityCveList = highCveList;
+            severityCveList = lowCveList;
+            tableElementId = "osa-cve-table-low";
 
             break;
     }
 
     //get container to create table element in
-    document.getElementById(tableElementId + '-container').innerHTML = severityTitle + '<table id="' + tableElementId + '"></table>'
+    document.getElementById(tableElementId + '-container').innerHTML =
+        severityTitle +
+        '<table id="' + tableElementId + '" class="cve-table">' +
+            '<tr>' +
+                '<th>Vulnerability Type</th>' +
+                '<th>##</th>' +
+            '</tr>' +
+        '</table>';
 
 //    get the created table
     var table = document.getElementById(tableElementId);
+    var row;
 
     //add rows to table
     for (i = 0; i < severityCount; i++) {
-        table.insertRow(i).innerHTML = severityCveList[i].cveName;
+        row = table.insertRow(i + 1);
+        row.insertCell(0).innerHTML = severityCveList[i].cveName;
+        row.insertCell(1).innerHTML = 78;
+
     }
-
-//    return ret;
-
 }
 
 var highCveList = [
@@ -441,7 +479,6 @@ var medCveList = [
         "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
     }
 ];
-
 var lowCveList = [
     {
         "id": "0",
