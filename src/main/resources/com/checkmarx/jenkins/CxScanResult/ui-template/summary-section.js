@@ -303,85 +303,136 @@ function generateCveTableTitle(severity) {
     }
 }
 
-function generateCveTable(severity) {
-    var severityTitle = "";
+function generateSastCveTable(severity) {
     var severityCount;
     var severityCveList;
-
-    // todo - icon, text and count
-    var highTitle = generateCveTableTitle(SEVERITY.HIGH);
-    var medTitle = generateCveTableTitle(SEVERITY.MED);
-    var lowTitle = generateCveTableTitle(SEVERITY.LOW);
-    var osaHighTitle = generateCveTableTitle(SEVERITY.OSA_HIGH);
-    var osaMedTitle = generateCveTableTitle(SEVERITY.OSA_MED);
-    var osaLowTitle = generateCveTableTitle(SEVERITY.OSA_LOW);
+    var tableElementId = "";
 
     switch (severity) {
         case SEVERITY.HIGH:
-            severityTitle = highTitle;
             severityCount = highCount;
             severityCveList = highCveList;
             tableElementId = "sast-cve-table-high";
-
             break;
+
         case SEVERITY.MED:
-            severityTitle = medTitle;
             severityCount = medCount;
             severityCveList = medCveList;
             tableElementId = "sast-cve-table-med";
-
             break;
+
         case SEVERITY.LOW:
-            severityTitle = lowTitle;
             severityCount = lowCount;
             severityCveList = lowCveList;
             tableElementId = "sast-cve-table-low";
-
-            break;
-
-        case SEVERITY.OSA_HIGH:
-            severityTitle = osaHighTitle;
-            severityCount = osaHighCount;
-            severityCveList = highCveList;
-            tableElementId = "osa-cve-table-high";
-
-            break;
-        case SEVERITY.OSA_MED:
-            severityTitle = osaMedTitle;
-            severityCount = osaMedCount;
-            severityCveList = medCveList;
-            tableElementId = "osa-cve-table-med";
-
-            break;
-        case SEVERITY.OSA_LOW:
-            severityTitle = osaLowTitle;
-            severityCount = osaLowCount;
-            severityCveList = lowCveList;
-            tableElementId = "osa-cve-table-low";
-
             break;
     }
 
-    //get container to create table element in
+    //generate table title
+    var severityTitle = generateCveTableTitle(severity);
+
+    //generate table headers
+    var tableHeadersNames = {h1: "Vulnerability Type", h2: "##"};
+    var tableHeadersElement = generateCveTableHeaders(tableHeadersNames);
+
+    //get container and create table element in it
     document.getElementById(tableElementId + '-container').innerHTML =
         severityTitle +
         '<table id="' + tableElementId + '" class="cve-table">' +
-            '<tr>' +
-                '<th>Vulnerability Type</th>' +
-                '<th>##</th>' +
-            '</tr>' +
+            tableHeadersElement +
         '</table>';
 
-//    get the created table
+    //get the created table
     var table = document.getElementById(tableElementId);
-    var row;
 
     //add rows to table
+    var row;
     for (i = 0; i < severityCount; i++) {
         row = table.insertRow(i + 1);
         row.insertCell(0).innerHTML = severityCveList[i].cveName;
         row.insertCell(1).innerHTML = 78;
 
+    }
+}
+
+function generateOsaCveTable(severity) {
+    var severityCount;
+    var severityCveList;
+    var tableElementId = "";
+
+    switch (severity) {
+        case SEVERITY.OSA_HIGH:
+            severityCount = osaHighCount;
+            severityCveList = highCveList;
+            tableElementId = "osa-cve-table-high";
+            break;
+
+        case SEVERITY.OSA_MED:
+            severityCount = osaMedCount;
+            severityCveList = medCveList;
+            tableElementId = "osa-cve-table-med";
+            break;
+
+        case SEVERITY.OSA_LOW:
+            severityCount = osaLowCount;
+            severityCveList = lowCveList;
+            tableElementId = "osa-cve-table-low";
+            break;
+    }
+
+    //generate table title
+    var severityTitle = generateCveTableTitle(severity);
+
+    //generate table headers
+    var tableHeadersNames = {h1: "Vulnerability Type", h2: "Publish Date", h3: "Library"};
+    var tableHeadersElement = generateCveTableHeaders(tableHeadersNames);
+
+    //get container and create table element in it
+    document.getElementById(tableElementId + '-container').innerHTML =
+        severityTitle +
+        '<table id="' + tableElementId + '" class="cve-table">' +
+            tableHeadersElement +
+        '</table>';
+
+    //get the created table
+    var table = document.getElementById(tableElementId);
+
+    //add rows to table
+    var row;
+    for (i = 0; i < severityCount; i++) {
+        row = table.insertRow(i + 1);
+        row.insertCell(0).innerHTML = severityCveList[i].cveName;
+        row.insertCell(1).innerHTML = 78;
+        row.insertCell(2).innerHTML = 78;
+
+    }
+}
+
+
+function generateCveTableHeaders(headers) {
+    var ret = "<tr>";
+
+    for (h in headers) {
+        ret += '<th>' + headers[h] + '</th>';
+    }
+
+    ret += "</tr>";
+    return ret;
+}
+
+function generateCveTable(severity) {
+    switch (severity) {
+        case SEVERITY.HIGH:
+        case SEVERITY.MED:
+        case SEVERITY.LOW:
+            generateSastCveTable(severity);
+            break;
+
+        case SEVERITY.OSA_HIGH:
+        case SEVERITY.OSA_MED:
+        case SEVERITY.OSA_LOW:
+            generateOsaCveTable(severity);
+            break;
     }
 }
 
