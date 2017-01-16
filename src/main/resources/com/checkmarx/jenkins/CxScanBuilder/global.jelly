@@ -43,6 +43,10 @@
             </f:entry>
         </f:advanced>
 
+        <f:entry title="Allow Checkmarx project creation if project doesn't exist" field="allowProjectCreation">
+        	<f:checkbox default="true" />
+        </f:entry>
+
 		<f:entry title="Hide results" field="hideResults">
 			<f:checkbox default="false" />
 		</f:entry>

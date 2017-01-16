@@ -458,12 +458,20 @@ public class CxScanBuilder extends Builder {
             instanceLogger.info("Checkmarx server login successful");
 
             setProjectId(build, listener, cxWebService);
-
             if (needToAvoidDuplicateProjectScans(cxWebService)) {
                 instanceLogger.info("\nAvoid duplicate project scans in queue\n");
                 return true;
             }
 
+            if(projectId == 0 && !descriptor.isAllowProjectCreation()){
+                instanceLogger.info("\nThere is no Checkmarx project under the name "+projectName+" and there is no authorization to create new Checkmarx projects.");
+                instanceLogger.info("Please use an existing Checkmarx project or refer to admin to enable Checkmarx project creation.");
+                instanceLogger.info("[Enable project creation by admin: Manage jenkins > Configure System > checkbox: Create a new Checkmarx project if does not already exist]\n");
+                build.setResult(Result.FAILURE);
+                return true;
+            }
+
+            //If there no project under the project name a new project will be created
             cxWSResponseRunID = submitScan(build, cxWebService, listener);
             setProjectId(build, listener, cxWebService);
 
@@ -622,41 +630,42 @@ public class CxScanBuilder extends Builder {
                 html = Pattern.compile("\\<!--thresholdStatusStart-->.*\\<!--thresholdStatusEnd-->", Pattern.DOTALL).matcher(html).replaceAll("");
             }
 
-            if(!cxScanResult.getOsaScanResult().isOsaEnabled()) {
-                html = Pattern.compile("\\<!--osaStart-->.*\\<!--osaEnd-->", Pattern.DOTALL).matcher(html).replaceAll("");
-            } else {
-
-                int osaResultsSum = cxScanResult.getOsaScanResult().getOsaHighCount() + cxScanResult.getOsaScanResult().getOsaMediumCount() + cxScanResult.getOsaScanResult().getOsaLowCount();
-                String linkToOsaPDF = Jenkins.getInstance().getRootUrl() + build.getUrl() + "checkmarx/osaPdfReport";
-                String linkToOsaHtml = Jenkins.getInstance().getRootUrl() + build.getUrl() + "checkmarx/osaHtmlReport";
-
-                html = html.replace("#osaPdfReportUrl#", linkToOsaPDF)
-                        .replace("#osaHtmlReportUrl#", linkToOsaHtml)
-                        .replace("#osaHighResults#", Integer.toString(cxScanResult.getOsaScanResult().getOsaHighCount()))
-                        .replace("#osaHighResultsHeight#", formatHtmlResultsHeight(cxScanResult.getOsaScanResult().getOsaHighCount(), osaResultsSum))
-                        .replace("#osaMediumResults#", Integer.toString(cxScanResult.getOsaScanResult().getOsaMediumCount()))
-                        .replace("#osaMediumResultsHeight#", formatHtmlResultsHeight(cxScanResult.getOsaScanResult().getOsaMediumCount(), osaResultsSum))
-                        .replace("#osaLowResults#", Integer.toString(cxScanResult.getOsaScanResult().getOsaLowCount()))
-                        .replace("#osaLowResultsHeight#", formatHtmlResultsHeight(cxScanResult.getOsaScanResult().getOsaLowCount(), osaResultsSum))
-                        .replace("#osaVulnerableAndOutdatedLibs#", Integer.toString(cxScanResult.getOsaScanResult().getOsaVulnerableAndOutdatedLibs()))
-                        .replace("#osaNoVulnerabilityLibs#", Integer.toString(cxScanResult.getOsaScanResult().getOsaNoVulnerabilityLibs()));
-
-                html = formatHtmlThreshold(html, cxScanResult.getOsaScanResult().getOsaHighCount(), cxScanResult.getOsaHighThreshold(), "<!--osaHighThresholdStart-->", "<!--osaHighThresholdEnd-->", "#osaHighThresholdHeight#", "#osaHighThreshold#");
-                html = formatHtmlThreshold(html, cxScanResult.getOsaScanResult().getOsaMediumCount(), cxScanResult.getOsaMediumThreshold(), "<!--osaMediumThresholdStart-->", "<!--osaMediumThresholdEnd-->", "#osaMediumThresholdHeight#", "#osaMediumThreshold#");
-                html = formatHtmlThreshold(html, cxScanResult.getOsaScanResult().getOsaLowCount(), cxScanResult.getOsaLowThreshold(), "<!--osaLowThresholdStart-->", "<!--osaLowThresholdEnd-->", "#osaLowThresholdHeight#", "#osaLowThreshold#");
-
-                if(vulnerabilityThresholdEnabled) {
-                    if(cxScanResult.isOsaThresholdExceeded()) {
-                        html = html.replace("#osaThresholdCompliance#", "style=\"visibility: hidden\"");
-                        html = html.replace("#osaThresholdExceeded#", "");
-                    } else {
-                        html = html.replace("#osaThresholdExceeded#", "style=\"visibility: hidden\"");
-                        html = html.replace("#osaThresholdCompliance#", "");
-                    }
-
+            if(cxScanResult.getOsaScanResult() != null ) {
+                if (!cxScanResult.getOsaScanResult().isOsaEnabled()) {
+                    html = Pattern.compile("\\<!--osaStart-->.*\\<!--osaEnd-->", Pattern.DOTALL).matcher(html).replaceAll("");
                 } else {
-                    html = Pattern.compile("\\<!--osaThresholdStatusStart-->.*\\<!--osaThresholdStatusEnd-->", Pattern.DOTALL).matcher(html).replaceAll("");
+
+                    int osaResultsSum = cxScanResult.getOsaScanResult().getOsaHighCount() + cxScanResult.getOsaScanResult().getOsaMediumCount() + cxScanResult.getOsaScanResult().getOsaLowCount();
+                    String linkToOsaPDF = Jenkins.getInstance().getRootUrl() + build.getUrl() + "checkmarx/osaPdfReport";
+                    String linkToOsaHtml = Jenkins.getInstance().getRootUrl() + build.getUrl() + "checkmarx/osaHtmlReport";
+
+                    html = html.replace("#osaPdfReportUrl#", linkToOsaPDF)
+                            .replace("#osaHtmlReportUrl#", linkToOsaHtml)
+                            .replace("#osaHighResults#", Integer.toString(cxScanResult.getOsaScanResult().getOsaHighCount()))
+                            .replace("#osaHighResultsHeight#", formatHtmlResultsHeight(cxScanResult.getOsaScanResult().getOsaHighCount(), osaResultsSum))
+                            .replace("#osaMediumResults#", Integer.toString(cxScanResult.getOsaScanResult().getOsaMediumCount()))
+                            .replace("#osaMediumResultsHeight#", formatHtmlResultsHeight(cxScanResult.getOsaScanResult().getOsaMediumCount(), osaResultsSum))
+                            .replace("#osaLowResults#", Integer.toString(cxScanResult.getOsaScanResult().getOsaLowCount()))
+                            .replace("#osaLowResultsHeight#", formatHtmlResultsHeight(cxScanResult.getOsaScanResult().getOsaLowCount(), osaResultsSum))
+                            .replace("#osaVulnerableAndOutdatedLibs#", Integer.toString(cxScanResult.getOsaScanResult().getOsaVulnerableAndOutdatedLibs()))
+                            .replace("#osaNoVulnerabilityLibs#", Integer.toString(cxScanResult.getOsaScanResult().getOsaNoVulnerabilityLibs()));
+
+                    html = formatHtmlThreshold(html, cxScanResult.getOsaScanResult().getOsaHighCount(), cxScanResult.getOsaHighThreshold(), "<!--osaHighThresholdStart-->", "<!--osaHighThresholdEnd-->", "#osaHighThresholdHeight#", "#osaHighThreshold#");
+                    html = formatHtmlThreshold(html, cxScanResult.getOsaScanResult().getOsaMediumCount(), cxScanResult.getOsaMediumThreshold(), "<!--osaMediumThresholdStart-->", "<!--osaMediumThresholdEnd-->", "#osaMediumThresholdHeight#", "#osaMediumThreshold#");
+                    html = formatHtmlThreshold(html, cxScanResult.getOsaScanResult().getOsaLowCount(), cxScanResult.getOsaLowThreshold(), "<!--osaLowThresholdStart-->", "<!--osaLowThresholdEnd-->", "#osaLowThresholdHeight#", "#osaLowThreshold#");
                 }
+            }
+            if(vulnerabilityThresholdEnabled) {
+                if(cxScanResult.isOsaThresholdExceeded()) {
+                    html = html.replace("#osaThresholdCompliance#", "style=\"visibility: hidden\"");
+                    html = html.replace("#osaThresholdExceeded#", "");
+                } else {
+                    html = html.replace("#osaThresholdExceeded#", "style=\"visibility: hidden\"");
+                    html = html.replace("#osaThresholdCompliance#", "");
+                }
+
+            } else {
+                html = Pattern.compile("\\<!--osaThresholdStatusStart-->.*\\<!--osaThresholdStatusEnd-->", Pattern.DOTALL).matcher(html).replaceAll("");
             }
 
 
@@ -1087,6 +1096,8 @@ public class CxScanBuilder extends Builder {
         private String username;
         @Nullable
         private String password;
+
+        private boolean allowProjectCreation;
         private boolean hideResults;
         private boolean enableCertificateValidation;
         @Nullable
@@ -1157,6 +1168,15 @@ public class CxScanBuilder extends Builder {
         public String getPasswordPlainText(String password) {
             return Secret.fromString(password).getPlainText();
         }
+
+        public boolean isAllowProjectCreation() {
+            return allowProjectCreation;
+        }
+
+        public void setAllowProjectCreation(boolean allowProjectCreation) {
+            this.allowProjectCreation = allowProjectCreation;
+        }
+
 
         public boolean isHideResults() {
             return hideResults;
