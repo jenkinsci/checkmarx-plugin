@@ -27,6 +27,7 @@ import java.util.Map;
  * @author tsahi
  * @since 02/02/16
  */
+@Deprecated
 public class ScanClient implements Closeable {
     private static final String ROOT_PATH = "CxRestAPI/";
     private static final String AUTHENTICATION_PATH = "auth/login";

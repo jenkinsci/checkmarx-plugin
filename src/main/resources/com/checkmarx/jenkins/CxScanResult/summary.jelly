@@ -324,17 +324,17 @@ var medCount = ${it.mediumCount};
 var lowCount = ${it.lowCount};
 
 //osa
-var osaEnabled = ${it.osaEnabled};
-var vulnerableLibraries = ${it.osaVulnerableAndOutdatedLibs};
-var okLibraries = ${it.osaNoVulnerabilityLibs};
+var osaEnabled = ${it.osaScanResult.osaEnabled};
+var vulnerableLibraries = ${it.osaScanResult.osaVulnerableAndOutdatedLibs};
+var okLibraries = ${it.osaScanResult.osaNoVulnerabilityLibs};
 var osaThresholdsEnabled = ${it.osaThresholdsEnabled};
 
 var osaHighThreshold = ${it.osaHighThreshold};
 var osaMedThreshold = ${it.osaMediumThreshold};
 var osaLowThreshold = ${it.osaLowThreshold};
-var osaHighCount = ${it.osaHighCount};
-var osaMedCount = ${it.osaMediumCount};
-var osaLowCount = ${it.osaLowCount};
+var osaHighCount = ${it.osaScanResult.osaHighCount};
+var osaMedCount = ${it.osaScanResult.osaMediumCount};
+var osaLowCount = ${it.osaScanResult.osaLowCount};
 
 window.onload = function() {
 
@@ -748,7 +748,7 @@ function tooltipGenerator(severity) {
     </tr>
 
 
-    <!--<j:if test="${it.isOsaEnabled()}">-->
+    <!--<j:if test="${it.osaScanResult.isOsaEnabled()}">-->
     <!--osa row-->
     <tr id="osa-info" class="summary-table-row cxosa top-padding">
         <td class="title-column">

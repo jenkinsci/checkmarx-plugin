@@ -1,28 +1,11 @@
 package com.checkmarx.jenkins;
 
-import static com.checkmarx.jenkins.CxResultSeverity.HIGH;
-import static com.checkmarx.jenkins.CxResultSeverity.INFO;
-import static com.checkmarx.jenkins.CxResultSeverity.LOW;
-import static com.checkmarx.jenkins.CxResultSeverity.MEDIUM;
-import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
 import hudson.PluginWrapper;
-import hudson.model.Action;
 import hudson.model.AbstractBuild;
+import hudson.model.Action;
 import hudson.model.Hudson;
 import hudson.util.IOUtils;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.servlet.ServletOutputStream;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
 import jenkins.model.Jenkins;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -32,6 +15,17 @@ import org.kohsuke.stapler.StaplerResponse;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
+
+import javax.servlet.ServletOutputStream;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.File;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+
+import static com.checkmarx.jenkins.CxResultSeverity.*;
 
 /**
  * @author denis
@@ -56,6 +50,8 @@ public class CxScanResult implements Action {
     private LinkedList<QueryResult> lowQueryResultList;
     private LinkedList<QueryResult> infoQueryResultList;
 
+    private OsaScanResult osaScanResult;
+
     @NotNull
     private String resultDeepLink;
     private File pdfReport;
@@ -74,16 +70,6 @@ public class CxScanResult implements Action {
 
     private boolean resultIsValid;
     private String errorMessage;
-
-
-    //osa results
-    private int osaHighCount;
-    private int osaMediumCount;
-    private int osaLowCount;
-    private int osaVulnerableAndOutdatedLibs;
-    private int osaNoVulnerabilityLibs;
-    private boolean osaEnabled = false;
-
 
     //Thresholds
     private boolean thresholdsEnabled = false;
@@ -117,17 +103,6 @@ public class CxScanResult implements Action {
         this.infoQueryResultList = new LinkedList<>();
     }
 
-    public void addOsaResults(GetOpenSourceSummaryResponse osaResults) {
-        //osa fields
-        if (osaResults != null) {
-            this.setOsaEnabled(true);
-            this.osaHighCount = osaResults.getHighCount();
-            this.osaMediumCount = osaResults.getMediumCount();
-            this.osaLowCount = osaResults.getLowCount();
-            this.osaVulnerableAndOutdatedLibs = Integer.parseInt(osaResults.getVulnerableAndOutdated());
-            this.osaNoVulnerabilityLibs = Integer.parseInt(osaResults.getNoKnownVulnerabilities());
-        }
-    }
 
     public void setOsaThresholds(ThresholdConfig thresholdConfig) {
         this.setOsaThresholdsEnabled(true);
@@ -181,14 +156,6 @@ public class CxScanResult implements Action {
         @Nullable
         CxScanBuilder.DescriptorImpl descriptor = (CxScanBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(CxScanBuilder.class);
         return descriptor != null && !descriptor.isHideResults() && !isScanRanAsynchronous();
-    }
-
-    public boolean isOsaEnabled() {
-        return osaEnabled;
-    }
-
-    public void setOsaEnabled(boolean osaEnabled) {
-        this.osaEnabled = osaEnabled;
     }
 
     public boolean isThresholdsEnabled() {
@@ -434,44 +401,12 @@ public class CxScanResult implements Action {
         return serverUrl + "/CxWebClient/portal#/projectState/" + projectId + "/Summary";
     }
 
-    public int getOsaHighCount() {
-        return osaHighCount;
+    public OsaScanResult getOsaScanResult() {
+        return osaScanResult;
     }
 
-    public void setOsaHighCount(int osaHighCount) {
-        this.osaHighCount = osaHighCount;
-    }
-
-    public int getOsaMediumCount() {
-        return osaMediumCount;
-    }
-
-    public void setOsaMediumCount(int osaMediumCount) {
-        this.osaMediumCount = osaMediumCount;
-    }
-
-    public int getOsaLowCount() {
-        return osaLowCount;
-    }
-
-    public void setOsaLowCount(int osaLowCount) {
-        this.osaLowCount = osaLowCount;
-    }
-
-    public int getOsaVulnerableAndOutdatedLibs() {
-        return osaVulnerableAndOutdatedLibs;
-    }
-
-    public void setOsaVulnerableAndOutdatedLibs(int osaVulnerableAndOutdatedLibs) {
-        this.osaVulnerableAndOutdatedLibs = osaVulnerableAndOutdatedLibs;
-    }
-
-    public int getOsaNoVulnerabilityLibs() {
-        return osaNoVulnerabilityLibs;
-    }
-
-    public void setOsaNoVulnerabilityLibs(int osaNoVulnerabilityLibs) {
-        this.osaNoVulnerabilityLibs = osaNoVulnerabilityLibs;
+    public void setOsaScanResult(OsaScanResult osaScanResult) {
+        this.osaScanResult = osaScanResult;
     }
 
     private class ResultsParseHandler extends DefaultHandler {
@@ -587,9 +522,9 @@ public class CxScanResult implements Action {
     }
 
     public boolean isOsaThresholdExceeded() {
-        boolean ret = isThresholdExceededByLevel(osaHighCount, osaHighThreshold);
-        ret |= isThresholdExceededByLevel(osaMediumCount, osaMediumThreshold);
-        ret |= isThresholdExceededByLevel(osaLowCount, osaLowThreshold);
+        boolean ret = isThresholdExceededByLevel(osaScanResult.getOsaHighCount(), osaHighThreshold);
+        ret |= isThresholdExceededByLevel(osaScanResult.getOsaMediumCount(), osaMediumThreshold);
+        ret |= isThresholdExceededByLevel(osaScanResult.getOsaLowCount(), osaLowThreshold);
        return ret;
     }
 

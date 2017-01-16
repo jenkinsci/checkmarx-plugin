@@ -608,7 +608,7 @@ body {
 
 
 
-                               <j:if test="${it.lastSynchronousBuildAction.isOsaEnabled()}">
+                               <j:if test="${it.lastSynchronousBuildAction.osaScanResult.isOsaEnabled()}">
                        <!--osa row-->
                        <tr class="summary-table-row cxosa top-padding">
                            <td class="title-column">
@@ -708,7 +708,7 @@ body {
                                                </g>
                                            </svg>
                                        </div>
-                                       <div class="libraries-vulnerable-number">${it.lastSynchronousBuildAction.osaVulnerableAndOutdatedLibs}</div>
+                                       <div class="libraries-vulnerable-number">${it.lastSynchronousBuildAction.osaScanResult.osaVulnerableAndOutdatedLibs}</div>
                                        <div class="libraries-vulnerable-text">
                                            Vulnerable and outdated libraries
                                        </div>
@@ -740,7 +740,7 @@ body {
                                                </g>
                                            </svg>
                                        </div>
-                                       <div class="libraries-vulnerable-number">${it.lastSynchronousBuildAction.osaNoVulnerabilityLibs}</div>
+                                       <div class="libraries-vulnerable-number">${it.lastSynchronousBuildAction.osaScanResult.osaNoVulnerabilityLibs}</div>
                                        <div class="libraries-ok-text">
                                            Libraries with no vulnerabilities
                                        </div>
@@ -788,10 +788,10 @@ body {
 
                                    <ul class="chart">
                                        <li>
-                                           <div class="bar-count">${it.lastSynchronousBuildAction.osaHighCount}</div>
-                                           <span class="bar-1" style="height:${it.lastSynchronousBuildAction.osaHighCount*100/(it.lastSynchronousBuildAction.osaHighCount + it.lastSynchronousBuildAction.osaMediumCount + it.lastSynchronousBuildAction.osaLowCount)}%">
-                                               <j:if test="${it.lastSynchronousBuildAction.OsaThresholdsEnabled &amp;&amp; it.lastSynchronousBuildAction.osaHighThreshold!=null &amp;&amp; it.lastSynchronousBuildAction.osaHighCount>it.lastSynchronousBuildAction.osaHighThreshold}">
-                                                  <div class="tooltip-container" style="bottom:calc(${it.lastSynchronousBuildAction.osaHighThreshold*100/it.lastSynchronousBuildAction.osaHighCount}% - 1px)">
+                                           <div class="bar-count">${it.lastSynchronousBuildAction.osaScanResult.osaHighCount}</div>
+                                           <span class="bar-1" style="height:${it.lastSynchronousBuildAction.osaScanResult.osaHighCount*100/(it.lastSynchronousBuildAction.osaScanResult.osaHighCount + it.lastSynchronousBuildAction.osaScanResult.osaMediumCount + it.lastSynchronousBuildAction.osaScanResult.osaLowCount)}%">
+                                               <j:if test="${it.lastSynchronousBuildAction.OsaThresholdsEnabled &amp;&amp; it.lastSynchronousBuildAction.osaHighThreshold!=null &amp;&amp; it.lastSynchronousBuildAction.osaScanResult.osaHighCount>it.lastSynchronousBuildAction.osaHighThreshold}">
+                                                  <div class="tooltip-container" style="bottom:calc(${it.lastSynchronousBuildAction.osaHighThreshold*100/it.lastSynchronousBuildAction.osaScanResult.osaHighCount}% - 1px)">
                                                      <div class="threshold-line"></div>
                                                      <div class="threshold-tooltip">
                                                          <div class="threshold-tooltip-background">
@@ -845,10 +845,10 @@ body {
                                        </li>
                                        <li>
 
-                                           <div class="bar-count">${it.lastSynchronousBuildAction.osaMediumCount}</div>
-                                           <span class="bar-2" style="height:${it.lastSynchronousBuildAction.osaMediumCount*100/(it.lastSynchronousBuildAction.osaHighCount + it.lastSynchronousBuildAction.osaMediumCount + it.lastSynchronousBuildAction.osaLowCount)}%">
-                                               <j:if test="${it.lastSynchronousBuildAction.OsaThresholdsEnabled &amp;&amp; it.lastSynchronousBuildAction.osaMediumThreshold!=null &amp;&amp; it.lastSynchronousBuildAction.osaMediumCount>it.lastSynchronousBuildAction.osaMediumThreshold}">
-                                                    <div class="tooltip-container" style="bottom:calc(${it.lastSynchronousBuildAction.osaMediumThreshold*100/it.lastSynchronousBuildAction.osaMediumCount}% - 1px)">
+                                           <div class="bar-count">${it.lastSynchronousBuildAction.osaScanResult.osaMediumCount}</div>
+                                           <span class="bar-2" style="height:${it.lastSynchronousBuildAction.osaScanResult.osaMediumCount*100/(it.lastSynchronousBuildAction.osaScanResult.osaHighCount + it.lastSynchronousBuildAction.osaScanResult.osaMediumCount + it.lastSynchronousBuildAction.osaScanResult.osaLowCount)}%">
+                                               <j:if test="${it.lastSynchronousBuildAction.OsaThresholdsEnabled &amp;&amp; it.lastSynchronousBuildAction.osaMediumThreshold!=null &amp;&amp; it.lastSynchronousBuildAction.osaScanResult.osaMediumCount>it.lastSynchronousBuildAction.osaMediumThreshold}">
+                                                    <div class="tooltip-container" style="bottom:calc(${it.lastSynchronousBuildAction.osaMediumThreshold*100/it.lastSynchronousBuildAction.osaScanResult.osaMediumCount}% - 1px)">
                                                        <div class="threshold-line"></div>
                                                        <div class="threshold-tooltip">
                                                            <div class="threshold-tooltip-background">
@@ -901,10 +901,10 @@ body {
                                            </div>
                                        </li>
                                        <li>
-                                           <div class="bar-count">${it.lastSynchronousBuildAction.osaLowCount}</div>
-                                           <span class="bar-3" style="height:${it.lastSynchronousBuildAction.osaLowCount*100/(it.lastSynchronousBuildAction.osaHighCount + it.lastSynchronousBuildAction.osaMediumCount + it.lastSynchronousBuildAction.osaLowCount)}%">
-                                               <j:if test="${it.lastSynchronousBuildAction.OsaThresholdsEnabled &amp;&amp; it.lastSynchronousBuildAction.osaLowThreshold!=null &amp;&amp; it.lastSynchronousBuildAction.osaLowCount>it.lastSynchronousBuildAction.osaLowThreshold}">
-                                                    <div class="tooltip-container" style="bottom:calc(${it.lastSynchronousBuildAction.osaLowThreshold*100/it.lastSynchronousBuildAction.osaLowCount}% - 1px)">
+                                           <div class="bar-count">${it.lastSynchronousBuildAction.osaScanResult.osaLowCount}</div>
+                                           <span class="bar-3" style="height:${it.lastSynchronousBuildAction.osaScanResult.osaLowCount*100/(it.lastSynchronousBuildAction.osaScanResult.osaHighCount + it.lastSynchronousBuildAction.osaScanResult.osaMediumCount + it.lastSynchronousBuildAction.osaScanResult.osaLowCount)}%">
+                                               <j:if test="${it.lastSynchronousBuildAction.OsaThresholdsEnabled &amp;&amp; it.lastSynchronousBuildAction.osaLowThreshold!=null &amp;&amp; it.lastSynchronousBuildAction.osaScanResult.osaLowCount>it.lastSynchronousBuildAction.osaLowThreshold}">
+                                                    <div class="tooltip-container" style="bottom:calc(${it.lastSynchronousBuildAction.osaLowThreshold*100/it.lastSynchronousBuildAction.osaScanResult.osaLowCount}% - 1px)">
                                                        <div class="threshold-line"></div>
                                                        <div class="threshold-tooltip">
                                                            <div class="threshold-tooltip-background">

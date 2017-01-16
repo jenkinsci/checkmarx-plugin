@@ -3,14 +3,10 @@ package com.checkmarx.jenkins;
 import com.checkmarx.components.zipper.Zipper;
 import com.checkmarx.jenkins.filesystem.FolderPattern;
 import com.checkmarx.jenkins.filesystem.zip.CxZip;
-import com.checkmarx.jenkins.opensourceanalysis.DependencyFolder;
-import com.checkmarx.jenkins.opensourceanalysis.ScanResultsPresenter;
-import com.checkmarx.jenkins.opensourceanalysis.ScanSender;
-import com.checkmarx.jenkins.opensourceanalysis.ScanService;
-import com.checkmarx.jenkins.web.client.ScanClient;
+import com.checkmarx.jenkins.opensourceanalysis.*;
+import com.checkmarx.jenkins.web.client.OsaScanClient;
 import com.checkmarx.jenkins.web.contracts.ProjectContract;
 import com.checkmarx.jenkins.web.model.AuthenticationRequest;
-import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
 import com.checkmarx.ws.CxJenkinsWebService.*;
 import hudson.*;
 import hudson.console.HyperlinkNote;
@@ -476,7 +472,7 @@ public class CxScanBuilder extends Builder {
                 logAsyncMessage(serverUrlToUse);
                 addScanResultAction(build, serverUrlToUse, shouldRunAsynchronous, null);
                 if (osaEnabled) {
-                    analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService, listener, shouldRunAsynchronous);
+                    analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, cxWebService, listener, shouldRunAsynchronous);
                 }
                 return true;
             }
@@ -523,8 +519,8 @@ public class CxScanBuilder extends Builder {
             //OSA scan
             boolean isOSAThresholdFailedTheBuild = false;
             if (osaEnabled) {
-                GetOpenSourceSummaryResponse osaResults = analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, projectId, cxWebService, listener, shouldRunAsynchronous);
-                cxScanResult.addOsaResults(osaResults);
+                OsaScanResult osaScanResult = analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, cxWebService, listener, shouldRunAsynchronous);
+                cxScanResult.setOsaScanResult(osaScanResult);
                 ThresholdConfig osaThresholdConfig = createOsaThresholdConfig();
 
                 // Set scan thresholds for the summery.jelly
@@ -532,11 +528,11 @@ public class CxScanBuilder extends Builder {
                     cxScanResult.setOsaThresholds(osaThresholdConfig);
                 }
                 //retrieve osa scan results pdf + html
-                getOSAReports(serverUrlToUseNotNull, usernameToUse, passwordToUse, checkmarxBuildDir);
+                getOSAReports(cxScanResult.getOsaScanResult().getScanId(), serverUrlToUseNotNull, usernameToUse, passwordToUse, checkmarxBuildDir);
 
                 //OSA Threshold
-                isOSAThresholdFailedTheBuild = osaResults != null && ((descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || isVulnerabilityThresholdEnabled())
-                        && isThresholdCrossed(osaThresholdConfig, osaResults.getHighCount(), osaResults.getMediumCount(), osaResults.getLowCount(), "OSA ");
+                isOSAThresholdFailedTheBuild = cxScanResult.getOsaScanResult().isOsaReturnedResult() && ((descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || isVulnerabilityThresholdEnabled())
+                        && isThresholdCrossed(osaThresholdConfig, cxScanResult.getOsaScanResult().getOsaHighCount(), cxScanResult.getMediumCount(), cxScanResult.getLowCount(), "OSA ");
             }
 
 
@@ -626,28 +622,28 @@ public class CxScanBuilder extends Builder {
                 html = Pattern.compile("\\<!--thresholdStatusStart-->.*\\<!--thresholdStatusEnd-->", Pattern.DOTALL).matcher(html).replaceAll("");
             }
 
-            if(!cxScanResult.isOsaEnabled()) {
+            if(!cxScanResult.getOsaScanResult().isOsaEnabled()) {
                 html = Pattern.compile("\\<!--osaStart-->.*\\<!--osaEnd-->", Pattern.DOTALL).matcher(html).replaceAll("");
             } else {
 
-                int osaResultsSum = cxScanResult.getOsaHighCount() + cxScanResult.getOsaMediumCount() + cxScanResult.getOsaLowCount();
+                int osaResultsSum = cxScanResult.getOsaScanResult().getOsaHighCount() + cxScanResult.getOsaScanResult().getOsaMediumCount() + cxScanResult.getOsaScanResult().getOsaLowCount();
                 String linkToOsaPDF = Jenkins.getInstance().getRootUrl() + build.getUrl() + "checkmarx/osaPdfReport";
                 String linkToOsaHtml = Jenkins.getInstance().getRootUrl() + build.getUrl() + "checkmarx/osaHtmlReport";
 
                 html = html.replace("#osaPdfReportUrl#", linkToOsaPDF)
                         .replace("#osaHtmlReportUrl#", linkToOsaHtml)
-                        .replace("#osaHighResults#", Integer.toString(cxScanResult.getOsaHighCount()))
-                        .replace("#osaHighResultsHeight#", formatHtmlResultsHeight(cxScanResult.getOsaHighCount(), osaResultsSum))
-                        .replace("#osaMediumResults#", Integer.toString(cxScanResult.getOsaMediumCount()))
-                        .replace("#osaMediumResultsHeight#", formatHtmlResultsHeight(cxScanResult.getOsaMediumCount(), osaResultsSum))
-                        .replace("#osaLowResults#", Integer.toString(cxScanResult.getOsaLowCount()))
-                        .replace("#osaLowResultsHeight#", formatHtmlResultsHeight(cxScanResult.getOsaLowCount(), osaResultsSum))
-                        .replace("#osaVulnerableAndOutdatedLibs#", Integer.toString(cxScanResult.getOsaVulnerableAndOutdatedLibs()))
-                        .replace("#osaNoVulnerabilityLibs#", Integer.toString(cxScanResult.getOsaNoVulnerabilityLibs()));
+                        .replace("#osaHighResults#", Integer.toString(cxScanResult.getOsaScanResult().getOsaHighCount()))
+                        .replace("#osaHighResultsHeight#", formatHtmlResultsHeight(cxScanResult.getOsaScanResult().getOsaHighCount(), osaResultsSum))
+                        .replace("#osaMediumResults#", Integer.toString(cxScanResult.getOsaScanResult().getOsaMediumCount()))
+                        .replace("#osaMediumResultsHeight#", formatHtmlResultsHeight(cxScanResult.getOsaScanResult().getOsaMediumCount(), osaResultsSum))
+                        .replace("#osaLowResults#", Integer.toString(cxScanResult.getOsaScanResult().getOsaLowCount()))
+                        .replace("#osaLowResultsHeight#", formatHtmlResultsHeight(cxScanResult.getOsaScanResult().getOsaLowCount(), osaResultsSum))
+                        .replace("#osaVulnerableAndOutdatedLibs#", Integer.toString(cxScanResult.getOsaScanResult().getOsaVulnerableAndOutdatedLibs()))
+                        .replace("#osaNoVulnerabilityLibs#", Integer.toString(cxScanResult.getOsaScanResult().getOsaNoVulnerabilityLibs()));
 
-                html = formatHtmlThreshold(html, cxScanResult.getOsaHighCount(), cxScanResult.getOsaHighThreshold(), "<!--osaHighThresholdStart-->", "<!--osaHighThresholdEnd-->", "#osaHighThresholdHeight#", "#osaHighThreshold#");
-                html = formatHtmlThreshold(html, cxScanResult.getOsaMediumCount(), cxScanResult.getOsaMediumThreshold(), "<!--osaMediumThresholdStart-->", "<!--osaMediumThresholdEnd-->", "#osaMediumThresholdHeight#", "#osaMediumThreshold#");
-                html = formatHtmlThreshold(html, cxScanResult.getOsaLowCount(), cxScanResult.getOsaLowThreshold(), "<!--osaLowThresholdStart-->", "<!--osaLowThresholdEnd-->", "#osaLowThresholdHeight#", "#osaLowThreshold#");
+                html = formatHtmlThreshold(html, cxScanResult.getOsaScanResult().getOsaHighCount(), cxScanResult.getOsaHighThreshold(), "<!--osaHighThresholdStart-->", "<!--osaHighThresholdEnd-->", "#osaHighThresholdHeight#", "#osaHighThreshold#");
+                html = formatHtmlThreshold(html, cxScanResult.getOsaScanResult().getOsaMediumCount(), cxScanResult.getOsaMediumThreshold(), "<!--osaMediumThresholdStart-->", "<!--osaMediumThresholdEnd-->", "#osaMediumThresholdHeight#", "#osaMediumThreshold#");
+                html = formatHtmlThreshold(html, cxScanResult.getOsaScanResult().getOsaLowCount(), cxScanResult.getOsaLowThreshold(), "<!--osaLowThresholdStart-->", "<!--osaLowThresholdEnd-->", "#osaLowThresholdHeight#", "#osaLowThreshold#");
 
                 if(vulnerabilityThresholdEnabled) {
                     if(cxScanResult.isOsaThresholdExceeded()) {
@@ -690,11 +686,11 @@ public class CxScanBuilder extends Builder {
         }
     }
 
-    private void getOSAReports(String serverUrl, String username, String password, File checkmarxBuildDir) {
+    private void getOSAReports(String scanId, String serverUrl, String username, String password, File checkmarxBuildDir) {
         instanceLogger.info("retrieving osa report files");
         AuthenticationRequest authReq = new AuthenticationRequest(username, password);
-        ScanClient scanClient = new ScanClient(serverUrl, authReq);
-        String osaScanHtmlResults = scanClient.getOSAScanHtmlResults(projectId);
+        OsaScanClient scanClient = new OsaScanClient(serverUrl, authReq, instanceLogger);
+        String osaScanHtmlResults = scanClient.getOSAScanHtmlResults(scanId);
         File osaHtmlReport = new File(checkmarxBuildDir, "OSAReport.html");
         try {
             FileUtils.writeStringToFile(osaHtmlReport, osaScanHtmlResults);
@@ -703,7 +699,7 @@ public class CxScanBuilder extends Builder {
         }
         instanceLogger.info("osa report file [" + osaHtmlReport.getAbsolutePath() + "] generated successfully");
 
-        byte[] osaScanPdfResults = scanClient.getOSAScanPdfResults(projectId);
+        byte[] osaScanPdfResults = scanClient.getOSAScanPdfResults(scanId);
         File osaPdfReport = new File(checkmarxBuildDir, "OSAReport.pdf");
         try {
             FileUtils.writeByteArrayToFile(osaPdfReport, osaScanPdfResults);
@@ -711,7 +707,6 @@ public class CxScanBuilder extends Builder {
             instanceLogger.warn("fail to write osa pdf report to [" + osaPdfReport.getAbsolutePath() + "]");
         }
         instanceLogger.info("osa report file [" + osaPdfReport.getAbsolutePath() + "] generated successfully");
-
 
     }
 
@@ -834,14 +829,29 @@ public class CxScanBuilder extends Builder {
         return cxWebService.getProjectId(cliScanArgs.getPrjSettings());
     }
 
-    private GetOpenSourceSummaryResponse analyzeOpenSources(AbstractBuild<?, ?> build, String baseUri, String user, String password, long projectId, CxWebService webServiceClient, BuildListener listener, boolean shouldRunAsynchronous) throws IOException, InterruptedException {
-        DependencyFolder folders = new DependencyFolder(includeOpenSourceFolders, excludeOpenSourceFolders);
+    private OsaScanResult analyzeOpenSources(AbstractBuild<?, ?> build, String baseUri, String user, String password, CxWebService webServiceClient, BuildListener listener, boolean shouldRunAsynchronous) throws IOException, InterruptedException {
         AuthenticationRequest authReq = new AuthenticationRequest(user, password);
-        try (ScanClient scanClient = new ScanClient(baseUri, authReq)) {
-            ScanService scanService = new ScanService(folders,
-                    instanceLogger, webServiceClient, new CxZip(instanceLogger, build, listener), new FolderPattern(instanceLogger, build, listener), new ScanResultsPresenter(instanceLogger), new ScanSender(scanClient, projectId));
+        try (OsaScanClient scanClient = new OsaScanClient(baseUri, authReq, instanceLogger)) {
+            ScanServiceTools scanServiceTools = initScanServiceTools(scanClient, build, webServiceClient, listener);
+            ScanService scanService = new ScanService(scanServiceTools);
             return scanService.scan(shouldRunAsynchronous);
+        }catch (Exception e){
+            //todo
+           throw e;
         }
+    }
+
+    private ScanServiceTools initScanServiceTools(OsaScanClient scanClient, AbstractBuild<?, ?> build, CxWebService webServiceClient, BuildListener listener){
+        ScanServiceTools scanServiceTools = new ScanServiceTools();
+        scanServiceTools.setOsaScanClient(scanClient);
+        DependencyFolder folders = new DependencyFolder(includeOpenSourceFolders, excludeOpenSourceFolders);
+        scanServiceTools.setDependencyFolder(folders);
+        scanServiceTools.setBuild(build);
+        scanServiceTools.setListener(listener);
+        scanServiceTools.setLogger(instanceLogger);
+        scanServiceTools.setProjectId(projectId);
+        scanServiceTools.setWebServiceClient(webServiceClient);
+        return scanServiceTools;
     }
 
     private ThresholdConfig createThresholdConfig() {
