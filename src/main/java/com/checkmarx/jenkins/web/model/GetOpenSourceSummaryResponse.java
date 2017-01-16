@@ -3,97 +3,92 @@ package com.checkmarx.jenkins.web.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 /**
  * @author tsahi
  * @since 02/02/16
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-@XmlRootElement
 public class GetOpenSourceSummaryResponse {
-    @XmlElement(name="nonVulnerableLibraries")
-    private String noKnownVulnerabilities;
-    @XmlElement(name="vulnerableAndUpdated")
-    private String vulnerableAndUpdate;
-    @XmlElement(name="vulnerableAndOutdated")
-    private String vulnerableAndOutdated;
-    @XmlElement(name="totalLibraries")
-    private String total;
-    @XmlElement(name="highVulnerabilityLibraries")
-    private String highVulnerabilityLibraries;
-    @XmlElement(name="mediumVulnerabilityLibraries")
-    private String mediumVulnerabilityLibraries;
-    @XmlElement(name="lowVulnerabilityLibraries")
-    private String lowVulnerabilityLibraries;
-    @XmlElement(name="analyzeTime")
-    private String analyzeTime;
-    @XmlElement(name="vulnerabilityScore")
+    @JsonProperty("nonVulnerableLibraries")
+    private Integer noKnownVulnerabilities;
+    @JsonProperty("vulnerableAndUpdated")
+    private Integer vulnerableAndUpdate;
+    @JsonProperty("vulnerableAndOutdated")
+    private Integer vulnerableAndOutdated;
+    @JsonProperty("totalLibraries")
+    private Integer total;
+    @JsonProperty("highVulnerabilityLibraries")
+    private Integer highVulnerabilityLibraries;
+    @JsonProperty("mediumVulnerabilityLibraries")
+    private Integer mediumVulnerabilityLibraries;
+    @JsonProperty("lowVulnerabilityLibraries")
+    private Integer lowVulnerabilityLibraries;
+    @JsonProperty("vulnerabilityScore")
     private String vulnerabilityScore;
-    @XmlElement(name="highVulnerabilities")
-    private String highVulnerabilities;
-    @XmlElement(name="mediumVulnerabilities")
-    private String mediumVulnerabilities;
-    @XmlElement(name="lowVulnerabilities")
-    private String lowVulnerabilities;
+    @JsonProperty("totalHighVulnerabilities")
+    private Integer highVulnerabilities;
+    @JsonProperty("totalMediumVulnerabilities")
+    private Integer mediumVulnerabilities;
+    @JsonProperty("totalLowVulnerabilities")
+    private Integer lowVulnerabilities;
 
 
     public int getHighCount() {
-        return Integer.parseInt(highVulnerabilities);
+        return highVulnerabilities;
     }
     public int getMediumCount() {
-        return Integer.parseInt(mediumVulnerabilities);
-    }
-    public int getLowCount() {
-        return Integer.parseInt(lowVulnerabilities);
+        return mediumVulnerabilities;
     }
 
-    public String getNoKnownVulnerabilities() {
+    public int getLowCount() {
+        return lowVulnerabilities;
+    }
+
+    public Integer getNoKnownVulnerabilities() {
         return noKnownVulnerabilities;
     }
 
-    public void setNoKnownVulnerabilities(String noKnownVulnerabilities) {
+    public void setNoKnownVulnerabilities(Integer noKnownVulnerabilities) {
         this.noKnownVulnerabilities = noKnownVulnerabilities;
     }
 
-    public String getVulnerableAndUpdate() {
+    public Integer getVulnerableAndUpdate() {
         return vulnerableAndUpdate;
     }
 
-    public void setVulnerableAndUpdate(String vulnerableAndUpdate) {
+    public void setVulnerableAndUpdate(Integer vulnerableAndUpdate) {
         this.vulnerableAndUpdate = vulnerableAndUpdate;
     }
 
-    public String getVulnerableAndOutdated() {
+    public Integer getVulnerableAndOutdated() {
         return vulnerableAndOutdated;
     }
 
-    public void setVulnerableAndOutdated(String vulnerableAndOutdated) {
+    public void setVulnerableAndOutdated(Integer vulnerableAndOutdated) {
         this.vulnerableAndOutdated = vulnerableAndOutdated;
     }
 
-    public String getTotal() {
+    public Integer getTotal() {
         return total;
     }
 
-    public void setTotal(String total) {
+    public void setTotal(Integer total) {
         this.total = total;
     }
 
-    public String getHighVulnerabilityLibraries() {
+    public Integer getHighVulnerabilityLibraries() {
         return highVulnerabilityLibraries;
     }
 
-    public void setHighVulnerabilityLibraries(String highVulnerabilityLibraries) {
+    public void setHighVulnerabilityLibraries(Integer highVulnerabilityLibraries) {
         this.highVulnerabilityLibraries = highVulnerabilityLibraries;
     }
 
-    public String getMediumVulnerabilityLibraries() {
+    public Integer getMediumVulnerabilityLibraries() {
         return mediumVulnerabilityLibraries;
     }
 
-    public void setMediumVulnerabilityLibraries(String mediumVulnerabilityLibraries) {
+    public void setMediumVulnerabilityLibraries(Integer mediumVulnerabilityLibraries) {
         this.mediumVulnerabilityLibraries = mediumVulnerabilityLibraries;
     }
 
@@ -102,31 +97,42 @@ public class GetOpenSourceSummaryResponse {
         return vulnerabilityScore;
     }
 
-    public String getHighVulnerabilities()
+    public Integer getHighVulnerabilities()
     {
         return highVulnerabilities;
     }
 
-    public void setHighVulnerabilities(String highVulnerabilities) {
+    public void setHighVulnerabilities(Integer highVulnerabilities) {
         this.highVulnerabilities = highVulnerabilities;
     }
 
-    public String getMediumVulnerabilities()
+    public Integer getMediumVulnerabilities()
     {
         return mediumVulnerabilities;
     }
 
-    public void setMediumVulnerabilities(String mediumVulnerabilities) {
+    public void setMediumVulnerabilities(Integer mediumVulnerabilities) {
         this.mediumVulnerabilities = mediumVulnerabilities;
     }
 
-    public String getLowVulnerabilities()
+    public Integer getLowVulnerabilities()
     {
         return lowVulnerabilities;
     }
 
-    public void setLowVulnerabilities(String lowVulnerabilities) {
+    public void setLowVulnerabilities(Integer lowVulnerabilities) {
         this.lowVulnerabilities = lowVulnerabilities;
     }
 
+    public Integer getLowVulnerabilityLibraries() {
+        return lowVulnerabilityLibraries;
+    }
+
+    public void setLowVulnerabilityLibraries(Integer lowVulnerabilityLibraries) {
+        this.lowVulnerabilityLibraries = lowVulnerabilityLibraries;
+    }
+
+    public void setVulnerabilityScore(String vulnerabilityScore) {
+        this.vulnerabilityScore = vulnerabilityScore;
+    }
 }

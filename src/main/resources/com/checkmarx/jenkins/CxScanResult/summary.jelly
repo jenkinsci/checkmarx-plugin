@@ -387,38 +387,38 @@
 <script>
 
     //sast
-    var pdfReportReady = true;
+    var pdfReportReady = '${it.pdfReportReady}';
 
     //link paths
-    var sastPdfPath = "/dor/bo/rega";
-    var sastHtmlPath = "/haha/yissik";
-    var osaPdfPath = "/zepointer/mami";
-    var osaHtmlPath = "bati/laavod";
+    var sastPdfPath = "/dor/bo/rega"; //todo - sast pdf path
+    var sastHtmlPath = '${app.rootUrl}${it.owner.url}${it.urlName}';
+    var osaPdfPath = '${app.rootUrl}${it.owner.url}${it.urlName} + "/osaPdfReport"';
+    var osaHtmlPath = '${app.rootUrl}${it.owner.url}${it.urlName} + "/osaHtmlReport"';
     var sastFullHtmlPath = "tavi/lek/oded";
     var sastFullPdfPath = "tavi/pdf/oded";
     var sastFullCodeViewerPath = "tavi/CodeViewer/odetttt";
     var osaFullHtmlPath = "tavi/FullHtml/odetttt";
     var osaFullPdfPath = "tavi/FullPdf/odetttt";
 
-    var ThresholdsEnabled = true;
-    var highThreshold = 1;
-    var medThreshold = 1;
-    var lowThreshold = 1;
-    var highCount = 3;
-    var medCount = 3;
-    var lowCount = 3;
+    var ThresholdsEnabled = '${it.thresholdsEnabled}';
+    var highThreshold = '${it.highThreshold}';
+    var medThreshold = '${it.mediumThreshold}';
+    var lowThreshold = '${it.lowThreshold}';
+    var highCount = '${it.highCount}';
+    var medCount = '${it.mediumCount}';
+    var lowCount = '${it.lowCount}';
 
     //osa
-    var osaEnabled = true;
-    var vulnerableLibraries = 8;
-    var okLibraries = 28;
-    var osaThresholdsEnabled = true;
-    var osaHighThreshold = 1;
-    var osaMedThreshold = 1;
-    var osaLowThreshold = 1;
-    var osaHighCount = 3;
-    var osaMedCount = 3;
-    var osaLowCount = 3;
+    var osaEnabled = '${it.osaScanResult.osaEnabled}';
+    var vulnerableLibraries = '${it.osaScanResult.osaVulnerableAndOutdatedLibs}';
+    var okLibraries = '${it.osaScanResult.osaNoVulnerabilityLibs}';
+    var osaThresholdsEnabled = '${it.osaThresholdsEnabled}';
+    var osaHighThreshold = '${it.osaHighThreshold}';
+    var osaMedThreshold = '${it.osaMediumThreshold}';
+    var osaLowThreshold = '${it.osaLowThreshold}';
+    var osaHighCount = '${it.osaScanResult.osaHighCount}';
+    var osaMedCount = '${it.osaScanResult.osaMediumCount}';
+    var osaLowCount = '${it.osaScanResult.osaLowCount}';
 
     var highCveList = [
         {

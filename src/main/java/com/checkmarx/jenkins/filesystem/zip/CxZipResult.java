@@ -1,10 +1,9 @@
 package com.checkmarx.jenkins.filesystem.zip;
 
 import hudson.FilePath;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
-
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Stores zip file location.
@@ -18,13 +17,11 @@ public class CxZipResult implements Serializable {
     @NotNull
     private final FilePath tempFile;
     private final int numOfZippedFiles;
-    @NotNull
-    private final String logMessage;
 
-    public CxZipResult(@NotNull FilePath tempFile, int numOfZippedFiles, @NotNull String logMessage) {
+
+    public CxZipResult(@NotNull FilePath tempFile, int numOfZippedFiles) {
         this.tempFile = tempFile;
         this.numOfZippedFiles = numOfZippedFiles;
-        this.logMessage = logMessage;
     }
 
     @NotNull
@@ -36,8 +33,4 @@ public class CxZipResult implements Serializable {
         return numOfZippedFiles;
     }
 
-    @NotNull
-    public String getLogMessage() {
-        return logMessage;
-    }
 }

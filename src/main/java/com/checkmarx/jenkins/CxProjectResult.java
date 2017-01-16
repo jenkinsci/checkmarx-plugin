@@ -4,19 +4,8 @@ import hudson.Extension;
 import hudson.Functions;
 import hudson.PluginWrapper;
 import hudson.model.*;
-import hudson.util.Area;
-import hudson.util.ChartUtil;
-import hudson.util.DataSetBuilder;
-import hudson.util.ShiftedCategoryAxis;
-import hudson.util.StackedAreaRenderer2;
-
-import java.awt.Color;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.LinkedList;
-
+import hudson.util.*;
 import jenkins.model.Jenkins;
-
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,6 +21,11 @@ import org.jfree.data.category.CategoryDataset;
 import org.jfree.ui.RectangleInsets;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
+
+import java.awt.*;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedList;
 
 /**
  * @author denis

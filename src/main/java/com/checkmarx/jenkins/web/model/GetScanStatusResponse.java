@@ -8,6 +8,7 @@ import java.net.URI;
 /**
  * Created by tsahib on 9/27/2016.
  */
+@Deprecated
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GetScanStatusResponse {
     private int status;

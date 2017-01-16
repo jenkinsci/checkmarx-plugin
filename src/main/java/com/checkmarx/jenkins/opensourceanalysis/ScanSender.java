@@ -1,22 +1,21 @@
 package com.checkmarx.jenkins.opensourceanalysis;
-import com.checkmarx.jenkins.web.client.ScanClient;
-import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryRequest;
-import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
+import com.checkmarx.jenkins.OsaScanResult;
+import com.checkmarx.jenkins.web.client.OsaScanClient;
 import com.checkmarx.jenkins.web.model.CreateScanRequest;
+import com.checkmarx.jenkins.web.model.CreateScanResponse;
+import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
 import hudson.FilePath;
-
-import java.net.URI;
 
 
 /**
  * Created by tsahib on 9/12/2016.
  */
 public class ScanSender {
-    private ScanClient scanClient;
+    private OsaScanClient osaScanClient;
     private long projectId;
 
-    public ScanSender(ScanClient scanClient, long projectId) {
-        this.scanClient = scanClient;
+    public ScanSender(OsaScanClient scanClient, long projectId) {
+        this.osaScanClient = scanClient;
         this.projectId = projectId;
     }
 
@@ -24,24 +23,25 @@ public class ScanSender {
         createScan(sourceCodeZip);
     }
 
-    public GetOpenSourceSummaryResponse send(FilePath sourceCodeZip) throws Exception {
-        URI scanStatusUri = createScan(sourceCodeZip);
-        waitForScanToFinish(scanStatusUri);
-        GetOpenSourceSummaryResponse summary = getOpenSourceSummary();
-        return summary;
+    public void sendScanAndSetResults(FilePath sourceCodeZip, OsaScanResult osaScanResult) throws Exception {
+        CreateScanResponse createScanResponse = createScan(sourceCodeZip);
+        osaScanResult.setScanId(createScanResponse.getScanId());
+        waitForScanToFinish(createScanResponse.getScanId());
+        GetOpenSourceSummaryResponse getOpenSourceSummaryResponse = getOpenSourceSummary(createScanResponse.getScanId());
+        osaScanResult.addOsaResults(getOpenSourceSummaryResponse);
     }
 
-    private URI createScan(FilePath zipFile) throws Exception {
+    private CreateScanResponse createScan(FilePath zipFile) throws Exception {
         CreateScanRequest anaReq = new CreateScanRequest(projectId, zipFile);
-        return scanClient.createScan(anaReq);
+        return osaScanClient.createScan(anaReq);
     }
 
-    private void waitForScanToFinish(URI uri) throws InterruptedException {
-        scanClient.waitForScanToFinish(uri);
+    private void waitForScanToFinish(String scanId) throws InterruptedException {
+        osaScanClient.waitForScanToFinish(scanId);
     }
 
-    private GetOpenSourceSummaryResponse getOpenSourceSummary() throws Exception {
-        GetOpenSourceSummaryRequest summaryRequest = new GetOpenSourceSummaryRequest(projectId);
-        return scanClient.getOpenSourceSummary(summaryRequest);
+    private GetOpenSourceSummaryResponse getOpenSourceSummary(String scanId) throws Exception {
+        return osaScanClient.getOpenSourceSummary(scanId);
     }
+
 }

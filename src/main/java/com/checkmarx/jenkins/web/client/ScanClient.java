@@ -1,5 +1,19 @@
 package com.checkmarx.jenkins.web.client;
 
+import com.checkmarx.jenkins.web.model.*;
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.MultiPart;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
+import org.jetbrains.annotations.NotNull;
+
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.client.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.NewCookie;
+import javax.ws.rs.core.Response;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -7,21 +21,13 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
 
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.*;
-import javax.ws.rs.core.*;
-import com.checkmarx.jenkins.web.model.*;
-import org.glassfish.jersey.media.multipart.*;
-import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
-import org.jetbrains.annotations.NotNull;
-
 
 
 /**
  * @author tsahi
  * @since 02/02/16
  */
+@Deprecated
 public class ScanClient implements Closeable {
     private static final String ROOT_PATH = "CxRestAPI/";
     private static final String AUTHENTICATION_PATH = "auth/login";
