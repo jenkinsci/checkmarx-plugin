@@ -464,9 +464,8 @@ public class CxScanBuilder extends Builder {
             }
 
             if(projectId == 0 && !descriptor.isAllowProjectCreation()){
-                instanceLogger.info("\nThere is no Checkmarx project under the name "+projectName+" and there is no authorization to create new Checkmarx projects.");
-                instanceLogger.info("Please use an existing Checkmarx project or refer to admin to enable Checkmarx project creation.");
-                instanceLogger.info("[Enable project creation by admin: Manage jenkins > Configure System > checkbox: Create a new Checkmarx project if does not already exist]\n");
+                instanceLogger.info("\nCreation of the new project "+projectName+" is not authorized. Please use an existing project.");
+                instanceLogger.info("You can enable the creation of new projects by enabling the \"allow creation of new projects\" checkbox in the Jenkins plugin global settings.\n");
                 build.setResult(Result.FAILURE);
                 return true;
             }

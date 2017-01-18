@@ -14,9 +14,8 @@
 			<f:textbox default="${descriptor.currentTime}" field="timestamp" />
 		</f:invisibleEntry>
 
-		<f:entry title="Enable TLS/SSL Server Certificate Validation" field="enableCertificateValidation">
-			<f:checkbox default="false" />
-		</f:entry>
+        <f:optionalBlock title="Enable TLS/SSL Server Certificate Validation" inline="true"
+               field="enableCertificateValidation" checked="false"/>
 
 		<f:entry title="Default Server URL" field="serverUrl">
 			<f:textbox />
@@ -43,13 +42,10 @@
             </f:entry>
         </f:advanced>
 
-        <f:entry title="Allow Checkmarx project creation if project doesn't exist" field="allowProjectCreation">
-        	<f:checkbox default="true" />
-        </f:entry>
+        <f:optionalBlock title="Allow project creation if project name doesn't already exist" inline="true"
+             field="allowProjectCreation" checked="true"/>
 
-		<f:entry title="Hide results" field="hideResults">
-			<f:checkbox default="false" />
-		</f:entry>
+        <f:optionalBlock title="Hide results" inline="true" field="hideResults" checked="false"/>
 
 		<f:entry name="jobGlobalStatusOnError" title="Job status when CxSAST scan returns an error:" field="jobGlobalStatusOnError">
 			<f:enum field="jobGlobalStatusOnError">${it.displayName}</f:enum>
@@ -58,9 +54,8 @@
 		<f:optionalBlock title="Set vulnerability settings for all jobs" inline="true"
 			field="forcingVulnerabilityThresholdEnabled">
 
-			<f:entry title="Lock global vulnerability settings for all scans / jobs" field="lockVulnerabilitySettings">
-				<f:checkbox default="false" />
-			</f:entry>
+			<f:optionalBlock title="Lock global vulnerability settings for all scans / jobs" inline="true"
+                field="lockVulnerabilitySettings" checked="false"/>
 
 			<f:entry title="Build status when results exceed threshold:" field="jobGlobalStatusOnThresholdViolation">
 				<f:enum>${it.displayName}</f:enum>
