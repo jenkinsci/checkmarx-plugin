@@ -1,5 +1,9 @@
 package com.checkmarx.jenkins;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.PluginWrapper;
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
@@ -49,6 +53,13 @@ public class CxScanResult implements Action {
     private LinkedList<QueryResult> mediumQueryResultList;
     private LinkedList<QueryResult> lowQueryResultList;
     private LinkedList<QueryResult> infoQueryResultList;
+
+    private static String highQueryResultsJson;
+    private static String mediumQueryResultsJson;
+    private static String lowQueryResultsJson;
+    private static String infoQueryResultsJson;
+    //maps the above
+    private static ObjectMapper mapper = new ObjectMapper();
 
     private OsaScanResult osaScanResult;
 
@@ -418,6 +429,54 @@ public class CxScanResult implements Action {
         return scanId;
     }
 
+    public String getHighQueryResultsJson() {
+      if(highQueryResultsJson == null){
+              try {
+                  highQueryResultsJson = mapper.writeValueAsString(getHighQueryResultList());
+              } catch (JsonProcessingException e) {
+                  e.printStackTrace();
+              }
+      }
+        return highQueryResultsJson;
+    }
+
+    public String getMediumQueryResultsJson() {
+        if(mediumQueryResultsJson == null){
+            try {
+                mediumQueryResultsJson = mapper.writeValueAsString(getMediumQueryResultList());
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        }
+        return mediumQueryResultsJson;
+    }
+
+    public String getLowQueryResultsJson() {
+        if(lowQueryResultsJson == null){
+            try {
+                lowQueryResultsJson = mapper.writeValueAsString(getLowQueryResultList());
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        }
+        return lowQueryResultsJson;
+    }
+
+    public String getInfoQueryResultsJson() {
+        if(infoQueryResultsJson == null){
+            try {
+                lowQueryResultsJson = mapper.writeValueAsString(getInfoQueryResultsJson());
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        }
+        return infoQueryResultsJson;
+    }
+
+    public void setInfoQueryResultsJson(String infoQueryResultsJson) {
+        this.infoQueryResultsJson = infoQueryResultsJson;
+    }
+
     private class ResultsParseHandler extends DefaultHandler {
 
         @Nullable
@@ -545,11 +604,15 @@ public class CxScanResult implements Action {
         return ret;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class QueryResult {
         @Nullable
+        @JsonProperty("name")
         private String name;
         @Nullable
+        @JsonProperty("severity")
         private String severity;
+        @JsonProperty("count")
         private int count;
 
         @Nullable

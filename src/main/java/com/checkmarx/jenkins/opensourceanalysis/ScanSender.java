@@ -11,6 +11,8 @@ import hudson.FilePath;
  * Created by tsahib on 9/12/2016.
  */
 public class ScanSender {
+
+    //todo: make wait handler part of scan sender and move waiting logic out of client
     private OsaScanClient osaScanClient;
     private long projectId;
 

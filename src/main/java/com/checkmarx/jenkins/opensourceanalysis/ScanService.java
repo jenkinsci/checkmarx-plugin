@@ -25,6 +25,7 @@ public class ScanService {
     private final FolderPattern folderPattern;
     private ScanResultsPresenter scanResultsPresenter;
     private transient Logger logger;
+    //todo: make wait handler part of scan sender and move waiting logic out of client
     private ScanSender scanSender;
     private LibrariesAndCVEsExtractor librariesAndCVEsExtractor;
 

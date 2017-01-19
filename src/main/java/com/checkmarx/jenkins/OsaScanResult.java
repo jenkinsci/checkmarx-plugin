@@ -1,6 +1,5 @@
 package com.checkmarx.jenkins;
 
-import com.checkmarx.jenkins.web.model.CVE;
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
 import com.checkmarx.jenkins.web.model.Library;
 
@@ -18,12 +17,15 @@ public class OsaScanResult {
     private int osaMediumCount;
     private int osaLowCount;
     private int osaVulnerableAndOutdatedLibs;
+    private int osaTotalVulnerabilitiesLibs;
     private int osaNoVulnerabilityLibs;
     private boolean osaEnabled = false;
     private List<Library> osaLibrariesList;
-    private List<CVE> osaCveList;
-    private String scanId;
+    private String highCvesList;
+    private String mediumCvesList;
+    private String lowCvesList;
 
+    private String scanId;
 
     public void addOsaResults(GetOpenSourceSummaryResponse osaResults) {
         setIsOsaReturnedResult(osaResults != null);
@@ -34,6 +36,7 @@ public class OsaScanResult {
             this.osaHighCount = osaResults.getHighCount();
             this.osaMediumCount = osaResults.getMediumCount();
             this.osaLowCount = osaResults.getLowCount();
+            this.osaTotalVulnerabilitiesLibs = osaResults.getHighCount() + osaResults.getMediumCount() + osaResults.getLowCount();
             this.osaVulnerableAndOutdatedLibs = osaResults.getVulnerableAndOutdated();
             this.osaNoVulnerabilityLibs = osaResults.getNoKnownVulnerabilities();
         }
@@ -95,20 +98,16 @@ public class OsaScanResult {
         this.osaLibrariesList = ohsaLibrariesList;
     }
 
-    public List<CVE> getOsaCveList() {
-        return osaCveList;
-    }
-
-    public void setOsaCveList(List<CVE> osaCveList) {
-        this.osaCveList = osaCveList;
-    }
-
     public boolean isOsaEnabled() {
         return osaEnabled;
     }
 
     public void setOsaEnabled(boolean osaEnabled) {
         this.osaEnabled = osaEnabled;
+    }
+
+    public int getOsaTotalVulnerabilitiesLibs() {
+        return osaTotalVulnerabilitiesLibs;
     }
 
     public String getScanId() {
@@ -125,5 +124,29 @@ public class OsaScanResult {
 
     public void setGetOpenSourceSummaryResponse(GetOpenSourceSummaryResponse getOpenSourceSummaryResponse) {
         this.getOpenSourceSummaryResponse = getOpenSourceSummaryResponse;
+    }
+
+    public String getHighCvesList() {
+        return highCvesList;
+    }
+
+    public void setHighCvesList(String highCvesList) {
+        this.highCvesList = highCvesList;
+    }
+
+    public String getMediumCvesList() {
+        return mediumCvesList;
+    }
+
+    public void setMediumCvesList(String mediumCvesList) {
+        this.mediumCvesList = mediumCvesList;
+    }
+
+    public String getLowCvesList() {
+        return lowCvesList;
+    }
+
+    public void setLowCvesList(String lowCvesList) {
+        this.lowCvesList = lowCvesList;
     }
 }

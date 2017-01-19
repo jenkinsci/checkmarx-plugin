@@ -193,6 +193,7 @@ public class OsaScanClient implements Closeable {
         return new File(request.getZipFile().getRemote());
     }
 
+    //todo: make wait handler part of scan sender and move waiting logic out of client
     public void waitForScanToFinish(String scanId) throws InterruptedException {
         Map<String, NewCookie> cookies = login();
         Invocation invocation = root.path(SCAN_STATUS_PATH).resolveTemplate("scanId", scanId)
