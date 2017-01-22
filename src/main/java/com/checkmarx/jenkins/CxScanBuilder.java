@@ -463,9 +463,9 @@ public class CxScanBuilder extends Builder {
                 return true;
             }
 
-            if(projectId == 0 && !descriptor.isAllowProjectCreation()){
+            if(projectId == 0 && descriptor.isProhibitProjectCreation()){
                 instanceLogger.info("\nCreation of the new project "+projectName+" is not authorized. Please use an existing project.");
-                instanceLogger.info("You can enable the creation of new projects by enabling the \"allow creation of new projects\" checkbox in the Jenkins plugin global settings.\n");
+                instanceLogger.info("You can enable the creation of new projects by disabling the \"prohibit creation of new projects\" checkbox in the Jenkins plugin global settings.\n");
                 build.setResult(Result.FAILURE);
                 return true;
             }
@@ -1096,7 +1096,7 @@ public class CxScanBuilder extends Builder {
         @Nullable
         private String password;
 
-        private boolean allowProjectCreation;
+        private boolean prohibitProjectCreation;
         private boolean hideResults;
         private boolean enableCertificateValidation;
         @Nullable
@@ -1168,14 +1168,13 @@ public class CxScanBuilder extends Builder {
             return Secret.fromString(password).getPlainText();
         }
 
-        public boolean isAllowProjectCreation() {
-            return allowProjectCreation;
+        public boolean isProhibitProjectCreation() {
+            return prohibitProjectCreation;
         }
 
-        public void setAllowProjectCreation(boolean allowProjectCreation) {
-            this.allowProjectCreation = allowProjectCreation;
+        public void setProhibitProjectCreation(boolean prohibitProjectCreation) {
+            this.prohibitProjectCreation = prohibitProjectCreation;
         }
-
 
         public boolean isHideResults() {
             return hideResults;
