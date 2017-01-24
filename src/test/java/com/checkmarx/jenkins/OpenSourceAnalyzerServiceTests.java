@@ -67,7 +67,7 @@ public class OpenSourceAnalyzerServiceTests {
                 return null;
             }
             @Mock
-            GetOpenSourceSummaryResponse getOpenSourceSummary(GetOpenSourceSummaryRequest request){
+            GetOpenSourceSummaryResponse getOpenSourceSummaryJson(GetOpenSourceSummaryRequest request){
                 return new GetOpenSourceSummaryResponse();
             }
             @Mock

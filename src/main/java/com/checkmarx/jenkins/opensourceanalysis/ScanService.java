@@ -59,7 +59,7 @@ public class ScanService {
                 logger.info(OSA_RUN_STARTED);
                 scanSender.sendScanAndSetResults(sourceCodeZip, osaScanResult);
                 logger.info(OSA_RUN_ENDED);
-                scanResultsPresenter.printResultsToOutput(osaScanResult.getGetOpenSourceSummaryResponse());
+                scanResultsPresenter.printResultsToOutput(osaScanResult.getOpenSourceSummaryResponse());
             }
         } catch (Exception e) {
             logger.error("Open Source Analysis failed:", e);

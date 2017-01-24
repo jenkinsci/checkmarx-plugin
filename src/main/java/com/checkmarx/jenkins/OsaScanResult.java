@@ -1,9 +1,8 @@
 package com.checkmarx.jenkins;
 
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
-import com.checkmarx.jenkins.web.model.Library;
-
-import java.util.List;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Created by zoharby on 10/01/2017.
@@ -12,7 +11,8 @@ public class OsaScanResult {
 
     //osa results
     private boolean isOsaReturnedResult;
-    private GetOpenSourceSummaryResponse getOpenSourceSummaryResponse;
+    private GetOpenSourceSummaryResponse openSourceSummaryResponse;
+    private String openSourceSummaryJson;
     private int osaHighCount;
     private int osaMediumCount;
     private int osaLowCount;
@@ -20,18 +20,20 @@ public class OsaScanResult {
     private int osaTotalVulnerabilitiesLibs;
     private int osaNoVulnerabilityLibs;
     private boolean osaEnabled = false;
-    private List<Library> osaLibrariesList;
+
+    private String scanId;
+
+    private String osaFullLibraryList;
+    private String osaFullCVEsList;
     private String highCvesList;
     private String mediumCvesList;
     private String lowCvesList;
-
-    private String scanId;
 
     public void addOsaResults(GetOpenSourceSummaryResponse osaResults) {
         setIsOsaReturnedResult(osaResults != null);
         //osa fields
         if (isOsaReturnedResult) {
-            this.getOpenSourceSummaryResponse = osaResults;
+            this.openSourceSummaryResponse = osaResults;
             this.setOsaEnabled(true);
             this.osaHighCount = osaResults.getHighCount();
             this.osaMediumCount = osaResults.getMediumCount();
@@ -39,6 +41,13 @@ public class OsaScanResult {
             this.osaTotalVulnerabilitiesLibs = osaResults.getHighCount() + osaResults.getMediumCount() + osaResults.getLowCount();
             this.osaVulnerableAndOutdatedLibs = osaResults.getVulnerableAndOutdated();
             this.osaNoVulnerabilityLibs = osaResults.getNoKnownVulnerabilities();
+
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                this.openSourceSummaryJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(osaResults);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -90,14 +99,6 @@ public class OsaScanResult {
         isOsaReturnedResult = osaReturnedResult;
     }
 
-    public List<Library> getOsaLibrariesList() {
-        return osaLibrariesList;
-    }
-
-    public void setOsaLibrariesList(List<Library> ohsaLibrariesList) {
-        this.osaLibrariesList = ohsaLibrariesList;
-    }
-
     public boolean isOsaEnabled() {
         return osaEnabled;
     }
@@ -118,12 +119,36 @@ public class OsaScanResult {
         this.scanId = scanId;
     }
 
-    public GetOpenSourceSummaryResponse getGetOpenSourceSummaryResponse() {
-        return getOpenSourceSummaryResponse;
+    public GetOpenSourceSummaryResponse getOpenSourceSummaryResponse() {
+        return openSourceSummaryResponse;
     }
 
-    public void setGetOpenSourceSummaryResponse(GetOpenSourceSummaryResponse getOpenSourceSummaryResponse) {
-        this.getOpenSourceSummaryResponse = getOpenSourceSummaryResponse;
+    public void setOpenSourceSummaryResponse(GetOpenSourceSummaryResponse openSourceSummaryResponse) {
+        this.openSourceSummaryResponse = openSourceSummaryResponse;
+    }
+
+    public String getOpenSourceSummaryJson() {
+        return openSourceSummaryJson;
+    }
+
+    public void setOpenSourceSummaryJson(String openSourceSummaryJson) {
+        this.openSourceSummaryJson = openSourceSummaryJson;
+    }
+
+    public String getOsaFullLibraryList() {
+        return osaFullLibraryList;
+    }
+
+    public void setOsaFullLibraryList(String osaFullLibraryList) {
+        this.osaFullLibraryList = osaFullLibraryList;
+    }
+
+    public String getOsaFullCVEsList() {
+        return osaFullCVEsList;
+    }
+
+    public void setOsaFullCVEsList(String osaFullCVEsList) {
+        this.osaFullCVEsList = osaFullCVEsList;
     }
 
     public String getHighCvesList() {

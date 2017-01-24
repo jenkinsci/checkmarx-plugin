@@ -23,24 +23,47 @@ public class LibrariesAndCVEsExtractor {
     }
 
     public void getAndSetLibrariesAndCVEs(OsaScanResult osaScanResult){
-        getAndSetLibraries(osaScanResult);
-        List<CVE> cveList = getAndSetCVEsObjects(osaScanResult);
-        formatDate(cveList);
+        List<Library> libraryList = osaScanClient.getScanResultLibraries(osaScanResult.getScanId());
+        setLibrariesJson(libraryList, osaScanResult);
+
+        List<CVE> cveList = osaScanClient.getScanResultCVEs(osaScanResult.getScanId());
+        setCVEsJson(cveList, osaScanResult);
+
+        prepareAndSetCVEsObjects(cveList, libraryList, osaScanResult);
+    }
+
+    private void setLibrariesJson(List<Library> libraryList, OsaScanResult osaScanResult){
+        String libraryListJson = turnListToJSON(libraryList);
+        osaScanResult.setOsaFullLibraryList(libraryListJson);
+    }
+
+    private void setCVEsJson(List<CVE> cvesList, OsaScanResult osaScanResult){
+        String cvesListJson = turnListToJSON(cvesList);
+        osaScanResult.setOsaFullCVEsList(cvesListJson);
+    }
+
+    private String turnListToJSON(List<?> list){
+        try {
+            if(list != null) {
+                return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(list);
+            }
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return "[]";
+    }
+
+    private void prepareAndSetCVEsObjects(List<CVE> cveList, List<Library> libraryList, OsaScanResult osaScanResult){
+        setCVEsLibraryName(cveList, libraryList, osaScanResult);
+        formatCVEsDates(cveList);
         getAndSetCVEJsonByVulnerability(cveList, osaScanResult);
     }
 
-    private void getAndSetLibraries(OsaScanResult osaScanResult){
-        List<Library> libraryList = osaScanClient.getScanResultLibraries(osaScanResult.getScanId());
-        osaScanResult.setOsaLibrariesList(libraryList);
-    }
-
-    private List<CVE> getAndSetCVEsObjects(OsaScanResult osaScanResult){
-        List<CVE> cveList = osaScanClient.getScanResultCVEs(osaScanResult.getScanId());
+    private void setCVEsLibraryName(List<CVE> cveList, List<Library> libraryList, OsaScanResult osaScanResult){
         for(CVE cve:cveList){
-            String libraryName = getLibraryNameFromList(cve.getLibraryId(),osaScanResult.getOsaLibrariesList());
+            String libraryName = getLibraryNameFromList(cve.getLibraryId(),libraryList);
             cve.setLibraryName(libraryName);
         }
-        return cveList;
     }
 
     private String getLibraryNameFromList(String libraryId, List<Library> libraryList){
@@ -53,7 +76,7 @@ public class LibrariesAndCVEsExtractor {
     }
 
     //change time format from "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" to "dd-MM-yyyy"
-    private void formatDate(List<CVE> cveList){
+    private void formatCVEsDates(List<CVE> cveList){
         for (CVE cve: cveList){
             String[] timeParts = cve.getPublishDate().split("T");
             String[] partsOfTimePart = timeParts[0].split("-");

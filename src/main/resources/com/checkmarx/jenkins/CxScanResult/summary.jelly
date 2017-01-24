@@ -27,19 +27,20 @@
 
         //thresholds
         var ThresholdsEnabled = verifyVar([${it.thresholdsEnabled}]);
-        var highThreshold = verifyVar([${it.highThreshold}]);
-        var medThreshold = verifyVar([${it.mediumThreshold}]);
-        var lowThreshold = verifyVar([${it.lowThreshold}]);
-
+        if(ThresholdsEnabled){
+        var highThreshold = verifyVar([${it.sastThresholdConfig.highThreshold}]);
+        var medThreshold = verifyVar([${it.sastThresholdConfig.mediumThreshold}]);
+        var lowThreshold = verifyVar([${it.sastThresholdConfig.lowThreshold}]);
+        }
         //counts
-        var highCount = verifyVar([${it.highCount}]);
-        var medCount = verifyVar([${it.mediumCount}]);
-        var lowCount = verifyVar([${it.lowCount}]);
+        var highCount = verifyVar([${it.sastScanResult.highCount}]);
+        var medCount = verifyVar([${it.sastScanResult.mediumCount}]);
+        var lowCount = verifyVar([${it.sastScanResult.lowCount}]);
 
         //cve lists
-        var highCveList = ${it.highQueryResultsJson};
-        var medCveList = ${it.mediumQueryResultsJson};
-        var lowCveList = ${it.lowQueryResultsJson};
+        var highCveList = verifyVar([${it.sastScanResult.highQueryResultsJson}]);
+        var medCveList = verifyVar([${it.sastScanResult.mediumQueryResultsJson}]);
+        var lowCveList = verifyVar([${it.sastScanResult.lowQueryResultsJson}]);
 
 
         //-------------------------- osa --------------------------------------
@@ -56,10 +57,11 @@
 
         //thresholds
         var osaThresholdsEnabled = verifyVar([${it.osaThresholdsEnabled}]);
-        var osaHighThreshold = verifyVar([${it.osaHighThreshold}]);
-        var osaMedThreshold = verifyVar([${it.osaMediumThreshold}]);
-        var osaLowThreshold = verifyVar([${it.osaLowThreshold}]);
-
+       if(osaThresholdsEnabled){
+        var osaHighThreshold = verifyVar([${it.osaThresholdConfig.osaHighThreshold}]);
+        var osaMedThreshold = verifyVar([${it.osaThresholdConfig.osaMediumThreshold}]);
+        var osaLowThreshold = verifyVar([${it.osaThresholdConfig.osaLowThreshold}]);
+        }
         //counts
         var osaHighCount = verifyVar([${it.osaScanResult.osaHighCount}]);
         var osaMedCount = verifyVar([${it.osaScanResult.osaMediumCount}]);
