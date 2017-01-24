@@ -591,7 +591,7 @@ public class CxWebService {
 		}
 
 		if (projectId == 0) {
-			throw new AbortException("Can't find exsiting project to scan");
+			throw new AbortException("Can't find existing project to scan");
 		}
 
 		return projectId;

@@ -43,7 +43,7 @@
             </f:entry>
         </f:advanced>
 
-        <f:entry title="Prohibit project creation if project name doesn't already exist" field="prohibitProjectCreation">
+        <f:entry title="Deny new Checkmarx projects creation" field="prohibitProjectCreation">
         	<f:checkbox default="false" />
         </f:entry>
 

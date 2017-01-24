@@ -465,7 +465,7 @@ public class CxScanBuilder extends Builder {
 
             if(projectId == 0 && descriptor.isProhibitProjectCreation()){
                 instanceLogger.info("\nCreation of the new project "+projectName+" is not authorized. Please use an existing project.");
-                instanceLogger.info("You can enable the creation of new projects by disabling the \"prohibit creation of new projects\" checkbox in the Jenkins plugin global settings.\n");
+                instanceLogger.info("You can enable the creation of new projects by disabling the \"Deny new Checkmarx projects creation\" checkbox in the Jenkins plugin global settings.\n");
                 build.setResult(Result.FAILURE);
                 return true;
             }
