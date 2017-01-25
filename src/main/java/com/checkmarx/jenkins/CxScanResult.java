@@ -1,9 +1,3 @@
-        //todo erase when legacy code is no longer needed
-        initializeSastLegacyThresholdVariables(thresholdConfig);
-    //(when we stop supporting 8.4.1 and down)
-    /*******************
-     * Legacy Variables for UI backward computability
-     ****************************************/
 package com.checkmarx.jenkins;
 
 import hudson.PluginWrapper;
@@ -39,7 +33,7 @@ import static com.checkmarx.jenkins.CxResultSeverity.*;
  */
 public class CxScanResult implements Action {
 
-    private static Logger logger; // NOSONAR
+    private final transient Logger logger; // NOSONAR
 
     public final AbstractBuild<?, ?> owner;
     private final long projectId;
@@ -320,7 +314,6 @@ public class CxScanResult implements Action {
         File buildDirectory = owner.getRootDir();
         File a = new File(buildDirectory, "/checkmarx/" + PDF_REPORT_NAME);
 
-    public void initializeSastLegacyVariables() {
         IOUtils.copy(a, outputStream);
 
         outputStream.flush();
@@ -418,7 +411,6 @@ public class CxScanResult implements Action {
 
     private class ResultsParseHandler extends DefaultHandler {
 
-    public void initializeOsaLegacyVariables() {
         @Nullable
         private String currentQueryName;
         @Nullable
@@ -468,7 +460,6 @@ public class CxScanResult implements Action {
                     }
                     currentQueryNumOfResults = 0;
 
-    private void initializeSastLegacyThresholdVariables(ThresholdConfig thresholdConfig) {
                     break;
                 default:
                     if ("CxXMLResults".equals(qName)) {
@@ -483,7 +474,6 @@ public class CxScanResult implements Action {
             }
         }
 
-    private void initializeOsaLegacyThresholdVariables(ThresholdConfig thresholdConfig) {
         @Override
         public void endElement(String uri, String localName, String qName) throws SAXException {
             super.endElement(uri, localName, qName);
@@ -528,19 +518,19 @@ public class CxScanResult implements Action {
         boolean ret = isThresholdExceededByLevel(highCount, highThreshold);
         ret |= isThresholdExceededByLevel(mediumCount, mediumThreshold);
         ret |= isThresholdExceededByLevel(lowCount, lowThreshold);
-        return ret;
+       return ret;
     }
 
     public boolean isOsaThresholdExceeded() {
         boolean ret = isThresholdExceededByLevel(osaScanResult.getOsaHighCount(), osaHighThreshold);
         ret |= isThresholdExceededByLevel(osaScanResult.getOsaMediumCount(), osaMediumThreshold);
         ret |= isThresholdExceededByLevel(osaScanResult.getOsaLowCount(), osaLowThreshold);
-        return ret;
+       return ret;
     }
 
-    private boolean isThresholdExceededByLevel(int count, Integer threshold) {
+    private boolean isThresholdExceededByLevel(int count, Integer threshold){
         boolean ret = false;
-        if (threshold != null && count > threshold) {
+        if (threshold != null && count > threshold){
             ret = true;
         }
         return ret;

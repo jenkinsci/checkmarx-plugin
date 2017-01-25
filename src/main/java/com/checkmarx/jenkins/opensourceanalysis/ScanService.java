@@ -15,8 +15,6 @@ import java.io.IOException;
  */
 public class ScanService {
 
-    private static Logger logger;
-
     private static final String OSA_RUN_STARTED = "OSA (open source analysis) Run has started";
     private static final String OSA_RUN_ENDED = "OSA (open source analysis) Run has finished successfully";
     private static final String OSA_RUN_SUBMITTED = "OSA (open source analysis) submitted successfully";
@@ -26,6 +24,7 @@ public class ScanService {
     private final CxZip cxZip;
     private final FolderPattern folderPattern;
     private ScanResultsPresenter scanResultsPresenter;
+    private transient Logger logger;
     private ScanSender scanSender;
     private LibrariesAndCVEsExtractor librariesAndCVEsExtractor;
 

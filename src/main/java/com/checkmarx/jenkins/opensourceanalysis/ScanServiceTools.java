@@ -11,13 +11,12 @@ import org.apache.log4j.Logger;
  */
 public class ScanServiceTools {
 
-    private static Logger logger;
-
     private DependencyFolder dependencyFolder;
     private CxWebService webServiceClient;
     private OsaScanClient osaScanClient;
     private AbstractBuild<?, ?> build;
     private BuildListener listener;
+    private transient Logger logger;
     private long projectId;
 
     public DependencyFolder getDependencyFolder() {

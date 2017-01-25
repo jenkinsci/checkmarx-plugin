@@ -14,8 +14,7 @@ import java.io.IOException;
  */
 public class FolderPattern {
 
-    private static Logger logger;
-
+    private Logger logger;
     private AbstractBuild<?, ?> build;
     private BuildListener listener;
 

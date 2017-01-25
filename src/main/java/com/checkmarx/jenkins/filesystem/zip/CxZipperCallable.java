@@ -20,9 +20,9 @@ import java.io.OutputStream;
  *
  * @author yevgenib
  * @since 11/03/14
+ *
  */
 public class CxZipperCallable implements FilePath.FileCallable<CxZipResult> {
-
     private static final long serialVersionUID = 1L;
 
     @NotNull
@@ -30,9 +30,9 @@ public class CxZipperCallable implements FilePath.FileCallable<CxZipResult> {
     private int numOfZippedFiles;
 
     @NotNull
-    private static Logger logger;
+    private Logger logger;
 
-    public CxZipperCallable(@NotNull String combinedFilterPattern, @NotNull Logger logger) {
+    public CxZipperCallable(@NotNull String combinedFilterPattern, @NotNull Logger logger){
         this.combinedFilterPattern = combinedFilterPattern;
         this.numOfZippedFiles = 0;
         this.logger = logger;
@@ -50,11 +50,11 @@ public class CxZipperCallable implements FilePath.FileCallable<CxZipResult> {
 
         final File tempFile = File.createTempFile("base64ZippedSource", ".bin");
         final OutputStream fileOutputStream = new FileOutputStream(tempFile);
-        final Base64OutputStream base64FileOutputStream = new Base64OutputStream(fileOutputStream, true, 0, null);
+        final Base64OutputStream base64FileOutputStream = new Base64OutputStream(fileOutputStream,true,0,null);
 
         try {
             new Zipper().zip(file, combinedFilterPattern, base64FileOutputStream, CxConfig.maxZipSize(), zipListener);
-        } finally {
+        }finally {
             fileOutputStream.close();
         }
         final FilePath remoteTempFile = new FilePath(tempFile);

@@ -7,8 +7,7 @@ import org.apache.log4j.Logger;
  * Created by tsahib on 9/13/2016.
  */
 public class ScanResultsPresenter {
-
-    private static Logger logger;
+    private transient Logger logger;
 
     public ScanResultsPresenter(Logger logger) {
         this.logger = logger;

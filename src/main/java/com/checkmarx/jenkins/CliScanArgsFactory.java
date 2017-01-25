@@ -9,8 +9,7 @@ import org.apache.log4j.Logger;
  */
 public class CliScanArgsFactory {
 
-    private static Logger log;
-
+    private Logger logger;
     private String preset;
     private final String projectName;
     private final String groupId;
@@ -22,7 +21,7 @@ public class CliScanArgsFactory {
     private long projectId;
 
     public CliScanArgsFactory(Logger logger, String preset, String projectName, String groupId, String sourceEncoding, String comment, boolean isThisBuildIncremental, byte[] compressedSources, EnvVars env, long projectId) {
-        log = logger;
+        this.logger = logger;
         this.preset = preset;
         this.projectName = projectName;
         this.groupId = groupId;
@@ -42,7 +41,7 @@ public class CliScanArgsFactory {
         try {
             presetLong = Long.parseLong(preset);
         } catch (Exception e) {
-            log.error("Encountered illegal preset value: " + preset + ". Using default preset.");
+            logger.error("Encountered illegal preset value: " + preset + ". Using default preset.");
         }
 
         projectSettings.setPresetID(presetLong);
@@ -53,7 +52,7 @@ public class CliScanArgsFactory {
         try {
             configuration = Long.parseLong(sourceEncoding);
         } catch (Exception e) {
-            log.error("Encountered illegal source encoding (configuration) value: " + sourceEncoding + ". Using default configuration.");
+            logger.error("Encountered illegal source encoding (configuration) value: " + sourceEncoding + ". Using default configuration.");
         }
         projectSettings.setScanConfigurationID(configuration);
 
