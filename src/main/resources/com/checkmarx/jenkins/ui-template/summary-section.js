@@ -1,38 +1,157 @@
-/**
- * Created by galisp on 15/12/2016.
- */
-
-//sast
+//-------------------------- sast vars --------------------------------------
 var pdfReportReady = true;
-var sastPdfPath = "/dor/bo/rega";
-var sastHtmlPath = "/haha/yissik";
-var osaPdfPath = "/zepointer/mami";
-var osaHtmlPath = "bati/laavod";
 
-var ThresholdsEnabled = true;
-var highThreshold = 25;
-var medThreshold = 80;
-var lowThreshold = 10;
+//link paths
+var sastPdfPath = "/dor/bo/rega"; //todo - sast pdf path
+var sastHtmlPath = "/haha/yissik";
+
+//thresholds
+var thresholdsEnabled = true;
+var highThreshold = 0;
+var medThreshold = 0;
+var lowThreshold = 1;
+
+//counts
 var highCount = 3;
 var medCount = 3;
 var lowCount = 3;
 
-//osa
+//cve lists
+// **These dummies should be deleted from the end of this file after putting the real lists in from server**
+var highCveList = [
+        {
+            "name": "cve-name-high",
+            "count": "10"
+        },
+        {
+            "name": "cve-name-high",
+            "count": "10"
+        },
+        {
+            "name": "cve-name-high",
+            "count": "10"
+        }
+    ];
+var medCveList = [
+        {
+            "name": "cve-name-high",
+            "count": "10"
+        },
+        {
+            "name": "cve-name-high",
+            "count": "10"
+        },
+        {
+            "name": "cve-name-high",
+            "count": "10"
+        }
+    ];
+var lowCveList = [
+        {
+            "name": "cve-name-high",
+            "count": "10"
+        },
+        {
+            "name": "cve-name-high",
+            "count": "10"
+        },
+        {
+            "name": "cve-name-high",
+            "count": "10"
+        }
+    ];
+
+
+//-------------------------- osa vars --------------------------------------
+//this var is needed in jenkins only - so that previous builds display correctly
+var isOsaFeature = true;
+
+//link paths
+var osaPdfPath = "/zepointer/mami";
+var osaHtmlPath = "bati/laavod";
+
 var osaEnabled = true;
+
+//libraries
 var vulnerableLibraries = 8;
 var okLibraries = 28;
+
+//thresholds
 var osaThresholdsEnabled = true;
-var osaHighThreshold = 1125;
-var osaMedThreshold = 10;
+var osaHighThreshold = 1;
+var osaMedThreshold = 0;
 var osaLowThreshold = 1;
+
+//counts
 var osaHighCount = 3;
 var osaMedCount = 3;
 var osaLowCount = 3;
 
+//cve lists
+var osaHighCveList = [
+        {
+            "cveName": "cve-name-high",
+            "publishDate": "28/06/2016",
+            "libraryName":"library-name"
+        },
+        {
+            "cveName": "cve-name-high",
+            "publishDate": "28/06/2016",
+            "libraryName":"library-name"
+        },
+        {
+            "cveName": "cve-name-high",
+            "publishDate": "28/06/2016",
+            "libraryName":"library-name"
+        }
+    ];
+var osaMedCveList = [
+    {
+        "cveName": "cve-name-high",
+        "publishDate": "28/06/2016",
+        "libraryName":"library-name"
+    },
+    {
+        "cveName": "cve-name-high",
+        "publishDate": "28/06/2016",
+        "libraryName":"library-name"
+    },
+    {
+        "cveName": "cve-name-high",
+        "publishDate": "28/06/2016",
+        "libraryName":"library-name"
+    }
+];
+var osaLowCveList = [
+    {
+        "cveName": "cve-name-high",
+        "publishDate": "28/06/2016",
+        "libraryName":"library-name"
+    },
+    {
+        "cveName": "cve-name-high",
+        "publishDate": "28/06/2016",
+        "libraryName":"library-name"
+    },
+    {
+        "cveName": "cve-name-high",
+        "publishDate": "28/06/2016",
+        "libraryName":"library-name"
+    }
+];
+
+//-------------------------- full reports vars --------------------------------------
+var sastFullHtmlPath = "tavi/lek/oded";
+var sastFullPdfPath = "tavi/pdf/oded";
+var sastFullCodeViewerPath = "tavi/CodeViewer/odetttt";
+
+var osaFullHtmlPath = "tavi/FullHtml/odetttt";
+var osaFullPdfPath = "tavi/FullPdf/odetttt";
+
+
 window.onload = function () {
 
-    //sast
-
+    //---------------------------------------------------------- sast ---------------------------------------------------------------
     //todo - catch exceptions?
     //set bars height and count
     document.getElementById("bar-count-high").innerHTML = highCount;
@@ -43,16 +162,8 @@ window.onload = function () {
     document.getElementById("bar-med").setAttribute("style", "height:" + medCount * 100 / (highCount + medCount + lowCount) + "%");
     document.getElementById("bar-low").setAttribute("style", "height:" + lowCount * 100 / (highCount + medCount + lowCount) + "%");
 
-    document.getElementById("html-report-link").setAttribute("href", sastHtmlPath);
-
-    document.getElementById("vulnerable-libraries").innerHTML = vulnerableLibraries;
-    document.getElementById("ok-libraries").innerHTML = okLibraries;
-
-    document.getElementById("osa-pdf-report-link").setAttribute("href", osaPdfPath);
-    document.getElementById("osa-html-report-link").setAttribute("href", osaHtmlPath);
-
-
-    //if generate pdf report option is chosen
+    //report links
+    //sastPdfPath only if pdfReportReady
     if (pdfReportReady) {
         document.getElementById("pdf-report-link").innerHTML =
 
@@ -65,9 +176,10 @@ window.onload = function () {
             '</div>' +
             '</a>';
     }
+    document.getElementById("html-report-link").setAttribute("href", sastHtmlPath);
 
     //if threshold is enabled
-    if (ThresholdsEnabled) {
+    if (thresholdsEnabled) {
         var isThresholdExceeded = false;
         var thresholdExceededComplianceElement = document.getElementById("threshold-exceeded-compliance");
 
@@ -98,10 +210,9 @@ window.onload = function () {
         else {
             thresholdExceededComplianceElement.innerHTML = thresholdComplianceHtml;
         }
-
     }
 
-//osa
+    //---------------------------------------------------------- osa ---------------------------------------------------------------
     if (osaEnabled) {
         //todo - catch exceptions?
         //set bars height and count
@@ -112,6 +223,18 @@ window.onload = function () {
         document.getElementById("osa-bar-high").setAttribute("style", "height:" + osaHighCount * 100 / (osaHighCount + osaMedCount + osaLowCount) + "%");
         document.getElementById("osa-bar-med").setAttribute("style", "height:" + osaMedCount * 100 / (osaHighCount + osaMedCount + osaLowCount) + "%");
         document.getElementById("osa-bar-low").setAttribute("style", "height:" + osaLowCount * 100 / (osaHighCount + osaMedCount + osaLowCount) + "%");
+
+        document.getElementById("vulnerable-libraries").innerHTML = vulnerableLibraries;
+        document.getElementById("ok-libraries").innerHTML = okLibraries;
+
+        //this is for support for versions before OSA was implemented
+        if (!isOsaFeature) {
+            document.getElementById("osa-full").setAttribute("style", "display: none");
+        }
+
+        //report links
+        document.getElementById("osa-pdf-report-link").setAttribute("href", osaPdfPath);
+        document.getElementById("osa-html-report-link").setAttribute("href", osaHtmlPath);
 
         //if threshold is enabled
         if (osaThresholdsEnabled) {
@@ -137,7 +260,6 @@ window.onload = function () {
 
             //if threshold exceeded
             if (isOsaThresholdExceeded) {
-
                 osaThresholdExceededComplianceElement.innerHTML = thresholdExceededHtml;
             }
 
@@ -154,8 +276,17 @@ window.onload = function () {
     }
 
 
+    //---------------------------------------------------------- full reports ---------------------------------------------------------------
+    //sast full links
+    document.getElementById("sast-full-html-link").setAttribute("href", sastFullHtmlPath);
+    document.getElementById("sast-full-pdf-link").setAttribute("href", sastFullPdfPath);
+    document.getElementById("sast-code-viewer-link").setAttribute("href", sastFullCodeViewerPath);
 
-//    full reports
+    //osa full links
+    document.getElementById("osa-full-html-link").setAttribute("href", osaFullHtmlPath);
+    document.getElementById("osa-full-pdf-link").setAttribute("href", osaFullPdfPath);
+
+    //generate full reports
     if (highCount > 0) {
         generateCveTable(SEVERITY.HIGH);
     }
@@ -174,9 +305,6 @@ window.onload = function () {
     if (osaLowCount > 0) {
         generateCveTable(SEVERITY.OSA_LOW);
     }
-
-//    document.getElementById("osa-cve-table").innerHTML = cveListHtml;
-
 };
 
 var thresholdExceededHtml =
@@ -272,11 +400,11 @@ function generateCveTableTitle(severity) {
         case SEVERITY.OSA_HIGH:
             return '' +
                 '<div class="full-severity-title">' +
-                    '<div class="severity-icon">' +
-                        '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="21px" viewBox="0 0 23 21" version="1.1"> <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch --> <title>high</title> <desc>Created with Sketch.</desc> <defs> <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733" id="path-1"></path> <mask id="mask-1" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884" height="19" fill="white"> <use xlink:href="#path-1"></use> </mask> </defs> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Jenkins" transform="translate(-602.000000, -537.000000)"> <g id="SAST" transform="translate(272.000000, 180.000000)"> <g id="Vulnerabilities-Stat" transform="translate(246.082552, 0.000000)"> <g id="High" transform="translate(22.425880, 105.921935)"> <g id="high" transform="translate(62.000000, 252.000000)"> <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z" id="Combined-Shape" fill="#F5F5F5"></path> <use id="Rectangle-40-Copy" stroke="#666666" mask="url(#mask-1)" stroke-width="4" xlink:href="#path-1"></use> <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z" id="Page-1" fill="#DA2945"></path> <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12" width="2" height="4"></rect> <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17" width="2" height="2"></rect> </g> </g> </g> </g> </g> </g> </svg>' +
-                    '</div>' +
-                    '<div class="severity-title-name">High</div>' +
-                    '<div class="severity-count">' + highCount + '</div>' +
+                '<div class="severity-icon">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="21px" viewBox="0 0 23 21" version="1.1"> <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch --> <title>high</title> <desc>Created with Sketch.</desc> <defs> <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733" id="path-1"></path> <mask id="mask-1" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884" height="19" fill="white"> <use xlink:href="#path-1"></use> </mask> </defs> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Jenkins" transform="translate(-602.000000, -537.000000)"> <g id="SAST" transform="translate(272.000000, 180.000000)"> <g id="Vulnerabilities-Stat" transform="translate(246.082552, 0.000000)"> <g id="High" transform="translate(22.425880, 105.921935)"> <g id="high" transform="translate(62.000000, 252.000000)"> <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z" id="Combined-Shape" fill="#F5F5F5"></path> <use id="Rectangle-40-Copy" stroke="#666666" mask="url(#mask-1)" stroke-width="4" xlink:href="#path-1"></use> <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z" id="Page-1" fill="#DA2945"></path> <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12" width="2" height="4"></rect> <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17" width="2" height="2"></rect> </g> </g> </g> </g> </g> </g> </svg>' +
+                '</div>' +
+                '<div class="severity-title-name">High</div>' +
+                '<div class="severity-count">' + highCount + '</div>' +
                 '</div>';
 
         case SEVERITY.MED:
@@ -338,8 +466,8 @@ function generateSastCveTable(severity) {
     //get container and create table element in it
     document.getElementById(tableElementId + '-container').innerHTML =
         severityTitle +
-        '<table id="' + tableElementId + '" class="cve-table">' +
-            tableHeadersElement +
+        '<table id="' + tableElementId + '" class="cve-table ' + tableElementId + '">' +
+        tableHeadersElement +
         '</table>';
 
     //get the created table
@@ -347,10 +475,10 @@ function generateSastCveTable(severity) {
 
     //add rows to table
     var row;
-    for (i = 0; i < severityCount; i++) {
+    for (i = 0; i < severityCveList.length; i++) {
         row = table.insertRow(i + 1);
-        row.insertCell(0).innerHTML = severityCveList[i].cveName;
-        row.insertCell(1).innerHTML = 78;
+        row.insertCell(0).innerHTML = severityCveList[i].name;
+        row.insertCell(1).innerHTML = severityCveList[i].count;
 
     }
 }
@@ -363,19 +491,19 @@ function generateOsaCveTable(severity) {
     switch (severity) {
         case SEVERITY.OSA_HIGH:
             severityCount = osaHighCount;
-            severityCveList = highCveList;
+            severityCveList = osaHighCveList;
             tableElementId = "osa-cve-table-high";
             break;
 
         case SEVERITY.OSA_MED:
             severityCount = osaMedCount;
-            severityCveList = medCveList;
+            severityCveList = osaMedCveList;
             tableElementId = "osa-cve-table-med";
             break;
 
         case SEVERITY.OSA_LOW:
             severityCount = osaLowCount;
-            severityCveList = lowCveList;
+            severityCveList = osaLowCveList;
             tableElementId = "osa-cve-table-low";
             break;
     }
@@ -391,7 +519,7 @@ function generateOsaCveTable(severity) {
     document.getElementById(tableElementId + '-container').innerHTML =
         severityTitle +
         '<table id="' + tableElementId + '" class="cve-table">' +
-            tableHeadersElement +
+        tableHeadersElement +
         '</table>';
 
     //get the created table
@@ -399,15 +527,14 @@ function generateOsaCveTable(severity) {
 
     //add rows to table
     var row;
-    for (i = 0; i < severityCount; i++) {
+    for (i = 0; i < severityCveList.length; i++) {
         row = table.insertRow(i + 1);
         row.insertCell(0).innerHTML = severityCveList[i].cveName;
-        row.insertCell(1).innerHTML = 78;
-        row.insertCell(2).innerHTML = 78;
+        row.insertCell(1).innerHTML = severityCveList[i].publishDate;
+        row.insertCell(2).innerHTML = severityCveList[i].libraryName;
 
     }
 }
-
 
 function generateCveTableHeaders(headers) {
     var ret = "<tr>";
@@ -436,54 +563,21 @@ function generateCveTable(severity) {
     }
 }
 
-var highCveList = [
+var dummyHighCveList = [
     {
-        "id": "0",
-        "cveName": "cve-name-high",
-        "score": 100.0,
-        "severity": {
-            "Id": 1,
-            "name": "High"
-        },
-        "publishDate": "2016-11-07T10:16:06.1206743Z",
-        "url": "http://cv1",
-        "description": null,
-        "recommendations": "recommendation 1",
-        "sourceFileName": "SourceFileName 1",
-        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
+        "name": "cve-name-high",
+        "count": "10"
     },
     {
-        "id": "0",
-        "cveName": "cve-name-high",
-        "score": 100.0,
-        "severity": {
-            "Id": 1,
-            "name": "High"
-        },
-        "publishDate": "2016-11-07T10:16:06.1206743Z",
-        "url": "http://cv1",
-        "description": null,
-        "recommendations": "recommendation 1",
-        "sourceFileName": "SourceFileName 1",
-        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
+        "name": "cve-name-high",
+        "count": "10"
     },
     {
-        "id": "0",
-        "cveName": "cve-name-high",
-        "score": 100.0,
-        "severity": {
-            "Id": 1,
-            "name": "High"
-        },
-        "publishDate": "2016-11-07T10:16:06.1206743Z",
-        "url": "http://cv1",
-        "description": null,
-        "recommendations": "recommendation 1",
-        "sourceFileName": "SourceFileName 1",
-        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
+        "name": "cve-name-high",
+        "count": "10"
     }
 ];
-var medCveList = [
+var dummyMedCveList = [
     {
         "id": "0",
         "cveName": "cve-name-med",
@@ -530,7 +624,149 @@ var medCveList = [
         "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
     }
 ];
-var lowCveList = [
+var dummyLowCveList = [
+    {
+        "id": "0",
+        "cveName": "cve-name-low",
+        "score": 1.0,
+        "severity": {
+            "Id": 3,
+            "name": "Low"
+        },
+        "publishDate": "2016-11-07T10:16:06.1206743Z",
+        "url": "http://cv1",
+        "description": null,
+        "recommendations": "recommendation 3",
+        "sourceFileName": "SourceFileName 3",
+        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
+    },
+    {
+        "id": "0",
+        "cveName": "cve-name-low",
+        "score": 1.0,
+        "severity": {
+            "Id": 3,
+            "name": "Low"
+        },
+        "publishDate": "2016-11-07T10:16:06.1206743Z",
+        "url": "http://cv1",
+        "description": null,
+        "recommendations": "recommendation 3",
+        "sourceFileName": "SourceFileName 3",
+        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
+    },
+    {
+        "id": "0",
+        "cveName": "cve-name-low",
+        "score": 1.0,
+        "severity": {
+            "Id": 3,
+            "name": "Low"
+        },
+        "publishDate": "2016-11-07T10:16:06.1206743Z",
+        "url": "http://cv1",
+        "description": null,
+        "recommendations": "recommendation 3",
+        "sourceFileName": "SourceFileName 3",
+        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
+    }
+];
+
+var dummyOsaHighCveList = [
+    {
+        "id": "0",
+        "cveName": "cve-name-high",
+        "score": 100.0,
+        "severity": {
+            "Id": 1,
+            "name": "High"
+        },
+        "publishDate": "2016-11-07T10:16:06.1206743Z",
+        "url": "http://cv1",
+        "description": null,
+        "recommendations": "recommendation 1",
+        "sourceFileName": "SourceFileName 1",
+        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
+    },
+    {
+        "id": "0",
+        "cveName": "cve-name-high",
+        "score": 100.0,
+        "severity": {
+            "Id": 1,
+            "name": "High"
+        },
+        "publishDate": "2016-11-07T10:16:06.1206743Z",
+        "url": "http://cv1",
+        "description": null,
+        "recommendations": "recommendation 1",
+        "sourceFileName": "SourceFileName 1",
+        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
+    },
+    {
+        "id": "0",
+        "cveName": "cve-name-high",
+        "score": 100.0,
+        "severity": {
+            "Id": 1,
+            "name": "High"
+        },
+        "publishDate": "2016-11-07T10:16:06.1206743Z",
+        "url": "http://cv1",
+        "description": null,
+        "recommendations": "recommendation 1",
+        "sourceFileName": "SourceFileName 1",
+        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
+    }
+];
+var dummyOsaMedCveList = [
+    {
+        "id": "0",
+        "cveName": "cve-name-med",
+        "score": 50.0,
+        "severity": {
+            "Id": 2,
+            "name": "Med"
+        },
+        "publishDate": "2016-11-07T10:16:06.1206743Z",
+        "url": "http://cv1",
+        "description": null,
+        "recommendations": "recommendation 2",
+        "sourceFileName": "SourceFileName 2",
+        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
+    },
+    {
+        "id": "0",
+        "cveName": "cve-name-med",
+        "score": 50.0,
+        "severity": {
+            "Id": 2,
+            "name": "Med"
+        },
+        "publishDate": "2016-11-07T10:16:06.1206743Z",
+        "url": "http://cv1",
+        "description": null,
+        "recommendations": "recommendation 2",
+        "sourceFileName": "SourceFileName 2",
+        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
+    },
+    {
+        "id": "0",
+        "cveName": "cve-name-med",
+        "score": 50.0,
+        "severity": {
+            "Id": 2,
+            "name": "Med"
+        },
+        "publishDate": "2016-11-07T10:16:06.1206743Z",
+        "url": "http://cv1",
+        "description": null,
+        "recommendations": "recommendation 2",
+        "sourceFileName": "SourceFileName 2",
+        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
+    }
+];
+var dummyOsaLowCveList = [
     {
         "id": "0",
         "cveName": "cve-name-low",

@@ -21,9 +21,9 @@
 
         //thresholds
         var thresholdsEnabled = verifyVar([${it.thresholdsEnabled}]);
-        var highThreshold = verifyVar([${it.sastThresholdConfig.highThreshold}]);
-        var medThreshold = verifyVar([${it.sastThresholdConfig.mediumThreshold}]);
-        var lowThreshold = verifyVar([${it.sastThresholdConfig.lowThreshold}]);
+        var highThreshold = verifyVar([${it.sastThresholdConfig.highSeverity}]);
+        var medThreshold = verifyVar([${it.sastThresholdConfig.mediumSeverity}]);
+        var lowThreshold = verifyVar([${it.sastThresholdConfig.lowSeverity}]);
 
         //counts
         var highCount = verifyVar([${it.sastScanResult.highCount}]);
@@ -37,7 +37,7 @@
 
 
         //-------------------------- osa vars --------------------------------------
-        //        var isOsaFeature = (['${it.osaScanResult}'][0] !== '');
+        //this var is needed so previous builds display correctly
         var isOsaFeature = verifyVar(['${it.osaScanResult}']) !== '';
 
         //link paths
@@ -45,7 +45,6 @@
         var osaHtmlPath = '${app.rootUrl}${it.owner.url}${it.urlName}' + "/osaHtmlReport";
 
         var osaEnabled = verifyVar([${it.osaScanResult.osaEnabled}]);
-        //        osaEnabled == null ? false : osaEnabled;
 
         //libraries
         var vulnerableLibraries = verifyVar([${it.osaScanResult.osaTotalVulnerabilitiesLibs}]);
@@ -53,9 +52,9 @@
 
         //thresholds
         var osaThresholdsEnabled = verifyVar([${it.osaThresholdsEnabled}]);
-        var osaHighThreshold = verifyVar([${it.osaThresholdConfig.osaHighThreshold}]);
-        var osaMedThreshold = verifyVar([${it.osaThresholdConfig.osaMediumThreshold}]);
-        var osaLowThreshold = verifyVar([${it.osaThresholdConfig.osaLowThreshold}]);
+        var osaHighThreshold = verifyVar([${it.osaThresholdConfig.highSeverity}]);
+        var osaMedThreshold = verifyVar([${it.osaThresholdConfig.mediumSeverity}]);
+        var osaLowThreshold = verifyVar([${it.osaThresholdConfig.lowSeverity}]);
 
         //counts
         var osaHighCount = verifyVar([${it.osaScanResult.osaHighCount}]);
@@ -945,9 +944,9 @@
             padding: 11px 0;
         }
 
-        table.cve-table td > .sast-cve-table-high,
-        table.cve-table td .sast-cve-table-med,
-        table.cve-table td .sast-cve-table-low {
+        table.cve-table td.sast-cve-table-high,
+        table.cve-table td.sast-cve-table-med,
+        table.cve-table td.sast-cve-table-low {
             max-width: 19px;
         }
 
