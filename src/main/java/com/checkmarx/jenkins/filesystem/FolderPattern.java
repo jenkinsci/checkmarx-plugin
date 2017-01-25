@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
@@ -14,7 +15,7 @@ import java.util.logging.Logger;
  */
 public class FolderPattern {
 
-    private static final Logger LOGGER = Logger.getLogger(FolderPattern.class.getName());
+    private static final Logger LOGGER = LogManager.getLogManager().getLogger("hudson.WebAppMain");
 
     private AbstractBuild<?, ?> build;
     private BuildListener listener;

@@ -8,6 +8,7 @@ import hudson.FilePath;
 
 import java.io.IOException;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
@@ -16,7 +17,7 @@ import java.util.logging.Logger;
  */
 public class ScanService {
 
-    private static final Logger LOGGER = Logger.getLogger(ScanService.class.getName());
+    private static final Logger LOGGER = LogManager.getLogManager().getLogger("hudson.WebAppMain");
 
     private static final String OSA_RUN_STARTED = "OSA (open source analysis) Run has started";
     private static final String OSA_RUN_ENDED = "OSA (open source analysis) Run has finished successfully";

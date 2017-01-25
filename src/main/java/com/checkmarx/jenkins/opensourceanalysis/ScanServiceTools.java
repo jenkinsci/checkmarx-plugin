@@ -5,8 +5,8 @@ import com.checkmarx.jenkins.web.client.OsaScanClient;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
-
 
 
 /**
@@ -14,7 +14,7 @@ import java.util.logging.Logger;
  */
 public class ScanServiceTools {
 
-    private static final Logger LOGGER = Logger.getLogger(ScanServiceTools.class.getName());
+    private static final Logger LOGGER = LogManager.getLogManager().getLogger("hudson.WebAppMain");
 
     private DependencyFolder dependencyFolder;
     private CxWebService webServiceClient;

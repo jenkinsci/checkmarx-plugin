@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
@@ -29,7 +30,7 @@ public class CxZipperCallable implements FilePath.FileCallable<CxZipResult> {
     private final String combinedFilterPattern;
     private int numOfZippedFiles;
 
-    private static final Logger LOGGER = Logger.getLogger(CxZipperCallable.class.getName());
+    private static final Logger LOGGER = LogManager.getLogManager().getLogger("hudson.WebAppMain");
 
     public CxZipperCallable(@NotNull String combinedFilterPattern) {
         this.combinedFilterPattern = combinedFilterPattern;

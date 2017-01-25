@@ -32,6 +32,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import static ch.lambdaj.Lambda.*;
@@ -44,7 +45,7 @@ import static ch.lambdaj.Lambda.*;
  */
 public class CxWebService {
 
-    private static final Logger LOGGER = Logger.getLogger(CxWebService.class.getName());
+    private static final Logger LOGGER = LogManager.getLogManager().getLogger("hudson.WebAppMain");
 
     private static final String CHECKMARX_SERVER_WAS_NOT_FOUND_ON_THE_SPECIFIED_ADRESS = "Checkmarx server was not found on the specified adress";
     private static final int WEBSERVICE_API_VERSION = 1;

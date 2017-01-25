@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import static com.checkmarx.jenkins.CxResultSeverity.*;
@@ -34,7 +35,7 @@ import static com.checkmarx.jenkins.CxResultSeverity.*;
  */
 public class CxScanResult implements Action {
 
-    private static final Logger LOGGER = Logger.getLogger(CxScanResult.class.getName());
+    private static final Logger LOGGER = LogManager.getLogManager().getLogger("hudson.WebAppMain");
 
     public final AbstractBuild<?, ?> owner;
     private final long projectId;

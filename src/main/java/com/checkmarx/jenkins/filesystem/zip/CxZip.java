@@ -7,6 +7,7 @@ import hudson.model.BuildListener;
 import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
@@ -14,7 +15,7 @@ import java.util.logging.Logger;
  */
 public class CxZip {
 
-    private static final Logger LOGGER = Logger.getLogger(CxZip.class.getName());
+    private static final Logger LOGGER = LogManager.getLogManager().getLogger("hudson.WebAppMain");
 
     private AbstractBuild<?, ?> build;
     private BuildListener listener;

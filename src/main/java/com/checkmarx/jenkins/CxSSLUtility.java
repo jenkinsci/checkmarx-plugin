@@ -8,6 +8,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
@@ -18,7 +19,7 @@ import java.util.logging.Logger;
  */
 public class CxSSLUtility {
 
-    private static final Logger LOGGER = Logger.getLogger(CxSSLUtility.class.getName());
+    private static final Logger LOGGER = LogManager.getLogManager().getLogger("hudson.WebAppMain");
 
     @Nullable
     private static HostnameVerifier originalHostnameVerifier = null;

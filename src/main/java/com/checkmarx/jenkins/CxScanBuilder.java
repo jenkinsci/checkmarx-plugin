@@ -43,6 +43,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -127,7 +128,7 @@ public class CxScanBuilder extends Builder {
     // Kept for backward compatibility with old serialized plugin configuration.
     private static transient Logger staticLogger;
 
-    private static final Logger LOGGER = Logger.getLogger(CxScanBuilder.class.getName());
+    private static final Logger LOGGER = LogManager.getLogManager().getLogger("hudson.WebAppMain");
     // it is initialized in perform method
     private JobStatusOnError jobStatusOnError;
 
@@ -1074,7 +1075,7 @@ public class CxScanBuilder extends Builder {
         public static final int FULL_SCAN_CYCLE_MIN = 1;
         public static final int FULL_SCAN_CYCLE_MAX = 99;
 
-        private static final Logger logger = Logger.getLogger(DescriptorImpl.class.getName());
+        private static final Logger logger = LogManager.getLogManager().getLogger("hudson.WebAppMain");
 
         //////////////////////////////////////////////////////////////////////////////////////
         //  Persistent plugin global configuration parameters

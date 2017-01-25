@@ -24,6 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
@@ -31,7 +32,7 @@ import java.util.logging.Logger;
  */
 public class OsaScanClient implements Closeable {
 
-    private static final Logger LOGGER = Logger.getLogger(OsaScanClient.class.getName());
+    private static final Logger LOGGER = LogManager.getLogManager().getLogger("hudson.WebAppMain");
 
     private static final String ROOT_PATH = "CxRestAPI/";
     private static final String AUTHENTICATION_PATH = "auth/login";
