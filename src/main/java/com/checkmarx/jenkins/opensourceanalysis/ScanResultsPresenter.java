@@ -1,17 +1,18 @@
 package com.checkmarx.jenkins.opensourceanalysis;
 
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
-import org.apache.log4j.Logger;
+
+import java.util.logging.Logger;
+
 
 /**
  * Created by tsahib on 9/13/2016.
  */
 public class ScanResultsPresenter {
 
-    private static Logger log;
+    private static final Logger LOGGER = Logger.getLogger(ScanResultsPresenter.class.getName());
 
-    public ScanResultsPresenter(Logger logger) {
-        log = logger;
+    public ScanResultsPresenter() {
     }
 
     public void printResultsToOutput(GetOpenSourceSummaryResponse results) {
@@ -28,6 +29,6 @@ public class ScanResultsPresenter {
         sb.append("vulnerability score: ").append(results.getVulnerabilityScore()).append("\n");
         sb.append("----------------------------------------------------------------------------").append("\n");
 
-        log.info(sb.toString());
+        LOGGER.info(sb.toString());
     }
 }

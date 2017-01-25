@@ -1,9 +1,9 @@
 package com.checkmarx.jenkins;
 
-import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.logging.Logger;
 
 /**
  * Creates a logger with the following name: "com.checkmarx.<suffix>.<className>"

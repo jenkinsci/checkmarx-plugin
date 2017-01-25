@@ -2,14 +2,16 @@ package com.checkmarx.jenkins;
 
 import com.checkmarx.ws.CxJenkinsWebService.*;
 import hudson.EnvVars;
-import org.apache.log4j.Logger;
+
+import java.util.logging.Logger;
+
 
 /**
  * Created by tsahib on 7/5/2016.
  */
 public class CliScanArgsFactory {
 
-    private static Logger log;
+    private static final Logger LOGGER = Logger.getLogger(CliScanArgsFactory.class.getName());
 
     private String preset;
     private final String projectName;
@@ -21,8 +23,7 @@ public class CliScanArgsFactory {
     private final EnvVars env;
     private long projectId;
 
-    public CliScanArgsFactory(Logger logger, String preset, String projectName, String groupId, String sourceEncoding, String comment, boolean isThisBuildIncremental, byte[] compressedSources, EnvVars env, long projectId) {
-        log = logger;
+    public CliScanArgsFactory(String preset, String projectName, String groupId, String sourceEncoding, String comment, boolean isThisBuildIncremental, byte[] compressedSources, EnvVars env, long projectId) {
         this.preset = preset;
         this.projectName = projectName;
         this.groupId = groupId;
@@ -42,7 +43,7 @@ public class CliScanArgsFactory {
         try {
             presetLong = Long.parseLong(preset);
         } catch (Exception e) {
-            log.error("Encountered illegal preset value: " + preset + ". Using default preset.");
+            LOGGER.severe("Encountered illegal preset value: " + preset + ". Using default preset.");
         }
 
         projectSettings.setPresetID(presetLong);
@@ -53,7 +54,7 @@ public class CliScanArgsFactory {
         try {
             configuration = Long.parseLong(sourceEncoding);
         } catch (Exception e) {
-            log.error("Encountered illegal source encoding (configuration) value: " + sourceEncoding + ". Using default configuration.");
+            LOGGER.severe("Encountered illegal source encoding (configuration) value: " + sourceEncoding + ". Using default configuration.");
         }
         projectSettings.setScanConfigurationID(configuration);
 

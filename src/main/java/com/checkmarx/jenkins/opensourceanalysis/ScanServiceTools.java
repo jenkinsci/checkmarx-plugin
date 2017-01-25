@@ -4,14 +4,17 @@ import com.checkmarx.jenkins.CxWebService;
 import com.checkmarx.jenkins.web.client.OsaScanClient;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
-import org.apache.log4j.Logger;
+
+import java.util.logging.Logger;
+
+
 
 /**
  * Created by zoharby on 10/01/2017.
  */
 public class ScanServiceTools {
 
-    private static Logger log;
+    private static final Logger LOGGER = Logger.getLogger(ScanServiceTools.class.getName());
 
     private DependencyFolder dependencyFolder;
     private CxWebService webServiceClient;
@@ -58,14 +61,6 @@ public class ScanServiceTools {
 
     public void setListener(BuildListener listener) {
         this.listener = listener;
-    }
-
-    public Logger getLogger() {
-        return log;
-    }
-
-    public void setLogger(Logger logger) {
-        log = logger;
     }
 
     public long getProjectId() {

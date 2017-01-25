@@ -4,23 +4,22 @@ import hudson.EnvVars;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * Created by tsahib on 7/5/2016.
  */
 public class FolderPattern {
 
-    private static Logger log;
+    private static final Logger LOGGER = Logger.getLogger(FolderPattern.class.getName());
 
     private AbstractBuild<?, ?> build;
     private BuildListener listener;
 
-    public FolderPattern(Logger logger, final AbstractBuild<?, ?> build, final BuildListener listener) {
-        log = logger;
+    public FolderPattern(final AbstractBuild<?, ?> build, final BuildListener listener) {
         this.build = build;
         this.listener = listener;
     }
@@ -45,7 +44,7 @@ public class FolderPattern {
                 result.append("/**/*, ");
             }
         }
-        log.debug("Exclude folders converted to: " + result.toString());
+        LOGGER.fine("Exclude folders converted to: " + result.toString());
         return result.toString();
     }
 }

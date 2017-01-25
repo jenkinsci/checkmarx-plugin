@@ -7,13 +7,13 @@ import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
 import org.apache.commons.codec.binary.Base64OutputStream;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.logging.Logger;
 
 /**
  * Creates zip file with source files.
@@ -29,13 +29,11 @@ public class CxZipperCallable implements FilePath.FileCallable<CxZipResult> {
     private final String combinedFilterPattern;
     private int numOfZippedFiles;
 
-    @NotNull
-    private static Logger log;
+    private static final Logger LOGGER = Logger.getLogger(CxZipperCallable.class.getName());
 
-    public CxZipperCallable(@NotNull String combinedFilterPattern, @NotNull Logger logger) {
+    public CxZipperCallable(@NotNull String combinedFilterPattern) {
         this.combinedFilterPattern = combinedFilterPattern;
         this.numOfZippedFiles = 0;
-        log = logger;
     }
 
     @Override
@@ -44,7 +42,7 @@ public class CxZipperCallable implements FilePath.FileCallable<CxZipResult> {
             @Override
             public void updateProgress(String fileName, long size) {
                 numOfZippedFiles++;
-                log.info("Zipping (" + FileUtils.byteCountToDisplaySize(size) + "): " + fileName + "\n");
+                LOGGER.info("Zipping (" + FileUtils.byteCountToDisplaySize(size) + "): " + fileName + "\n");
             }
         };
 

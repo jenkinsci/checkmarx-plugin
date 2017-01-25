@@ -14,8 +14,6 @@ import hudson.FilePath;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.hamcrest.Matchers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,6 +31,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static ch.lambdaj.Lambda.*;
 
@@ -44,7 +44,7 @@ import static ch.lambdaj.Lambda.*;
  */
 public class CxWebService {
 
-    private static Logger log;
+    private static final Logger LOGGER = Logger.getLogger(CxWebService.class.getName());
 
     private static final String CHECKMARX_SERVER_WAS_NOT_FOUND_ON_THE_SPECIFIED_ADRESS = "Checkmarx server was not found on the specified adress";
     private static final int WEBSERVICE_API_VERSION = 1;
@@ -57,14 +57,7 @@ public class CxWebService {
     private CxJenkinsWebServiceSoap cxJenkinsWebServiceSoap;
     private final URL webServiceUrl;
 
-    public CxWebService(String serverUrl) throws MalformedURLException, AbortException {
-        this(serverUrl, null);
-    }
-
-    public CxWebService(@NotNull final String serverUrl, @Nullable final String loggerSuffix)
-            throws MalformedURLException, AbortException {
-        log = CxLogUtils.loggerWithSuffix(getClass(), loggerSuffix);
-
+    public CxWebService(@NotNull final String serverUrl) throws MalformedURLException, AbortException {
         disableCertificateValidation();
 
         validateServerUrl(serverUrl);
@@ -87,11 +80,11 @@ public class CxWebService {
                 WEBSERVICE_API_VERSION);
         if (!cxWSResponseDiscovery.isIsSuccesfull()) {
             String message = "Failed to resolve Checkmarx webservice url: \n" + cxWSResponseDiscovery.getErrorMessage();
-            log.error(message);
+            LOGGER.severe(message);
             throw new AbortException(message);
         }
         URL webServiceUrl = new URL(cxWSResponseDiscovery.getServiceURL());
-        log.debug("Webservice url: " + webServiceUrl);
+        LOGGER.fine("Webservice url: " + webServiceUrl);
         return webServiceUrl;
     }
 
@@ -100,12 +93,12 @@ public class CxWebService {
 
         checkServerConnectivity(resolverUrl);
 
-        log.debug("Resolver url: " + resolverUrl);
+        LOGGER.fine("Resolver url: " + resolverUrl);
         CxWSResolver cxWSResolver;
         try {
             cxWSResolver = new CxWSResolver(resolverUrl);
         } catch (WebServiceException e) {
-            log.error("Failed to resolve Checkmarx webservice url with resolver at: " + resolverUrl, e);
+            LOGGER.log(Level.SEVERE, "Failed to resolve Checkmarx webservice url with resolver at: " + resolverUrl, e);
             throw new AbortException("Checkmarx server was not found on url: " + serverUrl);
         }
         CxWSResolverSoap resolverSoap = cxWSResolver.getCxWSResolverSoap();
@@ -114,11 +107,11 @@ public class CxWebService {
     }
 
     private void validateServerUrl(@NotNull final String serverUrl) throws AbortException, MalformedURLException {
-        log.info("Establishing connection with Checkmarx server at: " + serverUrl);
+        LOGGER.info("Establishing connection with Checkmarx server at: " + serverUrl);
         UrlValidations urlValidations = new UrlValidations();
         if (urlValidations.urlHasPaths(serverUrl)) {
             String message = "Checkmarx server url must not contain path: " + serverUrl;
-            log.debug(message);
+            LOGGER.fine(message);
             throw new AbortException(message);
         }
     }
@@ -128,7 +121,7 @@ public class CxWebService {
         CxScanBuilder.DescriptorImpl descriptor = (CxScanBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(
                 CxScanBuilder.class);
         if (descriptor != null && !descriptor.isEnableCertificateValidation()) {
-            log.info("SSL/TLS Certificate Validation Disabled");
+            LOGGER.fine("SSL/TLS Certificate Validation Disabled");
             CxSSLUtility.disableSSLCertificateVerification();
         }
     }
@@ -147,13 +140,13 @@ public class CxWebService {
                 throw new AbortException(CHECKMARX_SERVER_WAS_NOT_FOUND_ON_THE_SPECIFIED_ADRESS);
             }
         } catch (IOException e) {
-            log.debug(CHECKMARX_SERVER_WAS_NOT_FOUND_ON_THE_SPECIFIED_ADRESS, e);
+            LOGGER.log(Level.FINE, CHECKMARX_SERVER_WAS_NOT_FOUND_ON_THE_SPECIFIED_ADRESS, e);
             throw new AbortException(CHECKMARX_SERVER_WAS_NOT_FOUND_ON_THE_SPECIFIED_ADRESS);
         }
     }
 
     private void setClientTimeout(BindingProvider provider, int seconds) {
-        log.debug("Setting connection timeout to " + seconds + " seconds");
+        LOGGER.fine("Setting connection timeout to " + seconds + " seconds");
         int milliseconds = seconds * 1000;
         Map<String, Object> requestContext = provider.getRequestContext();
         // see https://java.net/jira/browse/JAX_WS-1166
@@ -174,13 +167,13 @@ public class CxWebService {
         CxWSResponseLoginData cxWSResponseLoginData = cxJenkinsWebServiceSoap.login(credentials, LCID);
 
         if (!cxWSResponseLoginData.isIsSuccesfull()) {
-            log.error("Login to Checkmarx server failed:");
-            log.error(cxWSResponseLoginData.getErrorMessage());
+            LOGGER.severe("Login to Checkmarx server failed:");
+            LOGGER.severe(cxWSResponseLoginData.getErrorMessage());
             throw new AbortException(cxWSResponseLoginData.getErrorMessage());
         }
 
         sessionId = cxWSResponseLoginData.getSessionId();
-        log.debug("Login successful, sessionId: " + sessionId);
+        LOGGER.fine("Login successful, sessionId: " + sessionId);
     }
 
     private CxWSResponseScanStatus getScanStatus(CxWSResponseRunID cxWSResponseRunID) throws AbortException {
@@ -189,7 +182,7 @@ public class CxWebService {
                 cxWSResponseRunID.getRunId());
         if (!cxWSResponseScanStatus.isIsSuccesfull()) {
             String message = "Error received from Checkmarx server: " + cxWSResponseScanStatus.getErrorMessage();
-            log.error(message);
+            LOGGER.severe(message);
             throw new AbortException(message);
         }
         return cxWSResponseScanStatus;
@@ -209,7 +202,7 @@ public class CxWebService {
     private String cleanLogger(Level level, String prevMsg, String newMsg) {
         //only log if new != old
         if (!newMsg.equals(prevMsg)) {
-            log.log(level, newMsg);
+            LOGGER.log(level, newMsg);
         }
 
         //if new, return the message logged
@@ -234,7 +227,7 @@ public class CxWebService {
 
                 if (scanTimeOutEnabled
                         && jobStartTime + scanTimeoutDuration * MILISECONDS_IN_MINUTE < System.currentTimeMillis()) {
-                    log.info("Scan duration exceeded timeout threshold");
+                    LOGGER.info("Scan duration exceeded timeout threshold");
                     return 0;
                 }
 
@@ -249,7 +242,7 @@ public class CxWebService {
 
                     case QUEUED:
                         if (!locReported) {
-                            log.info("Source contains: " + status.getLOC() + " lines of code.");
+                            LOGGER.info("Source contains: " + status.getLOC() + " lines of code.");
                             locReported = true;
                         }
                         newMessage = "Scan job queued at position: " + status.getQueuePosition();
@@ -257,11 +250,11 @@ public class CxWebService {
                         break;
 
                     case UNZIPPING:
-                        log.info("Unzipping: " + status.getCurrentStagePercent() + "% finished");
-                        log.info("LOC: " + status.getLOC());
-                        log.info("StageMessage: " + status.getStageMessage());
-                        log.info("StepMessage: " + status.getStepMessage());
-                        log.info("StepDetails: " + status.getStepDetails());
+                        LOGGER.info("Unzipping: " + status.getCurrentStagePercent() + "% finished");
+                        LOGGER.info("LOC: " + status.getLOC());
+                        LOGGER.info("StageMessage: " + status.getStageMessage());
+                        LOGGER.info("StepMessage: " + status.getStepMessage());
+                        LOGGER.info("StepDetails: " + status.getStepDetails());
                         break;
 
                     case WORKING:
@@ -275,7 +268,7 @@ public class CxWebService {
 
                     // End of progress states
                     case FINISHED:
-                        log.info("Scan Finished Successfully -  RunID: " + status.getRunId() + " ScanID:"
+                        LOGGER.info("Scan Finished Successfully -  RunID: " + status.getRunId() + " ScanID:"
                                 + status.getScanId());
                         return status.getScanId();
 
@@ -285,7 +278,7 @@ public class CxWebService {
                     case CANCELED:
                         String message = "Scan " + status.getStageName() + " -  RunID: " + status.getRunId() + " ScanID: "
                                 + status.getScanId() + " Server scan status: " + status.getStageMessage();
-                        log.info(message);
+                        LOGGER.info(message);
                         throw new AbortException(message);
                 }
 
@@ -302,7 +295,7 @@ public class CxWebService {
     }
 
     private void RestoreSession(String username, String password) throws AbortException {
-        log.info("Session was rejected by the Checkmarx server, trying to re-login");
+        LOGGER.info("Session was rejected by the Checkmarx server, trying to re-login");
         this.login(username, password);
     }
 
@@ -312,7 +305,7 @@ public class CxWebService {
         CxWSReportRequest cxWSReportRequest = new CxWSReportRequest();
         cxWSReportRequest.setScanID(scanId);
         cxWSReportRequest.setType(reportType);
-        log.info("Requesting " + reportType.toString().toUpperCase() + " Scan Report Generation");
+        LOGGER.info("Requesting " + reportType.toString().toUpperCase() + " Scan Report Generation");
 
         int retryAttempts = CxConfig.getServerCallRetryNumber();
         CxWSCreateReportResponse cxWSCreateReportResponse;
@@ -320,13 +313,13 @@ public class CxWebService {
             cxWSCreateReportResponse = cxJenkinsWebServiceSoap.createScanReport(sessionId, cxWSReportRequest);
             if (!cxWSCreateReportResponse.isIsSuccesfull()) {
                 retryAttempts--;
-                log.warn("Error requesting scan report generation: " + cxWSCreateReportResponse.getErrorMessage());
+                LOGGER.warning("Error requesting scan report generation: " + cxWSCreateReportResponse.getErrorMessage());
             }
         } while (!cxWSCreateReportResponse.isIsSuccesfull() && retryAttempts > 0);
 
         if (!cxWSCreateReportResponse.isIsSuccesfull()) {
             String message = "Error requesting scan report generation: " + cxWSCreateReportResponse.getErrorMessage();
-            log.error(message);
+            LOGGER.severe(message);
             throw new AbortException(message);
         }
 
@@ -343,18 +336,18 @@ public class CxWebService {
                     reportId);
             if (!cxWSReportStatusResponse.isIsSuccesfull()) {
                 String message = "Error retrieving scan report status: " + cxWSReportStatusResponse.getErrorMessage();
-                log.error(message);
+                LOGGER.severe(message);
                 throw new AbortException(message);
             }
             if (cxWSReportStatusResponse.isIsFailed()) {
                 String message = "Failed to create scan report";
-                log.error("Web method getScanReportStatus returned status response with isFailed field set to true");
-                log.error(message);
+                LOGGER.severe("Web method getScanReportStatus returned status response with isFailed field set to true");
+                LOGGER.severe(message);
                 throw new AbortException(message);
             }
 
             if (cxWSReportStatusResponse.isIsReady()) {
-                log.info("Scan report generated on Checkmarx server");
+                LOGGER.info("Scan report generated on Checkmarx server");
                 break;
             }
 
@@ -366,7 +359,7 @@ public class CxWebService {
         CxWSResponseScanResults cxWSResponseScanResults = cxJenkinsWebServiceSoap.getScanReport(sessionId, reportId);
         if (!cxWSResponseScanResults.isIsSuccesfull()) {
             String message = "Error retrieving scan report: " + cxWSResponseScanResults.getErrorMessage();
-            log.error(message);
+            LOGGER.severe(message);
             throw new AbortException(message);
         }
 
@@ -379,12 +372,12 @@ public class CxWebService {
             fileOutputStream.close();
 
         } catch (IOException e) {
-            log.debug(e);
+            LOGGER.log(Level.FINE, e.getMessage(), e);
             String message = "Can't create report file: " + reportFile.getAbsolutePath();
-            log.info(message);
+            LOGGER.info(message);
             throw new AbortException(message);
         }
-        log.info("Scan report written to: " + reportFile.getAbsolutePath());
+        LOGGER.info("Scan report written to: " + reportFile.getAbsolutePath());
     }
 
     public List<ProjectDisplayData> getProjectsDisplayData() throws AbortException {
@@ -395,7 +388,7 @@ public class CxWebService {
         if (!cxWSResponseProjectsDisplayData.isIsSuccesfull()) {
             String message = "Error retrieving projects display data from server: "
                     + cxWSResponseProjectsDisplayData.getErrorMessage();
-            log.error(message);
+            LOGGER.severe(message);
             throw new AbortException(message);
         }
 
@@ -407,7 +400,7 @@ public class CxWebService {
         CxWSResponsePresetList cxWSResponsePresetList = this.cxJenkinsWebServiceSoap.getPresetList(this.sessionId);
         if (!cxWSResponsePresetList.isIsSuccesfull()) {
             String message = "Error retrieving presets from server: " + cxWSResponsePresetList.getErrorMessage();
-            log.error(message);
+            LOGGER.severe(message);
             throw new AbortException(message);
         }
         return cxWSResponsePresetList.getPresetList().getPreset();
@@ -421,7 +414,7 @@ public class CxWebService {
         if (!cxWSResponseConfigSetList.isIsSuccesfull()) {
             String message = "Error retrieving configurations from server: "
                     + cxWSResponseConfigSetList.getErrorMessage();
-            log.error(message);
+            LOGGER.severe(message);
             throw new AbortException(message);
         }
         return cxWSResponseConfigSetList.getConfigSetList().getConfigurationSet();
@@ -475,7 +468,7 @@ public class CxWebService {
         } catch (JAXBException | UnsupportedEncodingException e) {
 
             // Getting here indicates a bug
-            log.error(e.getMessage(), e);
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
             throw new RuntimeException("Eror creating SOAP message", e);
         }
     }
@@ -488,7 +481,7 @@ public class CxWebService {
         if (!associatedGroupsList.isIsSuccesfull()) {
             String message = "Error retrieving associated groups (teams) from server: "
                     + associatedGroupsList.getErrorMessage();
-            log.error(message);
+            LOGGER.severe(message);
             throw new AbortException(message);
         }
 
@@ -569,13 +562,13 @@ public class CxWebService {
         if (selected.isEmpty()) {
             final String message = "Could not translate group (team) id: " + groupId + " to group name\n"
                     + "Open the Job configuration page, and select a team.\n";
-            log.error(message);
+            LOGGER.severe(message);
             throw new AbortException(message);
 
         } else if (selected.size() > 1) {
-            log.warn("Server returned more than one group with id: " + groupId);
+            LOGGER.warning("Server returned more than one group with id: " + groupId);
             for (Group g : selected) {
-                log.warn("Group Id: " + g.getID() + " groupName: " + g.getGroupName());
+                LOGGER.warning("Group Id: " + g.getID() + " groupName: " + g.getGroupName());
             }
         }
 
@@ -647,7 +640,7 @@ public class CxWebService {
             streamingUrlConnection.connect();
             final OutputStream os = streamingUrlConnection.getOutputStream();
 
-            log.info("Uploading sources to Checkmarx server");
+            LOGGER.info("Uploading sources to Checkmarx server");
             os.write(soapMessage.getLeft());
             final InputStream fis = base64ZipFile.read();
             org.apache.commons.io.IOUtils.copyLarge(fis, os);
@@ -655,7 +648,7 @@ public class CxWebService {
             os.write(soapMessage.getRight());
             os.close();
             fis.close();
-            log.info("Finished uploading sources to Checkmarx server");
+            LOGGER.info("Finished uploading sources to Checkmarx server");
 
             CxWSResponseRunID cxWSResponseRunID = xmlResponseParser.parse(streamingUrlConnection.getInputStream());
 
@@ -669,10 +662,10 @@ public class CxWebService {
         } catch (HttpRetryException e) {
             String consoleMessage = "\nCheckmarx plugin for Jenkins does not support Single sign-on authentication."
                     + "\nPlease, configure Checkmarx server to work in Anonymous authentication mode.\n";
-            log.error(consoleMessage);
+            LOGGER.severe(consoleMessage);
             throw new AbortException(e.getMessage());
         } catch (IOException | JAXBException | XMLStreamException | InterruptedException e) {
-            log.error(e.getMessage(), e);
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
             throw new AbortException(e.getMessage());
         }
     }

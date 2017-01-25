@@ -1,6 +1,5 @@
 package com.checkmarx.jenkins;
 
-import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import javax.net.ssl.*;
@@ -8,16 +7,18 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Allows skipping SSL certificate validation
- * 
+ *
  * @author denis
  * @since 23/3/14
  */
 public class CxSSLUtility {
 
-    private static final Logger logger = Logger.getLogger(CxSSLUtility.class);
+    private static final Logger LOGGER = Logger.getLogger(CxSSLUtility.class.getName());
 
     @Nullable
     private static HostnameVerifier originalHostnameVerifier = null;
@@ -35,7 +36,7 @@ public class CxSSLUtility {
         try {
             HttpsURLConnection.setDefaultSSLSocketFactory(SSLContext.getDefault().getSocketFactory());
         } catch (NoSuchAlgorithmException e) {
-            logger.error(e);
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
 
         HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
@@ -85,10 +86,10 @@ public class CxSSLUtility {
             HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
         } catch (KeyManagementException e) {
             // In case of exception, do not install fake trust manager
-            logger.warn("Failed to disable SSL/TLS certificate validation", e);
+            LOGGER.log(Level.WARNING, "Failed to disable SSL/TLS certificate validation", e);
         } catch (NoSuchAlgorithmException e) {
             // In case of exception, do not install fake trust manager
-            logger.warn("Failed to disable SSL/TLS certificate validation", e);
+            LOGGER.log(Level.WARNING,"Failed to disable SSL/TLS certificate validation", e);
         }
     }
 }

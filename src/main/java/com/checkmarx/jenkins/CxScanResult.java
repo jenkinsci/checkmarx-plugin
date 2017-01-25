@@ -7,7 +7,6 @@ import hudson.model.Hudson;
 import hudson.util.IOUtils;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.StaplerRequest;
@@ -24,6 +23,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static com.checkmarx.jenkins.CxResultSeverity.*;
 
@@ -33,7 +34,7 @@ import static com.checkmarx.jenkins.CxResultSeverity.*;
  */
 public class CxScanResult implements Action {
 
-    private static Logger log; // NOSONAR
+    private static final Logger LOGGER = Logger.getLogger(CxScanResult.class.getName());
 
     public final AbstractBuild<?, ?> owner;
     private final long projectId;
@@ -89,10 +90,9 @@ public class CxScanResult implements Action {
     private Integer osaLowThreshold;
 
 
-    public CxScanResult(final AbstractBuild owner, final String loggerSuffix, String serverUrl, long projectId, boolean scanRanAsynchronous) {
+    public CxScanResult(final AbstractBuild owner, String serverUrl, long projectId, boolean scanRanAsynchronous) {
         this.projectId = projectId;
         this.scanRanAsynchronous = scanRanAsynchronous;
-        log = CxLogUtils.loggerWithSuffix(getClass(), loggerSuffix);
         this.owner = owner;
         this.serverUrl = serverUrl;
         this.resultIsValid = true;
@@ -381,11 +381,11 @@ public class CxScanResult implements Action {
             errorMessage = null;
 
         } catch (ParserConfigurationException e) {
-            log.fatal(e);
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
         } catch (SAXException | IOException e) {
             resultIsValid = false;
             errorMessage = e.getMessage();
-            log.warn(e);
+            LOGGER.log(Level.WARNING, e.getMessage(), e);
         }
     }
 
@@ -443,7 +443,7 @@ public class CxScanResult implements Action {
                                 infoCount++;
                             }
                         } else {
-                            log.warn("\"SeverityIndex\" attribute was not found in element \"Result\" in XML report. "
+                            LOGGER.warning("\"SeverityIndex\" attribute was not found in element \"Result\" in XML report. "
                                     + "Make sure you are working with Checkmarx server version 7.1.6 HF3 or above.");
                         }
                     }
@@ -451,11 +451,11 @@ public class CxScanResult implements Action {
                 case "Query":
                     currentQueryName = attributes.getValue("name");
                     if (currentQueryName == null) {
-                        log.warn("\"name\" attribute was not found in element \"Query\" in XML report");
+                        LOGGER.warning("\"name\" attribute was not found in element \"Query\" in XML report");
                     }
                     currentQuerySeverity = attributes.getValue("SeverityIndex");
                     if (currentQuerySeverity == null) {
-                        log.warn("\"SeverityIndex\" attribute was not found in element \"Query\" in XML report. "
+                        LOGGER.warning("\"SeverityIndex\" attribute was not found in element \"Query\" in XML report. "
                                 + "Make sure you are working with Checkmarx server version 7.1.6 HF3 or above.");
                     }
                     currentQueryNumOfResults = 0;
@@ -492,7 +492,7 @@ public class CxScanResult implements Action {
                 } else if (StringUtils.equals(qr.getSeverity(), INFO.xmlParseString)) {
                     infoQueryResultList.add(qr);
                 } else {
-                    log.warn("Encountered a result query with unknown severity: " + qr.getSeverity());
+                    LOGGER.warning("Encountered a result query with unknown severity: " + qr.getSeverity());
                 }
             }
         }
@@ -500,13 +500,13 @@ public class CxScanResult implements Action {
         @NotNull
         private String constructDeepLink(@Nullable String rawDeepLink) {
             if (rawDeepLink == null) {
-                log.warn("\"DeepLink\" attribute was not found in element \"CxXMLResults\" in XML report");
+                LOGGER.warning("\"DeepLink\" attribute was not found in element \"CxXMLResults\" in XML report");
                 return "";
             }
             String token = "CxWebClient";
             String[] tokens = rawDeepLink.split(token);
             if (tokens.length < 1) {
-                log.warn("DeepLink value found in XML report is of unexpected format: " + rawDeepLink + "\n"
+                LOGGER.warning("DeepLink value found in XML report is of unexpected format: " + rawDeepLink + "\n"
                         + "\"Open Code Viewer\" button will not be functional");
             }
             return serverUrl + "/" + token + tokens[1];
@@ -518,19 +518,19 @@ public class CxScanResult implements Action {
         boolean ret = isThresholdExceededByLevel(highCount, highThreshold);
         ret |= isThresholdExceededByLevel(mediumCount, mediumThreshold);
         ret |= isThresholdExceededByLevel(lowCount, lowThreshold);
-       return ret;
+        return ret;
     }
 
     public boolean isOsaThresholdExceeded() {
         boolean ret = isThresholdExceededByLevel(osaScanResult.getOsaHighCount(), osaHighThreshold);
         ret |= isThresholdExceededByLevel(osaScanResult.getOsaMediumCount(), osaMediumThreshold);
         ret |= isThresholdExceededByLevel(osaScanResult.getOsaLowCount(), osaLowThreshold);
-       return ret;
+        return ret;
     }
 
-    private boolean isThresholdExceededByLevel(int count, Integer threshold){
+    private boolean isThresholdExceededByLevel(int count, Integer threshold) {
         boolean ret = false;
-        if (threshold != null && count > threshold){
+        if (threshold != null && count > threshold) {
             ret = true;
         }
         return ret;
