@@ -50,7 +50,7 @@ public class OsaScanClient implements Closeable {
     private AuthenticationRequest authenticationRequest;
     private Client client;
     private WebTarget root;
-    private transient Logger logger;
+    private static Logger logger;
 
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -86,7 +86,7 @@ public class OsaScanClient implements Closeable {
         logger.debug("sending request for HTML report");
         Response response = invokeRequest(invocation);
         validateResponse(response, Response.Status.OK, "fail get OSA scan summary results");
-        return  response.readEntity(GetOpenSourceSummaryResponse.class);
+        return response.readEntity(GetOpenSourceSummaryResponse.class);
     }
 
     public String getOSAScanHtmlResults(String scanId) {
@@ -105,22 +105,22 @@ public class OsaScanClient implements Closeable {
         return response.readEntity(byte[].class);
     }
 
-    public List<Library> getScanResultLibraries(String scanId){
+    public List<Library> getScanResultLibraries(String scanId) {
         List<Library> libraryList = new LinkedList<>();
         int lastListSize = ITEMS_PER_PAGE;
         int currentPage = 1;
         while (lastListSize == ITEMS_PER_PAGE) {
             Invocation invocation = getPageRequestInvocation(LIBRARIES_PATH, currentPage, scanId);
-            logger.debug("sending request for libraries page number "+ currentPage);
+            logger.debug("sending request for libraries page number " + currentPage);
             Response response = invokeRequest(invocation);
             validateResponse(response, Response.Status.OK, "fail get OSA scan libraries");
             try {
                 List<Library> libraryPage = mapper.readValue(response.readEntity(String.class), new TypeReference<List<Library>>() {
                 });
-                if(libraryPage != null) {
+                if (libraryPage != null) {
                     libraryList.addAll(libraryPage);
                     lastListSize = libraryPage.size();
-                }else {
+                } else {
                     break;
                 }
             } catch (IOException e) {
@@ -132,22 +132,22 @@ public class OsaScanClient implements Closeable {
         return libraryList;
     }
 
-    public List<CVE> getScanResultCVEs(String scanId){
+    public List<CVE> getScanResultCVEs(String scanId) {
         List<CVE> cvesList = new LinkedList<>();
         int lastListSize = ITEMS_PER_PAGE;
         int currentPage = 1;
         while (lastListSize == ITEMS_PER_PAGE) {
             Invocation invocation = getPageRequestInvocation(CVEs_PATH, currentPage, scanId);
-            logger.debug("sending request for CVE's page number "+ currentPage);
+            logger.debug("sending request for CVE's page number " + currentPage);
             Response response = invokeRequest(invocation);
             validateResponse(response, Response.Status.OK, "fail get OSA scan CVE's");
             try {
                 List<CVE> cvePage = mapper.readValue(response.readEntity(String.class), new TypeReference<List<CVE>>() {
                 });
-                if(cvePage != null) {
+                if (cvePage != null) {
                     lastListSize = cvePage.size();
                     cvesList.addAll(cvePage);
-                }else {
+                } else {
                     break;
                 }
             } catch (IOException e) {
@@ -160,8 +160,8 @@ public class OsaScanClient implements Closeable {
     }
 
 
-    private Invocation getSummeryByAcceptHeaderInvocation(String scanId, String acceptHeaderValue){
-        return  root.path(ANALYZE_SUMMARY_PATH).queryParam("scanId", scanId).request()
+    private Invocation getSummeryByAcceptHeaderInvocation(String scanId, String acceptHeaderValue) {
+        return root.path(ANALYZE_SUMMARY_PATH).queryParam("scanId", scanId).request()
                 .header(CX_ORIGIN_HEADER, CX_ORIGIN_VALUE)
                 .cookie(cookies.get(CX_COOKIE))
                 .header(ACCEPT_HEADER, acceptHeaderValue)
@@ -169,8 +169,8 @@ public class OsaScanClient implements Closeable {
                 .header(CSRF_COOKIE, cookies.get(CSRF_COOKIE).getValue()).buildGet();
     }
 
-    private Invocation getPageRequestInvocation(String path, int pageNumber, String scanId){
-       return root.path(path).queryParam("scanId", scanId)
+    private Invocation getPageRequestInvocation(String path, int pageNumber, String scanId) {
+        return root.path(path).queryParam("scanId", scanId)
                 .queryParam("page", pageNumber).queryParam("itemsPerPage", ITEMS_PER_PAGE).request()
                 .header(CX_ORIGIN_HEADER, CX_ORIGIN_VALUE)
                 .cookie(cookies.get(CX_COOKIE))
@@ -181,7 +181,7 @@ public class OsaScanClient implements Closeable {
     private MultiPart createScanMultiPartRequest(CreateScanRequest request) throws IOException {
         InputStream read = request.getZipFile().read();
 
-        final StreamDataBodyPart filePart = new StreamDataBodyPart (OSA_ZIPPED_FILE_KEY_NAME, read);
+        final StreamDataBodyPart filePart = new StreamDataBodyPart(OSA_ZIPPED_FILE_KEY_NAME, read);
         return new FormDataMultiPart()
                 .bodyPart(new FormDataBodyPart("origin", Integer.toString(CreateScanRequest.JENKINS_ORIGIN)))
                 .bodyPart(filePart);
@@ -207,12 +207,12 @@ public class OsaScanClient implements Closeable {
 
     private void sampleScan(Invocation invocation) throws InterruptedException {
         Boolean scanFinished = false;
-        while (!scanFinished){
+        while (!scanFinished) {
             Response response = invokeRequest(invocation);
             validateResponse(response, Response.Status.OK, "error occured while waiting for scan to finish");
-            if (scanFinished(response)){
+            if (scanFinished(response)) {
                 scanFinished = true;
-            }else {
+            } else {
                 Thread.sleep(5L * 1000);
             }
         }
@@ -221,7 +221,7 @@ public class OsaScanClient implements Closeable {
     private boolean scanFinished(Response response) {
         ScanDetails scanStatusResponse = response.readEntity(ScanDetails.class);
         ScanStatus scanStatus = ScanStatus.fromId(scanStatusResponse.getState().getId());
-        switch (scanStatus){
+        switch (scanStatus) {
             case NotStarted:
                 return false;
             case InProgress:
