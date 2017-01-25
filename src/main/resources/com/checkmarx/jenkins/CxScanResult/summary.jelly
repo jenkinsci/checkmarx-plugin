@@ -1,4 +1,5 @@
 <?jelly escape-by-default='true'?>
+<!--suppress ALL -->
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
@@ -11,27 +12,19 @@
 
             return undefined;
         }
-        //-------------------------- sast --------------------------------------
-        var pdfReportReady = '${it.pdfReportReady}';
+        //-------------------------- sast vars --------------------------------------
+        var pdfReportReady = verifyVar(${it.pdfReportReady});
 
         //link paths
         var sastPdfPath = "/dor/bo/rega"; //todo - sast pdf path
         var sastHtmlPath = '${app.rootUrl}${it.owner.url}${it.urlName}';
-        var osaPdfPath = '${app.rootUrl}${it.owner.url}${it.urlName}' + "/osaPdfReport";
-        var osaHtmlPath = '${app.rootUrl}${it.owner.url}${it.urlName}' + "/osaHtmlReport";
-        var sastFullHtmlPath = "tavi/lek/oded";
-        var sastFullPdfPath = "tavi/pdf/oded";
-        var sastFullCodeViewerPath = "tavi/CodeViewer/odetttt";
-        var osaFullHtmlPath = "tavi/FullHtml/odetttt";
-        var osaFullPdfPath = "tavi/FullPdf/odetttt";
 
         //thresholds
-        var ThresholdsEnabled = verifyVar([${it.thresholdsEnabled}]);
-        if(ThresholdsEnabled){
+        var thresholdsEnabled = verifyVar([${it.thresholdsEnabled}]);
         var highThreshold = verifyVar([${it.sastThresholdConfig.highThreshold}]);
         var medThreshold = verifyVar([${it.sastThresholdConfig.mediumThreshold}]);
         var lowThreshold = verifyVar([${it.sastThresholdConfig.lowThreshold}]);
-        }
+
         //counts
         var highCount = verifyVar([${it.sastScanResult.highCount}]);
         var medCount = verifyVar([${it.sastScanResult.mediumCount}]);
@@ -43,10 +36,13 @@
         var lowCveList = verifyVar([${it.sastScanResult.lowQueryResultsJson}]);
 
 
-        //-------------------------- osa --------------------------------------
+        //-------------------------- osa vars --------------------------------------
         //        var isOsaFeature = (['${it.osaScanResult}'][0] !== '');
         var isOsaFeature = verifyVar(['${it.osaScanResult}']) !== '';
 
+        //link paths
+        var osaPdfPath = '${app.rootUrl}${it.owner.url}${it.urlName}' + "/osaPdfReport";
+        var osaHtmlPath = '${app.rootUrl}${it.owner.url}${it.urlName}' + "/osaHtmlReport";
 
         var osaEnabled = verifyVar([${it.osaScanResult.osaEnabled}]);
         //        osaEnabled == null ? false : osaEnabled;
@@ -57,11 +53,10 @@
 
         //thresholds
         var osaThresholdsEnabled = verifyVar([${it.osaThresholdsEnabled}]);
-       if(osaThresholdsEnabled){
         var osaHighThreshold = verifyVar([${it.osaThresholdConfig.osaHighThreshold}]);
         var osaMedThreshold = verifyVar([${it.osaThresholdConfig.osaMediumThreshold}]);
         var osaLowThreshold = verifyVar([${it.osaThresholdConfig.osaLowThreshold}]);
-        }
+
         //counts
         var osaHighCount = verifyVar([${it.osaScanResult.osaHighCount}]);
         var osaMedCount = verifyVar([${it.osaScanResult.osaMediumCount}]);
@@ -71,6 +66,15 @@
         var osaHighCveList = verifyVar([${it.osaScanResult.highCvesList}]);
         var osaMedCveList = verifyVar([${it.osaScanResult.mediumCvesList}]);
         var osaLowCveList = verifyVar([${it.osaScanResult.lowCvesList}]);
+
+        //-------------------------- full reports vars --------------------------------------
+        var sastFullHtmlPath = "tavi/lek/oded";
+        var sastFullPdfPath = "tavi/pdf/oded";
+        var sastFullCodeViewerPath = "tavi/CodeViewer/odetttt";
+
+        var osaFullHtmlPath = "tavi/FullHtml/odetttt";
+        var osaFullPdfPath = "tavi/FullPdf/odetttt";
+
 
         window.onload = function () {
 
@@ -84,14 +88,6 @@
             document.getElementById("bar-high").setAttribute("style", "height:" + highCount * 100 / (highCount + medCount + lowCount) + "%");
             document.getElementById("bar-med").setAttribute("style", "height:" + medCount * 100 / (highCount + medCount + lowCount) + "%");
             document.getElementById("bar-low").setAttribute("style", "height:" + lowCount * 100 / (highCount + medCount + lowCount) + "%");
-
-            document.getElementById("vulnerable-libraries").innerHTML = vulnerableLibraries;
-            document.getElementById("ok-libraries").innerHTML = okLibraries;
-
-            //this is for support for versions before OSA was implemented
-            if (!isOsaFeature) {
-                document.getElementById("osa-full").setAttribute("style", "display: none");
-            }
 
             //report links
             //sastPdfPath only if pdfReportReady
@@ -108,16 +104,9 @@
                         '</a>';
             }
             document.getElementById("html-report-link").setAttribute("href", sastHtmlPath);
-            document.getElementById("osa-pdf-report-link").setAttribute("href", osaPdfPath);
-            document.getElementById("osa-html-report-link").setAttribute("href", osaHtmlPath);
-            document.getElementById("sast-full-html-link").setAttribute("href", sastFullHtmlPath);
-            document.getElementById("sast-full-pdf-link").setAttribute("href", sastFullPdfPath);
-            document.getElementById("sast-code-viewer-link").setAttribute("href", sastFullCodeViewerPath);
-            document.getElementById("osa-full-html-link").setAttribute("href", osaFullHtmlPath);
-            document.getElementById("osa-full-pdf-link").setAttribute("href", osaFullPdfPath);
 
             //if threshold is enabled
-            if (ThresholdsEnabled) {
+            if (thresholdsEnabled) {
                 var isThresholdExceeded = false;
                 var thresholdExceededComplianceElement = document.getElementById("threshold-exceeded-compliance");
 
@@ -148,7 +137,6 @@
                 else {
                     thresholdExceededComplianceElement.innerHTML = thresholdComplianceHtml;
                 }
-
             }
 
             //---------------------------------------------------------- osa ---------------------------------------------------------------
@@ -162,6 +150,18 @@
                 document.getElementById("osa-bar-high").setAttribute("style", "height:" + osaHighCount * 100 / (osaHighCount + osaMedCount + osaLowCount) + "%");
                 document.getElementById("osa-bar-med").setAttribute("style", "height:" + osaMedCount * 100 / (osaHighCount + osaMedCount + osaLowCount) + "%");
                 document.getElementById("osa-bar-low").setAttribute("style", "height:" + osaLowCount * 100 / (osaHighCount + osaMedCount + osaLowCount) + "%");
+
+                document.getElementById("vulnerable-libraries").innerHTML = vulnerableLibraries;
+                document.getElementById("ok-libraries").innerHTML = okLibraries;
+
+                //this is for support for versions before OSA was implemented
+                if (!isOsaFeature) {
+                    document.getElementById("osa-full").setAttribute("style", "display: none");
+                }
+
+                //report links
+                document.getElementById("osa-pdf-report-link").setAttribute("href", osaPdfPath);
+                document.getElementById("osa-html-report-link").setAttribute("href", osaHtmlPath);
 
                 //if threshold is enabled
                 if (osaThresholdsEnabled) {
@@ -204,6 +204,16 @@
 
 
             //---------------------------------------------------------- full reports ---------------------------------------------------------------
+            //sast full links
+            document.getElementById("sast-full-html-link").setAttribute("href", sastFullHtmlPath);
+            document.getElementById("sast-full-pdf-link").setAttribute("href", sastFullPdfPath);
+            document.getElementById("sast-code-viewer-link").setAttribute("href", sastFullCodeViewerPath);
+
+            //osa full links
+            document.getElementById("osa-full-html-link").setAttribute("href", osaFullHtmlPath);
+            document.getElementById("osa-full-pdf-link").setAttribute("href", osaFullPdfPath);
+
+            //generate full reports
             if (highCount &gt; 0) {
                 generateCveTable(SEVERITY.HIGH);
             }
@@ -221,60 +231,6 @@
             }
             if (osaLowCount &gt; 0) {
                 generateCveTable(SEVERITY.OSA_LOW);
-            }
-
-//    document.getElementById("osa-cve-table").innerHTML = cveListHtml;
-
-
-            //osa
-            if (osaEnabled) {
-                //todo - catch exceptions?
-                //set bars height and count
-                document.getElementById("osa-bar-count-high").innerHTML = osaHighCount;
-                document.getElementById("osa-bar-count-med").innerHTML = osaMedCount;
-                document.getElementById("osa-bar-count-low").innerHTML = osaLowCount;
-
-                document.getElementById("osa-bar-high").setAttribute("style", "height:" + osaHighCount * 100 / (osaHighCount + osaMedCount + osaLowCount) + "%");
-                document.getElementById("osa-bar-med").setAttribute("style", "height:" + osaMedCount * 100 / (osaHighCount + osaMedCount + osaLowCount) + "%");
-                document.getElementById("osa-bar-low").setAttribute("style", "height:" + osaLowCount * 100 / (osaHighCount + osaMedCount + osaLowCount) + "%");
-
-                //if threshold is enabled
-                if (osaThresholdsEnabled) {
-                    var isOsaThresholdExceeded = false;
-                    var osaThresholdExceededComplianceElement = document.getElementById("osa-threshold-exceeded-compliance");
-
-
-                    if (osaHighThreshold != null &amp;&amp; osaHighCount &gt; osaHighThreshold) {
-                        document.getElementById("osa-tooltip-high").innerHTML = tooltipGenerator(SEVERITY.OSA_HIGH);
-                        isOsaThresholdExceeded = true;
-                    }
-
-                    if (osaMedThreshold != null &amp;&amp; osaMedCount &gt; osaMedThreshold) {
-                        document.getElementById("osa-tooltip-med").innerHTML = tooltipGenerator(SEVERITY.OSA_MED);
-                        isOsaThresholdExceeded = true;
-                    }
-
-                    if (osaLowThreshold != null &amp;&amp; osaLowCount &gt; osaLowThreshold) {
-                        document.getElementById("osa-tooltip-low").innerHTML = tooltipGenerator(SEVERITY.OSA_LOW);
-                        isOsaThresholdExceeded = true;
-                    }
-
-
-                    //if threshold exceeded
-                    if (isOsaThresholdExceeded) {
-                        osaThresholdExceededComplianceElement.innerHTML = thresholdExceededHtml;
-                    }
-
-                    //else
-                    //show threshold compliance element
-                    else {
-                        osaThresholdExceededComplianceElement.innerHTML = thresholdComplianceHtml;
-                    }
-
-                }
-            }
-            else {
-                document.getElementById("osa-info").setAttribute("style", "display:none");
             }
         };
 
@@ -507,7 +463,6 @@
             }
         }
 
-
         function generateCveTableHeaders(headers) {
             var ret = "<tr>";
 
@@ -534,7 +489,6 @@
                     break;
             }
         }
-
     </script>
 
     <style>
@@ -1631,7 +1585,7 @@
                                         <div class="full-start-end-text">
                                             Start:
                                         </div>
-                                        <div id="full-start-date" class="full-start-end-date">28/06/2016 08:35</div>
+                                        <div id="sast-full-start-date" class="full-start-end-date"></div>
                                     </div>
                                 </div>
 
@@ -1667,7 +1621,7 @@
                                         <div class="full-start-end-text">
                                             End:
                                         </div>
-                                        <div id="full-end-date" class="full-start-end-date">28/06/2016 08:35</div>
+                                        <div id="sast-full-end-date" class="full-start-end-date"></div>
                                     </div>
                                 </div>
 
@@ -1706,7 +1660,7 @@
                                         <div class="full-start-end-text">
                                             Files:
                                         </div>
-                                        <div id="full-files" class="full-start-end-date">3,567</div>
+                                        <div id="sast-full-files" class="full-start-end-date"></div>
                                     </div>
                                 </div>
 
@@ -1736,7 +1690,7 @@
                                         <div class="full-start-end-text">
                                             Code Lines:
                                         </div>
-                                        <div id="full-loc" class="full-start-end-date">2,003,567</div>
+                                        <div id="sast-full-loc" class="full-start-end-date"></div>
                                     </div>
                                 </div>
                             </div>
@@ -1849,7 +1803,7 @@
                                         <div class="full-start-end-text">
                                             Start:
                                         </div>
-                                        <div id="full-start-date" class="full-start-end-date">28/06/2016 08:35</div>
+                                        <div id="osa-full-start-date" class="full-start-end-date"></div>
                                     </div>
                                 </div>
 
@@ -1885,7 +1839,7 @@
                                         <div class="full-start-end-text">
                                             End:
                                         </div>
-                                        <div id="full-end-date" class="full-start-end-date">28/06/2016 08:35</div>
+                                        <div id="osa-full-end-date" class="full-start-end-date"></div>
                                     </div>
                                 </div>
 
@@ -1913,7 +1867,7 @@
                                         <div class="full-start-end-text">
                                             Files:
                                         </div>
-                                        <div id="full-files" class="full-start-end-date">3,567</div>
+                                        <div id="osa-full-files" class="full-start-end-date"></div>
                                     </div>
                                 </div>
 
