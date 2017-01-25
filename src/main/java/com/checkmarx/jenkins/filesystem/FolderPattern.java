@@ -14,13 +14,13 @@ import java.io.IOException;
  */
 public class FolderPattern {
 
-    private static Logger logger;
+    private static Logger log;
 
     private AbstractBuild<?, ?> build;
     private BuildListener listener;
 
     public FolderPattern(Logger logger, final AbstractBuild<?, ?> build, final BuildListener listener) {
-        this.logger = logger;
+        log = logger;
         this.build = build;
         this.listener = listener;
     }
@@ -45,7 +45,7 @@ public class FolderPattern {
                 result.append("/**/*, ");
             }
         }
-        logger.debug("Exclude folders converted to: " + result.toString());
+        log.debug("Exclude folders converted to: " + result.toString());
         return result.toString();
     }
 }

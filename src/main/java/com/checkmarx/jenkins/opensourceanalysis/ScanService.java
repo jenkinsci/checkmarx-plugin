@@ -15,7 +15,7 @@ import java.io.IOException;
  */
 public class ScanService {
 
-    private static Logger logger;
+    private static Logger log;
 
     private static final String OSA_RUN_STARTED = "OSA (open source analysis) Run has started";
     private static final String OSA_RUN_ENDED = "OSA (open source analysis) Run has finished successfully";
@@ -31,8 +31,8 @@ public class ScanService {
 
 
     public ScanService(ScanServiceTools scanServiceTools) {
+        log = scanServiceTools.getLogger();
         this.dependencyFolder = scanServiceTools.getDependencyFolder();
-        this.logger = scanServiceTools.getLogger();
         this.webServiceClient = scanServiceTools.getWebServiceClient();
         this.cxZip = new CxZip(scanServiceTools.getLogger(), scanServiceTools.getBuild(), scanServiceTools.getListener());
         this.folderPattern = new FolderPattern(scanServiceTools.getLogger(), scanServiceTools.getBuild(), scanServiceTools.getListener());
@@ -45,24 +45,24 @@ public class ScanService {
         OsaScanResult osaScanResult = new OsaScanResult();
         try {
             if (!validLicense()) {
-                logger.error(NO_LICENSE_ERROR);
+                log.error(NO_LICENSE_ERROR);
                 osaScanResult.setIsOsaReturnedResult(false);
                 return osaScanResult;
             }
 
             FilePath sourceCodeZip = zipOpenSourceCode();
             if (asynchronousScan) {
-                logger.info(OSA_RUN_SUBMITTED);
+                log.info(OSA_RUN_SUBMITTED);
                 scanSender.sendAsync(sourceCodeZip);
                 return null;
             } else {
-                logger.info(OSA_RUN_STARTED);
+                log.info(OSA_RUN_STARTED);
                 scanSender.sendScanAndSetResults(sourceCodeZip, osaScanResult);
-                logger.info(OSA_RUN_ENDED);
+                log.info(OSA_RUN_ENDED);
                 scanResultsPresenter.printResultsToOutput(osaScanResult.getGetOpenSourceSummaryResponse());
             }
         } catch (Exception e) {
-            logger.error("Open Source Analysis failed:", e);
+            log.error("Open Source Analysis failed:", e);
         }
         librariesAndCVEsExtractor.getAndSetLibrariesAndCVEs(osaScanResult);
         return osaScanResult;

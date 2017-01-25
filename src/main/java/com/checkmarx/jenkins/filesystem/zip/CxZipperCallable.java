@@ -30,12 +30,12 @@ public class CxZipperCallable implements FilePath.FileCallable<CxZipResult> {
     private int numOfZippedFiles;
 
     @NotNull
-    private static Logger logger;
+    private static Logger log;
 
     public CxZipperCallable(@NotNull String combinedFilterPattern, @NotNull Logger logger) {
         this.combinedFilterPattern = combinedFilterPattern;
         this.numOfZippedFiles = 0;
-        this.logger = logger;
+        log = logger;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class CxZipperCallable implements FilePath.FileCallable<CxZipResult> {
             @Override
             public void updateProgress(String fileName, long size) {
                 numOfZippedFiles++;
-                logger.info("Zipping (" + FileUtils.byteCountToDisplaySize(size) + "): " + fileName + "\n");
+                log.info("Zipping (" + FileUtils.byteCountToDisplaySize(size) + "): " + fileName + "\n");
             }
         };
 

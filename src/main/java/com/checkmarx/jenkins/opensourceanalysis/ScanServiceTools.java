@@ -11,7 +11,7 @@ import org.apache.log4j.Logger;
  */
 public class ScanServiceTools {
 
-    private static Logger logger;
+    private static Logger log;
 
     private DependencyFolder dependencyFolder;
     private CxWebService webServiceClient;
@@ -61,11 +61,11 @@ public class ScanServiceTools {
     }
 
     public Logger getLogger() {
-        return logger;
+        return log;
     }
 
     public void setLogger(Logger logger) {
-        this.logger = logger;
+        log = logger;
     }
 
     public long getProjectId() {

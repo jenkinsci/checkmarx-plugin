@@ -8,10 +8,10 @@ import org.apache.log4j.Logger;
  */
 public class ScanResultsPresenter {
 
-    private static Logger logger;
+    private static Logger log;
 
     public ScanResultsPresenter(Logger logger) {
-        this.logger = logger;
+        log = logger;
     }
 
     public void printResultsToOutput(GetOpenSourceSummaryResponse results) {
@@ -28,6 +28,6 @@ public class ScanResultsPresenter {
         sb.append("vulnerability score: ").append(results.getVulnerabilityScore()).append("\n");
         sb.append("----------------------------------------------------------------------------").append("\n");
 
-        logger.info(sb.toString());
+        log.info(sb.toString());
     }
 }

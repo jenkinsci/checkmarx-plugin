@@ -14,13 +14,13 @@ import java.io.IOException;
  */
 public class CxZip {
 
-    private static Logger logger;
+    private static Logger log;
 
     private AbstractBuild<?, ?> build;
     private BuildListener listener;
 
     public CxZip(Logger logger, final AbstractBuild<?, ?> build, final BuildListener listener) {
-        this.logger = logger;
+        log = logger;
         this.build = build;
         this.listener = listener;
     }
@@ -32,18 +32,18 @@ public class CxZip {
                     "Checkmarx Scan Failed: cannot acquire Jenkins workspace location. It can be due to workspace residing on a disconnected slave.");
         }
 
-        logger.info("Started zipping the workspace");
+        log.info("Started zipping the workspace");
 
-        CxZipperCallable zipperCallable = new CxZipperCallable(filterPattern, logger);
+        CxZipperCallable zipperCallable = new CxZipperCallable(filterPattern, log);
 
         final CxZipResult zipResult = baseDir.act(zipperCallable);
 
         final FilePath tempFile = zipResult.getTempFile();
         final int numOfZippedFiles = zipResult.getNumOfZippedFiles();
 
-        logger.info("Zipping complete with " + numOfZippedFiles + " files, total compressed size: " +
+        log.info("Zipping complete with " + numOfZippedFiles + " files, total compressed size: " +
                 FileUtils.byteCountToDisplaySize(tempFile.length() / 8 * 6)); // We print here the size of compressed sources before encoding to base 64
-        logger.info("Temporary file with zipped and base64 encoded sources was created at: " + tempFile.getRemote());
+        log.info("Temporary file with zipped and base64 encoded sources was created at: " + tempFile.getRemote());
         listener.getLogger().flush();
 
         return tempFile;

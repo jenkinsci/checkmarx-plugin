@@ -50,7 +50,7 @@ public class OsaScanClient implements Closeable {
     private AuthenticationRequest authenticationRequest;
     private Client client;
     private WebTarget root;
-    private static Logger logger;
+    private static Logger log;
 
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -60,14 +60,14 @@ public class OsaScanClient implements Closeable {
         this.authenticationRequest = authenticationRequest;
         client = ClientBuilder.newBuilder().register(MultiPartFeature.class).build();
         root = client.target(hostname.trim()).path(ROOT_PATH);
-        this.logger = logger;
+        log = logger;
         cookies = login();
     }
 
 
     public CreateScanResponse createScan(CreateScanRequest request) throws IOException {
         final MultiPart multipart = createScanMultiPartRequest(request);
-        logger.debug("sending request for osa scan");
+        log.debug("sending request for osa scan");
         Invocation invocation = root.path(ANALYZE_PATH)
                 .resolveTemplate("projectId", request.getProjectId())
                 .request()
@@ -83,7 +83,7 @@ public class OsaScanClient implements Closeable {
 
     public GetOpenSourceSummaryResponse getOpenSourceSummary(String scanId) throws IOException {
         Invocation invocation = getSummeryByAcceptHeaderInvocation(scanId, "application/json");
-        logger.debug("sending request for HTML report");
+        log.debug("sending request for HTML report");
         Response response = invokeRequest(invocation);
         validateResponse(response, Response.Status.OK, "fail get OSA scan summary results");
         return  response.readEntity(GetOpenSourceSummaryResponse.class);
@@ -91,7 +91,7 @@ public class OsaScanClient implements Closeable {
 
     public String getOSAScanHtmlResults(String scanId) {
         Invocation invocation = getSummeryByAcceptHeaderInvocation(scanId, "text/html");
-        logger.debug("sending request for JSON report");
+        log.debug("sending request for JSON report");
         Response response = invokeRequest(invocation);
         validateResponse(response, Response.Status.OK, "fail get OSA scan html results");
         return response.readEntity(String.class);
@@ -99,7 +99,7 @@ public class OsaScanClient implements Closeable {
 
     public byte[] getOSAScanPdfResults(String scanId) {
         Invocation invocation = getSummeryByAcceptHeaderInvocation(scanId, "application/pdf");
-        logger.debug("sending request for PDF report");
+        log.debug("sending request for PDF report");
         Response response = invokeRequest(invocation);
         validateResponse(response, Response.Status.OK, "fail get OSA scan pdf results");
         return response.readEntity(byte[].class);
@@ -111,7 +111,7 @@ public class OsaScanClient implements Closeable {
         int currentPage = 1;
         while (lastListSize == ITEMS_PER_PAGE) {
             Invocation invocation = getPageRequestInvocation(LIBRARIES_PATH, currentPage, scanId);
-            logger.debug("sending request for libraries page number "+ currentPage);
+            log.debug("sending request for libraries page number "+ currentPage);
             Response response = invokeRequest(invocation);
             validateResponse(response, Response.Status.OK, "fail get OSA scan libraries");
             try {
@@ -124,7 +124,7 @@ public class OsaScanClient implements Closeable {
                     break;
                 }
             } catch (IOException e) {
-                logger.info("failed to parse Libraries", e);
+                log.info("failed to parse Libraries", e);
                 lastListSize = 0;
             }
             ++currentPage;
@@ -138,7 +138,7 @@ public class OsaScanClient implements Closeable {
         int currentPage = 1;
         while (lastListSize == ITEMS_PER_PAGE) {
             Invocation invocation = getPageRequestInvocation(CVEs_PATH, currentPage, scanId);
-            logger.debug("sending request for CVE's page number "+ currentPage);
+            log.debug("sending request for CVE's page number "+ currentPage);
             Response response = invokeRequest(invocation);
             validateResponse(response, Response.Status.OK, "fail get OSA scan CVE's");
             try {
@@ -151,7 +151,7 @@ public class OsaScanClient implements Closeable {
                     break;
                 }
             } catch (IOException e) {
-                logger.info("failed to parse CVE's", e);
+                log.info("failed to parse CVE's", e);
                 lastListSize = 0;
             }
             ++currentPage;
@@ -241,7 +241,7 @@ public class OsaScanClient implements Closeable {
                 .request()
                 .header(CX_ORIGIN_HEADER, CX_ORIGIN_VALUE)
                 .buildPost(Entity.entity(authenticationRequest, MediaType.APPLICATION_JSON));
-        logger.debug("Authenticating client");
+        log.debug("Authenticating client");
         Response response = invokeRequest(invocation);
         validateResponse(response, Response.Status.OK, "fail to perform login");
 
