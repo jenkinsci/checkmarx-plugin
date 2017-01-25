@@ -50,7 +50,7 @@ public class OsaScanClient implements Closeable {
     private AuthenticationRequest authenticationRequest;
     private Client client;
     private WebTarget root;
-    private transient Logger logger;
+    private static Logger logger;
 
     private ObjectMapper mapper = new ObjectMapper();
 

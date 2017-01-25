@@ -13,7 +13,9 @@ import java.io.IOException;
  * Created by tsahib on 7/5/2016.
  */
 public class CxZip {
-    private Logger logger;
+
+    private static Logger logger;
+
     private AbstractBuild<?, ?> build;
     private BuildListener listener;
 

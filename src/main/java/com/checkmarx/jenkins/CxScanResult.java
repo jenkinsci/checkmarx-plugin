@@ -33,7 +33,7 @@ import static com.checkmarx.jenkins.CxResultSeverity.*;
  */
 public class CxScanResult implements Action {
 
-    private final transient Logger logger; // NOSONAR
+    private static Logger logger; // NOSONAR
 
     public final AbstractBuild<?, ?> owner;
     private final long projectId;
