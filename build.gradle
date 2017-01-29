@@ -68,6 +68,20 @@ wsdl2java {
 }
 
 
+def configurePom(def pom) {
+	// pom file details
+	pom.project {
+	   licenses {
+              license {
+                 name 'MIT'
+                 url 'http://opensource.org/licenses/MIT'
+                 distribution 'repo'
+              }
+	   }
+        }
+}
+
+
 jenkinsPlugin {
 	// version of Jenkins core this plugin depends on
 	coreVersion = '1.579'
