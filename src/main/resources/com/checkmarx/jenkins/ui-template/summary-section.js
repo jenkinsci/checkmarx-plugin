@@ -17,7 +17,6 @@ var medCount = 3;
 var lowCount = 3;
 
 //cve lists
-// **These dummies should be deleted from the end of this file after putting the real lists in from server**
 var highCveList = [
         {
             "name": "cve-name-high",
@@ -147,6 +146,15 @@ var sastFullCodeViewerPath = "tavi/CodeViewer/odetttt";
 
 var osaFullHtmlPath = "tavi/FullHtml/odetttt";
 var osaFullPdfPath = "tavi/FullPdf/odetttt";
+
+var sastStartDate = "28/06/2016";
+var sastEndtDate = "28/06/2016";
+var sastNumFiles = 2507;
+var sastLoc = 359;
+
+var osaStartDate = "28/07/2016";
+var osaEndtDate = "28/07/2016";
+var osaNumFiles = 3507;
 
 
 window.onload = function () {
@@ -285,6 +293,17 @@ window.onload = function () {
     //osa full links
     document.getElementById("osa-full-html-link").setAttribute("href", osaFullHtmlPath);
     document.getElementById("osa-full-pdf-link").setAttribute("href", osaFullPdfPath);
+
+    //sast info
+    document.getElementById("sast-full-start-date").innerHTML = sastStartDate;
+    document.getElementById("sast-full-end-date").innerHTML = sastEndtDate;
+    document.getElementById("sast-full-files").innerHTML = sastNumFiles;
+    document.getElementById("sast-full-loc").innerHTML = sastLoc;
+
+    //osa info
+    document.getElementById("osa-full-start-date").innerHTML = osaStartDate;
+    document.getElementById("osa-full-end-date").innerHTML = osaEndtDate;
+    document.getElementById("osa-full-files").innerHTML = osaNumFiles;
 
     //generate full reports
     if (highCount > 0) {
