@@ -1,7 +1,9 @@
-package com.checkmarx.jenkins.filesystem.zip;
+package com.checkmarx.jenkins.filesystem.zip.callable;
 
-import com.checkmarx.components.zipper.Zipper;
 import com.checkmarx.jenkins.CxConfig;
+import com.checkmarx.jenkins.filesystem.zip.Zipper;
+import com.checkmarx.jenkins.filesystem.zip.dto.CxZipResult;
+import com.checkmarx.jenkins.filesystem.zip.dto.ZippingDetails;
 import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
 import org.jetbrains.annotations.NotNull;
@@ -14,12 +16,12 @@ import java.io.OutputStream;
 /**
  * Created by tsahib on 9/8/2016.
  */
-public class ZipperCallable implements FilePath.FileCallable<CxZipResult>  {
+public class OsaZipperCallable implements FilePath.FileCallable<CxZipResult>  {
 
     @NotNull
     private final String combinedFilterPattern;
 
-    public ZipperCallable(@NotNull String combinedFilterPattern){
+    public OsaZipperCallable(@NotNull String combinedFilterPattern){
         this.combinedFilterPattern = combinedFilterPattern;
     }
 
@@ -29,9 +31,9 @@ public class ZipperCallable implements FilePath.FileCallable<CxZipResult>  {
         OutputStream fileOutputStream = null;
         try{
             fileOutputStream = new FileOutputStream(tempFile);
-            new Zipper().zip(file, combinedFilterPattern, fileOutputStream, CxConfig.maxZipSize(), null);
+            ZippingDetails zippingDetails = new Zipper().zip(file, combinedFilterPattern, fileOutputStream, CxConfig.maxZipSize());
             final FilePath remoteTempFile = new FilePath(tempFile);
-            return new CxZipResult(remoteTempFile, 0, null);
+            return new CxZipResult(remoteTempFile, zippingDetails);
         }
         finally {
             if(fileOutputStream != null) {

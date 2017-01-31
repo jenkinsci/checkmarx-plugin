@@ -1,47 +1,42 @@
 package com.checkmarx.jenkins;
 
+import com.checkmarx.jenkins.logger.CxPluginLogger;
+import org.jetbrains.annotations.Nullable;
+
+import javax.net.ssl.*;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
-import org.apache.log4j.Logger;
-import org.jetbrains.annotations.Nullable;
-
 /**
  * Allows skipping SSL certificate validation
- * 
+ *
  * @author denis
  * @since 23/3/14
  */
-public class CxSSLUtility{
-    private static final Logger logger = Logger.getLogger(CxSSLUtility.class);
+public class CxSSLUtility {
+
+    private static CxPluginLogger LOGGER;
+
     @Nullable
     private static HostnameVerifier originalHostnameVerifier = null;
     @Nullable
     private static SSLSocketFactory originalSSLSocketFactory = null;
 
-	/*
-	 * Prevents instantiation
-	 */
-	private CxSSLUtility() {
+    /*
+     * Prevents instantiation
+     */
+    private CxSSLUtility() {
 
-	}
+    }
 
-    public static void enableSSLCertificateVerification()
-    {
+    public static void enableSSLCertificateVerification(CxPluginLogger cxPluginLogger) {
+        LOGGER = cxPluginLogger;
         try {
             HttpsURLConnection.setDefaultSSLSocketFactory(SSLContext.getDefault().getSocketFactory());
         } catch (NoSuchAlgorithmException e) {
-            logger.error(e);
+            LOGGER.error(e.getMessage(), e);
         }
 
         HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
@@ -53,8 +48,7 @@ public class CxSSLUtility{
     }
 
 
-    public static void disableSSLCertificateVerification()
-    {
+    public static void disableSSLCertificateVerification(CxPluginLogger cxPluginLogger) {
         HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
             @Override
             public boolean verify(String s, SSLSession sslSession) {
@@ -62,11 +56,11 @@ public class CxSSLUtility{
             }
         });
 
-        trustAllCertificates();
+        trustAllCertificates(cxPluginLogger);
     }
 
-    private static void trustAllCertificates()
-    {
+    private static void trustAllCertificates(CxPluginLogger cxPluginLogger) {
+        LOGGER = cxPluginLogger;
         // Create a trust manager that does not validate certificate chains
         final TrustManager[] trustManagers = new TrustManager[]{new X509TrustManager() {
             @Override
@@ -93,11 +87,10 @@ public class CxSSLUtility{
             HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
         } catch (KeyManagementException e) {
             // In case of exception, do not install fake trust manager
-            logger.warn("Failed to disable SSL/TLS certificate validation",e);
-        } catch (NoSuchAlgorithmException e)
-        {
+            LOGGER.error("Failed to disable SSL/TLS certificate validation", e);
+        } catch (NoSuchAlgorithmException e) {
             // In case of exception, do not install fake trust manager
-            logger.warn("Failed to disable SSL/TLS certificate validation",e);
+            LOGGER.error("Failed to disable SSL/TLS certificate validation", e);
         }
     }
 }

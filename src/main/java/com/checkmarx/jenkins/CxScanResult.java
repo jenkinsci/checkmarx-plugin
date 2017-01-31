@@ -1,30 +1,14 @@
 package com.checkmarx.jenkins;
 
-import static com.checkmarx.jenkins.CxResultSeverity.HIGH;
-import static com.checkmarx.jenkins.CxResultSeverity.INFO;
-import static com.checkmarx.jenkins.CxResultSeverity.LOW;
-import static com.checkmarx.jenkins.CxResultSeverity.MEDIUM;
+import com.checkmarx.jenkins.logger.CxPluginLogger;
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
 import hudson.PluginWrapper;
-import hudson.model.Action;
 import hudson.model.AbstractBuild;
+import hudson.model.Action;
 import hudson.model.Hudson;
 import hudson.util.IOUtils;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.servlet.ServletOutputStream;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
 import jenkins.model.Jenkins;
-
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.StaplerRequest;
@@ -33,13 +17,24 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import javax.servlet.ServletOutputStream;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.File;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+
+import static com.checkmarx.jenkins.CxResultSeverity.*;
+
 /**
  * @author denis
  * @since 3/11/13
  */
 public class CxScanResult implements Action {
 
-    private final transient Logger logger; // NOSONAR
+    private static CxPluginLogger LOGGER;
 
     public final AbstractBuild<?, ?> owner;
     private final long projectId;
@@ -103,10 +98,10 @@ public class CxScanResult implements Action {
     private Integer osaLowThreshold;
 
 
-    public CxScanResult(final AbstractBuild owner, final String loggerSuffix, String serverUrl, long projectId, boolean scanRanAsynchronous) {
+    public CxScanResult(final AbstractBuild owner, CxPluginLogger cxPluginLogger, String serverUrl, long projectId, boolean scanRanAsynchronous) {
         this.projectId = projectId;
+        LOGGER = cxPluginLogger;
         this.scanRanAsynchronous = scanRanAsynchronous;
-        logger = CxLogUtils.loggerWithSuffix(getClass(), loggerSuffix);
         this.owner = owner;
         this.serverUrl = serverUrl;
         this.resultIsValid = true;
@@ -414,11 +409,11 @@ public class CxScanResult implements Action {
             errorMessage = null;
 
         } catch (ParserConfigurationException e) {
-            logger.fatal(e);
+            LOGGER.error(e.getMessage(), e);
         } catch (SAXException | IOException e) {
             resultIsValid = false;
             errorMessage = e.getMessage();
-            logger.warn(e);
+            LOGGER.error(e.getMessage(), e);
         }
     }
 
@@ -508,7 +503,7 @@ public class CxScanResult implements Action {
                                 infoCount++;
                             }
                         } else {
-                            logger.warn("\"SeverityIndex\" attribute was not found in element \"Result\" in XML report. "
+                            LOGGER.error("\"SeverityIndex\" attribute was not found in element \"Result\" in XML report. "
                                     + "Make sure you are working with Checkmarx server version 7.1.6 HF3 or above.");
                         }
                     }
@@ -516,11 +511,11 @@ public class CxScanResult implements Action {
                 case "Query":
                     currentQueryName = attributes.getValue("name");
                     if (currentQueryName == null) {
-                        logger.warn("\"name\" attribute was not found in element \"Query\" in XML report");
+                        LOGGER.error("\"name\" attribute was not found in element \"Query\" in XML report");
                     }
                     currentQuerySeverity = attributes.getValue("SeverityIndex");
                     if (currentQuerySeverity == null) {
-                        logger.warn("\"SeverityIndex\" attribute was not found in element \"Query\" in XML report. "
+                        LOGGER.error("\"SeverityIndex\" attribute was not found in element \"Query\" in XML report. "
                                 + "Make sure you are working with Checkmarx server version 7.1.6 HF3 or above.");
                     }
                     currentQueryNumOfResults = 0;
@@ -557,7 +552,7 @@ public class CxScanResult implements Action {
                 } else if (StringUtils.equals(qr.getSeverity(), INFO.xmlParseString)) {
                     infoQueryResultList.add(qr);
                 } else {
-                    logger.warn("Encountered a result query with unknown severity: " + qr.getSeverity());
+                    LOGGER.error("Encountered a result query with unknown severity: " + qr.getSeverity());
                 }
             }
         }
@@ -565,13 +560,13 @@ public class CxScanResult implements Action {
         @NotNull
         private String constructDeepLink(@Nullable String rawDeepLink) {
             if (rawDeepLink == null) {
-                logger.warn("\"DeepLink\" attribute was not found in element \"CxXMLResults\" in XML report");
+                LOGGER.error("\"DeepLink\" attribute was not found in element \"CxXMLResults\" in XML report");
                 return "";
             }
             String token = "CxWebClient";
             String[] tokens = rawDeepLink.split(token);
             if (tokens.length < 1) {
-                logger.warn("DeepLink value found in XML report is of unexpected format: " + rawDeepLink + "\n"
+                LOGGER.error("DeepLink value found in XML report is of unexpected format: " + rawDeepLink + "\n"
                         + "\"Open Code Viewer\" button will not be functional");
             }
             return serverUrl + "/" + token + tokens[1];

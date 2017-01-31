@@ -1,15 +1,17 @@
 package com.checkmarx.jenkins;
 
+import com.checkmarx.jenkins.logger.CxPluginLogger;
 import com.checkmarx.ws.CxJenkinsWebService.*;
 import hudson.EnvVars;
-import org.apache.log4j.Logger;
+
 
 /**
  * Created by tsahib on 7/5/2016.
  */
 public class CliScanArgsFactory {
 
-    private Logger logger;
+    private static CxPluginLogger LOGGER;
+
     private String preset;
     private final String projectName;
     private final String groupId;
@@ -20,8 +22,7 @@ public class CliScanArgsFactory {
     private final EnvVars env;
     private long projectId;
 
-    public CliScanArgsFactory(Logger logger, String preset, String projectName, String groupId, String sourceEncoding, String comment, boolean isThisBuildIncremental, byte[] compressedSources, EnvVars env, long projectId) {
-        this.logger = logger;
+    public CliScanArgsFactory(String preset, String projectName, String groupId, String sourceEncoding, String comment, boolean isThisBuildIncremental, byte[] compressedSources, EnvVars env, long projectId, CxPluginLogger cxPluginLogger) {
         this.preset = preset;
         this.projectName = projectName;
         this.groupId = groupId;
@@ -31,6 +32,7 @@ public class CliScanArgsFactory {
         this.compressedSources = compressedSources;
         this.env = env;
         this.projectId = projectId;
+        LOGGER = cxPluginLogger;
     }
 
     public CliScanArgs create() {
@@ -41,7 +43,7 @@ public class CliScanArgsFactory {
         try {
             presetLong = Long.parseLong(preset);
         } catch (Exception e) {
-            logger.error("Encountered illegal preset value: " + preset + ". Using default preset.");
+            LOGGER.error("Encountered illegal preset value: " + preset + ". Using default preset.");
         }
 
         projectSettings.setPresetID(presetLong);
@@ -52,7 +54,7 @@ public class CliScanArgsFactory {
         try {
             configuration = Long.parseLong(sourceEncoding);
         } catch (Exception e) {
-            logger.error("Encountered illegal source encoding (configuration) value: " + sourceEncoding + ". Using default configuration.");
+            LOGGER.error("Encountered illegal source encoding (configuration) value: " + sourceEncoding + ". Using default configuration.");
         }
         projectSettings.setScanConfigurationID(configuration);
 

@@ -1,10 +1,10 @@
 package com.checkmarx.jenkins.filesystem;
 
+import com.checkmarx.jenkins.logger.CxPluginLogger;
 import hudson.EnvVars;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -14,14 +14,14 @@ import java.io.IOException;
  */
 public class FolderPattern {
 
-    private Logger logger;
+    private static CxPluginLogger LOGGER;
     private AbstractBuild<?, ?> build;
     private BuildListener listener;
 
-    public FolderPattern(Logger logger, final AbstractBuild<?, ?> build, final BuildListener listener) {
-        this.logger = logger;
+    public FolderPattern(final AbstractBuild<?, ?> build, final BuildListener listener) {
         this.build = build;
         this.listener = listener;
+        LOGGER = new CxPluginLogger(listener);
     }
 
     public String generatePattern(String filterPattern, String excludeFolders) throws IOException, InterruptedException {
@@ -44,7 +44,7 @@ public class FolderPattern {
                 result.append("/**/*, ");
             }
         }
-        logger.debug("Exclude folders converted to: " + result.toString());
+        LOGGER.debug("Exclude folders converted to: " + result.toString());
         return result.toString();
     }
 }

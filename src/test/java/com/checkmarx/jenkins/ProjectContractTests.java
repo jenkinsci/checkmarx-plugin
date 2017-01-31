@@ -1,25 +1,9 @@
 package com.checkmarx.jenkins;
 
-import com.checkmarx.jenkins.web.contracts.ProjectContract;
-import com.checkmarx.ws.CxJenkinsWebService.ArrayOfCxWSResponseScanStatus;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseScanStatus;
-import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseScanStatusArray;
-import hudson.AbortException;
-import mockit.Mock;
-import mockit.MockUp;
-import org.junit.Test;
-
-
-import javax.ws.rs.WebApplicationException;
-import java.net.MalformedURLException;
-import java.util.List;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 /**
  * Created by tsahib on 7/7/2016.
  */
+/*
 public class ProjectContractTests {
 
     @Test
@@ -136,3 +120,4 @@ public class ProjectContractTests {
         assertFalse(result);
     }
 }
+*/

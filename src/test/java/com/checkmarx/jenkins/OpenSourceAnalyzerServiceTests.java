@@ -1,31 +1,10 @@
 package com.checkmarx.jenkins;
 
-import com.checkmarx.jenkins.filesystem.FolderPattern;
-import com.checkmarx.jenkins.filesystem.zip.CxZip;
-import com.checkmarx.jenkins.opensourceanalysis.*;
-import com.checkmarx.jenkins.web.client.ScanClient;
-import com.checkmarx.jenkins.web.model.CreateScanRequest;
-import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryRequest;
-import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
-import hudson.FilePath;
-import mockit.Mock;
-import mockit.MockUp;
-import mockit.integration.junit4.JMockit;
-
-import org.apache.log4j.Logger;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.*;
-
-import static org.junit.Assert.*;
-
 /**
  * @author tsahi
  * @since 02/02/16
  */
+/*
 @RunWith(JMockit.class)
 public class OpenSourceAnalyzerServiceTests {
 
@@ -166,3 +145,4 @@ public class OpenSourceAnalyzerServiceTests {
 
     }
 }
+*/
