@@ -53,7 +53,7 @@ public class CxPluginLogger implements Serializable {
     }
 
     public void error(String message, Throwable error) {
-        loggingDevice.error( message+"\n\n"+ Arrays.toString(error.getStackTrace()));
+        loggingDevice.error( message+"\n\n"+ Arrays.toString(error.getStackTrace())+"\n\n");
     }
 
     public void debug(String message) {

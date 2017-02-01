@@ -43,7 +43,7 @@ public class CxZip implements Serializable {
         SastZipperCallable sastZipperCallable = new SastZipperCallable(filterPattern);
         final CxZipResult zipResult = zipFileAndGetResult(baseDir, sastZipperCallable);
 
-        logZippingCompletionSummery(zipResult, "Temporary file with zipped and base64 encoded sources");
+        logZippingCompletionSummery(zipResult, "Temporary file with zipped and base64 encoded sources", 64);
 
         return zipResult.getTempFile();
     }
@@ -59,7 +59,7 @@ public class CxZip implements Serializable {
         OsaZipperCallable osaZipperCallable = new OsaZipperCallable(filterPattern);
         final CxZipResult zipResult = zipFileAndGetResult(baseDir, osaZipperCallable);
 
-        logZippingCompletionSummery(zipResult, "Temporary zip file");
+        logZippingCompletionSummery(zipResult, "Temporary zip file", 1);
 
         return zipResult.getTempFile();
     }
@@ -80,9 +80,9 @@ public class CxZip implements Serializable {
         }
     }
 
-    private void logZippingCompletionSummery(CxZipResult zipResult, String tempFileDescription) throws IOException, InterruptedException {
+    private void logZippingCompletionSummery(CxZipResult zipResult, String tempFileDescription, int base) throws IOException, InterruptedException {
         LOGGER.info("Zipping complete with " + zipResult.getZippingDetails().getNumOfZippedFiles() + " files, total compressed size: " +
-                FileUtils.byteCountToDisplaySize(zipResult.getTempFile().length() / 8 * 6)); // We print here the size of compressed sources before encoding to base 64
+                FileUtils.byteCountToDisplaySize(zipResult.getTempFile().length() / base)); // We print here the size of compressed sources before encoding to base
         LOGGER.info(tempFileDescription+" was created at: " + zipResult.getTempFile().getRemote());
     }
 }
