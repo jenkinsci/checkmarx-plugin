@@ -278,7 +278,7 @@ public class Zipper {
                 throw new ZipperException(e, new ZippingDetails(numberOfZippedFiles, zippingLogForJenkinsConsole));
             }
 
-            double totalSizeIfNextFileWillBeZipped = compressedSize + (file.length() / AVERAGE_ZIP_COMPRESSION_RATIO);
+            long totalSizeIfNextFileWillBeZipped = (long)(compressedSize + (file.length() / AVERAGE_ZIP_COMPRESSION_RATIO));
             if (maxZipSize > 0 && totalSizeIfNextFileWillBeZipped > maxZipSize) {
                 updateError("Maximum zip file size reached. Zip size: " + totalSizeIfNextFileWillBeZipped + " bytes Limit: " + maxZipSize
                         + " bytes");
