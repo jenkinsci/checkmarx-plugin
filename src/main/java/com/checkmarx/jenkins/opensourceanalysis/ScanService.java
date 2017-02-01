@@ -64,7 +64,6 @@ public class ScanService {
             exposeZippingLogToJobConsole(e);
             LOGGER.error("Open Source Analysis failed: When zipping file " + e.getCurrentZippedFileName() + ", reached maximum upload size limit of "
                     + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()) + "\n", e);
-
         } catch (Zipper.ZipperException e) {
             exposeZippingLogToJobConsole(e);
             LOGGER.error("Open Source Analysis failed: "+e.getMessage(), e);
