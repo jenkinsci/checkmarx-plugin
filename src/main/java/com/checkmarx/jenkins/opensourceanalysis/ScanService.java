@@ -11,7 +11,6 @@ import hudson.FilePath;
 import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * @author tsahi
@@ -72,7 +71,7 @@ public class ScanService {
                     exposeZippingLogToJobConsole(zipException);
                     LOGGER.error("Open Source Analysis failed: "+zipException.getMessage(), zipException);
             } catch (IOException ex) {
-                LOGGER.error("Open Source Analysis failed: "+ex.getMessage() +"\n\n"+ Arrays.toString(ex.getStackTrace()));
+                LOGGER.error("Open Source Analysis failed: "+ex.getMessage(),e);
             }
         }
          catch (Exception e) {
