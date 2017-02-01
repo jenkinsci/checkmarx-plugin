@@ -11,6 +11,7 @@ import hudson.FilePath;
 import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * @author tsahi
@@ -41,7 +42,7 @@ public class ScanService {
         LOGGER = cxPluginLogger;
     }
 
-    public GetOpenSourceSummaryResponse scan(boolean asynchronousScan) {
+    public GetOpenSourceSummaryResponse scan(boolean asynchronousScan){
 
         GetOpenSourceSummaryResponse scanResults = null;
 
@@ -60,13 +61,19 @@ public class ScanService {
                 LOGGER.info(OSA_RUN_ENDED);
                 scanResultsPresenter.printResultsToOutput(scanResults);
             }
-        } catch (Zipper.MaxZipSizeReached e) {
-            exposeZippingLogToJobConsole(e);
-            LOGGER.error("Open Source Analysis failed: When zipping file " + e.getCurrentZippedFileName() + ", reached maximum upload size limit of "
-                    + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()) + "\n", e);
-        } catch (Zipper.ZipperException e) {
-            exposeZippingLogToJobConsole(e);
-            LOGGER.error("Open Source Analysis failed: "+e.getMessage(), e);
+        }catch(IOException e){
+            try {
+                throw e.getCause();
+            }catch (Zipper.MaxZipSizeReached zipSizeReached) {
+                    exposeZippingLogToJobConsole(zipSizeReached);
+                    LOGGER.error("Open Source Analysis failed: When zipping file " + zipSizeReached.getCurrentZippedFileName() + ", reached maximum upload size limit of "
+                            + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()) + "\n", e);
+                } catch (Zipper.ZipperException zipException) {
+                    exposeZippingLogToJobConsole(zipException);
+                    LOGGER.error("Open Source Analysis failed: "+zipException.getMessage(), zipException);
+            } catch (Throwable throwable) {
+                LOGGER.error("Open Source Analysis failed: "+throwable.getMessage() +"\n\n"+ Arrays.toString(throwable.getStackTrace()));
+            }
         } catch (Exception e) {
             LOGGER.error("Open Source Analysis failed: "+e.getMessage(), e);
         }
