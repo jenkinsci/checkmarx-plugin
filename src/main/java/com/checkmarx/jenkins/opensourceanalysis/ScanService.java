@@ -63,7 +63,7 @@ public class ScanService {
             }
         }catch(IOException e){
             try {
-                throw e.getCause();
+                throw e;
             }catch (Zipper.MaxZipSizeReached zipSizeReached) {
                     exposeZippingLogToJobConsole(zipSizeReached);
                     LOGGER.error("Open Source Analysis failed: When zipping file " + zipSizeReached.getCurrentZippedFileName() + ", reached maximum upload size limit of "
@@ -71,12 +71,13 @@ public class ScanService {
                 } catch (Zipper.ZipperException zipException) {
                     exposeZippingLogToJobConsole(zipException);
                     LOGGER.error("Open Source Analysis failed: "+zipException.getMessage(), zipException);
-            } catch (Throwable throwable) {
-                LOGGER.error("Open Source Analysis failed: "+throwable.getMessage() +"\n\n"+ Arrays.toString(throwable.getStackTrace()));
+            } catch (Exception ex) {
+                LOGGER.error("Open Source Analysis failed: "+ex.getMessage() +"\n\n"+ Arrays.toString(ex.getStackTrace()));
             }
-        } catch (Exception e) {
-            LOGGER.error("Open Source Analysis failed: "+e.getMessage(), e);
         }
+         catch (Exception e) {
+             LOGGER.error("Open Source Analysis failed: " + e.getMessage(), e);
+         }
         return scanResults;
     }
 
