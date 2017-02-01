@@ -1,5 +1,6 @@
 package com.checkmarx.jenkins.opensourceanalysis;
 
+import com.checkmarx.jenkins.CxConfig;
 import com.checkmarx.jenkins.CxWebService;
 import com.checkmarx.jenkins.filesystem.FolderPattern;
 import com.checkmarx.jenkins.filesystem.zip.CxZip;
@@ -7,6 +8,7 @@ import com.checkmarx.jenkins.filesystem.zip.Zipper;
 import com.checkmarx.jenkins.logger.CxPluginLogger;
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
 import hudson.FilePath;
+import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
 
@@ -58,6 +60,11 @@ public class ScanService {
                 LOGGER.info(OSA_RUN_ENDED);
                 scanResultsPresenter.printResultsToOutput(scanResults);
             }
+        } catch (Zipper.MaxZipSizeReached e) {
+            exposeZippingLogToJobConsole(e);
+            LOGGER.error("Open Source Analysis failed: When zipping file " + e.getCurrentZippedFileName() + ", reached maximum upload size limit of "
+                    + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()) + "\n", e);
+
         } catch (Zipper.ZipperException e) {
             exposeZippingLogToJobConsole(e);
             LOGGER.error("Open Source Analysis failed: "+e.getMessage(), e);
