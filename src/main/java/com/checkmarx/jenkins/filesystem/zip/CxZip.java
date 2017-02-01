@@ -51,6 +51,8 @@ public class CxZip implements Serializable {
     }
 
     public FilePath zipSourceCode(String filterPattern) throws IOException, InterruptedException {
+        LOGGER.info("Started zipping files for OSA");
+
         OsaZipperCallable zipperCallable = new OsaZipperCallable(filterPattern);
         FilePath baseDir = build.getWorkspace();
         final CxZipResult zipResult = baseDir.act(zipperCallable);
