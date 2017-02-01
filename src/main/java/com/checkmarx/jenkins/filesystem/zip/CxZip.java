@@ -55,6 +55,8 @@ public class CxZip implements Serializable {
         FilePath baseDir = build.getWorkspace();
         final CxZipResult zipResult = baseDir.act(zipperCallable);
         final FilePath tempFile = zipResult.getTempFile();
+
+        exposeZippingLogWithLogger(zipResult);
         return tempFile;
     }
 

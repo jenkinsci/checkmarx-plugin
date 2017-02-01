@@ -3,6 +3,7 @@ package com.checkmarx.jenkins.opensourceanalysis;
 import com.checkmarx.jenkins.CxWebService;
 import com.checkmarx.jenkins.filesystem.FolderPattern;
 import com.checkmarx.jenkins.filesystem.zip.CxZip;
+import com.checkmarx.jenkins.filesystem.zip.Zipper;
 import com.checkmarx.jenkins.logger.CxPluginLogger;
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
 import hudson.FilePath;
@@ -47,7 +48,6 @@ public class ScanService {
                 LOGGER.error(NO_LICENSE_ERROR);
                 return scanResults;
             }
-
             FilePath sourceCodeZip = zipOpenSourceCode();
             if (asynchronousScan) {
                 LOGGER.info(OSA_RUN_SUBMITTED);
@@ -58,8 +58,11 @@ public class ScanService {
                 LOGGER.info(OSA_RUN_ENDED);
                 scanResultsPresenter.printResultsToOutput(scanResults);
             }
+        } catch (Zipper.ZipperException e) {
+            exposeZippingLogToJobConsole(e);
+            LOGGER.error("Open Source Analysis failed: "+e.getMessage(), e);
         } catch (Exception e) {
-            LOGGER.error("Open Source Analysis failed:", e);
+            LOGGER.error("Open Source Analysis failed: "+e.getMessage(), e);
         }
         return scanResults;
     }
@@ -71,5 +74,9 @@ public class ScanService {
     private FilePath zipOpenSourceCode() throws IOException, InterruptedException {
         String combinedFilterPattern = folderPattern.generatePattern(dependencyFolder.getInclude(), dependencyFolder.getExclude());
         return cxZip.zipSourceCode(combinedFilterPattern);
+    }
+
+    private void exposeZippingLogToJobConsole(Zipper.ZipperException zipperException){
+        LOGGER.info(zipperException.getZippingDetails().getZippingLog());
     }
 }
