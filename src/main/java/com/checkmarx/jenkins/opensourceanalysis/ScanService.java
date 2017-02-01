@@ -71,7 +71,7 @@ public class ScanService {
                 } catch (Zipper.ZipperException zipException) {
                     exposeZippingLogToJobConsole(zipException);
                     LOGGER.error("Open Source Analysis failed: "+zipException.getMessage(), zipException);
-            } catch (Exception ex) {
+            } catch (IOException ex) {
                 LOGGER.error("Open Source Analysis failed: "+ex.getMessage() +"\n\n"+ Arrays.toString(ex.getStackTrace()));
             }
         }
