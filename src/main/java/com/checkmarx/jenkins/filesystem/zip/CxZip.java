@@ -36,13 +36,12 @@ public class CxZip implements Serializable {
                     "Checkmarx Scan Failed: cannot acquire Jenkins workspace location. It can be due to workspace residing on a disconnected slave.");
         }
 
-        LOGGER.info("Started zipping the workspace");
+        LOGGER.info("Started zipping the workspace, this may take a while.");
 
         SastZipperCallable zipperCallable = new SastZipperCallable(filterPattern);
         final CxZipResult zipResult = baseDir.act(zipperCallable);
         final FilePath tempFile = zipResult.getTempFile();
 
-        exposeZippingLogWithLogger(zipResult);
         LOGGER.info("Zipping complete with " + zipResult.getZippingDetails().getNumOfZippedFiles() + " files, total compressed size: " +
                 FileUtils.byteCountToDisplaySize(tempFile.length() / 8 * 6)); // We print here the size of compressed sources before encoding to base 64
         LOGGER.info("Temporary file with zipped and base64 encoded sources was created at: " + tempFile.getRemote());
@@ -51,18 +50,15 @@ public class CxZip implements Serializable {
     }
 
     public FilePath zipSourceCode(String filterPattern) throws IOException, InterruptedException {
-        LOGGER.info("Started zipping files for OSA");
+        LOGGER.info("Started zipping files for OSA, this may take a while.");
 
         OsaZipperCallable zipperCallable = new OsaZipperCallable(filterPattern);
         FilePath baseDir = build.getWorkspace();
         final CxZipResult zipResult = baseDir.act(zipperCallable);
         final FilePath tempFile = zipResult.getTempFile();
+        LOGGER.info("Zipping complete with " + zipResult.getZippingDetails().getNumOfZippedFiles() + " files, total compressed size: " +
+                FileUtils.byteCountToDisplaySize(tempFile.length() / 8 * 6));
 
-        exposeZippingLogWithLogger(zipResult);
         return tempFile;
-    }
-
-    private void exposeZippingLogWithLogger(CxZipResult zipResult){
-        LOGGER.info(zipResult.getZippingDetails().getZippingLog());
     }
 }
