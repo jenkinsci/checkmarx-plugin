@@ -69,6 +69,9 @@ public class CxZip implements Serializable {
             return baseDir.act(callable);
         //Handles the case where "act" method works on a remote system catches the ZipperException and make it's own IOException
         }catch (IOException e){
+            if(e.getCause() != null && e.getCause().getClass().isInstance(Zipper.MaxZipSizeReached.class)) {
+                throw (Zipper.MaxZipSizeReached) e.getCause();
+            }
             if(e.getCause() != null && e.getCause().getClass().isInstance(Zipper.ZipperException.class)){
                 throw (Zipper.ZipperException)e.getCause();
             } else{
