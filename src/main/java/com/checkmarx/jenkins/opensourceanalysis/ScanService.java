@@ -10,8 +10,6 @@ import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
 import hudson.FilePath;
 import org.apache.commons.io.FileUtils;
 
-import java.io.IOException;
-
 /**
  * @author tsahi
  * @since 02/02/16
@@ -42,7 +40,6 @@ public class ScanService {
     }
 
     public GetOpenSourceSummaryResponse scan(boolean asynchronousScan){
-
         GetOpenSourceSummaryResponse scanResults = null;
 
         try {
@@ -60,23 +57,16 @@ public class ScanService {
                 LOGGER.info(OSA_RUN_ENDED);
                 scanResultsPresenter.printResultsToOutput(scanResults);
             }
-        }catch(IOException e){
-            try {
-                throw e;
-            }catch (Zipper.MaxZipSizeReached zipSizeReached) {
-                    exposeZippingLogToJobConsole(zipSizeReached);
-                    LOGGER.error("Open Source Analysis failed: When zipping file " + zipSizeReached.getCurrentZippedFileName() + ", reached maximum upload size limit of "
-                            + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()) + "\n", e);
-                } catch (Zipper.ZipperException zipException) {
-                    exposeZippingLogToJobConsole(zipException);
-                    LOGGER.error("Open Source Analysis failed: "+zipException.getMessage(), zipException);
-            } catch (IOException ex) {
-                LOGGER.error("Open Source Analysis failed: "+ex.getMessage(),e);
-            }
+        } catch (Zipper.MaxZipSizeReached zipSizeReached) {
+            exposeZippingLogToJobConsole(zipSizeReached);
+            LOGGER.error("Open Source Analysis failed: When zipping file " + zipSizeReached.getCurrentZippedFileName() + ", reached maximum upload size limit of "
+                    + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()) + "\n", zipSizeReached);
+        } catch (Zipper.ZipperException zipException) {
+            exposeZippingLogToJobConsole(zipException);
+            LOGGER.error("Open Source Analysis failed: " + zipException.getMessage(), zipException);
+        } catch (Exception e) {
+            LOGGER.error("Open Source Analysis failed: "+e.getMessage(), e);
         }
-         catch (Exception e) {
-             LOGGER.error("Open Source Analysis failed: " + e.getMessage(), e);
-         }
         return scanResults;
     }
 
@@ -84,7 +74,7 @@ public class ScanService {
         return webServiceClient.isOsaLicenseValid();
     }
 
-    private FilePath zipOpenSourceCode() throws IOException, InterruptedException {
+    private FilePath zipOpenSourceCode() throws Exception {
         String combinedFilterPattern = folderPattern.generatePattern(dependencyFolder.getInclude(), dependencyFolder.getExclude());
         return cxZip.zipSourceCode(combinedFilterPattern);
     }
