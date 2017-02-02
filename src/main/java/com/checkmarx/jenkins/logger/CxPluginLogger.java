@@ -49,7 +49,7 @@ public class CxPluginLogger implements Serializable {
     }
 
     public void error(String message) {
-        loggingDevice.info(message);
+        loggingDevice.error(message);
     }
 
     public void error(String message, Throwable error) {
