@@ -60,7 +60,10 @@ public class ScanService {
         } catch (Zipper.MaxZipSizeReached zipSizeReached) {
             exposeZippingLogToJobConsole(zipSizeReached);
             LOGGER.error("Open Source Analysis failed: When zipping file " + zipSizeReached.getCurrentZippedFileName() + ", reached maximum upload size limit of "
-                    + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()) + "\n", zipSizeReached);
+                    + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()) + "\n");
+        } catch (Zipper.NoFilesToZip noFilesToZip) {
+            exposeZippingLogToJobConsole(noFilesToZip);
+            LOGGER.error("Open Source Analysis failed: No files to scan");
         } catch (Zipper.ZipperException zipException) {
             exposeZippingLogToJobConsole(zipException);
             LOGGER.error("Open Source Analysis failed: " + zipException.getMessage(), zipException);
