@@ -1,15 +1,14 @@
 package com.checkmarx.jenkins.opensourceanalysis;
 
+import com.checkmarx.jenkins.CxConfig;
 import com.checkmarx.jenkins.CxWebService;
 import com.checkmarx.jenkins.OsaScanResult;
 import com.checkmarx.jenkins.filesystem.FolderPattern;
 import com.checkmarx.jenkins.filesystem.zip.CxZip;
+import com.checkmarx.jenkins.filesystem.zip.Zipper;
+import com.checkmarx.jenkins.logger.CxPluginLogger;
 import hudson.FilePath;
-
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
+import org.apache.commons.io.FileUtils;
 
 /**
  * @author tsahi
@@ -17,7 +16,7 @@ import java.util.logging.Logger;
  */
 public class ScanService {
 
-    private static final Logger LOGGER = LogManager.getLogManager().getLogger("hudson.WebAppMain");
+    private static CxPluginLogger LOGGER;
 
     private static final String OSA_RUN_STARTED = "OSA (open source analysis) Run has started";
     private static final String OSA_RUN_ENDED = "OSA (open source analysis) Run has finished successfully";
@@ -31,22 +30,22 @@ public class ScanService {
     private ScanSender scanSender;
     private LibrariesAndCVEsExtractor librariesAndCVEsExtractor;
 
-
     public ScanService(ScanServiceTools scanServiceTools) {
         this.dependencyFolder = scanServiceTools.getDependencyFolder();
         this.webServiceClient = scanServiceTools.getWebServiceClient();
         this.cxZip = new CxZip(scanServiceTools.getBuild(), scanServiceTools.getListener());
         this.folderPattern = new FolderPattern(scanServiceTools.getBuild(), scanServiceTools.getListener());
-        this.scanResultsPresenter = new ScanResultsPresenter();
+        this.scanResultsPresenter = new ScanResultsPresenter(scanServiceTools.getListener());
         this.scanSender = new ScanSender(scanServiceTools.getOsaScanClient(), scanServiceTools.getProjectId());
         this.librariesAndCVEsExtractor = new LibrariesAndCVEsExtractor(scanServiceTools.getOsaScanClient());
+        LOGGER = new CxPluginLogger(scanServiceTools.getListener());
     }
 
     public OsaScanResult scan(boolean asynchronousScan) {
         OsaScanResult osaScanResult = new OsaScanResult();
         try {
             if (!validLicense()) {
-                LOGGER.severe(NO_LICENSE_ERROR);
+                LOGGER.error(NO_LICENSE_ERROR);
                 osaScanResult.setIsOsaReturnedResult(false);
                 return osaScanResult;
             }
@@ -62,10 +61,16 @@ public class ScanService {
                 LOGGER.info(OSA_RUN_ENDED);
                 scanResultsPresenter.printResultsToOutput(osaScanResult.getGetOpenSourceSummaryResponse());
             }
+        } catch (Zipper.MaxZipSizeReached zipSizeReached) {
+            exposeZippingLogToJobConsole(zipSizeReached);
+            LOGGER.error("Open Source Analysis failed: When zipping file " + zipSizeReached.getCurrentZippedFileName() + ", reached maximum upload size limit of "
+                    + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()) + "\n", zipSizeReached);
+        } catch (Zipper.ZipperException zipException) {
+            exposeZippingLogToJobConsole(zipException);
+            LOGGER.error("Open Source Analysis failed: " + zipException.getMessage(), zipException);
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Open Source Analysis failed:", e);
+            LOGGER.error("Open Source Analysis failed: "+e.getMessage(), e);
         }
-        librariesAndCVEsExtractor.getAndSetLibrariesAndCVEs(osaScanResult);
         return osaScanResult;
     }
 
@@ -73,8 +78,13 @@ public class ScanService {
         return webServiceClient.isOsaLicenseValid();
     }
 
-    private FilePath zipOpenSourceCode() throws IOException, InterruptedException {
+    private FilePath zipOpenSourceCode() throws Exception {
         String combinedFilterPattern = folderPattern.generatePattern(dependencyFolder.getInclude(), dependencyFolder.getExclude());
         return cxZip.zipSourceCode(combinedFilterPattern);
     }
+
+    private void exposeZippingLogToJobConsole(Zipper.ZipperException zipperException){
+        LOGGER.info(zipperException.getZippingDetails().getZippingLog());
+    }
+
 }

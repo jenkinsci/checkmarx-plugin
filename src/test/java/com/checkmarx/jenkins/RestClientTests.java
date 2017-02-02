@@ -1,3 +1,4 @@
+/*
 package com.checkmarx.jenkins;
 
 import com.checkmarx.jenkins.web.client.ScanClient;
@@ -20,9 +21,11 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+*/
 /**
  * Created by eranb on 10/03/2016.
- */
+ *//*
+
 public class RestClientTests {
 
     @Test
@@ -138,4 +141,4 @@ public class RestClientTests {
 //            assertEquals(ex.getMessage(),"connection to checkmarx server failed");
 //        }
     }
-}
+}*/

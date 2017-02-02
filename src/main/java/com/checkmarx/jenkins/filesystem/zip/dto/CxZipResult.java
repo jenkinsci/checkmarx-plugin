@@ -1,4 +1,4 @@
-package com.checkmarx.jenkins.filesystem.zip;
+package com.checkmarx.jenkins.filesystem.zip.dto;
 
 import hudson.FilePath;
 import org.jetbrains.annotations.NotNull;
@@ -16,12 +16,12 @@ public class CxZipResult implements Serializable {
 
     @NotNull
     private final FilePath tempFile;
-    private final int numOfZippedFiles;
+    @NotNull
+    private final ZippingDetails zippingDetails;
 
-
-    public CxZipResult(@NotNull FilePath tempFile, int numOfZippedFiles) {
+    public CxZipResult(@NotNull FilePath tempFile, ZippingDetails zippingDetails) {
         this.tempFile = tempFile;
-        this.numOfZippedFiles = numOfZippedFiles;
+        this.zippingDetails = zippingDetails;
     }
 
     @NotNull
@@ -29,8 +29,8 @@ public class CxZipResult implements Serializable {
         return tempFile;
     }
 
-    public int getNumOfZippedFiles(){
-        return numOfZippedFiles;
+    @NotNull
+    public ZippingDetails getZippingDetails() {
+        return zippingDetails;
     }
-
 }

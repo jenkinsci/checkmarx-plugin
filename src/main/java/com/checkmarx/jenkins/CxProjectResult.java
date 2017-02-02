@@ -25,8 +25,6 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
 
 /**
  * @author denis
@@ -254,8 +252,6 @@ public class CxProjectResult implements Action {
 
     @Extension
     public static class Factory extends TransientProjectActionFactory {
-
-        private static final Logger LOGGER = LogManager.getLogManager().getLogger("hudson.WebAppMain");
 
         /**
          * This factory method is called by Jenkins to create instances of CxProjectResult for every project in the

@@ -1,8 +1,9 @@
 package com.checkmarx.jenkins;
 
-import com.checkmarx.components.zipper.Zipper;
 import com.checkmarx.jenkins.filesystem.FolderPattern;
 import com.checkmarx.jenkins.filesystem.zip.CxZip;
+import com.checkmarx.jenkins.filesystem.zip.Zipper;
+import com.checkmarx.jenkins.logger.CxPluginLogger;
 import com.checkmarx.jenkins.opensourceanalysis.DependencyFolder;
 import com.checkmarx.jenkins.opensourceanalysis.ScanService;
 import com.checkmarx.jenkins.opensourceanalysis.ScanServiceTools;
@@ -42,8 +43,6 @@ import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -128,7 +127,10 @@ public class CxScanBuilder extends Builder {
     // Kept for backward compatibility with old serialized plugin configuration.
     private static transient Logger staticLogger;
 
-    private static final Logger LOGGER = LogManager.getLogManager().getLogger("hudson.WebAppMain");
+    // LOGGER is initialized here due to the pre-perform methods
+    // LOGGER will NOT print to job console before it initialized with  constructor: CxPluginLogger(BuildListener listener)
+    private static CxPluginLogger LOGGER = new CxPluginLogger();
+
     // it is initialized in perform method
     private JobStatusOnError jobStatusOnError;
 
@@ -423,6 +425,9 @@ public class CxScanBuilder extends Builder {
                            final Launcher launcher,
                            final BuildListener listener) throws InterruptedException, IOException {
 
+        //set to the logger to print into the job console
+        LOGGER = new CxPluginLogger(listener);
+
         final DescriptorImpl descriptor = getDescriptor();
 
         CxWSResponseRunID cxWSResponseRunID = null;
@@ -448,7 +453,7 @@ public class CxScanBuilder extends Builder {
 
             String serverUrlToUseNotNull = serverUrlToUse != null ? serverUrlToUse : "";
 
-            cxWebService = new CxWebService(serverUrlToUseNotNull);
+            cxWebService = new CxWebService(serverUrlToUseNotNull, LOGGER);
             cxWebService.login(usernameToUse, passwordToUse);
 
             LOGGER.info("Checkmarx server login successful");
@@ -560,17 +565,17 @@ public class CxScanBuilder extends Builder {
         } catch (IOException | WebServiceException e) {
             if (useUnstableOnError(descriptor)) {
                 build.setResult(Result.UNSTABLE);
-                LOGGER.log(Level.SEVERE, e.getMessage(), e);
+                LOGGER.error(e.getMessage(), e);
                 return true;
             } else {
                 throw e;
             }
         } catch (InterruptedException e) {
             if (reportResponse != null) {
-                LOGGER.severe("Cancelling report generation on the Checkmarx server...");
+                LOGGER.error("Cancelling report generation on the Checkmarx server...");
                 cxWebService.cancelScanReport(reportResponse.getID());
             } else if (cxWSResponseRunID != null) {
-                LOGGER.severe("Cancelling scan on the Checkmarx server...");
+                LOGGER.error("Cancelling scan on the Checkmarx server...");
                 cxWebService.cancelScan(cxWSResponseRunID.getRunId());
             }
             throw e;
@@ -665,7 +670,7 @@ public class CxScanBuilder extends Builder {
 
 
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "fail to generate html report", e);
+            LOGGER.error("fail to generate html report", e);
 
         }
     }
@@ -696,7 +701,7 @@ public class CxScanBuilder extends Builder {
         try {
             FileUtils.writeStringToFile(osaHtmlReport, osaScanHtmlResults);
         } catch (IOException e) {
-            LOGGER.warning("fail to write osa html report to [" + osaHtmlReport.getAbsolutePath() + "]");
+            LOGGER.error("fail to write osa html report to [" + osaHtmlReport.getAbsolutePath() + "]");
         }
         LOGGER.info("osa report file [" + osaHtmlReport.getAbsolutePath() + "] generated successfully");
 
@@ -705,7 +710,7 @@ public class CxScanBuilder extends Builder {
         try {
             FileUtils.writeByteArrayToFile(osaPdfReport, osaScanPdfResults);
         } catch (IOException e) {
-            LOGGER.warning("fail to write osa pdf report to [" + osaPdfReport.getAbsolutePath() + "]");
+            LOGGER.error("fail to write osa pdf report to [" + osaPdfReport.getAbsolutePath() + "]");
         }
         LOGGER.info("osa report file [" + osaPdfReport.getAbsolutePath() + "] generated successfully");
 
@@ -786,7 +791,7 @@ public class CxScanBuilder extends Builder {
                 remoteFile.copyFrom(fileInputStream);
 
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "fail to copy file [" + file.getName() + "] to workspace", e);
+                LOGGER.error("fail to copy file [" + file.getName() + "] to workspace", e);
 
             } finally {
                 IOUtils.closeQuietly(fileInputStream);
@@ -926,29 +931,6 @@ public class CxScanBuilder extends Builder {
         return build.getProject().getDisplayName() + "-" + build.getDisplayName();
     }
 
-/*    private void initLogger(final File checkmarxBuildDir, final BuildListener listener, final String loggerSuffix) {
-        LOGGER = CxLogUtils.loggerWithSuffix(getClass(), loggerSuffix);
-        final WriterAppender writerAppender = new WriterAppender(new PatternLayout("%m%n"), listener.getLogger());
-        writerAppender.setThreshold(Level.INFO);
-        final Logger parentLogger = CxLogUtils.parentLoggerWithSuffix(loggerSuffix);
-        parentLogger.addAppender(writerAppender);
-        String logFileName = checkmarxBuildDir.getAbsolutePath() + File.separator + "checkmarx.log";
-
-        try {
-            fileAppender = new FileAppender(new PatternLayout("%C: [%d] %-5p: %m%n"), logFileName);
-            fileAppender.setThreshold(Level.DEBUG);
-            parentLogger.addAppender(fileAppender);
-        } catch (IOException e) {
-            LOGGER.warn("Could not open log file for writing: " + logFileName);
-            LOGGER.debug(e);
-        }
-    }
-
-    private void closeLogger() {
-        LOGGER.removeAppender(fileAppender);
-        fileAppender.close();
-        LOGGER = LOGGER; // Redirect all logs back to static logger
-    }*/
 
     private CxWSResponseRunID submitScan(final AbstractBuild<?, ?> build, final CxWebService cxWebService, final BuildListener listener) throws IOException {
 
@@ -963,17 +945,28 @@ public class CxScanBuilder extends Builder {
             LOGGER.info("Temporary file deleted");
             LOGGER.info("\nScan job submitted successfully\n");
             return cxWSResponseRunId;
+
         } catch (Zipper.MaxZipSizeReached e) {
+            exposeZippingLogToJobConsole(e);
             throw new AbortException("Checkmarx Scan Failed: When zipping file " + e.getCurrentZippedFileName() + ", reached maximum upload size limit of "
                     + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()) + "\n");
 
         } catch (Zipper.NoFilesToZip e) {
+            exposeZippingLogToJobConsole(e);
             throw new AbortException("Checkmarx Scan Failed: No files to scan");
+
+        } catch (Zipper.ZipperException e) {
+            exposeZippingLogToJobConsole(e);
+            throw new AbortException("Checkmarx Scan Failed: "+ e.getMessage());
+
         } catch (InterruptedException e) {
             throw new AbortException("Remote operation failed on slave node: " + e.getMessage());
         }
     }
 
+    private void exposeZippingLogToJobConsole(Zipper.ZipperException zipperException){
+        LOGGER.info(zipperException.getZippingDetails().getZippingLog());
+    }
 
     private boolean needToAvoidDuplicateProjectScans(CxWebService cxWebService) throws AbortException {
         return avoidDuplicateProjectScans && projectHasQueuedScans(cxWebService);
@@ -1008,7 +1001,7 @@ public class CxScanBuilder extends Builder {
 
 
     private CliScanArgs createCliScanArgs(byte[] compressedSources, EnvVars env) {
-        CliScanArgsFactory cliScanArgsFactory = new CliScanArgsFactory(getPreset(), getProjectName(), getGroupId(), getSourceEncoding(), getComment(), isThisBuildIncremental, compressedSources, env, projectId);
+        CliScanArgsFactory cliScanArgsFactory = new CliScanArgsFactory(getPreset(), getProjectName(), getGroupId(), getSourceEncoding(), getComment(), isThisBuildIncremental, compressedSources, env, projectId, LOGGER);
         return cliScanArgsFactory.create();
     }
 
@@ -1075,7 +1068,6 @@ public class CxScanBuilder extends Builder {
         public static final int FULL_SCAN_CYCLE_MIN = 1;
         public static final int FULL_SCAN_CYCLE_MAX = 99;
 
-        private static final Logger logger = LogManager.getLogManager().getLogger("hudson.WebAppMain");
 
         //////////////////////////////////////////////////////////////////////////////////////
         //  Persistent plugin global configuration parameters
@@ -1190,7 +1182,7 @@ public class CxScanBuilder extends Builder {
 	            effect.
 	             */
 
-                CxSSLUtility.enableSSLCertificateVerification();
+                CxSSLUtility.enableSSLCertificateVerification(LOGGER);
             }
             this.enableCertificateValidation = enableCertificateValidation;
         }
@@ -1299,6 +1291,7 @@ public class CxScanBuilder extends Builder {
             return true;
         }
 
+
         //////////////////////////////////////////////////////////////////////////////////////
         //  Helper methods for jelly views
         //////////////////////////////////////////////////////////////////////////////////////
@@ -1327,7 +1320,6 @@ public class CxScanBuilder extends Builder {
         // Field value validators
         //////////////////////////////////////////////////////////////////////////////////////
 
-
         /*
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
 	     *  shared state to avoid synchronization issues.
@@ -1344,7 +1336,7 @@ public class CxScanBuilder extends Builder {
             try {
                 cxWebService = prepareLoggedInWebservice(useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password));
             } catch (Exception e) {
-                logger.log(Level.FINE, e.getMessage(), e);
+                 LOGGER.error(e.getMessage(), e);
                 return FormValidation.ok();
             }
 
@@ -1379,9 +1371,9 @@ public class CxScanBuilder extends Builder {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             CxWebService cxWebService = null;
             try {
-                cxWebService = new CxWebService(serverUrl);
+                cxWebService = new CxWebService(serverUrl, LOGGER);
             } catch (Exception e) {
-                logger.log(Level.FINE, e.getMessage(), e);
+                 LOGGER.error(e.getMessage(), e);
                 return FormValidation.error("Invalid system URL");
             }
 
@@ -1407,12 +1399,11 @@ public class CxScanBuilder extends Builder {
             String serverUrlToUse = !useOwnServerCredentials ? serverUrl : getServerUrl();
             String usernameToUse = !useOwnServerCredentials ? username : getUsername();
             String passwordToUse = !useOwnServerCredentials ? getPasswordPlainText(password) : getPasswordPlainText();
-            logger.log(Level.FINE, "prepareLoggedInWebservice: server: " + serverUrlToUse + " user: " + usernameToUse);
 
-            CxWebService cxWebService = new CxWebService(serverUrlToUse);
-            logger.log(Level.FINE, "prepareLoggedInWebservice: created cxWebService");
+            LOGGER.info("prepareLoggedInWebservice: server: " + serverUrlToUse + " user: " + usernameToUse);
+
+            CxWebService cxWebService = new CxWebService(serverUrlToUse, LOGGER);
             cxWebService.login(usernameToUse, passwordToUse);
-            logger.log(Level.FINE, "prepareLoggedInWebservice: logged in");
             return cxWebService;
         }
 
@@ -1433,11 +1424,11 @@ public class CxScanBuilder extends Builder {
                     projectNames.add(pd.getProjectName());
                 }
 
-                logger.log(Level.FINE, "Projects list: " + projectNames.size());
+                LOGGER.info("Projects list: " + projectNames.size());
                 return projectNames;
 
             } catch (Exception e) {
-                logger.log(Level.FINE, "Projects list: empty");
+                LOGGER.info("Projects list: empty");
                 return projectNames; // Return empty list of project names
             }
         }
@@ -1476,7 +1467,7 @@ public class CxScanBuilder extends Builder {
                                 cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("Unauthorized user")) {
                             return FormValidation.error("The user is not authorized to create/run Checkmarx projects");
                         } else if (cxWSBasicRepsonse.getErrorMessage().startsWith("Exception occurred at IsValidProjectCreationRequest:")) {
-                            logger.warning("Couldn't validate project name with Checkmarx sever:\n" + cxWSBasicRepsonse.getErrorMessage());
+                            LOGGER.error("Couldn't validate project name with Checkmarx sever:\n" + cxWSBasicRepsonse.getErrorMessage());
                             return FormValidation.warning(cxWSBasicRepsonse.getErrorMessage());
                         } else {
                             return FormValidation.error(cxWSBasicRepsonse.getErrorMessage());
@@ -1486,7 +1477,7 @@ public class CxScanBuilder extends Builder {
                     return FormValidation.ok();
                 }
             } catch (Exception e) {
-                logger.warning("Couldn't validate project name with Checkmarx sever:\n" + e.getLocalizedMessage());
+                LOGGER.error("Couldn't validate project name with Checkmarx sever:\n" + e.getLocalizedMessage());
                 return FormValidation.warning("Can't reach server to validate project name");
             }
         }
@@ -1518,11 +1509,11 @@ public class CxScanBuilder extends Builder {
                     listBoxModel.add(new ListBoxModel.Option(p.getPresetName(), Long.toString(p.getID())));
                 }
 
-                logger.fine("Presets list: " + listBoxModel.size());
+                LOGGER.info("Presets list: " + listBoxModel.size());
                 return listBoxModel;
 
             } catch (Exception e) {
-                logger.fine("Presets list: empty");
+                LOGGER.info("Presets list: empty");
                 String message = "Provide Checkmarx server credentials to see presets list";
                 listBoxModel.add(new ListBoxModel.Option(message, message));
                 return listBoxModel; // Return empty list of project names
@@ -1559,9 +1550,9 @@ public class CxScanBuilder extends Builder {
                     listBoxModel.add(new ListBoxModel.Option(cs.getConfigSetName(), Long.toString(cs.getID())));
                 }
 
-                logger.fine("Source encodings list: " + listBoxModel.size());
+                LOGGER.info("Source encodings list: " + listBoxModel.size());
             } catch (Exception e) {
-                logger.fine("Source encodings list: empty");
+                LOGGER.info("Source encodings list: empty");
                 String message = "Provide Checkmarx server credentials to see source encodings list";
                 listBoxModel.add(new ListBoxModel.Option(message, message));
             }
@@ -1587,11 +1578,11 @@ public class CxScanBuilder extends Builder {
                     listBoxModel.add(new ListBoxModel.Option(group.getGroupName(), group.getID()));
                 }
 
-                logger.fine("Associated groups list: " + listBoxModel.size());
+                LOGGER.info("Associated groups list: " + listBoxModel.size());
                 return listBoxModel;
 
             } catch (Exception e) {
-                logger.fine("Associated groups: empty");
+                LOGGER.info("Associated groups: empty");
                 String message = "Provide Checkmarx server credentials to see teams list";
                 listBoxModel.add(new ListBoxModel.Option(message, message));
                 return listBoxModel; // Return empty list of project names

@@ -1,3 +1,4 @@
+/*
 package com.checkmarx.jenkins;
 
 import com.checkmarx.jenkins.web.contracts.ProjectContract;
@@ -17,9 +18,11 @@ import java.util.List;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+*/
 /**
  * Created by tsahib on 7/7/2016.
- */
+ *//*
+
 public class ProjectContractTests {
 
     @Test
@@ -136,3 +139,4 @@ public class ProjectContractTests {
         assertFalse(result);
     }
 }
+*/

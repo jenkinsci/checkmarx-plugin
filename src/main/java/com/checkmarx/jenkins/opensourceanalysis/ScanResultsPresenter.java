@@ -1,9 +1,8 @@
 package com.checkmarx.jenkins.opensourceanalysis;
 
+import com.checkmarx.jenkins.logger.CxPluginLogger;
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
-
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
+import hudson.model.BuildListener;
 
 
 /**
@@ -11,9 +10,10 @@ import java.util.logging.Logger;
  */
 public class ScanResultsPresenter {
 
-    private static final Logger LOGGER = LogManager.getLogManager().getLogger("hudson.WebAppMain");
+    private static CxPluginLogger LOGGER;
 
-    public ScanResultsPresenter() {
+    public ScanResultsPresenter(BuildListener listener) {
+        LOGGER = new CxPluginLogger(listener);
     }
 
     public void printResultsToOutput(GetOpenSourceSummaryResponse results) {
