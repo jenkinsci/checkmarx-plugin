@@ -64,20 +64,21 @@ public class CxZip implements Serializable {
     private CxZipResult zipFileAndGetResult(FilePath baseDir, FilePath.FileCallable<CxZipResult> callable) throws InterruptedException, IOException {
         try {
             return baseDir.act(callable);
-        //Handles the case where "act" method works on a remote system catches the ZipperException and make it's own IOException
-        //Does NOT work with isInstance
+            //Handles the case where "act" method works on a remote system catches the ZipperException and make it's own IOException
+            //Does NOT work with isInstance
         }catch (IOException e){
-            if(e.getCause() != null && e.getCause().getClass() == (Zipper.MaxZipSizeReached.class)) {
-                throw (Zipper.MaxZipSizeReached) e.getCause();
+            if(e.getCause() != null){
+                if(e.getCause().getClass() == (Zipper.NoFilesToZip.class)) {
+                    throw (Zipper.NoFilesToZip) e.getCause();
+                }
+                if(e.getCause().getClass() == (Zipper.MaxZipSizeReached.class)) {
+                    throw (Zipper.MaxZipSizeReached) e.getCause();
+                }
+                if(e.getCause().getClass() == (Zipper.ZipperException.class)){
+                    throw (Zipper.ZipperException)e.getCause();
+                }
             }
-            if(e.getCause() != null && e.getCause().getClass() == (Zipper.NoFilesToZip.class)) {
-                throw (Zipper.NoFilesToZip) e.getCause();
-            }
-            if(e.getCause() != null && e.getCause().getClass() == (Zipper.ZipperException.class)){
-                throw (Zipper.ZipperException)e.getCause();
-            } else{
-                throw e;
-            }
+            throw e;
         }
     }
 
