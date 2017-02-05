@@ -20,7 +20,7 @@ public class CxZip implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static CxPluginLogger LOGGER;
+    private transient CxPluginLogger logger;
 
     private static String CANNOT_FIND_WORKSPACE = "Cannot acquire Jenkins workspace location. It can be due to workspace residing on a disconnected slave.";
 
@@ -28,7 +28,7 @@ public class CxZip implements Serializable {
 
     public CxZip(final AbstractBuild<?, ?> build, final BuildListener listener) {
         this.build = build;
-        LOGGER = new CxPluginLogger(listener);
+        this.logger = new CxPluginLogger(listener);
     }
 
     public FilePath ZipWorkspaceFolder(String filterPattern) throws IOException, InterruptedException {
@@ -38,7 +38,7 @@ public class CxZip implements Serializable {
                     "Checkmarx Scan Failed: "+CANNOT_FIND_WORKSPACE);
         }
 
-        LOGGER.info("Started zipping the workspace, this may take a while.");
+        logger.info("Started zipping the workspace, this may take a while.");
 
         SastZipperCallable sastZipperCallable = new SastZipperCallable(filterPattern);
         final CxZipResult zipResult = zipFileAndGetResult(baseDir, sastZipperCallable);
@@ -54,7 +54,7 @@ public class CxZip implements Serializable {
             throw new Exception(CANNOT_FIND_WORKSPACE);
         }
 
-        LOGGER.info("Started zipping files for OSA, this may take a while.");
+        logger.info("Started zipping files for OSA, this may take a while.");
 
         OsaZipperCallable osaZipperCallable = new OsaZipperCallable(filterPattern);
         final CxZipResult zipResult = zipFileAndGetResult(baseDir, osaZipperCallable);
@@ -86,8 +86,8 @@ public class CxZip implements Serializable {
     }
 
     private void logZippingCompletionSummery(CxZipResult zipResult, String tempFileDescription, int base) throws IOException, InterruptedException {
-        LOGGER.info("Zipping complete with " + zipResult.getZippingDetails().getNumOfZippedFiles() + " files, total compressed size: " +
+        logger.info("Zipping complete with " + zipResult.getZippingDetails().getNumOfZippedFiles() + " files, total compressed size: " +
                 FileUtils.byteCountToDisplaySize(zipResult.getTempFile().length() / base)); // We print here the size of compressed sources before encoding to base
-        LOGGER.info(tempFileDescription+" was created at: " + zipResult.getTempFile().getRemote());
+        logger.info(tempFileDescription+" was created at: " + zipResult.getTempFile().getRemote());
     }
 }

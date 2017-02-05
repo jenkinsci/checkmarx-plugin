@@ -7,10 +7,10 @@ import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
  * Created by tsahib on 9/13/2016.
  */
 public class ScanResultsPresenter {
-    private static CxPluginLogger LOGGER;
+    private transient CxPluginLogger logger;
 
     public ScanResultsPresenter(CxPluginLogger logger) {
-        LOGGER = logger;
+        this.logger = logger;
     }
 
     public void printResultsToOutput(GetOpenSourceSummaryResponse results) {
@@ -27,6 +27,6 @@ public class ScanResultsPresenter {
         sb.append("vulnerability score: ").append(results.getVulnerabilityScore()).append("\n");
         sb.append("----------------------------------------------------------------------------").append("\n");
 
-        LOGGER.info(sb.toString());
+        logger.info(sb.toString());
     }
 }

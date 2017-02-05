@@ -34,7 +34,7 @@ import static com.checkmarx.jenkins.CxResultSeverity.*;
  */
 public class CxScanResult implements Action {
 
-    private static CxPluginLogger LOGGER;
+    private transient CxPluginLogger logger = new CxPluginLogger();
 
     public final AbstractBuild<?, ?> owner;
     private final long projectId;
@@ -100,7 +100,7 @@ public class CxScanResult implements Action {
 
     public CxScanResult(final AbstractBuild owner, CxPluginLogger cxPluginLogger, String serverUrl, long projectId, boolean scanRanAsynchronous) {
         this.projectId = projectId;
-        LOGGER = cxPluginLogger;
+        this.logger = cxPluginLogger;
         this.scanRanAsynchronous = scanRanAsynchronous;
         this.owner = owner;
         this.serverUrl = serverUrl;
@@ -409,11 +409,11 @@ public class CxScanResult implements Action {
             errorMessage = null;
 
         } catch (ParserConfigurationException e) {
-            LOGGER.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
         } catch (SAXException | IOException e) {
             resultIsValid = false;
             errorMessage = e.getMessage();
-            LOGGER.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
         }
     }
 
@@ -503,7 +503,7 @@ public class CxScanResult implements Action {
                                 infoCount++;
                             }
                         } else {
-                            LOGGER.error("\"SeverityIndex\" attribute was not found in element \"Result\" in XML report. "
+                            logger.error("\"SeverityIndex\" attribute was not found in element \"Result\" in XML report. "
                                     + "Make sure you are working with Checkmarx server version 7.1.6 HF3 or above.");
                         }
                     }
@@ -511,11 +511,11 @@ public class CxScanResult implements Action {
                 case "Query":
                     currentQueryName = attributes.getValue("name");
                     if (currentQueryName == null) {
-                        LOGGER.error("\"name\" attribute was not found in element \"Query\" in XML report");
+                        logger.error("\"name\" attribute was not found in element \"Query\" in XML report");
                     }
                     currentQuerySeverity = attributes.getValue("SeverityIndex");
                     if (currentQuerySeverity == null) {
-                        LOGGER.error("\"SeverityIndex\" attribute was not found in element \"Query\" in XML report. "
+                        logger.error("\"SeverityIndex\" attribute was not found in element \"Query\" in XML report. "
                                 + "Make sure you are working with Checkmarx server version 7.1.6 HF3 or above.");
                     }
                     currentQueryNumOfResults = 0;
@@ -552,7 +552,7 @@ public class CxScanResult implements Action {
                 } else if (StringUtils.equals(qr.getSeverity(), INFO.xmlParseString)) {
                     infoQueryResultList.add(qr);
                 } else {
-                    LOGGER.error("Encountered a result query with unknown severity: " + qr.getSeverity());
+                    logger.error("Encountered a result query with unknown severity: " + qr.getSeverity());
                 }
             }
         }
@@ -560,13 +560,13 @@ public class CxScanResult implements Action {
         @NotNull
         private String constructDeepLink(@Nullable String rawDeepLink) {
             if (rawDeepLink == null) {
-                LOGGER.error("\"DeepLink\" attribute was not found in element \"CxXMLResults\" in XML report");
+                logger.error("\"DeepLink\" attribute was not found in element \"CxXMLResults\" in XML report");
                 return "";
             }
             String token = "CxWebClient";
             String[] tokens = rawDeepLink.split(token);
             if (tokens.length < 1) {
-                LOGGER.error("DeepLink value found in XML report is of unexpected format: " + rawDeepLink + "\n"
+                logger.error("DeepLink value found in XML report is of unexpected format: " + rawDeepLink + "\n"
                         + "\"Open Code Viewer\" button will not be functional");
             }
             return serverUrl + "/" + token + tokens[1];

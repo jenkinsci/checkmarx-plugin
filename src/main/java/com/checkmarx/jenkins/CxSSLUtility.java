@@ -17,8 +17,6 @@ import java.security.cert.X509Certificate;
  */
 public class CxSSLUtility {
 
-    private static CxPluginLogger LOGGER;
-
     @Nullable
     private static HostnameVerifier originalHostnameVerifier = null;
     @Nullable
@@ -32,11 +30,10 @@ public class CxSSLUtility {
     }
 
     public static void enableSSLCertificateVerification(CxPluginLogger cxPluginLogger) {
-        LOGGER = cxPluginLogger;
         try {
             HttpsURLConnection.setDefaultSSLSocketFactory(SSLContext.getDefault().getSocketFactory());
         } catch (NoSuchAlgorithmException e) {
-            LOGGER.error(e.getMessage(), e);
+            cxPluginLogger.error(e.getMessage(), e);
         }
 
         HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
@@ -60,7 +57,6 @@ public class CxSSLUtility {
     }
 
     private static void trustAllCertificates(CxPluginLogger cxPluginLogger) {
-        LOGGER = cxPluginLogger;
         // Create a trust manager that does not validate certificate chains
         final TrustManager[] trustManagers = new TrustManager[]{new X509TrustManager() {
             @Override
@@ -87,10 +83,10 @@ public class CxSSLUtility {
             HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
         } catch (KeyManagementException e) {
             // In case of exception, do not install fake trust manager
-            LOGGER.error("Failed to disable SSL/TLS certificate validation", e);
+            cxPluginLogger.error("Failed to disable SSL/TLS certificate validation", e);
         } catch (NoSuchAlgorithmException e) {
             // In case of exception, do not install fake trust manager
-            LOGGER.error("Failed to disable SSL/TLS certificate validation", e);
+            cxPluginLogger.error("Failed to disable SSL/TLS certificate validation", e);
         }
     }
 }
