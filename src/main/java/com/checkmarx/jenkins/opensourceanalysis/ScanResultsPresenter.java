@@ -10,10 +10,10 @@ import hudson.model.BuildListener;
  */
 public class ScanResultsPresenter {
 
-    private static CxPluginLogger LOGGER;
+    private transient CxPluginLogger logger;
 
     public ScanResultsPresenter(BuildListener listener) {
-        LOGGER = new CxPluginLogger(listener);
+        this.logger = new CxPluginLogger(listener);
     }
 
     public void printResultsToOutput(GetOpenSourceSummaryResponse results) {
@@ -30,6 +30,6 @@ public class ScanResultsPresenter {
         sb.append("vulnerability score: ").append(results.getVulnerabilityScore()).append("\n");
         sb.append("----------------------------------------------------------------------------").append("\n");
 
-        LOGGER.info(sb.toString());
+        logger.info(sb.toString());
     }
 }

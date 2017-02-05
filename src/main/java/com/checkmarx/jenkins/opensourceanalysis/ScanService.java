@@ -16,7 +16,7 @@ import org.apache.commons.io.FileUtils;
  */
 public class ScanService {
 
-    private static CxPluginLogger LOGGER;
+    private transient CxPluginLogger logger;
 
     private static final String OSA_RUN_STARTED = "OSA (open source analysis) Run has started";
     private static final String OSA_RUN_ENDED = "OSA (open source analysis) Run has finished successfully";
@@ -38,41 +38,41 @@ public class ScanService {
         this.scanResultsPresenter = new ScanResultsPresenter(scanServiceTools.getListener());
         this.scanSender = new ScanSender(scanServiceTools.getOsaScanClient(), scanServiceTools.getProjectId());
         this.librariesAndCVEsExtractor = new LibrariesAndCVEsExtractor(scanServiceTools.getOsaScanClient());
-        LOGGER = new CxPluginLogger(scanServiceTools.getListener());
+        this.logger = new CxPluginLogger(scanServiceTools.getListener());
     }
 
     public OsaScanResult scan(boolean asynchronousScan) {
         OsaScanResult osaScanResult = new OsaScanResult();
         try {
             if (!validLicense()) {
-                LOGGER.error(NO_LICENSE_ERROR);
+                logger.error(NO_LICENSE_ERROR);
                 osaScanResult.setIsOsaReturnedResult(false);
                 return osaScanResult;
             }
 
             FilePath sourceCodeZip = zipOpenSourceCode();
             if (asynchronousScan) {
-                LOGGER.info(OSA_RUN_SUBMITTED);
+                logger.info(OSA_RUN_SUBMITTED);
                 scanSender.sendAsync(sourceCodeZip);
                 return null;
             } else {
-                LOGGER.info(OSA_RUN_STARTED);
+                logger.info(OSA_RUN_STARTED);
                 scanSender.sendScanAndSetResults(sourceCodeZip, osaScanResult);
-                LOGGER.info(OSA_RUN_ENDED);
+                logger.info(OSA_RUN_ENDED);
                 scanResultsPresenter.printResultsToOutput(osaScanResult.getGetOpenSourceSummaryResponse());
             }
         } catch (Zipper.MaxZipSizeReached zipSizeReached) {
             exposeZippingLogToJobConsole(zipSizeReached);
-            LOGGER.error("Open Source Analysis failed: When zipping file " + zipSizeReached.getCurrentZippedFileName() + ", reached maximum upload size limit of "
+            logger.error("Open Source Analysis failed: When zipping file " + zipSizeReached.getCurrentZippedFileName() + ", reached maximum upload size limit of "
                     + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()) + "\n");
         } catch (Zipper.NoFilesToZip noFilesToZip) {
             exposeZippingLogToJobConsole(noFilesToZip);
-            LOGGER.error("Open Source Analysis failed: No files to scan");
+            logger.error("Open Source Analysis failed: No files to scan");
         } catch (Zipper.ZipperException zipException) {
             exposeZippingLogToJobConsole(zipException);
-            LOGGER.error("Open Source Analysis failed: " + zipException.getMessage(), zipException);
+            logger.error("Open Source Analysis failed: " + zipException.getMessage(), zipException);
         } catch (Exception e) {
-            LOGGER.error("Open Source Analysis failed: "+e.getMessage(), e);
+            logger.error("Open Source Analysis failed: "+e.getMessage(), e);
         }
         return osaScanResult;
     }
@@ -87,7 +87,7 @@ public class ScanService {
     }
 
     private void exposeZippingLogToJobConsole(Zipper.ZipperException zipperException){
-        LOGGER.info(zipperException.getZippingDetails().getZippingLog());
+        logger.info(zipperException.getZippingDetails().getZippingLog());
     }
 
 }

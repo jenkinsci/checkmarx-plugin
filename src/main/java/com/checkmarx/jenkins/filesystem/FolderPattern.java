@@ -14,7 +14,7 @@ import java.io.IOException;
  */
 public class FolderPattern {
 
-    private static CxPluginLogger LOGGER;
+    private transient CxPluginLogger logger;
 
     private AbstractBuild<?, ?> build;
     private BuildListener listener;
@@ -22,7 +22,7 @@ public class FolderPattern {
     public FolderPattern(final AbstractBuild<?, ?> build, final BuildListener listener) {
         this.build = build;
         this.listener = listener;
-        LOGGER = new CxPluginLogger(listener);
+        this.logger = new CxPluginLogger(listener);
     }
 
     public String generatePattern(String filterPattern, String excludeFolders) throws IOException, InterruptedException {
@@ -45,7 +45,7 @@ public class FolderPattern {
                 result.append("/**/*, ");
             }
         }
-        LOGGER.info("Exclude folders converted to: " + result.toString());
+        logger.info("Exclude folders converted to: " + result.toString());
         return result.toString();
     }
 }

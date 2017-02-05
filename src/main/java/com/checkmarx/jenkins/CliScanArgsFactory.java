@@ -10,7 +10,7 @@ import hudson.EnvVars;
  */
 public class CliScanArgsFactory {
 
-    private static CxPluginLogger LOGGER;
+    private transient CxPluginLogger logger;
 
     private String preset;
     private final String projectName;
@@ -32,7 +32,7 @@ public class CliScanArgsFactory {
         this.compressedSources = compressedSources;
         this.env = env;
         this.projectId = projectId;
-        LOGGER = cxPluginLogger;
+        this.logger = cxPluginLogger;
     }
 
     public CliScanArgs create() {
@@ -43,7 +43,7 @@ public class CliScanArgsFactory {
         try {
             presetLong = Long.parseLong(preset);
         } catch (Exception e) {
-            LOGGER.error("Encountered illegal preset value: " + preset + ". Using default preset.");
+            logger.error("Encountered illegal preset value: " + preset + ". Using default preset.");
         }
 
         projectSettings.setPresetID(presetLong);
@@ -54,7 +54,7 @@ public class CliScanArgsFactory {
         try {
             configuration = Long.parseLong(sourceEncoding);
         } catch (Exception e) {
-            LOGGER.error("Encountered illegal source encoding (configuration) value: " + sourceEncoding + ". Using default configuration.");
+            logger.error("Encountered illegal source encoding (configuration) value: " + sourceEncoding + ". Using default configuration.");
         }
         projectSettings.setScanConfigurationID(configuration);
 

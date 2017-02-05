@@ -7,7 +7,6 @@ import hudson.model.BuildListener;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.Logger;
 
 
@@ -27,7 +26,6 @@ public class CxPluginLogger implements Serializable {
 
     static {
         STATIC_LOGGER = Logger.getLogger(WebAppMain.class.getName());
-        STATIC_LOGGER.addHandler(new ConsoleHandler());
     }
 
     public CxPluginLogger() {
@@ -55,11 +53,6 @@ public class CxPluginLogger implements Serializable {
     public void error(String message, Throwable error) {
         loggingDevice.error( message+"\n\n"+ Arrays.toString(error.getStackTrace())+"\n\n");
     }
-
-    public void debug(String message) {
-        STATIC_LOGGER.fine("[Checkmarx] - [DEBUG] - " + message);
-    }
-
 
     private class JavaLoggingDevice implements LoggingDevice{
 
