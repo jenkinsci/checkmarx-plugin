@@ -234,7 +234,7 @@ public class CxScanResult implements Action {
     public void setOsaScanResult(OsaScanResult osaScanResult) {
         this.osaScanResult = osaScanResult;
         //todo erase when legacy code is no longer needed
-        initializeOsaLegacyVariables();
+        initializeOsaLegacyVariables(osaScanResult);
     }
 
     public SastScanResult getSastScanResult() {
@@ -244,7 +244,7 @@ public class CxScanResult implements Action {
     public void setSastScanResult(SastScanResult sastScanResult) {
         this.sastScanResult = sastScanResult;
         //todo erase when legacy code is no longer needed
-        initializeSastLegacyVariables();
+        initializeSastLegacyVariables(sastScanResult);
     }
 
     public void setScanId(long scanId) {
@@ -312,7 +312,7 @@ public class CxScanResult implements Action {
     private String errorMessage;
 
 
-    public void initializeSastLegacyVariables(){
+    public void initializeSastLegacyVariables(SastScanResult sastScanResult){
         this.highCount = sastScanResult.getHighCount();
         this.mediumCount = sastScanResult.getMediumCount();
         this.lowCount = sastScanResult.getLowCount();
@@ -412,7 +412,7 @@ public class CxScanResult implements Action {
     private int osaNoVulnerabilityLibs;
     private boolean osaEnabled = false;
 
-    public void initializeOsaLegacyVariables(){
+    public void initializeOsaLegacyVariables(OsaScanResult osaScanResult){
         this.osaHighCount = osaScanResult.getOsaHighCount();
         this.osaMediumCount = osaScanResult.getOsaMediumCount();
         this.osaLowCount = osaScanResult.getOsaLowCount();
