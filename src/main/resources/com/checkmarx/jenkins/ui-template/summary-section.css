@@ -1,7 +1,6 @@
 .cx-title.job-main-title {
   width: calc(100% - 1em - 48px);
 }
-
 .cx-title {
   font-size: 24px;
   font-weight: 500;
@@ -11,49 +10,39 @@
   border-bottom: solid 2px #373050;
   color: #373050;
 }
-
 .summary-section {
   width: 100%;
   font-family: 'Roboto', sans-serif;
 }
-
 .summary-section td {
   font-family: 'Roboto', sans-serif;
 }
-
 tr.summary-table-row {
   white-space: nowrap;
 }
-
 table {
   border-collapse: collapse;
 }
-
 table td,
 table th {
   border: solid transparent;
 }
-
 .top-padding td {
   padding-top: 59px;
 }
-
 td {
   border-color: transparent;
 }
-
 tr.cxsast,
 tr.cxosa {
   border-bottom: solid 2px #373050;
 }
-
 .title-column,
 .main-column {
   padding: 59px 0;
   line-height: 25px;
   display: inline-block;
 }
-
 .main-column {
   text-align: center;
   padding-bottom: 45px;
@@ -64,7 +53,6 @@ tr.cxosa {
   box-sizing: border-box;
   max-width: 709px;
 }
-
 .title-column {
   margin-right: 10px;
   vertical-align: top;
@@ -74,7 +62,6 @@ tr.cxosa {
   color: #373050;
   max-width: 250px;
 }
-
 .summary-title {
   border-bottom: solid #979797 1px;
   color: white;
@@ -82,43 +69,35 @@ tr.cxosa {
   line-height: 28px;
   padding: 5px 13px;
 }
-
 .sum1 {
   font-size: 24px;
   font-weight: 500;
 }
-
 .sum2 {
   font-size: 16px;
 }
-
 .sum-line1 {
   width: 100%;
   height: 1px;
   background-color: #979797;
 }
-
 .graph-title {
   font-weight: 500;
   font-size: 16px;
   display: inline-block;
 }
-
 .graph {
   position: relative;
   max-width: 709px;
   text-align: left;
   margin-right: 50px;
 }
-
 .threshold-exceeded-text {
   color: #da2945;
 }
-
 .threshold-compliance-text {
   color: #21bf3f;
 }
-
 .threshold-exceeded,
 .threshold-compliance {
   display: inline-flex;
@@ -126,49 +105,40 @@ tr.cxosa {
   position: absolute;
   right: 0;
 }
-
 .threshold-exceeded-icon,
 .threshold-compliance-icon {
   margin-right: 6px;
   line-height: 28px;
 }
-
 .detailed-report {
   margin-top: 12px;
   display: block;
   padding: 0 11px;
 }
-
 .detailed-report-ttl {
   font-size: 14px;
   letter-spacing: -0.53px;
 }
-
 .download-detailed-report {
   color: #9b9b9b;
   font-size: 14px;
   letter-spacing: -0.47px;
 }
-
 .download-icon,
 .download-icon,
 .download-txt {
   display: inline-block;
 }
-
 .download-icon {
   margin-right: 9px;
 }
-
 .download-icon > svg {
   vertical-align: sub;
 }
-
 body {
   font: 13px/1.3 'Lucida Grande', sans-serif;
   color: #666;
 }
-
 .chart {
   display: table;
   table-layout: fixed;
@@ -183,38 +153,32 @@ body {
   background-position: left bottom;
   border-bottom: solid #979797 2px;
 }
-
 .chart tr {
   white-space: nowrap;
 }
-
 .chart li {
   position: relative;
   display: table-cell;
   vertical-align: bottom;
   height: 200px;
 }
-
 .chart span {
   margin: auto;
   display: block;
   background: #d1ecfa;
   animation: draw 1s ease-in-out;
 }
-
 .chart .bar-count {
   text-align: center;
   font-size: 14px;
   letter-spacing: -0.47px;
   line-height: 40px;
 }
-
 .chart .bar-title {
   font-size: 16px;
   padding: 0 18px;
   color: #525055;
 }
-
 .chart .bar-title-container {
   position: absolute;
   padding-top: 21px;
@@ -224,47 +188,38 @@ body {
   left: 50%;
   transform: translate(-50%);
 }
-
 .chart .bar-1 {
   position: relative;
   background-color: #da2945;
 }
-
 .chart .bar-2 {
   position: relative;
   background-color: #ffb400;
 }
-
 .chart .bar-3 {
   position: relative;
   background-color: #efd412;
 }
-
 .chart li span {
   max-width: 53px;
 }
-
 .download-cx-report {
   font-size: 16px;
   padding-bottom: 5px;
 }
-
 .pdf-report.download-icon,
 .html-report.download-icon {
   margin-right: 6px;
 }
-
 .report-link {
   line-height: 28px;
 }
-
 .libraries {
   display: inline-flex;
   text-align: left;
   width: 100%;
   padding-top: 10px;
 }
-
 .libraries-vulnerable,
 .libraries-ok {
   width: 200px;
@@ -272,20 +227,17 @@ body {
   margin-bottom: 47px;
   margin-right: 122px;
 }
-
 .libraries-vulnerable-number,
 .libraries-ok-number {
   display: inline-block;
   font-size: 28px;
   letter-spacing: -0.93px;
 }
-
 .libraries-vulnerable-icon,
 .libraries-ok-icon {
   display: inline-block;
   margin-right: 9px;
 }
-
 .libraries-vulnerable-text,
 .libraries-ok-text {
   white-space: normal;
@@ -293,7 +245,6 @@ body {
   letter-spacing: -0.53px;
   color: #525055;
 }
-
 .full-start-end {
   display: inline-flex;
   text-align: left;
@@ -302,11 +253,9 @@ body {
   color: #525055;
   padding-top: 6px;
 }
-
 .full-start-end-icon {
   margin: 4px 7px 0 0;
 }
-
 .full-start,
 .full-end,
 .full-files,
@@ -315,23 +264,19 @@ body {
   line-height: 18px;
   margin-right: 63px;
 }
-
 .full-loc {
   margin: auto;
   display: inline-block;
 }
-
 .full-loc > div {
   display: inline-block;
 }
-
 .threshold-icon-white {
   position: relative;
   top: 2px;
   display: inline-block;
   vertical-align: top;
 }
-
 .threshold-text {
   position: relative;
   color: white;
@@ -341,32 +286,27 @@ body {
   vertical-align: top;
   font-size: 13px;
 }
-
 .threshold-number {
   position: relative;
   color: white;
   display: inline-block;
   vertical-align: top;
 }
-
 .tooltip-container {
   position: absolute;
   display: inline-flex;
 }
-
 .threshold-tooltip {
   text-align: right;
   transform: translate(0, 50%);
   flex-shrink: 0;
 }
-
 .threshold-line {
   width: 53px;
   border-bottom: dashed white 1px;
   padding-right: 3px;
   flex-shrink: 0;
 }
-
 .threshold-tooltip-background {
   position: relative;
   padding: 0 12px;
@@ -375,7 +315,6 @@ body {
   background: #373050;
   border-radius: 5px;
 }
-
 .threshold-tooltip-background::after {
   content: "";
   position: absolute;
@@ -385,64 +324,52 @@ body {
   border: 5px solid transparent;
   border-right-color: #373050;
 }
-
 .threshold-exceeded,
 .threshold-compliance {
   font-size: 15px;
   font-weight: bold;
 }
-
 .threshold-exceeded {
   color: #d82743;
 }
-
 .threshold-compliance {
   color: #20be3d;
 }
-
 .osa-downloads a,
 .sast-downloads a {
   color: black;
   text-decoration: none;
 }
-
 .full-severity-title {
   display: block;
   text-align: left;
   margin-top: 45px;
   margin-bottom: 18px;
 }
-
 .full-severity-title .severity-title-name {
   display: inline-block;
   font-size: 16px;
   margin: 0 10px;
 }
-
 .full-severity-title .severity-count {
   display: inline-block;
 }
-
 .full-severity-title .severity-icon {
   display: inline-block;
 }
-
 table.cve-table {
   width: 100%;
 }
-
 table.cve-table th,
 table.cve-table td {
   border: 1px solid transparent;
   text-align: left;
 }
-
 table.cve-table th {
   border-bottom: 1px solid #373050;
   font-size: 14px;
   color: #9b9b9b;
 }
-
 table.cve-table td {
   font-weight: 500;
   font-size: 16px;
@@ -450,9 +377,8 @@ table.cve-table td {
   border-bottom: 1px solid #979797;
   padding: 11px 0;
 }
-
-table.cve-table td > .sast-cve-table-high,
-table.cve-table td .sast-cve-table-med,
-table.cve-table td .sast-cve-table-low {
+table.cve-table td.sast-cve-table-high,
+table.cve-table td.sast-cve-table-med,
+table.cve-table td.sast-cve-table-low {
   max-width: 19px;
 }
