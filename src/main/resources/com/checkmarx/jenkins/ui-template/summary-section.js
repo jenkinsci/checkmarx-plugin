@@ -1,3 +1,12 @@
+//this function prevents compilation errors after jelly script works its magic
+function verifyVar(variableList) {
+    if (variableList.length > 0) {
+        return variableList[0];
+    }
+
+    return undefined;
+}
+
 //-------------------------- sast vars --------------------------------------
 var pdfReportReady = true;
 
@@ -5,18 +14,18 @@ var pdfReportReady = true;
 var sastPdfPath = "/dor/bo/rega"; //todo - sast pdf path
 var sastHtmlPath = "/haha/yissik";
 
-//thresholds
+//thresholds - Legacy form
 var thresholdsEnabled = true;
 var highThreshold = 0;
 var medThreshold = 0;
 var lowThreshold = 1;
 
-//counts
+//counts - Legacy form
 var highCount = 3;
 var medCount = 3;
 var lowCount = 3;
 
-//cve lists
+//cve lists - New (8.4.2 and up)
 var highCveList = [
         {
             "name": "cve-name-high",
@@ -64,29 +73,31 @@ var lowCveList = [
 //-------------------------- osa vars --------------------------------------
 //this var is needed in jenkins only - so that previous builds display correctly
 var isOsaFeature = true;
+var isSastFeature = true;
 
 //link paths
 var osaPdfPath = "/zepointer/mami";
 var osaHtmlPath = "bati/laavod";
 
+//Legacy form
 var osaEnabled = true;
 
-//libraries
-var vulnerableLibraries = 8;
+//libraries - Legacy form
+var osaVulnerableAndOutdatedLibs = 8;
 var okLibraries = 28;
 
-//thresholds
+//thresholds - Legacy form
 var osaThresholdsEnabled = true;
 var osaHighThreshold = 1;
 var osaMedThreshold = 0;
 var osaLowThreshold = 1;
 
-//counts
+//counts - Legacy form
 var osaHighCount = 3;
 var osaMedCount = 3;
 var osaLowCount = 3;
 
-//cve lists
+//cve lists - New (8.4.2 and up)
 var osaHighCveList = [
         {
             "cveName": "cve-name-high",
@@ -140,6 +151,7 @@ var osaLowCveList = [
 ];
 
 //-------------------------- full reports vars --------------------------------------
+//todo: apply real values
 var sastFullHtmlPath = "tavi/lek/oded";
 var sastFullPdfPath = "tavi/pdf/oded";
 var sastFullCodeViewerPath = "tavi/CodeViewer/odetttt";
@@ -157,7 +169,35 @@ var osaEndtDate = "28/07/2016";
 var osaNumFiles = 3507;
 
 
-window.onload = function () {
+//---------------------------------------------------------- all other vars ---------------------------------------------------------------
+var SEVERITY = {
+    HIGH: {value: 0, name: "high"},
+    MED: {value: 1, name: "medium"},
+    LOW: {value: 2, name: "low"},
+    OSA_HIGH: {value: 3, name: "high"},
+    OSA_MED: {value: 4, name: "medium"},
+    OSA_LOW: {value: 5, name: "low"}
+};
+
+var thresholdExceededHtml =
+    '<div class="threshold-exceeded">' +
+    '<div class="threshold-exceeded-icon">' +
+    '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1015" version="1.1" width="9.400000000000091" height="12.399999999999977" viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold ICON</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1016"/><path id="SvgjsPath1017" d="M1052 190L1056.29 190L1056.29 195.6L1052 195.6Z " fill="#da2945" fill-opacity="1" transform="matrix(1,0,0,1,-1049.3,-184.3)"/><path id="SvgjsPath1018" d="M1052.71 185.1L1055.57 185.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#da2945" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-1049.3,-184.3)"/><path id="SvgjsPath1019" d="M1052.71 188.1L1055.57 188.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#da2945" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-1049.3,-184.3)"/><path id="SvgjsPath1020" d="M1050.42 195.1L1057.64 195.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#da2945" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-1049.3,-184.3)"/></svg>' +
+    '</div>' +
+    '<div class="threshold-exceeded-text">' +
+    'Threshold Exceeded' +
+    '</div>' +
+    '</div>';
+
+var thresholdComplianceHtml =
+    '<div class="threshold-compliance">' +
+    '<div class="threshold-compliance-icon">' +
+    '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1050" version="1.1" width="13.99264158479491" height="13" viewBox="0 0 13.99264158479491 13"><title>Icon</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1051"><clipPath id="SvgjsClipPath1056"><path id="SvgjsPath1055" d="M1035.00736 793.9841L1035.00736 784.01589L1046.9926400000002 784.01589L1046.9926400000002 793.9841ZM1038.67 790.72L1036.68 788.72L1036 789.4L1038.67 792.0699999999999L1045.21 785.67L1044.54 785Z " fill="#ffffff"/></clipPath></defs><path id="SvgjsPath1052" d="M1033 789.5C1033 785.91015 1035.91015 783 1039.5 783C1043.08985 783 1046 785.91015 1046 789.5C1046 793.08985 1043.08985 796 1039.5 796C1035.91015 796 1033 793.08985 1033 789.5Z " fill="#21bf3f" fill-opacity="1" transform="matrix(1,0,0,1,-1033,-783)"/><path id="SvgjsPath1053" d="M1038.67 790.72L1036.68 788.72L1036 789.4L1038.67 792.0699999999999L1045.21 785.67L1044.54 785Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-1033,-783)"/><path id="SvgjsPath1054" d="M1038.67 790.72L1036.68 788.72L1036 789.4L1038.67 792.0699999999999L1045.21 785.67L1044.54 785Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" clip-path="url(&quot;#SvgjsClipPath1056&quot;)" transform="matrix(1,0,0,1,-1033,-783)"/></svg>' +
+    '</div>' +
+    '<div class="threshold-compliance-text">' +
+    'Threshold Compliance' +
+    '</div>' +
+    '</div>';
 
     //---------------------------------------------------------- sast ---------------------------------------------------------------
     //todo - catch exceptions?
@@ -232,13 +272,8 @@ window.onload = function () {
         document.getElementById("osa-bar-med").setAttribute("style", "height:" + osaMedCount * 100 / (osaHighCount + osaMedCount + osaLowCount) + "%");
         document.getElementById("osa-bar-low").setAttribute("style", "height:" + osaLowCount * 100 / (osaHighCount + osaMedCount + osaLowCount) + "%");
 
-        document.getElementById("vulnerable-libraries").innerHTML = vulnerableLibraries;
+        document.getElementById("vulnerable-libraries").innerHTML = osaVulnerableAndOutdatedLibs;
         document.getElementById("ok-libraries").innerHTML = okLibraries;
-
-        //this is for support for versions before OSA was implemented
-        if (!isOsaFeature) {
-            document.getElementById("osa-full").setAttribute("style", "display: none");
-        }
 
         //report links
         document.getElementById("osa-pdf-report-link").setAttribute("href", osaPdfPath);
@@ -305,7 +340,9 @@ window.onload = function () {
     document.getElementById("osa-full-end-date").innerHTML = osaEndtDate;
     document.getElementById("osa-full-files").innerHTML = osaNumFiles;
 
-    //generate full reports
+
+//generate full reports
+if(isSastFeature) {
     if (highCount > 0) {
         generateCveTable(SEVERITY.HIGH);
     }
@@ -315,6 +352,12 @@ window.onload = function () {
     if (lowCount > 0) {
         generateCveTable(SEVERITY.LOW);
     }
+} else {
+    //this is for support for versions before Full Reports feature was implemented - legacy
+    document.getElementById("sast-full").setAttribute("style", "display: none");
+}
+
+if(isOsaFeature) {
     if (osaHighCount > 0) {
         generateCveTable(SEVERITY.OSA_HIGH);
     }
@@ -324,36 +367,11 @@ window.onload = function () {
     if (osaLowCount > 0) {
         generateCveTable(SEVERITY.OSA_LOW);
     }
-};
+} else {
+    //this is for support for versions before Full Reports feature was implemented - legacy
+    document.getElementById("osa-full").setAttribute("style", "display: none");
+}
 
-var thresholdExceededHtml =
-    '<div class="threshold-exceeded">' +
-    '<div class="threshold-exceeded-icon">' +
-    '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1015" version="1.1" width="9.400000000000091" height="12.399999999999977" viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold ICON</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1016"/><path id="SvgjsPath1017" d="M1052 190L1056.29 190L1056.29 195.6L1052 195.6Z " fill="#da2945" fill-opacity="1" transform="matrix(1,0,0,1,-1049.3,-184.3)"/><path id="SvgjsPath1018" d="M1052.71 185.1L1055.57 185.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#da2945" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-1049.3,-184.3)"/><path id="SvgjsPath1019" d="M1052.71 188.1L1055.57 188.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#da2945" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-1049.3,-184.3)"/><path id="SvgjsPath1020" d="M1050.42 195.1L1057.64 195.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#da2945" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-1049.3,-184.3)"/></svg>' +
-    '</div>' +
-    '<div class="threshold-exceeded-text">' +
-    'Threshold Exceeded' +
-    '</div>' +
-    '</div>';
-
-var thresholdComplianceHtml =
-    '<div class="threshold-compliance">' +
-    '<div class="threshold-compliance-icon">' +
-    '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1050" version="1.1" width="13.99264158479491" height="13" viewBox="0 0 13.99264158479491 13"><title>Icon</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1051"><clipPath id="SvgjsClipPath1056"><path id="SvgjsPath1055" d="M1035.00736 793.9841L1035.00736 784.01589L1046.9926400000002 784.01589L1046.9926400000002 793.9841ZM1038.67 790.72L1036.68 788.72L1036 789.4L1038.67 792.0699999999999L1045.21 785.67L1044.54 785Z " fill="#ffffff"/></clipPath></defs><path id="SvgjsPath1052" d="M1033 789.5C1033 785.91015 1035.91015 783 1039.5 783C1043.08985 783 1046 785.91015 1046 789.5C1046 793.08985 1043.08985 796 1039.5 796C1035.91015 796 1033 793.08985 1033 789.5Z " fill="#21bf3f" fill-opacity="1" transform="matrix(1,0,0,1,-1033,-783)"/><path id="SvgjsPath1053" d="M1038.67 790.72L1036.68 788.72L1036 789.4L1038.67 792.0699999999999L1045.21 785.67L1044.54 785Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-1033,-783)"/><path id="SvgjsPath1054" d="M1038.67 790.72L1036.68 788.72L1036 789.4L1038.67 792.0699999999999L1045.21 785.67L1044.54 785Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" clip-path="url(&quot;#SvgjsClipPath1056&quot;)" transform="matrix(1,0,0,1,-1033,-783)"/></svg>' +
-    '</div>' +
-    '<div class="threshold-compliance-text">' +
-    'Threshold Compliance' +
-    '</div>' +
-    '</div>';
-
-var SEVERITY = {
-    HIGH: {value: 0, name: "high"},
-    MED: {value: 1, name: "medium"},
-    LOW: {value: 2, name: "low"},
-    OSA_HIGH: {value: 3, name: "high"},
-    OSA_MED: {value: 4, name: "medium"},
-    OSA_LOW: {value: 5, name: "low"}
-};
 
 
 function tooltipGenerator(severity) {
@@ -601,254 +619,3 @@ function generateCveTable(severity) {
             break;
     }
 }
-
-var dummyHighCveList = [
-    {
-        "name": "cve-name-high",
-        "count": "10"
-    },
-    {
-        "name": "cve-name-high",
-        "count": "10"
-    },
-    {
-        "name": "cve-name-high",
-        "count": "10"
-    }
-];
-var dummyMedCveList = [
-    {
-        "id": "0",
-        "cveName": "cve-name-med",
-        "score": 50.0,
-        "severity": {
-            "Id": 2,
-            "name": "Med"
-        },
-        "publishDate": "2016-11-07T10:16:06.1206743Z",
-        "url": "http://cv1",
-        "description": null,
-        "recommendations": "recommendation 2",
-        "sourceFileName": "SourceFileName 2",
-        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
-    },
-    {
-        "id": "0",
-        "cveName": "cve-name-med",
-        "score": 50.0,
-        "severity": {
-            "Id": 2,
-            "name": "Med"
-        },
-        "publishDate": "2016-11-07T10:16:06.1206743Z",
-        "url": "http://cv1",
-        "description": null,
-        "recommendations": "recommendation 2",
-        "sourceFileName": "SourceFileName 2",
-        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
-    },
-    {
-        "id": "0",
-        "cveName": "cve-name-med",
-        "score": 50.0,
-        "severity": {
-            "Id": 2,
-            "name": "Med"
-        },
-        "publishDate": "2016-11-07T10:16:06.1206743Z",
-        "url": "http://cv1",
-        "description": null,
-        "recommendations": "recommendation 2",
-        "sourceFileName": "SourceFileName 2",
-        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
-    }
-];
-var dummyLowCveList = [
-    {
-        "id": "0",
-        "cveName": "cve-name-low",
-        "score": 1.0,
-        "severity": {
-            "Id": 3,
-            "name": "Low"
-        },
-        "publishDate": "2016-11-07T10:16:06.1206743Z",
-        "url": "http://cv1",
-        "description": null,
-        "recommendations": "recommendation 3",
-        "sourceFileName": "SourceFileName 3",
-        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
-    },
-    {
-        "id": "0",
-        "cveName": "cve-name-low",
-        "score": 1.0,
-        "severity": {
-            "Id": 3,
-            "name": "Low"
-        },
-        "publishDate": "2016-11-07T10:16:06.1206743Z",
-        "url": "http://cv1",
-        "description": null,
-        "recommendations": "recommendation 3",
-        "sourceFileName": "SourceFileName 3",
-        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
-    },
-    {
-        "id": "0",
-        "cveName": "cve-name-low",
-        "score": 1.0,
-        "severity": {
-            "Id": 3,
-            "name": "Low"
-        },
-        "publishDate": "2016-11-07T10:16:06.1206743Z",
-        "url": "http://cv1",
-        "description": null,
-        "recommendations": "recommendation 3",
-        "sourceFileName": "SourceFileName 3",
-        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
-    }
-];
-
-var dummyOsaHighCveList = [
-    {
-        "id": "0",
-        "cveName": "cve-name-high",
-        "score": 100.0,
-        "severity": {
-            "Id": 1,
-            "name": "High"
-        },
-        "publishDate": "2016-11-07T10:16:06.1206743Z",
-        "url": "http://cv1",
-        "description": null,
-        "recommendations": "recommendation 1",
-        "sourceFileName": "SourceFileName 1",
-        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
-    },
-    {
-        "id": "0",
-        "cveName": "cve-name-high",
-        "score": 100.0,
-        "severity": {
-            "Id": 1,
-            "name": "High"
-        },
-        "publishDate": "2016-11-07T10:16:06.1206743Z",
-        "url": "http://cv1",
-        "description": null,
-        "recommendations": "recommendation 1",
-        "sourceFileName": "SourceFileName 1",
-        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
-    },
-    {
-        "id": "0",
-        "cveName": "cve-name-high",
-        "score": 100.0,
-        "severity": {
-            "Id": 1,
-            "name": "High"
-        },
-        "publishDate": "2016-11-07T10:16:06.1206743Z",
-        "url": "http://cv1",
-        "description": null,
-        "recommendations": "recommendation 1",
-        "sourceFileName": "SourceFileName 1",
-        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
-    }
-];
-var dummyOsaMedCveList = [
-    {
-        "id": "0",
-        "cveName": "cve-name-med",
-        "score": 50.0,
-        "severity": {
-            "Id": 2,
-            "name": "Med"
-        },
-        "publishDate": "2016-11-07T10:16:06.1206743Z",
-        "url": "http://cv1",
-        "description": null,
-        "recommendations": "recommendation 2",
-        "sourceFileName": "SourceFileName 2",
-        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
-    },
-    {
-        "id": "0",
-        "cveName": "cve-name-med",
-        "score": 50.0,
-        "severity": {
-            "Id": 2,
-            "name": "Med"
-        },
-        "publishDate": "2016-11-07T10:16:06.1206743Z",
-        "url": "http://cv1",
-        "description": null,
-        "recommendations": "recommendation 2",
-        "sourceFileName": "SourceFileName 2",
-        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
-    },
-    {
-        "id": "0",
-        "cveName": "cve-name-med",
-        "score": 50.0,
-        "severity": {
-            "Id": 2,
-            "name": "Med"
-        },
-        "publishDate": "2016-11-07T10:16:06.1206743Z",
-        "url": "http://cv1",
-        "description": null,
-        "recommendations": "recommendation 2",
-        "sourceFileName": "SourceFileName 2",
-        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
-    }
-];
-var dummyOsaLowCveList = [
-    {
-        "id": "0",
-        "cveName": "cve-name-low",
-        "score": 1.0,
-        "severity": {
-            "Id": 3,
-            "name": "Low"
-        },
-        "publishDate": "2016-11-07T10:16:06.1206743Z",
-        "url": "http://cv1",
-        "description": null,
-        "recommendations": "recommendation 3",
-        "sourceFileName": "SourceFileName 3",
-        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
-    },
-    {
-        "id": "0",
-        "cveName": "cve-name-low",
-        "score": 1.0,
-        "severity": {
-            "Id": 3,
-            "name": "Low"
-        },
-        "publishDate": "2016-11-07T10:16:06.1206743Z",
-        "url": "http://cv1",
-        "description": null,
-        "recommendations": "recommendation 3",
-        "sourceFileName": "SourceFileName 3",
-        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
-    },
-    {
-        "id": "0",
-        "cveName": "cve-name-low",
-        "score": 1.0,
-        "severity": {
-            "Id": 3,
-            "name": "Low"
-        },
-        "publishDate": "2016-11-07T10:16:06.1206743Z",
-        "url": "http://cv1",
-        "description": null,
-        "recommendations": "recommendation 3",
-        "sourceFileName": "SourceFileName 3",
-        "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
-    }
-];

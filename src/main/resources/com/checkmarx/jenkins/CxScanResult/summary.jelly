@@ -1438,6 +1438,7 @@
         //-------------------------- osa vars --------------------------------------
         //this var is needed so previous builds display correctly
         var isOsaFeature = verifyVar(['${it.osaScanResult}']) !== '';
+        var isSastFeature = verifyVar(['${it.sastScanResult}']) !== '';
 
         //link paths
         var osaPdfPath = '${app.rootUrl}${it.owner.url}${it.urlName}' + "/osaPdfReport";
@@ -1446,9 +1447,9 @@
         //Legacy form
         var osaEnabled = verifyVar([${it.osaEnabled}]);
 
-        //libraries - New (8.4.2 and up)
-        var vulnerableLibraries = verifyVar([${it.osaScanResult.osaTotalVulnerabilitiesLibs}]);
-        var okLibraries = verifyVar([${it.osaScanResult.osaNoVulnerabilityLibs}]);
+        //libraries - Legacy form
+        var osaVulnerableAndOutdatedLibs = verifyVar([${it.osaVulnerableAndOutdatedLibs}]);
+        var okLibraries = verifyVar([${it.osaNoVulnerabilityLibs}]);
 
         //thresholds - Legacy form
         var osaThresholdsEnabled = verifyVar([${it.osaThresholdsEnabled}]);
@@ -1588,13 +1589,8 @@
             document.getElementById("osa-bar-med").setAttribute("style", "height:" + osaMedCount * 100 / (osaHighCount + osaMedCount + osaLowCount) + "%");
             document.getElementById("osa-bar-low").setAttribute("style", "height:" + osaLowCount * 100 / (osaHighCount + osaMedCount + osaLowCount) + "%");
 
-            document.getElementById("vulnerable-libraries").innerHTML = vulnerableLibraries;
+            document.getElementById("vulnerable-libraries").innerHTML = osaVulnerableAndOutdatedLibs;
             document.getElementById("ok-libraries").innerHTML = okLibraries;
-
-            //this is for support for versions before OSA was implemented
-            if (!isOsaFeature) {
-                document.getElementById("osa-full").setAttribute("style", "display: none");
-            }
 
             //report links
             document.getElementById("osa-pdf-report-link").setAttribute("href", osaPdfPath);
@@ -1661,25 +1657,38 @@
         document.getElementById("osa-full-end-date").innerHTML = osaEndtDate;
         document.getElementById("osa-full-files").innerHTML = osaNumFiles;
 
+
         //generate full reports
-        if (highCount &gt; 0) {
-            generateCveTable(SEVERITY.HIGH);
+        if(isSastFeature) {
+            if (highCount &gt; 0) {
+                generateCveTable(SEVERITY.HIGH);
+            }
+            if (medCount &gt; 0) {
+                generateCveTable(SEVERITY.MED);
+            }
+            if (lowCount &gt; 0) {
+                generateCveTable(SEVERITY.LOW);
+            }
+        } else {
+            //this is for support for versions before Full Reports feature was implemented - legacy
+            document.getElementById("sast-full").setAttribute("style", "display: none");
         }
-        if (medCount &gt; 0) {
-            generateCveTable(SEVERITY.MED);
+
+        if(isOsaFeature) {
+            if (osaHighCount &gt; 0) {
+                generateCveTable(SEVERITY.OSA_HIGH);
+            }
+            if (osaMedCount &gt; 0) {
+                generateCveTable(SEVERITY.OSA_MED);
+            }
+            if (osaLowCount &gt; 0) {
+                generateCveTable(SEVERITY.OSA_LOW);
+            }
+        } else {
+            //this is for support for versions before Full Reports feature was implemented - legacy
+            document.getElementById("osa-full").setAttribute("style", "display: none");
         }
-        if (lowCount &gt; 0) {
-            generateCveTable(SEVERITY.LOW);
-        }
-        if (osaHighCount &gt; 0) {
-            generateCveTable(SEVERITY.OSA_HIGH);
-        }
-        if (osaMedCount &gt; 0) {
-            generateCveTable(SEVERITY.OSA_MED);
-        }
-        if (osaLowCount &gt; 0) {
-            generateCveTable(SEVERITY.OSA_LOW);
-        }
+
 
 
         function tooltipGenerator(severity) {
