@@ -3,6 +3,8 @@ package com.checkmarx.jenkins.web.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
 /**
  * Created by zoharby on 09/01/2017.
  */
@@ -19,6 +21,8 @@ public class ScanDetails {
     private String origin;//:"Eclipse",
     @JsonProperty("state")
     private State state;
+    @JsonProperty("sharedSourceLocationPaths")
+    private List<String> sharedSourceLocationPaths;
 
     public String getId() {
         return id;
@@ -60,11 +64,21 @@ public class ScanDetails {
         this.state = state;
     }
 
+    public List<String> getSharedSourceLocationPaths() {
+        return sharedSourceLocationPaths;
+    }
+
+    public void setSharedSourceLocationPaths(List<String> sharedSourceLocationPaths) {
+        this.sharedSourceLocationPaths = sharedSourceLocationPaths;
+    }
+
     public static class State{
         @JsonProperty("id")
         int id;
         @JsonProperty("name")
         String name;
+        @JsonProperty("failureReason")
+        String failureReason;
 
         public int getId() {
             return id;
@@ -80,6 +94,14 @@ public class ScanDetails {
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        public String getFailureReason() {
+            return failureReason;
+        }
+
+        public void setFailureReason(String failureReason) {
+            this.failureReason = failureReason;
         }
     }
 }
