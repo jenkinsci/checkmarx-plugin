@@ -31,7 +31,7 @@ public class OsaZipperCallable implements FilePath.FileCallable<CxZipResult>  {
         OutputStream fileOutputStream = null;
         try{
             fileOutputStream = new FileOutputStream(tempFile);
-            ZippingDetails zippingDetails = new Zipper().zip(file, combinedFilterPattern, fileOutputStream, CxConfig.maxZipSize());
+            ZippingDetails zippingDetails = new Zipper().zip(file, combinedFilterPattern, fileOutputStream, CxConfig.maxOSAZipSize());
             final FilePath remoteTempFile = new FilePath(tempFile);
             return new CxZipResult(remoteTempFile, zippingDetails);
         }
