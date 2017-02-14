@@ -147,7 +147,7 @@ public class CxScanBuilder extends Builder {
     public static final String ASYNC_MESSAGE = "CxSAST scan was run in asynchronous mode.\nRefer to the {0} for the scan results\n";
 
     public static final int MINIMUM_TIMEOUT_IN_MINUTES = 1;
-    public static final String REPORTS_FOLDER = "Checkmarx\\Reports";
+    public static final String REPORTS_FOLDER = "Checkmarx/Reports";
 
     private StringBuilder thresholdsError;
 
@@ -774,14 +774,14 @@ public class CxScanBuilder extends Builder {
 
     private void copyReportsToWorkspace(AbstractBuild<?, ?> build, File checkmarxBuildDir) {
 
-        String remoteDirPath = build.getWorkspace().getRemote() + "\\" + REPORTS_FOLDER;
+        String remoteDirPath = build.getWorkspace().getRemote() + File.separator + REPORTS_FOLDER;
 
         Collection<File> files = FileUtils.listFiles(checkmarxBuildDir, null, true);
         FileInputStream fileInputStream = null;
 
         for (File file : files) {
             try {
-                String remoteFilePath = remoteDirPath + "\\" + file.getName();
+                String remoteFilePath = remoteDirPath + File.separator + file.getName();
                 jobConsoleLogger.info("Copying file [" + file.getName() + "] to workspace [" + remoteFilePath + "]");
                 FilePath remoteFile = new FilePath(build.getWorkspace().getChannel(), remoteFilePath);
                 fileInputStream = new FileInputStream(file);
