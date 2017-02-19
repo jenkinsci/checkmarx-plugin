@@ -40,7 +40,8 @@ dependencies {
 			'com.googlecode.lambdaj:lambdaj:2.3.3',
 			'org.glassfish.jersey.core:jersey-client:2.22.1',
 			'org.glassfish.jersey.media:jersey-media-json-jackson:2.22.1',
-			'org.glassfish.jersey.media:jersey-media-multipart:2.22.1'
+			'org.glassfish.jersey.media:jersey-media-multipart:2.22.1',
+			'org.apache.httpcomponents:httpmime:4.4.1'
 
 	optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.3@jar'
 

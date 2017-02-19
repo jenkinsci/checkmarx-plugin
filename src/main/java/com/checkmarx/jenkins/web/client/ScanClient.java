@@ -1,21 +1,41 @@
 package com.checkmarx.jenkins.web.client;
 
+import com.checkmarx.jenkins.web.model.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.InputStreamBody;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.MultiPart;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
+import org.jetbrains.annotations.NotNull;
+
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.client.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.NewCookie;
+import javax.ws.rs.core.Response;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.util.Map;
-
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.*;
-import javax.ws.rs.core.*;
-import com.checkmarx.jenkins.web.model.*;
-import org.glassfish.jersey.media.multipart.*;
-import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
-import org.jetbrains.annotations.NotNull;
-
 
 
 /**
@@ -59,6 +79,62 @@ public class ScanClient implements Closeable {
         return scanResponse.getLink();
     }
 
+    public URI createScanLargeFileWorkaround(CreateScanRequest request) throws IOException {
+
+        //create httpclient
+        CookieStore cookieStore = new BasicCookieStore();
+        HttpClient apacheClient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
+
+        //create login request
+        HttpPost loginPost = new HttpPost(root.getUri() + AUTHENTICATION_PATH);
+        String json = "{\"username\":\"" + authenticationRequest.getUsername() + "\", \"password\": \"" + authenticationRequest.getPassword() + "\"}";
+        StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
+        loginPost.setEntity(requestEntity);
+
+        //send login request
+        HttpResponse loginResponse = apacheClient.execute(loginPost);
+
+        //validate login response
+        String loginMessageBody = IOUtils.toString(loginResponse.getEntity().getContent());
+        validateApacheHttpClientResponse(loginResponse, 200, "Fail to authenticate", loginMessageBody);
+
+
+        //create OSA scan request
+        HttpPost post = new HttpPost(root.getUri() + ANALYZE_PATH.replace("{projectId}", String.valueOf(request.getProjectId())));
+        InputStreamBody streamBody = new InputStreamBody(request.getZipFile().read(), ContentType.APPLICATION_OCTET_STREAM, OSA_ZIPPED_FILE_KEY_NAME);
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+        builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+        builder.addPart(OSA_ZIPPED_FILE_KEY_NAME, streamBody);
+        HttpEntity entity = builder.build();
+        post.setEntity(entity);
+
+        //set csrf header and cookies
+        for (org.apache.http.cookie.Cookie c : cookieStore.getCookies()) {
+            if (CSRF_COOKIE.equals(c.getName())) {
+                post.addHeader(CSRF_COOKIE, c.getValue());
+            }
+        }
+        Header[] setCookies = loginResponse.getHeaders("Set-Cookie");
+        StringBuilder cookies = new StringBuilder();
+        for (Header h : setCookies) {
+            cookies.append(h.getValue()).append(";");
+        }
+        post.addHeader("cookie", cookies.toString());
+
+        //sent scan request
+        HttpResponse response = apacheClient.execute(post);
+
+        //verify scan request
+        String createScanResponseBody = IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset());
+        validateApacheHttpClientResponse(response, 202, "Fail to create OSA scan", createScanResponseBody);
+
+        //extract response as object and return the link
+        ObjectMapper mapper = new ObjectMapper();
+        CreateScanResponse createScanResponse = mapper.readValue(createScanResponseBody, CreateScanResponse.class);
+        return createScanResponse.getLink();
+    }
+
+
     public String getOSAScanHtmlResults(long projectId) {
         Map<String, NewCookie> cookies = authenticate();
         Response response = root.path(OSA_SCAN_HTML_PATH).resolveTemplate("projectId", projectId).request().cookie(cookies.get(CX_COOKIE))
@@ -82,10 +158,10 @@ public class ScanClient implements Closeable {
     private MultiPart createScanMultiPartRequest(CreateScanRequest request) throws IOException {
         InputStream read = request.getZipFile().read();
 
-        final StreamDataBodyPart filePart = new StreamDataBodyPart (OSA_ZIPPED_FILE_KEY_NAME, read);
+        final StreamDataBodyPart filePart = new StreamDataBodyPart(OSA_ZIPPED_FILE_KEY_NAME, read);
         return new FormDataMultiPart()
-                    .bodyPart(new FormDataBodyPart("origin", Integer.toString(CreateScanRequest.JENKINS_ORIGIN)))
-                    .bodyPart(filePart);
+                .bodyPart(new FormDataBodyPart("origin", Integer.toString(CreateScanRequest.JENKINS_ORIGIN)))
+                .bodyPart(filePart);
 
     }
 
@@ -108,12 +184,12 @@ public class ScanClient implements Closeable {
 
     private void sampleScan(Invocation invocation) throws InterruptedException {
         Boolean scanFinished = false;
-        while (!scanFinished){
+        while (!scanFinished) {
             Response response = invokeRequet(invocation);
             validateResponse(response);
-            if (scanFinished(response)){
+            if (scanFinished(response)) {
                 scanFinished = true;
-            }else {
+            } else {
                 Thread.sleep(5L * 1000);
             }
         }
@@ -122,7 +198,7 @@ public class ScanClient implements Closeable {
     private boolean scanFinished(Response response) {
         GetScanStatusResponse scanStatusResponse = response.readEntity(GetScanStatusResponse.class);
         ScanStatus scanStatus = ScanStatus.fromId(scanStatusResponse.getStatus());
-        switch (scanStatus){
+        switch (scanStatus) {
             case InProgress:
                 return false;
             case Finished:
@@ -166,6 +242,12 @@ public class ScanClient implements Closeable {
         }
     }
 
+    private void validateApacheHttpClientResponse(HttpResponse response, int status, String message, String messageBody) {
+        if (response.getStatusLine().getStatusCode() != status) {
+            throw new WebApplicationException(message + ": " + "status code: " + response.getStatusLine().getStatusCode() + ". reason phrase: " + response.getStatusLine().getReasonPhrase() + ". message body: " + messageBody);
+        }
+    }
+
     private void validateResponse(Response response) {
         int httpStatus = response.getStatus();
         if (httpStatus < 400) return;
@@ -183,7 +265,7 @@ public class ScanClient implements Closeable {
         CxException cxException = response.readEntity(CxException.class);
         if (cxException != null) {
             throw new WebApplicationException(cxException.getMessageCode() + "\n" + cxException.getMessageDetails(), response);
-        }else {
+        } else {
             throw new WebApplicationException(response);
         }
     }

@@ -33,7 +33,7 @@ public class ScanSender {
 
     private URI createScan(FilePath zipFile) throws Exception {
         CreateScanRequest anaReq = new CreateScanRequest(projectId, zipFile);
-        return scanClient.createScan(anaReq);
+        return scanClient.createScanLargeFileWorkaround(anaReq);
     }
 
     private void waitForScanToFinish(URI uri) throws InterruptedException {
