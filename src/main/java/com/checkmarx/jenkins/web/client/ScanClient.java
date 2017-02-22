@@ -121,7 +121,7 @@ public class ScanClient implements Closeable {
         }
         post.addHeader("cookie", cookies.toString());
 
-        //sent scan request
+        //send scan request
         HttpResponse response = apacheClient.execute(post);
 
         //verify scan request
