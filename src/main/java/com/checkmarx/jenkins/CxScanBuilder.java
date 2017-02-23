@@ -147,7 +147,7 @@ public class CxScanBuilder extends Builder {
     public static final String ASYNC_MESSAGE = "CxSAST scan was run in asynchronous mode.\nRefer to the {0} for the scan results\n";
 
     public static final int MINIMUM_TIMEOUT_IN_MINUTES = 1;
-    public static final String REPORTS_FOLDER = "Checkmarx/Reports";
+    public static final String REPORTS_FOLDER = "Checkmarx" + File.separator + "Reports";
 
     private StringBuilder thresholdsError;
 
@@ -920,11 +920,13 @@ public class CxScanBuilder extends Builder {
 
     private CxWSResponseRunID submitScan(final AbstractBuild<?, ?> build, final CxWebService cxWebService, final BuildListener listener) throws IOException {
 
+        FilePath zipFile = null;
+
         try {
             EnvVars env = build.getEnvironment(listener);
             final CliScanArgs cliScanArgs = createCliScanArgs(new byte[]{}, env);
             checkIncrementalScan(build);
-            FilePath zipFile = zipWorkspaceFolder(build, listener);
+            zipFile = zipWorkspaceFolder(build, listener);
             SastScan sastScan = new SastScan(cxWebService, cliScanArgs, new ProjectContract(cxWebService));
             CxWSResponseRunID cxWSResponseRunId = sastScan.scan(getGroupId(), zipFile, isThisBuildIncremental);
             zipFile.delete();
@@ -947,6 +949,21 @@ public class CxScanBuilder extends Builder {
 
         } catch (InterruptedException e) {
             throw new AbortException("Remote operation failed on slave node: " + e.getMessage());
+
+        }  finally {
+            if(zipFile != null) {
+                try {
+                    if (zipFile.exists()) {
+                        if (zipFile.delete()) {
+                            jobConsoleLogger.info("Temporary file deleted");
+                        } else {
+                            jobConsoleLogger.info("Fail to delete temporary file");
+                        }
+                    }
+                } catch (Exception e) {
+                    jobConsoleLogger.error("Fail to delete temporary file", e);
+                }
+            }
         }
     }
 

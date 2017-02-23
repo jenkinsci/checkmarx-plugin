@@ -39,15 +39,16 @@ public class ScanService {
         this.logger = cxPluginLogger;
     }
 
-    public GetOpenSourceSummaryResponse scan(boolean asynchronousScan){
+    public GetOpenSourceSummaryResponse scan(boolean asynchronousScan) {
         GetOpenSourceSummaryResponse scanResults = null;
+        FilePath sourceCodeZip = null;
 
         try {
             if (!validLicense()) {
                 logger.error(NO_LICENSE_ERROR);
                 return scanResults;
             }
-            FilePath sourceCodeZip = zipOpenSourceCode();
+            sourceCodeZip = zipOpenSourceCode();
             if (asynchronousScan) {
                 logger.info(OSA_RUN_SUBMITTED);
                 scanSender.sendAsync(sourceCodeZip);
@@ -68,7 +69,13 @@ public class ScanService {
             exposeZippingLogToJobConsole(zipException);
             logger.error("Open Source Analysis failed: " + zipException.getMessage(), zipException);
         } catch (Exception e) {
-            logger.error("Open Source Analysis failed: "+e.getMessage(), e);
+            logger.error("Open Source Analysis failed: " + e.getMessage(), e);
+        } finally {
+            //delete temp file
+            if(sourceCodeZip != null) {
+                deleteTemporaryFile(sourceCodeZip);
+            }
+
         }
         return scanResults;
     }
@@ -82,7 +89,22 @@ public class ScanService {
         return cxZip.zipSourceCode(combinedFilterPattern);
     }
 
-    private void exposeZippingLogToJobConsole(Zipper.ZipperException zipperException){
+    private void exposeZippingLogToJobConsole(Zipper.ZipperException zipperException) {
         logger.info(zipperException.getZippingDetails().getZippingLog());
     }
+
+    private void deleteTemporaryFile(FilePath file) {
+        try {
+            if (file.exists()) {
+                if (file.delete()) {
+                    logger.info("Temporary file deleted");
+                } else {
+                    logger.info("Fail to delete temporary file");
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Fail to delete temporary file", e);
+        }
+    }
+
 }
