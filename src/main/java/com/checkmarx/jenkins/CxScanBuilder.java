@@ -146,7 +146,7 @@ public class CxScanBuilder extends Builder {
     public static final String ASYNC_MESSAGE = "CxSAST scan was run in asynchronous mode.\nRefer to the {0} for the scan results\n";
 
     public static final int MINIMUM_TIMEOUT_IN_MINUTES = 1;
-    public static final String REPORTS_FOLDER = "Checkmarx\\Reports";
+    public static final String REPORTS_FOLDER = "Checkmarx/Reports";
 
     private StringBuilder thresholdsError;
 
@@ -778,14 +778,14 @@ public class CxScanBuilder extends Builder {
 
     private void copyReportsToWorkspace(AbstractBuild<?, ?> build, File checkmarxBuildDir) {
 
-        String remoteDirPath = build.getWorkspace().getRemote() + "\\" + REPORTS_FOLDER;
+        String remoteDirPath = build.getWorkspace().getRemote() + "/" + REPORTS_FOLDER;
 
         Collection<File> files = FileUtils.listFiles(checkmarxBuildDir, null, true);
         FileInputStream fileInputStream = null;
 
         for (File file : files) {
             try {
-                String remoteFilePath = remoteDirPath + "\\" + file.getName();
+                String remoteFilePath = remoteDirPath + "/" + file.getName();
                 jobConsoleLogger.info("Copying file [" + file.getName() + "] to workspace [" + remoteFilePath + "]");
                 FilePath remoteFile = new FilePath(build.getWorkspace().getChannel(), remoteFilePath);
                 fileInputStream = new FileInputStream(file);
@@ -935,11 +935,13 @@ public class CxScanBuilder extends Builder {
 
     private CxWSResponseRunID submitScan(final AbstractBuild<?, ?> build, final CxWebService cxWebService, final BuildListener listener) throws IOException {
 
+        FilePath zipFile = null;
+
         try {
             EnvVars env = build.getEnvironment(listener);
             final CliScanArgs cliScanArgs = createCliScanArgs(new byte[]{}, env);
             checkIncrementalScan(build);
-            FilePath zipFile = zipWorkspaceFolder(build, listener);
+            zipFile = zipWorkspaceFolder(build, listener);
             SastScan sastScan = new SastScan(cxWebService, cliScanArgs, new ProjectContract(cxWebService));
             CxWSResponseRunID cxWSResponseRunId = sastScan.scan(getGroupId(), zipFile, isThisBuildIncremental);
             zipFile.delete();
@@ -962,6 +964,21 @@ public class CxScanBuilder extends Builder {
 
         } catch (InterruptedException e) {
             throw new AbortException("Remote operation failed on slave node: " + e.getMessage());
+
+        }  finally {
+            if(zipFile != null) {
+                try {
+                    if (zipFile.exists()) {
+                        if (zipFile.delete()) {
+                            jobConsoleLogger.info("Temporary file deleted");
+                        } else {
+                            jobConsoleLogger.info("Fail to delete temporary file");
+                        }
+                    }
+                } catch (Exception e) {
+                    jobConsoleLogger.error("Fail to delete temporary file", e);
+                }
+            }
         }
     }
 

@@ -106,8 +106,8 @@ import java.util.logging.Logger;
 public class Zipper {
 
     private static Logger LOGGER = Logger.getLogger(Zipper.class.getName());
-    private static List<String> zippingLogForJenkinsConsole = new LinkedList<>();
-    private static int numberOfZippedFiles = 0;
+    private List<String> zippingLogForJenkinsConsole = new LinkedList<>();
+    private int numberOfZippedFiles = 0;
 
     /**
      * Scans the base directory, filters the files, and writes the compressed
@@ -260,6 +260,7 @@ public class Zipper {
         ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
         zipOutputStream.setEncoding("UTF8");
 
+        numberOfZippedFiles = 0;
         long compressedSize = 0;
         final double AVERAGE_ZIP_COMPRESSION_RATIO = 4.0;
 

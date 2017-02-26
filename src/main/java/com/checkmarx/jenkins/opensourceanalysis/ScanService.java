@@ -43,6 +43,8 @@ public class ScanService {
 
     public OsaScanResult scan(boolean asynchronousScan) {
         OsaScanResult osaScanResult = new OsaScanResult();
+        FilePath sourceCodeZip = null;
+
         try {
             if (!validLicense()) {
                 logger.error(NO_LICENSE_ERROR);
@@ -50,7 +52,7 @@ public class ScanService {
                 return osaScanResult;
             }
 
-            FilePath sourceCodeZip = zipOpenSourceCode();
+            sourceCodeZip = zipOpenSourceCode();
             if (asynchronousScan) {
                 logger.info(OSA_RUN_SUBMITTED);
                 scanSender.sendAsync(sourceCodeZip);
@@ -64,7 +66,7 @@ public class ScanService {
         } catch (Zipper.MaxZipSizeReached zipSizeReached) {
             exposeZippingLogToJobConsole(zipSizeReached);
             logger.error("Open Source Analysis failed: When zipping file " + zipSizeReached.getCurrentZippedFileName() + ", reached maximum upload size limit of "
-                    + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()) + "\n");
+                    + FileUtils.byteCountToDisplaySize(CxConfig.maxOSAZipSize()) + "\n");
         } catch (Zipper.NoFilesToZip noFilesToZip) {
             exposeZippingLogToJobConsole(noFilesToZip);
             logger.error("Open Source Analysis failed: No files to scan");
@@ -72,7 +74,13 @@ public class ScanService {
             exposeZippingLogToJobConsole(zipException);
             logger.error("Open Source Analysis failed: " + zipException.getMessage(), zipException);
         } catch (Exception e) {
-            logger.error("Open Source Analysis failed: "+e.getMessage(), e);
+            logger.error("Open Source Analysis failed: " + e.getMessage(), e);
+        } finally {
+            //delete temp file
+            if(sourceCodeZip != null) {
+                deleteTemporaryFile(sourceCodeZip);
+            }
+
         }
         return osaScanResult;
     }
@@ -88,6 +96,20 @@ public class ScanService {
 
     private void exposeZippingLogToJobConsole(Zipper.ZipperException zipperException){
         logger.info(zipperException.getZippingDetails().getZippingLog());
+    }
+
+    private void deleteTemporaryFile(FilePath file) {
+        try {
+            if (file.exists()) {
+                if (file.delete()) {
+                    logger.info("Temporary file deleted");
+                } else {
+                    logger.info("Fail to delete temporary file");
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Fail to delete temporary file", e);
+        }
     }
 
 }

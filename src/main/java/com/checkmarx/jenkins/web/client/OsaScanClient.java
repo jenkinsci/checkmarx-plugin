@@ -4,6 +4,20 @@ import com.checkmarx.jenkins.logger.CxPluginLogger;
 import com.checkmarx.jenkins.web.model.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.InputStreamBody;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
@@ -21,6 +35,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +76,66 @@ public class OsaScanClient implements Closeable {
         client = ClientBuilder.newBuilder().register(MultiPartFeature.class).build();
         root = client.target(hostname.trim()).path(ROOT_PATH);
         cookies = login();
+    }
+
+    public CreateScanResponse createScanLargeFileWorkaround(CreateScanRequest request) throws IOException {
+
+        //create httpclient
+        CookieStore cookieStore = new BasicCookieStore();
+        HttpClient apacheClient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
+
+        //create login request
+        HttpPost loginPost = new HttpPost(root.getUri() + AUTHENTICATION_PATH);
+        String json = mapper.writeValueAsString(authenticationRequest);
+        StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
+        loginPost.setEntity(requestEntity);
+
+        //send login request
+        HttpResponse loginResponse = apacheClient.execute(loginPost);
+
+        //validate login response
+        String loginMessageBody = IOUtils.toString(loginResponse.getEntity().getContent());
+        validateApacheHttpClientResponse(loginResponse, 200, "Fail to authenticate", loginMessageBody);
+
+
+        //create OSA scan request
+        HttpPost post = new HttpPost(root.getUri() + ANALYZE_PATH.replace("{projectId}", String.valueOf(request.getProjectId())));
+        InputStreamBody streamBody = new InputStreamBody(request.getZipFile().read(), ContentType.APPLICATION_OCTET_STREAM, OSA_ZIPPED_FILE_KEY_NAME);
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+        builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+        builder.addPart(OSA_ZIPPED_FILE_KEY_NAME, streamBody);
+        HttpEntity entity = builder.build();
+        post.setEntity(entity);
+
+        //set csrf header and cookies
+        for (org.apache.http.cookie.Cookie c : cookieStore.getCookies()) {
+            if (CSRF_COOKIE.equals(c.getName())) {
+                post.addHeader(CSRF_COOKIE, c.getValue());
+            }
+        }
+        Header[] setCookies = loginResponse.getHeaders("Set-Cookie");
+        StringBuilder cookies = new StringBuilder();
+        for (Header h : setCookies) {
+            cookies.append(h.getValue()).append(";");
+        }
+        post.addHeader("cookie", cookies.toString());
+
+        //send scan request
+        HttpResponse response = apacheClient.execute(post);
+
+        //verify scan request
+        String createScanResponseBody = IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset());
+        validateApacheHttpClientResponse(response, 202, "Fail to create OSA scan", createScanResponseBody);
+
+        //extract response as object and return the link
+        CreateScanResponse createScanResponse = mapper.readValue(createScanResponseBody, CreateScanResponse.class);
+        return createScanResponse;
+    }
+
+    private void validateApacheHttpClientResponse(HttpResponse response, int status, String message, String messageBody) {
+        if (response.getStatusLine().getStatusCode() != status) {
+            throw new WebApplicationException(message + ": " + "status code: " + response.getStatusLine().getStatusCode() + ". reason phrase: " + response.getStatusLine().getReasonPhrase() + ". message body: " + messageBody);
+        }
     }
 
 

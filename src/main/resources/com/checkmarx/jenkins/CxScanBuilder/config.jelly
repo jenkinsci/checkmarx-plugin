@@ -110,10 +110,10 @@
 
         <f:optionalBlock title="Enable OSA" inline="true" field="osaEnabled">
             <f:entry/>
-            <f:entry title="Includes" field="includeOpenSourceFolders">
+            <f:entry title="Include/Exclude wildcard patterns" field="includeOpenSourceFolders">
                 <f:textbox/>
             </f:entry>
-            <f:entry title="Excludes" field="excludeOpenSourceFolders">
+            <f:entry title="Exclude folders" field="excludeOpenSourceFolders">
                 <f:textbox/>
             </f:entry>
 
