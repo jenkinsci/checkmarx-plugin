@@ -194,7 +194,7 @@ public class OsaScanClient implements Closeable {
     }
 
     //todo: make wait handler part of scan sender and move waiting logic out of client
-    public void waitForScanToFinish(String scanId) throws InterruptedException {
+    public ScanDetails waitForScanToFinish(String scanId) throws InterruptedException {
         Map<String, NewCookie> cookies = login();
         Invocation invocation = root.path(SCAN_STATUS_PATH).resolveTemplate("scanId", scanId)
                 .request()
@@ -203,24 +203,26 @@ public class OsaScanClient implements Closeable {
                 .cookie(CSRF_COOKIE, cookies.get(CSRF_COOKIE).getValue())
                 .header(CSRF_COOKIE, cookies.get(CSRF_COOKIE).getValue())
                 .buildGet();
-        sampleScan(invocation);
+        return sampleScanAndGetScanDetailsWhenScanSucceed(invocation);
     }
 
-    private void sampleScan(Invocation invocation) throws InterruptedException {
+    private ScanDetails sampleScanAndGetScanDetailsWhenScanSucceed(Invocation invocation) throws InterruptedException {
+        ScanDetails scanStatusResponse = null;
         Boolean scanFinished = false;
         while (!scanFinished){
             Response response = invokeRequest(invocation);
             validateResponse(response, Response.Status.OK, "error occured while waiting for scan to finish");
-            if (scanFinished(response)){
+            scanStatusResponse = response.readEntity(ScanDetails.class);
+            if (isScanFinished(scanStatusResponse)){
                 scanFinished = true;
             }else {
                 Thread.sleep(5L * 1000);
             }
         }
+        return scanStatusResponse;
     }
 
-    private boolean scanFinished(Response response) {
-        ScanDetails scanStatusResponse = response.readEntity(ScanDetails.class);
+    private boolean isScanFinished(ScanDetails scanStatusResponse) {
         ScanStatus scanStatus = ScanStatus.fromId(scanStatusResponse.getState().getId());
         switch (scanStatus){
             case NotStarted:
@@ -230,7 +232,7 @@ public class OsaScanClient implements Closeable {
             case Finished:
                 return true;
             case Failed:
-                throw new WebApplicationException("Scan was unsuccessful");
+                throw new WebApplicationException("Scan was unsuccessful: "+ scanStatusResponse.getState().getFailureReason());
             default:
                 throw new WebApplicationException("Scan Status invalid: " + scanStatus);
         }

@@ -160,7 +160,7 @@ public class SastScanResult {
     }
 
     public void setScanStart(@Nullable String scanStart) {
-        this.scanStart = scanStart;
+        this.scanStart = formatTime(scanStart);
     }
 
     @Nullable
@@ -169,7 +169,7 @@ public class SastScanResult {
     }
 
     public void setScanTime(@Nullable String scanTime) {
-        this.scanTime = scanTime;
+        this.scanTime = formatTime(scanTime);
     }
 
     @Nullable
@@ -198,4 +198,10 @@ public class SastScanResult {
     public void setScanType(@Nullable String scanType) {
         this.scanType = scanType;
     }
+
+    //"Sunday, February 26, 2017 12:17:09 PM" Date to "26/2/17 12:17"
+    private String formatTime(String time) {
+       return time;
+    }
+
 }

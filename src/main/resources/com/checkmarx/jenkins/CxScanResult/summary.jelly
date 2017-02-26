@@ -1476,14 +1476,14 @@
         var osaFullHtmlPath = "tavi/FullHtml/odetttt";
         var osaFullPdfPath = "tavi/FullPdf/odetttt";
 
-        var sastStartDate = "28/06/2016";
-        var sastEndtDate = "28/06/2016";
-        var sastNumFiles = 2507;
-        var sastLoc = 359;
+        var sastStartDate =  verifyVar([${it.sastScanResult.scanStart}]);
+        var sastEndtDate = verifyVar([${it.sastScanResult.scanStart}]);
+        var sastNumFiles = verifyVar([${it.sastScanResult.scanTime}]);
+        var sastLoc = verifyVar([${it.sastScanResult.linesOfCodeScanned}]);
 
-        var osaStartDate = "28/07/2016";
-        var osaEndtDate = "28/07/2016";
-        var osaNumFiles = 3507;
+        var osaStartDate = verifyVar([${it.osaScanResult.osaScanStartTime}]);
+        var osaEndtDate = verifyVar([${it.osaScanResult.osaScanEndTime}]);
+        var osaNumFiles = verifyVar([${it.osaScanResult.osaScanTotalLibraries}]);
 
 
         //---------------------------------------------------------- all other vars ---------------------------------------------------------------

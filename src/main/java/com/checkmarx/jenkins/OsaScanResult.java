@@ -1,6 +1,7 @@
 package com.checkmarx.jenkins;
 
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
+import com.checkmarx.jenkins.web.model.ScanDetails;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -8,6 +9,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * Created by zoharby on 10/01/2017.
  */
 public class OsaScanResult {
+
+    //Osa scan times
+    private String osaScanStartTime;
+    private String osaScanEndTime;
 
     //osa results
     private boolean isOsaReturnedResult;
@@ -19,6 +24,9 @@ public class OsaScanResult {
     private int osaVulnerableAndOutdatedLibs;
     private int osaTotalVulnerabilitiesLibs;
     private int osaNoVulnerabilityLibs;
+
+    private int osaScanTotalLibraries;
+
     private boolean osaEnabled = false;
 
     private String scanId;
@@ -29,26 +37,51 @@ public class OsaScanResult {
     private String mediumCvesList;
     private String lowCvesList;
 
-    public void addOsaResults(GetOpenSourceSummaryResponse osaResults) {
+    public void setOsaScanStartAndEndTimes(ScanDetails scanDetails){
+        this.osaScanStartTime = formatTime(scanDetails.getStartAnalyzeTime());
+        this.osaScanEndTime = formatTime(scanDetails.getEndAnalyzeTime());
+    }
+
+    //Format from "2016-12-19T10:16:06.1196743Z" to "19/12/16 16:06"
+    private String formatTime(String time){
+        String[] timeParts = time.split("T");
+        String[] partsOfTimePart = timeParts[0].split("-");
+        String metricDate = partsOfTimePart[2]+"/"+partsOfTimePart[1]+"/"+partsOfTimePart[0].substring(2);
+        String armyTime = timeParts[1].substring(0,5);
+        return metricDate+" "+armyTime;
+    }
+
+    public void setOsaResults(GetOpenSourceSummaryResponse osaResults) {
         setIsOsaReturnedResult(osaResults != null);
         //osa fields
         if (isOsaReturnedResult) {
             this.openSourceSummaryResponse = osaResults;
             this.setOsaEnabled(true);
-            this.osaHighCount = osaResults.getHighCount();
-            this.osaMediumCount = osaResults.getMediumCount();
-            this.osaLowCount = osaResults.getLowCount();
-            this.osaTotalVulnerabilitiesLibs = osaResults.getHighCount() + osaResults.getMediumCount() + osaResults.getLowCount();
-            this.osaVulnerableAndOutdatedLibs = osaResults.getVulnerableAndOutdated();
-            this.osaNoVulnerabilityLibs = osaResults.getNoKnownVulnerabilities();
+           if(osaResults != null) {
+               this.osaHighCount = osaResults.getHighCount();
+               this.osaMediumCount = osaResults.getMediumCount();
+               this.osaLowCount = osaResults.getLowCount();
+               this.osaTotalVulnerabilitiesLibs = osaResults.getLowVulnerabilityLibraries() + osaResults.getMediumVulnerabilityLibraries() + osaResults.getHighVulnerabilityLibraries();
+               this.osaVulnerableAndOutdatedLibs = osaResults.getVulnerableAndOutdated();
+               this.osaNoVulnerabilityLibs = osaResults.getNoKnownVulnerabilities();
+               this.osaScanTotalLibraries = getOsaTotalVulnerabilitiesLibs() + getOsaNoVulnerabilityLibs();
 
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                this.openSourceSummaryJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(osaResults);
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
+               ObjectMapper mapper = new ObjectMapper();
+               try {
+                   this.openSourceSummaryJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(osaResults);
+               } catch (JsonProcessingException e) {
+                   e.printStackTrace();
+               }
+           }
         }
+    }
+
+    public String getOsaScanStartTime() {
+        return osaScanStartTime;
+    }
+
+    public String getOsaScanEndTime() {
+        return osaScanEndTime;
     }
 
     public int getOsaHighCount() {
@@ -173,5 +206,9 @@ public class OsaScanResult {
 
     public void setLowCvesList(String lowCvesList) {
         this.lowCvesList = lowCvesList;
+    }
+
+    public int getOsaScanTotalLibraries() {
+        return osaScanTotalLibraries;
     }
 }

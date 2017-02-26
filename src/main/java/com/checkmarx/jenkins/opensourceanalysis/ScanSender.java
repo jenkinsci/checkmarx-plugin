@@ -4,6 +4,7 @@ import com.checkmarx.jenkins.web.client.OsaScanClient;
 import com.checkmarx.jenkins.web.model.CreateScanRequest;
 import com.checkmarx.jenkins.web.model.CreateScanResponse;
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
+import com.checkmarx.jenkins.web.model.ScanDetails;
 import hudson.FilePath;
 
 
@@ -28,18 +29,19 @@ public class ScanSender {
     public void sendScanAndSetResults(FilePath sourceCodeZip, OsaScanResult osaScanResult) throws Exception {
         CreateScanResponse createScanResponse = createScan(sourceCodeZip);
         osaScanResult.setScanId(createScanResponse.getScanId());
-        waitForScanToFinish(createScanResponse.getScanId());
+        ScanDetails scanDetails = waitForScanToFinish(createScanResponse.getScanId());
         GetOpenSourceSummaryResponse getOpenSourceSummaryResponse = getOpenSourceSummary(createScanResponse.getScanId());
-        osaScanResult.addOsaResults(getOpenSourceSummaryResponse);
+        osaScanResult.setOsaScanStartAndEndTimes(scanDetails);
+        osaScanResult.setOsaResults(getOpenSourceSummaryResponse);
     }
 
     private CreateScanResponse createScan(FilePath zipFile) throws Exception {
-        CreateScanRequest anaReq = new CreateScanRequest(projectId, zipFile);
-        return osaScanClient.createScan(anaReq);
+        CreateScanRequest scanRequest = new CreateScanRequest(projectId, zipFile);
+        return osaScanClient.createScan(scanRequest);
     }
 
-    private void waitForScanToFinish(String scanId) throws InterruptedException {
-        osaScanClient.waitForScanToFinish(scanId);
+    private ScanDetails waitForScanToFinish(String scanId) throws InterruptedException {
+        return osaScanClient.waitForScanToFinish(scanId);
     }
 
     private GetOpenSourceSummaryResponse getOpenSourceSummary(String scanId) throws Exception {

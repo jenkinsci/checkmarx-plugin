@@ -526,7 +526,7 @@ public class CxScanBuilder extends Builder {
                 // Set scan thresholds for the summery.jelly
                 if (isOsaThresholdEnabled()) {
                     cxScanResult.setOsaThresholds(osaThresholdConfig);
-                }
+            }
 
                 createOsaJsonReports(osaScanResult, checkmarxBuildDir);
 
