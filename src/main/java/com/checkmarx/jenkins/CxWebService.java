@@ -80,7 +80,7 @@ public class CxWebService {
         CxWSResponseDiscovery cxWSResponseDiscovery = cxWSResolverSoap.getWebServiceUrl(CxClientType.JENKINS,
                 WEBSERVICE_API_VERSION);
         if (!cxWSResponseDiscovery.isIsSuccesfull()) {
-            String message = "Failed to resolve Checkmarx webservice url: \n" + cxWSResponseDiscovery.getErrorMessage();
+            String message = "Failed to resolve Checkmarx webservice url: " + cxWSResponseDiscovery.getErrorMessage();
             logger.error(message);
             throw new AbortException(message);
         }

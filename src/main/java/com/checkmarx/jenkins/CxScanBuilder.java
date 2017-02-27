@@ -1392,7 +1392,7 @@ public class CxScanBuilder extends Builder {
                 cxWebService = new CxWebService(serverUrl, STATIC_LOGGER);
             } catch (Exception e) {
                  STATIC_LOGGER.error(e.getMessage(), e);
-                return FormValidation.error("Invalid system URL");
+                return FormValidation.error(e.getMessage());
             }
 
             try {
