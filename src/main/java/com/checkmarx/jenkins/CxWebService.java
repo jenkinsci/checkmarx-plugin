@@ -551,10 +551,9 @@ public class CxWebService {
         return response.isIsOsaEnabled();
     }
 
-    public long getProjectId(ProjectSettings projectSettings) throws AbortException {
+    public long resolveProjectId(String projectName, String groupId) throws AbortException {
         CxWSResponseProjectsDisplayData projects = cxJenkinsWebServiceSoap.getProjectsDisplayData(sessionId);
 
-        final String groupId = projectSettings.getAssociatedGroupID();
         final List<Group> groups = getAssociatedGroups();
         final List<Group> selected = filter(having(on(Group.class).getID(), Matchers.equalTo(groupId)), groups);
 
@@ -574,16 +573,12 @@ public class CxWebService {
         long projectId = 0;
         if (projects != null && projects.isIsSuccesfull()) {
             for (ProjectDisplayData projectDisplayData : projects.getProjectList().getProjectDisplayData()) {
-                if (projectDisplayData.getProjectName().equals(projectSettings.getProjectName())
+                if (projectDisplayData.getProjectName().equalsIgnoreCase(projectName)
                         && projectDisplayData.getGroup().equals(selected.get(0).getGroupName())) {
                     projectId = projectDisplayData.getProjectID();
                     break;
                 }
             }
-        }
-
-        if (projectId == 0) {
-            throw new AbortException("Can't find exsiting project to scan");
         }
 
         return projectId;

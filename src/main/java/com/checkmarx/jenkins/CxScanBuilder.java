@@ -459,13 +459,13 @@ public class CxScanBuilder extends Builder {
 
             jobConsoleLogger.info("Checkmarx server login successful");
 
-            setProjectId(build, listener, cxWebService);
+            projectId = cxWebService.resolveProjectId(build.getEnvironment(listener).expand(projectName), groupId);
             if (needToAvoidDuplicateProjectScans(cxWebService)) {
                 jobConsoleLogger.info("\nAvoid duplicate project scans in queue\n");
                 return true;
             }
 
-            if (projectId == 0 && descriptor.isProhibitProjectCreation()) {
+            if (descriptor.isProhibitProjectCreation() && projectId == 0) {
                 jobConsoleLogger.info("\nCreation of the new project " + projectName + " is not authorized. Please use an existing project.");
                 jobConsoleLogger.info("You can enable the creation of new projects by disabling the \"Deny new Checkmarx projects creation\" checkbox in the Jenkins plugin global settings.\n");
                 build.setResult(Result.FAILURE);
@@ -474,7 +474,7 @@ public class CxScanBuilder extends Builder {
 
             //If there no project under the project name a new project will be created
             cxWSResponseRunID = submitScan(build, cxWebService, listener);
-            setProjectId(build, listener, cxWebService);
+            projectId = cxWSResponseRunID.getProjectID();
 
             boolean shouldRunAsynchronous = scanShouldRunAsynchronous(descriptor);
             if (shouldRunAsynchronous) {
@@ -810,16 +810,6 @@ public class CxScanBuilder extends Builder {
         return cxScanResult;
     }
 
-    private void setProjectId(AbstractBuild<?, ?> build, BuildListener listener, CxWebService cxWebService) throws IOException, InterruptedException {
-        if (projectId == 0) {
-            EnvVars env = build.getEnvironment(listener);
-            ProjectContract projectContract = new ProjectContract(cxWebService);
-            if (!projectContract.newProject(env.expand(getProjectName()), getGroupId())) {
-                projectId = getProjectId(build, listener, cxWebService);
-            }
-        }
-    }
-
     private void logAsyncMessage(String serverUrlToUse) {
         String projectStateUrl = serverUrlToUse + PROJECT_STATE_URL_TEMPLATE.replace("{0}", Long.toString(projectId));
         String projectStateLink = HyperlinkNote.encodeTo(projectStateUrl, "CxSAST Web");
@@ -828,12 +818,6 @@ public class CxScanBuilder extends Builder {
 
     private boolean scanShouldRunAsynchronous(DescriptorImpl descriptor) {
         return !isWaitForResultsEnabled() && !(descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings());
-    }
-
-    private long getProjectId(AbstractBuild<?, ?> build, BuildListener listener, CxWebService cxWebService) throws IOException, InterruptedException {
-        EnvVars env = build.getEnvironment(listener);
-        final CliScanArgs cliScanArgs = createCliScanArgs(new byte[]{}, env);
-        return cxWebService.getProjectId(cliScanArgs.getPrjSettings());
     }
 
     private OsaScanResult analyzeOpenSources(AbstractBuild<?, ?> build, String baseUri, String user, String password, CxWebService webServiceClient, BuildListener listener, boolean shouldRunAsynchronous) throws IOException, InterruptedException {
