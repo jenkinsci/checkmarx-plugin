@@ -3,7 +3,12 @@ package com.checkmarx.jenkins;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
+import java.util.Locale;
 
 /**
  * Created by zoharby on 22/01/2017.
@@ -109,7 +114,7 @@ public class SastScanResult {
         return mediumQueryResultsJson;
     }
 
-    public  void setMediumQueryResultsJson(String mediumQueryResultsJson) {
+    public void setMediumQueryResultsJson(String mediumQueryResultsJson) {
         this.mediumQueryResultsJson = mediumQueryResultsJson;
     }
 
@@ -125,7 +130,7 @@ public class SastScanResult {
         return infoQueryResultsJson;
     }
 
-    public  void setInfoQueryResultsJson(String infoQueryResultsJson) {
+    public void setInfoQueryResultsJson(String infoQueryResultsJson) {
         this.infoQueryResultsJson = infoQueryResultsJson;
     }
 
@@ -201,7 +206,25 @@ public class SastScanResult {
 
     //"Sunday, February 26, 2017 12:17:09 PM" Date to "26/2/17 12:17"
     private String formatTime(String time) {
-       return time;
+
+        String oldPattern = "EEEE, MMMM dd, yyyy hh:mm:ss a";
+        String newPattern = "dd/MM/yy HH:mm";
+        Locale locale = Locale.ENGLISH;
+
+        DateFormat oldDateFormat = new SimpleDateFormat(oldPattern, locale);
+
+        Date date = new Date();
+
+        try {
+            date = oldDateFormat.parse(time);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        String newDate = new SimpleDateFormat(newPattern, locale).format(date);
+
+
+        return newDate;
     }
 
 }
