@@ -2,7 +2,7 @@ package com.checkmarx.jenkins.logger;
 
 
 import hudson.WebAppMain;
-import hudson.model.BuildListener;
+import hudson.model.TaskListener;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -32,7 +32,7 @@ public class CxPluginLogger implements Serializable {
         this.loggingDevice = new JavaLoggingDevice();
     }
 
-    public CxPluginLogger(BuildListener listener) {
+    public CxPluginLogger(TaskListener listener) {
         this.loggingDevice = new ListenerLoggingDevice(listener);
     }
 
@@ -72,9 +72,9 @@ public class CxPluginLogger implements Serializable {
 
     private class ListenerLoggingDevice implements LoggingDevice{
 
-        private BuildListener listener;
+        private TaskListener listener;
 
-        public ListenerLoggingDevice(BuildListener listener) {
+        public ListenerLoggingDevice(TaskListener listener) {
             this.listener = listener;
         }
 

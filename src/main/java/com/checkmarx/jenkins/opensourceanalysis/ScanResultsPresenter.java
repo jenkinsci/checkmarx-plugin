@@ -2,7 +2,7 @@ package com.checkmarx.jenkins.opensourceanalysis;
 
 import com.checkmarx.jenkins.logger.CxPluginLogger;
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
-import hudson.model.BuildListener;
+import hudson.model.TaskListener;
 
 
 /**
@@ -12,7 +12,7 @@ public class ScanResultsPresenter {
 
     private transient CxPluginLogger logger;
 
-    public ScanResultsPresenter(BuildListener listener) {
+    public ScanResultsPresenter(TaskListener listener) {
         this.logger = new CxPluginLogger(listener);
     }
 

@@ -1,13 +1,12 @@
 package com.checkmarx.jenkins.filesystem.zip;
 
-import com.checkmarx.jenkins.logger.CxPluginLogger;
 import com.checkmarx.jenkins.filesystem.zip.callable.OsaZipperCallable;
 import com.checkmarx.jenkins.filesystem.zip.callable.SastZipperCallable;
 import com.checkmarx.jenkins.filesystem.zip.dto.CxZipResult;
+import com.checkmarx.jenkins.logger.CxPluginLogger;
 import hudson.AbortException;
 import hudson.FilePath;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
+import hudson.model.TaskListener;
 import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
@@ -24,23 +23,22 @@ public class CxZip implements Serializable {
 
     private static String CANNOT_FIND_WORKSPACE = "Cannot acquire Jenkins workspace location. It can be due to workspace residing on a disconnected slave.";
 
-    private AbstractBuild<?, ?> build;
+    private FilePath workspace;
 
-    public CxZip(final AbstractBuild<?, ?> build, final BuildListener listener) {
-        this.build = build;
+    public CxZip(FilePath workspace, final TaskListener listener) {
+        this.workspace = workspace;
         this.logger = new CxPluginLogger(listener);
     }
 
     public FilePath ZipWorkspaceFolder(String filterPattern) throws IOException, InterruptedException {
-        FilePath baseDir = build.getWorkspace();
-        if (baseDir == null) {
+        if (workspace == null) {
             throw new AbortException(
                     "Checkmarx Scan Failed: "+CANNOT_FIND_WORKSPACE);
         }
         logger.info("Started zipping the workspace, this may take a while.");
 
         SastZipperCallable sastZipperCallable = new SastZipperCallable(filterPattern);
-        final CxZipResult zipResult = zipFileAndGetResult(baseDir, sastZipperCallable);
+        final CxZipResult zipResult = zipFileAndGetResult(workspace, sastZipperCallable);
 
         logZippingCompletionSummery(zipResult, "Temporary file with zipped and base64 encoded sources", 64);
 
@@ -48,14 +46,13 @@ public class CxZip implements Serializable {
     }
 
     public FilePath zipSourceCode(String filterPattern) throws Exception {
-        FilePath baseDir = build.getWorkspace();
-        if (baseDir == null) {
+        if (workspace == null) {
             throw new Exception(CANNOT_FIND_WORKSPACE);
         }
 
         logger.info("Started zipping files for OSA, this may take a while.");
         OsaZipperCallable osaZipperCallable = new OsaZipperCallable(filterPattern);
-        final CxZipResult zipResult = zipFileAndGetResult(baseDir, osaZipperCallable);
+        final CxZipResult zipResult = zipFileAndGetResult(workspace, osaZipperCallable);
         logZippingCompletionSummery(zipResult, "Temporary zip file",1);
 
         return zipResult.getTempFile();

@@ -2,8 +2,8 @@ package com.checkmarx.jenkins.filesystem;
 
 import com.checkmarx.jenkins.logger.CxPluginLogger;
 import hudson.EnvVars;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,17 +16,17 @@ public class FolderPattern {
 
     private transient CxPluginLogger logger;
 
-    private AbstractBuild<?, ?> build;
-    private BuildListener listener;
+    private Run<?, ?> run;
+    private TaskListener listener;
 
-    public FolderPattern(final AbstractBuild<?, ?> build, final BuildListener listener) {
-        this.build = build;
+    public FolderPattern(final Run<?, ?> run, final TaskListener listener) {
+        this.run = run;
         this.listener = listener;
         this.logger = new CxPluginLogger(listener);
     }
 
     public String generatePattern(String filterPattern, String excludeFolders) throws IOException, InterruptedException {
-        EnvVars env = build.getEnvironment(listener);
+        EnvVars env = run.getEnvironment(listener);
         return env.expand(filterPattern) + "," + processExcludeFolders(env.expand(excludeFolders));
     }
 

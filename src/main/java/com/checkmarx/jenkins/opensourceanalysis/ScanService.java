@@ -33,8 +33,8 @@ public class ScanService {
     public ScanService(ScanServiceTools scanServiceTools) {
         this.dependencyFolder = scanServiceTools.getDependencyFolder();
         this.webServiceClient = scanServiceTools.getWebServiceClient();
-        this.cxZip = new CxZip(scanServiceTools.getBuild(), scanServiceTools.getListener());
-        this.folderPattern = new FolderPattern(scanServiceTools.getBuild(), scanServiceTools.getListener());
+        this.cxZip = new CxZip(scanServiceTools.getWorkspace(), scanServiceTools.getListener());
+        this.folderPattern = new FolderPattern(scanServiceTools.getRun(), scanServiceTools.getListener());
         this.scanResultsPresenter = new ScanResultsPresenter(scanServiceTools.getListener());
         this.scanSender = new ScanSender(scanServiceTools.getOsaScanClient(), scanServiceTools.getProjectId());
         this.librariesAndCVEsExtractor = new LibrariesAndCVEsExtractor(scanServiceTools.getOsaScanClient());

@@ -2,8 +2,9 @@ package com.checkmarx.jenkins.opensourceanalysis;
 
 import com.checkmarx.jenkins.CxWebService;
 import com.checkmarx.jenkins.web.client.OsaScanClient;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
+import hudson.FilePath;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 
 
 /**
@@ -14,9 +15,18 @@ public class ScanServiceTools {
     private DependencyFolder dependencyFolder;
     private CxWebService webServiceClient;
     private OsaScanClient osaScanClient;
-    private AbstractBuild<?, ?> build;
-    private BuildListener listener;
+    private FilePath workspace;
+    private Run<?, ?> run;
+    private TaskListener listener;
     private long projectId;
+
+    public FilePath getWorkspace() {
+        return workspace;
+    }
+
+    public void setWorkspace(FilePath workspace) {
+        this.workspace = workspace;
+    }
 
     public DependencyFolder getDependencyFolder() {
         return dependencyFolder;
@@ -42,19 +52,19 @@ public class ScanServiceTools {
         this.osaScanClient = osaScanClient;
     }
 
-    public AbstractBuild<?, ?> getBuild() {
-        return build;
+    public Run<?, ?> getRun() {
+        return run;
     }
 
-    public void setBuild(AbstractBuild<?, ?> build) {
-        this.build = build;
+    public void setRun(Run<?, ?> run) {
+        this.run = run;
     }
 
-    public BuildListener getListener() {
+    public TaskListener getListener() {
         return listener;
     }
 
-    public void setListener(BuildListener listener) {
+    public void setListener(TaskListener listener) {
         this.listener = listener;
     }
 

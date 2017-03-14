@@ -36,28 +36,8 @@
                     with="serverUrl,username,password,timestamp" />
             </f:optionalBlock>
 
-            <f:entry title="Checkmarx project name" field="projectName"
-                description="Existing projects appear in a completion list when server url is provided (up to 20)">
-
-                <!--The below code is a reimplementation of f:combobox with support of default value -->
-                <j:set var="attrs.field" value="projectName" />
-                <j:set var="attrs.default" value="${descriptor.defaultProjectName}" />
-                <j:set var="value" value="${attrs.value ?: instance[attrs.field] ?: attrs.default}" />
-
-                <st:once>
-                    <script type="text/javascript" src="${request.contextPath}/scripts/utilities.js" />
-                    <script type="text/javascript" src="${request.contextPath}/scripts/combobox.js" />
-                </st:once>
-                <st:adjunct includes="lib.form.combobox.combobox" />
-
-                <f:prepareDatabinding />
-                ${descriptor.calcFillSettings(field,attrs)}
-
-                <m:input xmlns:m="jelly:hudson.util.jelly.MorphTagLibrary" ATTRIBUTES="${attrs}" EXCEPT="field items clazz"
-                    autocomplete="off" class="combobox2 setting-input ${attrs.clazz}${attrs.checkUrl!=null ? ' validated' : ''}"
-                    name="${attrs.name ?: '_.'+attrs.field}" value="${value}" />
-
-
+            <f:entry title="Checkmarx project name" description="Existing projects appear in a completion list when server url is provided (up to 20)">
+                <f:combobox field="projectName" value="${instance.projectName == null?descriptor.defaultProjectName:instance.projectName}"/>
             </f:entry>
 
             <f:entry title="Team" field="groupId">

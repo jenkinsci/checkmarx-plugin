@@ -47,7 +47,7 @@ public class CxConfig {
 	}
 
 	public static String version() {
-		return Jenkins.getInstance().getPluginManager().getPlugin(CxPlugin.class).getVersion();
+		return Jenkins.getInstance().getPluginManager().getPlugin("checkmarx").getVersion();
 	}
 
 	public static int getServerCallRetryNumber() {
