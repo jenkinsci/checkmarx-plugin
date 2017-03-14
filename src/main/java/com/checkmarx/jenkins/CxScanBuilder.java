@@ -8,6 +8,7 @@ import com.checkmarx.jenkins.web.client.OsaScanClient;
 import com.checkmarx.jenkins.web.contracts.ProjectContract;
 import com.checkmarx.jenkins.web.model.AuthenticationRequest;
 import com.checkmarx.ws.CxJenkinsWebService.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.*;
 import hudson.console.HyperlinkNote;
 import hudson.model.*;
@@ -32,16 +33,16 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import javax.xml.ws.WebServiceException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
+
+import org.apache.commons.jelly.JellyContext;
+import org.apache.commons.jelly.XMLOutput;
 
 /**
  * The main entry point for Checkmarx plugin. This class implements the Builder
@@ -526,7 +527,7 @@ public class CxScanBuilder extends Builder {
                 // Set scan thresholds for the summery.jelly
                 if (isOsaThresholdEnabled()) {
                     cxScanResult.setOsaThresholds(osaThresholdConfig);
-            }
+                }
 
                 createOsaJsonReports(osaScanResult, checkmarxBuildDir);
 
@@ -582,8 +583,45 @@ public class CxScanBuilder extends Builder {
 
 
     private void generateHtmlReport(AbstractBuild<?, ?> build, File checkmarxBuildDir, CxScanResult cxScanResult) {
+        //todo: print to log - generating report
+        System.out.println("generating html report");
+        System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "");
 
-        String linkToResults = Jenkins.getInstance().getRootUrl() +  build.getUrl() + "checkmarx/";
+        //Object to JSON string
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+
+//            String cxScanResultJson = mapper.writeValueAsString(cxScanResult);
+            //create output file report.html
+            File reportFile = new File(checkmarxBuildDir, "report.html");
+
+
+            OutputStream output = new FileOutputStream(reportFile);
+            XMLOutput xmlOutput = XMLOutput.createXMLOutput(output);
+
+            //jelly template file to set vars in
+            File jellyTemplate = new File("C:\\cxdev\\checkmarx-plugin\\src\\main\\resources\\com\\checkmarx\\jenkins\\CxScanResult\\summary.jelly");
+
+            //create jelly context for setting variables
+            JellyContext context = new JellyContext();
+            context.setVariable("it", cxScanResult);
+
+            //run script
+            context.runScript(jellyTemplate, xmlOutput);
+            xmlOutput.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        System.out.println("Finished merging template");
+
+
+    }
+
+    private void generateHtmlReportOld(AbstractBuild<?, ?> build, File checkmarxBuildDir, CxScanResult cxScanResult) {
+
+        String linkToResults = Jenkins.getInstance().getRootUrl() + build.getUrl() + "checkmarx/";
         String linkToPDF = Jenkins.getInstance().getRootUrl() + build.getUrl() + "checkmarx/pdfReport";
         String html;
 
@@ -602,19 +640,19 @@ public class CxScanBuilder extends Builder {
                     .replace("#lowResults#", Integer.toString(cxScanResult.getSastScanResult().getLowCount()))
                     .replace("#lowResultsHeight#", formatHtmlResultsHeight(cxScanResult.getSastScanResult().getLowCount(), resultsSum));
 
-            if(generatePdfReport) {
+            if (generatePdfReport) {
                 html = html.replace("#pdfReportUrl#", linkToPDF);
             } else {
                 html = Pattern.compile("\\<!--pdfStart-->.*\\<!--pdfEnd-->", Pattern.DOTALL).matcher(html).replaceAll("");
             }
 
-            if(vulnerabilityThresholdEnabled) {
+            if (vulnerabilityThresholdEnabled) {
 
                 html = formatHtmlThreshold(html, cxScanResult.getSastScanResult().getHighCount(), cxScanResult.getSastThresholdConfig().getHighSeverity(), "<!--highThresholdStart-->", "<!--highThresholdEnd-->", "#highThresholdHeight#", "#highThreshold#");
                 html = formatHtmlThreshold(html, cxScanResult.getSastScanResult().getMediumCount(), cxScanResult.getSastThresholdConfig().getMediumSeverity(), "<!--mediumThresholdStart-->", "<!--mediumThresholdEnd-->", "#mediumThresholdHeight#", "#mediumThreshold#");
                 html = formatHtmlThreshold(html, cxScanResult.getSastScanResult().getLowCount(), cxScanResult.getSastThresholdConfig().getLowSeverity(), "<!--lowThresholdStart-->", "<!--lowThresholdEnd-->", "#lowThresholdHeight#", "#lowThreshold#");
 
-                if(cxScanResult.isThresholdExceeded()) {
+                if (cxScanResult.isThresholdExceeded()) {
                     html = html.replace("#sastThresholdCompliance#", "style=\"visibility: hidden\"");
                     html = html.replace("#sastThresholdExceeded#", "");
                 } else {
@@ -626,7 +664,7 @@ public class CxScanBuilder extends Builder {
                 html = Pattern.compile("\\<!--thresholdStatusStart-->.*\\<!--thresholdStatusEnd-->", Pattern.DOTALL).matcher(html).replaceAll("");
             }
 
-            if(!cxScanResult.getOsaScanResult().isOsaEnabled()) {
+            if (!cxScanResult.getOsaScanResult().isOsaEnabled()) {
                 html = Pattern.compile("\\<!--osaStart-->.*\\<!--osaEnd-->", Pattern.DOTALL).matcher(html).replaceAll("");
             } else {
 
@@ -646,12 +684,12 @@ public class CxScanBuilder extends Builder {
                         .replace("#osaNoVulnerabilityLibs#", Integer.toString(cxScanResult.getOsaScanResult().getOsaNoVulnerabilityLibs()));
 
 
-                if(vulnerabilityThresholdEnabled) {
+                if (vulnerabilityThresholdEnabled) {
                     html = formatHtmlThreshold(html, cxScanResult.getOsaScanResult().getOsaHighCount(), cxScanResult.getOsaThresholdConfig().getHighSeverity(), "<!--osaHighThresholdStart-->", "<!--osaHighThresholdEnd-->", "#osaHighThresholdHeight#", "#osaHighThreshold#");
                     html = formatHtmlThreshold(html, cxScanResult.getOsaScanResult().getOsaMediumCount(), cxScanResult.getOsaThresholdConfig().getMediumSeverity(), "<!--osaMediumThresholdStart-->", "<!--osaMediumThresholdEnd-->", "#osaMediumThresholdHeight#", "#osaMediumThreshold#");
                     html = formatHtmlThreshold(html, cxScanResult.getOsaScanResult().getOsaLowCount(), cxScanResult.getOsaThresholdConfig().getLowSeverity(), "<!--osaLowThresholdStart-->", "<!--osaLowThresholdEnd-->", "#osaLowThresholdHeight#", "#osaLowThreshold#");
 
-                    if(cxScanResult.isOsaThresholdExceeded()) {
+                    if (cxScanResult.isOsaThresholdExceeded()) {
                         html = html.replace("#osaThresholdCompliance#", "style=\"visibility: hidden\"");
                         html = html.replace("#osaThresholdExceeded#", "");
                     } else {
@@ -675,8 +713,8 @@ public class CxScanBuilder extends Builder {
     }
 
     private String formatHtmlResultsHeight(int results, int resultsSum) {
-        if(resultsSum > 0) {
-            return Integer.toString(results*100/resultsSum);
+        if (resultsSum > 0) {
+            return Integer.toString(results * 100 / resultsSum);
         }
         return "0";
     }
@@ -684,10 +722,10 @@ public class CxScanBuilder extends Builder {
 
     private String formatHtmlThreshold(String html, int results, Integer threshold, String startTag, String endTag, String heightReplaceTag, String thresholdTag) {
 
-        if(!vulnerabilityThresholdEnabled || threshold == null || results <= threshold) {
-            return Pattern.compile("\\"+startTag+".*\\"+endTag, Pattern.DOTALL).matcher(html).replaceAll("");
+        if (!vulnerabilityThresholdEnabled || threshold == null || results <= threshold) {
+            return Pattern.compile("\\" + startTag + ".*\\" + endTag, Pattern.DOTALL).matcher(html).replaceAll("");
         } else {
-            return html.replace(heightReplaceTag, Integer.toString(threshold*100/results)).replace(thresholdTag, Integer.toString(threshold));
+            return html.replace(heightReplaceTag, Integer.toString(threshold * 100 / results)).replace(thresholdTag, Integer.toString(threshold));
         }
     }
 
@@ -720,15 +758,14 @@ public class CxScanBuilder extends Builder {
         instanceLogger.info("osa pdf report file [" + osaPdfReport.getAbsolutePath() + "] generated successfully");
     }
 
-    private void writeStringToWorkspaceFile(String dataDescription, File workspaceFile, String dataString){
+    private void writeStringToWorkspaceFile(String dataDescription, File workspaceFile, String dataString) {
         try {
             FileUtils.writeStringToFile(workspaceFile, dataString);
         } catch (IOException e) {
-            instanceLogger.warn("fail to write "+ dataDescription +" to [" + workspaceFile.getAbsolutePath() + "]");
+            instanceLogger.warn("fail to write " + dataDescription + " to [" + workspaceFile.getAbsolutePath() + "]");
         }
-        instanceLogger.info(dataDescription+" file [" + workspaceFile.getAbsolutePath() + "] generated successfully");
+        instanceLogger.info(dataDescription + " file [" + workspaceFile.getAbsolutePath() + "] generated successfully");
     }
-
 
 
     private void printConfiguration(DescriptorImpl descriptor) {
@@ -858,13 +895,13 @@ public class CxScanBuilder extends Builder {
             ScanServiceTools scanServiceTools = initScanServiceTools(scanClient, build, webServiceClient, listener);
             ScanService scanService = new ScanService(scanServiceTools);
             return scanService.scan(shouldRunAsynchronous);
-        }catch (Exception e){
+        } catch (Exception e) {
             //todo
-           throw e;
+            throw e;
         }
     }
 
-    private ScanServiceTools initScanServiceTools(OsaScanClient scanClient, AbstractBuild<?, ?> build, CxWebService webServiceClient, BuildListener listener){
+    private ScanServiceTools initScanServiceTools(OsaScanClient scanClient, AbstractBuild<?, ?> build, CxWebService webServiceClient, BuildListener listener) {
         ScanServiceTools scanServiceTools = new ScanServiceTools();
         scanServiceTools.setOsaScanClient(scanClient);
         DependencyFolder folders = new DependencyFolder(includeOpenSourceFolders, excludeOpenSourceFolders);
@@ -987,8 +1024,8 @@ public class CxScanBuilder extends Builder {
             instanceLogger.info("\nScan job submitted successfully\n");
             return cxWSResponseRunId;
         } catch (Zipper.MaxZipSizeReached e) {
-            throw new AbortException("Checkmarx Scan Failed: When zipping file "+ e.getCurrentZippedFileName()+", reached maximum upload size limit of "
-            + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize())+"\n");
+            throw new AbortException("Checkmarx Scan Failed: When zipping file " + e.getCurrentZippedFileName() + ", reached maximum upload size limit of "
+                    + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()) + "\n");
 
         } catch (Zipper.NoFilesToZip e) {
             throw new AbortException("Checkmarx Scan Failed: No files to scan");
@@ -1409,7 +1446,7 @@ public class CxScanBuilder extends Builder {
 
         // Prepares a this.cxWebService object to be connected and logged in
         /*
-	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
 	     *  shared state to avoid synchronization issues.
 	     */
         private CxWebService prepareLoggedInWebservice(boolean useOwnServerCredentials,
@@ -1456,7 +1493,7 @@ public class CxScanBuilder extends Builder {
         }
 
 	    /*
-	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
 	     *  shared state to avoid synchronization issues.
 	     */
 
@@ -1515,7 +1552,7 @@ public class CxScanBuilder extends Builder {
          * @param timestamp
          * @return list of presets
          */
-	    /*
+        /*
 	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
 	     *  shared state to avoid synchronization issues.
 	     */

@@ -1,17 +1,21 @@
-.cx-title.job-main-title {
-  width: calc(100% - 1em - 48px);
+.cx-icon {
+  margin-left: 1em;
+  margin-right: 1em;
+  padding: 4px;
+  vertical-align: middle;
 }
 .cx-title {
   font-size: 24px;
   font-weight: 500;
   display: inline-block;
   padding: 10px 0;
-  width: calc(100% - 48px);
+  width: calc(100% - 48px - 2em);
   border-bottom: solid 2px #373050;
   color: #373050;
 }
 .summary-section {
-  width: 100%;
+  width: calc(100% - 2em - 4px);
+  margin: auto;
   font-family: 'Roboto', sans-serif;
 }
 .summary-section td {
@@ -34,7 +38,8 @@ td {
   border-color: transparent;
 }
 tr.cxsast,
-tr.cxosa {
+tr.cxosa,
+tr.cxosa-full {
   border-bottom: solid 2px #373050;
 }
 .title-column,
@@ -381,4 +386,13 @@ table.cve-table td.sast-cve-table-high,
 table.cve-table td.sast-cve-table-med,
 table.cve-table td.sast-cve-table-low {
   max-width: 19px;
+}
+table.cve-table.sast-cve-table td:last-child,
+table.cve-table.sast-cve-table th:last-child {
+  padding-right: 20px;
+  text-align: right;
+}
+table.cve-table.osa-cve-table td:last-child,
+table.cve-table.osa-cve-table th:last-child {
+  width: 32%;
 }
