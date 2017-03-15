@@ -41,7 +41,7 @@
             </f:entry>
         </f:advanced>
 
-        <f:optionalBlock title="Deny new Checkmarx projects creation" field="prohibitProjectCreation" />
+        <f:optionalBlock title="Deny new Checkmarx projects creation" inline="true" field="prohibitProjectCreation" />
 
 		<f:optionalBlock title="Hide results" inline="true" field="hideResults" />
 
