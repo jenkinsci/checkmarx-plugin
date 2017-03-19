@@ -27,6 +27,8 @@ import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.jelly.JellyContext;
+import org.apache.commons.jelly.XMLOutput;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,9 +45,6 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.commons.jelly.JellyContext;
-import org.apache.commons.jelly.XMLOutput;
 
 /**
  * The main entry point for Checkmarx plugin. This class implements the Builder
@@ -751,7 +750,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
 
     private void generateHtmlReport(Run<?, ?> run, File checkmarxBuildDir, CxScanResult cxScanResult) {
-    private void generateHtmlReport(AbstractBuild<?, ?> build, File checkmarxBuildDir, CxScanResult cxScanResult) {
         //todo: print to log - generating report
         System.out.println("generating html report");
         System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "");
@@ -788,7 +786,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     }
 
-    private void generateHtmlReportOld(AbstractBuild<?, ?> build, File checkmarxBuildDir, CxScanResult cxScanResult) {
+    private void generateHtmlReportOld(Run<?, ?> run, File checkmarxBuildDir, CxScanResult cxScanResult) {
 
         String linkToResults = Jenkins.getInstance().getRootUrl() + run.getUrl() + "checkmarx/";
         String linkToPDF = Jenkins.getInstance().getRootUrl() + run.getUrl() + "checkmarx/pdfReport";
@@ -899,7 +897,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     private void createOsaJsonReports(OsaScanResult osaScanResult, File checkmarxBuildDir) {
-        instanceLogger.info("retrieving osa json report files");
+        jobConsoleLogger.info("retrieving osa json report files");
         File osaSummeryJsonReport = new File(checkmarxBuildDir, "OSASummery.json");
         writeStringToWorkspaceFile("osa summery json report", osaSummeryJsonReport, osaScanResult.getOpenSourceSummaryJson());
         File osaLibrariesJsonReport = new File(checkmarxBuildDir, "OSALibraries.json");
@@ -930,7 +928,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         try {
             FileUtils.writeStringToFile(workspaceFile, dataString);
         } catch (IOException e) {
-            jobConsoleLogger.warn("fail to write " + dataDescription + " to [" + workspaceFile.getAbsolutePath() + "]");
+            jobConsoleLogger.error("fail to write " + dataDescription + " to [" + workspaceFile.getAbsolutePath() + "]");
         }
         jobConsoleLogger.info(dataDescription + " file [" + workspaceFile.getAbsolutePath() + "] generated successfully");
     }
@@ -1022,7 +1020,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private CxScanResult addScanResultAction(Run<?, ?> run, String serverUrlToUse, boolean shouldRunAsynchronous, File xmlReportFile) {
         CxScanResult cxScanResult = new CxScanResult(run, serverUrlToUse, projectId, shouldRunAsynchronous);
         if (xmlReportFile != null) {
-            SastResultParser sastResultParser = new SastResultParser(instanceLogger, serverUrlToUse);
+            SastResultParser sastResultParser = new SastResultParser(jobConsoleLogger, serverUrlToUse);
             SastScanResult sastScanResult = sastResultParser.readScanXMLReport(xmlReportFile);
             cxScanResult.setSastScanResult(sastScanResult);
         }
@@ -1157,10 +1155,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         } catch (Zipper.MaxZipSizeReached e) {
             throw new AbortException("Checkmarx Scan Failed: When zipping file " + e.getCurrentZippedFileName() + ", reached maximum upload size limit of "
                     + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()) + "\n");
-            exposeZippingLogToJobConsole(e);
-            throw new AbortException("Checkmarx Scan Failed: When zipping file " + e.getCurrentZippedFileName() + ", reached maximum upload size limit of "
-                    + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()) + "\n");
-
         } catch (Zipper.NoFilesToZip e) {
             exposeZippingLogToJobConsole(e);
             throw new AbortException("Checkmarx Scan Failed: No files to scan");
