@@ -1,6 +1,5 @@
 package com.checkmarx.jenkins.web.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -31,8 +30,9 @@ public class CVE {
     @JsonProperty("libraryId")
     String libraryId;//:"36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
 
-    @JsonIgnore
-    Library library;
+    //Added after request
+    @JsonProperty("libraryName")
+    String libraryName;
 
     public String getLibraryId() {
         return libraryId;
@@ -114,11 +114,11 @@ public class CVE {
         this.id = id;
     }
 
-    public Library getLibrary() {
-        return library;
+    public String getLibraryName() {
+        return libraryName;
     }
 
-    public void setLibrary(Library library) {
-        this.library = library;
+    public void setLibraryName(String libraryName) {
+        this.libraryName = libraryName;
     }
 }

@@ -4,7 +4,6 @@ import com.checkmarx.jenkins.logger.CxPluginLogger;
 import hudson.PluginWrapper;
 import hudson.model.Action;
 import hudson.model.Hudson;
-import hudson.model.Run;
 import hudson.util.IOUtils;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
@@ -12,20 +11,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
 import javax.servlet.ServletOutputStream;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-
-import static com.checkmarx.jenkins.CxResultSeverity.*;
 
 /**
  * @author denis
@@ -40,53 +31,20 @@ public class CxScanResult implements Action {
     private final boolean scanRanAsynchronous;
     private String serverUrl;
 
-    private int highCount;
-    private int mediumCount;
-    private int lowCount;
-    private int infoCount;
+    private long scanId;
 
-    private LinkedList<QueryResult> highQueryResultList;
-    private LinkedList<QueryResult> mediumQueryResultList;
-    private LinkedList<QueryResult> lowQueryResultList;
-    private LinkedList<QueryResult> infoQueryResultList;
-
+    //Results
     private OsaScanResult osaScanResult;
-
-    @NotNull
-    private String resultDeepLink;
-    private File pdfReport;
-
-    public static final String PDF_REPORT_NAME = "ScanReport.pdf";
-    @Nullable
-    private String scanStart;
-    @Nullable
-    private String scanTime;
-    @Nullable
-    private String linesOfCodeScanned;
-    @Nullable
-    private String filesScanned;
-    @Nullable
-    private String scanType;
-
-    private boolean resultIsValid;
-    private String errorMessage;
+    private SastScanResult sastScanResult;
 
     //Thresholds
     private boolean thresholdsEnabled = false;
     private boolean osaThresholdsEnabled = false;
+    private ThresholdConfig sastThresholdConfig;
+    private ThresholdConfig osaThresholdConfig;
 
-    @Nullable
-    private Integer highThreshold;
-    @Nullable
-    private Integer mediumThreshold;
-    @Nullable
-    private Integer lowThreshold;
-    @Nullable
-    private Integer osaHighThreshold;
-    @Nullable
-    private Integer osaMediumThreshold;
-    @Nullable
-    private Integer osaLowThreshold;
+    private File pdfReport;
+    public static final String PDF_REPORT_NAME = "ScanReport.pdf";
 
 
     public CxScanResult(Run<?, ?> owner, String serverUrl, long projectId, boolean scanRanAsynchronous) {
@@ -104,17 +62,17 @@ public class CxScanResult implements Action {
 
 
     public void setOsaThresholds(ThresholdConfig thresholdConfig) {
+        this.osaThresholdConfig = thresholdConfig;
         this.setOsaThresholdsEnabled(true);
-        this.setOsaHighThreshold(thresholdConfig.getHighSeverity());
-        this.setOsaMediumThreshold(thresholdConfig.getMediumSeverity());
-        this.setOsaLowThreshold(thresholdConfig.getLowSeverity());
+        //todo erase when legacy code is no longer needed
+        initializeOsaLegacyThresholdVariables(thresholdConfig);
     }
 
     public void setThresholds(ThresholdConfig thresholdConfig) {
+        this.sastThresholdConfig = thresholdConfig;
         this.setThresholdsEnabled(true);
-        this.setHighThreshold(thresholdConfig.getHighSeverity());
-        this.setMediumThreshold(thresholdConfig.getMediumSeverity());
-        this.setLowThreshold(thresholdConfig.getLowSeverity());
+        //todo erase when legacy code is no longer needed
+       initializeSastLegacyThresholdVariables(thresholdConfig);
     }
 
     @Override
@@ -173,58 +131,206 @@ public class CxScanResult implements Action {
         this.osaThresholdsEnabled = osaThresholdsEnabled;
     }
 
+    public ThresholdConfig getSastThresholdConfig() {
+        return sastThresholdConfig;
+    }
+
+    public void setSastThresholdConfig(ThresholdConfig sastThresholdConfig) {
+        this.sastThresholdConfig = sastThresholdConfig;
+    }
+
+    public ThresholdConfig getOsaThresholdConfig() {
+        return osaThresholdConfig;
+    }
+
+    public void setOsaThresholdConfig(ThresholdConfig osaThresholdConfig) {
+        this.osaThresholdConfig = osaThresholdConfig;
+    }
+
+    public boolean isPdfReportReady() {
+        File buildDirectory = owner.getRootDir();
+        pdfReport = new File(buildDirectory, "/checkmarx/" + PDF_REPORT_NAME);
+        return pdfReport.exists();
+    }
+
+    public String getPdfReportUrl() {
+        return "/pdfReport";
+    }
+
+    public void doPdfReport(StaplerRequest req, StaplerResponse rsp) throws IOException {
+        rsp.setContentType("application/pdf");
+        ServletOutputStream outputStream = rsp.getOutputStream();
+        File buildDirectory = owner.getRootDir();
+        File a = new File(buildDirectory, "/checkmarx/" + PDF_REPORT_NAME);
+
+        IOUtils.copy(a, outputStream);
+
+        outputStream.flush();
+        outputStream.close();
+    }
+
+    public void doOsaPdfReport(StaplerRequest req, StaplerResponse rsp) throws IOException {
+
+        rsp.setContentType("application/pdf");
+        ServletOutputStream outputStream = rsp.getOutputStream();
+        File buildDirectory = owner.getRootDir();
+        File a = new File(buildDirectory, "/checkmarx/" + "OSAReport.pdf");
+
+        IOUtils.copy(a, outputStream);
+
+        outputStream.flush();
+        outputStream.close();
+    }
+
+
+    public void doOsaHtmlReport(StaplerRequest req, StaplerResponse rsp) throws IOException {
+        rsp.setContentType("text/html");
+        ServletOutputStream outputStream = rsp.getOutputStream();
+        File buildDirectory = owner.getRootDir();
+        File a = new File(buildDirectory, "/checkmarx/" + "OSAReport.html");
+
+        IOUtils.copy(a, outputStream);
+
+        outputStream.flush();
+        outputStream.close();
+    }
+
+    /**
+     * Gets the test result of the previous build, if it's recorded, or null.
+     */
+
+    public CxScanResult getPreviousResult() {
+        Run<?, ?> b = owner;
+        while (true) {
+            b = b.getPreviousBuild();
+            if (b == null) {
+                return null;
+            }
+            CxScanResult r = b.getAction(CxScanResult.class);
+            if (r != null) {
+                return r;
+            }
+        }
+    }
+
+
+    public long getProjectId() {
+        return projectId;
+    }
+
+    public boolean isScanRanAsynchronous() {
+        return scanRanAsynchronous;
+    }
+
+    public String getProjectStateUrl() {
+        return serverUrl + "/CxWebClient/portal#/projectState/" + projectId + "/Summary";
+    }
+
+    public OsaScanResult getOsaScanResult() {
+        return osaScanResult;
+    }
+
+    public void setOsaScanResult(OsaScanResult osaScanResult) {
+        this.osaScanResult = osaScanResult;
+        //todo erase when legacy code is no longer needed
+        initializeOsaLegacyVariables(osaScanResult);
+    }
+
+    public SastScanResult getSastScanResult() {
+        return sastScanResult;
+    }
+
+    public void setSastScanResult(SastScanResult sastScanResult) {
+        this.sastScanResult = sastScanResult;
+        //todo erase when legacy code is no longer needed
+        initializeSastLegacyVariables(sastScanResult);
+    }
+
+    public void setScanId(long scanId) {
+        this.scanId = scanId;
+    }
+
+    public long getScanId() {
+        return scanId;
+    }
+
+
+    public boolean isThresholdExceeded() {
+        boolean ret = isThresholdExceededByLevel(sastScanResult.getHighCount(), sastThresholdConfig.getHighSeverity());
+        ret |= isThresholdExceededByLevel(sastScanResult.getMediumCount(), sastThresholdConfig.getMediumSeverity());
+        ret |= isThresholdExceededByLevel(sastScanResult.getLowCount(), sastThresholdConfig.getLowSeverity());
+       return ret;
+    }
+
+    public boolean isOsaThresholdExceeded() {
+        boolean ret = isThresholdExceededByLevel(osaScanResult.getOsaHighCount(), osaThresholdConfig.getHighSeverity());
+        ret |= isThresholdExceededByLevel(osaScanResult.getOsaMediumCount(), osaThresholdConfig.getMediumSeverity());
+        ret |= isThresholdExceededByLevel(osaScanResult.getOsaLowCount(), osaThresholdConfig.getLowSeverity());
+       return ret;
+    }
+
+    private boolean isThresholdExceededByLevel(int count, Integer threshold){
+        boolean ret = false;
+        if (threshold != null && count > threshold){
+            ret = true;
+        }
+        return ret;
+    }
+/********************************************************************************************************************/
+/********************************************************************************************************************/
+/********************************************************************************************************************/
+    //todo remove from class once UI is adjusted to use the above DTO's instead of the legacy variables
+    //(when we stop supporting 8.4.1 and down)
+    /*******************Legacy Variables for UI backward computability****************************************/
+
+    private int highCount;
+    private int mediumCount;
+    private int lowCount;
+    private int infoCount;
+
+    private LinkedList<QueryResult> highQueryResultList;
+    private LinkedList<QueryResult> mediumQueryResultList;
+    private LinkedList<QueryResult> lowQueryResultList;
+    private LinkedList<QueryResult> infoQueryResultList;
+
+    @NotNull
+    private String resultDeepLink;
+
     @Nullable
-    public Integer getHighThreshold() {
-        return highThreshold;
-    }
-
-    public void setHighThreshold(@Nullable Integer highThreshold) {
-        this.highThreshold = highThreshold;
-    }
-
+    private String scanStart;
     @Nullable
-    public Integer getMediumThreshold() {
-        return mediumThreshold;
-    }
-
-    public void setMediumThreshold(@Nullable Integer mediumThreshold) {
-        this.mediumThreshold = mediumThreshold;
-    }
-
+    private String scanTime;
     @Nullable
-    public Integer getLowThreshold() {
-        return lowThreshold;
-    }
-
-    public void setLowThreshold(@Nullable Integer lowThreshold) {
-        this.lowThreshold = lowThreshold;
-    }
-
+    private String linesOfCodeScanned;
     @Nullable
-    public Integer getOsaHighThreshold() {
-        return osaHighThreshold;
-    }
-
-    public void setOsaHighThreshold(@Nullable Integer osaHighThreshold) {
-        this.osaHighThreshold = osaHighThreshold;
-    }
-
+    private String filesScanned;
     @Nullable
-    public Integer getOsaMediumThreshold() {
-        return osaMediumThreshold;
-    }
+    private String scanType;
 
-    public void setOsaMediumThreshold(@Nullable Integer osaMediumThreshold) {
-        this.osaMediumThreshold = osaMediumThreshold;
-    }
+    private boolean resultIsValid;
+    private String errorMessage;
 
-    @Nullable
-    public Integer getOsaLowThreshold() {
-        return osaLowThreshold;
-    }
 
-    public void setOsaLowThreshold(@Nullable Integer osaLowThreshold) {
-        this.osaLowThreshold = osaLowThreshold;
+    public void initializeSastLegacyVariables(SastScanResult sastScanResult){
+        this.highCount = sastScanResult.getHighCount();
+        this.mediumCount = sastScanResult.getMediumCount();
+        this.lowCount = sastScanResult.getLowCount();
+        this.infoCount = sastScanResult.getInfoCount();
+
+        this.highQueryResultList = sastScanResult.getHighQueryResultList();
+        this.mediumQueryResultList = sastScanResult.getMediumQueryResultList();
+        this.lowQueryResultList = sastScanResult.getLowQueryResultList();
+        this.infoQueryResultList = sastScanResult.getInfoQueryResultList();
+
+        this.resultDeepLink = sastScanResult.getResultDeepLink();
+        this.scanStart = sastScanResult.getScanStart();
+        this.scanTime = sastScanResult.getScanTime();
+        this.linesOfCodeScanned = sastScanResult.getLinesOfCodeScanned();
+        this.filesScanned = sastScanResult.getFilesScanned();
+        this.scanType = sastScanResult.getScanType();
+
+        this.resultIsValid = sastScanResult.isResultIsValid();
+        this.errorMessage = sastScanResult.getErrorMessage();
     }
 
     public int getHighCount() {
@@ -297,284 +403,125 @@ public class CxScanResult implements Action {
         return infoQueryResultList;
     }
 
-    public boolean isPdfReportReady() {
-        File buildDirectory = owner.getRootDir();
-        pdfReport = new File(buildDirectory, "/checkmarx/" + PDF_REPORT_NAME);
-        return pdfReport.exists();
+    //osa results
+    private int osaHighCount;
+    private int osaMediumCount;
+    private int osaLowCount;
+    private int osaVulnerableAndOutdatedLibs;
+    private int osaNoVulnerabilityLibs;
+    private boolean osaEnabled = false;
+
+    public void initializeOsaLegacyVariables(OsaScanResult osaScanResult){
+        this.osaHighCount = osaScanResult.getOsaHighCount();
+        this.osaMediumCount = osaScanResult.getOsaMediumCount();
+        this.osaLowCount = osaScanResult.getOsaLowCount();
+        this.osaNoVulnerabilityLibs = osaScanResult.getOsaNoVulnerabilityLibs();
+        this.osaVulnerableAndOutdatedLibs = osaScanResult.getOsaVulnerableAndOutdatedLibs();
+        this.osaEnabled = osaScanResult.isOsaEnabled();
     }
 
-    public String getPdfReportUrl() {
-        return "/pdfReport";
+    public int getOsaHighCount() {
+        return osaHighCount;
     }
 
-    public void doPdfReport(StaplerRequest req, StaplerResponse rsp) throws IOException {
-        rsp.setContentType("application/pdf");
-        ServletOutputStream outputStream = rsp.getOutputStream();
-        File buildDirectory = owner.getRootDir();
-        File a = new File(buildDirectory, "/checkmarx/" + PDF_REPORT_NAME);
-
-        IOUtils.copy(a, outputStream);
-
-        outputStream.flush();
-        outputStream.close();
+    public int getOsaMediumCount() {
+        return osaMediumCount;
     }
 
-    public void doOsaPdfReport(StaplerRequest req, StaplerResponse rsp) throws IOException {
-
-        rsp.setContentType("application/pdf");
-        ServletOutputStream outputStream = rsp.getOutputStream();
-        File buildDirectory = owner.getRootDir();
-        File a = new File(buildDirectory, "/checkmarx/" + "OSAReport.pdf");
-
-        IOUtils.copy(a, outputStream);
-
-        outputStream.flush();
-        outputStream.close();
+    public int getOsaLowCount() {
+        return osaLowCount;
     }
 
-
-    public void doOsaHtmlReport(StaplerRequest req, StaplerResponse rsp) throws IOException {
-        rsp.setContentType("text/html");
-        ServletOutputStream outputStream = rsp.getOutputStream();
-        File buildDirectory = owner.getRootDir();
-        File a = new File(buildDirectory, "/checkmarx/" + "OSAReport.html");
-
-        IOUtils.copy(a, outputStream);
-
-        outputStream.flush();
-        outputStream.close();
+    public int getOsaVulnerableAndOutdatedLibs() {
+        return osaVulnerableAndOutdatedLibs;
     }
 
-    /**
-     * Gets the test result of the previous build, if it's recorded, or null.
-     */
-
-    public CxScanResult getPreviousResult() {
-        Run<?, ?> b = owner;
-        while (true) {
-            b = b.getPreviousBuild();
-            if (b == null) {
-                return null;
-            }
-            CxScanResult r = b.getAction(CxScanResult.class);
-            if (r != null) {
-                return r;
-            }
-        }
+    public int getOsaNoVulnerabilityLibs() {
+        return osaNoVulnerabilityLibs;
     }
 
-    public void readScanXMLReport(File scanXMLReport) {
-        ResultsParseHandler handler = new ResultsParseHandler();
-
-        try {
-            SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
-
-            highCount = 0;
-            mediumCount = 0;
-            lowCount = 0;
-            infoCount = 0;
-
-            saxParser.parse(scanXMLReport, handler);
-
-            resultIsValid = true;
-            errorMessage = null;
-
-        } catch (ParserConfigurationException e) {
-            logger.error(e.getMessage(), e);
-        } catch (SAXException | IOException e) {
-            resultIsValid = false;
-            errorMessage = e.getMessage();
-            logger.error(e.getMessage(), e);
-        }
-    }
-
-    public long getProjectId() {
-        return projectId;
-    }
-
-    public boolean isScanRanAsynchronous() {
-        return scanRanAsynchronous;
-    }
-
-    public String getProjectStateUrl() {
-        return serverUrl + "/CxWebClient/portal#/projectState/" + projectId + "/Summary";
-    }
-
-    public OsaScanResult getOsaScanResult() {
-        return osaScanResult;
-    }
-
-    public void setOsaScanResult(OsaScanResult osaScanResult) {
-        this.osaScanResult = osaScanResult;
-    }
-
-    private class ResultsParseHandler extends DefaultHandler {
-
-        @Nullable
-        private String currentQueryName;
-        @Nullable
-        private String currentQuerySeverity;
-        private int currentQueryNumOfResults;
-
-        @Override
-        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-            super.startElement(uri, localName, qName, attributes);
-
-            switch (qName) {
-                case "Result":
-                    @Nullable
-                    String falsePositive = attributes.getValue("FalsePositive");
-                    if (!"True".equals(falsePositive)) {
-                        currentQueryNumOfResults++;
-                        @Nullable
-                        String severity = attributes.getValue("SeverityIndex");
-                        if (severity != null) {
-                            if (severity.equals(HIGH.xmlParseString)) {
-                                highCount++;
-
-                            } else if (severity.equals(MEDIUM.xmlParseString)) {
-                                mediumCount++;
-
-                            } else if (severity.equals(LOW.xmlParseString)) {
-                                lowCount++;
-
-                            } else if (severity.equals(INFO.xmlParseString)) {
-                                infoCount++;
-                            }
-                        } else {
-                            logger.error("\"SeverityIndex\" attribute was not found in element \"Result\" in XML report. "
-                                    + "Make sure you are working with Checkmarx server version 7.1.6 HF3 or above.");
-                        }
-                    }
-                    break;
-                case "Query":
-                    currentQueryName = attributes.getValue("name");
-                    if (currentQueryName == null) {
-                        logger.error("\"name\" attribute was not found in element \"Query\" in XML report");
-                    }
-                    currentQuerySeverity = attributes.getValue("SeverityIndex");
-                    if (currentQuerySeverity == null) {
-                        logger.error("\"SeverityIndex\" attribute was not found in element \"Query\" in XML report. "
-                                + "Make sure you are working with Checkmarx server version 7.1.6 HF3 or above.");
-                    }
-                    currentQueryNumOfResults = 0;
-
-                    break;
-                default:
-                    if ("CxXMLResults".equals(qName)) {
-                        resultDeepLink = constructDeepLink(attributes.getValue("DeepLink"));
-                        scanStart = attributes.getValue("ScanStart");
-                        scanTime = attributes.getValue("ScanTime");
-                        linesOfCodeScanned = attributes.getValue("LinesOfCodeScanned");
-                        filesScanned = attributes.getValue("FilesScanned");
-                        scanType = attributes.getValue("ScanType");
-                    }
-                    break;
-            }
-        }
-
-        @Override
-        public void endElement(String uri, String localName, String qName) throws SAXException {
-            super.endElement(uri, localName, qName);
-            if ("Query".equals(qName)) {
-                QueryResult qr = new QueryResult();
-                qr.setName(currentQueryName);
-                qr.setSeverity(currentQuerySeverity);
-                qr.setCount(currentQueryNumOfResults);
-
-                if (StringUtils.equals(qr.getSeverity(), HIGH.xmlParseString)) {
-                    highQueryResultList.add(qr);
-                } else if (StringUtils.equals(qr.getSeverity(), MEDIUM.xmlParseString)) {
-                    mediumQueryResultList.add(qr);
-                } else if (StringUtils.equals(qr.getSeverity(), LOW.xmlParseString)) {
-                    lowQueryResultList.add(qr);
-                } else if (StringUtils.equals(qr.getSeverity(), INFO.xmlParseString)) {
-                    infoQueryResultList.add(qr);
-                } else {
-                    logger.error("Encountered a result query with unknown severity: " + qr.getSeverity());
-                }
-            }
-        }
-
-        @NotNull
-        private String constructDeepLink(@Nullable String rawDeepLink) {
-            if (rawDeepLink == null) {
-                logger.error("\"DeepLink\" attribute was not found in element \"CxXMLResults\" in XML report");
-                return "";
-            }
-            String token = "CxWebClient";
-            String[] tokens = rawDeepLink.split(token);
-            if (tokens.length < 1) {
-                logger.error("DeepLink value found in XML report is of unexpected format: " + rawDeepLink + "\n"
-                        + "\"Open Code Viewer\" button will not be functional");
-            }
-            return serverUrl + "/" + token + tokens[1];
-        }
+    public boolean isOsaEnabled() {
+        return osaEnabled;
     }
 
 
-    public boolean isThresholdExceeded() {
-        boolean ret = isThresholdExceededByLevel(highCount, highThreshold);
-        ret |= isThresholdExceededByLevel(mediumCount, mediumThreshold);
-        ret |= isThresholdExceededByLevel(lowCount, lowThreshold);
-        return ret;
+    @Nullable
+    private Integer highThreshold;
+    @Nullable
+    private Integer mediumThreshold;
+    @Nullable
+    private Integer lowThreshold;
+    @Nullable
+    private Integer osaHighThreshold;
+    @Nullable
+    private Integer osaMediumThreshold;
+    @Nullable
+    private Integer osaLowThreshold;
+
+    private void initializeSastLegacyThresholdVariables(ThresholdConfig thresholdConfig){
+        this.setHighThreshold(thresholdConfig.getHighSeverity());
+        this.setMediumThreshold(thresholdConfig.getMediumSeverity());
+        this.setLowThreshold(thresholdConfig.getLowSeverity());
     }
 
-    public boolean isOsaThresholdExceeded() {
-        boolean ret = isThresholdExceededByLevel(osaScanResult.getOsaHighCount(), osaHighThreshold);
-        ret |= isThresholdExceededByLevel(osaScanResult.getOsaMediumCount(), osaMediumThreshold);
-        ret |= isThresholdExceededByLevel(osaScanResult.getOsaLowCount(), osaLowThreshold);
-        return ret;
+    private void initializeOsaLegacyThresholdVariables(ThresholdConfig thresholdConfig){
+        this.setOsaHighThreshold(thresholdConfig.getHighSeverity());
+        this.setOsaMediumThreshold(thresholdConfig.getMediumSeverity());
+        this.setOsaLowThreshold(thresholdConfig.getLowSeverity());
     }
 
-    private boolean isThresholdExceededByLevel(int count, Integer threshold) {
-        boolean ret = false;
-        if (threshold != null && count > threshold) {
-            ret = true;
-        }
-        return ret;
+    @Nullable
+    public Integer getHighThreshold() {
+        return highThreshold;
     }
 
-    public static class QueryResult {
-        @Nullable
-        private String name;
-        @Nullable
-        private String severity;
-        private int count;
-
-        @Nullable
-        public String getName() {
-            return name;
-        }
-
-        public void setName(@Nullable String name) {
-            this.name = name;
-        }
-
-        @Nullable
-        public String getSeverity() {
-            return severity;
-        }
-
-        public void setSeverity(@Nullable String severity) {
-            this.severity = severity;
-        }
-
-        public int getCount() {
-            return count;
-        }
-
-        public void setCount(int count) {
-            this.count = count;
-        }
-
-        @NotNull
-        public String getPrettyName() {
-            if (this.name != null) {
-                return this.name.replace('_', ' ');
-            } else {
-                return "";
-            }
-        }
+    public void setHighThreshold(@Nullable Integer highThreshold) {
+        this.highThreshold = highThreshold;
     }
+
+    @Nullable
+    public Integer getMediumThreshold() {
+        return mediumThreshold;
+    }
+
+    public void setMediumThreshold(@Nullable Integer mediumThreshold) {
+        this.mediumThreshold = mediumThreshold;
+    }
+
+    @Nullable
+    public Integer getLowThreshold() {
+        return lowThreshold;
+    }
+
+    public void setLowThreshold(@Nullable Integer lowThreshold) {
+        this.lowThreshold = lowThreshold;
+    }
+
+    @Nullable
+    public Integer getOsaHighThreshold() {
+        return osaHighThreshold;
+    }
+
+    public void setOsaHighThreshold(@Nullable Integer osaHighThreshold) {
+        this.osaHighThreshold = osaHighThreshold;
+    }
+
+    @Nullable
+    public Integer getOsaMediumThreshold() {
+        return osaMediumThreshold;
+    }
+
+    public void setOsaMediumThreshold(@Nullable Integer osaMediumThreshold) {
+        this.osaMediumThreshold = osaMediumThreshold;
+    }
+
+    @Nullable
+    public Integer getOsaLowThreshold() {
+        return osaLowThreshold;
+    }
+
+    public void setOsaLowThreshold(@Nullable Integer osaLowThreshold) {
+        this.osaLowThreshold = osaLowThreshold;
+    }
+
 }

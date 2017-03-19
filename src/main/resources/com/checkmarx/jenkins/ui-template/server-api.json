@@ -1,0 +1,76 @@
+[
+  //•         /osa/scans/{scanId}
+  //o   Returns basic scan details
+  //o   Response body:
+  {
+    "id": "cc5ce4a8-daeb-43d3-a594-83ace96df8e2",
+    "startAnalyzeTime": "2016-12-19T10:16:06.1196743Z",
+    "endAnalyzeTime": "2016-12-19T10:29:06.1196743Z",
+    "origin": "Eclipse",
+    "state": {
+      "id": 1,
+      "name": "Succeeded"
+    }
+  },
+  //•         /osa/scans?projectId=1&sortBy=ScanDate&sortOrder=descending&page=1&itemsPerPage=10
+  //o   Returns the last scans with basic scan details
+  //o   Remarks:   currently only the following query parameters will be supported sortBy=ScanDate&sortOrder=descending (i.e.: we won't support query parameter values like so: sortBy=ScanState&sortOrder=ascending)
+  //  moreover, providing a projectId parameter will also be required (i.e. calling only /osa/scans will return an error)
+  //  page & itemsPerPage can have different values
+  //o   Response body:
+  [
+    {
+      "id": "cc5ce4a8-daeb-43d3-a594-83ace96df8e2",
+      "startAnalyzeTime": "2016-12-19T10:16:06.1196743Z",
+      "endAnalyzeTime": "2016-12-19T10:29:06.1196743Z",
+      "origin": "Eclipse",
+      "state": {
+        "id": 1,
+        "name": "Succeeded"
+      }
+    }
+  ],
+  //•         /osa/libraries?scanId={scanId}&page=1&itemsPerPage=10
+  //o   Returns all the used libraries for the specified scanID
+  //o   Remarks:   In this version, scanId will be required (omitting it will raise an error)
+  //o   Response body:
+  [
+    {
+      "id": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9",
+      "name": "lib-name",
+      "version": "lib-version",
+      "highVulnerabilityCount": 1,
+      "mediumVulnerabilityCount": 1,
+      "lowVulnerabilityCount": 1,
+      "newestVersion": "1.0.0",
+      "newestVersionReleaseDate": "2016-12-19T10:16:19.1206743Z",
+      "numberOfVersionsSinceLastUpdate": 10,
+      "confidenceLevel": 100
+    }
+  ],
+  //
+  //•         /osa/vulnerabilities?scanId={scanId}&page=1&itemsPerPage=10
+  //o   Returns all the vulnerabilities for the specified scanID
+  //o   Remarks:   In this version, scanId will be required (omitting it will raise an error)
+  //o   Response body:
+  [
+    {
+      "id": "0",
+      "cveName": "cve-name-1",
+      "score": 100.0,
+      "severity": {
+        "Id": 1,
+        "name": "High"
+      },
+      "publishDate": "2016-11-07T10:16:06.1206743Z",
+      "url": "http://cv1",
+      "description": null,
+      "recommendations": "recommendation 1",
+      "sourceFileName": "SourceFileName 1",
+      "libraryId": "36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
+    }
+  ]
+
+  //•         /osa/reports?scanId={scanId}
+  //o   Returns the report (pdf, html, json – a.k.a. "summary") for the specified scanId
+]
