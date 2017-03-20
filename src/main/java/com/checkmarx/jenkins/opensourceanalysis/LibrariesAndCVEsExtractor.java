@@ -22,7 +22,7 @@ public class LibrariesAndCVEsExtractor {
         this.osaScanClient = osaScanClient;
     }
 
-    public void getAndSetLibrariesAndCVEs(OsaScanResult osaScanResult){
+    public void getAndSetLibrariesAndCVEsToScanResult(OsaScanResult osaScanResult){
         List<Library> libraryList = osaScanClient.getScanResultLibraries(osaScanResult.getScanId());
         setLibrariesJson(libraryList, osaScanResult);
 
@@ -37,9 +37,8 @@ public class LibrariesAndCVEsExtractor {
 
     private String turnListToJSON(List<?> list){
         try {
-            if(list != null) {
-                return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(list);
-            }
+            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(list);
+
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -100,10 +99,10 @@ public class LibrariesAndCVEsExtractor {
             osaScanResult.setMediumCvesList(mediumJson);
             String lowJson = mapper.writeValueAsString(low);
             osaScanResult.setLowCvesList(lowJson);
-            osaScanResult.setOsaFullCVEsList("[ 'High':"+ highJson +",\n 'Medium':"+ mediumJson +",\n 'Low':"+ lowJson +" ]");
+            osaScanResult.setOsaFullCVEsList("{ 'High':"+ highJson +",\n 'Medium':"+ mediumJson +",\n 'Low':"+ lowJson +" }");
         } catch (JsonProcessingException e) {
             e.printStackTrace();
-            osaScanResult.setOsaFullCVEsList("[]");
+            osaScanResult.setOsaFullCVEsList("{}");
         }
 
     }

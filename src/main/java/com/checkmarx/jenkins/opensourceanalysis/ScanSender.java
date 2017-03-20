@@ -25,13 +25,15 @@ public class ScanSender {
         createScan(sourceCodeZip);
     }
 
-    public void sendScanAndSetResults(FilePath sourceCodeZip, OsaScanResult osaScanResult) throws Exception {
+    public OsaScanResult sendOsaScanAndGetResults(FilePath sourceCodeZip) throws Exception {
+        OsaScanResult osaScanResult = new OsaScanResult();
         CreateScanResponse createScanResponse = createScan(sourceCodeZip);
         osaScanResult.setScanId(createScanResponse.getScanId());
         ScanDetails scanDetails = waitForScanToFinish(createScanResponse.getScanId());
         GetOpenSourceSummaryResponse getOpenSourceSummaryResponse = getOpenSourceSummary(createScanResponse.getScanId());
         osaScanResult.setOsaScanStartAndEndTimes(scanDetails);
         osaScanResult.setOsaResults(getOpenSourceSummaryResponse);
+        return osaScanResult;
     }
 
     private CreateScanResponse createScan(FilePath zipFile) throws Exception {

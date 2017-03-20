@@ -33,6 +33,8 @@ public class CxScanResult implements Action {
 
     private long scanId;
 
+    private boolean osaEnabled;
+
     //Results
     private OsaScanResult osaScanResult;
     private SastScanResult sastScanResult;
@@ -113,6 +115,14 @@ public class CxScanResult implements Action {
         @Nullable
         CxScanBuilder.DescriptorImpl descriptor = (CxScanBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(CxScanBuilder.class);
         return descriptor != null && !descriptor.isHideResults() && !isScanRanAsynchronous();
+    }
+
+    public boolean isOsaEnabled() {
+        return osaEnabled;
+    }
+
+    public void setOsaEnabled(boolean osaEnabled) {
+        this.osaEnabled = osaEnabled;
     }
 
     public boolean isThresholdsEnabled() {
@@ -312,26 +322,26 @@ public class CxScanResult implements Action {
 
 
     public void initializeSastLegacyVariables(SastScanResult sastScanResult){
-        this.highCount = sastScanResult.getHighCount();
-        this.mediumCount = sastScanResult.getMediumCount();
-        this.lowCount = sastScanResult.getLowCount();
-        this.infoCount = sastScanResult.getInfoCount();
+         this.highCount = sastScanResult.getHighCount();
+         this.mediumCount = sastScanResult.getMediumCount();
+         this.lowCount = sastScanResult.getLowCount();
+         this.infoCount = sastScanResult.getInfoCount();
 
-        this.highQueryResultList = sastScanResult.getHighQueryResultList();
-        this.mediumQueryResultList = sastScanResult.getMediumQueryResultList();
-        this.lowQueryResultList = sastScanResult.getLowQueryResultList();
-        this.infoQueryResultList = sastScanResult.getInfoQueryResultList();
+         this.highQueryResultList = sastScanResult.getHighQueryResultList();
+         this.mediumQueryResultList = sastScanResult.getMediumQueryResultList();
+         this.lowQueryResultList = sastScanResult.getLowQueryResultList();
+         this.infoQueryResultList = sastScanResult.getInfoQueryResultList();
 
-        this.resultDeepLink = sastScanResult.getResultDeepLink();
-        this.scanStart = sastScanResult.getScanStart();
-        this.scanTime = sastScanResult.getScanTime();
-        this.linesOfCodeScanned = sastScanResult.getLinesOfCodeScanned();
-        this.filesScanned = sastScanResult.getFilesScanned();
-        this.scanType = sastScanResult.getScanType();
+         this.resultDeepLink = sastScanResult.getResultDeepLink();
+         this.scanStart = sastScanResult.getScanStart();
+         this.scanTime = sastScanResult.getScanTime();
+         this.linesOfCodeScanned = sastScanResult.getLinesOfCodeScanned();
+         this.filesScanned = sastScanResult.getFilesScanned();
+         this.scanType = sastScanResult.getScanType();
 
-        this.resultIsValid = sastScanResult.isResultIsValid();
-        this.errorMessage = sastScanResult.getErrorMessage();
-    }
+         this.resultIsValid = sastScanResult.isResultIsValid();
+         this.errorMessage = sastScanResult.getErrorMessage();
+     }
 
     public int getHighCount() {
         return highCount;
@@ -409,15 +419,15 @@ public class CxScanResult implements Action {
     private int osaLowCount;
     private int osaVulnerableAndOutdatedLibs;
     private int osaNoVulnerabilityLibs;
-    private boolean osaEnabled = false;
 
     public void initializeOsaLegacyVariables(OsaScanResult osaScanResult){
-        this.osaHighCount = osaScanResult.getOsaHighCount();
-        this.osaMediumCount = osaScanResult.getOsaMediumCount();
-        this.osaLowCount = osaScanResult.getOsaLowCount();
-        this.osaNoVulnerabilityLibs = osaScanResult.getOsaNoVulnerabilityLibs();
-        this.osaVulnerableAndOutdatedLibs = osaScanResult.getOsaVulnerableAndOutdatedLibs();
-        this.osaEnabled = osaScanResult.isOsaEnabled();
+        if(osaScanResult != null) {
+            this.osaHighCount = osaScanResult.getOsaHighCount();
+            this.osaMediumCount = osaScanResult.getOsaMediumCount();
+            this.osaLowCount = osaScanResult.getOsaLowCount();
+            this.osaNoVulnerabilityLibs = osaScanResult.getOsaNoVulnerabilityLibs();
+            this.osaVulnerableAndOutdatedLibs = osaScanResult.getOsaVulnerableAndOutdatedLibs();
+        }
     }
 
     public int getOsaHighCount() {
@@ -438,10 +448,6 @@ public class CxScanResult implements Action {
 
     public int getOsaNoVulnerabilityLibs() {
         return osaNoVulnerabilityLibs;
-    }
-
-    public boolean isOsaEnabled() {
-        return osaEnabled;
     }
 
 

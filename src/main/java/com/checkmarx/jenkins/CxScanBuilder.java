@@ -642,7 +642,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 logAsyncMessage(serverUrlToUse);
                 addScanResultAction(run, serverUrlToUse, shouldRunAsynchronous, null);
                 if (osaEnabled) {
-                    analyzeOpenSources(run, workspace, serverUrlToUseNotNull, usernameToUse, passwordToUse, cxWebService, listener, shouldRunAsynchronous);
+                    try {
+                        analyzeOpenSources(run, workspace, serverUrlToUseNotNull, usernameToUse, passwordToUse, cxWebService, listener, shouldRunAsynchronous);
+                    } catch (Exception ignored) {
+                    }
                 }
                 return;
             }
@@ -688,25 +691,35 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             //OSA scan
             boolean isOSAThresholdFailedTheBuild = false;
+
             if (osaEnabled) {
-                OsaScanResult osaScanResult = analyzeOpenSources(run, workspace, serverUrlToUseNotNull, usernameToUse, passwordToUse, cxWebService, listener, shouldRunAsynchronous);
-                cxScanResult.setOsaScanResult(osaScanResult);
-                ThresholdConfig osaThresholdConfig = createOsaThresholdConfig();
 
-                // Set scan thresholds for the summery.jelly
-                if (isOsaThresholdEnabled()) {
-                    cxScanResult.setOsaThresholds(osaThresholdConfig);
+                OsaScanResult osaScanResult = null;
+                osaScanResult = analyzeOpenSources(run, workspace, serverUrlToUseNotNull, usernameToUse, passwordToUse, cxWebService, listener, shouldRunAsynchronous);
+
+                if(osaScanResult != null) {
+                    //todo: when CxResult + ui report legacy code will be removed, stop using this as a flag for osa scan execution success
+                    //(meaning - move the line below up [under the line "if (osaEnabled)"] and start using the existence of osaScanResult object to decide weather to present osa results)
+                    cxScanResult.setOsaEnabled(true);
+
+                    cxScanResult.setOsaScanResult(osaScanResult);
+
+                    ThresholdConfig osaThresholdConfig = createOsaThresholdConfig();
+                    // Set scan thresholds for the summery.jelly
+                    if (isOsaThresholdEnabled()) {
+                        cxScanResult.setOsaThresholds(osaThresholdConfig);
+                    }
+
+                    createOsaJsonReports(osaScanResult, checkmarxBuildDir);
+
+                    //retrieve osa scan results pdf + html
+                    getOSAReports(cxScanResult.getOsaScanResult().getScanId(), serverUrlToUseNotNull, usernameToUse, passwordToUse, checkmarxBuildDir);
+
+
+                    //OSA Threshold
+                    isOSAThresholdFailedTheBuild = cxScanResult.getOsaScanResult() != null && ((descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || isVulnerabilityThresholdEnabled())
+                            && isThresholdCrossed(osaThresholdConfig, cxScanResult.getOsaScanResult().getOsaHighCount(), cxScanResult.getMediumCount(), cxScanResult.getLowCount(), "OSA ");
                 }
-
-                createOsaJsonReports(osaScanResult, checkmarxBuildDir);
-
-                //retrieve osa scan results pdf + html
-                getOSAReports(cxScanResult.getOsaScanResult().getScanId(), serverUrlToUseNotNull, usernameToUse, passwordToUse, checkmarxBuildDir);
-
-
-                //OSA Threshold
-                isOSAThresholdFailedTheBuild = cxScanResult.getOsaScanResult().isOsaReturnedResult() && ((descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || isVulnerabilityThresholdEnabled())
-                        && isThresholdCrossed(osaThresholdConfig, cxScanResult.getOsaScanResult().getOsaHighCount(), cxScanResult.getMediumCount(), cxScanResult.getLowCount(), "OSA ");
             }
 
 
@@ -831,7 +844,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 html = Pattern.compile("\\<!--thresholdStatusStart-->.*\\<!--thresholdStatusEnd-->", Pattern.DOTALL).matcher(html).replaceAll("");
             }
 
-            if (!cxScanResult.getOsaScanResult().isOsaEnabled()) {
+            if (!cxScanResult.isOsaEnabled()) {
                 html = Pattern.compile("\\<!--osaStart-->.*\\<!--osaEnd-->", Pattern.DOTALL).matcher(html).replaceAll("");
             } else {
 
@@ -1038,16 +1051,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return !isWaitForResultsEnabled() && !(descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings());
     }
 
-    private OsaScanResult analyzeOpenSources(Run<?, ?> run, FilePath workspace, String baseUri, String user, String password, CxWebService webServiceClient, TaskListener listener, boolean shouldRunAsynchronous) throws IOException, InterruptedException {
+    private OsaScanResult analyzeOpenSources(Run<?, ?> run, FilePath workspace, String baseUri, String user, String password, CxWebService webServiceClient, TaskListener listener, boolean shouldRunAsynchronous) {
         AuthenticationRequest authReq = new AuthenticationRequest(user, password);
-        try (OsaScanClient scanClient = new OsaScanClient(baseUri, authReq)) {
+            OsaScanClient scanClient = new OsaScanClient(baseUri, authReq);
             ScanServiceTools scanServiceTools = initScanServiceTools(scanClient, run, workspace, webServiceClient, listener);
             ScanService scanService = new ScanService(scanServiceTools);
             return scanService.scan(shouldRunAsynchronous);
-        } catch (Exception e) {
-            //todo
-            throw e;
-        }
     }
 
     private ScanServiceTools initScanServiceTools(OsaScanClient scanClient, Run<?, ?> run, FilePath workspace, CxWebService webServiceClient, TaskListener listener) {

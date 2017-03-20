@@ -15,10 +15,10 @@ import java.util.Locale;
  */
 public class SastScanResult {
 
-    private int highCount;
-    private int mediumCount;
-    private int lowCount;
-    private int infoCount;
+    private Integer highCount;
+    private Integer mediumCount;
+    private Integer lowCount;
+    private Integer infoCount;
 
     private LinkedList<QueryResult> highQueryResultList;
     private LinkedList<QueryResult> mediumQueryResultList;
@@ -54,7 +54,7 @@ public class SastScanResult {
         this.infoQueryResultList = new LinkedList<>();
     }
 
-    public int getHighCount() {
+    public Integer getHighCount() {
         return highCount;
     }
 
@@ -62,7 +62,7 @@ public class SastScanResult {
         this.highCount = highCount;
     }
 
-    public int getMediumCount() {
+    public Integer getMediumCount() {
         return mediumCount;
     }
 
@@ -70,7 +70,7 @@ public class SastScanResult {
         this.mediumCount = mediumCount;
     }
 
-    public int getLowCount() {
+    public Integer getLowCount() {
         return lowCount;
     }
 
@@ -78,7 +78,7 @@ public class SastScanResult {
         this.lowCount = lowCount;
     }
 
-    public int getInfoCount() {
+    public Integer getInfoCount() {
         return infoCount;
     }
 

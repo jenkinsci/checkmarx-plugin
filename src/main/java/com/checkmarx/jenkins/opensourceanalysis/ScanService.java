@@ -42,14 +42,13 @@ public class ScanService {
     }
 
     public OsaScanResult scan(boolean asynchronousScan) {
-        OsaScanResult osaScanResult = new OsaScanResult();
+        OsaScanResult osaScanResult;
         FilePath sourceCodeZip = null;
 
         try {
             if (!validLicense()) {
                 logger.error(NO_LICENSE_ERROR);
-                osaScanResult.setIsOsaReturnedResult(false);
-                return osaScanResult;
+                return null;
             }
 
             sourceCodeZip = zipOpenSourceCode();
@@ -59,30 +58,32 @@ public class ScanService {
                 return null;
             } else {
                 logger.info(OSA_RUN_STARTED);
-                scanSender.sendScanAndSetResults(sourceCodeZip, osaScanResult);
+                osaScanResult = scanSender.sendOsaScanAndGetResults(sourceCodeZip);
                 logger.info(OSA_RUN_ENDED);
                 scanResultsPresenter.printResultsToOutput(osaScanResult.getOpenSourceSummaryResponse());
             }
         } catch (Zipper.MaxZipSizeReached zipSizeReached) {
             exposeZippingLogToJobConsole(zipSizeReached);
             logger.error("Open Source Analysis failed: When zipping file " + zipSizeReached.getCurrentZippedFileName() + ", reached maximum upload size limit of "
-                    + FileUtils.byteCountToDisplaySize(CxConfig.maxOSAZipSize()) + "\n");
+                                                                    + FileUtils.byteCountToDisplaySize(CxConfig.maxOSAZipSize()) + "\n");
+            return null;
         } catch (Zipper.NoFilesToZip noFilesToZip) {
             exposeZippingLogToJobConsole(noFilesToZip);
             logger.error("Open Source Analysis failed: No files to scan");
+            return null;
         } catch (Zipper.ZipperException zipException) {
             exposeZippingLogToJobConsole(zipException);
             logger.error("Open Source Analysis failed: " + zipException.getMessage(), zipException);
+            return null;
         } catch (Exception e) {
             logger.error("Open Source Analysis failed: " + e.getMessage(), e);
+            return null;
         } finally {
-            //delete temp file
             if(sourceCodeZip != null) {
                 deleteTemporaryFile(sourceCodeZip);
             }
-
         }
-        librariesAndCVEsExtractor.getAndSetLibrariesAndCVEs(osaScanResult);
+        librariesAndCVEsExtractor.getAndSetLibrariesAndCVEsToScanResult(osaScanResult);
         return osaScanResult;
     }
 
