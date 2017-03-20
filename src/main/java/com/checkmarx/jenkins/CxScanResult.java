@@ -76,6 +76,14 @@ public class CxScanResult implements Action {
        initializeSastLegacyThresholdVariables(thresholdConfig);
     }
 
+    public String getLargeIconFileName() {
+        if (isShowResults()) {
+            return getIconPath() + "CxIcon48x48.png";
+        } else {
+            return null;
+        }
+    }
+
     @Override
     public String getIconFileName() {
         if (isShowResults()) {
@@ -225,6 +233,11 @@ public class CxScanResult implements Action {
 
     public String getProjectStateUrl() {
         return serverUrl + "/CxWebClient/portal#/projectState/" + projectId + "/Summary";
+    }
+
+//    http://localhost/CxWebClient/ViewerMain.aspx?scanid=1030692&projectid=40565
+    public String getCodeViewerUrl() {
+        return serverUrl + "/CxWebClient/ViewerMain.aspx?scanid=" + scanId + "&projectid=" + projectId;
     }
 
     public OsaScanResult getOsaScanResult() {
