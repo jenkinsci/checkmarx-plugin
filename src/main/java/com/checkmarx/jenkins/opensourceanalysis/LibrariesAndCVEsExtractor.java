@@ -93,13 +93,13 @@ public class LibrariesAndCVEsExtractor {
         }
 
         try {
-            String highJson = mapper.writeValueAsString(high);
+            String highJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(high);
             osaScanResult.setHighCvesList(highJson);
-            String mediumJson = mapper.writeValueAsString(medium);
+            String mediumJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(medium);
             osaScanResult.setMediumCvesList(mediumJson);
-            String lowJson = mapper.writeValueAsString(low);
+            String lowJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(low);
             osaScanResult.setLowCvesList(lowJson);
-            osaScanResult.setOsaFullCVEsList("{ 'High':"+ highJson +",\n 'Medium':"+ mediumJson +",\n 'Low':"+ lowJson +" }");
+            osaScanResult.setOsaFullCVEsList("{ \"High\":"+ highJson +",\n \"Medium\":"+ mediumJson +",\n \"Low\":"+ lowJson +" }");
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             osaScanResult.setOsaFullCVEsList("{}");
