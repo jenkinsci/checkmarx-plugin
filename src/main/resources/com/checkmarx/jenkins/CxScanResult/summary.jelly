@@ -1414,11 +1414,10 @@
         var osaLowCveList = verifyVar([${it.osaScanResult.lowCvesList}]);
 
         //-------------------------- full reports vars --------------------------------------
-        //todo: apply real values
         var sastPdfPath = '${app.rootUrl}${it.owner.url}${it.urlName}${it.pdfReportUrl}';
         var sastHtmlPath = '${app.rootUrl}${it.owner.url}${it.urlName}';
         //    http://localhost/CxWebClient/ViewerMain.aspx?scanid=1030692&amp;projectid=40565
-        var sastCodeViewerPath = "${it.codeViewerUrl}?scanid=${it.scanId}&amp;projectid=${it.projectId}"; //todo
+        var sastCodeViewerPath = "${it.codeViewerUrl}?scanid=${it.scanId}&amp;projectid=${it.projectId}";
 
         var osaHtmlPath = '${app.rootUrl}${it.owner.url}${it.urlName}' + "/osaHtmlReport";
         var osaPdfPath = '${app.rootUrl}${it.owner.url}${it.urlName}' + "/osaPdfReport";
