@@ -15,19 +15,16 @@ public class OsaScanResult {
     private String osaScanEndTime;
 
     //osa results
-    private boolean isOsaReturnedResult;
     private GetOpenSourceSummaryResponse openSourceSummaryResponse;
     private String openSourceSummaryJson;
-    private int osaHighCount;
-    private int osaMediumCount;
-    private int osaLowCount;
-    private int osaVulnerableAndOutdatedLibs;
-    private int osaTotalVulnerabilitiesLibs;
-    private int osaNoVulnerabilityLibs;
+    private Integer osaHighCount;
+    private Integer osaMediumCount;
+    private Integer osaLowCount;
+    private Integer osaVulnerableAndOutdatedLibs;
+    private Integer osaTotalVulnerabilitiesLibs;
+    private Integer osaNoVulnerabilityLibs;
 
-    private int osaScanTotalLibraries;
-
-    private boolean osaEnabled = false;
+    private Integer osaScanTotalLibraries;
 
     private String scanId;
 
@@ -52,28 +49,23 @@ public class OsaScanResult {
     }
 
     public void setOsaResults(GetOpenSourceSummaryResponse osaResults) {
-        setIsOsaReturnedResult(osaResults != null);
-        //osa fields
-        if (isOsaReturnedResult) {
-            this.openSourceSummaryResponse = osaResults;
-            this.setOsaEnabled(true);
-           if(osaResults != null) {
-               this.osaHighCount = osaResults.getHighCount();
-               this.osaMediumCount = osaResults.getMediumCount();
-               this.osaLowCount = osaResults.getLowCount();
-               this.osaTotalVulnerabilitiesLibs = osaResults.getLowVulnerabilityLibraries() + osaResults.getMediumVulnerabilityLibraries() + osaResults.getHighVulnerabilityLibraries();
-               this.osaVulnerableAndOutdatedLibs = osaResults.getVulnerableAndOutdated();
-               this.osaNoVulnerabilityLibs = osaResults.getNoKnownVulnerabilities();
-               this.osaScanTotalLibraries = getOsaTotalVulnerabilitiesLibs() + getOsaNoVulnerabilityLibs();
+       if(osaResults != null) {
+           this.openSourceSummaryResponse = osaResults;
+           this.osaHighCount = osaResults.getHighCount();
+           this.osaMediumCount = osaResults.getMediumCount();
+           this.osaLowCount = osaResults.getLowCount();
+           this.osaTotalVulnerabilitiesLibs = osaResults.getLowVulnerabilityLibraries() + osaResults.getMediumVulnerabilityLibraries() + osaResults.getHighVulnerabilityLibraries();
+           this.osaVulnerableAndOutdatedLibs = osaResults.getVulnerableAndOutdated();
+           this.osaNoVulnerabilityLibs = osaResults.getNoKnownVulnerabilities();
+           this.osaScanTotalLibraries = getOsaTotalVulnerabilitiesLibs() + getOsaNoVulnerabilityLibs();
 
-               ObjectMapper mapper = new ObjectMapper();
-               try {
-                   this.openSourceSummaryJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(osaResults);
-               } catch (JsonProcessingException e) {
-                   e.printStackTrace();
-               }
+           ObjectMapper mapper = new ObjectMapper();
+           try {
+               this.openSourceSummaryJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(osaResults);
+           } catch (JsonProcessingException e) {
+               e.printStackTrace();
            }
-        }
+       }
     }
 
     public String getOsaScanStartTime() {
@@ -122,22 +114,6 @@ public class OsaScanResult {
 
     public void setOsaNoVulnerabilityLibs(int osaNoVulnerabilityLibs) {
         this.osaNoVulnerabilityLibs = osaNoVulnerabilityLibs;
-    }
-
-    public boolean isOsaReturnedResult() {
-        return isOsaReturnedResult;
-    }
-
-    public void setIsOsaReturnedResult(boolean osaReturnedResult) {
-        isOsaReturnedResult = osaReturnedResult;
-    }
-
-    public boolean isOsaEnabled() {
-        return osaEnabled;
-    }
-
-    public void setOsaEnabled(boolean osaEnabled) {
-        this.osaEnabled = osaEnabled;
     }
 
     public int getOsaTotalVulnerabilitiesLibs() {
@@ -208,7 +184,7 @@ public class OsaScanResult {
         this.lowCvesList = lowCvesList;
     }
 
-    public int getOsaScanTotalLibraries() {
+    public Integer getOsaScanTotalLibraries() {
         return osaScanTotalLibraries;
     }
 }

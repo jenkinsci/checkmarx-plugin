@@ -1,12 +1,12 @@
 package com.checkmarx.jenkins;
 
+import com.checkmarx.jenkins.logger.CxPluginLogger;
 import hudson.PluginWrapper;
-import hudson.model.AbstractBuild;
 import hudson.model.Action;
 import hudson.model.Hudson;
+import hudson.model.Run;
 import hudson.util.IOUtils;
 import jenkins.model.Jenkins;
-import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.StaplerRequest;
@@ -24,14 +24,16 @@ import java.util.List;
  */
 public class CxScanResult implements Action {
 
-    private final transient Logger logger; // NOSONAR
+    private transient CxPluginLogger logger = new CxPluginLogger();
 
-    public final AbstractBuild<?, ?> owner;
+    public final Run<?, ?> owner;
     private final long projectId;
     private final boolean scanRanAsynchronous;
     private String serverUrl;
 
     private long scanId;
+
+    private boolean osaEnabled;
 
     //Results
     private OsaScanResult osaScanResult;
@@ -47,10 +49,9 @@ public class CxScanResult implements Action {
     public static final String PDF_REPORT_NAME = "ScanReport.pdf";
 
 
-    public CxScanResult(final AbstractBuild owner, final String loggerSuffix, String serverUrl, long projectId, boolean scanRanAsynchronous) {
+    public CxScanResult(Run<?, ?> owner, String serverUrl, long projectId, boolean scanRanAsynchronous) {
         this.projectId = projectId;
         this.scanRanAsynchronous = scanRanAsynchronous;
-        logger = CxLogUtils.loggerWithSuffix(getClass(), loggerSuffix);
         this.owner = owner;
         this.serverUrl = serverUrl;
         this.resultIsValid = true;
@@ -122,6 +123,14 @@ public class CxScanResult implements Action {
         @Nullable
         CxScanBuilder.DescriptorImpl descriptor = (CxScanBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(CxScanBuilder.class);
         return descriptor != null && !descriptor.isHideResults() && !isScanRanAsynchronous();
+    }
+
+    public boolean isOsaEnabled() {
+        return osaEnabled;
+    }
+
+    public void setOsaEnabled(boolean osaEnabled) {
+        this.osaEnabled = osaEnabled;
     }
 
     public boolean isThresholdsEnabled() {
@@ -209,7 +218,7 @@ public class CxScanResult implements Action {
      */
 
     public CxScanResult getPreviousResult() {
-        AbstractBuild<?, ?> b = owner;
+        Run<?, ?> b = owner;
         while (true) {
             b = b.getPreviousBuild();
             if (b == null) {
@@ -326,26 +335,26 @@ public class CxScanResult implements Action {
 
 
     public void initializeSastLegacyVariables(SastScanResult sastScanResult){
-        this.highCount = sastScanResult.getHighCount();
-        this.mediumCount = sastScanResult.getMediumCount();
-        this.lowCount = sastScanResult.getLowCount();
-        this.infoCount = sastScanResult.getInfoCount();
+         this.highCount = sastScanResult.getHighCount();
+         this.mediumCount = sastScanResult.getMediumCount();
+         this.lowCount = sastScanResult.getLowCount();
+         this.infoCount = sastScanResult.getInfoCount();
 
-        this.highQueryResultList = sastScanResult.getHighQueryResultList();
-        this.mediumQueryResultList = sastScanResult.getMediumQueryResultList();
-        this.lowQueryResultList = sastScanResult.getLowQueryResultList();
-        this.infoQueryResultList = sastScanResult.getInfoQueryResultList();
+         this.highQueryResultList = sastScanResult.getHighQueryResultList();
+         this.mediumQueryResultList = sastScanResult.getMediumQueryResultList();
+         this.lowQueryResultList = sastScanResult.getLowQueryResultList();
+         this.infoQueryResultList = sastScanResult.getInfoQueryResultList();
 
-        this.resultDeepLink = sastScanResult.getResultDeepLink();
-        this.scanStart = sastScanResult.getScanStart();
-        this.scanTime = sastScanResult.getScanTime();
-        this.linesOfCodeScanned = sastScanResult.getLinesOfCodeScanned();
-        this.filesScanned = sastScanResult.getFilesScanned();
-        this.scanType = sastScanResult.getScanType();
+         this.resultDeepLink = sastScanResult.getResultDeepLink();
+         this.scanStart = sastScanResult.getScanStart();
+         this.scanTime = sastScanResult.getScanTime();
+         this.linesOfCodeScanned = sastScanResult.getLinesOfCodeScanned();
+         this.filesScanned = sastScanResult.getFilesScanned();
+         this.scanType = sastScanResult.getScanType();
 
-        this.resultIsValid = sastScanResult.isResultIsValid();
-        this.errorMessage = sastScanResult.getErrorMessage();
-    }
+         this.resultIsValid = sastScanResult.isResultIsValid();
+         this.errorMessage = sastScanResult.getErrorMessage();
+     }
 
     public int getHighCount() {
         return highCount;
@@ -423,15 +432,15 @@ public class CxScanResult implements Action {
     private int osaLowCount;
     private int osaVulnerableAndOutdatedLibs;
     private int osaNoVulnerabilityLibs;
-    private boolean osaEnabled = false;
 
     public void initializeOsaLegacyVariables(OsaScanResult osaScanResult){
-        this.osaHighCount = osaScanResult.getOsaHighCount();
-        this.osaMediumCount = osaScanResult.getOsaMediumCount();
-        this.osaLowCount = osaScanResult.getOsaLowCount();
-        this.osaNoVulnerabilityLibs = osaScanResult.getOsaNoVulnerabilityLibs();
-        this.osaVulnerableAndOutdatedLibs = osaScanResult.getOsaVulnerableAndOutdatedLibs();
-        this.osaEnabled = osaScanResult.isOsaEnabled();
+        if(osaScanResult != null) {
+            this.osaHighCount = osaScanResult.getOsaHighCount();
+            this.osaMediumCount = osaScanResult.getOsaMediumCount();
+            this.osaLowCount = osaScanResult.getOsaLowCount();
+            this.osaNoVulnerabilityLibs = osaScanResult.getOsaNoVulnerabilityLibs();
+            this.osaVulnerableAndOutdatedLibs = osaScanResult.getOsaVulnerableAndOutdatedLibs();
+        }
     }
 
     public int getOsaHighCount() {
@@ -452,10 +461,6 @@ public class CxScanResult implements Action {
 
     public int getOsaNoVulnerabilityLibs() {
         return osaNoVulnerabilityLibs;
-    }
-
-    public boolean isOsaEnabled() {
-        return osaEnabled;
     }
 
 

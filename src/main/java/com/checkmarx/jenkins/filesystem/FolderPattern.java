@@ -1,10 +1,10 @@
 package com.checkmarx.jenkins.filesystem;
 
+import com.checkmarx.jenkins.logger.CxPluginLogger;
 import hudson.EnvVars;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -14,18 +14,19 @@ import java.io.IOException;
  */
 public class FolderPattern {
 
-    private Logger logger;
-    private AbstractBuild<?, ?> build;
-    private BuildListener listener;
+    private transient CxPluginLogger logger;
 
-    public FolderPattern(Logger logger, final AbstractBuild<?, ?> build, final BuildListener listener) {
-        this.logger = logger;
-        this.build = build;
+    private Run<?, ?> run;
+    private TaskListener listener;
+
+    public FolderPattern(final Run<?, ?> run, final TaskListener listener) {
+        this.run = run;
         this.listener = listener;
+        this.logger = new CxPluginLogger(listener);
     }
 
     public String generatePattern(String filterPattern, String excludeFolders) throws IOException, InterruptedException {
-        EnvVars env = build.getEnvironment(listener);
+        EnvVars env = run.getEnvironment(listener);
         return env.expand(filterPattern) + "," + processExcludeFolders(env.expand(excludeFolders));
     }
 
@@ -44,7 +45,7 @@ public class FolderPattern {
                 result.append("/**/*, ");
             }
         }
-        logger.debug("Exclude folders converted to: " + result.toString());
+        logger.info("Exclude folders converted to: " + result.toString());
         return result.toString();
     }
 }

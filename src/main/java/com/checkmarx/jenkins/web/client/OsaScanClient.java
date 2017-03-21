@@ -1,9 +1,23 @@
 package com.checkmarx.jenkins.web.client;
 
+import com.checkmarx.jenkins.logger.CxPluginLogger;
 import com.checkmarx.jenkins.web.model.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.log4j.Logger;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.InputStreamBody;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
@@ -21,6 +35,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +44,8 @@ import java.util.Map;
  * Created by zoharby on 09/01/2017.
  */
 public class OsaScanClient implements Closeable {
+
+    private transient CxPluginLogger logger = new CxPluginLogger();
 
     private static final String ROOT_PATH = "CxRestAPI/";
     private static final String AUTHENTICATION_PATH = "auth/login";
@@ -46,32 +63,88 @@ public class OsaScanClient implements Closeable {
     private static final String OSA_ZIPPED_FILE_KEY_NAME = "OSAZippedSourceCode";
 
     private static final int ITEMS_PER_PAGE = 10;
-
     private AuthenticationRequest authenticationRequest;
     private Client client;
     private WebTarget root;
-    private transient Logger logger;
 
     private ObjectMapper mapper = new ObjectMapper();
 
     Map<String, NewCookie> cookies;
 
-    public OsaScanClient(String hostname, AuthenticationRequest authenticationRequest, Logger logger) {
+    public OsaScanClient(String hostname, AuthenticationRequest authenticationRequest) {
         this.authenticationRequest = authenticationRequest;
         client = ClientBuilder.newBuilder().register(MultiPartFeature.class).build();
         root = client.target(hostname.trim()).path(ROOT_PATH);
-        this.logger = logger;
         cookies = login();
+    }
+
+    public CreateScanResponse createScanLargeFileWorkaround(CreateScanRequest request) throws IOException {
+
+        //create httpclient
+        CookieStore cookieStore = new BasicCookieStore();
+        HttpClient apacheClient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
+
+        //create login request
+        HttpPost loginPost = new HttpPost(root.getUri() + AUTHENTICATION_PATH);
+        String json = mapper.writeValueAsString(authenticationRequest);
+        StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
+        loginPost.setEntity(requestEntity);
+
+        //send login request
+        HttpResponse loginResponse = apacheClient.execute(loginPost);
+
+        //validate login response
+        String loginMessageBody = IOUtils.toString(loginResponse.getEntity().getContent());
+        validateApacheHttpClientResponse(loginResponse, 200, "Fail to authenticate", loginMessageBody);
+
+
+        //create OSA scan request
+        HttpPost post = new HttpPost(root.getUri() + ANALYZE_PATH.replace("{projectId}", String.valueOf(request.getProjectId())));
+        InputStreamBody streamBody = new InputStreamBody(request.getZipFile().read(), ContentType.APPLICATION_OCTET_STREAM, OSA_ZIPPED_FILE_KEY_NAME);
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+        builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+        builder.addPart(OSA_ZIPPED_FILE_KEY_NAME, streamBody);
+        HttpEntity entity = builder.build();
+        post.setEntity(entity);
+
+        //set csrf header and cookies
+        for (org.apache.http.cookie.Cookie c : cookieStore.getCookies()) {
+            if (CSRF_COOKIE.equals(c.getName())) {
+                post.addHeader(CSRF_COOKIE, c.getValue());
+            }
+        }
+        Header[] setCookies = loginResponse.getHeaders("Set-Cookie");
+        StringBuilder cookies = new StringBuilder();
+        for (Header h : setCookies) {
+            cookies.append(h.getValue()).append(";");
+        }
+        post.addHeader("cookie", cookies.toString());
+
+        //send scan request
+        HttpResponse response = apacheClient.execute(post);
+
+        //verify scan request
+        String createScanResponseBody = IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset());
+        validateApacheHttpClientResponse(response, 202, "Fail to create OSA scan", createScanResponseBody);
+
+        //extract response as object and return the link
+        CreateScanResponse createScanResponse = mapper.readValue(createScanResponseBody, CreateScanResponse.class);
+        return createScanResponse;
+    }
+
+    private void validateApacheHttpClientResponse(HttpResponse response, int status, String message, String messageBody) {
+        if (response.getStatusLine().getStatusCode() != status) {
+            throw new WebApplicationException(message + ": " + "status code: " + response.getStatusLine().getStatusCode() + ". reason phrase: " + response.getStatusLine().getReasonPhrase() + ". message body: " + messageBody);
+        }
     }
 
 
     public CreateScanResponse createScan(CreateScanRequest request) throws IOException {
         final MultiPart multipart = createScanMultiPartRequest(request);
-        logger.debug("sending request for osa scan");
+        logger.info("sending request for osa scan");
         Invocation invocation = root.path(ANALYZE_PATH)
                 .resolveTemplate("projectId", request.getProjectId())
                 .request()
-                .header(CX_ORIGIN_HEADER, CX_ORIGIN_VALUE)
                 .cookie(cookies.get(CX_COOKIE))
                 .cookie(CSRF_COOKIE, cookies.get(CSRF_COOKIE).getValue())
                 .header(CSRF_COOKIE, cookies.get(CSRF_COOKIE).getValue())
@@ -83,15 +156,15 @@ public class OsaScanClient implements Closeable {
 
     public GetOpenSourceSummaryResponse getOpenSourceSummary(String scanId) throws IOException {
         Invocation invocation = getSummeryByAcceptHeaderInvocation(scanId, "application/json");
-        logger.debug("sending request for HTML report");
+        logger.info("sending request for HTML report");
         Response response = invokeRequest(invocation);
         validateResponse(response, Response.Status.OK, "fail get OSA scan summary results");
-        return  response.readEntity(GetOpenSourceSummaryResponse.class);
+        return response.readEntity(GetOpenSourceSummaryResponse.class);
     }
 
     public String getOSAScanHtmlResults(String scanId) {
         Invocation invocation = getSummeryByAcceptHeaderInvocation(scanId, "text/html");
-        logger.debug("sending request for JSON report");
+        logger.info("sending request for JSON report");
         Response response = invokeRequest(invocation);
         validateResponse(response, Response.Status.OK, "fail get OSA scan html results");
         return response.readEntity(String.class);
@@ -99,32 +172,32 @@ public class OsaScanClient implements Closeable {
 
     public byte[] getOSAScanPdfResults(String scanId) {
         Invocation invocation = getSummeryByAcceptHeaderInvocation(scanId, "application/pdf");
-        logger.debug("sending request for PDF report");
+        logger.info("sending request for PDF report");
         Response response = invokeRequest(invocation);
         validateResponse(response, Response.Status.OK, "fail get OSA scan pdf results");
         return response.readEntity(byte[].class);
     }
 
-    public List<Library> getScanResultLibraries(String scanId){
+    public List<Library> getScanResultLibraries(String scanId) {
         List<Library> libraryList = new LinkedList<>();
         int lastListSize = ITEMS_PER_PAGE;
         int currentPage = 1;
         while (lastListSize == ITEMS_PER_PAGE) {
             Invocation invocation = getPageRequestInvocation(LIBRARIES_PATH, currentPage, scanId);
-            logger.debug("sending request for libraries page number "+ currentPage);
+            logger.info("sending request for libraries page number " + currentPage);
             Response response = invokeRequest(invocation);
             validateResponse(response, Response.Status.OK, "fail get OSA scan libraries");
             try {
                 List<Library> libraryPage = mapper.readValue(response.readEntity(String.class), new TypeReference<List<Library>>() {
                 });
-                if(libraryPage != null) {
+                if (libraryPage != null) {
                     libraryList.addAll(libraryPage);
                     lastListSize = libraryPage.size();
-                }else {
+                } else {
                     break;
                 }
             } catch (IOException e) {
-                logger.info("failed to parse Libraries", e);
+                logger.error("failed to parse Libraries: "+e.getMessage(), e);
                 lastListSize = 0;
             }
             ++currentPage;
@@ -132,26 +205,26 @@ public class OsaScanClient implements Closeable {
         return libraryList;
     }
 
-    public List<CVE> getScanResultCVEs(String scanId){
+    public List<CVE> getScanResultCVEs(String scanId) {
         List<CVE> cvesList = new LinkedList<>();
         int lastListSize = ITEMS_PER_PAGE;
         int currentPage = 1;
         while (lastListSize == ITEMS_PER_PAGE) {
             Invocation invocation = getPageRequestInvocation(CVEs_PATH, currentPage, scanId);
-            logger.debug("sending request for CVE's page number "+ currentPage);
+            logger.info("sending request for CVE's page number " + currentPage);
             Response response = invokeRequest(invocation);
             validateResponse(response, Response.Status.OK, "fail get OSA scan CVE's");
             try {
                 List<CVE> cvePage = mapper.readValue(response.readEntity(String.class), new TypeReference<List<CVE>>() {
                 });
-                if(cvePage != null) {
+                if (cvePage != null) {
                     lastListSize = cvePage.size();
                     cvesList.addAll(cvePage);
-                }else {
+                } else {
                     break;
                 }
             } catch (IOException e) {
-                logger.info("failed to parse CVE's", e);
+                logger.error("failed to parse CVE's", e);
                 lastListSize = 0;
             }
             ++currentPage;
@@ -160,8 +233,8 @@ public class OsaScanClient implements Closeable {
     }
 
 
-    private Invocation getSummeryByAcceptHeaderInvocation(String scanId, String acceptHeaderValue){
-        return  root.path(ANALYZE_SUMMARY_PATH).queryParam("scanId", scanId).request()
+    private Invocation getSummeryByAcceptHeaderInvocation(String scanId, String acceptHeaderValue) {
+        return root.path(ANALYZE_SUMMARY_PATH).queryParam("scanId", scanId).request()
                 .header(CX_ORIGIN_HEADER, CX_ORIGIN_VALUE)
                 .cookie(cookies.get(CX_COOKIE))
                 .header(ACCEPT_HEADER, acceptHeaderValue)
@@ -169,8 +242,8 @@ public class OsaScanClient implements Closeable {
                 .header(CSRF_COOKIE, cookies.get(CSRF_COOKIE).getValue()).buildGet();
     }
 
-    private Invocation getPageRequestInvocation(String path, int pageNumber, String scanId){
-       return root.path(path).queryParam("scanId", scanId)
+    private Invocation getPageRequestInvocation(String path, int pageNumber, String scanId) {
+        return root.path(path).queryParam("scanId", scanId)
                 .queryParam("page", pageNumber).queryParam("itemsPerPage", ITEMS_PER_PAGE).request()
                 .header(CX_ORIGIN_HEADER, CX_ORIGIN_VALUE)
                 .cookie(cookies.get(CX_COOKIE))
@@ -181,7 +254,7 @@ public class OsaScanClient implements Closeable {
     private MultiPart createScanMultiPartRequest(CreateScanRequest request) throws IOException {
         InputStream read = request.getZipFile().read();
 
-        final StreamDataBodyPart filePart = new StreamDataBodyPart (OSA_ZIPPED_FILE_KEY_NAME, read);
+        final StreamDataBodyPart filePart = new StreamDataBodyPart(OSA_ZIPPED_FILE_KEY_NAME, read);
         return new FormDataMultiPart()
                 .bodyPart(new FormDataBodyPart("origin", Integer.toString(CreateScanRequest.JENKINS_ORIGIN)))
                 .bodyPart(filePart);
@@ -224,7 +297,7 @@ public class OsaScanClient implements Closeable {
 
     private boolean isScanFinished(ScanDetails scanStatusResponse) {
         ScanStatus scanStatus = ScanStatus.fromId(scanStatusResponse.getState().getId());
-        switch (scanStatus){
+        switch (scanStatus) {
             case NotStarted:
                 return false;
             case InProgress:
@@ -244,7 +317,7 @@ public class OsaScanClient implements Closeable {
                 .request()
                 .header(CX_ORIGIN_HEADER, CX_ORIGIN_VALUE)
                 .buildPost(Entity.entity(authenticationRequest, MediaType.APPLICATION_JSON));
-        logger.debug("Authenticating client");
+        logger.info("Authenticating client");
         Response response = invokeRequest(invocation);
         validateResponse(response, Response.Status.OK, "fail to perform login");
 

@@ -13,7 +13,6 @@ import hudson.FilePath;
  */
 public class ScanSender {
 
-    //todo: make wait handler part of scan sender and move waiting logic out of client
     private OsaScanClient osaScanClient;
     private long projectId;
 
@@ -26,18 +25,20 @@ public class ScanSender {
         createScan(sourceCodeZip);
     }
 
-    public void sendScanAndSetResults(FilePath sourceCodeZip, OsaScanResult osaScanResult) throws Exception {
+    public OsaScanResult sendOsaScanAndGetResults(FilePath sourceCodeZip) throws Exception {
+        OsaScanResult osaScanResult = new OsaScanResult();
         CreateScanResponse createScanResponse = createScan(sourceCodeZip);
         osaScanResult.setScanId(createScanResponse.getScanId());
         ScanDetails scanDetails = waitForScanToFinish(createScanResponse.getScanId());
         GetOpenSourceSummaryResponse getOpenSourceSummaryResponse = getOpenSourceSummary(createScanResponse.getScanId());
         osaScanResult.setOsaScanStartAndEndTimes(scanDetails);
         osaScanResult.setOsaResults(getOpenSourceSummaryResponse);
+        return osaScanResult;
     }
 
     private CreateScanResponse createScan(FilePath zipFile) throws Exception {
         CreateScanRequest scanRequest = new CreateScanRequest(projectId, zipFile);
-        return osaScanClient.createScan(scanRequest);
+        return osaScanClient.createScanLargeFileWorkaround(scanRequest);
     }
 
     private ScanDetails waitForScanToFinish(String scanId) throws InterruptedException {

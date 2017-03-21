@@ -1,9 +1,12 @@
 package com.checkmarx.jenkins;
 
-import com.checkmarx.components.zipper.Zipper;
 import com.checkmarx.jenkins.filesystem.FolderPattern;
 import com.checkmarx.jenkins.filesystem.zip.CxZip;
-import com.checkmarx.jenkins.opensourceanalysis.*;
+import com.checkmarx.jenkins.filesystem.zip.Zipper;
+import com.checkmarx.jenkins.logger.CxPluginLogger;
+import com.checkmarx.jenkins.opensourceanalysis.DependencyFolder;
+import com.checkmarx.jenkins.opensourceanalysis.ScanService;
+import com.checkmarx.jenkins.opensourceanalysis.ScanServiceTools;
 import com.checkmarx.jenkins.web.client.OsaScanClient;
 import com.checkmarx.jenkins.web.contracts.ProjectContract;
 import com.checkmarx.jenkins.web.model.AuthenticationRequest;
@@ -20,18 +23,18 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
+import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.jelly.JellyContext;
+import org.apache.commons.jelly.XMLOutput;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.*;
 
+import javax.annotation.Nonnull;
 import javax.xml.ws.WebServiceException;
 import java.io.*;
 import java.net.MalformedURLException;
@@ -39,10 +42,9 @@ import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.commons.jelly.JellyContext;
-import org.apache.commons.jelly.XMLOutput;
 
 /**
  * The main entry point for Checkmarx plugin. This class implements the Builder
@@ -52,7 +54,7 @@ import org.apache.commons.jelly.XMLOutput;
  * @since 3/10/13
  */
 
-public class CxScanBuilder extends Builder {
+public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -121,19 +123,16 @@ public class CxScanBuilder extends Builder {
     //////////////////////////////////////////////////////////////////////////////////////
     // Private variables
     //////////////////////////////////////////////////////////////////////////////////////
-    static {
-        BasicConfigurator.configure();  // Set the log4j system to log to console
-    }
 
     // Kept for backward compatibility with old serialized plugin configuration.
     private static transient Logger staticLogger;
 
-    private static final transient Logger LOGGER = Logger.getLogger(CxScanBuilder.class);
+    // STATIC_LOGGER is initialized here due to the pre-perform methods, will NOT print to job console
+    private static CxPluginLogger STATIC_LOGGER = new CxPluginLogger();
+    //Print to job console, initialized within perform
+    private volatile transient CxPluginLogger jobConsoleLogger;
 
-    private transient Logger instanceLogger = LOGGER; // Instance logger redirects to static logger until
     // it is initialized in perform method
-    private transient FileAppender fileAppender;
-
     private JobStatusOnError jobStatusOnError;
 
     private String thresholdSettings;
@@ -147,7 +146,7 @@ public class CxScanBuilder extends Builder {
     public static final String ASYNC_MESSAGE = "CxSAST scan was run in asynchronous mode.\nRefer to the {0} for the scan results\n";
 
     public static final int MINIMUM_TIMEOUT_IN_MINUTES = 1;
-    public static final String REPORTS_FOLDER = "Checkmarx\\Reports";
+    public static final String REPORTS_FOLDER = "Checkmarx/Reports";
 
     private StringBuilder thresholdsError;
 
@@ -187,7 +186,7 @@ public class CxScanBuilder extends Builder {
             @Nullable Integer osaLowThreshold,
             boolean generatePdfReport,
             String thresholdSettings,
-            Result vulnerabilityThresholdResult,
+            String vulnerabilityThresholdResult,
             @Nullable String includeOpenSourceFolders,
             @Nullable String excludeOpenSourceFolders,
             boolean avoidDuplicateProjectScans) {
@@ -223,7 +222,9 @@ public class CxScanBuilder extends Builder {
         this.includeOpenSourceFolders = includeOpenSourceFolders;
         this.excludeOpenSourceFolders = excludeOpenSourceFolders;
         this.thresholdSettings = thresholdSettings;
-        this.vulnerabilityThresholdResult = vulnerabilityThresholdResult;
+        if(vulnerabilityThresholdResult != null) {
+            this.vulnerabilityThresholdResult = Result.fromString(vulnerabilityThresholdResult);
+        }
         this.avoidDuplicateProjectScans = avoidDuplicateProjectScans;
         init();
     }
@@ -275,7 +276,7 @@ public class CxScanBuilder extends Builder {
     // Workaround for compatibility with Conditional BuildStep Plugin
     @Nullable
     public String getBuildStep() {
-        return projectName;
+        return null;
     }
 
     @Nullable
@@ -357,6 +358,7 @@ public class CxScanBuilder extends Builder {
         return osaEnabled;
     }
 
+    @DataBoundSetter
     public void setOsaEnabled(boolean osaEnabled) {
         this.osaEnabled = osaEnabled;
     }
@@ -366,6 +368,7 @@ public class CxScanBuilder extends Builder {
         return osaHighThreshold;
     }
 
+    @DataBoundSetter
     public void setOsaHighThreshold(Integer osaHighThreshold) {
         this.osaHighThreshold = osaHighThreshold;
     }
@@ -375,6 +378,7 @@ public class CxScanBuilder extends Builder {
         return osaMediumThreshold;
     }
 
+    @DataBoundSetter
     public void setOsaMediumThreshold(Integer osaMediumThreshold) {
         this.osaMediumThreshold = osaMediumThreshold;
     }
@@ -384,6 +388,7 @@ public class CxScanBuilder extends Builder {
         return osaLowThreshold;
     }
 
+    @DataBoundSetter
     public void setOsaLowThreshold(Integer osaLowThreshold) {
         this.osaLowThreshold = osaLowThreshold;
     }
@@ -406,6 +411,7 @@ public class CxScanBuilder extends Builder {
         return avoidDuplicateProjectScans;
     }
 
+    @DataBoundSetter
     public void setThresholdSettings(String thresholdSettings) {
         this.thresholdSettings = thresholdSettings;
     }
@@ -414,18 +420,175 @@ public class CxScanBuilder extends Builder {
         return thresholdSettings;
     }
 
-    public void setVulnerabilityThresholdResult(Result result) {
-        this.vulnerabilityThresholdResult = result;
+    @DataBoundSetter
+    public void setVulnerabilityThresholdResult(String result) {
+        if(result != null) {
+            this.vulnerabilityThresholdResult = Result.fromString(result);
+        }
     }
 
-    public Result getVulnerabilityThresholdResult() {
-        return vulnerabilityThresholdResult;
+    public String getVulnerabilityThresholdResult() {
+        if(vulnerabilityThresholdResult != null) {
+            return vulnerabilityThresholdResult.toString();
+        }
+        return null;
+    }
+
+    @DataBoundSetter
+    public void setUseOwnServerCredentials(boolean useOwnServerCredentials) {
+        this.useOwnServerCredentials = useOwnServerCredentials;
+    }
+
+    @DataBoundSetter
+    public void setServerUrl(@Nullable String serverUrl) {
+        this.serverUrl = serverUrl;
+    }
+
+    @DataBoundSetter
+    public void setUsername(@Nullable String username) {
+        this.username = username;
+    }
+
+    @DataBoundSetter
+    public void setPassword(@Nullable String password) {
+        this.password = password;
+    }
+
+    @DataBoundSetter
+    public void setProjectName(@Nullable String projectName) {
+        this.projectName = projectName;
+    }
+
+    @DataBoundSetter
+    public void setPreset(@Nullable String preset) {
+        this.preset = preset;
+    }
+
+    @DataBoundSetter
+    public void setPresetSpecified(boolean presetSpecified) {
+        this.presetSpecified = presetSpecified;
+    }
+
+    @DataBoundSetter
+    public void setExcludeFolders(@Nullable String excludeFolders) {
+        this.excludeFolders = excludeFolders;
+    }
+
+    @DataBoundSetter
+    public void setFilterPattern(@Nullable String filterPattern) {
+        this.filterPattern = filterPattern;
+    }
+
+    @DataBoundSetter
+    public void setIncremental(boolean incremental) {
+        this.incremental = incremental;
+    }
+
+    @DataBoundSetter
+    public void setFullScansScheduled(boolean fullScansScheduled) {
+        this.fullScansScheduled = fullScansScheduled;
+    }
+
+    @DataBoundSetter
+    public void setFullScanCycle(int fullScanCycle) {
+        this.fullScanCycle = fullScanCycle;
+    }
+
+    @DataBoundSetter
+    public void setThisBuildIncremental(boolean thisBuildIncremental) {
+        isThisBuildIncremental = thisBuildIncremental;
+    }
+
+    @DataBoundSetter
+    public void setSourceEncoding(@Nullable String sourceEncoding) {
+        this.sourceEncoding = sourceEncoding;
+    }
+
+    @DataBoundSetter
+    public void setComment(@Nullable String comment) {
+        this.comment = comment;
+    }
+
+    @DataBoundSetter
+    public void setSkipSCMTriggers(boolean skipSCMTriggers) {
+        this.skipSCMTriggers = skipSCMTriggers;
+    }
+
+    @DataBoundSetter
+    public void setWaitForResultsEnabled(boolean waitForResultsEnabled) {
+        this.waitForResultsEnabled = waitForResultsEnabled;
+    }
+
+    @DataBoundSetter
+    public void setVulnerabilityThresholdEnabled(boolean vulnerabilityThresholdEnabled) {
+        this.vulnerabilityThresholdEnabled = vulnerabilityThresholdEnabled;
+    }
+
+    @DataBoundSetter
+    public void setHighThreshold(@Nullable Integer highThreshold) {
+        this.highThreshold = highThreshold;
+    }
+
+    @DataBoundSetter
+    public void setMediumThreshold(@Nullable Integer mediumThreshold) {
+        this.mediumThreshold = mediumThreshold;
+    }
+
+    @DataBoundSetter
+    public void setLowThreshold(@Nullable Integer lowThreshold) {
+        this.lowThreshold = lowThreshold;
+    }
+
+    @DataBoundSetter
+    public void setGeneratePdfReport(boolean generatePdfReport) {
+        this.generatePdfReport = generatePdfReport;
+    }
+
+    @DataBoundSetter
+    public void setIncludeOpenSourceFolders(@Nullable String includeOpenSourceFolders) {
+        this.includeOpenSourceFolders = includeOpenSourceFolders;
+    }
+
+    @DataBoundSetter
+    public void setExcludeOpenSourceFolders(@Nullable String excludeOpenSourceFolders) {
+        this.excludeOpenSourceFolders = excludeOpenSourceFolders;
+    }
+
+    @DataBoundSetter
+    public void setJobStatusOnError(JobStatusOnError jobStatusOnError) {
+        this.jobStatusOnError = jobStatusOnError;
+    }
+
+    @DataBoundSetter
+    public void setAvoidDuplicateProjectScans(boolean avoidDuplicateProjectScans) {
+        this.avoidDuplicateProjectScans = avoidDuplicateProjectScans;
+    }
+
+    @DataBoundSetter
+    public void setProjectId(long projectId) {
+        this.projectId = projectId;
+    }
+
+    public long getProjectId() {
+        return projectId;
+    }
+
+    public boolean isThisBuildIncremental() {
+        return isThisBuildIncremental;
+    }
+
+    @DataBoundSetter
+    public void setGroupId(@Nullable String groupId) {
+        this.groupId = groupId;
     }
 
     @Override
-    public boolean perform(final AbstractBuild<?, ?> build,
-                           final Launcher launcher,
-                           final BuildListener listener) throws InterruptedException, IOException {
+    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
+
+
+
+        //set to the logger to print into the job console
+        jobConsoleLogger = new CxPluginLogger(listener);
 
         final DescriptorImpl descriptor = getDescriptor();
 
@@ -434,18 +597,17 @@ public class CxScanBuilder extends Builder {
         CxWSCreateReportResponse reportResponse = null;
 
         try {
-            File checkmarxBuildDir = new File(build.getRootDir(), "checkmarx");
+            File checkmarxBuildDir = new File(run.getRootDir(), "checkmarx");
             checkmarxBuildDir.mkdir();
 
-            initLogger(checkmarxBuildDir, listener, instanceLoggerSuffix(build));
 
-            instanceLogger.info("Checkmarx Jenkins plugin version: " + CxConfig.version());
+            jobConsoleLogger.info("Checkmarx Jenkins plugin version: " + CxConfig.version());
             printConfiguration(descriptor);
 
-            if (isSkipScan(build)) {
-                instanceLogger.info("Checkmarx scan skipped since the build was triggered by SCM. " +
+            if (isSkipScan(run)) {
+                jobConsoleLogger.info("Checkmarx scan skipped since the build was triggered by SCM. " +
                         "Visit plugin configuration page to disable this skip.");
-                return true;
+                return;
             }
             final String serverUrlToUse = isUseOwnServerCredentials() ? getServerUrl() : descriptor.getServerUrl();
             final String usernameToUse = isUseOwnServerCredentials() ? getUsername() : descriptor.getUsername();
@@ -453,36 +615,46 @@ public class CxScanBuilder extends Builder {
 
             String serverUrlToUseNotNull = serverUrlToUse != null ? serverUrlToUse : "";
 
-            cxWebService = new CxWebService(serverUrlToUseNotNull, instanceLoggerSuffix(build));
+            cxWebService = new CxWebService(serverUrlToUseNotNull, jobConsoleLogger);
             cxWebService.login(usernameToUse, passwordToUse);
 
-            instanceLogger.info("Checkmarx server login successful");
+            jobConsoleLogger.info("Checkmarx server login successful");
 
-            setProjectId(build, listener, cxWebService);
-
+            projectId = cxWebService.resolveProjectId(run.getEnvironment(listener).expand(projectName), groupId);
             if (needToAvoidDuplicateProjectScans(cxWebService)) {
-                instanceLogger.info("\nAvoid duplicate project scans in queue\n");
-                return true;
+                jobConsoleLogger.info("\nAvoid duplicate project scans in queue\n");
+                return;
             }
 
-            cxWSResponseRunID = submitScan(build, cxWebService, listener);
-            setProjectId(build, listener, cxWebService);
+            if (descriptor.isProhibitProjectCreation() && projectId == 0) {
+                jobConsoleLogger.info("\nCreation of the new project " + projectName + " is not authorized. Please use an existing project.");
+                jobConsoleLogger.info("You can enable the creation of new projects by disabling the \"Deny new Checkmarx projects creation\" checkbox in the Jenkins plugin global settings.\n");
+                run.setResult(Result.FAILURE);
+                return;
+            }
+
+            //If there no project under the project name a new project will be created
+            cxWSResponseRunID = submitScan(run, workspace, cxWebService, listener);
+            projectId = cxWSResponseRunID.getProjectID();
 
             boolean shouldRunAsynchronous = scanShouldRunAsynchronous(descriptor);
             if (shouldRunAsynchronous) {
                 logAsyncMessage(serverUrlToUse);
-                addScanResultAction(build, serverUrlToUse, shouldRunAsynchronous, null);
+                addScanResultAction(run, serverUrlToUse, shouldRunAsynchronous, null);
                 if (osaEnabled) {
-                    analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, cxWebService, listener, shouldRunAsynchronous);
+                    try {
+                        analyzeOpenSources(run, workspace, serverUrlToUseNotNull, usernameToUse, passwordToUse, cxWebService, listener, shouldRunAsynchronous);
+                    } catch (Exception ignored) {
+                    }
                 }
-                return true;
+                return;
             }
 
             long scanId = cxWebService.trackScanProgress(cxWSResponseRunID, usernameToUse, passwordToUse, descriptor.getScanTimeOutEnabled(), descriptor.getScanTimeoutDuration());
 
             if (scanId == 0) {
-                build.setResult(Result.UNSTABLE);
-                return true;
+                run.setResult(Result.UNSTABLE);
+                return;
             }
 
             reportResponse = cxWebService.generateScanReport(scanId, CxWSReportType.XML);
@@ -496,12 +668,12 @@ public class CxScanBuilder extends Builder {
             }
 
 
-            CxScanResult cxScanResult = addScanResultAction(build, serverUrlToUse, shouldRunAsynchronous, xmlReportFile);
+            CxScanResult cxScanResult = addScanResultAction(run, serverUrlToUse, shouldRunAsynchronous, xmlReportFile);
             cxScanResult.setScanId(scanId);
             // Set scan results to environment
             EnvVarAction envVarAction = new EnvVarAction();
             envVarAction.setCxSastResults(cxScanResult);
-            build.addAction(envVarAction);
+            run.addAction(envVarAction);
 
             //CxSAST Thresholds
             thresholdsError = new StringBuilder();
@@ -519,70 +691,78 @@ public class CxScanBuilder extends Builder {
 
             //OSA scan
             boolean isOSAThresholdFailedTheBuild = false;
+
             if (osaEnabled) {
-                OsaScanResult osaScanResult = analyzeOpenSources(build, serverUrlToUseNotNull, usernameToUse, passwordToUse, cxWebService, listener, shouldRunAsynchronous);
-                cxScanResult.setOsaScanResult(osaScanResult);
-                ThresholdConfig osaThresholdConfig = createOsaThresholdConfig();
 
-                // Set scan thresholds for the summery.jelly
-                if (isOsaThresholdEnabled()) {
-                    cxScanResult.setOsaThresholds(osaThresholdConfig);
+                OsaScanResult osaScanResult = null;
+                osaScanResult = analyzeOpenSources(run, workspace, serverUrlToUseNotNull, usernameToUse, passwordToUse, cxWebService, listener, shouldRunAsynchronous);
+
+                if(osaScanResult != null) {
+                    //todo: when CxResult + ui report legacy code will be removed, stop using this as a flag for osa scan execution success
+                    //(meaning - move the line below up [under the line "if (osaEnabled)"] and start using the existence of osaScanResult object to decide weather to present osa results)
+                    cxScanResult.setOsaEnabled(true);
+
+                    cxScanResult.setOsaScanResult(osaScanResult);
+
+                    ThresholdConfig osaThresholdConfig = createOsaThresholdConfig();
+                    // Set scan thresholds for the summery.jelly
+                    if (isOsaThresholdEnabled()) {
+                        cxScanResult.setOsaThresholds(osaThresholdConfig);
+                    }
+
+                    createOsaJsonReports(osaScanResult, checkmarxBuildDir);
+
+                    //retrieve osa scan results pdf + html
+                    getOSAReports(cxScanResult.getOsaScanResult().getScanId(), serverUrlToUseNotNull, usernameToUse, passwordToUse, checkmarxBuildDir);
+
+
+                    //OSA Threshold
+                    isOSAThresholdFailedTheBuild = cxScanResult.getOsaScanResult() != null && ((descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || isVulnerabilityThresholdEnabled())
+                            && isThresholdCrossed(osaThresholdConfig, cxScanResult.getOsaScanResult().getOsaHighCount(), cxScanResult.getMediumCount(), cxScanResult.getLowCount(), "OSA ");
                 }
-
-                createOsaJsonReports(osaScanResult, checkmarxBuildDir);
-
-                //retrieve osa scan results pdf + html
-                getOSAReports(cxScanResult.getOsaScanResult().getScanId(), serverUrlToUseNotNull, usernameToUse, passwordToUse, checkmarxBuildDir);
-
-
-                //OSA Threshold
-                isOSAThresholdFailedTheBuild = cxScanResult.getOsaScanResult().isOsaReturnedResult() && ((descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || isVulnerabilityThresholdEnabled())
-                        && isThresholdCrossed(osaThresholdConfig, cxScanResult.getOsaScanResult().getOsaHighCount(), cxScanResult.getMediumCount(), cxScanResult.getLowCount(), "OSA ");
             }
 
 
-            generateHtmlReport(build, checkmarxBuildDir, cxScanResult);
-            instanceLogger.info("Copying reports to workspace");
-            copyReportsToWorkspace(build, checkmarxBuildDir);
+            generateHtmlReport(run, checkmarxBuildDir, cxScanResult);
+            jobConsoleLogger.info("Copying reports to workspace");
+            copyReportsToWorkspace(workspace, checkmarxBuildDir);
 
             //If one of the scan's threshold was crossed - fail the build
             if (isSASTThresholdFailedTheBuild || isOSAThresholdFailedTheBuild) {
-                build.setResult(thresholdConfig.getBuildStatus());
-                instanceLogger.info("*************************");
-                instanceLogger.info("The Build Failed due to: ");
-                instanceLogger.info("*************************");
+                run.setResult(thresholdConfig.getBuildStatus());
+                jobConsoleLogger.info("*************************");
+                jobConsoleLogger.info("The Build Failed due to: ");
+                jobConsoleLogger.info("*************************");
                 String[] lines = thresholdsError.toString().split("\\n");
                 for (String s : lines) {
-                    instanceLogger.info(s);
+                    jobConsoleLogger.info(s);
                 }
-                instanceLogger.info("---------------------------------------------------------------------");
+                jobConsoleLogger.info("---------------------------------------------------------------------");
             }
 
-            return true;
+            return;
         } catch (IOException | WebServiceException e) {
             if (useUnstableOnError(descriptor)) {
-                build.setResult(Result.UNSTABLE);
-                instanceLogger.error(e.getMessage(), e);
-                return true;
+                run.setResult(Result.UNSTABLE);
+                jobConsoleLogger.error(e.getMessage(), e);
+                return;
             } else {
                 throw e;
             }
         } catch (InterruptedException e) {
             if (reportResponse != null) {
-                instanceLogger.error("Cancelling report generation on the Checkmarx server...");
+                jobConsoleLogger.error("Cancelling report generation on the Checkmarx server...");
                 cxWebService.cancelScanReport(reportResponse.getID());
             } else if (cxWSResponseRunID != null) {
-                instanceLogger.error("Cancelling scan on the Checkmarx server...");
+                jobConsoleLogger.error("Cancelling scan on the Checkmarx server...");
                 cxWebService.cancelScan(cxWSResponseRunID.getRunId());
             }
             throw e;
-        } finally {
-            closeLogger();
         }
     }
 
 
-    private void generateHtmlReport(AbstractBuild<?, ?> build, File checkmarxBuildDir, CxScanResult cxScanResult) {
+    private void generateHtmlReport(Run<?, ?> run, File checkmarxBuildDir, CxScanResult cxScanResult) {
         //todo: print to log - generating report
         System.out.println("generating html report");
         System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "");
@@ -619,10 +799,10 @@ public class CxScanBuilder extends Builder {
 
     }
 
-    private void generateHtmlReportOld(AbstractBuild<?, ?> build, File checkmarxBuildDir, CxScanResult cxScanResult) {
+    private void generateHtmlReportOld(Run<?, ?> run, File checkmarxBuildDir, CxScanResult cxScanResult) {
 
-        String linkToResults = Jenkins.getInstance().getRootUrl() + build.getUrl() + "checkmarx/";
-        String linkToPDF = Jenkins.getInstance().getRootUrl() + build.getUrl() + "checkmarx/pdfReport";
+        String linkToResults = Jenkins.getInstance().getRootUrl() + run.getUrl() + "checkmarx/";
+        String linkToPDF = Jenkins.getInstance().getRootUrl() + run.getUrl() + "checkmarx/pdfReport";
         String html;
 
         try {
@@ -664,13 +844,13 @@ public class CxScanBuilder extends Builder {
                 html = Pattern.compile("\\<!--thresholdStatusStart-->.*\\<!--thresholdStatusEnd-->", Pattern.DOTALL).matcher(html).replaceAll("");
             }
 
-            if (!cxScanResult.getOsaScanResult().isOsaEnabled()) {
+            if (!cxScanResult.isOsaEnabled()) {
                 html = Pattern.compile("\\<!--osaStart-->.*\\<!--osaEnd-->", Pattern.DOTALL).matcher(html).replaceAll("");
             } else {
 
-                int osaResultsSum = cxScanResult.getOsaScanResult().getOsaHighCount() + cxScanResult.getOsaScanResult().getOsaMediumCount() + cxScanResult.getOsaScanResult().getOsaLowCount();
-                String linkToOsaPDF = Jenkins.getInstance().getRootUrl() + build.getUrl() + "checkmarx/osaPdfReport";
-                String linkToOsaHtml = Jenkins.getInstance().getRootUrl() + build.getUrl() + "checkmarx/osaHtmlReport";
+                    int osaResultsSum = cxScanResult.getOsaScanResult().getOsaHighCount() + cxScanResult.getOsaScanResult().getOsaMediumCount() + cxScanResult.getOsaScanResult().getOsaLowCount();
+                    String linkToOsaPDF = Jenkins.getInstance().getRootUrl() + run.getUrl() + "checkmarx/osaPdfReport";
+                    String linkToOsaHtml = Jenkins.getInstance().getRootUrl() + run.getUrl() + "checkmarx/osaHtmlReport";
 
                 html = html.replace("#osaPdfReportUrl#", linkToOsaPDF)
                         .replace("#osaHtmlReportUrl#", linkToOsaHtml)
@@ -707,7 +887,7 @@ public class CxScanBuilder extends Builder {
 
 
         } catch (Exception e) {
-            instanceLogger.warn("fail to generate html report", e);
+            jobConsoleLogger.error("fail to generate html report", e);
 
         }
     }
@@ -730,7 +910,7 @@ public class CxScanBuilder extends Builder {
     }
 
     private void createOsaJsonReports(OsaScanResult osaScanResult, File checkmarxBuildDir) {
-        instanceLogger.info("retrieving osa json report files");
+        jobConsoleLogger.info("retrieving osa json report files");
         File osaSummeryJsonReport = new File(checkmarxBuildDir, "OSASummery.json");
         writeStringToWorkspaceFile("osa summery json report", osaSummeryJsonReport, osaScanResult.getOpenSourceSummaryJson());
         File osaLibrariesJsonReport = new File(checkmarxBuildDir, "OSALibraries.json");
@@ -741,32 +921,30 @@ public class CxScanBuilder extends Builder {
 
 
     private void getOSAReports(String scanId, String serverUrl, String username, String password, File checkmarxBuildDir) {
-        instanceLogger.info("retrieving osa report files");
+        jobConsoleLogger.info("retrieving osa report files");
         AuthenticationRequest authReq = new AuthenticationRequest(username, password);
-        OsaScanClient scanClient = new OsaScanClient(serverUrl, authReq, instanceLogger);
+        OsaScanClient scanClient = new OsaScanClient(serverUrl, authReq);
         String osaScanHtmlResults = scanClient.getOSAScanHtmlResults(scanId);
         File osaHtmlReport = new File(checkmarxBuildDir, "OSAReport.html");
         writeStringToWorkspaceFile("osa html report", osaHtmlReport, osaScanHtmlResults);
-
         byte[] osaScanPdfResults = scanClient.getOSAScanPdfResults(scanId);
         File osaPdfReport = new File(checkmarxBuildDir, "OSAReport.pdf");
         try {
             FileUtils.writeByteArrayToFile(osaPdfReport, osaScanPdfResults);
         } catch (IOException e) {
-            instanceLogger.warn("fail to write osa pdf report to [" + osaPdfReport.getAbsolutePath() + "]");
+            jobConsoleLogger.error("fail to write osa pdf report to [" + osaPdfReport.getAbsolutePath() + "]");
         }
-        instanceLogger.info("osa pdf report file [" + osaPdfReport.getAbsolutePath() + "] generated successfully");
+        jobConsoleLogger.info("osa report file [" + osaPdfReport.getAbsolutePath() + "] generated successfully");
     }
 
     private void writeStringToWorkspaceFile(String dataDescription, File workspaceFile, String dataString) {
         try {
             FileUtils.writeStringToFile(workspaceFile, dataString);
         } catch (IOException e) {
-            instanceLogger.warn("fail to write " + dataDescription + " to [" + workspaceFile.getAbsolutePath() + "]");
+            jobConsoleLogger.error("fail to write " + dataDescription + " to [" + workspaceFile.getAbsolutePath() + "]");
         }
-        instanceLogger.info(dataDescription + " file [" + workspaceFile.getAbsolutePath() + "] generated successfully");
+        jobConsoleLogger.info(dataDescription + " file [" + workspaceFile.getAbsolutePath() + "] generated successfully");
     }
-
 
     private void printConfiguration(DescriptorImpl descriptor) {
         StringBuilder sb = new StringBuilder();
@@ -804,7 +982,7 @@ public class CxScanBuilder extends Builder {
         }
         sb.append(" ------------------------------------------------------------------------").append("\n");
 
-        instanceLogger.info(sb.toString());
+        jobConsoleLogger.info(sb.toString());
     }
 
     private boolean isOsaThresholdEnabled() {
@@ -824,26 +1002,26 @@ public class CxScanBuilder extends Builder {
         sb.append("Info Severity Results: ").append(scanResult.getInfoCount()).append("\n");
         sb.append("----------------------------------------------------------------------------").append("\n");
 
-        instanceLogger.info(sb.toString());
+        jobConsoleLogger.info(sb.toString());
     }
 
-    private void copyReportsToWorkspace(AbstractBuild<?, ?> build, File checkmarxBuildDir) {
+    private void copyReportsToWorkspace(FilePath workspace, File checkmarxBuildDir) {
 
-        String remoteDirPath = build.getWorkspace().getRemote() + "\\" + REPORTS_FOLDER;
+        String remoteDirPath = workspace.getRemote() + "/" + REPORTS_FOLDER;
 
         Collection<File> files = FileUtils.listFiles(checkmarxBuildDir, null, true);
         FileInputStream fileInputStream = null;
 
         for (File file : files) {
             try {
-                String remoteFilePath = remoteDirPath + "\\" + file.getName();
-                instanceLogger.info("Copying file [" + file.getName() + "] to workspace [" + remoteFilePath + "]");
-                FilePath remoteFile = new FilePath(build.getWorkspace().getChannel(), remoteFilePath);
+                String remoteFilePath = remoteDirPath + "/" + file.getName();
+                jobConsoleLogger.info("Copying file [" + file.getName() + "] to workspace [" + remoteFilePath + "]");
+                FilePath remoteFile = new FilePath(workspace.getChannel(), remoteFilePath);
                 fileInputStream = new FileInputStream(file);
                 remoteFile.copyFrom(fileInputStream);
 
             } catch (Exception e) {
-                instanceLogger.warn("fail to copy file [" + file.getName() + "] to workspace", e);
+                jobConsoleLogger.error("fail to copy file [" + file.getName() + "] to workspace", e);
 
             } finally {
                 IOUtils.closeQuietly(fileInputStream);
@@ -852,65 +1030,45 @@ public class CxScanBuilder extends Builder {
     }
 
     @NotNull
-    private CxScanResult addScanResultAction(AbstractBuild<?, ?> build, String serverUrlToUse, boolean shouldRunAsynchronous, File xmlReportFile) {
-        CxScanResult cxScanResult = new CxScanResult(build, instanceLoggerSuffix(build), serverUrlToUse, projectId, shouldRunAsynchronous);
+    private CxScanResult addScanResultAction(Run<?, ?> run, String serverUrlToUse, boolean shouldRunAsynchronous, File xmlReportFile) {
+        CxScanResult cxScanResult = new CxScanResult(run, serverUrlToUse, projectId, shouldRunAsynchronous);
         if (xmlReportFile != null) {
-            SastResultParser sastResultParser = new SastResultParser(instanceLogger, serverUrlToUse);
+            SastResultParser sastResultParser = new SastResultParser(jobConsoleLogger, serverUrlToUse);
             SastScanResult sastScanResult = sastResultParser.readScanXMLReport(xmlReportFile);
             cxScanResult.setSastScanResult(sastScanResult);
         }
-        build.addAction(cxScanResult);
+        run.addAction(cxScanResult);
         return cxScanResult;
-    }
-
-    private void setProjectId(AbstractBuild<?, ?> build, BuildListener listener, CxWebService cxWebService) throws IOException, InterruptedException {
-        if (projectId == 0) {
-            EnvVars env = build.getEnvironment(listener);
-            ProjectContract projectContract = new ProjectContract(cxWebService);
-            if (!projectContract.newProject(env.expand(getProjectName()), getGroupId())) {
-                projectId = getProjectId(build, listener, cxWebService);
-            }
-        }
     }
 
     private void logAsyncMessage(String serverUrlToUse) {
         String projectStateUrl = serverUrlToUse + PROJECT_STATE_URL_TEMPLATE.replace("{0}", Long.toString(projectId));
         String projectStateLink = HyperlinkNote.encodeTo(projectStateUrl, "CxSAST Web");
-        instanceLogger.info(ASYNC_MESSAGE.replace("{0}", projectStateLink));
+        jobConsoleLogger.info(ASYNC_MESSAGE.replace("{0}", projectStateLink));
     }
 
     private boolean scanShouldRunAsynchronous(DescriptorImpl descriptor) {
         return !isWaitForResultsEnabled() && !(descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings());
     }
 
-    private long getProjectId(AbstractBuild<?, ?> build, BuildListener listener, CxWebService cxWebService) throws IOException, InterruptedException {
-        EnvVars env = build.getEnvironment(listener);
-        final CliScanArgs cliScanArgs = createCliScanArgs(new byte[]{}, env);
-        return cxWebService.getProjectId(cliScanArgs.getPrjSettings());
-    }
-
-    private OsaScanResult analyzeOpenSources(AbstractBuild<?, ?> build, String baseUri, String user, String password, CxWebService webServiceClient, BuildListener listener, boolean shouldRunAsynchronous) throws IOException, InterruptedException {
+    private OsaScanResult analyzeOpenSources(Run<?, ?> run, FilePath workspace, String baseUri, String user, String password, CxWebService webServiceClient, TaskListener listener, boolean shouldRunAsynchronous) {
         AuthenticationRequest authReq = new AuthenticationRequest(user, password);
-        try (OsaScanClient scanClient = new OsaScanClient(baseUri, authReq, instanceLogger)) {
-            ScanServiceTools scanServiceTools = initScanServiceTools(scanClient, build, webServiceClient, listener);
+            OsaScanClient scanClient = new OsaScanClient(baseUri, authReq);
+            ScanServiceTools scanServiceTools = initScanServiceTools(scanClient, run, workspace, webServiceClient, listener);
             ScanService scanService = new ScanService(scanServiceTools);
             return scanService.scan(shouldRunAsynchronous);
-        } catch (Exception e) {
-            //todo
-            throw e;
-        }
     }
 
-    private ScanServiceTools initScanServiceTools(OsaScanClient scanClient, AbstractBuild<?, ?> build, CxWebService webServiceClient, BuildListener listener) {
+    private ScanServiceTools initScanServiceTools(OsaScanClient scanClient, Run<?, ?> run, FilePath workspace, CxWebService webServiceClient, TaskListener listener) {
         ScanServiceTools scanServiceTools = new ScanServiceTools();
         scanServiceTools.setOsaScanClient(scanClient);
         DependencyFolder folders = new DependencyFolder(includeOpenSourceFolders, excludeOpenSourceFolders);
         scanServiceTools.setDependencyFolder(folders);
-        scanServiceTools.setBuild(build);
+        scanServiceTools.setRun(run);
         scanServiceTools.setListener(listener);
-        scanServiceTools.setLogger(instanceLogger);
         scanServiceTools.setProjectId(projectId);
         scanServiceTools.setWebServiceClient(webServiceClient);
+        scanServiceTools.setWorkspace(workspace);
         return scanServiceTools;
     }
 
@@ -927,7 +1085,7 @@ public class CxScanBuilder extends Builder {
             config.setHighSeverity(getHighThreshold());
             config.setMediumSeverity(getMediumThreshold());
             config.setLowSeverity(getLowThreshold());
-            config.setBuildStatus(getVulnerabilityThresholdResult());
+            config.setBuildStatus(vulnerabilityThresholdResult);
         }
 
         return config;
@@ -986,78 +1144,81 @@ public class CxScanBuilder extends Builder {
         return build.getProject().getDisplayName() + "-" + build.getDisplayName();
     }
 
-    private void initLogger(final File checkmarxBuildDir, final BuildListener listener, final String loggerSuffix) {
-        instanceLogger = CxLogUtils.loggerWithSuffix(getClass(), loggerSuffix);
-        final WriterAppender writerAppender = new WriterAppender(new PatternLayout("%m%n"), listener.getLogger());
-        writerAppender.setThreshold(Level.INFO);
-        final Logger parentLogger = CxLogUtils.parentLoggerWithSuffix(loggerSuffix);
-        parentLogger.addAppender(writerAppender);
-        String logFileName = checkmarxBuildDir.getAbsolutePath() + File.separator + "checkmarx.log";
+
+    private CxWSResponseRunID submitScan(final Run<?, ?> run, FilePath workspace, final CxWebService cxWebService, final TaskListener listener) throws IOException {
+
+        FilePath zipFile = null;
 
         try {
-            fileAppender = new FileAppender(new PatternLayout("%C: [%d] %-5p: %m%n"), logFileName);
-            fileAppender.setThreshold(Level.DEBUG);
-            parentLogger.addAppender(fileAppender);
-        } catch (IOException e) {
-            LOGGER.warn("Could not open log file for writing: " + logFileName);
-            LOGGER.debug(e);
-        }
-    }
-
-    private void closeLogger() {
-        instanceLogger.removeAppender(fileAppender);
-        fileAppender.close();
-        instanceLogger = LOGGER; // Redirect all logs back to static logger
-    }
-
-    private CxWSResponseRunID submitScan(final AbstractBuild<?, ?> build, final CxWebService cxWebService, final BuildListener listener) throws IOException {
-
-        try {
-            EnvVars env = build.getEnvironment(listener);
+            EnvVars env = run.getEnvironment(listener);
             final CliScanArgs cliScanArgs = createCliScanArgs(new byte[]{}, env);
-            checkIncrementalScan(build);
-            FilePath zipFile = zipWorkspaceFolder(build, listener);
+            checkIncrementalScan(run);
+            zipFile = zipWorkspaceFolder(run, workspace, listener);
             SastScan sastScan = new SastScan(cxWebService, cliScanArgs, new ProjectContract(cxWebService));
             CxWSResponseRunID cxWSResponseRunId = sastScan.scan(getGroupId(), zipFile, isThisBuildIncremental);
             zipFile.delete();
-            instanceLogger.info("Temporary file deleted");
-            instanceLogger.info("\nScan job submitted successfully\n");
+            jobConsoleLogger.info("Temporary file deleted");
+            jobConsoleLogger.info("\nScan job submitted successfully\n");
             return cxWSResponseRunId;
+
         } catch (Zipper.MaxZipSizeReached e) {
             throw new AbortException("Checkmarx Scan Failed: When zipping file " + e.getCurrentZippedFileName() + ", reached maximum upload size limit of "
                     + FileUtils.byteCountToDisplaySize(CxConfig.maxZipSize()) + "\n");
-
         } catch (Zipper.NoFilesToZip e) {
+            exposeZippingLogToJobConsole(e);
             throw new AbortException("Checkmarx Scan Failed: No files to scan");
+
+        } catch (Zipper.ZipperException e) {
+            exposeZippingLogToJobConsole(e);
+            throw new AbortException("Checkmarx Scan Failed: "+ e.getMessage());
+
         } catch (InterruptedException e) {
             throw new AbortException("Remote operation failed on slave node: " + e.getMessage());
+
+        }  finally {
+            if(zipFile != null) {
+                try {
+                    if (zipFile.exists()) {
+                        if (zipFile.delete()) {
+                            jobConsoleLogger.info("Temporary file deleted");
+                        } else {
+                            jobConsoleLogger.info("Fail to delete temporary file");
+                        }
+                    }
+                } catch (Exception e) {
+                    jobConsoleLogger.error("Fail to delete temporary file", e);
+                }
+            }
         }
     }
 
+    private void exposeZippingLogToJobConsole(Zipper.ZipperException zipperException){
+        jobConsoleLogger.info(zipperException.getZippingDetails().getZippingLog());
+    }
 
     private boolean needToAvoidDuplicateProjectScans(CxWebService cxWebService) throws AbortException {
         return avoidDuplicateProjectScans && projectHasQueuedScans(cxWebService);
     }
 
-    private void checkIncrementalScan(AbstractBuild<?, ?> build) {
-        isThisBuildIncremental = isThisBuildIncremental(build.getNumber());
+    private void checkIncrementalScan(Run<?, ?> run) {
+        isThisBuildIncremental = isThisBuildIncremental(run.getNumber());
 
         if (isThisBuildIncremental) {
-            instanceLogger.info("\nScan job started in incremental scan mode\n");
+            jobConsoleLogger.info("\nScan job started in incremental scan mode\n");
         } else {
-            instanceLogger.info("\nScan job started in full scan mode\n");
+            jobConsoleLogger.info("\nScan job started in full scan mode\n");
         }
     }
 
-    private FilePath zipWorkspaceFolder(AbstractBuild<?, ?> build, BuildListener listener) throws IOException, InterruptedException {
-        FolderPattern folderPattern = new FolderPattern(instanceLogger, build, listener);
+    private FilePath zipWorkspaceFolder(Run<?, ?> run, FilePath workspace, TaskListener listener) throws IOException, InterruptedException {
+        FolderPattern folderPattern = new FolderPattern(run, listener);
         DescriptorImpl descriptor = getDescriptor();
         String excludeFolders = StringUtils.isNotEmpty(getExcludeFolders()) ? getExcludeFolders() : descriptor.getExcludeFolders();
         String filterPattern = StringUtils.isNotEmpty(getFilterPattern()) ? getFilterPattern() : descriptor.getFilterPattern();
 
         String combinedFilterPattern = folderPattern.generatePattern(filterPattern, excludeFolders);
 
-        CxZip cxZip = new CxZip(instanceLogger, build, listener);
+        CxZip cxZip = new CxZip(workspace, listener);
         return cxZip.ZipWorkspaceFolder(combinedFilterPattern);
     }
 
@@ -1068,7 +1229,7 @@ public class CxScanBuilder extends Builder {
 
 
     private CliScanArgs createCliScanArgs(byte[] compressedSources, EnvVars env) {
-        CliScanArgsFactory cliScanArgsFactory = new CliScanArgsFactory(instanceLogger, getPreset(), getProjectName(), getGroupId(), getSourceEncoding(), getComment(), isThisBuildIncremental, compressedSources, env, projectId);
+        CliScanArgsFactory cliScanArgsFactory = new CliScanArgsFactory(getPreset(), getProjectName(), getGroupId(), getSourceEncoding(), getComment(), isThisBuildIncremental, compressedSources, env, projectId, jobConsoleLogger);
         return cliScanArgsFactory.create();
     }
 
@@ -1099,13 +1260,13 @@ public class CxScanBuilder extends Builder {
 
     // Check what triggered this build, and in case the trigger was SCM
     // and the build is configured to skip those triggers, return true.
-    private boolean isSkipScan(final AbstractBuild<?, ?> build) {
+    private boolean isSkipScan(final Run<?, ?> run) {
 
         if (!isSkipSCMTriggers()) {
             return false;
         }
 
-        final List<Cause> causes = build.getCauses();
+        final List<Cause> causes = run.getCauses();
         final List<Cause> allowedCauses = new LinkedList<>();
 
         for (Cause c : causes) {
@@ -1135,7 +1296,6 @@ public class CxScanBuilder extends Builder {
         public static final int FULL_SCAN_CYCLE_MIN = 1;
         public static final int FULL_SCAN_CYCLE_MAX = 99;
 
-        private static final Logger logger = Logger.getLogger(DescriptorImpl.class);
 
         //////////////////////////////////////////////////////////////////////////////////////
         //  Persistent plugin global configuration parameters
@@ -1147,6 +1307,8 @@ public class CxScanBuilder extends Builder {
         private String username;
         @Nullable
         private String password;
+
+        private boolean prohibitProjectCreation;
         private boolean hideResults;
         private boolean enableCertificateValidation;
         @Nullable
@@ -1218,6 +1380,14 @@ public class CxScanBuilder extends Builder {
             return Secret.fromString(password).getPlainText();
         }
 
+        public boolean isProhibitProjectCreation() {
+            return prohibitProjectCreation;
+        }
+
+        public void setProhibitProjectCreation(boolean prohibitProjectCreation) {
+            this.prohibitProjectCreation = prohibitProjectCreation;
+        }
+
         public boolean isHideResults() {
             return hideResults;
         }
@@ -1240,7 +1410,7 @@ public class CxScanBuilder extends Builder {
 	            effect.
 	             */
 
-                CxSSLUtility.enableSSLCertificateVerification();
+                CxSSLUtility.enableSSLCertificateVerification(STATIC_LOGGER);
             }
             this.enableCertificateValidation = enableCertificateValidation;
         }
@@ -1349,6 +1519,7 @@ public class CxScanBuilder extends Builder {
             return true;
         }
 
+
         //////////////////////////////////////////////////////////////////////////////////////
         //  Helper methods for jelly views
         //////////////////////////////////////////////////////////////////////////////////////
@@ -1377,7 +1548,6 @@ public class CxScanBuilder extends Builder {
         // Field value validators
         //////////////////////////////////////////////////////////////////////////////////////
 
-
         /*
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
 	     *  shared state to avoid synchronization issues.
@@ -1394,7 +1564,7 @@ public class CxScanBuilder extends Builder {
             try {
                 cxWebService = prepareLoggedInWebservice(useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password));
             } catch (Exception e) {
-                logger.debug(e);
+                 STATIC_LOGGER.error(e.getMessage(), e);
                 return FormValidation.ok();
             }
 
@@ -1429,10 +1599,10 @@ public class CxScanBuilder extends Builder {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             CxWebService cxWebService = null;
             try {
-                cxWebService = new CxWebService(serverUrl);
+                cxWebService = new CxWebService(serverUrl, STATIC_LOGGER);
             } catch (Exception e) {
-                logger.debug(e);
-                return FormValidation.error("Invalid system URL");
+                 STATIC_LOGGER.error(e.getMessage(), e);
+                return FormValidation.error(e.getMessage());
             }
 
             try {
@@ -1457,12 +1627,11 @@ public class CxScanBuilder extends Builder {
             String serverUrlToUse = !useOwnServerCredentials ? serverUrl : getServerUrl();
             String usernameToUse = !useOwnServerCredentials ? username : getUsername();
             String passwordToUse = !useOwnServerCredentials ? getPasswordPlainText(password) : getPasswordPlainText();
-            logger.debug("prepareLoggedInWebservice: server: " + serverUrlToUse + " user: " + usernameToUse);
 
-            CxWebService cxWebService = new CxWebService(serverUrlToUse);
-            logger.debug("prepareLoggedInWebservice: created cxWebService");
+            STATIC_LOGGER.info("prepareLoggedInWebservice: server: " + serverUrlToUse + " user: " + usernameToUse);
+
+            CxWebService cxWebService = new CxWebService(serverUrlToUse, STATIC_LOGGER);
             cxWebService.login(usernameToUse, passwordToUse);
-            logger.debug("prepareLoggedInWebservice: logged in");
             return cxWebService;
         }
 
@@ -1483,11 +1652,11 @@ public class CxScanBuilder extends Builder {
                     projectNames.add(pd.getProjectName());
                 }
 
-                logger.debug("Projects list: " + projectNames.size());
+                STATIC_LOGGER.info("Projects list: " + projectNames.size());
                 return projectNames;
 
             } catch (Exception e) {
-                logger.debug("Projects list: empty");
+                STATIC_LOGGER.info("Projects list: empty");
                 return projectNames; // Return empty list of project names
             }
         }
@@ -1526,7 +1695,7 @@ public class CxScanBuilder extends Builder {
                                 cxWSBasicRepsonse.getErrorMessage().equalsIgnoreCase("Unauthorized user")) {
                             return FormValidation.error("The user is not authorized to create/run Checkmarx projects");
                         } else if (cxWSBasicRepsonse.getErrorMessage().startsWith("Exception occurred at IsValidProjectCreationRequest:")) {
-                            logger.warn("Couldn't validate project name with Checkmarx sever:\n" + cxWSBasicRepsonse.getErrorMessage());
+                            STATIC_LOGGER.error("Couldn't validate project name with Checkmarx sever:\n" + cxWSBasicRepsonse.getErrorMessage());
                             return FormValidation.warning(cxWSBasicRepsonse.getErrorMessage());
                         } else {
                             return FormValidation.error(cxWSBasicRepsonse.getErrorMessage());
@@ -1536,7 +1705,7 @@ public class CxScanBuilder extends Builder {
                     return FormValidation.ok();
                 }
             } catch (Exception e) {
-                logger.warn("Couldn't validate project name with Checkmarx sever:\n" + e.getLocalizedMessage());
+                STATIC_LOGGER.error("Couldn't validate project name with Checkmarx sever:\n" + e.getLocalizedMessage());
                 return FormValidation.warning("Can't reach server to validate project name");
             }
         }
@@ -1553,7 +1722,7 @@ public class CxScanBuilder extends Builder {
          * @return list of presets
          */
         /*
-	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
 	     *  shared state to avoid synchronization issues.
 	     */
         public ListBoxModel doFillPresetItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
@@ -1568,11 +1737,11 @@ public class CxScanBuilder extends Builder {
                     listBoxModel.add(new ListBoxModel.Option(p.getPresetName(), Long.toString(p.getID())));
                 }
 
-                logger.debug("Presets list: " + listBoxModel.size());
+                STATIC_LOGGER.info("Presets list: " + listBoxModel.size());
                 return listBoxModel;
 
             } catch (Exception e) {
-                logger.debug("Presets list: empty");
+                STATIC_LOGGER.info("Presets list: empty");
                 String message = "Provide Checkmarx server credentials to see presets list";
                 listBoxModel.add(new ListBoxModel.Option(message, message));
                 return listBoxModel; // Return empty list of project names
@@ -1585,8 +1754,8 @@ public class CxScanBuilder extends Builder {
          * @param value
          * @return if frequency is valid
          */
-	    /*
-	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+        /*
+         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
 	     *  shared state to avoid synchronization issues.
 	     */
         public FormValidation doCheckFullScanCycle(@QueryParameter final int value) {
@@ -1609,9 +1778,9 @@ public class CxScanBuilder extends Builder {
                     listBoxModel.add(new ListBoxModel.Option(cs.getConfigSetName(), Long.toString(cs.getID())));
                 }
 
-                logger.debug("Source encodings list: " + listBoxModel.size());
+                STATIC_LOGGER.info("Source encodings list: " + listBoxModel.size());
             } catch (Exception e) {
-                logger.debug("Source encodings list: empty");
+                STATIC_LOGGER.info("Source encodings list: empty");
                 String message = "Provide Checkmarx server credentials to see source encodings list";
                 listBoxModel.add(new ListBoxModel.Option(message, message));
             }
@@ -1621,8 +1790,8 @@ public class CxScanBuilder extends Builder {
 
 
         // Provides a list of source encodings from checkmarx server for dynamic drop-down list in configuration page
-	    /*
-	     *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+        /*
+         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
 	     *  shared state to avoid synchronization issues.
 	     */
 
@@ -1637,11 +1806,11 @@ public class CxScanBuilder extends Builder {
                     listBoxModel.add(new ListBoxModel.Option(group.getGroupName(), group.getID()));
                 }
 
-                logger.debug("Associated groups list: " + listBoxModel.size());
+                STATIC_LOGGER.info("Associated groups list: " + listBoxModel.size());
                 return listBoxModel;
 
             } catch (Exception e) {
-                logger.debug("Associated groups: empty");
+                STATIC_LOGGER.info("Associated groups: empty");
                 String message = "Provide Checkmarx server credentials to see teams list";
                 listBoxModel.add(new ListBoxModel.Option(message, message));
                 return listBoxModel; // Return empty list of project names
@@ -1790,13 +1959,15 @@ public class CxScanBuilder extends Builder {
                 decodedUrl = url;
             }
 
-            final String[] urlComponents = decodedUrl.split("/");
-            if (urlComponents.length > 0) {
-                return urlComponents[urlComponents.length - 1];
+            String regex = "job/(.*?)(/|$)";
+            String ret = "";
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(decodedUrl);
+            if(matcher.find()) {
+                ret = matcher.group(1);
             }
 
-            // This is a fallback if the above code fails
-            return "";
+            return ret;
         }
 
         /**

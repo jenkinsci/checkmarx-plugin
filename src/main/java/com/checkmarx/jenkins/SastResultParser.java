@@ -1,9 +1,9 @@
 package com.checkmarx.jenkins;
 
+import com.checkmarx.jenkins.logger.CxPluginLogger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.xml.sax.Attributes;
@@ -24,14 +24,14 @@ import static com.checkmarx.jenkins.CxResultSeverity.*;
  */
 public class SastResultParser {
 
-    private final transient Logger logger;
+    private CxPluginLogger logger;
     private String serverUrl;
 
     private SastScanResult sastScanResult;
 
     private static ObjectMapper mapper = new ObjectMapper();
 
-    public SastResultParser(Logger logger, String serverUrl) {
+    public SastResultParser(CxPluginLogger logger, String serverUrl) {
         this.logger = logger;
         this.serverUrl = serverUrl;
     }
@@ -54,11 +54,11 @@ public class SastResultParser {
             setQueriesAsJson();
 
         } catch (ParserConfigurationException e) {
-            logger.fatal(e);
+            logger.error(e.getMessage());
         } catch (SAXException | IOException e) {
             sastScanResult.setResultIsValid(false);
             sastScanResult.setErrorMessage(e.getMessage());
-            logger.warn(e);
+            logger.error(e.getMessage());
         }
         return sastScanResult;
     }
@@ -98,7 +98,7 @@ public class SastResultParser {
                                 sastScanResult.setInfoCount(sastScanResult.getInfoCount()+1);
                             }
                         } else {
-                            logger.warn("\"SeverityIndex\" attribute was not found in element \"Result\" in XML report. "
+                            logger.error("\"SeverityIndex\" attribute was not found in element \"Result\" in XML report. "
                                     + "Make sure you are working with Checkmarx server version 7.1.6 HF3 or above.");
                         }
                     }
@@ -106,11 +106,11 @@ public class SastResultParser {
                 case "Query":
                     currentQueryName = attributes.getValue("name");
                     if (currentQueryName == null) {
-                        logger.warn("\"name\" attribute was not found in element \"Query\" in XML report");
+                        logger.error("\"name\" attribute was not found in element \"Query\" in XML report");
                     }
                     currentQuerySeverity = attributes.getValue("SeverityIndex");
                     if (currentQuerySeverity == null) {
-                        logger.warn("\"SeverityIndex\" attribute was not found in element \"Query\" in XML report. "
+                        logger.error("\"SeverityIndex\" attribute was not found in element \"Query\" in XML report. "
                                 + "Make sure you are working with Checkmarx server version 7.1.6 HF3 or above.");
                     }
                     currentQueryNumOfResults = 0;
@@ -147,7 +147,7 @@ public class SastResultParser {
                 } else if (StringUtils.equals(qr.getSeverity(), INFO.xmlParseString)) {
                     sastScanResult.getInfoQueryResultList().add(qr);
                 } else {
-                    logger.warn("Encountered a result query with unknown severity: " + qr.getSeverity());
+                    logger.error("Encountered a result query with unknown severity: " + qr.getSeverity());
                 }
             }
         }
@@ -155,13 +155,13 @@ public class SastResultParser {
         @NotNull
         private String constructDeepLink(@Nullable String rawDeepLink) {
             if (rawDeepLink == null) {
-                logger.warn("\"DeepLink\" attribute was not found in element \"CxXMLResults\" in XML report");
+                logger.error("\"DeepLink\" attribute was not found in element \"CxXMLResults\" in XML report");
                 return "";
             }
             String token = "CxWebClient";
             String[] tokens = rawDeepLink.split(token);
             if (tokens.length < 1) {
-                logger.warn("DeepLink value found in XML report is of unexpected format: " + rawDeepLink + "\n"
+                logger.error("DeepLink value found in XML report is of unexpected format: " + rawDeepLink + "\n"
                         + "\"Open Code Viewer\" button will not be functional");
             }
             return serverUrl + "/" + token + tokens[1];
@@ -181,7 +181,7 @@ public class SastResultParser {
                    return mapper.writeValueAsString(queryResults);
                }
             } catch (JsonProcessingException e) {
-                logger.warn("Could not parse result to Json \n ", e);
+                logger.error("Could not parse result to Json \n ", e);
             }
             return "[]";
         }

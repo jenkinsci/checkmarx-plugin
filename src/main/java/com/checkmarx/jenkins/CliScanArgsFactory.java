@@ -1,15 +1,17 @@
 package com.checkmarx.jenkins;
 
+import com.checkmarx.jenkins.logger.CxPluginLogger;
 import com.checkmarx.ws.CxJenkinsWebService.*;
 import hudson.EnvVars;
-import org.apache.log4j.Logger;
+
 
 /**
  * Created by tsahib on 7/5/2016.
  */
 public class CliScanArgsFactory {
 
-    private Logger logger;
+    private transient CxPluginLogger logger;
+
     private String preset;
     private final String projectName;
     private final String groupId;
@@ -20,8 +22,7 @@ public class CliScanArgsFactory {
     private final EnvVars env;
     private long projectId;
 
-    public CliScanArgsFactory(Logger logger, String preset, String projectName, String groupId, String sourceEncoding, String comment, boolean isThisBuildIncremental, byte[] compressedSources, EnvVars env, long projectId) {
-        this.logger = logger;
+    public CliScanArgsFactory(String preset, String projectName, String groupId, String sourceEncoding, String comment, boolean isThisBuildIncremental, byte[] compressedSources, EnvVars env, long projectId, CxPluginLogger cxPluginLogger) {
         this.preset = preset;
         this.projectName = projectName;
         this.groupId = groupId;
@@ -31,6 +32,7 @@ public class CliScanArgsFactory {
         this.compressedSources = compressedSources;
         this.env = env;
         this.projectId = projectId;
+        this.logger = cxPluginLogger;
     }
 
     public CliScanArgs create() {

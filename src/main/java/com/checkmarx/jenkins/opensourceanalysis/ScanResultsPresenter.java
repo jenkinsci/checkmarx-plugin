@@ -1,16 +1,19 @@
 package com.checkmarx.jenkins.opensourceanalysis;
 
+import com.checkmarx.jenkins.logger.CxPluginLogger;
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
-import org.apache.log4j.Logger;
+import hudson.model.TaskListener;
+
 
 /**
  * Created by tsahib on 9/13/2016.
  */
 public class ScanResultsPresenter {
-    private transient Logger logger;
 
-    public ScanResultsPresenter(Logger logger) {
-        this.logger = logger;
+    private transient CxPluginLogger logger;
+
+    public ScanResultsPresenter(TaskListener listener) {
+        this.logger = new CxPluginLogger(listener);
     }
 
     public void printResultsToOutput(GetOpenSourceSummaryResponse results) {
