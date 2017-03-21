@@ -27,19 +27,12 @@ public class LibrariesAndCVEsExtractor {
         setLibrariesJson(libraryList, osaScanResult);
 
         List<CVE> cveList = osaScanClient.getScanResultCVEs(osaScanResult.getScanId());
-        setCVEsJson(cveList, osaScanResult);
-
         prepareAndSetCVEsObjects(cveList, libraryList, osaScanResult);
     }
 
     private void setLibrariesJson(List<Library> libraryList, OsaScanResult osaScanResult){
         String libraryListJson = turnListToJSON(libraryList);
         osaScanResult.setOsaFullLibraryList(libraryListJson);
-    }
-
-    private void setCVEsJson(List<CVE> cvesList, OsaScanResult osaScanResult){
-        String cvesListJson = turnListToJSON(cvesList);
-        osaScanResult.setOsaFullCVEsList(cvesListJson);
     }
 
     private String turnListToJSON(List<?> list){
@@ -107,8 +100,10 @@ public class LibrariesAndCVEsExtractor {
             osaScanResult.setMediumCvesList(mediumJson);
             String lowJson = mapper.writeValueAsString(low);
             osaScanResult.setLowCvesList(lowJson);
+            osaScanResult.setOsaFullCVEsList("[ 'High':"+ highJson +",\n 'Medium':"+ mediumJson +",\n 'Low':"+ lowJson +" ]");
         } catch (JsonProcessingException e) {
             e.printStackTrace();
+            osaScanResult.setOsaFullCVEsList("[]");
         }
 
     }

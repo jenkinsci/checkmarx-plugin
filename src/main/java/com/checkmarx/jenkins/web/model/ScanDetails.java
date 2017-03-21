@@ -12,7 +12,7 @@ import java.util.List;
 public class ScanDetails {
 
     @JsonProperty("id")
-    private String id;//"cc5ce4a8-daeb-43d3-a594-83ace96df8e2",
+    private String id;//"cc5ce4a8-daeb-43d3-a594-83ace96df8e2", nn
     @JsonProperty("startAnalyzeTime")
     private String startAnalyzeTime;//:"2016-12-19T10:16:06.1196743Z",
     @JsonProperty("endAnalyzeTime")
