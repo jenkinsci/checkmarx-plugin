@@ -1678,7 +1678,10 @@
             return '' +
 
                     '<div class="tooltip-container" style="bottom:calc(' + thresholdHeight + '% - 1px)">' +
-                    '<div class="threshold-line"></div>' +
+                    '<div class="threshold-line">' +
+                    '<div style="display: none' +
+                    ';">h</div>' +
+                    '</div>' +
                     '<div class="threshold-tooltip">' +
                     '<div class="threshold-tooltip-background">' +
                     '<div class="threshold-icon-white">' +

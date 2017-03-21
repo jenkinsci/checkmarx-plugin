@@ -1,4 +1,5 @@
 <?jelly escape-by-default='true'?>
+<!--suppress ALL -->
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
@@ -480,18 +481,14 @@
 
     </style>
 
-    <j:if test="${it.lastSynchronousBuildAction.showResults}">
-        <j:if test="${it.lastSynchronousBuildAction.lastBuildAsynchronous}">
-            <div>CxSAST scan was run in asynchronous mode. <br/> Refer to the <a target="_blank" href="${it.lastSynchronousBuildAction.projectStateUrl}">CxSAST Web</a> for the scan
-                results
-            </div>
-        </j:if>
-        <j:if test="${!it.lastBuildAsynchronous &amp;&amp; it.resultAvailable}">
 
-            <!--<t:summary icon="/plugin/checkmarx/CxIcon48x48.png">-->
+    <j:if test="${it.lastSynchronousBuildAction.showResults}">
+        <!--<t:summary icon="/plugin/checkmarx/CxIcon48x48.png">-->
+        <j:if test="${it.lastSynchronousBuildAction.resultIsValid}">
+
             <table class="summary-section">
-                <img class="cx-icon job-main-icon" src="/static/182ea377/plugin/checkmarx/CxIcon48x48.png"/>
-                <div class="cx-title job-main-title">Checkmarx</div>
+                <img id="cx-icon-main" class="cx-icon"/>
+                <div class="cx-title">Checkmarx</div>
 
                 <!--sast row-->
                 <tr class="summary-table-row cxsast">
@@ -500,48 +497,14 @@
                             <div class="sum1">CxSAST</div>
                             <div class="sum2">Summary</div>
                         </div>
-
-                        <div class="detailed-report sast-downloads">
-                            <div class="download-txt">
-                                <div class="download-cx-report">Checkmarx Report</div>
-
-                                <div id="pdf-report-link"></div>
-
-                                <div>
-                                    <a id="html-report-link" class="html-report">
-                                        <div class="html-report download-icon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://www.w3.org/2000/svg"
-                                                 id="SvgjsSvg1054" version="1.1" width="14" height="17.20710678118644" viewBox="0 0 14 17.20710678118644"><title>HTML
-                                                Icon</title>
-                                                <desc>Created with Avocode.</desc>
-                                                <defs id="SvgjsDefs1055"/>
-                                                <path id="SvgjsPath1056" d="M279.12 796L284 796L284 806L271 806L271 796L271 796L275.92 796 " fill-opacity="0" fill="#ffffff"
-                                                      stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050"
-                                                      stroke-miterlimit="50" stroke-width="1" transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                                <path id="SvgjsPath1057" d="M277.5 790.5L277.5 797.57 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                                      stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50"
-                                                      stroke-width="1" transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                                <path id="SvgjsPath1058" d="M277.5 790.5L280.5 793.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                                      stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50"
-                                                      stroke-width="1" transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                                <path id="SvgjsPath1059" d="M277.5 790.5L274.5 793.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                                      stroke-linejoin="miter" stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50"
-                                                      stroke-width="1" transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                            </svg>
-                                        </div>
-                                        <div class="html-report download-txt">
-                                            <div class="detailed-report-ttl">HTML</div>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
                     </td>
                     <td class="main-column">
                         <div class="graph">
                             <div class="graph-top">
 
-                                <div id="threshold-exceeded-compliance"></div>
+                                <div id="threshold-exceeded-compliance">
+                                    <div style="display: none">h</div>
+                                </div>
 
                                 <div class="graph-title">Vulnerabilities Status</div>
                             </div>
@@ -549,10 +512,14 @@
 
                                 <!--high-->
                                 <li>
-                                    <div id="bar-count-high" class="bar-count"></div>
-                        <span id="bar-high" class="bar-1">
-                            <div id="tooltip-high"></div>
-                        </span>
+                                    <div id="bar-count-high" class="bar-count">
+                                        <div style="display: none">h</div>
+                                    </div>
+                                        <span id="bar-high" class="bar-1">
+                                            <div id="tooltip-high">
+                                                <div style="display: none">h</div>
+                                            </div>
+                                        </span>
 
                                     <div class="bar-title-container">
                                         <div class="bar-title">High</div>
@@ -594,10 +561,14 @@
 
                                 <!--medium-->
                                 <li>
-                                    <div id="bar-count-med" class="bar-count"></div>
-                        <span id="bar-med" class="bar-2">
-                            <div id="tooltip-med"></div>
-                        </span>
+                                    <div id="bar-count-med" class="bar-count">
+                                        <div style="display: none">h</div>
+                                    </div>
+                                    <span id="bar-med" class="bar-2">
+                                        <div id="tooltip-med">
+                                            <div style="display: none">h</div>
+                                        </div>
+                                    </span>
                                     <div class="bar-title-container">
                                         <div class="bar-title">Medium</div>
                                         <div class="severity-icon">
@@ -638,10 +609,14 @@
 
                                 <!--low-->
                                 <li>
-                                    <div id="bar-count-low" class="bar-count"></div>
-                        <span id="bar-low" class="bar-3">
-                            <div id="tooltip-low"></div>
-                        </span>
+                                    <div id="bar-count-low" class="bar-count">
+                                        <div style="display: none">h</div>
+                                    </div>
+                                    <span id="bar-low" class="bar-3">
+                                        <div id="tooltip-low">
+                                            <div style="display: none">h</div>
+                                        </div>
+                                    </span>
 
                                     <div class="bar-title-container">
                                         <div class="bar-title">Low</div>
@@ -694,72 +669,6 @@
                             <div class="sum1">CxOSA</div>
                             <div class="sum2">Summary</div>
                         </div>
-
-                        <div class="detailed-report">
-                            <div class="download-cx-report">Checkmarx Report</div>
-
-                            <div class="osa-downloads">
-                                <div>
-                                    <a id="osa-pdf-report-link" class="pdf-report">
-                                        <div class="pdf-report download-icon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://www.w3.org/2000/svg"
-                                                 id="SvgjsSvg1022"
-                                                 version="1.1"
-                                                 width="13" height="16" viewBox="0 0 13 16"><title>PDF icon</title>
-                                                <desc>Created with Avocode.</desc>
-                                                <defs id="SvgjsDefs1023">
-                                                    <clipPath id="SvgjsClipPath1027">
-                                                        <path id="SvgjsPath1026" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill="#ffffff"/>
-                                                    </clipPath>
-                                                </defs>
-                                                <path id="SvgjsPath1024" d="M279 768L279 763L280.1 763L284 767L284 768Z " fill="#373050" fill-opacity="1"
-                                                      transform="matrix(1,0,0,1,-271,-763)"/>
-                                                <path id="SvgjsPath1025" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                                      stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2"
-                                                      clip-path="url(&quot;#SvgjsClipPath1027&quot;)" transform="matrix(1,0,0,1,-271,-763)"/>
-                                            </svg>
-                                        </div>
-                                        <div class="pdf-report download-txt">
-                                            <div class="pdf-report detailed-report-ttl">PDF</div>
-                                        </div>
-                                    </a>
-                                </div>
-                                <div>
-                                    <a id="osa-html-report-link" class="html-report">
-                                        <div class="html-report download-icon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://www.w3.org/2000/svg"
-                                                 id="SvgjsSvg1054"
-                                                 version="1.1"
-                                                 width="14" height="17.20710678118644" viewBox="0 0 14 17.20710678118644"><title>HTML Icon</title>
-                                                <desc>Created with Avocode.</desc>
-                                                <defs id="SvgjsDefs1055"/>
-                                                <path id="SvgjsPath1056" d="M279.12 796L284 796L284 806L271 806L271 796L271 796L275.92 796 " fill-opacity="0" fill="#ffffff"
-                                                      stroke-dasharray="0"
-                                                      stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                                      transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                                <path id="SvgjsPath1057" d="M277.5 790.5L277.5 797.57 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                                      stroke-linejoin="miter"
-                                                      stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                                      transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                                <path id="SvgjsPath1058" d="M277.5 790.5L280.5 793.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                                      stroke-linejoin="miter"
-                                                      stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                                      transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                                <path id="SvgjsPath1059" d="M277.5 790.5L274.5 793.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                                      stroke-linejoin="miter"
-                                                      stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                                      transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                            </svg>
-                                        </div>
-                                        <div class="html-report download-txt">
-                                            <div class="detailed-report-ttl">HTML</div>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-
-                        </div>
-
                     </td>
                     <td class="main-column">
                         <div class="libraries">
@@ -797,7 +706,9 @@
                                         </g>
                                     </svg>
                                 </div>
-                                <div id="vulnerable-libraries" class="libraries-vulnerable-number"></div>
+                                <div id="vulnerable-libraries" class="libraries-vulnerable-number">
+                                    <div style="display: none">h</div>
+                                </div>
                                 <div class="libraries-vulnerable-text">
                                     Vulnerable and outdated libraries
                                 </div>
@@ -832,7 +743,9 @@
                                         </g>
                                     </svg>
                                 </div>
-                                <div id="ok-libraries" class="libraries-vulnerable-number"></div>
+                                <div id="ok-libraries" class="libraries-vulnerable-number">
+                                    <div style="display: none">h</div>
+                                </div>
                                 <div class="libraries-ok-text">
                                     Libraries with no vulnerabilities
                                 </div>
@@ -840,17 +753,23 @@
                         </div>
                         <div class="graph">
 
-                            <div id="osa-threshold-exceeded-compliance"></div>
+                            <div id="osa-threshold-exceeded-compliance">
+                                <div style="display: none">h</div>
+                            </div>
                             <div class="graph-title">Vulnerabilities Status</div>
 
                             <ul class="osa-chart chart">
 
                                 <!--osa high-->
                                 <li>
-                                    <div id="osa-bar-count-high" class="bar-count"></div>
-                        <span id="osa-bar-high" class="bar-1">
-                            <div id="osa-tooltip-high"></div>
-                        </span>
+                                    <div id="osa-bar-count-high" class="bar-count">
+                                        <div style="display: none">h</div>
+                                    </div>
+                                    <span id="osa-bar-high" class="bar-1">
+                                        <div id="osa-tooltip-high">
+                                            <div style="display: none">h</div>
+                                        </div>
+                                    </span>
 
                                     <div class="bar-title-container">
                                         <div class="bar-title">High</div>
@@ -894,10 +813,14 @@
 
                                 <!--osa medium-->
                                 <li>
-                                    <div id="osa-bar-count-med" class="bar-count"></div>
-                        <span id="osa-bar-med" class="bar-2">
-                            <div id="osa-tooltip-med"></div>
-                        </span>
+                                    <div id="osa-bar-count-med" class="bar-count">
+                                        <div style="display: none">h</div>
+                                    </div>
+                                    <span id="osa-bar-med" class="bar-2">
+                                        <div id="osa-tooltip-med">
+                                            <div style="display: none">h</div>
+                                        </div>
+                                    </span>
                                     <div class="bar-title-container">
                                         <div class="bar-title">Medium</div>
                                         <div class="severity-icon">
@@ -940,10 +863,14 @@
 
                                 <!--osa low-->
                                 <li>
-                                    <div id="osa-bar-count-low" class="bar-count"></div>
-                        <span id="osa-bar-low" class="bar-3">
-                            <div id="osa-tooltip-low"></div>
-                        </span>
+                                    <div id="osa-bar-count-low" class="bar-count">
+                                        <div style="display: none">h</div>
+                                    </div>
+                                    <span id="osa-bar-low" class="bar-3">
+                                        <div id="osa-tooltip-low">
+                                            <div style="display: none">h</div>
+                                        </div>
+                                    </span>
 
                                     <div class="bar-title-container">
                                         <div class="bar-title">Low</div>
@@ -1001,7 +928,7 @@
                             <div class="sast-downloads">
                                 <!--analyzed results-->
                                 <div class="report-link">
-                                    <a id="sast-full-html-link" class="html-report">
+                                    <a id="sast-html-link" class="html-report">
                                         <div class="html-report download-icon">
                                             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="13px" height="16px" viewBox="0 0 13 16"
                                                  version="1.1"> <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch --> <title>Analize</title>
@@ -1030,28 +957,8 @@
                                 </div>
                                 <!--pdf-->
                                 <div class="report-link">
-                                    <a id="sast-full-pdf-link" class="pdf-report">
-                                        <div class="pdf-report download-icon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://www.w3.org/2000/svg"
-                                                 id="SvgjsSvg1022"
-                                                 version="1.1"
-                                                 width="13" height="16" viewBox="0 0 13 16"><title>PDF icon</title>
-                                                <desc>Created with Avocode.</desc>
-                                                <defs id="SvgjsDefs1023">
-                                                    <clipPath id="SvgjsClipPath1027">
-                                                        <path id="SvgjsPath1026" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill="#ffffff"/>
-                                                    </clipPath>
-                                                </defs>
-                                                <path id="SvgjsPath1024" d="M279 768L279 763L280.1 763L284 767L284 768Z " fill="#373050" fill-opacity="1"
-                                                      transform="matrix(1,0,0,1,-271,-763)"/>
-                                                <path id="SvgjsPath1025" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                                      stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2"
-                                                      clip-path="url(&quot;#SvgjsClipPath1027&quot;)" transform="matrix(1,0,0,1,-271,-763)"/>
-                                            </svg>
-                                        </div>
-                                        <div class="pdf-report download-txt">
-                                            <div class="pdf-report detailed-report-ttl">Download PDF Report</div>
-                                        </div>
+                                    <a id="sast-pdf-link" class="pdf-report">
+                                        <div style="display: none;">h</div>
                                     </a>
                                 </div>
                                 <!--code viewer-->
@@ -1118,7 +1025,9 @@
                                     <div class="full-start-end-text">
                                         Start:
                                     </div>
-                                    <div id="sast-full-start-date" class="full-start-end-date"></div>
+                                    <div id="sast-full-start-date" class="full-start-end-date">
+                                        <div style="display: none">h</div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -1154,7 +1063,9 @@
                                     <div class="full-start-end-text">
                                         End:
                                     </div>
-                                    <div id="sast-full-end-date" class="full-start-end-date"></div>
+                                    <div id="sast-full-end-date" class="full-start-end-date">
+                                        <div style="display: none">h</div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -1193,7 +1104,9 @@
                                     <div class="full-start-end-text">
                                         Files:
                                     </div>
-                                    <div id="sast-full-files" class="full-start-end-date"></div>
+                                    <div id="sast-full-files" class="full-start-end-date">
+                                        <div style="display: none">h</div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -1223,14 +1136,22 @@
                                     <div class="full-start-end-text">
                                         Code Lines:
                                     </div>
-                                    <div id="sast-full-loc" class="full-start-end-date"></div>
+                                    <div id="sast-full-loc" class="full-start-end-date">
+                                        <div style="display: none">h</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div id="sast-cve-table-high-container"></div>
-                        <div id="sast-cve-table-med-container"></div>
-                        <div id="sast-cve-table-low-container"></div>
+                        <div id="sast-cve-table-high-container">
+                            <div style="display: none">h</div>
+                        </div>
+                        <div id="sast-cve-table-med-container">
+                            <div style="display: none">h</div>
+                        </div>
+                        <div id="sast-cve-table-low-container">
+                            <div style="display: none">h</div>
+                        </div>
 
                     </td>
                 </tr>
@@ -1246,7 +1167,7 @@
                         <div class="detailed-report">
                             <div class="sast-downloads osa-downloads">
                                 <div class="report-link">
-                                    <a id="osa-full-html-link" class="html-report">
+                                    <a id="osa-html-link" class="html-report">
                                         <div class="html-report download-icon">
                                             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="13px" height="16px" viewBox="0 0 13 16"
                                                  version="1.1"> <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch --> <title>Analize</title>
@@ -1275,7 +1196,7 @@
                                 </div>
 
                                 <div class="report-link">
-                                    <a id="osa-full-pdf-link" class="pdf-report">
+                                    <a id="osa-pdf-link" class="pdf-report">
                                         <div class="pdf-report download-icon">
                                             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://www.w3.org/2000/svg"
                                                  id="SvgjsSvg1022" version="1.1" width="13" height="16" viewBox="0 0 13 16"><title>PDF icon</title>
@@ -1336,7 +1257,9 @@
                                     <div class="full-start-end-text">
                                         Start:
                                     </div>
-                                    <div id="osa-full-start-date" class="full-start-end-date"></div>
+                                    <div id="osa-full-start-date" class="full-start-end-date">
+                                        <div style="display: none">h</div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -1372,7 +1295,9 @@
                                     <div class="full-start-end-text">
                                         End:
                                     </div>
-                                    <div id="osa-full-end-date" class="full-start-end-date"></div>
+                                    <div id="osa-full-end-date" class="full-start-end-date">
+                                        <div style="display: none">h</div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -1400,26 +1325,34 @@
                                     <div class="full-start-end-text">
                                         Files:
                                     </div>
-                                    <div id="osa-full-files" class="full-start-end-date"></div>
+                                    <div id="osa-full-files" class="full-start-end-date">
+                                        <div style="display: none">h</div>
+                                    </div>
                                 </div>
                             </div>
 
                         </div>
 
-                        <div id="osa-cve-table-high-container"></div>
-                        <div id="osa-cve-table-med-container"></div>
-                        <div id="osa-cve-table-low-container"></div>
+                        <div id="osa-cve-table-high-container">
+                            <div style="display: none">h</div>
+                        </div>
+                        <div id="osa-cve-table-med-container">
+                            <div style="display: none">h</div>
+                        </div>
+                        <div id="osa-cve-table-low-container">
+                            <div style="display: none">h</div>
+                        </div>
 
                     </td>
                 </tr>
             </table>
-            <!--</t:summary>-->
-        </j:if>
 
-
-        <j:if test="${!it.resultAvailable}">
-            <p>No scan results available</p>
         </j:if>
+        <j:if test="${!it.resultIsValid}">
+            <p>Scan finished with the following error:</p>
+            <p>${it.lastSynchronousBuildAction.errorMessage}</p>
+        </j:if>
+        <!--</t:summary>-->
     </j:if>
 
     <script>
@@ -1433,11 +1366,7 @@
         }
 
         //-------------------------- sast vars --------------------------------------
-        var pdfReportReady = verifyVar([${it.lastSynchronousBuildAction.lastSynchronousBuildAction.pdfReportReady}]);
-
-        //link paths
-        var sastPdfPath = "/dor/bo/rega"; //todo - sast pdf path
-        var sastHtmlPath = '${app.rootUrl}${it.lastSynchronousBuildAction.lastSynchronousBuildAction.owner.url}${it.lastSynchronousBuildAction.lastSynchronousBuildAction.urlName}';
+        var pdfReportReady = verifyVar([${it.lastSynchronousBuildAction.pdfReportReady}]);
 
         //thresholds - Legacy form
         var thresholdsEnabled = verifyVar([${it.lastSynchronousBuildAction.thresholdsEnabled}]);
@@ -1460,10 +1389,6 @@
         //this var is needed so previous builds display correctly
         var isOsaFeature = verifyVar(['${it.lastSynchronousBuildAction.osaScanResult}']) !== '';
         var isSastFeature = verifyVar(['${it.lastSynchronousBuildAction.sastScanResult}']) !== '';
-
-        //link paths
-        var osaPdfPath = '${app.rootUrl}${it.lastSynchronousBuildAction.owner.url}${it.lastSynchronousBuildAction.urlName}' + "/osaPdfReport";
-        var osaHtmlPath = '${app.rootUrl}${it.lastSynchronousBuildAction.owner.url}${it.lastSynchronousBuildAction.urlName}' + "/osaHtmlReport";
 
         //Legacy form
         var osaEnabled = verifyVar([${it.lastSynchronousBuildAction.osaEnabled}]);
@@ -1489,13 +1414,13 @@
         var osaLowCveList = verifyVar([${it.lastSynchronousBuildAction.osaScanResult.lowCvesList}]);
 
         //-------------------------- full reports vars --------------------------------------
-        //todo: apply real values
-        var sastFullHtmlPath = "tavi/lek/oded";
-        var sastFullPdfPath = "tavi/pdf/oded";
-        var sastFullCodeViewerPath = "tavi/CodeViewer/odetttt";
+        var sastPdfPath = '${app.rootUrl}${it.lastSynchronousBuildAction.owner.url}${it.lastSynchronousBuildAction.urlName}${it.lastSynchronousBuildAction.pdfReportUrl}';
+        var sastHtmlPath = '${app.rootUrl}${it.lastSynchronousBuildAction.owner.url}${it.lastSynchronousBuildAction.urlName}';
+        //    http://localhost/CxWebClient/ViewerMain.aspx?scanid=1030692&amp;projectid=40565
+        var sastCodeViewerPath = "${it.lastSynchronousBuildAction.codeViewerUrl}?scanid=${it.lastSynchronousBuildAction.scanId}&amp;projectid=${it.lastSynchronousBuildAction.projectId}";
 
-        var osaFullHtmlPath = "tavi/FullHtml/odetttt";
-        var osaFullPdfPath = "tavi/FullPdf/odetttt";
+        var osaHtmlPath = '${app.rootUrl}${it.lastSynchronousBuildAction.owner.url}${it.lastSynchronousBuildAction.urlName}' + "/osaHtmlReport";
+        var osaPdfPath = '${app.rootUrl}${it.lastSynchronousBuildAction.owner.url}${it.lastSynchronousBuildAction.urlName}' + "/osaPdfReport";
 
         var sastStartDate = verifyVar(["${it.lastSynchronousBuildAction.sastScanResult.scanStart}"]);
         var sastEndtDate = verifyVar(["${it.lastSynchronousBuildAction.sastScanResult.scanTime}"]);
@@ -1508,6 +1433,8 @@
 
 
         //---------------------------------------------------------- all other vars ---------------------------------------------------------------
+        var cxIconPath = "${it.lastSynchronousBuildAction.largeIconFileName}";
+
         var SEVERITY = {
             HIGH: {value: 0, name: "high"},
             MED: {value: 1, name: "medium"},
@@ -1537,6 +1464,11 @@
                 '</div>' +
                 '</div>';
 
+
+
+        document.getElementById("cx-icon-main").setAttribute("src", cxIconPath);
+
+
         //---------------------------------------------------------- sast ---------------------------------------------------------------
         //todo - catch exceptions?
         //set bars height and count
@@ -1547,22 +1479,6 @@
         document.getElementById("bar-high").setAttribute("style", "height:" + highCount * 100 / (highCount + medCount + lowCount) + "%");
         document.getElementById("bar-med").setAttribute("style", "height:" + medCount * 100 / (highCount + medCount + lowCount) + "%");
         document.getElementById("bar-low").setAttribute("style", "height:" + lowCount * 100 / (highCount + medCount + lowCount) + "%");
-
-        //report links
-        //sastPdfPath only if pdfReportReady
-        if (pdfReportReady) {
-            document.getElementById("pdf-report-link").innerHTML =
-
-                    '<a class="pdf-report" href="' + sastPdfPath + '">' +
-                    '<div class="pdf-report download-icon">' +
-                    '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1022" version="1.1" width="13" height="16" viewBox="0 0 13 16"><title>PDF icon</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1023"><clipPath id="SvgjsClipPath1027"><path id="SvgjsPath1026" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill="#ffffff"/></clipPath></defs><path id="SvgjsPath1024" d="M279 768L279 763L280.1 763L284 767L284 768Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-271,-763)"/><path id="SvgjsPath1025" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2" clip-path="url(&quot;#SvgjsClipPath1027&quot;)" transform="matrix(1,0,0,1,-271,-763)"/></svg>' +
-                    '</div>' +
-                    '<div class="pdf-report download-txt">' +
-                    '<div class="pdf-report detailed-report-ttl">PDF</div>' +
-                    '</div>' +
-                    '</a>';
-        }
-        document.getElementById("html-report-link").setAttribute("href", sastHtmlPath);
 
         //if threshold is enabled
         if (thresholdsEnabled) {
@@ -1602,20 +1518,16 @@
         if (osaEnabled) {
             //todo - catch exceptions?
             //set bars height and count
-            document.getElementById("osa-bar-count-high").innerHTML = osaHighCount;
-            document.getElementById("osa-bar-count-med").innerHTML = osaMedCount;
-            document.getElementById("osa-bar-count-low").innerHTML = osaLowCount;
+            document.getElementById("osa-bar-count-high").innerHTML = numberWithCommas(osaHighCount);
+            document.getElementById("osa-bar-count-med").innerHTML = numberWithCommas(osaMedCount);
+            document.getElementById("osa-bar-count-low").innerHTML = numberWithCommas(osaLowCount);
 
             document.getElementById("osa-bar-high").setAttribute("style", "height:" + osaHighCount * 100 / (osaHighCount + osaMedCount + osaLowCount) + "%");
             document.getElementById("osa-bar-med").setAttribute("style", "height:" + osaMedCount * 100 / (osaHighCount + osaMedCount + osaLowCount) + "%");
             document.getElementById("osa-bar-low").setAttribute("style", "height:" + osaLowCount * 100 / (osaHighCount + osaMedCount + osaLowCount) + "%");
 
-            document.getElementById("vulnerable-libraries").innerHTML = osaVulnerableAndOutdatedLibs;
-            document.getElementById("ok-libraries").innerHTML = okLibraries;
-
-            //report links
-            document.getElementById("osa-pdf-report-link").setAttribute("href", osaPdfPath);
-            document.getElementById("osa-html-report-link").setAttribute("href", osaHtmlPath);
+            document.getElementById("vulnerable-libraries").innerHTML = numberWithCommas(osaVulnerableAndOutdatedLibs);
+            document.getElementById("ok-libraries").innerHTML = numberWithCommas(okLibraries);
 
             //if threshold is enabled
             if (osaThresholdsEnabled) {
@@ -1658,14 +1570,28 @@
 
 
         //---------------------------------------------------------- full reports ---------------------------------------------------------------
-        //sast full links
-        document.getElementById("sast-full-html-link").setAttribute("href", sastFullHtmlPath);
-        document.getElementById("sast-full-pdf-link").setAttribute("href", sastFullPdfPath);
-        document.getElementById("sast-code-viewer-link").setAttribute("href", sastFullCodeViewerPath);
+        //sast links
+        document.getElementById("sast-html-link").setAttribute("href", sastHtmlPath);
 
-        //osa full links
-        document.getElementById("osa-full-html-link").setAttribute("href", osaFullHtmlPath);
-        document.getElementById("osa-full-pdf-link").setAttribute("href", osaFullPdfPath);
+        //sastPdfPath only if pdfReportReady
+        if (pdfReportReady) {
+            document.getElementById("sast-pdf-link").innerHTML =
+
+                    '<a class="pdf-report" href="' + sastPdfPath + '">' +
+                    '<div class="pdf-report download-icon">' +
+                    '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1022" version="1.1" width="13" height="16" viewBox="0 0 13 16"><title>PDF icon</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1023"><clipPath id="SvgjsClipPath1027"><path id="SvgjsPath1026" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill="#ffffff"/></clipPath></defs><path id="SvgjsPath1024" d="M279 768L279 763L280.1 763L284 767L284 768Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-271,-763)"/><path id="SvgjsPath1025" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2" clip-path="url(&quot;#SvgjsClipPath1027&quot;)" transform="matrix(1,0,0,1,-271,-763)"/></svg>' +
+                    '</div>' +
+                    '<div class="pdf-report download-txt">' +
+                    '<div class="pdf-report detailed-report-ttl">PDF</div>' +
+                    '</div>' +
+                    '</a>';
+        }
+
+        document.getElementById("sast-code-viewer-link").setAttribute("href", sastCodeViewerPath);
+
+        //osa links
+        document.getElementById("osa-html-link").setAttribute("href", osaHtmlPath);
+        document.getElementById("osa-pdf-link").setAttribute("href", osaPdfPath);
 
         //sast info
         document.getElementById("sast-full-start-date").innerHTML = sastStartDate;
@@ -1680,7 +1606,9 @@
 
 
         //generate full reports
-        if (isSastFeature) {
+        if (!isSastFeature || (highCount == 0 &amp;&amp; medCount == 0 &amp;&amp; lowCount == 0 )) {
+            document.getElementById("sast-full").setAttribute("style", "display: none");
+        } else {
             if (highCount &gt; 0) {
                 generateCveTable(SEVERITY.HIGH);
             }
@@ -1690,12 +1618,11 @@
             if (lowCount &gt; 0) {
                 generateCveTable(SEVERITY.LOW);
             }
-        } else {
-            //this is for support for versions before Full Reports feature was implemented - legacy
-            document.getElementById("sast-full").setAttribute("style", "display: none");
         }
 
-        if (isOsaFeature) {
+        if (!isOsaFeature || (isOsaFeature &amp;&amp; osaHighCount == 0 &amp;&amp; osaMedCount == 0 &amp;&amp; osaLowCount == 0 )) {
+            document.getElementById("osa-full").setAttribute("style", "display: none");
+        } else {
             if (osaHighCount &gt; 0) {
                 generateCveTable(SEVERITY.OSA_HIGH);
             }
@@ -1705,12 +1632,9 @@
             if (osaLowCount &gt; 0) {
                 generateCveTable(SEVERITY.OSA_LOW);
             }
-        } else {
-            //this is for support for versions before Full Reports feature was implemented - legacy
-            document.getElementById("osa-full").setAttribute("style", "display: none");
         }
 
-
+        //functions
         function tooltipGenerator(severity) {
             var threshold = 0;
             var count = 0;
