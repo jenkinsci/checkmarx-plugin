@@ -174,7 +174,7 @@ public class CxWebService {
         }
 
         sessionId = cxWSResponseLoginData.getSessionId();
-        logger.info("Login successful, sessionId: " + sessionId);
+        logger.info("Login successful");
     }
 
     private CxWSResponseScanStatus getScanStatus(CxWSResponseRunID cxWSResponseRunID) throws AbortException {
