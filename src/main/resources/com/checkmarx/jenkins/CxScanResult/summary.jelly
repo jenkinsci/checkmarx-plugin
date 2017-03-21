@@ -1366,7 +1366,7 @@
         }
 
         //-------------------------- sast vars --------------------------------------
-        var pdfReportReady = verifyVar(${it.pdfReportReady});
+        var pdfReportReady = verifyVar([${it.pdfReportReady}]);
 
         //thresholds - Legacy form
         var thresholdsEnabled = verifyVar([${it.thresholdsEnabled}]);
@@ -1417,7 +1417,8 @@
         //todo: apply real values
         var sastPdfPath = '${app.rootUrl}${it.owner.url}${it.urlName}${it.pdfReportUrl}';
         var sastHtmlPath = '${app.rootUrl}${it.owner.url}${it.urlName}';
-        var sastCodeViewerPath = "tavi/CodeViewer/odetttt";
+        //    http://localhost/CxWebClient/ViewerMain.aspx?scanid=1030692&amp;projectid=40565
+        var sastCodeViewerPath = "${it.codeViewerUrl}?scanid=${it.scanId}&amp;projectid=${it.projectId}"; //todo
 
         var osaHtmlPath = '${app.rootUrl}${it.owner.url}${it.urlName}' + "/osaHtmlReport";
         var osaPdfPath = '${app.rootUrl}${it.owner.url}${it.urlName}' + "/osaPdfReport";
