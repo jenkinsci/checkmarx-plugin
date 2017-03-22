@@ -356,7 +356,7 @@
             position: relative;
             display: table-cell;
             vertical-align: middle;
-            padding-left: 5px;
+            padding-left: 7px;
             padding-top: 2px;
         }
 
@@ -376,7 +376,7 @@
             color: white;
             display: table-cell;
             vertical-align: middle;
-            padding-right: 5px;
+            padding-right: 7px;
         }
 
         .tooltip-container {
