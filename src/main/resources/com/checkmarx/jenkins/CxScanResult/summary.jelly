@@ -29,6 +29,7 @@
 
         .summary-section td {
             font-family: 'Roboto', sans-serif;
+            font-size: 13px;
         }
 
         tr.summary-table-row {
@@ -112,7 +113,9 @@
         .graph-title {
             font-weight: 500;
             font-size: 16px;
-            display: inline-block;
+            display: table-cell;
+            vertical-align: middle;
+            width: 75%;
         }
 
         .graph {
@@ -120,6 +123,22 @@
             max-width: 709px;
             text-align: left;
             margin-right: 50px;
+        }
+
+        .graph-top {
+            display: table;
+            vertical-align: middle;
+        }
+
+        .threshold-exceeded-compliance {
+            display: table-cell;
+            vertical-align: middle;
+        }
+
+        .threshold-exceeded-text,
+        .threshold-compliance-text {
+            display: table-cell;
+            vertical-align: middle;
         }
 
         .threshold-exceeded-text {
@@ -130,18 +149,15 @@
             color: #21bf3f;
         }
 
-        .threshold-exceeded,
-        .threshold-compliance {
-            display: inline-flex;
-            font-size: 14px;
-            position: absolute;
-            right: 0;
-        }
-
         .threshold-exceeded-icon,
         .threshold-compliance-icon {
-            margin-right: 6px;
+            display: table-cell;
+            /*margin-right: 6px;*/
             line-height: 28px;
+            vertical-align: middle;
+            padding-right: 6px;
+            height: initial;
+            padding-top: 2px;
         }
 
         .detailed-report {
@@ -338,26 +354,29 @@
 
         .threshold-icon-white {
             position: relative;
-            top: 2px;
-            display: inline-block;
-            vertical-align: top;
+            display: table-cell;
+            vertical-align: middle;
+            padding-left: 5px;
+            padding-top: 2px;
         }
 
         .threshold-text {
             position: relative;
             color: white;
-            display: inline-block;
+            display: table-cell;
             padding-right: 6px;
             padding-left: 7px;
-            vertical-align: top;
+            padding-bottom: 1px;
+            vertical-align: middle;
             font-size: 13px;
         }
 
         .threshold-number {
             position: relative;
             color: white;
-            display: inline-block;
-            vertical-align: top;
+            display: table-cell;
+            vertical-align: middle;
+            padding-right: 5px;
         }
 
         .tooltip-container {
@@ -380,6 +399,8 @@
 
         .threshold-tooltip-background {
             position: relative;
+            display: table;
+            vertical-align: middle;
             padding: 0 12px;
             margin: 0;
             margin-left: 4px;
@@ -399,8 +420,10 @@
 
         .threshold-exceeded,
         .threshold-compliance {
+            display: table;
             font-size: 15px;
             font-weight: bold;
+            vertical-align: middle;
         }
 
         .threshold-exceeded {
@@ -483,11 +506,10 @@
 
 
     <j:if test="${it.showResults}">
-        <!--<t:summary icon="/plugin/checkmarx/CxIcon48x48.png">-->
         <j:if test="${it.resultIsValid}">
 
             <table class="summary-section">
-                <img id="cx-icon-main" class="cx-icon"/>
+                <img class="cx-icon" id="cx-icon-main"/>
                 <div class="cx-title">Checkmarx</div>
 
                 <!--sast row-->
@@ -501,53 +523,51 @@
                     <td class="main-column">
                         <div class="graph">
                             <div class="graph-top">
-
+                                <div class="graph-title">Vulnerabilities Status</div>
                                 <div id="threshold-exceeded-compliance">
                                     <div style="display: none">h</div>
                                 </div>
-
-                                <div class="graph-title">Vulnerabilities Status</div>
                             </div>
                             <ul class="chart">
 
                                 <!--high-->
                                 <li>
-                                    <div id="bar-count-high" class="bar-count">
+                                    <div class="bar-count" id="bar-count-high">
                                         <div style="display: none">h</div>
                                     </div>
-                                        <span id="bar-high" class="bar-1">
-                                            <div id="tooltip-high">
-                                                <div style="display: none">h</div>
-                                            </div>
-                                        </span>
-
+                        <span class="bar-1" id="bar-high"><div id="tooltip-high">
+                            <div style="display: none">h</div>
+                        </div></span>
                                     <div class="bar-title-container">
                                         <div class="bar-title">High</div>
                                         <div class="severity-icon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="21px" viewBox="0 0 23 21"
-                                                 version="1.1"> <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch --> <title>high</title>
+                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="21px" version="1.1" viewBox="0 0 23 21"
+                                                 width="23px">
+                                                <title>high</title>
                                                 <desc>Created with Sketch.</desc>
                                                 <defs>
-                                                    <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"
-                                                          id="path-1"/>
-                                                    <mask id="mask-1" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884" height="19"
-                                                          fill="white">
+                                                    <path id="path-1"
+                                                          d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"/>
+                                                    <mask height="19" maskUnits="objectBoundingBox" id="mask-1" width="16.0859884" maskContentUnits="userSpaceOnUse" fill="white"
+                                                          x="0" y="0">
                                                         <use xlink:href="#path-1"/>
                                                     </mask>
                                                 </defs>
-                                                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                                    <g id="Jenkins" transform="translate(-602.000000, -537.000000)">
-                                                        <g id="SAST" transform="translate(272.000000, 180.000000)">
-                                                            <g id="Vulnerabilities-Stat" transform="translate(246.082552, 0.000000)">
-                                                                <g id="High" transform="translate(22.425880, 105.921935)">
-                                                                    <g id="high" transform="translate(62.000000, 252.000000)">
-                                                                        <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
-                                                                              id="Combined-Shape" fill="#F5F5F5"/>
-                                                                        <use id="Rectangle-40-Copy" stroke="#666666" mask="url(#mask-1)" stroke-width="4" xlink:href="#path-1"/>
-                                                                        <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
-                                                                              id="Page-1" fill="#DA2945"/>
-                                                                        <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12" width="2" height="4"/>
-                                                                        <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17" width="2" height="2"/>
+                                                <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
+                                                    <g transform="translate(-602.000000, -537.000000)" id="Jenkins">
+                                                        <g transform="translate(272.000000, 180.000000)" id="SAST">
+                                                            <g transform="translate(246.082552, 0.000000)" id="Vulnerabilities-Stat">
+                                                                <g transform="translate(22.425880, 105.921935)" id="High">
+                                                                    <g transform="translate(62.000000, 252.000000)" id="high">
+                                                                        <path id="Combined-Shape"
+                                                                              d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
+                                                                              fill="#F5F5F5"/>
+                                                                        <use mask="url(#mask-1)" stroke-width="4" id="Rectangle-40-Copy" stroke="#666666" xlink:href="#path-1"/>
+                                                                        <path id="Page-1"
+                                                                              d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
+                                                                              fill="#DA2945"/>
+                                                                        <rect height="4" id="Rectangle-5" width="2" fill="#FFFFFF" x="14" y="12"/>
+                                                                        <rect height="2" id="Rectangle-6" width="2" fill="#FFFFFF" x="14" y="17"/>
                                                                     </g>
                                                                 </g>
                                                             </g>
@@ -561,41 +581,42 @@
 
                                 <!--medium-->
                                 <li>
-                                    <div id="bar-count-med" class="bar-count">
+                                    <div class="bar-count" id="bar-count-med">
                                         <div style="display: none">h</div>
                                     </div>
-                                    <span id="bar-med" class="bar-2">
-                                        <div id="tooltip-med">
-                                            <div style="display: none">h</div>
-                                        </div>
-                                    </span>
+                        <span class="bar-2" id="bar-med"><div id="tooltip-med">
+                            <div style="display: none">h</div>
+                        </div></span>
                                     <div class="bar-title-container">
                                         <div class="bar-title">Medium</div>
                                         <div class="severity-icon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="21px" viewBox="0 0 23 21"
-                                                 version="1.1"> <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch --> <title>medium</title>
+                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="21px" version="1.1" viewBox="0 0 23 21"
+                                                 width="23px">
+                                                <title>medium</title>
                                                 <desc>Created with Sketch.</desc>
                                                 <defs>
-                                                    <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"
-                                                          id="path-2"/>
-                                                    <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884" height="19"
-                                                          fill="white">
+                                                    <path id="path-2"
+                                                          d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"/>
+                                                    <mask height="19" maskUnits="objectBoundingBox" id="mask-2" width="16.0859884" maskContentUnits="userSpaceOnUse" fill="white"
+                                                          x="0" y="0">
                                                         <use xlink:href="#path-2"/>
                                                     </mask>
                                                 </defs>
-                                                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                                    <g id="Jenkins" transform="translate(-680.000000, -537.000000)">
-                                                        <g id="SAST" transform="translate(272.000000, 180.000000)">
-                                                            <g id="Vulnerabilities-Stat" transform="translate(246.082552, 0.000000)">
-                                                                <g id="High" transform="translate(22.425880, 105.921935)">
-                                                                    <g id="med" transform="translate(140.000000, 252.000000)">
-                                                                        <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
-                                                                              id="Combined-Shape" fill="#F5F5F5"/>
-                                                                        <use id="Rectangle-40-Copy" stroke="#666666" mask="url(#mask-2)" stroke-width="4" xlink:href="#path-2"/>
-                                                                        <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
-                                                                              id="Page-1" fill="#FFB400"/>
-                                                                        <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12" width="2" height="4"/>
-                                                                        <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17" width="2" height="2"/>
+                                                <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
+                                                    <g transform="translate(-680.000000, -537.000000)" id="Jenkins">
+                                                        <g transform="translate(272.000000, 180.000000)" id="SAST">
+                                                            <g transform="translate(246.082552, 0.000000)" id="Vulnerabilities-Stat">
+                                                                <g transform="translate(22.425880, 105.921935)" id="High">
+                                                                    <g transform="translate(140.000000, 252.000000)" id="med">
+                                                                        <path id="Combined-Shape"
+                                                                              d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
+                                                                              fill="#F5F5F5"/>
+                                                                        <use mask="url(#mask-2)" stroke-width="4" id="Rectangle-40-Copy" stroke="#666666" xlink:href="#path-2"/>
+                                                                        <path id="Page-1"
+                                                                              d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
+                                                                              fill="#FFB400"/>
+                                                                        <rect height="4" id="Rectangle-5" width="2" fill="#FFFFFF" x="14" y="12"/>
+                                                                        <rect height="2" id="Rectangle-6" width="2" fill="#FFFFFF" x="14" y="17"/>
                                                                     </g>
                                                                 </g>
                                                             </g>
@@ -609,44 +630,42 @@
 
                                 <!--low-->
                                 <li>
-                                    <div id="bar-count-low" class="bar-count">
+                                    <div class="bar-count" id="bar-count-low">
                                         <div style="display: none">h</div>
                                     </div>
-                                    <span id="bar-low" class="bar-3">
-                                        <div id="tooltip-low">
-                                            <div style="display: none">h</div>
-                                        </div>
-                                    </span>
-
+                        <span class="bar-3" id="bar-low"><div id="tooltip-low">
+                            <div style="display: none">h</div>
+                        </div></span>
                                     <div class="bar-title-container">
                                         <div class="bar-title">Low</div>
                                         <div class="severity-icon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="21px" viewBox="0 0 23 21"
-                                                 version="1.1">
-                                                <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="21px" version="1.1" viewBox="0 0 23 21"
+                                                 width="23px">
                                                 <title>low</title>
                                                 <desc>Created with Sketch.</desc>
                                                 <defs>
-                                                    <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"
-                                                          id="path-3"/>
-                                                    <mask id="mask-3" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884" height="19"
-                                                          fill="white">
+                                                    <path id="path-3"
+                                                          d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"/>
+                                                    <mask height="19" maskUnits="objectBoundingBox" id="mask-3" width="16.0859884" maskContentUnits="userSpaceOnUse" fill="white"
+                                                          x="0" y="0">
                                                         <use xlink:href="#path-3"/>
                                                     </mask>
                                                 </defs>
-                                                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                                    <g id="Jenkins" transform="translate(-641.000000, -537.000000)">
-                                                        <g id="SAST" transform="translate(272.000000, 180.000000)">
-                                                            <g id="Vulnerabilities-Stat" transform="translate(246.082552, 0.000000)">
-                                                                <g id="High" transform="translate(22.425880, 105.921935)">
-                                                                    <g id="low" transform="translate(101.000000, 252.000000)">
-                                                                        <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
-                                                                              id="Combined-Shape" fill="#F5F5F5"/>
-                                                                        <use id="Rectangle-40-Copy" stroke="#666666" mask="url(#mask-3)" stroke-width="4" xlink:href="#path-3"/>
-                                                                        <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
-                                                                              id="Page-1" fill="#EFD412"/>
-                                                                        <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12" width="2" height="4"/>
-                                                                        <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17" width="2" height="2"/>
+                                                <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
+                                                    <g transform="translate(-641.000000, -537.000000)" id="Jenkins">
+                                                        <g transform="translate(272.000000, 180.000000)" id="SAST">
+                                                            <g transform="translate(246.082552, 0.000000)" id="Vulnerabilities-Stat">
+                                                                <g transform="translate(22.425880, 105.921935)" id="High">
+                                                                    <g transform="translate(101.000000, 252.000000)" id="low">
+                                                                        <path id="Combined-Shape"
+                                                                              d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
+                                                                              fill="#F5F5F5"/>
+                                                                        <use mask="url(#mask-3)" stroke-width="4" id="Rectangle-40-Copy" stroke="#666666" xlink:href="#path-3"/>
+                                                                        <path id="Page-1"
+                                                                              d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
+                                                                              fill="#EFD412"/>
+                                                                        <rect height="4" id="Rectangle-5" width="2" fill="#FFFFFF" x="14" y="12"/>
+                                                                        <rect height="2" id="Rectangle-6" width="2" fill="#FFFFFF" x="14" y="17"/>
                                                                     </g>
                                                                 </g>
                                                             </g>
@@ -663,7 +682,7 @@
                 </tr>
 
                 <!--osa row-->
-                <tr id="osa-info" class="summary-table-row cxosa">
+                <tr class="summary-table-row cxosa" id="osa-info">
                     <td class="title-column">
                         <div class="summary-title">
                             <div class="sum1">CxOSA</div>
@@ -672,32 +691,31 @@
                     </td>
                     <td class="main-column">
                         <div class="libraries">
-
                             <div class="libraries-vulnerable">
                                 <div class="libraries-vulnerable-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="47px" height="31px" viewBox="0 0 47 31"
-                                         version="1.1">
-                                        <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
-                                        <title>lib Vulnerabilities Icon</title>
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="31px" version="1.1" viewBox="0 0 47 31" width="47px">
+                                        <title>lib
+                                            Vulnerabilities Icon</title>
                                         <desc>Created with Sketch.</desc>
                                         <defs>
-                                            <path d="M25,31 L4,31 C1.94360167,31 0,29.0245324 0,27 L0,8 L0,3 C0,1.48550257 1.46424259,0 3,0 L9,0 C9.88514832,0 11.1635669,0.937415809 12,2 L12,4 L34,4 C36.0604107,4.42857143 38,6.41548071 38,9 L38,11"
-                                                  id="path-4"/>
-                                            <mask id="mask-4" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="38" height="31" fill="white">
+                                            <path id="path-4"
+                                                  d="M25,31 L4,31 C1.94360167,31 0,29.0245324 0,27 L0,8 L0,3 C0,1.48550257 1.46424259,0 3,0 L9,0 C9.88514832,0 11.1635669,0.937415809 12,2 L12,4 L34,4 C36.0604107,4.42857143 38,6.41548071 38,9 L38,11"/>
+                                            <mask height="31" maskUnits="objectBoundingBox" id="mask-4" width="38" maskContentUnits="userSpaceOnUse" fill="white" x="0" y="0">
                                                 <use xlink:href="#path-4"/>
                                             </mask>
                                         </defs>
-                                        <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                            <g id="Jenkins" transform="translate(-518.000000, -646.000000)">
-                                                <g id="OSA" transform="translate(270.000000, 646.000000)">
-                                                    <g id="Lib-Vulnerabilities" transform="translate(248.000000, 0.000000)">
+                                        <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
+                                            <g transform="translate(-518.000000, -646.000000)" id="Jenkins">
+                                                <g transform="translate(270.000000, 646.000000)" id="OSA">
+                                                    <g transform="translate(248.000000, 0.000000)" id="Lib-Vulnerabilities">
                                                         <g id="lib-Vulnerabilities-Icon">
-                                                            <use id="Combined-Shape" stroke="#362F53" mask="url(#mask-4)" stroke-width="4" xlink:href="#path-4"/>
-                                                            <g id="Alert" transform="translate(26.600000, 14.233021)">
-                                                                <path d="M9.71486676,1.21470909 C10.3018963,0.274949219 11.2197722,0.29932009 11.7612462,1.26246584 L19.4943093,15.0176364 C20.037464,15.9837716 19.5847058,16.7669789 18.4769973,16.7669789 L2.0007805,16.7669789 C0.895779941,16.7669789 0.477014275,16.0033396 1.06291102,15.0653932 L9.71486676,1.21470909 Z"
-                                                                      id="Page-1" fill="#DA2945"/>
-                                                                <rect id="Rectangle-5" fill="#FFFFFF" x="9.4" y="5.76697892" width="2" height="5"/>
-                                                                <rect id="Rectangle-6" fill="#FFFFFF" x="9.4" y="11.7669789" width="2" height="2"/>
+                                                            <use mask="url(#mask-4)" stroke-width="4" id="Combined-Shape" stroke="#362F53" xlink:href="#path-4"/>
+                                                            <g transform="translate(26.600000, 14.233021)" id="Alert">
+                                                                <path id="Page-1"
+                                                                      d="M9.71486676,1.21470909 C10.3018963,0.274949219 11.2197722,0.29932009 11.7612462,1.26246584 L19.4943093,15.0176364 C20.037464,15.9837716 19.5847058,16.7669789 18.4769973,16.7669789 L2.0007805,16.7669789 C0.895779941,16.7669789 0.477014275,16.0033396 1.06291102,15.0653932 L9.71486676,1.21470909 Z"
+                                                                      fill="#DA2945"/>
+                                                                <rect height="5" id="Rectangle-5" width="2" fill="#FFFFFF" x="9.4" y="5.76697892"/>
+                                                                <rect height="2" id="Rectangle-6" width="2" fill="#FFFFFF" x="9.4" y="11.7669789"/>
                                                             </g>
                                                         </g>
                                                     </g>
@@ -706,36 +724,35 @@
                                         </g>
                                     </svg>
                                 </div>
-                                <div id="vulnerable-libraries" class="libraries-vulnerable-number">
+                                <div class="libraries-vulnerable-number" id="vulnerable-libraries">
                                     <div style="display: none">h</div>
                                 </div>
                                 <div class="libraries-vulnerable-text">
                                     Vulnerable and outdated libraries
                                 </div>
                             </div>
-
                             <div class="libraries-ok">
                                 <div class="libraries-ok-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="47px" height="31px" viewBox="0 0 47 31"
-                                         version="1.1">
-                                        <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
-                                        <title>Icon</title>
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="31px" version="1.1" viewBox="0 0 47 31" width="47px">
+                                        <title>
+                                            Icon</title>
                                         <desc>Created with Sketch.</desc>
                                         <defs>
-                                            <path d="M28,31 L4,31 C1.99474908,31 0,29.0245324 0,27 L0,8 L0,3 C0,1.48550257 1.50277529,0 3,0 L9,0 C10.1452838,0 11.457345,0.937415809 12,2 L13,4 L35,4 C37.0093689,4.42857143 39,6.41548071 39,9 L39,11"
-                                                  id="path-5"/>
-                                            <mask id="mask-5" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="39" height="31" fill="white">
+                                            <path id="path-5"
+                                                  d="M28,31 L4,31 C1.99474908,31 0,29.0245324 0,27 L0,8 L0,3 C0,1.48550257 1.50277529,0 3,0 L9,0 C10.1452838,0 11.457345,0.937415809 12,2 L13,4 L35,4 C37.0093689,4.42857143 39,6.41548071 39,9 L39,11"/>
+                                            <mask height="31" maskUnits="objectBoundingBox" id="mask-5" width="39" maskContentUnits="userSpaceOnUse" fill="white" x="0" y="0">
                                                 <use xlink:href="#path-5"/>
                                             </mask>
                                         </defs>
-                                        <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                            <g id="Jenkins" transform="translate(-848.000000, -651.000000)">
-                                                <g id="OSA" transform="translate(270.000000, 646.000000)">
-                                                    <g id="Lib-OK" transform="translate(578.000000, 5.000000)">
+                                        <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
+                                            <g transform="translate(-848.000000, -651.000000)" id="Jenkins">
+                                                <g transform="translate(270.000000, 646.000000)" id="OSA">
+                                                    <g transform="translate(578.000000, 5.000000)" id="Lib-OK">
                                                         <g id="Icon">
-                                                            <use id="Combined-Shape-Copy" stroke="#362F53" mask="url(#mask-5)" stroke-width="4" xlink:href="#path-5"/>
-                                                            <path d="M46.4529784,18.9030304 C46.8068562,19.8686359 47,20.9117624 47,22 C47,26.9705627 42.9705627,31 38,31 C33.0294373,31 29,26.9705627 29,22 C29,17.0294373 33.0294373,13 38,13 C40.393622,13 42.5689975,13.934425 44.1812437,15.4583924 L37.6904269,21.8965709 L35.079173,19.3040452 L32.1948583,22.1475069 L37.6899611,27.6031981 L46.4529784,18.9030304 Z"
-                                                                  id="Combined-Shape" fill="#8EBE15"/>
+                                                            <use mask="url(#mask-5)" stroke-width="4" id="Combined-Shape-Copy" stroke="#362F53" xlink:href="#path-5"/>
+                                                            <path id="Combined-Shape"
+                                                                  d="M46.4529784,18.9030304 C46.8068562,19.8686359 47,20.9117624 47,22 C47,26.9705627 42.9705627,31 38,31 C33.0294373,31 29,26.9705627 29,22 C29,17.0294373 33.0294373,13 38,13 C40.393622,13 42.5689975,13.934425 44.1812437,15.4583924 L37.6904269,21.8965709 L35.079173,19.3040452 L32.1948583,22.1475069 L37.6899611,27.6031981 L46.4529784,18.9030304 Z"
+                                                                  fill="#8EBE15"/>
                                                         </g>
                                                     </g>
                                                 </g>
@@ -743,7 +760,7 @@
                                         </g>
                                     </svg>
                                 </div>
-                                <div id="ok-libraries" class="libraries-vulnerable-number">
+                                <div class="libraries-vulnerable-number" id="ok-libraries">
                                     <div style="display: none">h</div>
                                 </div>
                                 <div class="libraries-ok-text">
@@ -752,54 +769,50 @@
                             </div>
                         </div>
                         <div class="graph">
-
-                            <div id="osa-threshold-exceeded-compliance">
-                                <div style="display: none">h</div>
+                            <div class="graph-top">
+                                <div class="graph-title">Vulnerabilities Status</div>
+                                <div id="osa-threshold-exceeded-compliance">
+                                    <div style="display: none">h</div>
+                                </div>
                             </div>
-                            <div class="graph-title">Vulnerabilities Status</div>
-
                             <ul class="osa-chart chart">
-
-                                <!--osa high-->
                                 <li>
-                                    <div id="osa-bar-count-high" class="bar-count">
+                                    <div class="bar-count" id="osa-bar-count-high">
                                         <div style="display: none">h</div>
                                     </div>
-                                    <span id="osa-bar-high" class="bar-1">
-                                        <div id="osa-tooltip-high">
-                                            <div style="display: none">h</div>
-                                        </div>
-                                    </span>
-
+                        <span class="bar-1" id="osa-bar-high"><div id="osa-tooltip-high">
+                            <div style="display: none">h</div>
+                        </div></span>
                                     <div class="bar-title-container">
                                         <div class="bar-title">High</div>
                                         <div class="severity-icon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="21px" viewBox="0 0 23 21"
-                                                 version="1.1">
-                                                <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="21px" version="1.1" viewBox="0 0 23 21"
+                                                 width="23px">
                                                 <title>high</title>
                                                 <desc>Created with Sketch.</desc>
                                                 <defs>
-                                                    <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"
-                                                          id="path-1"/>
-                                                    <mask id="mask-1" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884" height="19"
-                                                          fill="white">
+                                                    <path id="path-1"
+                                                          d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"/>
+                                                    <mask height="19" maskUnits="objectBoundingBox" id="mask-1" width="16.0859884" maskContentUnits="userSpaceOnUse" fill="white"
+                                                          x="0" y="0">
                                                         <use xlink:href="#path-1"/>
                                                     </mask>
                                                 </defs>
-                                                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                                    <g id="Jenkins" transform="translate(-602.000000, -537.000000)">
-                                                        <g id="SAST" transform="translate(272.000000, 180.000000)">
-                                                            <g id="Vulnerabilities-Stat" transform="translate(246.082552, 0.000000)">
-                                                                <g id="High" transform="translate(22.425880, 105.921935)">
-                                                                    <g id="high" transform="translate(62.000000, 252.000000)">
-                                                                        <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
-                                                                              id="Combined-Shape" fill="#F5F5F5"/>
-                                                                        <use id="Rectangle-40-Copy" stroke="#666666" mask="url(#mask-1)" stroke-width="4" xlink:href="#path-1"/>
-                                                                        <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
-                                                                              id="Page-1" fill="#DA2945"/>
-                                                                        <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12" width="2" height="4"/>
-                                                                        <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17" width="2" height="2"/>
+                                                <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
+                                                    <g transform="translate(-602.000000, -537.000000)" id="Jenkins">
+                                                        <g transform="translate(272.000000, 180.000000)" id="SAST">
+                                                            <g transform="translate(246.082552, 0.000000)" id="Vulnerabilities-Stat">
+                                                                <g transform="translate(22.425880, 105.921935)" id="High">
+                                                                    <g transform="translate(62.000000, 252.000000)" id="high">
+                                                                        <path id="Combined-Shape"
+                                                                              d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
+                                                                              fill="#F5F5F5"/>
+                                                                        <use mask="url(#mask-1)" stroke-width="4" id="Rectangle-40-Copy" stroke="#666666" xlink:href="#path-1"/>
+                                                                        <path id="Page-1"
+                                                                              d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
+                                                                              fill="#DA2945"/>
+                                                                        <rect height="4" id="Rectangle-5" width="2" fill="#FFFFFF" x="14" y="12"/>
+                                                                        <rect height="2" id="Rectangle-6" width="2" fill="#FFFFFF" x="14" y="17"/>
                                                                     </g>
                                                                 </g>
                                                             </g>
@@ -813,43 +826,42 @@
 
                                 <!--osa medium-->
                                 <li>
-                                    <div id="osa-bar-count-med" class="bar-count">
+                                    <div class="bar-count" id="osa-bar-count-med">
                                         <div style="display: none">h</div>
                                     </div>
-                                    <span id="osa-bar-med" class="bar-2">
-                                        <div id="osa-tooltip-med">
-                                            <div style="display: none">h</div>
-                                        </div>
-                                    </span>
+                        <span class="bar-2" id="osa-bar-med"><div id="osa-tooltip-med">
+                            <div style="display: none">h</div>
+                        </div></span>
                                     <div class="bar-title-container">
                                         <div class="bar-title">Medium</div>
                                         <div class="severity-icon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="21px" viewBox="0 0 23 21"
-                                                 version="1.1">
-                                                <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="21px" version="1.1" viewBox="0 0 23 21"
+                                                 width="23px">
                                                 <title>medium</title>
                                                 <desc>Created with Sketch.</desc>
                                                 <defs>
-                                                    <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"
-                                                          id="path-2"/>
-                                                    <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884" height="19"
-                                                          fill="white">
+                                                    <path id="path-2"
+                                                          d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"/>
+                                                    <mask height="19" maskUnits="objectBoundingBox" id="mask-2" width="16.0859884" maskContentUnits="userSpaceOnUse" fill="white"
+                                                          x="0" y="0">
                                                         <use xlink:href="#path-2"/>
                                                     </mask>
                                                 </defs>
-                                                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                                    <g id="Jenkins" transform="translate(-680.000000, -537.000000)">
-                                                        <g id="SAST" transform="translate(272.000000, 180.000000)">
-                                                            <g id="Vulnerabilities-Stat" transform="translate(246.082552, 0.000000)">
-                                                                <g id="High" transform="translate(22.425880, 105.921935)">
-                                                                    <g id="med" transform="translate(140.000000, 252.000000)">
-                                                                        <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
-                                                                              id="Combined-Shape" fill="#F5F5F5"/>
-                                                                        <use id="Rectangle-40-Copy" stroke="#666666" mask="url(#mask-2)" stroke-width="4" xlink:href="#path-2"/>
-                                                                        <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
-                                                                              id="Page-1" fill="#FFB400"/>
-                                                                        <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12" width="2" height="4"/>
-                                                                        <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17" width="2" height="2"/>
+                                                <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
+                                                    <g transform="translate(-680.000000, -537.000000)" id="Jenkins">
+                                                        <g transform="translate(272.000000, 180.000000)" id="SAST">
+                                                            <g transform="translate(246.082552, 0.000000)" id="Vulnerabilities-Stat">
+                                                                <g transform="translate(22.425880, 105.921935)" id="High">
+                                                                    <g transform="translate(140.000000, 252.000000)" id="med">
+                                                                        <path id="Combined-Shape"
+                                                                              d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
+                                                                              fill="#F5F5F5"/>
+                                                                        <use mask="url(#mask-2)" stroke-width="4" id="Rectangle-40-Copy" stroke="#666666" xlink:href="#path-2"/>
+                                                                        <path id="Page-1"
+                                                                              d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
+                                                                              fill="#FFB400"/>
+                                                                        <rect height="4" id="Rectangle-5" width="2" fill="#FFFFFF" x="14" y="12"/>
+                                                                        <rect height="2" id="Rectangle-6" width="2" fill="#FFFFFF" x="14" y="17"/>
                                                                     </g>
                                                                 </g>
                                                             </g>
@@ -863,44 +875,42 @@
 
                                 <!--osa low-->
                                 <li>
-                                    <div id="osa-bar-count-low" class="bar-count">
+                                    <div class="bar-count" id="osa-bar-count-low">
                                         <div style="display: none">h</div>
                                     </div>
-                                    <span id="osa-bar-low" class="bar-3">
-                                        <div id="osa-tooltip-low">
-                                            <div style="display: none">h</div>
-                                        </div>
-                                    </span>
-
+                        <span class="bar-3" id="osa-bar-low"><div id="osa-tooltip-low">
+                            <div style="display: none">h</div>
+                        </div></span>
                                     <div class="bar-title-container">
                                         <div class="bar-title">Low</div>
                                         <div class="severity-icon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="21px" viewBox="0 0 23 21"
-                                                 version="1.1">
-                                                <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="21px" version="1.1" viewBox="0 0 23 21"
+                                                 width="23px">
                                                 <title>low</title>
                                                 <desc>Created with Sketch.</desc>
                                                 <defs>
-                                                    <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"
-                                                          id="path-3"/>
-                                                    <mask id="mask-3" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884" height="19"
-                                                          fill="white">
+                                                    <path id="path-3"
+                                                          d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"/>
+                                                    <mask height="19" maskUnits="objectBoundingBox" id="mask-3" width="16.0859884" maskContentUnits="userSpaceOnUse" fill="white"
+                                                          x="0" y="0">
                                                         <use xlink:href="#path-3"/>
                                                     </mask>
                                                 </defs>
-                                                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                                    <g id="Jenkins" transform="translate(-641.000000, -537.000000)">
-                                                        <g id="SAST" transform="translate(272.000000, 180.000000)">
-                                                            <g id="Vulnerabilities-Stat" transform="translate(246.082552, 0.000000)">
-                                                                <g id="High" transform="translate(22.425880, 105.921935)">
-                                                                    <g id="low" transform="translate(101.000000, 252.000000)">
-                                                                        <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
-                                                                              id="Combined-Shape" fill="#F5F5F5"/>
-                                                                        <use id="Rectangle-40-Copy" stroke="#666666" mask="url(#mask-3)" stroke-width="4" xlink:href="#path-3"/>
-                                                                        <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
-                                                                              id="Page-1" fill="#EFD412"/>
-                                                                        <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12" width="2" height="4"/>
-                                                                        <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17" width="2" height="2"/>
+                                                <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
+                                                    <g transform="translate(-641.000000, -537.000000)" id="Jenkins">
+                                                        <g transform="translate(272.000000, 180.000000)" id="SAST">
+                                                            <g transform="translate(246.082552, 0.000000)" id="Vulnerabilities-Stat">
+                                                                <g transform="translate(22.425880, 105.921935)" id="High">
+                                                                    <g transform="translate(101.000000, 252.000000)" id="low">
+                                                                        <path id="Combined-Shape"
+                                                                              d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
+                                                                              fill="#F5F5F5"/>
+                                                                        <use mask="url(#mask-3)" stroke-width="4" id="Rectangle-40-Copy" stroke="#666666" xlink:href="#path-3"/>
+                                                                        <path id="Page-1"
+                                                                              d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
+                                                                              fill="#EFD412"/>
+                                                                        <rect height="4" id="Rectangle-5" width="2" fill="#FFFFFF" x="14" y="12"/>
+                                                                        <rect height="2" id="Rectangle-6" width="2" fill="#FFFFFF" x="14" y="17"/>
                                                                     </g>
                                                                 </g>
                                                             </g>
@@ -923,72 +933,65 @@
                             <div class="sum1">CxSAST</div>
                             <div class="sum1">Full Report</div>
                         </div>
-
                         <div class="detailed-report">
                             <div class="sast-downloads">
-                                <!--analyzed results-->
-                                <div class="report-link">
-                                    <a id="sast-html-link" class="html-report">
-                                        <div class="html-report download-icon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="13px" height="16px" viewBox="0 0 13 16"
-                                                 version="1.1"> <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch --> <title>Analize</title>
-                                                <desc>Created with Sketch.</desc>
-                                                <defs/>
-                                                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                                    <g id="Jenkins" transform="translate(-286.000000, -1439.000000)">
-                                                        <g id="CxSAST" transform="translate(272.000000, 1290.000000)">
-                                                            <g id="Group" transform="translate(14.000000, 148.000000)">
-                                                                <g id="Analize" transform="translate(1.000000, 2.000000)">
-                                                                    <circle id="Oval-3" stroke="#373050" stroke-width="2" cx="5" cy="5" r="5"/>
-                                                                    <rect id="Rectangle-9" fill="#373050"
-                                                                          transform="translate(8.866025, 11.696152) rotate(-30.000000) translate(-8.866025, -11.696152) "
-                                                                          x="7.8660254" y="8.42820323" width="2" height="6.53589838"/>
-                                                                </g>
+                                <div class="report-link"><a class="html-report" id="sast-html-link">
+                                    <div class="html-report download-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="16px" version="1.1" viewBox="0 0 13 16"
+                                             width="13px"><title>
+                                            Analize</title>
+                                            <desc>Created with Sketch.</desc>
+                                            <defs/>
+                                            <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
+                                                <g transform="translate(-286.000000, -1439.000000)" id="Jenkins">
+                                                    <g transform="translate(272.000000, 1290.000000)" id="CxSAST">
+                                                        <g transform="translate(14.000000, 148.000000)" id="Group">
+                                                            <g transform="translate(1.000000, 2.000000)" id="Analize">
+                                                                <circle cy="5" stroke-width="2" id="Oval-3" r="5" stroke="#373050" cx="5"/>
+                                                                <rect transform="translate(8.866025, 11.696152) rotate(-30.000000) translate(-8.866025, -11.696152) "
+                                                                      height="6.53589838"
+                                                                      id="Rectangle-9" width="2" fill="#373050" x="7.8660254" y="8.42820323"/>
                                                             </g>
                                                         </g>
                                                     </g>
                                                 </g>
-                                            </svg>
-                                        </div>
-                                        <div class="html-report download-txt">
-                                            <div class="detailed-report-ttl">Analyzed results</div>
-                                        </div>
-                                    </a>
-                                </div>
+                                            </g>
+                                        </svg>
+                                    </div>
+                                    <div class="html-report download-txt">
+                                        <div class="detailed-report-ttl">Analyzed results</div>
+                                    </div>
+                                </a></div>
                                 <!--pdf-->
-                                <div class="report-link">
-                                    <a id="sast-pdf-link" class="pdf-report">
-                                      <div style="display: none;">h</div>
-                                    </a>
-                                </div>
-                                <!--code viewer-->
-                                <div class="report-link">
-                                    <a id="sast-code-viewer-link" class="pdf-report">
-                                        <div class="pdf-report download-icon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs"
-                                                 id="SvgjsSvg1041" version="1.1" width="15" height="13" viewBox="0 0 15 13"><title>Icon</title>
-                                                <desc>Created with Avocode.</desc>
-                                                <defs id="SvgjsDefs1042"/>
-                                                <path id="SvgjsPath1043" d="M296 843L299.53 847.78L296 852.56 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                                      stroke-linejoin="round" stroke-linecap="round" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                                      transform="matrix(1,0,0,1,-285.5,-841.5)"/>
-                                                <path id="SvgjsPath1044" d="M289.53 843L286 847.78L289.53 852.56 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                                      stroke-linejoin="round" stroke-linecap="round" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                                      transform="matrix(1,0,0,1,-285.5,-841.5)"/>
-                                                <path id="SvgjsPath1045" d="M293.61 842L291 853.79 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                                      stroke-linejoin="round" stroke-linecap="round" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                                      transform="matrix(1,0,0,1,-285.5,-841.5)"/>
-                                            </svg>
-                                        </div>
-                                        <div class="pdf-report download-txt">
-                                            <div class="pdf-report detailed-report-ttl">Open Code Viewer</div>
-                                        </div>
-                                    </a>
-                                </div>
+                                <div class="report-link"><a class="pdf-report" id="sast-pdf-link">
+                                    <div style="display: none;">h</div>
+                                </a></div>
+                                <div class="report-link"><a class="pdf-report" id="sast-code-viewer-link">
+                                    <div class="pdf-report download-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:svgjs="http://svgjs.com/svgjs" xmlns:xlink="http://www.w3.org/1999/xlink" height="13"
+                                             id="SvgjsSvg1041"
+                                             version="1.1" viewBox="0 0 15 13" width="15"><title>Icon</title>
+                                            <desc>Created with Avocode.</desc>
+                                            <defs id="SvgjsDefs1042"/>
+                                            <path stroke-miterlimit="50" transform="matrix(1,0,0,1,-285.5,-841.5)" stroke-width="1" id="SvgjsPath1043" fill-opacity="0"
+                                                  stroke-dasharray="0"
+                                                  d="M296 843L299.53 847.78L296 852.56 " stroke-opacity="1" fill="#ffffff" stroke="#373050" stroke-linecap="round"
+                                                  stroke-linejoin="round"/>
+                                            <path stroke-miterlimit="50" transform="matrix(1,0,0,1,-285.5,-841.5)" stroke-width="1" id="SvgjsPath1044" fill-opacity="0"
+                                                  stroke-dasharray="0"
+                                                  d="M289.53 843L286 847.78L289.53 852.56 " stroke-opacity="1" fill="#ffffff" stroke="#373050" stroke-linecap="round"
+                                                  stroke-linejoin="round"/>
+                                            <path stroke-miterlimit="50" transform="matrix(1,0,0,1,-285.5,-841.5)" stroke-width="1" id="SvgjsPath1045" fill-opacity="0"
+                                                  stroke-dasharray="0"
+                                                  d="M293.61 842L291 853.79 " stroke-opacity="1" fill="#ffffff" stroke="#373050" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </div>
+                                    <div class="pdf-report download-txt">
+                                        <div class="pdf-report detailed-report-ttl">Open Code Viewer</div>
+                                    </div>
+                                </a></div>
                             </div>
-
                         </div>
-
                     </td>
                     <td class="main-column">
                         <div class="full-start-end">
@@ -996,24 +999,25 @@
                             <!--start-->
                             <div class="full-start">
                                 <div class="full-start-end-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="26px" viewBox="0 0 23 26"
-                                         version="1.1"> <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch --> <title>Icon</title>
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="26px" version="1.1" viewBox="0 0 23 26" width="23px">
+                                        <title>
+                                            Icon</title>
                                         <desc>Created with Sketch.</desc>
                                         <defs>
-                                            <rect id="full-start-path" x="0" y="2" width="23" height="23" rx="1.6"/>
-                                            <mask id="full-start-mask" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="23" height="23"
-                                                  fill="white">
+                                            <rect height="23" rx="1.6" id="full-start-path" width="23" x="0" y="2"/>
+                                            <mask height="23" maskUnits="objectBoundingBox" id="full-start-mask" width="23" maskContentUnits="userSpaceOnUse" fill="white" x="0"
+                                                  y="0">
                                                 <use xlink:href="#full-start-path"/>
                                             </mask>
                                         </defs>
-                                        <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                            <g id="Jenkins" transform="translate(-684.000000, -708.000000)" stroke="#373050">
-                                                <g id="CxSAST" transform="translate(273.000000, 695.000000)">
-                                                    <g id="Group-2-Copy" transform="translate(411.000000, 9.000000)">
-                                                        <g id="Icon" transform="translate(0.000000, 5.000000)">
-                                                            <use id="Rectangle-22" mask="url(#full-start-mask)" stroke-width="4" xlink:href="#full-start-path"/>
-                                                            <path d="M5,0 L5,2.99971994" id="Line" stroke-width="2" stroke-linecap="square"/>
-                                                            <path d="M18,0 L18,2.99971994" id="Line-Copy" stroke-width="2" stroke-linecap="square"/>
+                                        <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
+                                            <g transform="translate(-684.000000, -708.000000)" id="Jenkins" stroke="#373050">
+                                                <g transform="translate(273.000000, 695.000000)" id="CxSAST">
+                                                    <g transform="translate(411.000000, 9.000000)" id="Group-2-Copy">
+                                                        <g transform="translate(0.000000, 5.000000)" id="Icon">
+                                                            <use mask="url(#full-start-mask)" stroke-width="4" id="Rectangle-22" xlink:href="#full-start-path"/>
+                                                            <path stroke-width="2" id="Line" d="M5,0 L5,2.99971994" stroke-linecap="square"/>
+                                                            <path stroke-width="2" id="Line-Copy" d="M18,0 L18,2.99971994" stroke-linecap="square"/>
                                                         </g>
                                                     </g>
                                                 </g>
@@ -1025,7 +1029,7 @@
                                     <div class="full-start-end-text">
                                         Start:
                                     </div>
-                                    <div id="sast-full-start-date" class="full-start-end-date">
+                                    <div class="full-start-end-date" id="sast-full-start-date">
                                         <div style="display: none">h</div>
                                     </div>
                                 </div>
@@ -1034,24 +1038,25 @@
                             <!--end-->
                             <div class="full-end">
                                 <div class="full-start-end-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="26px" viewBox="0 0 23 26"
-                                         version="1.1"> <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch --> <title>Icon</title>
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="26px" version="1.1" viewBox="0 0 23 26" width="23px">
+                                        <title>
+                                            Icon</title>
                                         <desc>Created with Sketch.</desc>
                                         <defs>
-                                            <rect id="full-start-path" x="0" y="2" width="23" height="23" rx="1.6"/>
-                                            <mask id="full-start-mask" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="23" height="23"
-                                                  fill="white">
+                                            <rect height="23" rx="1.6" id="full-start-path" width="23" x="0" y="2"/>
+                                            <mask height="23" maskUnits="objectBoundingBox" id="full-start-mask" width="23" maskContentUnits="userSpaceOnUse" fill="white" x="0"
+                                                  y="0">
                                                 <use xlink:href="#full-start-path"/>
                                             </mask>
                                         </defs>
-                                        <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                            <g id="Jenkins" transform="translate(-684.000000, -708.000000)" stroke="#373050">
-                                                <g id="CxSAST" transform="translate(273.000000, 695.000000)">
-                                                    <g id="Group-2-Copy" transform="translate(411.000000, 9.000000)">
-                                                        <g id="Icon" transform="translate(0.000000, 5.000000)">
-                                                            <use id="Rectangle-22" mask="url(#full-start-mask)" stroke-width="4" xlink:href="#full-start-path"/>
-                                                            <path d="M5,0 L5,2.99971994" id="Line" stroke-width="2" stroke-linecap="square"/>
-                                                            <path d="M18,0 L18,2.99971994" id="Line-Copy" stroke-width="2" stroke-linecap="square"/>
+                                        <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
+                                            <g transform="translate(-684.000000, -708.000000)" id="Jenkins" stroke="#373050">
+                                                <g transform="translate(273.000000, 695.000000)" id="CxSAST">
+                                                    <g transform="translate(411.000000, 9.000000)" id="Group-2-Copy">
+                                                        <g transform="translate(0.000000, 5.000000)" id="Icon">
+                                                            <use mask="url(#full-start-mask)" stroke-width="4" id="Rectangle-22" xlink:href="#full-start-path"/>
+                                                            <path stroke-width="2" id="Line" d="M5,0 L5,2.99971994" stroke-linecap="square"/>
+                                                            <path stroke-width="2" id="Line-Copy" d="M18,0 L18,2.99971994" stroke-linecap="square"/>
                                                         </g>
                                                     </g>
                                                 </g>
@@ -1063,7 +1068,7 @@
                                     <div class="full-start-end-text">
                                         End:
                                     </div>
-                                    <div id="sast-full-end-date" class="full-start-end-date">
+                                    <div class="full-start-end-date" id="sast-full-end-date">
                                         <div style="display: none">h</div>
                                     </div>
                                 </div>
@@ -1072,26 +1077,24 @@
                             <!--sast files-->
                             <div class="full-files">
                                 <div class="full-start-end-icon files-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="21px" height="26px" viewBox="0 0 21 26"
-                                         version="1.1">
-                                        <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
-                                        <title>file</title>
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="26px" version="1.1" viewBox="0 0 21 26" width="21px">
+                                        <title>
+                                            file</title>
                                         <desc>Created with Sketch.</desc>
                                         <defs>
-                                            <path d="M15.5147186,0 L1.99456145,0 C0.90234375,0 0,0.89408944 0,1.99700466 L0,24.0029953 C0,25.1050211 0.892995579,26 1.99456145,26 L19.0054385,26 C20.0976562,26 21,25.1059106 21,24.0029953 L21,5.43446766 L20.9745931,5.45987452 L15.5147186,5.55111512e-16 Z"
-                                                  id="files-path"/>
-                                            <mask id="files-mask" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="21" height="26"
-                                                  fill="white">
+                                            <path id="files-path"
+                                                  d="M15.5147186,0 L1.99456145,0 C0.90234375,0 0,0.89408944 0,1.99700466 L0,24.0029953 C0,25.1050211 0.892995579,26 1.99456145,26 L19.0054385,26 C20.0976562,26 21,25.1059106 21,24.0029953 L21,5.43446766 L20.9745931,5.45987452 L15.5147186,5.55111512e-16 Z"/>
+                                            <mask height="26" maskUnits="objectBoundingBox" id="files-mask" width="21" maskContentUnits="userSpaceOnUse" fill="white" x="0" y="0">
                                                 <use xlink:href="#files-path"/>
                                             </mask>
                                         </defs>
-                                        <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                            <g id="Jenkins" transform="translate(-847.000000, -709.000000)">
-                                                <g id="CxSAST" transform="translate(273.000000, 695.000000)">
-                                                    <g id="Group-3" transform="translate(574.000000, 9.000000)">
-                                                        <g id="file" transform="translate(0.000000, 5.000000)">
-                                                            <use id="Combined-Shape" stroke="#373050" mask="url(#files-mask)" stroke-width="4" xlink:href="#files-path"/>
-                                                            <path d="M13.8888889,0 L14.7777778,0 L21,7 L21,7.5 L21,8 L13,8 L13,0 L13.8888889,0 Z" id="Combined-Shape"
+                                        <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
+                                            <g transform="translate(-847.000000, -709.000000)" id="Jenkins">
+                                                <g transform="translate(273.000000, 695.000000)" id="CxSAST">
+                                                    <g transform="translate(574.000000, 9.000000)" id="Group-3">
+                                                        <g transform="translate(0.000000, 5.000000)" id="file">
+                                                            <use mask="url(#files-mask)" stroke-width="4" id="Combined-Shape" stroke="#373050" xlink:href="#files-path"/>
+                                                            <path id="Combined-Shape" d="M13.8888889,0 L14.7777778,0 L21,7 L21,7.5 L21,8 L13,8 L13,0 L13.8888889,0 Z"
                                                                   fill="#373050"/>
                                                         </g>
                                                     </g>
@@ -1104,7 +1107,7 @@
                                     <div class="full-start-end-text">
                                         Files:
                                     </div>
-                                    <div id="sast-full-files" class="full-start-end-date">
+                                    <div class="full-start-end-date" id="sast-full-files">
                                         <div style="display: none">h</div>
                                     </div>
                                 </div>
@@ -1113,36 +1116,35 @@
                             <!--sast loc-->
                             <div class="full-loc">
                                 <div class="full-start-end-icon loc-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://www.w3.org/2000/svg"
-                                         id="SvgjsSvg1018" version="1.1"
-                                         width="29" height="29" viewBox="0 0 29 29"><title>Icon</title>
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:svgjs="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="29"
+                                         id="SvgjsSvg1018"
+                                         version="1.1" viewBox="0 0 29 29" width="29"><title>Icon</title>
                                         <desc>Created with Avocode.</desc>
                                         <defs id="SvgjsDefs1019"/>
-                                        <path id="SvgjsPath1020" d="M1032 1368L1039.95 1378.76L1032 1389.51 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                              stroke-linejoin="round"
-                                              stroke-linecap="round" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2"
-                                              transform="matrix(1,0,0,1,-1012,-1365)"/>
-                                        <path id="SvgjsPath1021" d="M1020.95 1368L1013 1378.76L1020.95 1389.51 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                              stroke-linejoin="round"
-                                              stroke-linecap="round" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2"
-                                              transform="matrix(1,0,0,1,-1012,-1365)"/>
-                                        <path id="SvgjsPath1022" d="M1028.86 1366L1022.9999999999999 1392.54 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                              stroke-linejoin="round"
-                                              stroke-linecap="round" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2"
-                                              transform="matrix(1,0,0,1,-1012,-1365)"/>
+                                        <path stroke-miterlimit="50" transform="matrix(1,0,0,1,-1012,-1365)" stroke-width="2" id="SvgjsPath1020" fill-opacity="0"
+                                              stroke-dasharray="0"
+                                              d="M1032 1368L1039.95 1378.76L1032 1389.51 " stroke-opacity="1" fill="#ffffff" stroke="#373050" stroke-linecap="round"
+                                              stroke-linejoin="round"/>
+                                        <path stroke-miterlimit="50" transform="matrix(1,0,0,1,-1012,-1365)" stroke-width="2" id="SvgjsPath1021" fill-opacity="0"
+                                              stroke-dasharray="0"
+                                              d="M1020.95 1368L1013 1378.76L1020.95 1389.51 " stroke-opacity="1" fill="#ffffff" stroke="#373050" stroke-linecap="round"
+                                              stroke-linejoin="round"/>
+                                        <path stroke-miterlimit="50" transform="matrix(1,0,0,1,-1012,-1365)" stroke-width="2" id="SvgjsPath1022" fill-opacity="0"
+                                              stroke-dasharray="0"
+                                              d="M1028.86 1366L1022.9999999999999 1392.54 " stroke-opacity="1" fill="#ffffff" stroke="#373050" stroke-linecap="round"
+                                              stroke-linejoin="round"/>
                                     </svg>
                                 </div>
                                 <div class="full-start-end-text-date">
                                     <div class="full-start-end-text">
                                         Code Lines:
                                     </div>
-                                    <div id="sast-full-loc" class="full-start-end-date">
+                                    <div class="full-start-end-date" id="sast-full-loc">
                                         <div style="display: none">h</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                         <div id="sast-cve-table-high-container">
                             <div style="display: none">h</div>
                         </div>
@@ -1152,75 +1154,69 @@
                         <div id="sast-cve-table-low-container">
                             <div style="display: none">h</div>
                         </div>
-
                     </td>
                 </tr>
 
                 <!--osa full row-->
-                <tr id="osa-full" class="summary-table-row cxosa-full">
+                <tr class="summary-table-row cxosa-full" id="osa-full">
                     <td class="title-column">
                         <div class="summary-title">
                             <div class="sum1">CxOSA</div>
                             <div class="sum1">Full Report</div>
                         </div>
-
                         <div class="detailed-report">
                             <div class="sast-downloads osa-downloads">
-                                <div class="report-link">
-                                    <a id="osa-html-link" class="html-report">
-                                        <div class="html-report download-icon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="13px" height="16px" viewBox="0 0 13 16"
-                                                 version="1.1"> <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch --> <title>Analize</title>
-                                                <desc>Created with Sketch.</desc>
-                                                <defs/>
-                                                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                                    <g id="Jenkins" transform="translate(-286.000000, -1439.000000)">
-                                                        <g id="CxSAST" transform="translate(272.000000, 1290.000000)">
-                                                            <g id="Group" transform="translate(14.000000, 148.000000)">
-                                                                <g id="Analize" transform="translate(1.000000, 2.000000)">
-                                                                    <circle id="Oval-3" stroke="#373050" stroke-width="2" cx="5" cy="5" r="5"/>
-                                                                    <rect id="Rectangle-9" fill="#373050"
-                                                                          transform="translate(8.866025, 11.696152) rotate(-30.000000) translate(-8.866025, -11.696152) "
-                                                                          x="7.8660254" y="8.42820323" width="2" height="6.53589838"/>
-                                                                </g>
+                                <div class="report-link"><a class="html-report" id="osa-html-link">
+                                    <div class="html-report download-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="16px" version="1.1" viewBox="0 0 13 16"
+                                             width="13px"><title>
+                                            Analize</title>
+                                            <desc>Created with Sketch.</desc>
+                                            <defs/>
+                                            <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
+                                                <g transform="translate(-286.000000, -1439.000000)" id="Jenkins">
+                                                    <g transform="translate(272.000000, 1290.000000)" id="CxSAST">
+                                                        <g transform="translate(14.000000, 148.000000)" id="Group">
+                                                            <g transform="translate(1.000000, 2.000000)" id="Analize">
+                                                                <circle cy="5" stroke-width="2" id="Oval-3" r="5" stroke="#373050" cx="5"/>
+                                                                <rect transform="translate(8.866025, 11.696152) rotate(-30.000000) translate(-8.866025, -11.696152) "
+                                                                      height="6.53589838"
+                                                                      id="Rectangle-9" width="2" fill="#373050" x="7.8660254" y="8.42820323"/>
                                                             </g>
                                                         </g>
                                                     </g>
                                                 </g>
-                                            </svg>
-                                        </div>
-                                        <div class="html-report download-txt">
-                                            <div class="detailed-report-ttl">Analyzed results</div>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="report-link">
-                                    <a id="osa-pdf-link" class="pdf-report">
-                                        <div class="pdf-report download-icon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://www.w3.org/2000/svg"
-                                                 id="SvgjsSvg1022" version="1.1" width="13" height="16" viewBox="0 0 13 16"><title>PDF icon</title>
-                                                <desc>Created with Avocode.</desc>
-                                                <defs id="SvgjsDefs1023">
-                                                    <clipPath id="SvgjsClipPath1027">
-                                                        <path id="SvgjsPath1026" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill="#ffffff"/>
-                                                    </clipPath>
-                                                </defs>
-                                                <path id="SvgjsPath1024" d="M279 768L279 763L280.1 763L284 767L284 768Z " fill="#373050" fill-opacity="1"
-                                                      transform="matrix(1,0,0,1,-271,-763)"/>
-                                                <path id="SvgjsPath1025" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                                      stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2"
-                                                      clip-path="url(&quot;#SvgjsClipPath1027&quot;)" transform="matrix(1,0,0,1,-271,-763)"/>
-                                            </svg>
-                                        </div>
-                                        <div class="pdf-report download-txt">
-                                            <div class="pdf-report detailed-report-ttl">Download PDF Report</div>
-                                        </div>
-                                    </a>
-                                </div>
+                                            </g>
+                                        </svg>
+                                    </div>
+                                    <div class="html-report download-txt">
+                                        <div class="detailed-report-ttl">Analyzed results</div>
+                                    </div>
+                                </a></div>
+                                <div class="report-link"><a class="pdf-report" id="osa-pdf-link">
+                                    <div class="pdf-report download-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:svgjs="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="16"
+                                             id="SvgjsSvg1022" version="1.1" viewBox="0 0 13 16" width="13"><title>PDF icon</title>
+                                            <desc>Created with Avocode.</desc>
+                                            <defs id="SvgjsDefs1023">
+                                                <clipPath id="SvgjsClipPath1027">
+                                                    <path id="SvgjsPath1026" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill="#ffffff"/>
+                                                </clipPath>
+                                            </defs>
+                                            <path transform="matrix(1,0,0,1,-271,-763)" id="SvgjsPath1024" fill-opacity="1" d="M279 768L279 763L280.1 763L284 767L284 768Z "
+                                                  fill="#373050"/>
+                                            <path stroke-dasharray="0" d="M271 763L280.1 763L284 767L284 779L271 779Z " stroke-opacity="1" stroke="#373050" stroke-linecap="butt"
+                                                  stroke-linejoin="miter" stroke-miterlimit="50" transform="matrix(1,0,0,1,-271,-763)" stroke-width="2" id="SvgjsPath1025"
+                                                  fill-opacity="0"
+                                                  fill="#ffffff" clip-path="url(&quot;#SvgjsClipPath1027&quot;)"/>
+                                        </svg>
+                                    </div>
+                                    <div class="pdf-report download-txt">
+                                        <div class="pdf-report detailed-report-ttl">Download PDF Report</div>
+                                    </div>
+                                </a></div>
                             </div>
                         </div>
-
                     </td>
                     <td class="main-column">
                         <div class="full-start-end">
@@ -1228,24 +1224,25 @@
                             <!--osa start-->
                             <div class="full-start">
                                 <div class="full-start-end-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="26px" viewBox="0 0 23 26"
-                                         version="1.1"> <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch --> <title>Icon</title>
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="26px" version="1.1" viewBox="0 0 23 26" width="23px">
+                                        <title>
+                                            Icon</title>
                                         <desc>Created with Sketch.</desc>
                                         <defs>
-                                            <rect id="full-start-path" x="0" y="2" width="23" height="23" rx="1.6"/>
-                                            <mask id="full-start-mask" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="23" height="23"
-                                                  fill="white">
+                                            <rect height="23" rx="1.6" id="full-start-path" width="23" x="0" y="2"/>
+                                            <mask height="23" maskUnits="objectBoundingBox" id="full-start-mask" width="23" maskContentUnits="userSpaceOnUse" fill="white" x="0"
+                                                  y="0">
                                                 <use xlink:href="#full-start-path"/>
                                             </mask>
                                         </defs>
-                                        <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                            <g id="Jenkins" transform="translate(-684.000000, -708.000000)" stroke="#373050">
-                                                <g id="CxSAST" transform="translate(273.000000, 695.000000)">
-                                                    <g id="Group-2-Copy" transform="translate(411.000000, 9.000000)">
-                                                        <g id="Icon" transform="translate(0.000000, 5.000000)">
-                                                            <use id="Rectangle-22" mask="url(#full-start-mask)" stroke-width="4" xlink:href="#full-start-path"/>
-                                                            <path d="M5,0 L5,2.99971994" id="Line" stroke-width="2" stroke-linecap="square"/>
-                                                            <path d="M18,0 L18,2.99971994" id="Line-Copy" stroke-width="2" stroke-linecap="square"/>
+                                        <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
+                                            <g transform="translate(-684.000000, -708.000000)" id="Jenkins" stroke="#373050">
+                                                <g transform="translate(273.000000, 695.000000)" id="CxSAST">
+                                                    <g transform="translate(411.000000, 9.000000)" id="Group-2-Copy">
+                                                        <g transform="translate(0.000000, 5.000000)" id="Icon">
+                                                            <use mask="url(#full-start-mask)" stroke-width="4" id="Rectangle-22" xlink:href="#full-start-path"/>
+                                                            <path stroke-width="2" id="Line" d="M5,0 L5,2.99971994" stroke-linecap="square"/>
+                                                            <path stroke-width="2" id="Line-Copy" d="M18,0 L18,2.99971994" stroke-linecap="square"/>
                                                         </g>
                                                     </g>
                                                 </g>
@@ -1257,7 +1254,7 @@
                                     <div class="full-start-end-text">
                                         Start:
                                     </div>
-                                    <div id="osa-full-start-date" class="full-start-end-date">
+                                    <div class="full-start-end-date" id="osa-full-start-date">
                                         <div style="display: none">h</div>
                                     </div>
                                 </div>
@@ -1266,24 +1263,25 @@
                             <!--osa end-->
                             <div class="full-end">
                                 <div class="full-start-end-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="26px" viewBox="0 0 23 26"
-                                         version="1.1"> <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch --> <title>Icon</title>
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="26px" version="1.1" viewBox="0 0 23 26" width="23px">
+                                        <title>
+                                            Icon</title>
                                         <desc>Created with Sketch.</desc>
                                         <defs>
-                                            <rect id="full-start-path" x="0" y="2" width="23" height="23" rx="1.6"/>
-                                            <mask id="full-start-mask" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="23" height="23"
-                                                  fill="white">
+                                            <rect height="23" rx="1.6" id="full-start-path" width="23" x="0" y="2"/>
+                                            <mask height="23" maskUnits="objectBoundingBox" id="full-start-mask" width="23" maskContentUnits="userSpaceOnUse" fill="white" x="0"
+                                                  y="0">
                                                 <use xlink:href="#full-start-path"/>
                                             </mask>
                                         </defs>
-                                        <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                            <g id="Jenkins" transform="translate(-684.000000, -708.000000)" stroke="#373050">
-                                                <g id="CxSAST" transform="translate(273.000000, 695.000000)">
-                                                    <g id="Group-2-Copy" transform="translate(411.000000, 9.000000)">
-                                                        <g id="Icon" transform="translate(0.000000, 5.000000)">
-                                                            <use id="Rectangle-22" mask="url(#full-start-mask)" stroke-width="4" xlink:href="#full-start-path"/>
-                                                            <path d="M5,0 L5,2.99971994" id="Line" stroke-width="2" stroke-linecap="square"/>
-                                                            <path d="M18,0 L18,2.99971994" id="Line-Copy" stroke-width="2" stroke-linecap="square"/>
+                                        <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
+                                            <g transform="translate(-684.000000, -708.000000)" id="Jenkins" stroke="#373050">
+                                                <g transform="translate(273.000000, 695.000000)" id="CxSAST">
+                                                    <g transform="translate(411.000000, 9.000000)" id="Group-2-Copy">
+                                                        <g transform="translate(0.000000, 5.000000)" id="Icon">
+                                                            <use mask="url(#full-start-mask)" stroke-width="4" id="Rectangle-22" xlink:href="#full-start-path"/>
+                                                            <path stroke-width="2" id="Line" d="M5,0 L5,2.99971994" stroke-linecap="square"/>
+                                                            <path stroke-width="2" id="Line-Copy" d="M18,0 L18,2.99971994" stroke-linecap="square"/>
                                                         </g>
                                                     </g>
                                                 </g>
@@ -1295,7 +1293,7 @@
                                     <div class="full-start-end-text">
                                         End:
                                     </div>
-                                    <div id="osa-full-end-date" class="full-start-end-date">
+                                    <div class="full-start-end-date" id="osa-full-end-date">
                                         <div style="display: none">h</div>
                                     </div>
                                 </div>
@@ -1304,8 +1302,9 @@
                             <!--osa files-->
                             <div class="full-files">
                                 <div class="full-start-end-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1029"
-                                         version="1.1" width="32" height="27" viewBox="0 0 32 27"><title>Combined Shape</title>
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:svgjs="http://svgjs.com/svgjs" xmlns:xlink="http://www.w3.org/1999/xlink" height="27"
+                                         id="SvgjsSvg1029"
+                                         version="1.1" viewBox="0 0 32 27" width="32"><title>Combined Shape</title>
                                         <desc>Created with Avocode.</desc>
                                         <defs id="SvgjsDefs1030">
                                             <clipPath id="SvgjsClipPath1033">
@@ -1314,25 +1313,23 @@
                                                       fill="#ffffff"/>
                                             </clipPath>
                                         </defs>
-                                        <path id="SvgjsPath1031"
+                                        <path stroke-dasharray="0"
                                               d="M848 2095C848 2094.82964 848.0142 2094.6626 848.04148 2094.5C848.0142 2094.3374 848 2094.17036 848 2094V2091C848 2089.34315 849.34315 2088 851 2088H857C858.65685 2088 860.29137 2089.31116 860.65079 2090.92856L860.8888900000001 2092H877.0000000000001C878.6568500000001 2092 880.0000000000001 2093.34315 880.0000000000001 2095V2112C880.0000000000001 2113.65685 878.6568500000001 2115 877.0000000000001 2115H851.0000000000001C849.3431500000002 2115 848.0000000000001 2113.65685 848.0000000000001 2112Z "
-                                              fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1"
-                                              stroke="#373050" stroke-miterlimit="50" stroke-width="4" clip-path="url(&quot;#SvgjsClipPath1033&quot;)"
-                                              transform="matrix(1,0,0,1,-848,-2088)"/>
+                                              stroke-opacity="1" stroke="#373050" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="50"
+                                              transform="matrix(1,0,0,1,-848,-2088)"
+                                              stroke-width="4" id="SvgjsPath1031" fill-opacity="0" fill="#ffffff" clip-path="url(&quot;#SvgjsClipPath1033&quot;)"/>
                                     </svg>
                                 </div>
                                 <div class="full-start-end-text-date">
                                     <div class="full-start-end-text">
                                         Files:
                                     </div>
-                                    <div id="osa-full-files" class="full-start-end-date">
+                                    <div class="full-start-end-date" id="osa-full-files">
                                         <div style="display: none">h</div>
                                     </div>
                                 </div>
                             </div>
-
                         </div>
-
                         <div id="osa-cve-table-high-container">
                             <div style="display: none">h</div>
                         </div>
@@ -1342,7 +1339,6 @@
                         <div id="osa-cve-table-low-container">
                             <div style="display: none">h</div>
                         </div>
-
                     </td>
                 </tr>
             </table>
@@ -1352,7 +1348,6 @@
             <p>Scan finished with the following error:</p>
             <p>${it.errorMessage}</p>
         </j:if>
-        <!--</t:summary>-->
     </j:if>
 
     <script>
@@ -1463,7 +1458,6 @@
                 'Threshold Compliance' +
                 '</div>' +
                 '</div>';
-
 
 
         document.getElementById("cx-icon-main").setAttribute("src", cxIconPath);
@@ -1679,8 +1673,7 @@
 
                     '<div class="tooltip-container" style="bottom:calc(' + thresholdHeight + '% - 1px)">' +
                     '<div class="threshold-line">' +
-                    '<div style="display: none' +
-                    ';">h</div>' +
+                    '<div style="display: none">h</div>' +
                     '</div>' +
                     '<div class="threshold-tooltip">' +
                     '<div class="threshold-tooltip-background">' +
