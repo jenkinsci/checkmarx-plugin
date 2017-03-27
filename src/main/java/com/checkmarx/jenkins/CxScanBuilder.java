@@ -724,7 +724,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
 
 
-            generateHtmlReport(run, checkmarxBuildDir, cxScanResult);
+            generateHtmlReport(checkmarxBuildDir, cxScanResult);
             jobConsoleLogger.info("Copying reports to workspace");
             copyReportsToWorkspace(workspace, checkmarxBuildDir);
 
@@ -763,8 +763,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
 
-    private void generateHtmlReport(Run<?, ?> run, File checkmarxBuildDir, CxScanResult cxScanResult) {
+    private void generateHtmlReport( File checkmarxBuildDir, CxScanResult cxScanResult) {
+
+        jobConsoleLogger.info("Generating HTML report");
         try {
+
             //create output file report.html
             File reportFile = new File(checkmarxBuildDir, "report.html");
 
@@ -782,123 +785,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             context.runScript(jellyTemplate, xmlOutput);
             xmlOutput.flush();
         } catch (Exception e) {
-            jobConsoleLogger.error("failed to generate html report", e);
+            jobConsoleLogger.error("Failed to generate HTML report", e);
         }
-
-
-        jobConsoleLogger.info("Finished merging template");
-
-
-    }
-
-    private void generateHtmlReportOld(Run<?, ?> run, File checkmarxBuildDir, CxScanResult cxScanResult) {
-
-        String linkToResults = Jenkins.getInstance().getRootUrl() + run.getUrl() + "checkmarx/";
-        String linkToPDF = Jenkins.getInstance().getRootUrl() + run.getUrl() + "checkmarx/pdfReport";
-        String html;
-
-        try {
-
-            int resultsSum = cxScanResult.getHighCount() + cxScanResult.getMediumCount() + cxScanResult.getLowCount();
-
-            html = IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream("com/checkmarx/jenkins/CxScanResult/summary.html"));
-
-            html = html.replace("#reportUrl#", linkToResults)
-                    .replace("#projectName#", StringUtils.defaultString(projectName))
-                    .replace("#highResults#", Integer.toString(cxScanResult.getSastScanResult().getHighCount()))
-                    .replace("#highResultsHeight#", formatHtmlResultsHeight(cxScanResult.getSastScanResult().getHighCount(), resultsSum))
-                    .replace("#mediumResults#", Integer.toString(cxScanResult.getSastScanResult().getMediumCount()))
-                    .replace("#mediumResultsHeight#", formatHtmlResultsHeight(cxScanResult.getSastScanResult().getMediumCount(), resultsSum))
-                    .replace("#lowResults#", Integer.toString(cxScanResult.getSastScanResult().getLowCount()))
-                    .replace("#lowResultsHeight#", formatHtmlResultsHeight(cxScanResult.getSastScanResult().getLowCount(), resultsSum));
-
-            if (generatePdfReport) {
-                html = html.replace("#pdfReportUrl#", linkToPDF);
-            } else {
-                html = Pattern.compile("\\<!--pdfStart-->.*\\<!--pdfEnd-->", Pattern.DOTALL).matcher(html).replaceAll("");
-            }
-
-            if (vulnerabilityThresholdEnabled) {
-
-                html = formatHtmlThreshold(html, cxScanResult.getSastScanResult().getHighCount(), cxScanResult.getSastThresholdConfig().getHighSeverity(), "<!--highThresholdStart-->", "<!--highThresholdEnd-->", "#highThresholdHeight#", "#highThreshold#");
-                html = formatHtmlThreshold(html, cxScanResult.getSastScanResult().getMediumCount(), cxScanResult.getSastThresholdConfig().getMediumSeverity(), "<!--mediumThresholdStart-->", "<!--mediumThresholdEnd-->", "#mediumThresholdHeight#", "#mediumThreshold#");
-                html = formatHtmlThreshold(html, cxScanResult.getSastScanResult().getLowCount(), cxScanResult.getSastThresholdConfig().getLowSeverity(), "<!--lowThresholdStart-->", "<!--lowThresholdEnd-->", "#lowThresholdHeight#", "#lowThreshold#");
-
-                if (cxScanResult.isThresholdExceeded()) {
-                    html = html.replace("#sastThresholdCompliance#", "style=\"visibility: hidden\"");
-                    html = html.replace("#sastThresholdExceeded#", "");
-                } else {
-                    html = html.replace("#sastThresholdExceeded#", "style=\"visibility: hidden\"");
-                    html = html.replace("#sastThresholdCompliance#", "");
-                }
-
-            } else {
-                html = Pattern.compile("\\<!--thresholdStatusStart-->.*\\<!--thresholdStatusEnd-->", Pattern.DOTALL).matcher(html).replaceAll("");
-            }
-
-            if (!cxScanResult.isOsaEnabled()) {
-                html = Pattern.compile("\\<!--osaStart-->.*\\<!--osaEnd-->", Pattern.DOTALL).matcher(html).replaceAll("");
-            } else {
-
-                    int osaResultsSum = cxScanResult.getOsaScanResult().getOsaHighCount() + cxScanResult.getOsaScanResult().getOsaMediumCount() + cxScanResult.getOsaScanResult().getOsaLowCount();
-                    String linkToOsaPDF = Jenkins.getInstance().getRootUrl() + run.getUrl() + "checkmarx/osaPdfReport";
-                    String linkToOsaHtml = Jenkins.getInstance().getRootUrl() + run.getUrl() + "checkmarx/osaHtmlReport";
-
-                html = html.replace("#osaPdfReportUrl#", linkToOsaPDF)
-                        .replace("#osaHtmlReportUrl#", linkToOsaHtml)
-                        .replace("#osaHighResults#", Integer.toString(cxScanResult.getOsaScanResult().getOsaHighCount()))
-                        .replace("#osaHighResultsHeight#", formatHtmlResultsHeight(cxScanResult.getOsaScanResult().getOsaHighCount(), osaResultsSum))
-                        .replace("#osaMediumResults#", Integer.toString(cxScanResult.getOsaScanResult().getOsaMediumCount()))
-                        .replace("#osaMediumResultsHeight#", formatHtmlResultsHeight(cxScanResult.getOsaScanResult().getOsaMediumCount(), osaResultsSum))
-                        .replace("#osaLowResults#", Integer.toString(cxScanResult.getOsaScanResult().getOsaLowCount()))
-                        .replace("#osaLowResultsHeight#", formatHtmlResultsHeight(cxScanResult.getOsaScanResult().getOsaLowCount(), osaResultsSum))
-                        .replace("#osaVulnerableAndOutdatedLibs#", Integer.toString(cxScanResult.getOsaScanResult().getOsaVulnerableAndOutdatedLibs()))
-                        .replace("#osaNoVulnerabilityLibs#", Integer.toString(cxScanResult.getOsaScanResult().getOsaNoVulnerabilityLibs()));
-
-
-                if (vulnerabilityThresholdEnabled) {
-                    html = formatHtmlThreshold(html, cxScanResult.getOsaScanResult().getOsaHighCount(), cxScanResult.getOsaThresholdConfig().getHighSeverity(), "<!--osaHighThresholdStart-->", "<!--osaHighThresholdEnd-->", "#osaHighThresholdHeight#", "#osaHighThreshold#");
-                    html = formatHtmlThreshold(html, cxScanResult.getOsaScanResult().getOsaMediumCount(), cxScanResult.getOsaThresholdConfig().getMediumSeverity(), "<!--osaMediumThresholdStart-->", "<!--osaMediumThresholdEnd-->", "#osaMediumThresholdHeight#", "#osaMediumThreshold#");
-                    html = formatHtmlThreshold(html, cxScanResult.getOsaScanResult().getOsaLowCount(), cxScanResult.getOsaThresholdConfig().getLowSeverity(), "<!--osaLowThresholdStart-->", "<!--osaLowThresholdEnd-->", "#osaLowThresholdHeight#", "#osaLowThreshold#");
-
-                    if (cxScanResult.isOsaThresholdExceeded()) {
-                        html = html.replace("#osaThresholdCompliance#", "style=\"visibility: hidden\"");
-                        html = html.replace("#osaThresholdExceeded#", "");
-                    } else {
-                        html = html.replace("#osaThresholdExceeded#", "style=\"visibility: hidden\"");
-                        html = html.replace("#osaThresholdCompliance#", "");
-                    }
-
-                } else {
-                    html = Pattern.compile("\\<!--osaThresholdStatusStart-->.*\\<!--osaThresholdStatusEnd-->", Pattern.DOTALL).matcher(html).replaceAll("");
-                }
-            }
-
-
-            FileUtils.writeStringToFile(new File(checkmarxBuildDir, "report.html"), html);
-
-
-        } catch (Exception e) {
-            jobConsoleLogger.error("fail to generate html report", e);
-
-        }
-    }
-
-    private String formatHtmlResultsHeight(int results, int resultsSum) {
-        if (resultsSum > 0) {
-            return Integer.toString(results * 100 / resultsSum);
-        }
-        return "0";
-    }
-
-
-    private String formatHtmlThreshold(String html, int results, Integer threshold, String startTag, String endTag, String heightReplaceTag, String thresholdTag) {
-
-        if (!vulnerabilityThresholdEnabled || threshold == null || results <= threshold) {
-            return Pattern.compile("\\" + startTag + ".*\\" + endTag, Pattern.DOTALL).matcher(html).replaceAll("");
-        } else {
-            return html.replace(heightReplaceTag, Integer.toString(threshold * 100 / results)).replace(thresholdTag, Integer.toString(threshold));
-        }
+        jobConsoleLogger.info("HTML report created successfully");
     }
 
     private void createOsaJsonReports(OsaScanResult osaScanResult, File checkmarxBuildDir) {
