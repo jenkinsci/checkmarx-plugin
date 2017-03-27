@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.*;
+import org.xml.sax.InputSource;
 
 import javax.annotation.Nonnull;
 import javax.xml.ws.WebServiceException;
@@ -763,24 +764,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
 
     private void generateHtmlReport(Run<?, ?> run, File checkmarxBuildDir, CxScanResult cxScanResult) {
-        //todo: print to log - generating report
-        System.out.println("generating html report");
-        System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "");
-
-        //Object to JSON string
-        ObjectMapper mapper = new ObjectMapper();
         try {
-
-//            String cxScanResultJson = mapper.writeValueAsString(cxScanResult);
             //create output file report.html
             File reportFile = new File(checkmarxBuildDir, "report.html");
-
 
             OutputStream output = new FileOutputStream(reportFile);
             XMLOutput xmlOutput = XMLOutput.createXMLOutput(output);
 
             //jelly template file to set vars in
-            File jellyTemplate = new File("C:\\cxdev\\checkmarx-plugin\\src\\main\\resources\\com\\checkmarx\\jenkins\\CxScanResult\\summary.jelly");
+            InputSource jellyTemplate = new InputSource(this.getClass().getClassLoader().getResourceAsStream("com/checkmarx/jenkins/CxScanResult/summary.jelly"));
 
             //create jelly context for setting variables
             JellyContext context = new JellyContext();
@@ -790,11 +782,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             context.runScript(jellyTemplate, xmlOutput);
             xmlOutput.flush();
         } catch (Exception e) {
-            e.printStackTrace();
+            jobConsoleLogger.error("failed to generate html report", e);
         }
 
 
-        System.out.println("Finished merging template");
+        jobConsoleLogger.info("Finished merging template");
 
 
     }
