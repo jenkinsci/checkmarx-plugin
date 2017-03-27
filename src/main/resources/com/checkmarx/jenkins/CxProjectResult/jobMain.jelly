@@ -1428,7 +1428,7 @@
 
 
         //---------------------------------------------------------- all other vars ---------------------------------------------------------------
-        var cxIconPath = "${it.lastSynchronousBuildAction.largeIconFileName}";
+        var cxIconPath = "${resURL}${it.lastSynchronousBuildAction.largeIconFileName}";
 
         var SEVERITY = {
             HIGH: {value: 0, name: "high"},

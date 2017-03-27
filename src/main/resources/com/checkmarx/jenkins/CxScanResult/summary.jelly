@@ -1428,7 +1428,7 @@
 
 
         //---------------------------------------------------------- all other vars ---------------------------------------------------------------
-        var cxIconPath = "${it.largeIconFileName}";
+        var cxIconPath = "${resURL}${it.largeIconFileName}";
 
         var SEVERITY = {
             HIGH: {value: 0, name: "high"},
