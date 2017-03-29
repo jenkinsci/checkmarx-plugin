@@ -679,7 +679,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             ThresholdConfig thresholdConfig = createThresholdConfig();
 
             // Set scan thresholds for the summery.jelly
-            if (isSASTThresholdEnabled()) {
+            if (isSASThresholdEffectivelyEnabled()) {
                 cxScanResult.setThresholds(thresholdConfig);
             }
 
@@ -705,7 +705,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
                     ThresholdConfig osaThresholdConfig = createOsaThresholdConfig();
                     // Set scan thresholds for the summery.jelly
-                    if (isOsaThresholdEnabled()) {
+                    if (isOsaThresholdEffectivelyEnabled()) {
                         cxScanResult.setOsaThresholds(osaThresholdConfig);
                     }
 
@@ -841,7 +841,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             sb.append("highSeveritiesThreshold: ").append(descriptor.getHighThresholdEnforcement()).append("\n");
             sb.append("mediumSeveritiesThreshold: ").append(descriptor.getMediumThresholdEnforcement()).append("\n");
             sb.append("lowSeveritiesThreshold: ").append(descriptor.getLowThresholdEnforcement()).append("\n");
-        } else if (isSASTThresholdEnabled()) {
+        } else if (isSASThresholdEffectivelyEnabled()) {
             sb.append("highSeveritiesThreshold: ").append(getHighThreshold()).append("\n");
             sb.append("mediumSeveritiesThreshold: ").append(getMediumThreshold()).append("\n");
             sb.append("lowSeveritiesThreshold: ").append(getLowThreshold()).append("\n");
@@ -853,7 +853,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 sb.append("osaHighSeveritiesThreshold: ").append(descriptor.getOsaHighThresholdEnforcement()).append("\n");
                 sb.append("osaMediumSeveritiesThreshold: ").append(descriptor.getOsaMediumThresholdEnforcement()).append("\n");
                 sb.append("osaLowSeveritiesThreshold: ").append(descriptor.getOsaLowThresholdEnforcement()).append("\n");
-            } else if (isOsaThresholdEnabled()) {
+            } else if (isOsaThresholdEffectivelyEnabled()) {
                 sb.append("osaHighSeveritiesThreshold: ").append(getOsaHighThreshold()).append("\n");
                 sb.append("osaMediumSeveritiesThreshold: ").append(getOsaMediumThreshold()).append("\n");
                 sb.append("osaLowSeveritiesThreshold: ").append(getOsaLowThreshold()).append("\n");
@@ -864,12 +864,24 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         jobConsoleLogger.info(sb.toString());
     }
 
-    private boolean isOsaThresholdEnabled() {
-        return isVulnerabilityThresholdEnabled() && (getOsaLowThreshold() != null || getOsaMediumThreshold() != null || getOsaHighThreshold() != null);
+    private boolean isSASThresholdEffectivelyEnabled() {
+        DescriptorImpl descriptor = getDescriptor();
+        if (shouldUseGlobalThreshold() && (descriptor.getHighThresholdEnforcement() != null || descriptor.getMediumThresholdEnforcement() != null || descriptor.getLowThresholdEnforcement() != null)) {
+            return true;
+        } else if (this.isVulnerabilityThresholdEnabled() && (this.getHighThreshold() != null && this.getMediumThreshold() != null && this.getLowThreshold() != null)){
+            return true;
+        }
+        return false;
     }
 
-    private boolean isSASTThresholdEnabled() {
-        return isVulnerabilityThresholdEnabled() && (getLowThreshold() != null || getMediumThreshold() != null || getHighThreshold() != null);
+    private boolean isOsaThresholdEffectivelyEnabled() {
+        DescriptorImpl descriptor = getDescriptor();
+        if (shouldUseGlobalThreshold() && (descriptor.getOsaHighThresholdEnforcement() != null || descriptor.getOsaMediumThresholdEnforcement() != null || descriptor.getOsaLowThresholdEnforcement() != null)) {
+            return true;
+        } else if (this.isVulnerabilityThresholdEnabled() && (this.getOsaHighThreshold() != null && this.getOsaMediumThreshold() != null && this.getOsaLowThreshold() != null)){
+            return true;
+        }
+        return false;
     }
 
     private void printScanResult(CxScanResult scanResult) {
