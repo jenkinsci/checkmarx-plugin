@@ -11,7 +11,6 @@ import com.checkmarx.jenkins.web.client.OsaScanClient;
 import com.checkmarx.jenkins.web.contracts.ProjectContract;
 import com.checkmarx.jenkins.web.model.AuthenticationRequest;
 import com.checkmarx.ws.CxJenkinsWebService.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.*;
 import hudson.console.HyperlinkNote;
 import hudson.model.*;
@@ -22,7 +21,6 @@ import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
-import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
@@ -719,7 +717,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
                     //OSA Threshold
                     isOSAThresholdFailedTheBuild = cxScanResult.getOsaScanResult() != null && ((descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || isVulnerabilityThresholdEnabled())
-                            && isThresholdCrossed(osaThresholdConfig, cxScanResult.getOsaScanResult().getOsaHighCount(), cxScanResult.getMediumCount(), cxScanResult.getLowCount(), "OSA ");
+                            && isThresholdCrossed(osaThresholdConfig, cxScanResult.getOsaScanResult().getOsaHighCount(), cxScanResult.getOsaScanResult().getOsaMediumCount(), cxScanResult.getOsaScanResult().getOsaLowCount(), "OSA ");
                 }
             }
 

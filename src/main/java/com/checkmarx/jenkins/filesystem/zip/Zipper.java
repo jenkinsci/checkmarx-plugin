@@ -212,7 +212,7 @@ public class Zipper {
      *                       files will be written to the output stream. Therefore, the
      *                       maxZipSize limit may be beached by the compressed size of the
      *                       last file.
-     * @throws com.checkmarx.components.zipper.Zipper.MaxZipSizeReached If maxZipSize limit is reached
+     * @throws com.checkmarx.jenkins.filesystem.zip.Zipper.MaxZipSizeReached If maxZipSize limit is reached
      * @throws NoFilesToZip                                             If there are no files to zip. Either the base directory is
      *                                                                  empty or does not exists, or all the files are filtered out
      *                                                                  by the filter.
