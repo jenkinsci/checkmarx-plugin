@@ -935,33 +935,6 @@
                         </div>
                         <div class="detailed-report">
                             <div class="sast-downloads">
-                                <div class="report-link"><a class="html-report" id="sast-html-link">
-                                    <div class="html-report download-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="16px" version="1.1" viewBox="0 0 13 16"
-                                             width="13px"><title>
-                                            Analize</title>
-                                            <desc>Created with Sketch.</desc>
-                                            <defs/>
-                                            <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
-                                                <g transform="translate(-286.000000, -1439.000000)" id="Jenkins">
-                                                    <g transform="translate(272.000000, 1290.000000)" id="CxSAST">
-                                                        <g transform="translate(14.000000, 148.000000)" id="Group">
-                                                            <g transform="translate(1.000000, 2.000000)" id="Analize">
-                                                                <circle cy="5" stroke-width="2" id="Oval-3" r="5" stroke="#373050" cx="5"/>
-                                                                <rect transform="translate(8.866025, 11.696152) rotate(-30.000000) translate(-8.866025, -11.696152) "
-                                                                      height="6.53589838"
-                                                                      id="Rectangle-9" width="2" fill="#373050" x="7.8660254" y="8.42820323"/>
-                                                            </g>
-                                                        </g>
-                                                    </g>
-                                                </g>
-                                            </g>
-                                        </svg>
-                                    </div>
-                                    <div class="html-report download-txt">
-                                        <div class="detailed-report-ttl">Analyzed results</div>
-                                    </div>
-                                </a></div>
                                 <!--pdf-->
                                 <div class="report-link"><a class="pdf-report" id="sast-pdf-link">
                                     <div style="display: none;">h</div>
@@ -1166,6 +1139,28 @@
                         </div>
                         <div class="detailed-report">
                             <div class="sast-downloads osa-downloads">
+                                <div class="report-link"><a class="pdf-report" id="osa-pdf-link">
+                                    <div class="pdf-report download-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:svgjs="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="16"
+                                             id="SvgjsSvg1022" version="1.1" viewBox="0 0 13 16" width="13"><title>PDF icon</title>
+                                            <desc>Created with Avocode.</desc>
+                                            <defs id="SvgjsDefs1023">
+                                                <clipPath id="SvgjsClipPath1027">
+                                                    <path id="SvgjsPath1026" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill="#ffffff"/>
+                                                </clipPath>
+                                            </defs>
+                                            <path transform="matrix(1,0,0,1,-271,-763)" id="SvgjsPath1024" fill-opacity="1" d="M279 768L279 763L280.1 763L284 767L284 768Z "
+                                                  fill="#373050"/>
+                                            <path stroke-dasharray="0" d="M271 763L280.1 763L284 767L284 779L271 779Z " stroke-opacity="1" stroke="#373050" stroke-linecap="butt"
+                                                  stroke-linejoin="miter" stroke-miterlimit="50" transform="matrix(1,0,0,1,-271,-763)" stroke-width="2" id="SvgjsPath1025"
+                                                  fill-opacity="0"
+                                                  fill="#ffffff" clip-path="url(&quot;#SvgjsClipPath1027&quot;)"/>
+                                        </svg>
+                                    </div>
+                                    <div class="pdf-report download-txt">
+                                        <div class="pdf-report detailed-report-ttl">PDF Report</div>
+                                    </div>
+                                </a></div>
                                 <div class="report-link"><a class="html-report" id="osa-html-link">
                                     <div class="html-report download-icon">
                                         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="16px" version="1.1" viewBox="0 0 13 16"
@@ -1192,29 +1187,8 @@
                                     <div class="html-report download-txt">
                                         <div class="detailed-report-ttl">Analyzed results</div>
                                     </div>
-                                </a></div>
-                                <div class="report-link"><a class="pdf-report" id="osa-pdf-link">
-                                    <div class="pdf-report download-icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:svgjs="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="16"
-                                             id="SvgjsSvg1022" version="1.1" viewBox="0 0 13 16" width="13"><title>PDF icon</title>
-                                            <desc>Created with Avocode.</desc>
-                                            <defs id="SvgjsDefs1023">
-                                                <clipPath id="SvgjsClipPath1027">
-                                                    <path id="SvgjsPath1026" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill="#ffffff"/>
-                                                </clipPath>
-                                            </defs>
-                                            <path transform="matrix(1,0,0,1,-271,-763)" id="SvgjsPath1024" fill-opacity="1" d="M279 768L279 763L280.1 763L284 767L284 768Z "
-                                                  fill="#373050"/>
-                                            <path stroke-dasharray="0" d="M271 763L280.1 763L284 767L284 779L271 779Z " stroke-opacity="1" stroke="#373050" stroke-linecap="butt"
-                                                  stroke-linejoin="miter" stroke-miterlimit="50" transform="matrix(1,0,0,1,-271,-763)" stroke-width="2" id="SvgjsPath1025"
-                                                  fill-opacity="0"
-                                                  fill="#ffffff" clip-path="url(&quot;#SvgjsClipPath1027&quot;)"/>
-                                        </svg>
-                                    </div>
-                                    <div class="pdf-report download-txt">
-                                        <div class="pdf-report detailed-report-ttl">Download PDF Report</div>
-                                    </div>
-                                </a></div>
+                                </a>
+                                </div>
                             </div>
                         </div>
                     </td>
@@ -1565,7 +1539,7 @@
 
         //---------------------------------------------------------- full reports ---------------------------------------------------------------
         //sast links
-        document.getElementById("sast-html-link").setAttribute("href", sastHtmlPath);
+//        document.getElementById("sast-html-link").setAttribute("href", sastHtmlPath);
 
         //sastPdfPath only if pdfReportReady
         if (pdfReportReady) {
@@ -1576,7 +1550,7 @@
                     '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1022" version="1.1" width="13" height="16" viewBox="0 0 13 16"><title>PDF icon</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1023"><clipPath id="SvgjsClipPath1027"><path id="SvgjsPath1026" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill="#ffffff"/></clipPath></defs><path id="SvgjsPath1024" d="M279 768L279 763L280.1 763L284 767L284 768Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-271,-763)"/><path id="SvgjsPath1025" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2" clip-path="url(&quot;#SvgjsClipPath1027&quot;)" transform="matrix(1,0,0,1,-271,-763)"/></svg>' +
                     '</div>' +
                     '<div class="pdf-report download-txt">' +
-                    '<div class="pdf-report detailed-report-ttl">PDF</div>' +
+                    '<div class="pdf-report detailed-report-ttl">PDF Report</div>' +
                     '</div>' +
                     '</a>';
         }
