@@ -105,7 +105,7 @@ import java.util.List;
 public class Zipper {
 
     private List<String> zippingLogForJenkinsConsole = new LinkedList<>();
-    private int numberOfZippedFiles = 0;
+    private volatile int numberOfZippedFiles = 0;
 
     /**
      * Scans the base directory, filters the files, and writes the compressed
