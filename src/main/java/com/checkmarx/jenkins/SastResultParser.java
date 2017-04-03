@@ -15,7 +15,13 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import static com.checkmarx.jenkins.CxResultSeverity.*;
 
@@ -86,16 +92,16 @@ public class SastResultParser {
                         String severity = attributes.getValue("SeverityIndex");
                         if (severity != null) {
                             if (severity.equals(HIGH.xmlParseString)) {
-                                sastScanResult.setHighCount(sastScanResult.getHighCount()+1);
+                                sastScanResult.setHighCount(sastScanResult.getHighCount() + 1);
 
                             } else if (severity.equals(MEDIUM.xmlParseString)) {
-                                sastScanResult.setMediumCount(sastScanResult.getMediumCount()+1);
+                                sastScanResult.setMediumCount(sastScanResult.getMediumCount() + 1);
 
                             } else if (severity.equals(LOW.xmlParseString)) {
-                                sastScanResult.setLowCount(sastScanResult.getLowCount()+1);
+                                sastScanResult.setLowCount(sastScanResult.getLowCount() + 1);
 
                             } else if (severity.equals(INFO.xmlParseString)) {
-                                sastScanResult.setInfoCount(sastScanResult.getInfoCount()+1);
+                                sastScanResult.setInfoCount(sastScanResult.getInfoCount() + 1);
                             }
                         } else {
                             logger.error("\"SeverityIndex\" attribute was not found in element \"Result\" in XML report. "
@@ -119,8 +125,7 @@ public class SastResultParser {
                 default:
                     if ("CxXMLResults".equals(qName)) {
                         sastScanResult.setResultDeepLink(constructDeepLink(attributes.getValue("DeepLink")));
-                        sastScanResult.setScanStart(attributes.getValue("ScanStart"));
-                        sastScanResult.setScanTime(attributes.getValue("ScanTime"));
+                        setStartEndDateTime(attributes);
                         sastScanResult.setLinesOfCodeScanned(attributes.getValue("LinesOfCodeScanned"));
                         sastScanResult.setFilesScanned(attributes.getValue("FilesScanned"));
                         sastScanResult.setScanType(attributes.getValue("ScanType"));
@@ -128,6 +133,64 @@ public class SastResultParser {
                     break;
             }
         }
+
+        private void setStartEndDateTime(Attributes attributes) {
+            String scanStart = attributes.getValue("ScanStart");
+            String scanTime = attributes.getValue("ScanTime");
+
+            try {
+                //turn strings to date objects
+                Date scanStartDate = createStartDate(scanStart);
+                Date scanTimeDate = createTimeDate(scanTime);
+                Date scanEndDate = createEndDate(scanStartDate, scanTimeDate);
+
+                //turn dates back to strings
+                String scanStartDateFormatted = formatToDisplayDate(scanStartDate);
+                String scanEndDateFormatted = formatToDisplayDate(scanEndDate);
+
+                //set sast scan result object with formatted strings
+                sastScanResult.setScanStart(scanStartDateFormatted);
+                sastScanResult.setScanEnd(scanEndDateFormatted);
+
+            } catch (ParseException e) {
+                logger.error("Scan dates in wrong format. Could not parse scan start and end dates and scan time");
+            }
+
+        }
+
+        private String formatToDisplayDate(Date date) {
+            //"26/2/17 12:17"
+            String displayDatePattern = "dd/MM/yy HH:mm";
+            Locale locale = Locale.ENGLISH;
+
+            return new SimpleDateFormat(displayDatePattern, locale).format(date);
+        }
+
+        private Date createStartDate(String scanStart) throws ParseException {
+            //"Sunday, February 26, 2017 12:17:09 PM"
+            String oldPattern = "EEEE, MMMM dd, yyyy hh:mm:ss a";
+            Locale locale = Locale.ENGLISH;
+
+            DateFormat oldDateFormat = new SimpleDateFormat(oldPattern, locale);
+
+            return oldDateFormat.parse(scanStart);
+        }
+
+        private Date createTimeDate(String scanTime) throws ParseException {
+            //"00h:00m:30s"
+            String oldPattern = "HH'h':mm'm':ss's'";
+
+            DateFormat oldTimeFormat = new SimpleDateFormat(oldPattern);
+            oldTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+            return oldTimeFormat.parse(scanTime);
+        }
+
+        private Date createEndDate(Date scanStartDate, Date scanTimeDate) {
+            long time /*no c*/ = scanStartDate.getTime() + scanTimeDate.getTime();
+            return new Date(time);
+        }
+
 
         @Override
         public void endElement(String uri, String localName, String qName) throws SAXException {
@@ -168,22 +231,23 @@ public class SastResultParser {
         }
     }
 
-        private void setQueriesAsJson(){
-            sastScanResult.setHighQueryResultsJson(transformQueryListToJson(sastScanResult.getHighQueryResultList()));
-            sastScanResult.setMediumQueryResultsJson(transformQueryListToJson(sastScanResult.getMediumQueryResultList()));
-            sastScanResult.setLowQueryResultsJson(transformQueryListToJson(sastScanResult.getLowQueryResultList()));
-            sastScanResult.setInfoQueryResultsJson(transformQueryListToJson(sastScanResult.getInfoQueryResultList()));
-        }
 
-        private String transformQueryListToJson(List<QueryResult> queryResults){
-            try {
-               if(queryResults != null) {
-                   return mapper.writeValueAsString(queryResults);
-               }
-            } catch (JsonProcessingException e) {
-                logger.error("Could not parse result to Json \n ", e);
+    private void setQueriesAsJson() {
+        sastScanResult.setHighQueryResultsJson(transformQueryListToJson(sastScanResult.getHighQueryResultList()));
+        sastScanResult.setMediumQueryResultsJson(transformQueryListToJson(sastScanResult.getMediumQueryResultList()));
+        sastScanResult.setLowQueryResultsJson(transformQueryListToJson(sastScanResult.getLowQueryResultList()));
+        sastScanResult.setInfoQueryResultsJson(transformQueryListToJson(sastScanResult.getInfoQueryResultList()));
+    }
+
+    private String transformQueryListToJson(List<QueryResult> queryResults) {
+        try {
+            if (queryResults != null) {
+                return mapper.writeValueAsString(queryResults);
             }
-            return "[]";
+        } catch (JsonProcessingException e) {
+            logger.error("Could not parse result to Json \n ", e);
         }
+        return "[]";
+    }
 
 }

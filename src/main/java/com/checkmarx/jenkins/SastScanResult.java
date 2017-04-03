@@ -3,12 +3,7 @@ package com.checkmarx.jenkins;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.LinkedList;
-import java.util.Locale;
 
 /**
  * Created by zoharby on 22/01/2017.
@@ -36,7 +31,7 @@ public class SastScanResult {
     @Nullable
     private String scanStart;
     @Nullable
-    private String scanTime;
+    private String scanEnd;
     @Nullable
     private String linesOfCodeScanned;
     @Nullable
@@ -165,16 +160,16 @@ public class SastScanResult {
     }
 
     public void setScanStart(@Nullable String scanStart) {
-        this.scanStart = formatTime(scanStart);
+        this.scanStart = scanStart;
     }
 
     @Nullable
-    public String getScanTime() {
-        return scanTime;
+    public String getScanEnd() {
+        return scanEnd;
     }
 
-    public void setScanTime(@Nullable String scanTime) {
-        this.scanTime = formatTime(scanTime);
+    public void setScanEnd(@Nullable String scanEnd) {
+        this.scanEnd = scanEnd;
     }
 
     @Nullable
@@ -204,27 +199,8 @@ public class SastScanResult {
         this.scanType = scanType;
     }
 
-    //"Sunday, February 26, 2017 12:17:09 PM" Date to "26/2/17 12:17"
-    private String formatTime(String time) {
-
-        String oldPattern = "EEEE, MMMM dd, yyyy hh:mm:ss a";
-        String newPattern = "dd/MM/yy HH:mm";
-        Locale locale = Locale.ENGLISH;
-
-        DateFormat oldDateFormat = new SimpleDateFormat(oldPattern, locale);
-
-        Date date = new Date();
-
-        try {
-            date = oldDateFormat.parse(time);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        String newDate = new SimpleDateFormat(newPattern, locale).format(date);
 
 
-        return newDate;
-    }
+
 
 }

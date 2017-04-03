@@ -1392,12 +1392,12 @@
         var osaPdfPath = '${app.rootUrl}${it.lastSynchronousBuildAction.owner.url}${it.lastSynchronousBuildAction.urlName}' + "/osaPdfReport";
 
         var sastStartDate = verifyVar(["${it.lastSynchronousBuildAction.sastScanResult.scanStart}"]);
-        var sastEndtDate = verifyVar(["${it.lastSynchronousBuildAction.sastScanResult.scanTime}"]);
+        var sastEndDate = verifyVar(["${it.lastSynchronousBuildAction.sastScanResult.scanEnd}"]);
         var sastNumFiles = verifyVar(["${it.lastSynchronousBuildAction.sastScanResult.filesScanned}"]);
         var sastLoc = verifyVar(["${it.lastSynchronousBuildAction.sastScanResult.linesOfCodeScanned}"]);
 
         var osaStartDate = verifyVar(["${it.lastSynchronousBuildAction.osaScanResult.osaScanStartTime}"]);
-        var osaEndtDate = verifyVar(["${it.lastSynchronousBuildAction.osaScanResult.osaScanEndTime}"]);
+        var osaEndDate = verifyVar(["${it.lastSynchronousBuildAction.osaScanResult.osaScanEndTime}"]);
         var osaNumFiles = verifyVar(["${it.lastSynchronousBuildAction.osaScanResult.osaScanTotalLibraries}"]);
 
 
@@ -1563,13 +1563,13 @@
 
         //sast info
         document.getElementById("sast-full-start-date").innerHTML = sastStartDate;
-        document.getElementById("sast-full-end-date").innerHTML = sastEndtDate;
+        document.getElementById("sast-full-end-date").innerHTML = sastEndDate;
         document.getElementById("sast-full-files").innerHTML = numberWithCommas(sastNumFiles);
         document.getElementById("sast-full-loc").innerHTML = numberWithCommas(sastLoc);
 
         //osa info
         document.getElementById("osa-full-start-date").innerHTML = osaStartDate;
-        document.getElementById("osa-full-end-date").innerHTML = osaEndtDate;
+        document.getElementById("osa-full-end-date").innerHTML = osaEndDate;
         document.getElementById("osa-full-files").innerHTML = numberWithCommas(osaNumFiles);
 
 

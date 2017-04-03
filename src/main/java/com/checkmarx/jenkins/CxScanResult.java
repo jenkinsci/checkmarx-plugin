@@ -322,7 +322,7 @@ public class CxScanResult implements Action {
     @Nullable
     private String scanStart;
     @Nullable
-    private String scanTime;
+    private String scanEnd;
     @Nullable
     private String linesOfCodeScanned;
     @Nullable
@@ -347,7 +347,7 @@ public class CxScanResult implements Action {
 
          this.resultDeepLink = sastScanResult.getResultDeepLink();
          this.scanStart = sastScanResult.getScanStart();
-         this.scanTime = sastScanResult.getScanTime();
+         this.scanEnd = sastScanResult.getScanEnd();
          this.linesOfCodeScanned = sastScanResult.getLinesOfCodeScanned();
          this.filesScanned = sastScanResult.getFilesScanned();
          this.scanType = sastScanResult.getScanType();
@@ -383,8 +383,8 @@ public class CxScanResult implements Action {
     }
 
     @Nullable
-    public String getScanTime() {
-        return scanTime;
+    public String getScanEnd() {
+        return scanEnd;
     }
 
     @Nullable
