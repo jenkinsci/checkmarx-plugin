@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * File zipper with filter.
@@ -105,9 +104,8 @@ import java.util.logging.Logger;
  */
 public class Zipper {
 
-    private static Logger LOGGER = Logger.getLogger(Zipper.class.getName());
     private List<String> zippingLogForJenkinsConsole = new LinkedList<>();
-    private int numberOfZippedFiles = 0;
+    private volatile int numberOfZippedFiles = 0;
 
     /**
      * Scans the base directory, filters the files, and writes the compressed
@@ -141,7 +139,6 @@ public class Zipper {
             ds = createDirectoryScanner(baseDir, filterPatterns);
             ds.setFollowSymlinks(true);
             ds.scan();
-            printDebug(ds);
         }catch (Exception e){
             throw new ZipperException(e, new ZippingDetails(numberOfZippedFiles, zippingLogForJenkinsConsole));
         }
@@ -186,7 +183,6 @@ public class Zipper {
             ds = createDirectoryScanner(baseDir, filterExcludePatterns, filterIncludePatterns);
             ds.setFollowSymlinks(true);
             ds.scan();
-            printDebug(ds);
         }catch (Exception e){
             throw new ZipperException(e,new ZippingDetails(numberOfZippedFiles, zippingLogForJenkinsConsole));
         }
@@ -326,10 +322,8 @@ public class Zipper {
                 if (pattern.startsWith("!")) {
                     pattern = pattern.substring(1); // Trim the "!"
                     excludePatterns.add(pattern);
-                    LOGGER.fine("Exclude pattern detected: >" + pattern + "<");
                 } else {
                     includePatterns.add(pattern);
-                    LOGGER.fine("Include pattern detected: >" + pattern + "<");
                 }
             }
         }
@@ -355,35 +349,12 @@ public class Zipper {
     }
 
 
-    private void printDebug(DirectoryScanner ds) {
-
-        LOGGER.fine("Base Directory: " + ds.getBasedir());
-
-        for (String file : ds.getIncludedFiles()) {
-            LOGGER.fine("Included: " + file);
-        }
-
-        for (String file : ds.getExcludedFiles()) {
-            LOGGER.fine("Excluded File: " + file);
-        }
-
-        for (String file : ds.getExcludedDirectories()) {
-            LOGGER.fine("Excluded Dir: " + file);
-        }
-
-        for (String file : ds.getNotFollowedSymlinks()) {
-            LOGGER.fine("Not followed symbolic link: " + file);
-        }
-    }
-
 
     private void updateInfoProgress(String message){
-        LOGGER.info(message);
         zippingLogForJenkinsConsole.add(message);
     }
 
     private void updateError(String message){
-        LOGGER.warning(message);
         zippingLogForJenkinsConsole.add(message);
     }
 
