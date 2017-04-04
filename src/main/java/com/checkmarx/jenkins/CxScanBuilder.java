@@ -831,8 +831,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         StringBuilder sb = new StringBuilder();
         boolean useGlobalThreshold = shouldUseGlobalThreshold();
         sb.append("----------------------------Configurations:-----------------------------").append("\n");
-        sb.append("username: ").append(getUsername()).append("\n");
-        sb.append("url: ").append(getServerUrl()).append("\n");
+        if(isUseOwnServerCredentials()) {
+            sb.append("username: ").append(getUsername()).append("\n");
+            sb.append("url: ").append(getServerUrl()).append("\n");
+        }else{
+            sb.append("username: ").append(descriptor.getUsername()).append("\n");
+            sb.append("url: ").append(descriptor.getServerUrl()).append("\n");
+        }
         sb.append("projectName: ").append(getProjectName()).append("\n");
         //sb.append("preset: ").append(getPreset()).append("\n");
         sb.append("isIncrementalScan: ").append(isIncremental()).append("\n");
