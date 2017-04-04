@@ -21,6 +21,7 @@ import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
+import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
@@ -778,6 +779,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             //create jelly context for setting variables
             JellyContext context = new JellyContext();
             context.setVariable("it", cxScanResult);
+            context.setVariable("app", Jenkins.getInstance());
 
             //run script
             context.runScript(jellyTemplate, xmlOutput);
