@@ -1,0 +1,11 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
+         xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+
+    <j:if test="${it.actions.0.showResults}">
+        <div>
+            <h3 align="center">Checkmarx Security Vulnerabilities Trend</h3>
+            <img src="checkmarx/graph"></img>
+        </div>
+    </j:if>
+</j:jelly>

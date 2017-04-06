@@ -81,7 +81,7 @@ public class CxProjectResult implements Action {
 
     @NotNull
     public String getIconPath() {
-        PluginWrapper wrapper = Hudson.getInstance().getPluginManager().getPlugin(CxPlugin.class);
+        PluginWrapper wrapper = Jenkins.getInstance().getPluginManager().getPlugin("checkmarx");
         return "/plugin/" + wrapper.getShortName() + "/";
     }
 

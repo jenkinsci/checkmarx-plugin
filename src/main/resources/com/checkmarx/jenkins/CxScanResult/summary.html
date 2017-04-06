@@ -1,1276 +1,516 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Summary Section</title>
-</head>
-<body>
-<style>
 
-    .cx-title {
-        font-size: 24px;
-        font-weight: 500;
-        display: inline-flex;
-        padding: 10px 0;
-        width: 100%;
-        border-bottom: solid 2px #d5d5d5;
-        color: #373050;
-    }
+    <style>
+        .cx-icon {
+            margin-left: 1em;
+            margin-right: 1em;
+            padding: 4px;
+            vertical-align: middle;
+        }
 
-    .summary-section {
-        width: 100%;
-        font-family: 'Roboto', sans-serif;
-    }
+        .cx-title {
+            font-size: 24px;
+            font-weight: 500;
+            display: inline-block;
+            padding: 10px 0;
+            width: calc(100% - 48px - 2em);
+            border-bottom: solid 2px #373050;
+            color: #373050;
+        }
 
-    .summary-section td {
-        font-family: 'Roboto', sans-serif;
-    }
+        .summary-section {
+            width: calc(100% - 2em - 4px);
+            margin: auto;
+            font-family: 'Roboto', sans-serif;
+        }
 
-    tr.summary-table-row {
-        white-space: nowrap;
-    }
+        .summary-section td {
+            font-family: 'Roboto', sans-serif;
+            font-size: 13px;
+        }
 
-    table {
-        border-collapse: collapse;
-    }
+        tr.summary-table-row {
+            white-space: nowrap;
+        }
 
-    table td,
-    table th {
-        border: solid transparent;
-    }
+        table {
+            border-collapse: collapse;
+        }
 
-    .top-padding td {
-        padding-top: 43px;
-    }
+        table td,
+        table th {
+            border: solid transparent;
+        }
 
-    td {
-        border-color: transparent;
-    }
+        .top-padding td {
+            padding-top: 59px;
+        }
 
-    tr.cxsast {
-        border-bottom: solid 2px #d5d5d5;
-    }
+        td {
+            border-color: transparent;
+        }
 
-    .title-column,
-    .main-column {
-        padding: 44px 0;
-        line-height: 25px;
-        display: inline-block;
-    }
+        tr.cxiast {
+            border-bottom: solid 2px #373050;
+        }
 
-    .main-column {
-        padding-bottom: 45px;
-        margin-bottom: 42px;
-    }
+        .title-column,
+        .main-column {
+            padding: 59px 0;
+            line-height: 25px;
+            display: inline-block;
+        }
 
-    .title-column, .cx-title .cx {
-        margin-right: 10px;
-        vertical-align: top;
-        height: 100%;
-        letter-spacing: -0.8px;
-        width: 222px;
-        color: #373050;
-    }
+        .main-column {
+            text-align: center;
+            padding-bottom: 45px;
+            margin-bottom: 42px;
+            padding-left: 16px;
+            width: 79%;
+            min-height: 350px;
+            box-sizing: border-box;
+            max-width: 709px;
+        }
 
-    .summary-title {
-        padding-bottom: 21px;
-        border-bottom: solid #979797 1px;
-    }
+        .title-column {
+            margin-right: 10px;
+            vertical-align: top;
+            height: 100%;
+            letter-spacing: -0.8px;
+            width: 20%;
+            color: #373050;
+            max-width: 250px;
+        }
 
-    .sum1 {
-        font-size: 24px;
-        font-weight: 500;
-    }
-
-    .sum2 {
-        font-size: 16px;
-    }
-
-    .sum-line1 {
-        width: 100%;
-        height: 1px;
-        background-color: #979797;
-    }
-
-    .graph-title {
-        margin-bottom: 38px;
-        font-weight: 500;
-        font-size: 16px;
-    }
-
-    .threshold-exceeded {
-        margin-left: 84%;
-        font-size: 15px;
-        color: #d82743;
-        font-weight: bold
-    }
-
-    .threshold-compliance {
-        margin-left: 84%;
-        font-size: 15px;
-        color: #20be3d;
-        font-weight: bold
-    }
-
-    .graph {
-        width: 709px;
-        position: relative;
-    }
-
-    .threshold-exceeded-text {
-        color: #da2945;
-    }
-
-    .threshold-compliance-text {
-        color: #21bf3f;
-    }
-
-    .threshold-exceeded,
-    .threshold-compliance {
-        display: inline-flex;
-        font-size: 14px;
-        position: absolute;
-        right: 0;
-    }
-
-    .threshold-exceeded-icon,
-    .threshold-compliance-icon {
-        margin-right: 6px;
-        line-height: 28px;
-    }
-
-    .detailed-report {
-        margin-top: 24px;
-        display: block;
-    }
-
-    .detailed-report-ttl {
-        font-size: 16px;
-        line-height: 16px;
-        letter-spacing: -0.53px;
-    }
-
-    .download-detailed-report {
-        color: #9b9b9b;
-        font-size: 14px;
-        letter-spacing: -0.47px;
-    }
-
-    .download-icon,
-    .download-icon,
-    .download-txt {
-        display: inline-block;
-    }
-
-    .download-icon {
-        margin-right: 9px;
-    }
-
-    body {
-        font: 13px/1.3 'Lucida Grande', sans-serif;
-        color: #666;
-    }
-
-    .chart {
-        display: table;
-        table-layout: fixed;
-        width: 709px;
-        height: 288px;
-        margin: 0 auto;
-        padding: 0;
-        background-image: linear-gradient(to top, #d5d5d5, #ffffff 2%);
-        background-size: 100% 70px;
-        background-position: left bottom;
-        border-bottom: solid #979797 2px;
-    }
-
-    .chart tr {
-        white-space: nowrap;
-    }
-
-    .chart li {
-        position: relative;
-        display: table-cell;
-        vertical-align: bottom;
-        height: 200px;
-    }
-
-    .chart span {
-        margin: auto;
-        display: block;
-        background: #d1ecfa;
-        animation: draw 1s ease-in-out;
-    }
-
-    .chart .bar-count {
-        text-align: center;
-        font-size: 14px;
-        letter-spacing: -0.47px;
-        line-height: 40px;
-    }
-
-    .chart .bar-title {
-        font-size: 16px;
-        padding: 0 18px;
-        color: #525055;
-    }
-
-    .chart .bar-title-container {
-        position: absolute;
-        padding-top: 21px;
-        display: inline-flex;
-        text-align: center;
-        word-wrap: break-word;
-        left: 50%;
-        transform: translate(-50%);
-    }
-
-    .chart .bar-1 {
-        position: relative;
-        background-color: #da2945;
-    }
-
-    .chart .bar-2 {
-        position: relative;
-        background-color: #ffb400;
-    }
-
-    .chart .bar-3 {
-        position: relative;
-        background-color: #efd412;
-    }
-
-    .chart li span {
-        width: 53px;
-    }
-
-    .download-cx-report {
-        font-size: 16px;
-        padding-bottom: 5px;
-    }
-
-    .pdf-report.download-icon,
-    .html-report.download-icon {
-        margin-right: 6px;
-    }
-
-    .libraries {
-        display: inline-flex;
-    }
-
-    .libraries-vulnerable,
-    .libraries-ok {
-        width: 200px;
-        overflow: hidden;
-
-        margin-bottom: 47px;
-        margin-right: 122px;
-    }
-
-    .libraries-vulnerable-number,
-    .libraries-ok-number {
-        display: inline-block;
-        font-size: 28px;
-        letter-spacing: -0.93px;
-    }
-
-    .libraries-vulnerable-icon,
-    .libraries-ok-icon {
-        display: inline-block;
-        margin-right: 9px;
-    }
-
-    .libraries-vulnerable-text,
-    .libraries-ok-text {
-        white-space: normal;
-        font-size: 16px;
-        letter-spacing: -0.53px;
-    }
-
-    .threshold-tooltip-background {
-        position: absolute;
-        display: inline-flex;
-    }
-
-    .threshold-icon-white {
-        position: relative;
-        top: 2px;
-        display: inline-block;
-        padding-left: 16px;
-        vertical-align: top;
-    }
-
-    .threshold-text {
-        position: relative;
-        color: white;
-        display: inline-block;
-        padding-right: 6px;
-        padding-left: 7px;
-        vertical-align: top;
-    }
-
-    .threshold-number {
-        position: relative;
-        color: white;
-        display: inline-block;
-        vertical-align: top;
-    }
-
-    .tooltip-container {
-        position: absolute;
-        display: inline-flex;
-    }
-
-    .threshold-tooltip {
-        padding-right: 15px;
-        text-align: right;
-        transform: translate(0, 50%);
-    }
-
-    .threshold-line {
-        width: 53px;
-        border-bottom: dashed white 1px;
-        padding-right: 3px;
-    }
-
-    .osa-downloads a, .sast-downloads a {
-        color:black;
-        text-decoration: none;
-    }
-
-</style>
-
-<div class="cx-title">
-    <div class="cx">Checkmarx</div>
-    <div class="project-name">#projectName#</div>
-</div>
-
-<table class="summary-section">
-    <tr class="summary-table-row cxsast">
-        <td class="title-column">
-            <div class="summary-title">
-                <div class="sum1">CxSAST</div>
-                <div class="sum2">Summary</div>
-            </div>
+        .summary-title {
+            border-bottom: solid #979797 1px;
+            color: white;
+            background-color: #373050;
+            line-height: 28px;
+            padding: 5px 13px;
+        }
 
 
-            <div class="detailed-report">
-                <div class="download-cx-report">Checkmarx Report</div>
+        .sum2 {
+            font-size: 16px;
+        }
 
-                <div class="osa-downloads sast-downloads">
-                    <!--pdfStart-->
-                    <div>
-                        <a class="pdf-report" href="#pdfReportUrl#">
-                        <div class="pdf-report download-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1022" version="1.1"
-                                 width="13" height="16" viewBox="0 0 13 16"><title>PDF icon</title>
-                                <desc>Created with Avocode.</desc>
-                                <defs id="SvgjsDefs1023">
-                                    <clipPath id="SvgjsClipPath1027">
-                                        <path id="SvgjsPath1026" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill="#ffffff"/>
-                                    </clipPath>
-                                </defs>
-                                <path id="SvgjsPath1024" d="M279 768L279 763L280.1 763L284 767L284 768Z " fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-271,-763)"/>
-                                <path id="SvgjsPath1025" d="M271 763L280.1 763L284 767L284 779L271 779Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                      stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="2"
-                                      clip-path="url(&quot;#SvgjsClipPath1027&quot;)" transform="matrix(1,0,0,1,-271,-763)"/>
-                            </svg>
-                        </div>
-                        <div class="pdf-report download-txt">
-                            <div class="pdf-report detailed-report-ttl">PDF</div>
-                        </div>
-                    </a>
-                    </div>
-                    <!--pdfEnd-->
-                    <div>
-                        <a class="html-report" href="#reportUrl#">
-                        <div class="html-report download-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1054" version="1.1"
-                                 width="14" height="17.20710678118644" viewBox="0 0 14 17.20710678118644"><title>HTML Icon</title>
-                                <desc>Created with Avocode.</desc>
-                                <defs id="SvgjsDefs1055"/>
-                                <path id="SvgjsPath1056" d="M279.12 796L284 796L284 806L271 806L271 796L271 796L275.92 796 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                      stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                      transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                <path id="SvgjsPath1057" d="M277.5 790.5L277.5 797.57 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                      stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                      transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                <path id="SvgjsPath1058" d="M277.5 790.5L280.5 793.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                      stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                      transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                <path id="SvgjsPath1059" d="M277.5 790.5L274.5 793.5 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                      stroke-linecap="square" stroke-opacity="1" stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                      transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                            </svg>
-                        </div>
-                        <div class="html-report download-txt">
-                            <div class="detailed-report-ttl">HTML</div>
-                        </div>
-                    </a>
-                    </div>
+
+        .graph-title {
+            font-weight: 500;
+            font-size: 16px;
+            display: table-cell;
+            vertical-align: middle;
+            width: 100%;
+        }
+
+        .graph {
+            position: relative;
+            max-width: 709px;
+            text-align: left;
+            margin-right: 50px;
+        }
+
+        .graph-top {
+            display: table;
+            vertical-align: middle;
+        }
+
+        .square {
+            width: 25px;
+            height: 25px;
+            background: #96b7da;
+        }
+
+        .square1 {
+            width: 25px;
+            height: 25px;
+            background: #da2945;
+        }
+
+
+        .detailed-report-ttl {
+            font-size: 14px;
+            letter-spacing: -0.53px;
+        }
+
+
+        .scan-link {
+            display: inline-block;
+            font-size: 14px;
+            letter-spacing: -0.53px;
+        }
+
+
+        .download-icon > svg {
+            vertical-align: sub;
+        }
+
+        body {
+            font: 13px/1.3 'Lucida Grande', sans-serif;
+            color: #666;
+        }
+
+        .chart {
+            display: table;
+            table-layout: fixed;
+            max-width: 709px;
+            min-width: 550px;
+            width: 100%;
+            height: 288px;
+            margin: 38px auto 0;
+            padding: 0;
+            background-image: linear-gradient(to top, #d5d5d5, #ffffff 2%);
+            background-size: 100% 70px;
+            background-position: left bottom;
+            border-bottom: solid #979797 2px;
+        }
+
+        .chart tr {
+            white-space: nowrap;
+        }
+
+        .chart li {
+            position: relative;
+            display: table-cell;
+            vertical-align: bottom;
+            height: 200px;
+        }
+
+        .chart span {
+            margin: auto;
+            display: block;
+            background: #d1ecfa;
+            animation: draw 1s ease-in-out;
+        }
+
+        .chart .bar-count {
+            text-align: center;
+            font-size: 14px;
+            letter-spacing: -0.47px;
+            line-height: 40px;
+        }
+
+        .chart .bar-title {
+            font-size: 16px;
+            padding: 0 18px;
+            color: #525055;
+        }
+
+        .chart .bar-title-container {
+            position: absolute;
+            padding-top: 21px;
+            display: inline-flex;
+            text-align: center;
+            word-wrap: break-word;
+            left: 50%;
+            transform: translate(-50%);
+        }
+
+        .chart .bar-1 {
+            position: relative;
+            background-color: #da2945;
+        }
+
+        .chart .bar-1-new {
+            position: relative;
+            background-color: #96b7da;
+        }
+
+        .chart .bar-2 {
+            position: relative;
+            background-color: #ffb400;
+        }
+
+        .chart .bar-2-new {
+            position: relative;
+            background-color: #96b7da;
+        }
+
+        .chart .bar-3 {
+            position: relative;
+            background-color: #efd412;
+        }
+
+        .chart .bar-3-new {
+            position: relative;
+            background-color: #96b7da;
+        }
+
+        .chart li span {
+            max-width: 53px;
+        }
+
+
+    </style>
+
+    <table class="summary-section">
+        <img class="cx-icon" id="cx-icon-main"/>
+        <div class="cx-title">Checkmarx IAST</div>
+        <!--iast row-->
+        <tr class="summary-table-row cxiast">
+            <td class="title-column">
+                <div class="summary-title">
+                    <div class="sum2">Summary</div>
                 </div>
-            </div>
-
-        </td>
-        <td class="main-column">
-            <div class="graph">
-                <!--thresholdStatusStart-->
-                <div class="threshold-exceeded" #sastThresholdExceeded#>
-                    <div class="threshold-exceeded-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1015" version="1.1"
-                             width="9.400000000000091" height="12.399999999999977" viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold ICON</title>
-                            <desc>Created with Avocode.</desc>
-                            <defs id="SvgjsDefs1016"/>
-                            <path id="SvgjsPath1017" d="M1052 190L1056.29 190L1056.29 195.6L1052 195.6Z " fill="#da2945" fill-opacity="1"
-                                  transform="matrix(1,0,0,1,-1049.3,-184.3)"/>
-                            <path id="SvgjsPath1018" d="M1052.71 185.1L1055.57 185.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                  stroke-linecap="square" stroke-opacity="1" stroke="#da2945" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-1049.3,-184.3)"/>
-                            <path id="SvgjsPath1019" d="M1052.71 188.1L1055.57 188.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                  stroke-linecap="square" stroke-opacity="1" stroke="#da2945" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-1049.3,-184.3)"/>
-                            <path id="SvgjsPath1020" d="M1050.42 195.1L1057.64 195.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                  stroke-linecap="square" stroke-opacity="1" stroke="#da2945" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-1049.3,-184.3)"/>
-                        </svg>
+                <a id="scan-link">
+                    <div class="scan-link">
+                        <div>Scan link</div>
                     </div>
-                    <div class="threshold-exceeded-text">
-                        Threshold Exceeded
-                    </div>
-                </div>
+                </a>
+            </td>
 
-                <div class="threshold-compliance" #sastThresholdCompliance#>
-                    <div class="threshold-compliance-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1050" version="1.1" width="13.99264158479491" height="13" viewBox="0 0 13.99264158479491 13"><title>Icon</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1051"><clipPath id="SvgjsClipPath1056"><path id="SvgjsPath1055" d="M1035.00736 793.9841L1035.00736 784.01589L1046.9926400000002 784.01589L1046.9926400000002 793.9841ZM1038.67 790.72L1036.68 788.72L1036 789.4L1038.67 792.0699999999999L1045.21 785.67L1044.54 785Z " fill="#ffffff"/></clipPath></defs><path id="SvgjsPath1052" d="M1033 789.5C1033 785.91015 1035.91015 783 1039.5 783C1043.08985 783 1046 785.91015 1046 789.5C1046 793.08985 1043.08985 796 1039.5 796C1035.91015 796 1033 793.08985 1033 789.5Z " fill="#21bf3f" fill-opacity="1" transform="matrix(1,0,0,1,-1033,-783)"/><path id="SvgjsPath1053" d="M1038.67 790.72L1036.68 788.72L1036 789.4L1038.67 792.0699999999999L1045.21 785.67L1044.54 785Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-1033,-783)"/><path id="SvgjsPath1054" d="M1038.67 790.72L1036.68 788.72L1036 789.4L1038.67 792.0699999999999L1045.21 785.67L1044.54 785Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" clip-path="url(&quot;#SvgjsClipPath1056&quot;)" transform="matrix(1,0,0,1,-1033,-783)"/></svg>                    </div>
-                    <div class="threshold-compliance-text">
-                        Threshold Compliance
+            <td class="main-column">
+                <div class="graph">
+                    <div class="graph-top">
+                        <div class="graph-title">Vulnerabilities Status</div>
+                        <div class="graph-title">
+                            <div class="square"></div>
+                        </div>
+                        <div class="graph-title">
+                            <div>New</div>
+                        </div>
+                        <div class="graph-title">
+                            <div class="square1"></div>
+                        </div>
+                        <div class="graph-title">
+                            <div>Recurrent</div>
+                        </div>
                     </div>
-                </div>
-                <!--thresholdStatusEnd-->
 
-                <div class="graph-title">Vulnerabilities Status</div>
-                <ul class="chart">
-                    <li>
-                        <div class="bar-count">#highResults#</div>
-                        <span class="bar-1"
-                              style="height:#highResultsHeight#%">
-                            <!--highThresholdStart-->
-                            <div class="tooltip-container" style="bottom:#highThresholdHeight#%">
-                                <div class="threshold-line"></div>
-                                <div class="threshold-tooltip threshold-high">
-                                    <div class="threshold-tooltip-background">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                             xmlns:xlink="http://www.w3.org/1999/xlink"
-                                             xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1041" version="1.1"
-                                             width="124" height="25" viewBox="0 0 124 25"><title>Combined Shape</title>
-                                            <desc>Created with Avocode.</desc>
-                                            <defs id="SvgjsDefs1042"/>
-                                            <path id="SvgjsPath1043"
-                                                  d="M624.48 368.31C624.48 370.28000000000003 626.6800000000001 371.87 629.38 371.87L738 371.87C740.74 371.87 742.91 370.28000000000003 742.91 368.31L742.91 350.56C742.91 348.59 740.7099999999999 347 738 347L629.38 347C626.65 347 624.48 348.6 624.48 350.56L624.48 355.45L619 359.44L624.48 363.42Z "
-                                                  fill="#373050" fill-opacity="1"
-                                                  transform="matrix(1,0,0,1,-619,-347)"/>
-                                        </svg>
-                                    </div>
-                                    <div class="threshold-icon-white">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                             xmlns:xlink="http://www.w3.org/1999/xlink"
-                                             xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1044" version="1.1"
-                                             width="9.400000000000091" height="12.399999999999977"
-                                             viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold
-                                            ICON</title>
-                                            <desc>Created with Avocode.</desc>
-                                            <defs id="SvgjsDefs1045"/>
-                                            <path id="SvgjsPath1046" d="M638 360L642.29 360L642.29 365.6L638 365.6Z "
-                                                  fill="#ffffff" fill-opacity="1"
-                                                  transform="matrix(1,0,0,1,-635.3,-354.3)"/>
-                                            <path id="SvgjsPath1047" d="M638.71 355.1L641.57 355.1 " fill-opacity="0"
-                                                  fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                                  stroke-linecap="square" stroke-opacity="1" stroke="#ffffff"
-                                                  stroke-miterlimit="50" stroke-width="1.4"
-                                                  transform="matrix(1,0,0,1,-635.3,-354.3)"/>
-                                            <path id="SvgjsPath1048" d="M638.71 358.1L641.57 358.1 " fill-opacity="0"
-                                                  fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                                  stroke-linecap="square" stroke-opacity="1" stroke="#ffffff"
-                                                  stroke-miterlimit="50" stroke-width="1.4"
-                                                  transform="matrix(1,0,0,1,-635.3,-354.3)"/>
-                                            <path id="SvgjsPath1049" d="M636.42 365.1L643.64 365.1 " fill-opacity="0"
-                                                  fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                                  stroke-linecap="square" stroke-opacity="1" stroke="#ffffff"
-                                                  stroke-miterlimit="50" stroke-width="1.4"
-                                                  transform="matrix(1,0,0,1,-635.3,-354.3)"/>
-                                        </svg>
-                                    </div>
-                                    <div class="threshold-text">Threshold</div>
-                                    <div class="threshold-number">#highThreshold#</div>
+                    <ul class="chart">
+
+                        <!--high-->
+                        <li>
+                            <div class="bar-count" id="bar-count-high">
+                                <div style="display: none">h</div>
+                            </div>
+                            <span class="bar-1-new" id="bar-high-new">
+                                <div id="tooltip-high">
+                                    <div style="display: none">h</div>
                                 </div>
-                            </div>
-                            <!--highThresholdEnd-->
-                        </span>
-                        <div class="bar-title-container">
-                            <div class="bar-title">High</div>
-                            <div class="severity-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                                     width="23px" height="21px" viewBox="0 0 23 21" version="1.1">
-                                    <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
-                                    <title>high</title>
-                                    <desc>Created with Sketch.</desc>
-                                    <defs>
-                                        <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"
-                                              id="path-1"/>
-                                        <mask id="mask-1" maskContentUnits="userSpaceOnUse"
-                                              maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884" height="19"
-                                              fill="white">
-                                            <use xlink:href="#path-1"/>
-                                        </mask>
-                                    </defs>
-                                    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                        <g id="Jenkins" transform="translate(-602.000000, -537.000000)">
-                                            <g id="SAST" transform="translate(272.000000, 180.000000)">
-                                                <g id="Vulnerabilities-Stat"
-                                                   transform="translate(246.082552, 0.000000)">
-                                                    <g id="High" transform="translate(22.425880, 105.921935)">
-                                                        <g id="high" transform="translate(62.000000, 252.000000)">
-                                                            <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
-                                                                  id="Combined-Shape" fill="#F5F5F5"/>
-                                                            <use id="Rectangle-40-Copy" stroke="#666666"
-                                                                 mask="url(#mask-1)" stroke-width="4"
-                                                                 xlink:href="#path-1"/>
-                                                            <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
-                                                                  id="Page-1" fill="#DA2945"/>
-                                                            <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12"
-                                                                  width="2" height="4"/>
-                                                            <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17"
-                                                                  width="2" height="2"/>
-                                                        </g>
-                                                    </g>
-                                                </g>
-                                            </g>
-                                        </g>
-                                    </g>
-                                </svg>
-                            </div>
-                        </div>
-
-
-                    </li>
-                    <li>
-                        <div class="bar-count">#mediumResults#</div>
-                        <span class="bar-2"
-                              style="height:#mediumResultsHeight#%">
-                            <!--mediumThresholdStart-->
-                            <div class="tooltip-container" style="bottom:#mediumThresholdHeight#%">
-                                <div class="threshold-line"></div>
-                                <div class="threshold-tooltip threshold-medium">
-                                    <div class="threshold-tooltip-background">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                             xmlns:xlink="http://www.w3.org/1999/xlink"
-                                             xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1041" version="1.1"
-                                             width="124" height="25" viewBox="0 0 124 25"><title>Combined Shape</title>
-                                            <desc>Created with Avocode.</desc>
-                                            <defs id="SvgjsDefs1042"/>
-                                            <path id="SvgjsPath1043"
-                                                  d="M624.48 368.31C624.48 370.28000000000003 626.6800000000001 371.87 629.38 371.87L738 371.87C740.74 371.87 742.91 370.28000000000003 742.91 368.31L742.91 350.56C742.91 348.59 740.7099999999999 347 738 347L629.38 347C626.65 347 624.48 348.6 624.48 350.56L624.48 355.45L619 359.44L624.48 363.42Z "
-                                                  fill="#373050" fill-opacity="1"
-                                                  transform="matrix(1,0,0,1,-619,-347)"/>
-                                        </svg>
-                                    </div>
-                                    <div class="threshold-icon-white">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                             xmlns:xlink="http://www.w3.org/1999/xlink"
-                                             xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1044" version="1.1"
-                                             width="9.400000000000091" height="12.399999999999977"
-                                             viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold
-                                            ICON</title>
-                                            <desc>Created with Avocode.</desc>
-                                            <defs id="SvgjsDefs1045"/>
-                                            <path id="SvgjsPath1046" d="M638 360L642.29 360L642.29 365.6L638 365.6Z "
-                                                  fill="#ffffff" fill-opacity="1"
-                                                  transform="matrix(1,0,0,1,-635.3,-354.3)"/>
-                                            <path id="SvgjsPath1047" d="M638.71 355.1L641.57 355.1 " fill-opacity="0"
-                                                  fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                                  stroke-linecap="square" stroke-opacity="1" stroke="#ffffff"
-                                                  stroke-miterlimit="50" stroke-width="1.4"
-                                                  transform="matrix(1,0,0,1,-635.3,-354.3)"/>
-                                            <path id="SvgjsPath1048" d="M638.71 358.1L641.57 358.1 " fill-opacity="0"
-                                                  fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                                  stroke-linecap="square" stroke-opacity="1" stroke="#ffffff"
-                                                  stroke-miterlimit="50" stroke-width="1.4"
-                                                  transform="matrix(1,0,0,1,-635.3,-354.3)"/>
-                                            <path id="SvgjsPath1049" d="M636.42 365.1L643.64 365.1 " fill-opacity="0"
-                                                  fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                                  stroke-linecap="square" stroke-opacity="1" stroke="#ffffff"
-                                                  stroke-miterlimit="50" stroke-width="1.4"
-                                                  transform="matrix(1,0,0,1,-635.3,-354.3)"/>
-                                        </svg>
-                                    </div>
-                                    <div class="threshold-text">Threshold</div>
-                                    <div class="threshold-number">#mediumThreshold#</div>
-                                </div>
-                            </div>
-                            <!--mediumThresholdEnd-->
-                        </span>
-                        <div class="bar-title-container">
-                            <div class="bar-title">Medium</div>
-                            <div class="severity-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                                     width="23px" height="21px" viewBox="0 0 23 21" version="1.1">
-                                    <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
-                                    <title>medium</title>
-                                    <desc>Created with Sketch.</desc>
-                                    <defs>
-                                        <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"
-                                              id="path-1"/>
-                                        <mask id="mask-1" maskContentUnits="userSpaceOnUse"
-                                              maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884" height="19"
-                                              fill="white">
-                                            <use xlink:href="#path-1"/>
-                                        </mask>
-                                    </defs>
-                                    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                        <g id="Jenkins" transform="translate(-602.000000, -537.000000)">
-                                            <g id="SAST" transform="translate(272.000000, 180.000000)">
-                                                <g id="Vulnerabilities-Stat"
-                                                   transform="translate(246.082552, 0.000000)">
-                                                    <g id="Med" transform="translate(22.425880, 105.921935)">
-                                                        <g id="medium" transform="translate(62.000000, 252.000000)">
-                                                            <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
-                                                                  id="Combined-Shape" fill="#F5F5F5"/>
-                                                            <use id="Rectangle-40-Copy" stroke="#666666"
-                                                                 mask="url(#mask-1)" stroke-width="4"
-                                                                 xlink:href="#path-1"/>
-                                                            <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
-                                                                  id="Page-1" fill="#FFB400"/>
-                                                            <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12"
-                                                                  width="2" height="4"/>
-                                                            <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17"
-                                                                  width="2" height="2"/>
-                                                        </g>
-                                                    </g>
-                                                </g>
-                                            </g>
-                                        </g>
-                                    </g>
-                                </svg>
-                            </div>
-                        </div>
-
-                    </li>
-                    <li>
-                        <div class="bar-count">#lowResults#</div>
-                        <span class="bar-3"
-                              style="height:#lowResultsHeight#%">
-                            <!--lowThresholdStart-->
-                            <div class="tooltip-container" style="bottom:#lowThresholdHeight#%">
-                                <div class="threshold-line"></div>
-                                <div class="threshold-tooltip threshold-low">
-                                    <div class="threshold-tooltip-background">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                             xmlns:xlink="http://www.w3.org/1999/xlink"
-                                             xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1041" version="1.1"
-                                             width="124" height="25" viewBox="0 0 124 25"><title>Combined Shape</title>
-                                            <desc>Created with Avocode.</desc>
-                                            <defs id="SvgjsDefs1042"/>
-                                            <path id="SvgjsPath1043"
-                                                  d="M624.48 368.31C624.48 370.28000000000003 626.6800000000001 371.87 629.38 371.87L738 371.87C740.74 371.87 742.91 370.28000000000003 742.91 368.31L742.91 350.56C742.91 348.59 740.7099999999999 347 738 347L629.38 347C626.65 347 624.48 348.6 624.48 350.56L624.48 355.45L619 359.44L624.48 363.42Z "
-                                                  fill="#373050" fill-opacity="1"
-                                                  transform="matrix(1,0,0,1,-619,-347)"/>
-                                        </svg>
-                                    </div>
-                                    <div class="threshold-icon-white">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                             xmlns:xlink="http://www.w3.org/1999/xlink"
-                                             xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1044" version="1.1"
-                                             width="9.400000000000091" height="12.399999999999977"
-                                             viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold
-                                            ICON</title>
-                                            <desc>Created with Avocode.</desc>
-                                            <defs id="SvgjsDefs1045"/>
-                                            <path id="SvgjsPath1046" d="M638 360L642.29 360L642.29 365.6L638 365.6Z "
-                                                  fill="#ffffff" fill-opacity="1"
-                                                  transform="matrix(1,0,0,1,-635.3,-354.3)"/>
-                                            <path id="SvgjsPath1047" d="M638.71 355.1L641.57 355.1 " fill-opacity="0"
-                                                  fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                                  stroke-linecap="square" stroke-opacity="1" stroke="#ffffff"
-                                                  stroke-miterlimit="50" stroke-width="1.4"
-                                                  transform="matrix(1,0,0,1,-635.3,-354.3)"/>
-                                            <path id="SvgjsPath1048" d="M638.71 358.1L641.57 358.1 " fill-opacity="0"
-                                                  fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                                  stroke-linecap="square" stroke-opacity="1" stroke="#ffffff"
-                                                  stroke-miterlimit="50" stroke-width="1.4"
-                                                  transform="matrix(1,0,0,1,-635.3,-354.3)"/>
-                                            <path id="SvgjsPath1049" d="M636.42 365.1L643.64 365.1 " fill-opacity="0"
-                                                  fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                                  stroke-linecap="square" stroke-opacity="1" stroke="#ffffff"
-                                                  stroke-miterlimit="50" stroke-width="1.4"
-                                                  transform="matrix(1,0,0,1,-635.3,-354.3)"/>
-                                        </svg>
-                                    </div>
-                                    <div class="threshold-text">Threshold</div>
-                                    <div class="threshold-number">#lowThreshold#</div>
-                                </div>
-                            </div>
-                            <!--lowThresholdEnd-->
-                        </span>
-                        <div class="bar-title-container">
-                            <div class="bar-title">Low</div>
-                            <div class="severity-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                                     width="23px" height="21px" viewBox="0 0 23 21" version="1.1">
-                                    <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
-                                    <title>low</title>
-                                    <desc>Created with Sketch.</desc>
-                                    <defs>
-                                        <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"
-                                              id="path-1"/>
-                                        <mask id="mask-1" maskContentUnits="userSpaceOnUse"
-                                              maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884" height="19"
-                                              fill="white">
-                                            <use xlink:href="#path-1"/>
-                                        </mask>
-                                    </defs>
-                                    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                        <g id="Jenkins" transform="translate(-602.000000, -537.000000)">
-                                            <g id="SAST" transform="translate(272.000000, 180.000000)">
-                                                <g id="Vulnerabilities-Stat"
-                                                   transform="translate(246.082552, 0.000000)">
-                                                    <g id="Med" transform="translate(22.425880, 105.921935)">
-                                                        <g id="low" transform="translate(62.000000, 252.000000)">
-                                                            <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
-                                                                  id="Combined-Shape" fill="#F5F5F5"/>
-                                                            <use id="Rectangle-40-Copy" stroke="#666666"
-                                                                 mask="url(#mask-1)" stroke-width="4"
-                                                                 xlink:href="#path-1"/>
-                                                            <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
-                                                                  id="Page-1" fill="#EFD412"/>
-                                                            <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12"
-                                                                  width="2" height="4"/>
-                                                            <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17"
-                                                                  width="2" height="2"/>
-                                                        </g>
-                                                    </g>
-                                                </g>
-                                            </g>
-                                        </g>
-                                    </g>
-                                </svg>
-                            </div>
-                        </div>
-
-                    </li>
-                </ul>
-            </div>
-        </td>
-    </tr>
-
-    <!--osaStart-->
-    <tr class="summary-table-row cxosa top-padding">
-        <td class="title-column">
-            <div class="summary-title">
-                <div class="sum1">CxOSA</div>
-                <div class="sum2">Summary</div>
-            </div>
-
-
-            <div class="detailed-report">
-                <div class="download-cx-report">Checkmarx Report</div>
-
-                <div class="osa-downloads">
-                    <div>
-                        <a class="pdf-report" href="#osaPdfReportUrl#">
-                            <div class="pdf-report download-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                                     xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1022" version="1.1"
-                                     width="13" height="16" viewBox="0 0 13 16"><title>PDF icon</title>
-                                    <desc>Created with Avocode.</desc>
-                                    <defs id="SvgjsDefs1023">
-                                        <clipPath id="SvgjsClipPath1027">
-                                            <path id="SvgjsPath1026" d="M271 763L280.1 763L284 767L284 779L271 779Z "
-                                                  fill="#ffffff"/>
-                                        </clipPath>
-                                    </defs>
-                                    <path id="SvgjsPath1024" d="M279 768L279 763L280.1 763L284 767L284 768Z "
-                                          fill="#373050" fill-opacity="1" transform="matrix(1,0,0,1,-271,-763)"/>
-                                    <path id="SvgjsPath1025" d="M271 763L280.1 763L284 767L284 779L271 779Z "
-                                          fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                          stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1"
-                                          stroke="#373050" stroke-miterlimit="50" stroke-width="2"
-                                          clip-path="url(&quot;#SvgjsClipPath1027&quot;)"
-                                          transform="matrix(1,0,0,1,-271,-763)"/>
-                                </svg>
-                            </div>
-                            <div class="pdf-report download-txt">
-                                <div class="pdf-report detailed-report-ttl">PDF</div>
-                            </div>
-                        </a>
-                    </div>
-                    <div>
-                        <a class="html-report" href="#osaHtmlReportUrl#">
-                            <div class="html-report download-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                                     xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1054" version="1.1"
-                                     width="14" height="17.20710678118644" viewBox="0 0 14 17.20710678118644"><title>
-                                    HTML Icon</title>
-                                    <desc>Created with Avocode.</desc>
-                                    <defs id="SvgjsDefs1055"/>
-                                    <path id="SvgjsPath1056"
-                                          d="M279.12 796L284 796L284 806L271 806L271 796L271 796L275.92 796 "
-                                          fill-opacity="0" fill="#ffffff" stroke-dasharray="0"
-                                          stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1"
-                                          stroke="#373050" stroke-miterlimit="50" stroke-width="1"
-                                          transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                    <path id="SvgjsPath1057" d="M277.5 790.5L277.5 797.57 " fill-opacity="0"
-                                          fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                          stroke-linecap="square" stroke-opacity="1" stroke="#373050"
-                                          stroke-miterlimit="50" stroke-width="1"
-                                          transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                    <path id="SvgjsPath1058" d="M277.5 790.5L280.5 793.5 " fill-opacity="0"
-                                          fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                          stroke-linecap="square" stroke-opacity="1" stroke="#373050"
-                                          stroke-miterlimit="50" stroke-width="1"
-                                          transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                    <path id="SvgjsPath1059" d="M277.5 790.5L274.5 793.5 " fill-opacity="0"
-                                          fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                          stroke-linecap="square" stroke-opacity="1" stroke="#373050"
-                                          stroke-miterlimit="50" stroke-width="1"
-                                          transform="matrix(1,0,0,1,-270.5,-789.2928932188136)"/>
-                                </svg>
-                            </div>
-                            <div class="html-report download-txt">
-                                <div class="detailed-report-ttl">HTML</div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-
-            </div>
-
-        </td>
-        <td class="main-column">
-            <div class="libraries">
-
-                <div class="libraries-vulnerable">
-                    <div class="libraries-vulnerable-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                             width="47px" height="31px" viewBox="0 0 47 31" version="1.1">
-                            <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
-                            <title>lib Vulnerabilities Icon</title>
-                            <desc>Created with Sketch.</desc>
-                            <defs>
-                                <path d="M25,31 L4,31 C1.94360167,31 0,29.0245324 0,27 L0,8 L0,3 C0,1.48550257 1.46424259,0 3,0 L9,0 C9.88514832,0 11.1635669,0.937415809 12,2 L12,4 L34,4 C36.0604107,4.42857143 38,6.41548071 38,9 L38,11"
-                                      id="path-4"/>
-                                <mask id="mask-4" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox"
-                                      x="0" y="0" width="38" height="31" fill="white">
-                                    <use xlink:href="#path-4"/>
-                                </mask>
-                            </defs>
-                            <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                <g id="Jenkins" transform="translate(-518.000000, -646.000000)">
-                                    <g id="OSA" transform="translate(270.000000, 646.000000)">
-                                        <g id="Lib-Vulnerabilities" transform="translate(248.000000, 0.000000)">
-                                            <g id="lib-Vulnerabilities-Icon">
-                                                <use id="Combined-Shape" stroke="#362F53" mask="url(#mask-4)"
-                                                     stroke-width="4" xlink:href="#path-4"/>
-                                                <g id="Alert" transform="translate(26.600000, 14.233021)">
-                                                    <path d="M9.71486676,1.21470909 C10.3018963,0.274949219 11.2197722,0.29932009 11.7612462,1.26246584 L19.4943093,15.0176364 C20.037464,15.9837716 19.5847058,16.7669789 18.4769973,16.7669789 L2.0007805,16.7669789 C0.895779941,16.7669789 0.477014275,16.0033396 1.06291102,15.0653932 L9.71486676,1.21470909 Z"
-                                                          id="Page-1" fill="#DA2945"/>
-                                                    <rect id="Rectangle-5" fill="#FFFFFF" x="9.4" y="5.76697892"
-                                                          width="2" height="5"/>
-                                                    <rect id="Rectangle-6" fill="#FFFFFF" x="9.4" y="11.7669789"
-                                                          width="2" height="2"/>
-                                                </g>
-                                            </g>
-                                        </g>
-                                    </g>
-                                </g>
-                            </g>
-                        </svg>
-                    </div>
-                    <div class="libraries-vulnerable-number">#osaVulnerableAndOutdatedLibs#</div>
-                    <div class="libraries-vulnerable-text">
-                        Vulnerable and outdated libraries
-                    </div>
-                </div>
-
-                <div class="libraries-ok">
-                    <div class="libraries-ok-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                             width="47px" height="31px" viewBox="0 0 47 31" version="1.1">
-                            <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
-                            <title>Icon</title>
-                            <desc>Created with Sketch.</desc>
-                            <defs>
-                                <path d="M28,31 L4,31 C1.99474908,31 0,29.0245324 0,27 L0,8 L0,3 C0,1.48550257 1.50277529,0 3,0 L9,0 C10.1452838,0 11.457345,0.937415809 12,2 L13,4 L35,4 C37.0093689,4.42857143 39,6.41548071 39,9 L39,11"
-                                      id="path-5"/>
-                                <mask id="mask-5" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox"
-                                      x="0" y="0" width="39" height="31" fill="white">
-                                    <use xlink:href="#path-5"/>
-                                </mask>
-                            </defs>
-                            <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                <g id="Jenkins" transform="translate(-848.000000, -651.000000)">
-                                    <g id="OSA" transform="translate(270.000000, 646.000000)">
-                                        <g id="Lib-OK" transform="translate(578.000000, 5.000000)">
-                                            <g id="Icon">
-                                                <use id="Combined-Shape-Copy" stroke="#362F53" mask="url(#mask-5)"
-                                                     stroke-width="4" xlink:href="#path-5"/>
-                                                <path d="M46.4529784,18.9030304 C46.8068562,19.8686359 47,20.9117624 47,22 C47,26.9705627 42.9705627,31 38,31 C33.0294373,31 29,26.9705627 29,22 C29,17.0294373 33.0294373,13 38,13 C40.393622,13 42.5689975,13.934425 44.1812437,15.4583924 L37.6904269,21.8965709 L35.079173,19.3040452 L32.1948583,22.1475069 L37.6899611,27.6031981 L46.4529784,18.9030304 Z"
-                                                      id="Combined-Shape" fill="#8EBE15"/>
-                                            </g>
-                                        </g>
-                                    </g>
-                                </g>
-                            </g>
-                        </svg>
-                    </div>
-                    <div class="libraries-vulnerable-number">#osaNoVulnerabilityLibs#</div>
-                    <div class="libraries-ok-text">
-                        Libraries with no vulnerabilities
-                    </div>
-                </div>
-            </div>
-            <div class="graph">
-
-                <!--osaThresholdStatusStart-->
-                <div class="threshold-exceeded" #osaThresholdExceeded#>
-                    <div class="threshold-exceeded-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1015" version="1.1"
-                             width="9.400000000000091" height="12.399999999999977" viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold ICON</title>
-                            <desc>Created with Avocode.</desc>
-                            <defs id="SvgjsDefs1016"/>
-                            <path id="SvgjsPath1017" d="M1052 190L1056.29 190L1056.29 195.6L1052 195.6Z " fill="#da2945" fill-opacity="1"
-                                  transform="matrix(1,0,0,1,-1049.3,-184.3)"/>
-                            <path id="SvgjsPath1018" d="M1052.71 185.1L1055.57 185.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                  stroke-linecap="square" stroke-opacity="1" stroke="#da2945" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-1049.3,-184.3)"/>
-                            <path id="SvgjsPath1019" d="M1052.71 188.1L1055.57 188.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                  stroke-linecap="square" stroke-opacity="1" stroke="#da2945" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-1049.3,-184.3)"/>
-                            <path id="SvgjsPath1020" d="M1050.42 195.1L1057.64 195.1 " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                  stroke-linecap="square" stroke-opacity="1" stroke="#da2945" stroke-miterlimit="50" stroke-width="1.4" transform="matrix(1,0,0,1,-1049.3,-184.3)"/>
-                        </svg>
-                    </div>
-                    <div class="threshold-exceeded-text">
-                        Threshold Exceeded
-                    </div>
-                </div>
-
-                <div class="threshold-compliance" #osaThresholdCompliance#>
-                    <div class="threshold-compliance-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1050" version="1.1" width="13.99264158479491" height="13" viewBox="0 0 13.99264158479491 13"><title>Icon</title><desc>Created with Avocode.</desc><defs id="SvgjsDefs1051"><clipPath id="SvgjsClipPath1056"><path id="SvgjsPath1055" d="M1035.00736 793.9841L1035.00736 784.01589L1046.9926400000002 784.01589L1046.9926400000002 793.9841ZM1038.67 790.72L1036.68 788.72L1036 789.4L1038.67 792.0699999999999L1045.21 785.67L1044.54 785Z " fill="#ffffff"/></clipPath></defs><path id="SvgjsPath1052" d="M1033 789.5C1033 785.91015 1035.91015 783 1039.5 783C1043.08985 783 1046 785.91015 1046 789.5C1046 793.08985 1043.08985 796 1039.5 796C1035.91015 796 1033 793.08985 1033 789.5Z " fill="#21bf3f" fill-opacity="1" transform="matrix(1,0,0,1,-1033,-783)"/><path id="SvgjsPath1053" d="M1038.67 790.72L1036.68 788.72L1036 789.4L1038.67 792.0699999999999L1045.21 785.67L1044.54 785Z " fill="#ffffff" fill-opacity="1" transform="matrix(1,0,0,1,-1033,-783)"/><path id="SvgjsPath1054" d="M1038.67 790.72L1036.68 788.72L1036 789.4L1038.67 792.0699999999999L1045.21 785.67L1044.54 785Z " fill-opacity="0" fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="50" stroke-width="1.4" clip-path="url(&quot;#SvgjsClipPath1056&quot;)" transform="matrix(1,0,0,1,-1033,-783)"/></svg>                    </div>
-                    <div class="threshold-compliance-text">
-                        Threshold Compliance
-                    </div>
-                </div>
-                <!--osaThresholdStatusEnd-->
-
-                <div class="graph-title">Vulnerabilities Status</div>
-
-                <ul class="chart">
-                    <li>
-                        <div class="bar-count">#osaHighResults#</div>
-                            <span class="bar-1"
-                                  style="height:#osaHighResultsHeight#%">
-                            <!--osaHighThresholdStart-->
-                            <div class="tooltip-container" style="bottom:#osaHighThresholdHeight#%">
-                                <div class="threshold-line"></div>
-                                <div class="threshold-tooltip threshold-high">
-                                    <div class="threshold-tooltip-background">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                             xmlns:xlink="http://www.w3.org/1999/xlink"
-                                             xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1041" version="1.1"
-                                             width="124" height="25" viewBox="0 0 124 25"><title>Combined Shape</title>
-                                            <desc>Created with Avocode.</desc>
-                                            <defs id="SvgjsDefs1042"/>
-                                            <path id="SvgjsPath1043"
-                                                  d="M624.48 368.31C624.48 370.28000000000003 626.6800000000001 371.87 629.38 371.87L738 371.87C740.74 371.87 742.91 370.28000000000003 742.91 368.31L742.91 350.56C742.91 348.59 740.7099999999999 347 738 347L629.38 347C626.65 347 624.48 348.6 624.48 350.56L624.48 355.45L619 359.44L624.48 363.42Z "
-                                                  fill="#373050" fill-opacity="1"
-                                                  transform="matrix(1,0,0,1,-619,-347)"/>
-                                        </svg>
-                                    </div>
-                                    <div class="threshold-icon-white">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                             xmlns:xlink="http://www.w3.org/1999/xlink"
-                                             xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1044" version="1.1"
-                                             width="9.400000000000091" height="12.399999999999977"
-                                             viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold
-                                            ICON</title>
-                                            <desc>Created with Avocode.</desc>
-                                            <defs id="SvgjsDefs1045"/>
-                                            <path id="SvgjsPath1046" d="M638 360L642.29 360L642.29 365.6L638 365.6Z "
-                                                  fill="#ffffff" fill-opacity="1"
-                                                  transform="matrix(1,0,0,1,-635.3,-354.3)"/>
-                                            <path id="SvgjsPath1047" d="M638.71 355.1L641.57 355.1 " fill-opacity="0"
-                                                  fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                                  stroke-linecap="square" stroke-opacity="1" stroke="#ffffff"
-                                                  stroke-miterlimit="50" stroke-width="1.4"
-                                                  transform="matrix(1,0,0,1,-635.3,-354.3)"/>
-                                            <path id="SvgjsPath1048" d="M638.71 358.1L641.57 358.1 " fill-opacity="0"
-                                                  fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                                  stroke-linecap="square" stroke-opacity="1" stroke="#ffffff"
-                                                  stroke-miterlimit="50" stroke-width="1.4"
-                                                  transform="matrix(1,0,0,1,-635.3,-354.3)"/>
-                                            <path id="SvgjsPath1049" d="M636.42 365.1L643.64 365.1 " fill-opacity="0"
-                                                  fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                                  stroke-linecap="square" stroke-opacity="1" stroke="#ffffff"
-                                                  stroke-miterlimit="50" stroke-width="1.4"
-                                                  transform="matrix(1,0,0,1,-635.3,-354.3)"/>
-                                        </svg>
-                                    </div>
-                                    <div class="threshold-text">Threshold</div>
-                                    <div class="threshold-number">#osaHighThreshold#</div>
-                                </div>
-                            </div>
-                                <!--osaHighThresholdEnd-->
                             </span>
-                        <div class="bar-title-container">
-                            <div class="bar-title">High</div>
-                            <div class="severity-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                                     width="23px" height="21px" viewBox="0 0 23 21" version="1.1">
-                                    <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
-                                    <title>high</title>
-                                    <desc>Created with Sketch.</desc>
-                                    <defs>
-                                        <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"
-                                              id="path-6"/>
-                                        <mask id="mask-6" maskContentUnits="userSpaceOnUse"
-                                              maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884"
-                                              height="19" fill="white">
-                                            <use xlink:href="#path-6"/>
-                                        </mask>
-                                    </defs>
-                                    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                        <g id="Jenkins" transform="translate(-602.000000, -537.000000)">
-                                            <g id="SAST" transform="translate(272.000000, 180.000000)">
-                                                <g id="Vulnerabilities-Stat"
-                                                   transform="translate(246.082552, 0.000000)">
-                                                    <g id="High" transform="translate(22.425880, 105.921935)">
-                                                        <g id="high" transform="translate(62.000000, 252.000000)">
-                                                            <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
-                                                                  id="Combined-Shape" fill="#F5F5F5"/>
-                                                            <use id="Rectangle-40-Copy" stroke="#666666"
-                                                                 mask="url(#mask-2)" stroke-width="4"
-                                                                 xlink:href="#path-6"/>
-                                                            <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
-                                                                  id="Page-1" fill="#DA2945"/>
-                                                            <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12"
-                                                                  width="2" height="4"/>
-                                                            <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17"
-                                                                  width="2" height="2"/>
+                            <span class="bar-1" id="bar-high">
+                                <div id="tooltip-high">
+                                    <div style="display: none">h</div>
+                                </div>
+                            </span>
+                            <div class="bar-title-container">
+                                <div class="bar-title">High</div>
+                                <div class="severity-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                         height="21px" version="1.1" viewBox="0 0 23 21"
+                                         width="23px">
+                                        <title>high</title>
+                                        <desc>Created with Sketch.</desc>
+                                        <defs>
+                                            <path id="path-1"
+                                                  d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"/>
+                                            <mask height="19" maskUnits="objectBoundingBox" id="mask-1"
+                                                  width="16.0859884" maskContentUnits="userSpaceOnUse" fill="white"
+                                                  x="0" y="0">
+                                                <use xlink:href="#path-1"/>
+                                            </mask>
+                                        </defs>
+                                        <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
+                                            <g transform="translate(-602.000000, -537.000000)" id="Jenkins">
+                                                <g transform="translate(272.000000, 180.000000)" id="iast">
+                                                    <g transform="translate(246.082552, 0.000000)"
+                                                       id="Vulnerabilities-Stat">
+                                                        <g transform="translate(22.425880, 105.921935)" id="High">
+                                                            <g transform="translate(62.000000, 252.000000)" id="high">
+                                                                <path id="Combined-Shape"
+                                                                      d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
+                                                                      fill="#F5F5F5"/>
+                                                                <use mask="url(#mask-1)" stroke-width="4"
+                                                                     id="Rectangle-40-Copy" stroke="#666666"
+                                                                     xlink:href="#path-1"/>
+                                                                <path id="Page-1"
+                                                                      d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
+                                                                      fill="#DA2945"/>
+                                                                <rect height="4" id="Rectangle-5" width="2"
+                                                                      fill="#FFFFFF" x="14" y="12"/>
+                                                                <rect height="2" id="Rectangle-6" width="2"
+                                                                      fill="#FFFFFF" x="14" y="17"/>
+                                                            </g>
                                                         </g>
                                                     </g>
                                                 </g>
                                             </g>
                                         </g>
-                                    </g>
-                                </svg>
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-
-                        <div class="bar-count">#osaMediumResults#</div>
-                            <span class="bar-2"
-                                  style="height:#osaMediumResultsHeight#%">
-                            <!--osaMediumThresholdStart-->
-                            <div class="tooltip-container" style="bottom:#osaMediumThresholdHeight#%">
-                                <div class="threshold-line"></div>
-                                <div class="threshold-tooltip threshold-high">
-                                    <div class="threshold-tooltip-background">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                             xmlns:xlink="http://www.w3.org/1999/xlink"
-                                             xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1041" version="1.1"
-                                             width="124" height="25" viewBox="0 0 124 25"><title>Combined Shape</title>
-                                            <desc>Created with Avocode.</desc>
-                                            <defs id="SvgjsDefs1042"/>
-                                            <path id="SvgjsPath1043"
-                                                  d="M624.48 368.31C624.48 370.28000000000003 626.6800000000001 371.87 629.38 371.87L738 371.87C740.74 371.87 742.91 370.28000000000003 742.91 368.31L742.91 350.56C742.91 348.59 740.7099999999999 347 738 347L629.38 347C626.65 347 624.48 348.6 624.48 350.56L624.48 355.45L619 359.44L624.48 363.42Z "
-                                                  fill="#373050" fill-opacity="1"
-                                                  transform="matrix(1,0,0,1,-619,-347)"/>
-                                        </svg>
-                                    </div>
-                                    <div class="threshold-icon-white">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                             xmlns:xlink="http://www.w3.org/1999/xlink"
-                                             xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1044" version="1.1"
-                                             width="9.400000000000091" height="12.399999999999977"
-                                             viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold
-                                            ICON</title>
-                                            <desc>Created with Avocode.</desc>
-                                            <defs id="SvgjsDefs1045"/>
-                                            <path id="SvgjsPath1046" d="M638 360L642.29 360L642.29 365.6L638 365.6Z "
-                                                  fill="#ffffff" fill-opacity="1"
-                                                  transform="matrix(1,0,0,1,-635.3,-354.3)"/>
-                                            <path id="SvgjsPath1047" d="M638.71 355.1L641.57 355.1 " fill-opacity="0"
-                                                  fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                                  stroke-linecap="square" stroke-opacity="1" stroke="#ffffff"
-                                                  stroke-miterlimit="50" stroke-width="1.4"
-                                                  transform="matrix(1,0,0,1,-635.3,-354.3)"/>
-                                            <path id="SvgjsPath1048" d="M638.71 358.1L641.57 358.1 " fill-opacity="0"
-                                                  fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                                  stroke-linecap="square" stroke-opacity="1" stroke="#ffffff"
-                                                  stroke-miterlimit="50" stroke-width="1.4"
-                                                  transform="matrix(1,0,0,1,-635.3,-354.3)"/>
-                                            <path id="SvgjsPath1049" d="M636.42 365.1L643.64 365.1 " fill-opacity="0"
-                                                  fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                                  stroke-linecap="square" stroke-opacity="1" stroke="#ffffff"
-                                                  stroke-miterlimit="50" stroke-width="1.4"
-                                                  transform="matrix(1,0,0,1,-635.3,-354.3)"/>
-                                        </svg>
-                                    </div>
-                                    <div class="threshold-text">Threshold</div>
-                                    <div class="threshold-number">#osaMediumThreshold#</div>
+                                    </svg>
                                 </div>
                             </div>
-                                <!--osaMediumThresholdEnd-->
+                        </li>
+
+                        <!--medium-->
+                        <li>
+                            <div class="bar-count" id="bar-count-med">
+                                <div style="display: none">h</div>
+                            </div>
+                            <span class="bar-2-new" id="bar-med-new">
+                                <div id="tooltip-med">
+                                    <div style="display: none">h</div>
+                                </div>
                             </span>
-                        <div class="bar-title-container">
-                            <div class="bar-title">Medium</div>
-                            <div class="severity-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                                     width="23px" height="21px" viewBox="0 0 23 21" version="1.1">
-                                    <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
-                                    <title>med</title>
-                                    <desc>Created with Sketch.</desc>
-                                    <defs>
-                                        <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"
-                                              id="path-7"/>
-                                        <mask id="mask-7" maskContentUnits="userSpaceOnUse"
-                                              maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884"
-                                              height="19" fill="white">
-                                            <use xlink:href="#path-7"/>
-                                        </mask>
-                                    </defs>
-                                    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                        <g id="Jenkins" transform="translate(-680.000000, -537.000000)">
-                                            <g id="SAST" transform="translate(272.000000, 180.000000)">
-                                                <g id="Vulnerabilities-Stat"
-                                                   transform="translate(246.082552, 0.000000)">
-                                                    <g id="Med" transform="translate(22.425880, 105.921935)">
-                                                        <g id="med" transform="translate(140.000000, 252.000000)">
-                                                            <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
-                                                                  id="Combined-Shape" fill="#F5F5F5"/>
-                                                            <use id="Rectangle-40-Copy" stroke="#666666"
-                                                                 mask="url(#mask-7)" stroke-width="4"
-                                                                 xlink:href="#path-7"/>
-                                                            <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
-                                                                  id="Page-1" fill="#FFB400"/>
-                                                            <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12"
-                                                                  width="2" height="4"/>
-                                                            <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17"
-                                                                  width="2" height="2"/>
+                            <span class="bar-2" id="bar-med">
+                                <div id="tooltip-med">
+                                    <div style="display: none">h</div>
+                                </div>
+                            </span>
+                            <div class="bar-title-container">
+                                <div class="bar-title">Medium</div>
+                                <div class="severity-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                         height="21px" version="1.1" viewBox="0 0 23 21"
+                                         width="23px">
+                                        <title>medium</title>
+                                        <desc>Created with Sketch.</desc>
+                                        <defs>
+                                            <path id="path-2"
+                                                  d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"/>
+                                            <mask height="19" maskUnits="objectBoundingBox" id="mask-2"
+                                                  width="16.0859884" maskContentUnits="userSpaceOnUse" fill="white"
+                                                  x="0" y="0">
+                                                <use xlink:href="#path-2"/>
+                                            </mask>
+                                        </defs>
+                                        <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
+                                            <g transform="translate(-680.000000, -537.000000)" id="Jenkins">
+                                                <g transform="translate(272.000000, 180.000000)" id="iast">
+                                                    <g transform="translate(246.082552, 0.000000)"
+                                                       id="Vulnerabilities-Stat">
+                                                        <g transform="translate(22.425880, 105.921935)" id="High">
+                                                            <g transform="translate(140.000000, 252.000000)" id="med">
+                                                                <path id="Combined-Shape"
+                                                                      d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
+                                                                      fill="#F5F5F5"/>
+                                                                <use mask="url(#mask-2)" stroke-width="4"
+                                                                     id="Rectangle-40-Copy" stroke="#666666"
+                                                                     xlink:href="#path-2"/>
+                                                                <path id="Page-1"
+                                                                      d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
+                                                                      fill="#FFB400"/>
+                                                                <rect height="4" id="Rectangle-5" width="2"
+                                                                      fill="#FFFFFF" x="14" y="12"/>
+                                                                <rect height="2" id="Rectangle-6" width="2"
+                                                                      fill="#FFFFFF" x="14" y="17"/>
+                                                            </g>
                                                         </g>
                                                     </g>
                                                 </g>
                                             </g>
                                         </g>
-                                    </g>
-                                </svg>
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="bar-count">#osaLowResults#</div>
-                            <span class="bar-3"
-                                  style="height:#osaLowResultsHeight#%">
-                                <!--osaLowThresholdStart-->
-                            <div class="tooltip-container" style="bottom:#osaLowThresholdHeight#%">
-                                <div class="threshold-line"></div>
-                                <div class="threshold-tooltip threshold-high">
-                                    <div class="threshold-tooltip-background">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                             xmlns:xlink="http://www.w3.org/1999/xlink"
-                                             xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1041" version="1.1"
-                                             width="124" height="25" viewBox="0 0 124 25"><title>Combined Shape</title>
-                                            <desc>Created with Avocode.</desc>
-                                            <defs id="SvgjsDefs1042"/>
-                                            <path id="SvgjsPath1043"
-                                                  d="M624.48 368.31C624.48 370.28000000000003 626.6800000000001 371.87 629.38 371.87L738 371.87C740.74 371.87 742.91 370.28000000000003 742.91 368.31L742.91 350.56C742.91 348.59 740.7099999999999 347 738 347L629.38 347C626.65 347 624.48 348.6 624.48 350.56L624.48 355.45L619 359.44L624.48 363.42Z "
-                                                  fill="#373050" fill-opacity="1"
-                                                  transform="matrix(1,0,0,1,-619,-347)"/>
-                                        </svg>
-                                    </div>
-                                    <div class="threshold-icon-white">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                             xmlns:xlink="http://www.w3.org/1999/xlink"
-                                             xmlns:svgjs="http://svgjs.com/svgjs" id="SvgjsSvg1044" version="1.1"
-                                             width="9.400000000000091" height="12.399999999999977"
-                                             viewBox="0 0 9.400000000000091 12.399999999999977"><title>threshold
-                                            ICON</title>
-                                            <desc>Created with Avocode.</desc>
-                                            <defs id="SvgjsDefs1045"/>
-                                            <path id="SvgjsPath1046" d="M638 360L642.29 360L642.29 365.6L638 365.6Z "
-                                                  fill="#ffffff" fill-opacity="1"
-                                                  transform="matrix(1,0,0,1,-635.3,-354.3)"/>
-                                            <path id="SvgjsPath1047" d="M638.71 355.1L641.57 355.1 " fill-opacity="0"
-                                                  fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                                  stroke-linecap="square" stroke-opacity="1" stroke="#ffffff"
-                                                  stroke-miterlimit="50" stroke-width="1.4"
-                                                  transform="matrix(1,0,0,1,-635.3,-354.3)"/>
-                                            <path id="SvgjsPath1048" d="M638.71 358.1L641.57 358.1 " fill-opacity="0"
-                                                  fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                                  stroke-linecap="square" stroke-opacity="1" stroke="#ffffff"
-                                                  stroke-miterlimit="50" stroke-width="1.4"
-                                                  transform="matrix(1,0,0,1,-635.3,-354.3)"/>
-                                            <path id="SvgjsPath1049" d="M636.42 365.1L643.64 365.1 " fill-opacity="0"
-                                                  fill="#ffffff" stroke-dasharray="0" stroke-linejoin="miter"
-                                                  stroke-linecap="square" stroke-opacity="1" stroke="#ffffff"
-                                                  stroke-miterlimit="50" stroke-width="1.4"
-                                                  transform="matrix(1,0,0,1,-635.3,-354.3)"/>
-                                        </svg>
-                                    </div>
-                                    <div class="threshold-text">Threshold</div>
-                                    <div class="threshold-number">#osaLowThreshold#</div>
+                                    </svg>
                                 </div>
                             </div>
-                                <!--osaLowThresholdEnd-->
+                        </li>
+
+                        <!--low-->
+                        <li>
+                            <div class="bar-count" id="bar-count-low">
+                                <div style="display: none">h</div>
+                            </div>
+                            <span class="bar-3-new" id="bar-low-new">
+                                <div id="tooltip-low">
+                                    <div style="display: none">h</div>
+                                </div>
                             </span>
-                        <div class="bar-title-container">
-                            <div class="bar-title">Low</div>
-                            <div class="severity-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                                     width="23px" height="21px" viewBox="0 0 23 21" version="1.1">
-                                    <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
-                                    <title>low</title>
-                                    <desc>Created with Sketch.</desc>
-                                    <defs>
-                                        <path d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"
-                                              id="path-8"/>
-                                        <mask id="mask-8" maskContentUnits="userSpaceOnUse"
-                                              maskUnits="objectBoundingBox" x="0" y="0" width="16.0859884"
-                                              height="19" fill="white">
-                                            <use xlink:href="#path-8"/>
-                                        </mask>
-                                    </defs>
-                                    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                        <g id="Jenkins" transform="translate(-641.000000, -537.000000)">
-                                            <g id="SAST" transform="translate(272.000000, 180.000000)">
-                                                <g id="Vulnerabilities-Stat"
-                                                   transform="translate(246.082552, 0.000000)">
-                                                    <g id="Low" transform="translate(22.425880, 105.921935)">
-                                                        <g id="low" transform="translate(101.000000, 252.000000)">
-                                                            <path d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
-                                                                  id="Combined-Shape" fill="#F5F5F5"/>
-                                                            <use id="Rectangle-40-Copy" stroke="#666666"
-                                                                 mask="url(#mask-8)" stroke-width="4"
-                                                                 xlink:href="#path-8"/>
-                                                            <path d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
-                                                                  id="Page-1" fill="#EFD412"/>
-                                                            <rect id="Rectangle-5" fill="#FFFFFF" x="14" y="12"
-                                                                  width="2" height="4"/>
-                                                            <rect id="Rectangle-6" fill="#FFFFFF" x="14" y="17"
-                                                                  width="2" height="2"/>
+                            <span class="bar-3" id="bar-low">
+                                <div id="tooltip-low">
+                                    <div style="display: none">h</div>
+                                </div>
+                            </span>
+                            <div class="bar-title-container">
+                                <div class="bar-title">Low</div>
+                                <div class="severity-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                         height="21px" version="1.1" viewBox="0 0 23 21"
+                                         width="23px">
+                                        <title>low</title>
+                                        <desc>Created with Sketch.</desc>
+                                        <defs>
+                                            <path id="path-3"
+                                                  d="M6.54299421,19 C6.54299421,19 6.05426879,18.5188806 5.34871978,17.7129773 C3.86123349,16.0139175 1.41001114,12.8712609 0.542994209,9.75 C-0.678742762,5.3517469 0.542994209,1 0.542994209,1 L8.04299421,0 L15.5429942,1 C15.5429942,1 16.3322418,3.81124806 16.0076778,7.19836733"/>
+                                            <mask height="19" maskUnits="objectBoundingBox" id="mask-3"
+                                                  width="16.0859884" maskContentUnits="userSpaceOnUse" fill="white"
+                                                  x="0" y="0">
+                                                <use xlink:href="#path-3"/>
+                                            </mask>
+                                        </defs>
+                                        <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
+                                            <g transform="translate(-641.000000, -537.000000)" id="Jenkins">
+                                                <g transform="translate(272.000000, 180.000000)" id="iast">
+                                                    <g transform="translate(246.082552, 0.000000)"
+                                                       id="Vulnerabilities-Stat">
+                                                        <g transform="translate(22.425880, 105.921935)" id="High">
+                                                            <g transform="translate(101.000000, 252.000000)" id="low">
+                                                                <path id="Combined-Shape"
+                                                                      d="M8.00483672,16.8625579 L8.04299421,0 L0.542994209,1 C0.542994209,1 -0.678742762,5.3517469 0.542994209,9.75 C1.70821884,13.9448087 5.73482423,18.178262 6.4378676,18.8941974 L8.00483672,16.8625579 Z"
+                                                                      fill="#F5F5F5"/>
+                                                                <use mask="url(#mask-3)" stroke-width="4"
+                                                                     id="Rectangle-40-Copy" stroke="#666666"
+                                                                     xlink:href="#path-3"/>
+                                                                <path id="Page-1"
+                                                                      d="M14.4965773,8.86301041 C14.77461,8.38638292 15.2249744,8.38567036 15.5034227,8.86301041 L21.4965773,19.1369896 C21.77461,19.6136171 21.5500512,20 20.9931545,20 L9.00684547,20 C8.45078007,20 8.22497438,19.6143296 8.50342274,19.1369896 L14.4965773,8.86301041 Z"
+                                                                      fill="#EFD412"/>
+                                                                <rect height="4" id="Rectangle-5" width="2"
+                                                                      fill="#FFFFFF" x="14" y="12"/>
+                                                                <rect height="2" id="Rectangle-6" width="2"
+                                                                      fill="#FFFFFF" x="14" y="17"/>
+                                                            </g>
                                                         </g>
                                                     </g>
                                                 </g>
                                             </g>
                                         </g>
-                                    </g>
-                                </svg>
+                                    </svg>
+                                </div>
                             </div>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </td>
-    </tr>
-    <!--osaEnd-->
-</table>
+                        </li>
+                    </ul>
+                </div>
+            </td>
+        </tr>
 
-</body>
-</html>
+
+    </table>
+
+
+    <script>
+
+
+        var highCount = 3;
+        var medCount = 2;
+        var lowCount = 3;
+
+        var highCountNew = 1;
+        var medCountNew = 1;
+        var lowCountNew = 0;
+
+
+
+        var scanLink = '${it.scanLink}';
+        var cxIconPath = '${it.largeIconFileName}';
+
+
+        document.getElementById("cx-icon-main").setAttribute("src", cxIconPath);
+
+
+        //set bars height and count
+        document.getElementById("bar-count-high").innerHTML = highCount + highCountNew;
+        document.getElementById("bar-count-med").innerHTML = medCount + medCountNew;
+        document.getElementById("bar-count-low").innerHTML = lowCount + lowCountNew;
+
+        var sum = highCount + highCountNew + medCount + medCountNew + lowCount + lowCountNew;
+
+        document.getElementById("bar-high").setAttribute("style", "height:" + highCount * 100 / sum + "%");
+        document.getElementById("bar-high-new").setAttribute("style", "height:" + highCountNew * 100 / sum + "%");
+        document.getElementById("bar-med").setAttribute("style", "height:" + medCount * 100 / sum + "%");
+        document.getElementById("bar-med-new").setAttribute("style", "height:" + medCountNew * 100 / sum + "%");
+        document.getElementById("bar-low").setAttribute("style", "height:" + lowCount * 100 / sum + "%");
+        document.getElementById("bar-low-new").setAttribute("style", "height:" + lowCountNew * 100 / sum + "%");
+
+
+        document.getElementById("scan-link").setAttribute("href", scanLink);
+
+    </script>
