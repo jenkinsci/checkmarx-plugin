@@ -13,6 +13,7 @@
         height: 48px;
         display: inline-block;
         box-sizing: content-box;
+        float:left;
         }
 
         .cx-title {
@@ -513,8 +514,8 @@
         <j:if test="${it.resultIsValid}">
 
             <table class="summary-section">
-                <div class="cx-icon" id="cx-icon-main"></div>
                 <div class="cx-title">Checkmarx</div>
+                <div class="cx-icon" id="cx-icon-main"></div>
 
                 <!--sast row-->
                 <tr class="summary-table-row cxsast">
