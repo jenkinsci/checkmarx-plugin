@@ -111,6 +111,12 @@ public class CxProjectResult implements Action {
         return action.getProjectStateUrl();
     }
 
+    public String getOsaProjectStateUrl() {
+        CxScanResult action = getLastBuildAction();
+        if (action == null) return "";
+        return action.getOsaProjectStateUrl();
+    }
+
     // /////////////////////////////////////////////////////////////////////////////////////////////////
     // Graph generation logic
     // /////////////////////////////////////////////////////////////////////////////////////////////////

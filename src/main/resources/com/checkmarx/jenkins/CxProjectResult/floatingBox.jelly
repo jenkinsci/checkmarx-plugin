@@ -4,7 +4,7 @@
 
     <j:if test="${it.actions.0.showResults}">
         <div>
-            <h3 align="center">Checkmarx Security Vulnerabilities Trend</h3>
+            <h3 align="center">Checkmarx SAST Security Vulnerabilities Trend</h3>
             <img src="checkmarx/graph"></img>
         </div>
     </j:if>

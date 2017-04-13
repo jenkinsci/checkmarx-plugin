@@ -1301,7 +1301,7 @@
                                 </div>
                                 <div class="full-start-end-text-date">
                                     <div class="full-start-end-text">
-                                        Files:
+                                        Libraries:
                                     </div>
                                     <div class="full-start-end-date" id="osa-full-files">
                                         <div style="display: none">h</div>
@@ -1393,7 +1393,7 @@
         //    http://localhost/CxWebClient/ViewerMain.aspx?scanid=1030692&amp;projectid=40565
         var sastCodeViewerPath = "${it.codeViewerUrl}?scanid=${it.scanId}&amp;projectid=${it.projectId}";
 
-        var osaHtmlPath = '${app.rootUrl}${it.owner.url}${it.urlName}' + "/osaHtmlReport";
+        var osaHtmlPath = '${it.osaProjectStateUrl}';
         var osaPdfPath = '${app.rootUrl}${it.owner.url}${it.urlName}' + "/osaPdfReport";
 
         var sastStartDate = verifyVar(["${it.sastScanResult.scanStart}"]);

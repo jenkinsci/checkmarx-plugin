@@ -244,6 +244,10 @@ public class CxScanResult implements Action {
         return serverUrl + "/CxWebClient/portal#/projectState/" + projectId + "/Summary";
     }
 
+    public String getOsaProjectStateUrl() {
+        return serverUrl + "/CxWebClient/portal#/projectState/" + projectId + "/OSA";
+    }
+
 //    http://localhost/CxWebClient/ViewerMain.aspx?scanid=1030692&projectid=40565
     public String getCodeViewerUrl() {
         return serverUrl + "/CxWebClient/ViewerMain.aspx";
