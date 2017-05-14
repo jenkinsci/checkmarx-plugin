@@ -28,7 +28,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.jelly.JellyContext;
 import org.apache.commons.jelly.XMLOutput;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.*;
@@ -79,6 +78,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     private String preset;
     private boolean presetSpecified;
+
+    private boolean globalExclusions = true;
+
     @Nullable
     private String excludeFolders;
     @Nullable
@@ -136,6 +138,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private JobStatusOnError jobStatusOnError;
 
     private String thresholdSettings;
+    private String exclusionsSetting;
 
     private Result vulnerabilityThresholdResult;
 
@@ -167,6 +170,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             @Nullable String preset,
             JobStatusOnError jobStatusOnError,
             boolean presetSpecified,
+            String exclusionsSetting,
             @Nullable String excludeFolders,
             @Nullable String filterPattern,
             boolean incremental,
@@ -201,6 +205,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.preset = preset;
         this.jobStatusOnError = jobStatusOnError;
         this.presetSpecified = presetSpecified;
+        this.exclusionsSetting = exclusionsSetting;
+        this.globalExclusions = "global".equals(exclusionsSetting);
         this.excludeFolders = excludeFolders;
         this.filterPattern = filterPattern;
         this.incremental = incremental;
@@ -291,6 +297,23 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     public boolean isPresetSpecified() {
         return presetSpecified;
+    }
+
+    public boolean isGlobalExclusions() {
+        return globalExclusions;
+    }
+
+
+    public void setGlobalExclusions(boolean globalExclusions) {
+        this.globalExclusions = globalExclusions;
+    }
+
+    public String getExclusionsSetting() {
+        return exclusionsSetting;
+    }
+
+    public void setExclusionsSetting(String exclusionsSetting) {
+        this.exclusionsSetting = exclusionsSetting;
     }
 
     @Nullable
@@ -841,7 +864,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         sb.append("projectName: ").append(getProjectName()).append("\n");
         //sb.append("preset: ").append(getPreset()).append("\n");
         sb.append("isIncrementalScan: ").append(isIncremental()).append("\n");
-        sb.append("folderExclusions: ").append(getExcludeFolders()).append("\n");
+        if (isGlobalExclusions()) {
+            sb.append("folderExclusions: ").append(descriptor.getGlobalExcludeFolders()).append("\n");
+        }else{
+            sb.append("folderExclusions: ").append(getExcludeFolders()).append("\n");
+
+        }
         sb.append("isSynchronous: ").append(isWaitForResultsEnabled()).append("\n"); //TODO GLOBAL
         sb.append("generatePDFReport: ").append(isGeneratePdfReport()).append("\n");
         if (useGlobalThreshold) {
@@ -1111,8 +1139,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private FilePath zipWorkspaceFolder(Run<?, ?> run, FilePath workspace, TaskListener listener) throws IOException, InterruptedException {
         FolderPattern folderPattern = new FolderPattern(run, listener);
         DescriptorImpl descriptor = getDescriptor();
-        String excludeFolders = StringUtils.isNotEmpty(getExcludeFolders()) ? getExcludeFolders() : descriptor.getExcludeFolders();
-        String filterPattern = StringUtils.isNotEmpty(getFilterPattern()) ? getFilterPattern() : descriptor.getFilterPattern();
+        String excludeFolders = isGlobalExclusions()? descriptor.getGlobalExcludeFolders(): getExcludeFolders() ;
+        String filterPattern = isGlobalExclusions()? descriptor.getGlobalFilterPattern():getFilterPattern();
 
         String combinedFilterPattern = folderPattern.generatePattern(filterPattern, excludeFolders);
 
@@ -1210,9 +1238,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private boolean hideResults;
         private boolean enableCertificateValidation;
         @Nullable
-        private String excludeFolders;
+        private String globalExcludeFolders;
         @Nullable
-        private String filterPattern;
+        private String globalFilterPattern;
 
 
         private boolean forcingVulnerabilityThresholdEnabled;
@@ -1314,21 +1342,21 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         @Nullable
-        public String getExcludeFolders() {
-            return excludeFolders;
+        public String getGlobalExcludeFolders() {
+            return globalExcludeFolders;
         }
 
-        public void setExcludeFolders(@Nullable String excludeFolders) {
-            this.excludeFolders = excludeFolders;
+        public void setGlobalExcludeFolders(@Nullable String globalExcludeFolders) {
+            this.globalExcludeFolders = globalExcludeFolders;
         }
 
         @Nullable
-        public String getFilterPattern() {
-            return filterPattern;
+        public String getGlobalFilterPattern() {
+            return globalFilterPattern;
         }
 
-        public void setFilterPattern(@Nullable String filterPattern) {
-            this.filterPattern = filterPattern;
+        public void setGlobalFilterPattern(@Nullable String globalFilterPattern) {
+            this.globalFilterPattern = globalFilterPattern;
         }
 
         public boolean isForcingVulnerabilityThresholdEnabled() {
