@@ -75,9 +75,6 @@
                 </f:nested>
             </f:radioBlock>
 
-
-
-
             <f:optionalBlock title="Incremental" field="incremental" inline="true" checked="${instance.incremental}">
 
                 <f:optionalBlock title="Schedule periodic full scans" field="fullScansScheduled" inline="true"
