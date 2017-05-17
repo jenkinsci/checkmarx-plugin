@@ -52,8 +52,8 @@
             <f:radioBlock checked="${instance.getExclusionsSetting() == null || instance.getExclusionsSetting().equals('global')}" inline="true"
                 name="exclusionsSetting" title="Use Global Include/Exclude Settings" value="global">
                 <f:nested>
-                    <f:entry title="Exclude folders" field="globalExcludeFolders">
-                            <f:readOnlyTextbox  value="${descriptor.getGlobalExcludeFolders()}" style="color: #FF0000 !important;" />
+                    <f:entry title="Exclude folders" field="globalExcludeFolders" id="dfdfdf">
+                            <f:readOnlyTextbox id="887" value="${descriptor.getGlobalExcludeFolders()}"/>
                     </f:entry>
                     <f:entry title="Include/Exclude wildcard patterns" field="globalFilterPattern">
                                 <f:textarea readonly="readonly" value="${descriptor.getGlobalFilterPattern()}" />
@@ -66,10 +66,11 @@
                              name="exclusionsSetting" title="Specific Include/Exclude Settings" value="job">
                 <f:nested>
                     <f:entry title="Exclude folders" field="excludeFolders">
-                        <f:textbox />
+                       <f:textbox default="${descriptor.globalExcludeFolders}" />
                     </f:entry>
                    <f:entry title="Include/Exclude wildcard patterns" field="filterPattern">
-                       <f:textarea />
+                       <f:textarea default="${descriptor.globalFilterPattern}" />
+
                    </f:entry>
                 </f:nested>
             </f:radioBlock>
