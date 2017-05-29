@@ -27,7 +27,13 @@ public class FolderPattern {
 
     public String generatePattern(String filterPattern, String excludeFolders) throws IOException, InterruptedException {
         EnvVars env = run.getEnvironment(listener);
-        return env.expand(filterPattern) + "," + processExcludeFolders(env.expand(excludeFolders));
+        filterPattern = env.expand(filterPattern);
+        excludeFolders = processExcludeFolders(env.expand(excludeFolders));
+        if (!StringUtils.isEmpty(filterPattern) && !StringUtils.isEmpty(excludeFolders)){
+            return filterPattern + "," + excludeFolders;
+        }
+
+        return filterPattern + excludeFolders;
     }
 
     @NotNull
@@ -37,15 +43,21 @@ public class FolderPattern {
         }
         StringBuilder result = new StringBuilder();
         String[] patterns = StringUtils.split(excludeFolders, ",\n");
+        String prefix = "";
+
         for (String p : patterns) {
             p = p.trim();
             if (p.length() > 0) {
+                result.append(prefix);
                 result.append("!**/");
                 result.append(p);
-                result.append("/**/*, ");
+                result.append("/**/*");
+                prefix = ", ";
             }
         }
-        logger.info("Exclude folders converted to: " + result.toString());
+
+
+        logger.info("Excluded folders converted to: " + result.toString());
         return result.toString();
     }
 }

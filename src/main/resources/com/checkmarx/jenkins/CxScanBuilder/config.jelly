@@ -1,6 +1,6 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
-	xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+	xmlns:t="/lib/hudson" xmlns:f="/lib/form" descriptor="${it.descriptor}">
 	<!-- This jelly script is used for per-project configuration. -->
 
 	<f:invisibleEntry>
@@ -48,16 +48,33 @@
                 <f:select />
             </f:entry>
 
+             <!-- GLOBAL INCLUDE\EXCLUDE -->
+            <f:radioBlock checked="${instance == null || instance.exclusionsSetting == null || instance.exclusionsSetting.equals('global')}" inline="true"
+                name="exclusionsSetting" title="Use Global Include/Exclude Settings" value="global">
+                <f:nested>
+                    <f:entry title="Exclude Folders" field="globalExcludeFolders">
+                        <f:textbox readonly="readonly"  value="${descriptor.excludeFolders}"/>
+                    </f:entry>
+                    <f:entry title="Include/Exclude Wildcard Patterns" field="globalFilterPattern">
+                        <f:textarea readonly="readonly" value="${descriptor.filterPattern}" />
+                    </f:entry>
+                </f:nested>
+            </f:radioBlock>
 
-            <f:entry title="Exclude folders" field="excludeFolders">
-                <f:textbox />
-            </f:entry>
 
-            <f:advanced title="Advanced exclude/include settings">
-                <f:entry title="Include/Exclude wildcard patterns" field="filterPattern">
-                    <f:textarea />
-                </f:entry>
-            </f:advanced>
+             <!-- SPECIFIC INCLUDE\EXCLUDE -->
+             <f:radioBlock checked="${instance.getExclusionsSetting().equals('job')}" inline="true"
+                             name="exclusionsSetting" title="Specific Include/Exclude Settings" value="job">
+                <f:nested>
+                    <f:entry title="Exclude Folders" field="excludeFolders">
+                       <f:textbox default="${descriptor.excludeFolders}" />
+                    </f:entry>
+                   <f:entry title="Include/Exclude Wildcard Patterns" field="filterPattern">
+                       <f:textarea default="${descriptor.filterPattern}" />
+
+                   </f:entry>
+                </f:nested>
+            </f:radioBlock>
 
             <f:optionalBlock title="Incremental" field="incremental" inline="true" checked="${instance.incremental}">
 
