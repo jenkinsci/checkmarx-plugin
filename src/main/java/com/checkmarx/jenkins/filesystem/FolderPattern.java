@@ -57,7 +57,7 @@ public class FolderPattern {
         }
 
 
-        logger.info("Exclude folders converted to: " + result.toString());
+        logger.info("Excluded folders converted to: " + result.toString());
         return result.toString();
     }
 }

@@ -137,8 +137,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     // it is initialized in perform method
     private JobStatusOnError jobStatusOnError;
 
-    private String thresholdSettings;
     private String exclusionsSetting;
+    private String thresholdSettings;
 
     private Result vulnerabilityThresholdResult;
 
@@ -865,7 +865,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //sb.append("preset: ").append(getPreset()).append("\n");
         sb.append("isIncrementalScan: ").append(isIncremental()).append("\n");
         if (isGlobalExclusions()) {
-            sb.append("folderExclusions: ").append(descriptor.getGlobalExcludeFolders()).append("\n");
+            sb.append("folderExclusions: ").append(descriptor.getExcludeFolders()).append("\n");
         }else{
             sb.append("folderExclusions: ").append(getExcludeFolders()).append("\n");
 
@@ -1139,8 +1139,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private FilePath zipWorkspaceFolder(Run<?, ?> run, FilePath workspace, TaskListener listener) throws IOException, InterruptedException {
         FolderPattern folderPattern = new FolderPattern(run, listener);
         DescriptorImpl descriptor = getDescriptor();
-        String excludeFolders = isGlobalExclusions()? descriptor.getGlobalExcludeFolders(): getExcludeFolders() ;
-        String filterPattern = isGlobalExclusions()? descriptor.getGlobalFilterPattern():getFilterPattern();
+        String excludeFolders = isGlobalExclusions()? descriptor.getExcludeFolders(): getExcludeFolders() ;
+        String filterPattern = isGlobalExclusions()? descriptor.getFilterPattern():getFilterPattern();
 
         String combinedFilterPattern = folderPattern.generatePattern(filterPattern, excludeFolders);
 
@@ -1238,9 +1238,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private boolean hideResults;
         private boolean enableCertificateValidation;
         @Nullable
-        private String globalExcludeFolders;
+        private String excludeFolders;
         @Nullable
-        private String globalFilterPattern;
+        private String filterPattern;
 
 
         private boolean forcingVulnerabilityThresholdEnabled;
@@ -1342,21 +1342,21 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         @Nullable
-        public String getGlobalExcludeFolders() {
-            return globalExcludeFolders;
+        public String getExcludeFolders() {
+            return excludeFolders;
         }
 
-        public void setGlobalExcludeFolders(@Nullable String globalExcludeFolders) {
-            this.globalExcludeFolders = globalExcludeFolders;
+        public void setExcludeFolders(@Nullable String excludeFolders) {
+            this.excludeFolders = excludeFolders;
         }
 
         @Nullable
-        public String getGlobalFilterPattern() {
-            return globalFilterPattern;
+        public String getFilterPattern() {
+            return filterPattern;
         }
 
-        public void setGlobalFilterPattern(@Nullable String globalFilterPattern) {
-            this.globalFilterPattern = globalFilterPattern;
+        public void setFilterPattern(@Nullable String filterPattern) {
+            this.filterPattern = filterPattern;
         }
 
         public boolean isForcingVulnerabilityThresholdEnabled() {

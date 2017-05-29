@@ -31,11 +31,11 @@
 		<f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
 			with="serverUrl,username,password,timestamp" />
 
-		<f:entry title="Default Exclude folders" field="globalExcludeFolders">
+		<f:entry title="Default Exclude folders" field="excludeFolders">
             <f:textbox />
         </f:entry>
 
-        <f:entry title="Default Include/Exclude wildcard patterns" field="globalFilterPattern">
+            <f:entry title="Default Include/Exclude wildcard patterns" field="filterPattern">
             <f:textarea default="${descriptor.DEFAULT_FILTER_PATTERNS}" />
         </f:entry>
 
