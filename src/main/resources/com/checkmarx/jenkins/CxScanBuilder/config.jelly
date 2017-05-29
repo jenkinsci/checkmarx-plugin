@@ -61,6 +61,7 @@
                 </f:nested>
             </f:radioBlock>
 
+
              <!-- SPECIFIC INCLUDE\EXCLUDE -->
              <f:radioBlock checked="${instance.getExclusionsSetting().equals('job')}" inline="true"
                              name="exclusionsSetting" title="Specific Include/Exclude Settings" value="job">
