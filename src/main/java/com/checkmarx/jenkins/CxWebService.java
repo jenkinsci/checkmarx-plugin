@@ -551,6 +551,23 @@ public class CxWebService {
         return response.isIsOsaEnabled();
     }
 
+    public String resolveGroupId(String teamPath) throws AbortException {
+
+        final List<Group> groups = getAssociatedGroups();
+        final List<Group> selected = filter(having(on(Group.class).getGroupName(), Matchers.equalTo(teamPath)), groups);
+
+        if (selected.isEmpty()) {
+            final String message = "Could not translate teamPath ["+ teamPath +"] to id";
+            logger.error(message);
+            throw new AbortException(message);
+
+        } else if (selected.size() > 1) {
+            logger.error("Warning: Server returned more than one group associated with teamPath: ["+teamPath+"]");
+        }
+
+        return selected.get(0).getID();
+    }
+
     public long resolveProjectId(String projectName, String groupId) throws AbortException {
         CxWSResponseProjectsDisplayData projects = cxJenkinsWebServiceSoap.getProjectsDisplayData(sessionId);
 

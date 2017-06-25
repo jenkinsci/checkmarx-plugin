@@ -75,6 +75,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     private long projectId;
 
+    //used by pipeline
+    @Nullable
+    private String teamPath;
+
     @Nullable
     private String preset;
     private boolean presetSpecified;
@@ -167,6 +171,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             long projectId,
             String buildStep,
             @Nullable String groupId,
+            @Nullable String teamPath, //used by pipeline
             @Nullable String preset,
             JobStatusOnError jobStatusOnError,
             boolean presetSpecified,
@@ -202,6 +207,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.projectName = (projectName == null) ? buildStep : projectName;
         this.projectId = projectId;
         this.groupId = groupId;
+        this.teamPath = teamPath;
         this.preset = preset;
         this.jobStatusOnError = jobStatusOnError;
         this.presetSpecified = presetSpecified;
@@ -288,6 +294,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     public String getGroupId() {
         return groupId;
+    }
+
+    @Nullable
+    public String getTeamPath() {
+        return teamPath;
     }
 
     @Nullable
@@ -642,6 +653,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             cxWebService.login(usernameToUse, passwordToUse);
 
             jobConsoleLogger.info("Checkmarx server login successful");
+
+            if(!StringUtils.isEmpty(teamPath)) {
+                jobConsoleLogger.info("Resolving teamPath ["+teamPath+"] to groupId");
+                groupId = cxWebService.resolveGroupId(teamPath);
+            }
 
             projectId = cxWebService.resolveProjectId(run.getEnvironment(listener).expand(projectName), groupId);
             if (needToAvoidDuplicateProjectScans(cxWebService)) {
