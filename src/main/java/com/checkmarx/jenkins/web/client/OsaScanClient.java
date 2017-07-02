@@ -94,8 +94,7 @@ public class OsaScanClient implements Closeable {
         HttpResponse loginResponse = apacheClient.execute(loginPost);
 
         //validate login response
-        String loginMessageBody = IOUtils.toString(loginResponse.getEntity().getContent());
-        validateApacheHttpClientResponse(loginResponse, 200, "Fail to authenticate", loginMessageBody);
+        validateApacheHttpClientResponse(loginResponse, 200, "Failed to authenticate");
 
 
         //create OSA scan request
@@ -124,17 +123,19 @@ public class OsaScanClient implements Closeable {
         HttpResponse response = apacheClient.execute(post);
 
         //verify scan request
-        String createScanResponseBody = IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset());
-        validateApacheHttpClientResponse(response, 202, "Fail to create OSA scan", createScanResponseBody);
+        validateApacheHttpClientResponse(response, 202, "Failed to create OSA scan");
 
         //extract response as object and return the link
+        String createScanResponseBody = IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset());
         CreateScanResponse createScanResponse = mapper.readValue(createScanResponseBody, CreateScanResponse.class);
         return createScanResponse;
     }
 
-    private void validateApacheHttpClientResponse(HttpResponse response, int status, String message, String messageBody) {
+    private void validateApacheHttpClientResponse(HttpResponse response, int status, String message) {
         if (response.getStatusLine().getStatusCode() != status) {
-            throw new WebApplicationException(message + ": " + "status code: " + response.getStatusLine().getStatusCode() + ". reason phrase: " + response.getStatusLine().getReasonPhrase() + ". message body: " + messageBody);
+            String responseBody = extractResponseBody(response);
+            responseBody = responseBody.replace("{", "").replace("}", "").replace(System.lineSeparator(), " ").replace("  ", "");
+            throw new WebApplicationException(message + ": " + "status code: " + response.getStatusLine().getStatusCode() + ". error:" + responseBody);
         }
     }
 
@@ -336,12 +337,22 @@ public class OsaScanClient implements Closeable {
         if (response.getStatus() == Response.Status.SERVICE_UNAVAILABLE.getStatusCode())
             ThrowFailedToConnectCxServerError();
         if (response.getStatus() != expectedStatus.getStatusCode()) {
-            throw new WebApplicationException(message + ": " + response.getStatusInfo().toString());
+            String responseBody = response.readEntity(String.class);
+            responseBody = responseBody.replace("{", "").replace("}", "").replace(System.lineSeparator(), " ").replace("  ", "");
+            throw new WebApplicationException(message + ": " + "status code: " + response.getStatus() + ". error:" + responseBody);
         }
     }
 
     private Response ThrowFailedToConnectCxServerError() {
         throw new WebApplicationException(FAILED_TO_CONNECT_CX_SERVER_ERROR);
+    }
+
+    private String extractResponseBody(HttpResponse response) {
+        try {
+            return IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset());
+        } catch (IOException e) {
+            return "";
+        }
     }
 
     @Override
