@@ -31,15 +31,13 @@
 		<f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
 			with="serverUrl,username,password,timestamp" />
 
-		<f:entry title="Exclude folders" field="excludeFolders">
+		<f:entry title="Default Exclude folders" field="excludeFolders">
             <f:textbox />
         </f:entry>
 
-        <f:advanced title="Advanced exclude/include settings">
-            <f:entry title="Include/Exclude wildcard patterns" field="filterPattern">
-                <f:textarea default="${descriptor.DEFAULT_FILTER_PATTERNS}" />
-            </f:entry>
-        </f:advanced>
+            <f:entry title="Default Include/Exclude wildcard patterns" field="filterPattern">
+            <f:textarea default="${descriptor.DEFAULT_FILTER_PATTERNS}" />
+        </f:entry>
 
         <f:optionalBlock title="Deny new Checkmarx projects creation" inline="true" field="prohibitProjectCreation" />
 
