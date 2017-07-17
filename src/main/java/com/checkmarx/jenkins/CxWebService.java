@@ -557,7 +557,7 @@ public class CxWebService {
         final List<Group> selected = filter(having(on(Group.class).getGroupName(), Matchers.equalTo(teamPath)), groups);
 
         if (selected.isEmpty()) {
-            final String message = "Could not translate teamPath ["+ teamPath +"] to id";
+            final String message = "Team ["+teamPath+"] is not found on server";
             logger.error(message);
             throw new AbortException(message);
 
