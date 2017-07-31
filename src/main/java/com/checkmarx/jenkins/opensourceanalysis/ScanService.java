@@ -46,9 +46,12 @@ public class ScanService {
         FilePath sourceCodeZip = null;
 
         try {
+            osaScanResult = new OsaScanResult();
+
             if (!validLicense()) {
                 logger.error(NO_LICENSE_ERROR);
-                return null;
+                osaScanResult.setOsaLicense(false);
+                return osaScanResult;
             }
 
             sourceCodeZip = zipOpenSourceCode();
@@ -59,6 +62,7 @@ public class ScanService {
             } else {
                 logger.info(OSA_RUN_STARTED);
                 osaScanResult = scanSender.sendOsaScanAndGetResults(sourceCodeZip);
+                osaScanResult.setOsaLicense(true);
                 logger.info(OSA_RUN_ENDED);
                 scanResultsPresenter.printResultsToOutput(osaScanResult.getOpenSourceSummaryResponse());
             }

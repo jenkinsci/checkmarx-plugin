@@ -33,6 +33,15 @@ public class OsaScanResult {
     private String highCvesList;
     private String mediumCvesList;
     private String lowCvesList;
+    public boolean isOsaLicense;
+
+    public boolean isOsaLicense() {
+        return isOsaLicense;
+    }
+
+    public void setOsaLicense(boolean osaLicense) {
+        isOsaLicense = osaLicense;
+    }
 
     public void setOsaScanStartAndEndTimes(ScanDetails scanDetails){
         this.osaScanStartTime = formatTime(scanDetails.getStartAnalyzeTime());

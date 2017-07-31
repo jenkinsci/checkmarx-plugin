@@ -49,6 +49,7 @@ public class CxScanResult implements Action {
     public static final String PDF_REPORT_NAME = "ScanReport.pdf";
 
 
+
     public CxScanResult(Run<?, ?> owner, String serverUrl, long projectId, boolean scanRanAsynchronous) {
         this.projectId = projectId;
         this.scanRanAsynchronous = scanRanAsynchronous;
@@ -259,8 +260,11 @@ public class CxScanResult implements Action {
 
     public void setOsaScanResult(OsaScanResult osaScanResult) {
         this.osaScanResult = osaScanResult;
+
         //todo erase when legacy code is no longer needed
-        initializeOsaLegacyVariables(osaScanResult);
+        if(osaScanResult.isOsaLicense()) {
+            initializeOsaLegacyVariables(osaScanResult);
+        }
     }
 
     public SastScanResult getSastScanResult() {

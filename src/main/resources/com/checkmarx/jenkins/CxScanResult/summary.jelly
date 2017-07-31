@@ -4,6 +4,17 @@
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
     <style>
+        .summary-results {
+            display: flex;
+            /*padding-top: 34px;*/
+            /*padding-bottom: 25px;*/
+            position: relative;
+            width: 100%;
+        }
+        .results-report .osa-summary {
+            margin: 0;
+            position: relative;
+        }
         .aui-item.details {
             width: 530px;
         }
@@ -42,8 +53,31 @@
             display: flex;
             padding-top: 34px;
             padding-bottom: 25px;
+            position: relative;
         }
 
+        .sast-failed-error {
+            height: 512px;
+            width: 100%;
+            background-color: #F2F2F2;
+            z-index: 3;
+            position: relative;
+        }
+        .sast-error-container {
+            position: absolute;
+            right: 50%;
+            top: 50%;
+            transform: translate(0, -50%);
+            text-align: center;
+        }
+
+        .sast-error-text {
+            color: #382F50;
+            font-family: Roboto, sans-serif;
+            font-size: 15px;
+            line-height: 22px;
+            margin-top: 17px;
+        }
         .results-report .summary-report-title {
             font-size: 24px;
             font-weight: 400;
@@ -180,10 +214,11 @@
         .results-report .bar-title-icon svg {
             position: absolute;
         }
+
         .results-report .bar-title-icon {
             margin-right: 6px;
             height: 20px;
-            width:16px;
+            width: 16px;
             text-align: left;
         }
 
@@ -496,15 +531,16 @@
             margin-right: 6px;
         }
 
-
         .summary-section .html-report {
             margin-right: 10px;
             border-right: solid 1px #d5d5d5;
         }
+
         .link-to-result a {
             display: inline-flex;
             align-items: center;
         }
+
         .title-links a {
             color: #4A90E2;
             text-decoration: none;
@@ -636,6 +672,32 @@
             display: block;
         }
 
+        .no-scan-message-container {
+            display: none;
+            position: absolute;
+            height: calc(100% - 50px);
+            width: 100%;
+            background-color: #F2F2F2;
+            z-index: 1;
+            margin-top: 17px;
+            margin-bottom: 21px;
+        }
+
+        .no-scan-message-icon {
+            padding: 27px;
+        }
+
+        .no-scan-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #382F50;
+            font-size: 15px;
+            text-align: center;
+            width: 89%;
+        }
+
 
     </style>
 
@@ -650,304 +712,48 @@
                 </div>
 
 
-                <div id="onSastError" class="error-msg">
-                    <div id="scanErrorMessage" class="aui-message error">
-                        <span class="aui-icon icon-error"></span>
-                        <strong>Currently scan results are not available. Please check the scan logs for more information</strong>
-                    </div>
-                </div>
-
-
                 <div id="results-report" class="results-report">
 
 
                     <div class="summary-section">
+                        <div id="sast-failed-error" class="sast-failed-error"></div>
+                        <div id="summary-results" class="summary-results">
+                            <div class="sast-summary" id="sast-summary">
+                                <div class="summary-report-title sast">
+                                    <div class="summary-title-text sast">CxSAST Vulnerabilities Status</div>
 
-                        <div class="sast-summary" id="sast-summary">
-                            <div class="summary-report-title sast">
-                                <div class="summary-title-text sast">CxSAST Vulnerabilities Status</div>
-
-                                <div class="title-links">
-                                    <div class="link-to-result summary-link">
-                                        <a class="html-report" id="sast-summary-html-link">
-                                            <div class="results-link-icon link-icon">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="14" viewBox="0 0 12 14">
-                                                    <g fill="none" fill-rule="evenodd">
-                                                        <circle stroke="#4A90E2" stroke-width="2" cx="5" cy="5" r="4"></circle>
-                                                        <path fill="#4A90E2" d="M6.366 8.366l1.732-1 3.268 5.66-1.732 1z"></path>
-                                                    </g>
-                                                </svg>
-                                            </div>
-                                            <div class="link-text">Results</div>
-                                        </a>
+                                    <div class="title-links">
+                                        <div class="link-to-result summary-link">
+                                            <a class="html-report" id="sast-summary-html-link">
+                                                <div class="results-link-icon link-icon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="14" viewBox="0 0 12 14">
+                                                        <g fill="none" fill-rule="evenodd">
+                                                            <circle stroke="#4A90E2" stroke-width="2" cx="5" cy="5" r="4"></circle>
+                                                            <path fill="#4A90E2" d="M6.366 8.366l1.732-1 3.268 5.66-1.732 1z"></path>
+                                                        </g>
+                                                    </svg>
+                                                </div>
+                                                <div class="link-text">Results</div>
+                                            </a>
+                                        </div>
+                                        <div id="sast-summary-pdf-link" class="link-to-result"></div>
                                     </div>
-                                    <div id="sast-summary-pdf-link" class="link-to-result"></div>
+
+
                                 </div>
+                                <div class="summary-chart">
+                                    <div class="threshold-exceeded-compliance" id="threshold-exceeded-compliance"></div>
+                                    <ul class="chart">
 
-
-                            </div>
-                            <div class="summary-chart">
-                                <div class="threshold-exceeded-compliance" id="threshold-exceeded-compliance"></div>
-                                <ul class="chart">
-
-                                    <!--high-->
-                                    <li>
+                                        <!--high-->
+                                        <li>
                                 <span class="bar-1" id="bar-high">
                                     <div id="tooltip-high"></div>
                                 </span>
-                                        <div class="bar-title-container">
-                                            <div class="bar-title-icon">
-                                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                                                     width="16px" height="19px" viewBox="0 0 16 19" version="1.1">
-                                                    <!-- Generator: Sketch 43.2 (39069) - http://www.bohemiancoding.com/sketch -->
-                                                    <title>Med</title>
-                                                    <desc>Created with Sketch.</desc>
-                                                    <defs>
-                                                        <path d="M1,1 L8,0 L15,1 C15,1 16,4.01515152 16,7 C16,13.0151515 10.6766131,18.2701936 10.6766131,18.2701936 C10.30293,18.6732545 9.55664682,19 8.9906311,19 L7.0093689,19 C6.45190985,19 5.70245907,18.6673641 5.33497024,18.2411641 C5.33497024,18.2411641 3.70193273e-12,12.5151515 3.63797881e-12,8 C7.03437308e-13,4.82765152 1,1 1,1 Z"
-                                                              id="path-1"/>
-                                                        <path d="M1,1 L8,0 L15,1 C15,1 16,4.01515152 16,7 C16,13.0151515 10.6766131,18.2701936 10.6766131,18.2701936 C10.30293,18.6732545 9.55664682,19 8.9906311,19 L7.0093689,19 C6.45190985,19 5.70245907,18.6673641 5.33497024,18.2411641 C5.33497024,18.2411641 3.70193273e-12,12.5151515 3.63797881e-12,8 C7.03437308e-13,4.82765152 1,1 1,1 Z"
-                                                              id="path-3"/>
-                                                    </defs>
-                                                    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                                        <g id="Icons" transform="translate(-47.000000, -88.000000)">
-                                                            <g id="High" transform="translate(47.000000, 88.000000)">
-                                                                <g id="Vonerability-High">
-                                                                    <mask id="mask-2" fill="white">
-                                                                        <use xlink:href="#path-1"/>
-                                                                    </mask>
-                                                                    <g id="Rectangle-10">
-                                                                        <use fill="#D82D49" fill-rule="evenodd"
-                                                                             xlink:href="#path-1"/>
-                                                                        <path stroke="#BB1A34" stroke-width="1"
-                                                                              d="M1.4041953,1.44733409 L8,0.505076272 L14.6160396,1.45022478 C14.6341112,1.51124347 14.6539641,1.5795116 14.6753578,1.65465958 C14.7899552,2.05719756 14.9047222,2.50600605 15.0118679,2.98897331 C15.3098751,4.33226343 15.4915175,5.67204692 15.4997158,6.91419406 C15.4999523,6.95710967 15.4999523,6.95710967 15.5,7 C15.5,9.52090451 14.5340777,12.111589 12.9179883,14.6199787 C12.3484584,15.5039663 11.7377754,16.313821 11.1275564,17.0311249 C10.9144997,17.2815702 10.7170402,17.5022391 10.5403911,17.6908777 C10.4358029,17.8025645 10.3623853,17.8778048 10.3253512,17.9143634 C10.0291161,18.2331673 9.41484636,18.5 8.9906311,18.5 L7.0093689,18.5 C6.59080843,18.5 5.98194778,18.2258269 5.71364227,17.9146561 C5.66213668,17.8588317 5.58703389,17.7761053 5.4807125,17.6555634 C5.30200204,17.4529504 5.10247221,17.2193106 4.88735491,16.9580823 C4.27213719,16.2109907 3.656779,15.394289 3.08320773,14.5359605 C2.09721248,13.0604546 1.34127053,11.6205479 0.906388115,10.2835472 C0.639104683,9.46181216 0.5,8.69692293 0.5,8 C0.5,7.56658708 0.519280284,7.10494686 0.556403808,6.61890492 C0.63408435,5.60186781 0.786470164,4.51217341 0.991682584,3.40118912 C1.09968656,2.81647439 1.21542088,2.26333889 1.3310756,1.7595034 C1.35796875,1.64234673 1.3824953,1.53794489 1.4041953,1.44733409 Z"/>
-                                                                    </g>
-                                                                    <rect id="Rectangle-22" fill="#BB1A34" mask="url(#mask-2)" x="8"
-                                                                          y="0" width="8" height="20"/>
-                                                                    <mask id="mask-4" fill="white">
-                                                                        <use xlink:href="#path-3"/>
-                                                                    </mask>
-                                                                    <path stroke="#BB1A34"
-                                                                          d="M1.4041953,1.44733409 L8,0.505076272 L14.6160396,1.45022478 C14.6341112,1.51124347 14.6539641,1.5795116 14.6753578,1.65465958 C14.7899552,2.05719756 14.9047222,2.50600605 15.0118679,2.98897331 C15.3098751,4.33226343 15.4915175,5.67204692 15.4997158,6.91419406 C15.4999523,6.95710967 15.4999523,6.95710967 15.5,7 C15.5,9.52090451 14.5340777,12.111589 12.9179883,14.6199787 C12.3484584,15.5039663 11.7377754,16.313821 11.1275564,17.0311249 C10.9144997,17.2815702 10.7170402,17.5022391 10.5403911,17.6908777 C10.4358029,17.8025645 10.3623853,17.8778048 10.3253512,17.9143634 C10.0291161,18.2331673 9.41484636,18.5 8.9906311,18.5 L7.0093689,18.5 C6.59080843,18.5 5.98194778,18.2258269 5.71364227,17.9146561 C5.66213668,17.8588317 5.58703389,17.7761053 5.4807125,17.6555634 C5.30200204,17.4529504 5.10247221,17.2193106 4.88735491,16.9580823 C4.27213719,16.2109907 3.656779,15.394289 3.08320773,14.5359605 C2.09721248,13.0604546 1.34127053,11.6205479 0.906388115,10.2835472 C0.639104683,9.46181216 0.5,8.69692293 0.5,8 C0.5,7.56658708 0.519280284,7.10494686 0.556403808,6.61890492 C0.63408435,5.60186781 0.786470164,4.51217341 0.991682584,3.40118912 C1.09968656,2.81647439 1.21542088,2.26333889 1.3310756,1.7595034 C1.35796875,1.64234673 1.3824953,1.53794489 1.4041953,1.44733409 Z"/>
-                                                                    <polygon id="H" fill="#FFFFFF" mask="url(#mask-4)"
-                                                                             points="5 12 7 12 7 9.5 9 9.5 9 12 11 12 11 5 9 5 9 7.5 7 7.5 7 5 5 5"/>
-                                                                </g>
-                                                            </g>
-                                                        </g>
-                                                    </g>
-                                                </svg>
-                                            </div>
-                                            <div class="bar-title">High -</div>
-                                            <div class="bar-count" id="bar-count-high"></div>
-                                        </div>
-                                    </li>
-
-                                    <!--medium-->
-                                    <li>
-                                <span class="bar-2" id="bar-med">
-                                    <div id="tooltip-med"></div>
-                                </span>
-                                        <div class="bar-title-container">
-                                            <div class="bar-title-icon">
-                                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                                                     width="16" height="20" viewBox="0 0 16 20"><title>Low</title>
-                                                    <defs>
-                                                        <path d="M1 1.053L8 0l7 1.053s1 3.173 1 6.315c0 6.332-5.346 11.89-5.346 11.89-.36.41-1.097.742-1.663.742H7.01c-.558 0-1.3-.34-1.652-.77 0 0-5.358-6.056-5.358-10.81 0-3.338 1-7.367 1-7.367z"
-                                                              id="a"/>
-                                                        <path d="M1 1.053L8 0l7 1.053s1 3.173 1 6.315c0 6.332-5.346 11.89-5.346 11.89-.36.41-1.097.742-1.663.742H7.01c-.558 0-1.3-.34-1.652-.77 0 0-5.358-6.056-5.358-10.81 0-3.338 1-7.367 1-7.367z"
-                                                              id="c"/>
-                                                    </defs>
-                                                    <g fill="none" fill-rule="evenodd">
-                                                        <mask id="b" fill="#fff">
-                                                            <use xlink:href="#a"/>
-                                                        </mask>
-                                                        <use fill="#FFAC00" xlink:href="#a"/>
-                                                        <path stroke="#E49B16"
-                                                              d="M1.41 1.497L8 .507l6.61.993c.02.067.04.144.064.228.114.425.23.898.337 1.407.3 1.418.48 2.83.49 4.143v.09c0 2.665-.973 5.404-2.6 8.06-.572.934-1.186 1.79-1.8 2.55-.214.264-.413.498-.59.698-.106.118-.18.198-.217.237-.282.32-.882.587-1.302.587H7.01c-.414 0-1.01-.277-1.266-.587-.05-.06-.126-.146-.233-.274-.18-.215-.38-.463-.595-.74-.62-.79-1.237-1.653-1.814-2.56C2.12 13.79 1.363 12.28.923 10.877.644 9.994.5 9.17.5 8.42c0-.457.02-.944.057-1.457.077-1.072.23-2.22.435-3.392.11-.615.224-1.198.34-1.73l.077-.343z"/>
-                                                        <path fill="#D79201" mask="url(#b)" d="M8 0h8v20H8z"/>
-                                                        <mask id="d" fill="#fff">
-                                                            <use xlink:href="#c"/>
-                                                        </mask>
-                                                        <path stroke="#D49100"
-                                                              d="M1.41 1.497L8 .507l6.61.993c.02.067.04.144.064.228.114.425.23.898.337 1.407.3 1.418.48 2.83.49 4.143v.09c0 2.665-.973 5.404-2.6 8.06-.572.934-1.186 1.79-1.8 2.55-.214.264-.413.498-.59.698-.106.118-.18.198-.217.237-.282.32-.882.587-1.302.587H7.01c-.414 0-1.01-.277-1.266-.587-.05-.06-.126-.146-.233-.274-.18-.215-.38-.463-.595-.74-.62-.79-1.237-1.653-1.814-2.56C2.12 13.79 1.363 12.28.923 10.877.644 9.994.5 9.17.5 8.42c0-.457.02-.944.057-1.457.077-1.072.23-2.22.435-3.392.11-.615.224-1.198.34-1.73l.077-.343z"/>
-                                                        <path fill="#472F00" mask="url(#d)"
-                                                              d="M4.28 12.632h1.9v-4.21l1.78 2.862H8L9.79 8.4v4.232h1.93v-7.37H9.67L8 8.117 6.33 5.263H4.28"/>
-                                                    </g>
-                                                </svg>
-                                            </div>
-                                            <div class="bar-title">Medium -</div>
-                                            <div class="bar-count" id="bar-count-med"></div>
-                                        </div>
-                                    </li>
-
-                                    <!--low-->
-                                    <li>
-                                <span class="bar-3" id="bar-low">
-                                    <div id="tooltip-low"></div>
-                                </span>
-                                        <div class="bar-title-container">
-                                            <div class="bar-title-icon">
-                                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                                                     width="16" height="19" viewBox="0 0 16 19"><title>Low</title>
-                                                    <defs>
-                                                        <path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z"
-                                                              id="a"/>
-                                                        <path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z"
-                                                              id="c"/>
-                                                    </defs>
-                                                    <g fill="none" fill-rule="evenodd">
-                                                        <path d="M7.96 17.32L8 .015l-6.5 1s-.96 4.5-.96 8.75c1.272 4.602 5.968 9.25 5.968 9.25h.163l1.29-1.695z"
-                                                              fill="#EDEFF5"/>
-                                                        <mask id="b" fill="#fff">
-                                                            <use xlink:href="#a"/>
-                                                        </mask>
-                                                        <use fill="#FFEB3B" xlink:href="#a"/>
-                                                        <path stroke="#E4D200"
-                                                              d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.342.48 2.682.488 3.924V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38C.634 5.6.786 4.51.992 3.4c.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/>
-                                                        <path fill="#DDCE00" mask="url(#b)" d="M8-8h10v32H8z"/>
-                                                        <mask id="d" fill="#fff">
-                                                            <use xlink:href="#c"/>
-                                                        </mask>
-                                                        <path stroke="#E4D200"
-                                                              d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.342.48 2.682.488 3.924V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38C.634 5.6.786 4.51.992 3.4c.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/>
-                                                        <path fill="#605900" mask="url(#d)" d="M5.54 12h5.33v-1.7H7.48V5H5.54"/>
-                                                    </g>
-                                                </svg>
-                                            </div>
-                                            <div class="bar-title">Low -</div>
-                                            <div class="bar-count" id="bar-count-low"></div>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div class="osa-summary" id="osa-summary">
-                            <div class="summary-report-title osa">
-                                <div class="summary-title-text osa">CxOSA Vulnerabilities &amp; Libraries</div>
-                                <div class="title-links">
-                                    <div class="link-to-result summary-link">
-                                        <a class="html-report" id="osa-summary-html-link">
-                                            <div class="results-link-icon link-icon">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="14" viewBox="0 0 12 14">
-                                                    <title>analize</title>
-                                                    <g fill="none" fill-rule="evenodd">
-                                                        <circle stroke="#4A90E2" stroke-width="2" cx="5" cy="5" r="4"/>
-                                                        <path fill="#4A90E2" d="M6.366 8.366l1.732-1 3.268 5.66-1.732 1z"/>
-                                                    </g>
-                                                </svg>
-                                            </div>
-                                            <div class="link-text">Results</div>
-                                        </a>
-                                    </div>
-                                    <div id="osa-summary-pdf-link" class="link-to-result"></div>
-                                </div>
-                            </div>
-                            <div class="osa-results">
-                                <div class="osa-libraries">
-                                    <div class="osa-libraries-title">Libraries:</div>
-                                    <div class="libraries-vulnerable">
-                                        <div class="libraries-icon-number">
-                                            <div class="libraries-vulnerable-icon">
-                                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                                                     height="31px" version="1.1" viewBox="0 0 47 31" width="47px">
-                                                    <title>lib
-                                                        Vulnerabilities Icon</title>
-                                                    <desc>Created with Sketch.</desc>
-                                                    <defs>
-                                                        <path id="path-14"
-                                                              d="M25,31 L4,31 C1.94360167,31 0,29.0245324 0,27 L0,8 L0,3 C0,1.48550257 1.46424259,0 3,0 L9,0 C9.88514832,0 11.1635669,0.937415809 12,2 L12,4 L34,4 C36.0604107,4.42857143 38,6.41548071 38,9 L38,11"/>
-                                                        <mask height="31" maskUnits="objectBoundingBox" id="mask-14" width="38"
-                                                              maskContentUnits="userSpaceOnUse" fill="white" x="0" y="0">
-                                                            <use xlink:href="#path-14"/>
-                                                        </mask>
-                                                    </defs>
-                                                    <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
-                                                        <g transform="translate(-518.000000, -646.000000)" id="Jenkins">
-                                                            <g transform="translate(270.000000, 646.000000)" id="OSA">
-                                                                <g transform="translate(248.000000, 0.000000)"
-                                                                   id="Lib-Vulnerabilities">
-                                                                    <g id="lib-Vulnerabilities-Icon">
-                                                                        <use mask="url(#mask-14)" stroke-width="4"
-                                                                             id="Combined-Shape"
-                                                                             stroke="#362F53" xlink:href="#path-14"/>
-                                                                        <g transform="translate(26.600000, 14.233021)" id="Alert">
-                                                                            <path id="Page-1"
-                                                                                  d="M9.71486676,1.21470909 C10.3018963,0.274949219 11.2197722,0.29932009 11.7612462,1.26246584 L19.4943093,15.0176364 C20.037464,15.9837716 19.5847058,16.7669789 18.4769973,16.7669789 L2.0007805,16.7669789 C0.895779941,16.7669789 0.477014275,16.0033396 1.06291102,15.0653932 L9.71486676,1.21470909 Z"
-                                                                                  fill="#DA2945"/>
-                                                                            <rect height="5" id="Rectangle-5" width="2"
-                                                                                  fill="#FFFFFF"
-                                                                                  x="9.4" y="5.76697892"/>
-                                                                            <rect height="2" id="Rectangle-6" width="2"
-                                                                                  fill="#FFFFFF"
-                                                                                  x="9.4" y="11.7669789"/>
-                                                                        </g>
-                                                                    </g>
-                                                                </g>
-                                                            </g>
-                                                        </g>
-                                                    </g>
-                                                </svg>
-                                            </div>
-                                            <div class="libraries-vulnerable-number" id="vulnerable-libraries"></div>
-                                        </div>
-                                        <div class="libraries-vulnerable-text">
-                                            Vulnerable and Outdated Libraries
-                                        </div>
-                                    </div>
-                                    <div class="libraries-ok">
-                                        <div class="libraries-icon-number">
-                                            <div class="libraries-ok-icon">
-                                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                                                     height="31px" version="1.1" viewBox="0 0 47 31" width="47px">
-                                                    <title>
-                                                        Icon</title>
-                                                    <desc>Created with Sketch.</desc>
-                                                    <defs>
-                                                        <path id="path-5"
-                                                              d="M28,31 L4,31 C1.99474908,31 0,29.0245324 0,27 L0,8 L0,3 C0,1.48550257 1.50277529,0 3,0 L9,0 C10.1452838,0 11.457345,0.937415809 12,2 L13,4 L35,4 C37.0093689,4.42857143 39,6.41548071 39,9 L39,11"/>
-                                                        <mask height="31" maskUnits="objectBoundingBox" id="mask-5" width="39"
-                                                              maskContentUnits="userSpaceOnUse" fill="white" x="0" y="0">
-                                                            <use xlink:href="#path-5"/>
-                                                        </mask>
-                                                    </defs>
-                                                    <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
-                                                        <g transform="translate(-848.000000, -651.000000)" id="Jenkins">
-                                                            <g transform="translate(270.000000, 646.000000)" id="OSA">
-                                                                <g transform="translate(578.000000, 5.000000)" id="Lib-OK">
-                                                                    <g id="Icon">
-                                                                        <use mask="url(#mask-5)" stroke-width="4"
-                                                                             id="Combined-Shape-Copy"
-                                                                             stroke="#362F53" xlink:href="#path-5"/>
-                                                                        <path id="Combined-Shape"
-                                                                              d="M46.4529784,18.9030304 C46.8068562,19.8686359 47,20.9117624 47,22 C47,26.9705627 42.9705627,31 38,31 C33.0294373,31 29,26.9705627 29,22 C29,17.0294373 33.0294373,13 38,13 C40.393622,13 42.5689975,13.934425 44.1812437,15.4583924 L37.6904269,21.8965709 L35.079173,19.3040452 L32.1948583,22.1475069 L37.6899611,27.6031981 L46.4529784,18.9030304 Z"
-                                                                              fill="#8EBE15"/>
-                                                                    </g>
-                                                                </g>
-                                                            </g>
-                                                        </g>
-                                                    </g>
-                                                </svg>
-                                            </div>
-                                            <div class="libraries-vulnerable-number" id="ok-libraries"></div>
-                                        </div>
-                                        <div class="libraries-ok-text">
-                                            No Known Vulnerability Libraries
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="osa-chart">
-                                    <div class="threshold-exceeded-compliance" id="osa-threshold-exceeded-compliance"></div>
-                                    <ul class="osa-chart chart">
-                                        <li>
-                                    <span class="bar-1" id="osa-bar-high">
-                                        <div id="osa-tooltip-high"></div>
-                                    </span>
                                             <div class="bar-title-container">
                                                 <div class="bar-title-icon">
-                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                         xmlns:xlink="http://www.w3.org/1999/xlink" width="16px" height="19px"
-                                                         viewBox="0 0 16 19"
-                                                         version="1.1">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                                         width="16px" height="19px" viewBox="0 0 16 19" version="1.1">
                                                         <!-- Generator: Sketch 43.2 (39069) - http://www.bohemiancoding.com/sketch -->
                                                         <title>Med</title>
                                                         <desc>Created with Sketch.</desc>
@@ -957,8 +763,7 @@
                                                             <path d="M1,1 L8,0 L15,1 C15,1 16,4.01515152 16,7 C16,13.0151515 10.6766131,18.2701936 10.6766131,18.2701936 C10.30293,18.6732545 9.55664682,19 8.9906311,19 L7.0093689,19 C6.45190985,19 5.70245907,18.6673641 5.33497024,18.2411641 C5.33497024,18.2411641 3.70193273e-12,12.5151515 3.63797881e-12,8 C7.03437308e-13,4.82765152 1,1 1,1 Z"
                                                                   id="path-3"/>
                                                         </defs>
-                                                        <g id="Page-1" stroke="none" stroke-width="1" fill="none"
-                                                           fill-rule="evenodd">
+                                                        <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                                                             <g id="Icons" transform="translate(-47.000000, -88.000000)">
                                                                 <g id="High" transform="translate(47.000000, 88.000000)">
                                                                     <g id="Vonerability-High">
@@ -971,8 +776,8 @@
                                                                             <path stroke="#BB1A34" stroke-width="1"
                                                                                   d="M1.4041953,1.44733409 L8,0.505076272 L14.6160396,1.45022478 C14.6341112,1.51124347 14.6539641,1.5795116 14.6753578,1.65465958 C14.7899552,2.05719756 14.9047222,2.50600605 15.0118679,2.98897331 C15.3098751,4.33226343 15.4915175,5.67204692 15.4997158,6.91419406 C15.4999523,6.95710967 15.4999523,6.95710967 15.5,7 C15.5,9.52090451 14.5340777,12.111589 12.9179883,14.6199787 C12.3484584,15.5039663 11.7377754,16.313821 11.1275564,17.0311249 C10.9144997,17.2815702 10.7170402,17.5022391 10.5403911,17.6908777 C10.4358029,17.8025645 10.3623853,17.8778048 10.3253512,17.9143634 C10.0291161,18.2331673 9.41484636,18.5 8.9906311,18.5 L7.0093689,18.5 C6.59080843,18.5 5.98194778,18.2258269 5.71364227,17.9146561 C5.66213668,17.8588317 5.58703389,17.7761053 5.4807125,17.6555634 C5.30200204,17.4529504 5.10247221,17.2193106 4.88735491,16.9580823 C4.27213719,16.2109907 3.656779,15.394289 3.08320773,14.5359605 C2.09721248,13.0604546 1.34127053,11.6205479 0.906388115,10.2835472 C0.639104683,9.46181216 0.5,8.69692293 0.5,8 C0.5,7.56658708 0.519280284,7.10494686 0.556403808,6.61890492 C0.63408435,5.60186781 0.786470164,4.51217341 0.991682584,3.40118912 C1.09968656,2.81647439 1.21542088,2.26333889 1.3310756,1.7595034 C1.35796875,1.64234673 1.3824953,1.53794489 1.4041953,1.44733409 Z"/>
                                                                         </g>
-                                                                        <rect id="Rectangle-22" fill="#BB1A34" mask="url(#mask-2)"
-                                                                              x="8" y="0" width="8" height="20"/>
+                                                                        <rect id="Rectangle-22" fill="#BB1A34" mask="url(#mask-2)" x="8"
+                                                                              y="0" width="8" height="20"/>
                                                                         <mask id="mask-4" fill="white">
                                                                             <use xlink:href="#path-3"/>
                                                                         </mask>
@@ -987,21 +792,19 @@
                                                     </svg>
                                                 </div>
                                                 <div class="bar-title">High -</div>
-                                                <div class="bar-count" id="osa-bar-count-high"></div>
+                                                <div class="bar-count" id="bar-count-high"></div>
                                             </div>
                                         </li>
 
-                                        <!--osa medium-->
+                                        <!--medium-->
                                         <li>
-                                    <span class="bar-2" id="osa-bar-med">
-                                        <div id="osa-tooltip-med"></div>
-                                    </span>
+                                <span class="bar-2" id="bar-med">
+                                    <div id="tooltip-med"></div>
+                                </span>
                                             <div class="bar-title-container">
                                                 <div class="bar-title-icon">
-                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                         xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="20"
-                                                         viewBox="0 0 16 20"><title>
-                                                        Low</title>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                                         width="16" height="20" viewBox="0 0 16 20"><title>Low</title>
                                                         <defs>
                                                             <path d="M1 1.053L8 0l7 1.053s1 3.173 1 6.315c0 6.332-5.346 11.89-5.346 11.89-.36.41-1.097.742-1.663.742H7.01c-.558 0-1.3-.34-1.652-.77 0 0-5.358-6.056-5.358-10.81 0-3.338 1-7.367 1-7.367z"
                                                                   id="a"/>
@@ -1014,34 +817,32 @@
                                                             </mask>
                                                             <use fill="#FFAC00" xlink:href="#a"/>
                                                             <path stroke="#E49B16"
-                                                                  d="M1.41 1.497L8 .507l6.61.993c.02.067.04.144.064.228.114.425.23.898.337 1.407.3 1.418.48 2.83.49 4.143v.09c0 2.665-.972 5.404-2.6 8.06-.57.934-1.185 1.79-1.8 2.55-.213.264-.412.498-.59.698-.105.118-.18.198-.216.237-.282.32-.882.587-1.302.587H7.01c-.414 0-1.01-.277-1.266-.587-.05-.06-.126-.146-.233-.274-.18-.216-.38-.464-.594-.74-.62-.79-1.237-1.654-1.814-2.56-.982-1.55-1.74-3.06-2.18-4.463C.645 9.994.5 9.17.5 8.42c0-.457.02-.944.057-1.457.077-1.072.23-2.22.435-3.392.11-.614.224-1.197.34-1.73L1.41 1.5z"/>
+                                                                  d="M1.41 1.497L8 .507l6.61.993c.02.067.04.144.064.228.114.425.23.898.337 1.407.3 1.418.48 2.83.49 4.143v.09c0 2.665-.973 5.404-2.6 8.06-.572.934-1.186 1.79-1.8 2.55-.214.264-.413.498-.59.698-.106.118-.18.198-.217.237-.282.32-.882.587-1.302.587H7.01c-.414 0-1.01-.277-1.266-.587-.05-.06-.126-.146-.233-.274-.18-.215-.38-.463-.595-.74-.62-.79-1.237-1.653-1.814-2.56C2.12 13.79 1.363 12.28.923 10.877.644 9.994.5 9.17.5 8.42c0-.457.02-.944.057-1.457.077-1.072.23-2.22.435-3.392.11-.615.224-1.198.34-1.73l.077-.343z"/>
                                                             <path fill="#D79201" mask="url(#b)" d="M8 0h8v20H8z"/>
                                                             <mask id="d" fill="#fff">
                                                                 <use xlink:href="#c"/>
                                                             </mask>
                                                             <path stroke="#D49100"
-                                                                  d="M1.41 1.497L8 .507l6.61.993c.02.067.04.144.064.228.114.425.23.898.337 1.407.3 1.418.48 2.83.49 4.143v.09c0 2.665-.972 5.404-2.6 8.06-.57.934-1.185 1.79-1.8 2.55-.213.264-.412.498-.59.698-.105.118-.18.198-.216.237-.282.32-.882.587-1.302.587H7.01c-.414 0-1.01-.277-1.266-.587-.05-.06-.126-.146-.233-.274-.18-.216-.38-.464-.594-.74-.62-.79-1.237-1.654-1.814-2.56-.982-1.55-1.74-3.06-2.18-4.463C.645 9.994.5 9.17.5 8.42c0-.457.02-.944.057-1.457.077-1.072.23-2.22.435-3.392.11-.614.224-1.197.34-1.73L1.41 1.5z"/>
+                                                                  d="M1.41 1.497L8 .507l6.61.993c.02.067.04.144.064.228.114.425.23.898.337 1.407.3 1.418.48 2.83.49 4.143v.09c0 2.665-.973 5.404-2.6 8.06-.572.934-1.186 1.79-1.8 2.55-.214.264-.413.498-.59.698-.106.118-.18.198-.217.237-.282.32-.882.587-1.302.587H7.01c-.414 0-1.01-.277-1.266-.587-.05-.06-.126-.146-.233-.274-.18-.215-.38-.463-.595-.74-.62-.79-1.237-1.653-1.814-2.56C2.12 13.79 1.363 12.28.923 10.877.644 9.994.5 9.17.5 8.42c0-.457.02-.944.057-1.457.077-1.072.23-2.22.435-3.392.11-.615.224-1.198.34-1.73l.077-.343z"/>
                                                             <path fill="#472F00" mask="url(#d)"
                                                                   d="M4.28 12.632h1.9v-4.21l1.78 2.862H8L9.79 8.4v4.232h1.93v-7.37H9.67L8 8.117 6.33 5.263H4.28"/>
                                                         </g>
                                                     </svg>
                                                 </div>
                                                 <div class="bar-title">Medium -</div>
-                                                <div class="bar-count" id="osa-bar-count-med"></div>
+                                                <div class="bar-count" id="bar-count-med"></div>
                                             </div>
                                         </li>
 
-                                        <!--osa low-->
+                                        <!--low-->
                                         <li>
-                                    <span class="bar-3" id="osa-bar-low">
-                                        <div id="osa-tooltip-low"></div>
-                                    </span>
+                                <span class="bar-3" id="bar-low">
+                                    <div id="tooltip-low"></div>
+                                </span>
                                             <div class="bar-title-container">
                                                 <div class="bar-title-icon">
-                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                         xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="19"
-                                                         viewBox="0 0 16 19"><title>
-                                                        Low</title>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                                         width="16" height="19" viewBox="0 0 16 19"><title>Low</title>
                                                         <defs>
                                                             <path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z"
                                                                   id="a"/>
@@ -1056,22 +857,319 @@
                                                             </mask>
                                                             <use fill="#FFEB3B" xlink:href="#a"/>
                                                             <path stroke="#E4D200"
-                                                                  d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.34.48 2.68.488 3.923V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38.078-1.02.23-2.11.436-3.22.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/>
+                                                                  d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.342.48 2.682.488 3.924V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38C.634 5.6.786 4.51.992 3.4c.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/>
                                                             <path fill="#DDCE00" mask="url(#b)" d="M8-8h10v32H8z"/>
                                                             <mask id="d" fill="#fff">
                                                                 <use xlink:href="#c"/>
                                                             </mask>
                                                             <path stroke="#E4D200"
-                                                                  d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.34.48 2.68.488 3.923V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38.078-1.02.23-2.11.436-3.22.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/>
+                                                                  d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.342.48 2.682.488 3.924V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38C.634 5.6.786 4.51.992 3.4c.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/>
                                                             <path fill="#605900" mask="url(#d)" d="M5.54 12h5.33v-1.7H7.48V5H5.54"/>
                                                         </g>
                                                     </svg>
                                                 </div>
                                                 <div class="bar-title">Low -</div>
-                                                <div class="bar-count" id="osa-bar-count-low"></div>
+                                                <div class="bar-count" id="bar-count-low"></div>
                                             </div>
                                         </li>
                                     </ul>
+                                </div>
+                            </div>
+
+                            <div class="osa-summary" id="osa-summary">
+                                <div class="summary-report-title osa">
+                                    <div class="summary-title-text osa">CxOSA Vulnerabilities &amp; Libraries</div>
+
+
+                                    <div id="no-scan-message-osa-failed" class="no-scan-message-container">
+                                        <div class="no-scan-message">
+                                            <div class="no-scan-message-icon">
+                                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="48px" height="37px" viewBox="0 0 48 37" version="1.1"> <!-- Generator: Sketch 45.2 (43514) - http:/*www.bohemiancoding.com/sketch -->*/ <title>scan_failed</title> <desc>Created with Sketch.</desc> <defs/> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Jenkins-OSA-empty" transform="translate(-936.000000, -335.000000)"> <g id="Group-2" transform="translate(683.000000, 179.000000)"> <g id="Group" transform="translate(81.000000, 155.202941)"> <g id="Group-3" transform="translate(171.000000, 0.000000)"> <g transform="translate(2.000606, 1.714748)"> <path d="M24.3114123,0.619831205 L44.98533,32.7440758 L44.98533,32.7440758 C45.2842135,33.208497 45.1500186,33.8272778 44.6855974,34.1261613 C44.5242092,34.2300245 44.336342,34.2852522 44.1444209,34.2852522 L1.8977196,34.2852522 L1.8977196,34.2852522 C1.34543485,34.2852522 0.897719599,33.837537 0.897719599,33.2852522 C0.897719599,33.0866799 0.956838199,32.8926033 1.0675421,32.7277531 L22.6403257,0.60350849 L22.6403257,0.60350849 C22.948224,0.145014117 23.569508,0.0229318695 24.0280024,0.330830157 C24.1411852,0.406837189 24.2376306,0.50518529 24.3114123,0.619831205 Z" id="Triangle" stroke="#373050" stroke-width="2"/> <rect id="Rectangle-6" fill="#373050" x="21.9993936" y="11.2852522" width="3" height="13" rx="1.5"/> <path d="M23.4993936,26.2852522 L23.4993936,26.2852522 L23.4993936,26.2852522 C24.3278207,26.2852522 24.9993936,26.9568251 24.9993936,27.7852522 L24.9993936,27.7852522 L24.9993936,27.7852522 C24.9993936,28.6136794 24.3278207,29.2852522 23.4993936,29.2852522 L23.4993936,29.2852522 L23.4993936,29.2852522 C22.6709664,29.2852522 21.9993936,28.6136794 21.9993936,27.7852522 L21.9993936,27.7852522 L21.9993936,27.7852522 C21.9993936,26.9568251 22.6709664,26.2852522 23.4993936,26.2852522 Z" id="Rectangle-6-Copy" fill="#373050"/> </g> </g> </g> </g> </g> </g> </svg>
+                                            </div>
+                                            <div class="no-scan-message-text">OSA Scan Failed</div>
+                                        </div>
+                                    </div>
+
+                                    <div id="no-scan-message-no-license" class="no-scan-message-container">
+                                        <div class="no-scan-message">
+                                            <div class="no-scan-message-icon">
+                                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="61px" height="60px" viewBox="0 0 61 60"
+                                                     version="1.1">
+                                                    <!-- Generator: Sketch 43.2 (39069) - http://www.bohemiancoding.com/sketch -->
+                                                    <title>licence_no</title>
+                                                    <desc>Created with Sketch.</desc>
+                                                    <defs/>
+                                                    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                        <g id="Icons" transform="translate(-143.000000, -293.000000)">
+                                                            <g id="licence_no" transform="translate(145.000000, 294.000000)">
+                                                                <rect id="Rectangle-2" stroke="#382F50" stroke-linecap="square" x="8" y="1" width="42" height="55"/>
+                                                                <polygon id="Rectangle-3" fill="#382F50" points="35 1 45 1 45 21 40 16.5 35 21"/>
+                                                                <path d="M15.5,9.5 L29.5,9.5" id="Line" stroke="#979797" stroke-linecap="square"/>
+                                                                <path d="M15.5,17.5 L29.5,17.5" id="Line-Copy" stroke="#979797" stroke-linecap="square"/>
+                                                                <path d="M15.7377037,26.5 L43.9431037,26.5" id="Line-Copy-2" stroke="#979797" stroke-linecap="square"/>
+                                                                <path d="M15.7377037,36.5 L43.9431037,36.5" id="Line-Copy-4" stroke="#979797" stroke-linecap="square"/>
+                                                                <path d="M15.7377037,46.5 L43.9431037,46.5" id="Line-Copy-5" stroke="#979797" stroke-linecap="square"/>
+                                                                <path d="M0.5,1.5 L55.4181209,56.4181209" id="Line-Copy-3" stroke="#F6F7FA" stroke-width="3"
+                                                                      stroke-linecap="square"/>
+                                                                <path d="M2.5,0.5 L57.4181209,55.4181209" id="Line" stroke="#382F50" stroke-width="2" stroke-linecap="square"/>
+                                                            </g>
+                                                        </g>
+                                                    </g>
+                                                </svg>
+                                            </div>
+                                            <div class="no-scan-message-text">OSA License is not enabled. Please contact you Checkmarx Administrator</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="title-links">
+                                        <div class="link-to-result summary-link">
+                                            <a class="html-report" id="osa-summary-html-link">
+                                                <div class="results-link-icon link-icon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="14" viewBox="0 0 12 14">
+                                                        <title>analize</title>
+                                                        <g fill="none" fill-rule="evenodd">
+                                                            <circle stroke="#4A90E2" stroke-width="2" cx="5" cy="5" r="4"/>
+                                                            <path fill="#4A90E2" d="M6.366 8.366l1.732-1 3.268 5.66-1.732 1z"/>
+                                                        </g>
+                                                    </svg>
+                                                </div>
+                                                <div class="link-text">Results</div>
+                                            </a>
+                                        </div>
+                                        <div id="osa-summary-pdf-link" class="link-to-result"></div>
+                                    </div>
+                                </div>
+                                <div class="osa-results">
+                                    <div class="osa-libraries">
+                                        <div class="osa-libraries-title">Libraries:</div>
+                                        <div class="libraries-vulnerable">
+                                            <div class="libraries-icon-number">
+                                                <div class="libraries-vulnerable-icon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                                         height="31px" version="1.1" viewBox="0 0 47 31" width="47px">
+                                                        <title>lib
+                                                            Vulnerabilities Icon</title>
+                                                        <desc>Created with Sketch.</desc>
+                                                        <defs>
+                                                            <path id="path-14"
+                                                                  d="M25,31 L4,31 C1.94360167,31 0,29.0245324 0,27 L0,8 L0,3 C0,1.48550257 1.46424259,0 3,0 L9,0 C9.88514832,0 11.1635669,0.937415809 12,2 L12,4 L34,4 C36.0604107,4.42857143 38,6.41548071 38,9 L38,11"/>
+                                                            <mask height="31" maskUnits="objectBoundingBox" id="mask-14" width="38"
+                                                                  maskContentUnits="userSpaceOnUse" fill="white" x="0" y="0">
+                                                                <use xlink:href="#path-14"/>
+                                                            </mask>
+                                                        </defs>
+                                                        <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
+                                                            <g transform="translate(-518.000000, -646.000000)" id="Jenkins">
+                                                                <g transform="translate(270.000000, 646.000000)" id="OSA">
+                                                                    <g transform="translate(248.000000, 0.000000)"
+                                                                       id="Lib-Vulnerabilities">
+                                                                        <g id="lib-Vulnerabilities-Icon">
+                                                                            <use mask="url(#mask-14)" stroke-width="4"
+                                                                                 id="Combined-Shape"
+                                                                                 stroke="#362F53" xlink:href="#path-14"/>
+                                                                            <g transform="translate(26.600000, 14.233021)" id="Alert">
+                                                                                <path id="Page-1"
+                                                                                      d="M9.71486676,1.21470909 C10.3018963,0.274949219 11.2197722,0.29932009 11.7612462,1.26246584 L19.4943093,15.0176364 C20.037464,15.9837716 19.5847058,16.7669789 18.4769973,16.7669789 L2.0007805,16.7669789 C0.895779941,16.7669789 0.477014275,16.0033396 1.06291102,15.0653932 L9.71486676,1.21470909 Z"
+                                                                                      fill="#DA2945"/>
+                                                                                <rect height="5" id="Rectangle-5" width="2"
+                                                                                      fill="#FFFFFF"
+                                                                                      x="9.4" y="5.76697892"/>
+                                                                                <rect height="2" id="Rectangle-6" width="2"
+                                                                                      fill="#FFFFFF"
+                                                                                      x="9.4" y="11.7669789"/>
+                                                                            </g>
+                                                                        </g>
+                                                                    </g>
+                                                                </g>
+                                                            </g>
+                                                        </g>
+                                                    </svg>
+                                                </div>
+                                                <div class="libraries-vulnerable-number" id="vulnerable-libraries"></div>
+                                            </div>
+                                            <div class="libraries-vulnerable-text">
+                                                Vulnerable and Outdated Libraries
+                                            </div>
+                                        </div>
+                                        <div class="libraries-ok">
+                                            <div class="libraries-icon-number">
+                                                <div class="libraries-ok-icon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                                         height="31px" version="1.1" viewBox="0 0 47 31" width="47px">
+                                                        <title>
+                                                            Icon</title>
+                                                        <desc>Created with Sketch.</desc>
+                                                        <defs>
+                                                            <path id="path-5"
+                                                                  d="M28,31 L4,31 C1.99474908,31 0,29.0245324 0,27 L0,8 L0,3 C0,1.48550257 1.50277529,0 3,0 L9,0 C10.1452838,0 11.457345,0.937415809 12,2 L13,4 L35,4 C37.0093689,4.42857143 39,6.41548071 39,9 L39,11"/>
+                                                            <mask height="31" maskUnits="objectBoundingBox" id="mask-5" width="39"
+                                                                  maskContentUnits="userSpaceOnUse" fill="white" x="0" y="0">
+                                                                <use xlink:href="#path-5"/>
+                                                            </mask>
+                                                        </defs>
+                                                        <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
+                                                            <g transform="translate(-848.000000, -651.000000)" id="Jenkins">
+                                                                <g transform="translate(270.000000, 646.000000)" id="OSA">
+                                                                    <g transform="translate(578.000000, 5.000000)" id="Lib-OK">
+                                                                        <g id="Icon">
+                                                                            <use mask="url(#mask-5)" stroke-width="4"
+                                                                                 id="Combined-Shape-Copy"
+                                                                                 stroke="#362F53" xlink:href="#path-5"/>
+                                                                            <path id="Combined-Shape"
+                                                                                  d="M46.4529784,18.9030304 C46.8068562,19.8686359 47,20.9117624 47,22 C47,26.9705627 42.9705627,31 38,31 C33.0294373,31 29,26.9705627 29,22 C29,17.0294373 33.0294373,13 38,13 C40.393622,13 42.5689975,13.934425 44.1812437,15.4583924 L37.6904269,21.8965709 L35.079173,19.3040452 L32.1948583,22.1475069 L37.6899611,27.6031981 L46.4529784,18.9030304 Z"
+                                                                                  fill="#8EBE15"/>
+                                                                        </g>
+                                                                    </g>
+                                                                </g>
+                                                            </g>
+                                                        </g>
+                                                    </svg>
+                                                </div>
+                                                <div class="libraries-vulnerable-number" id="ok-libraries"></div>
+                                            </div>
+                                            <div class="libraries-ok-text">
+                                                No Known Vulnerability Libraries
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="osa-chart">
+                                        <div class="threshold-exceeded-compliance" id="osa-threshold-exceeded-compliance"></div>
+                                        <ul class="osa-chart chart">
+                                            <li>
+                                    <span class="bar-1" id="osa-bar-high">
+                                        <div id="osa-tooltip-high"></div>
+                                    </span>
+                                                <div class="bar-title-container">
+                                                    <div class="bar-title-icon">
+                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                             xmlns:xlink="http://www.w3.org/1999/xlink" width="16px" height="19px"
+                                                             viewBox="0 0 16 19"
+                                                             version="1.1">
+                                                            <!-- Generator: Sketch 43.2 (39069) - http://www.bohemiancoding.com/sketch -->
+                                                            <title>Med</title>
+                                                            <desc>Created with Sketch.</desc>
+                                                            <defs>
+                                                                <path d="M1,1 L8,0 L15,1 C15,1 16,4.01515152 16,7 C16,13.0151515 10.6766131,18.2701936 10.6766131,18.2701936 C10.30293,18.6732545 9.55664682,19 8.9906311,19 L7.0093689,19 C6.45190985,19 5.70245907,18.6673641 5.33497024,18.2411641 C5.33497024,18.2411641 3.70193273e-12,12.5151515 3.63797881e-12,8 C7.03437308e-13,4.82765152 1,1 1,1 Z"
+                                                                      id="path-1"/>
+                                                                <path d="M1,1 L8,0 L15,1 C15,1 16,4.01515152 16,7 C16,13.0151515 10.6766131,18.2701936 10.6766131,18.2701936 C10.30293,18.6732545 9.55664682,19 8.9906311,19 L7.0093689,19 C6.45190985,19 5.70245907,18.6673641 5.33497024,18.2411641 C5.33497024,18.2411641 3.70193273e-12,12.5151515 3.63797881e-12,8 C7.03437308e-13,4.82765152 1,1 1,1 Z"
+                                                                      id="path-3"/>
+                                                            </defs>
+                                                            <g id="Page-1" stroke="none" stroke-width="1" fill="none"
+                                                               fill-rule="evenodd">
+                                                                <g id="Icons" transform="translate(-47.000000, -88.000000)">
+                                                                    <g id="High" transform="translate(47.000000, 88.000000)">
+                                                                        <g id="Vonerability-High">
+                                                                            <mask id="mask-2" fill="white">
+                                                                                <use xlink:href="#path-1"/>
+                                                                            </mask>
+                                                                            <g id="Rectangle-10">
+                                                                                <use fill="#D82D49" fill-rule="evenodd"
+                                                                                     xlink:href="#path-1"/>
+                                                                                <path stroke="#BB1A34" stroke-width="1"
+                                                                                      d="M1.4041953,1.44733409 L8,0.505076272 L14.6160396,1.45022478 C14.6341112,1.51124347 14.6539641,1.5795116 14.6753578,1.65465958 C14.7899552,2.05719756 14.9047222,2.50600605 15.0118679,2.98897331 C15.3098751,4.33226343 15.4915175,5.67204692 15.4997158,6.91419406 C15.4999523,6.95710967 15.4999523,6.95710967 15.5,7 C15.5,9.52090451 14.5340777,12.111589 12.9179883,14.6199787 C12.3484584,15.5039663 11.7377754,16.313821 11.1275564,17.0311249 C10.9144997,17.2815702 10.7170402,17.5022391 10.5403911,17.6908777 C10.4358029,17.8025645 10.3623853,17.8778048 10.3253512,17.9143634 C10.0291161,18.2331673 9.41484636,18.5 8.9906311,18.5 L7.0093689,18.5 C6.59080843,18.5 5.98194778,18.2258269 5.71364227,17.9146561 C5.66213668,17.8588317 5.58703389,17.7761053 5.4807125,17.6555634 C5.30200204,17.4529504 5.10247221,17.2193106 4.88735491,16.9580823 C4.27213719,16.2109907 3.656779,15.394289 3.08320773,14.5359605 C2.09721248,13.0604546 1.34127053,11.6205479 0.906388115,10.2835472 C0.639104683,9.46181216 0.5,8.69692293 0.5,8 C0.5,7.56658708 0.519280284,7.10494686 0.556403808,6.61890492 C0.63408435,5.60186781 0.786470164,4.51217341 0.991682584,3.40118912 C1.09968656,2.81647439 1.21542088,2.26333889 1.3310756,1.7595034 C1.35796875,1.64234673 1.3824953,1.53794489 1.4041953,1.44733409 Z"/>
+                                                                            </g>
+                                                                            <rect id="Rectangle-22" fill="#BB1A34" mask="url(#mask-2)"
+                                                                                  x="8" y="0" width="8" height="20"/>
+                                                                            <mask id="mask-4" fill="white">
+                                                                                <use xlink:href="#path-3"/>
+                                                                            </mask>
+                                                                            <path stroke="#BB1A34"
+                                                                                  d="M1.4041953,1.44733409 L8,0.505076272 L14.6160396,1.45022478 C14.6341112,1.51124347 14.6539641,1.5795116 14.6753578,1.65465958 C14.7899552,2.05719756 14.9047222,2.50600605 15.0118679,2.98897331 C15.3098751,4.33226343 15.4915175,5.67204692 15.4997158,6.91419406 C15.4999523,6.95710967 15.4999523,6.95710967 15.5,7 C15.5,9.52090451 14.5340777,12.111589 12.9179883,14.6199787 C12.3484584,15.5039663 11.7377754,16.313821 11.1275564,17.0311249 C10.9144997,17.2815702 10.7170402,17.5022391 10.5403911,17.6908777 C10.4358029,17.8025645 10.3623853,17.8778048 10.3253512,17.9143634 C10.0291161,18.2331673 9.41484636,18.5 8.9906311,18.5 L7.0093689,18.5 C6.59080843,18.5 5.98194778,18.2258269 5.71364227,17.9146561 C5.66213668,17.8588317 5.58703389,17.7761053 5.4807125,17.6555634 C5.30200204,17.4529504 5.10247221,17.2193106 4.88735491,16.9580823 C4.27213719,16.2109907 3.656779,15.394289 3.08320773,14.5359605 C2.09721248,13.0604546 1.34127053,11.6205479 0.906388115,10.2835472 C0.639104683,9.46181216 0.5,8.69692293 0.5,8 C0.5,7.56658708 0.519280284,7.10494686 0.556403808,6.61890492 C0.63408435,5.60186781 0.786470164,4.51217341 0.991682584,3.40118912 C1.09968656,2.81647439 1.21542088,2.26333889 1.3310756,1.7595034 C1.35796875,1.64234673 1.3824953,1.53794489 1.4041953,1.44733409 Z"/>
+                                                                            <polygon id="H" fill="#FFFFFF" mask="url(#mask-4)"
+                                                                                     points="5 12 7 12 7 9.5 9 9.5 9 12 11 12 11 5 9 5 9 7.5 7 7.5 7 5 5 5"/>
+                                                                        </g>
+                                                                    </g>
+                                                                </g>
+                                                            </g>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="bar-title">High -</div>
+                                                    <div class="bar-count" id="osa-bar-count-high"></div>
+                                                </div>
+                                            </li>
+
+                                            <!--osa medium-->
+                                            <li>
+                                    <span class="bar-2" id="osa-bar-med">
+                                        <div id="osa-tooltip-med"></div>
+                                    </span>
+                                                <div class="bar-title-container">
+                                                    <div class="bar-title-icon">
+                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                             xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="20"
+                                                             viewBox="0 0 16 20"><title>
+                                                            Low</title>
+                                                            <defs>
+                                                                <path d="M1 1.053L8 0l7 1.053s1 3.173 1 6.315c0 6.332-5.346 11.89-5.346 11.89-.36.41-1.097.742-1.663.742H7.01c-.558 0-1.3-.34-1.652-.77 0 0-5.358-6.056-5.358-10.81 0-3.338 1-7.367 1-7.367z"
+                                                                      id="a"/>
+                                                                <path d="M1 1.053L8 0l7 1.053s1 3.173 1 6.315c0 6.332-5.346 11.89-5.346 11.89-.36.41-1.097.742-1.663.742H7.01c-.558 0-1.3-.34-1.652-.77 0 0-5.358-6.056-5.358-10.81 0-3.338 1-7.367 1-7.367z"
+                                                                      id="c"/>
+                                                            </defs>
+                                                            <g fill="none" fill-rule="evenodd">
+                                                                <mask id="b" fill="#fff">
+                                                                    <use xlink:href="#a"/>
+                                                                </mask>
+                                                                <use fill="#FFAC00" xlink:href="#a"/>
+                                                                <path stroke="#E49B16"
+                                                                      d="M1.41 1.497L8 .507l6.61.993c.02.067.04.144.064.228.114.425.23.898.337 1.407.3 1.418.48 2.83.49 4.143v.09c0 2.665-.972 5.404-2.6 8.06-.57.934-1.185 1.79-1.8 2.55-.213.264-.412.498-.59.698-.105.118-.18.198-.216.237-.282.32-.882.587-1.302.587H7.01c-.414 0-1.01-.277-1.266-.587-.05-.06-.126-.146-.233-.274-.18-.216-.38-.464-.594-.74-.62-.79-1.237-1.654-1.814-2.56-.982-1.55-1.74-3.06-2.18-4.463C.645 9.994.5 9.17.5 8.42c0-.457.02-.944.057-1.457.077-1.072.23-2.22.435-3.392.11-.614.224-1.197.34-1.73L1.41 1.5z"/>
+                                                                <path fill="#D79201" mask="url(#b)" d="M8 0h8v20H8z"/>
+                                                                <mask id="d" fill="#fff">
+                                                                    <use xlink:href="#c"/>
+                                                                </mask>
+                                                                <path stroke="#D49100"
+                                                                      d="M1.41 1.497L8 .507l6.61.993c.02.067.04.144.064.228.114.425.23.898.337 1.407.3 1.418.48 2.83.49 4.143v.09c0 2.665-.972 5.404-2.6 8.06-.57.934-1.185 1.79-1.8 2.55-.213.264-.412.498-.59.698-.105.118-.18.198-.216.237-.282.32-.882.587-1.302.587H7.01c-.414 0-1.01-.277-1.266-.587-.05-.06-.126-.146-.233-.274-.18-.216-.38-.464-.594-.74-.62-.79-1.237-1.654-1.814-2.56-.982-1.55-1.74-3.06-2.18-4.463C.645 9.994.5 9.17.5 8.42c0-.457.02-.944.057-1.457.077-1.072.23-2.22.435-3.392.11-.614.224-1.197.34-1.73L1.41 1.5z"/>
+                                                                <path fill="#472F00" mask="url(#d)"
+                                                                      d="M4.28 12.632h1.9v-4.21l1.78 2.862H8L9.79 8.4v4.232h1.93v-7.37H9.67L8 8.117 6.33 5.263H4.28"/>
+                                                            </g>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="bar-title">Medium -</div>
+                                                    <div class="bar-count" id="osa-bar-count-med"></div>
+                                                </div>
+                                            </li>
+
+                                            <!--osa low-->
+                                            <li>
+                                    <span class="bar-3" id="osa-bar-low">
+                                        <div id="osa-tooltip-low"></div>
+                                    </span>
+                                                <div class="bar-title-container">
+                                                    <div class="bar-title-icon">
+                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                             xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="19"
+                                                             viewBox="0 0 16 19"><title>
+                                                            Low</title>
+                                                            <defs>
+                                                                <path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z"
+                                                                      id="a"/>
+                                                                <path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z"
+                                                                      id="c"/>
+                                                            </defs>
+                                                            <g fill="none" fill-rule="evenodd">
+                                                                <path d="M7.96 17.32L8 .015l-6.5 1s-.96 4.5-.96 8.75c1.272 4.602 5.968 9.25 5.968 9.25h.163l1.29-1.695z"
+                                                                      fill="#EDEFF5"/>
+                                                                <mask id="b" fill="#fff">
+                                                                    <use xlink:href="#a"/>
+                                                                </mask>
+                                                                <use fill="#FFEB3B" xlink:href="#a"/>
+                                                                <path stroke="#E4D200"
+                                                                      d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.34.48 2.68.488 3.923V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38.078-1.02.23-2.11.436-3.22.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/>
+                                                                <path fill="#DDCE00" mask="url(#b)" d="M8-8h10v32H8z"/>
+                                                                <mask id="d" fill="#fff">
+                                                                    <use xlink:href="#c"/>
+                                                                </mask>
+                                                                <path stroke="#E4D200"
+                                                                      d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.34.48 2.68.488 3.923V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38.078-1.02.23-2.11.436-3.22.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/>
+                                                                <path fill="#605900" mask="url(#d)" d="M5.54 12h5.33v-1.7H7.48V5H5.54"/>
+                                                            </g>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="bar-title">Low -</div>
+                                                    <div class="bar-count" id="osa-bar-count-low"></div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1484,11 +1582,11 @@
     <script>
         //this function prevents compilation errors after jelly script works its magic
         function verifyVar(variableList) {
-        if (variableList.length &gt; 0) {
-        return variableList[0];
-        }
+            if (variableList.length &gt; 0) {
+                return variableList[0];
+            }
 
-        return undefined;
+            return undefined;
         }
 
         //---------------------------------------------------------- vars --------------------------------------------
@@ -1513,7 +1611,7 @@
 
         //links
         var sastScanResultsLink = '${it.codeViewerUrl}?scanid=${it.scanId}&amp;projectid=${it.projectId}';
-        var sastPDFLink= '${app.rootUrl}${it.owner.url}${it.urlName}${it.pdfReportUrl}';
+        var sastPDFLink = '${app.rootUrl}${it.owner.url}${it.urlName}${it.pdfReportUrl}';
 
 
         //counts - Legacy form
@@ -1534,6 +1632,9 @@
 
         //Legacy form
         var osaEnabled = verifyVar([${it.osaEnabled}]);
+
+        var isOsaLicense = verifyVar([${it.osaScanResult.isOsaLicense}]);
+        var isOsaSuccess = isOsaFeature;
 
         //libraries - Legacy form
         var osaVulnerableAndOutdatedLibs = verifyVar([${it.osaVulnerableAndOutdatedLibs}]);
@@ -1620,9 +1721,21 @@
                 '</div>';
 
 
+        var sastErrorMsg =
+                '<div class="sast-error-container">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="48px" height="37px" viewBox="0 0 48 37" version="1.1"> <!-- Generator: Sketch 45.2 (43514) - http:/*www.bohemiancoding.com/sketch -->*/ <title>scan_failed</title> <desc>Created with Sketch.</desc> <defs/> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Jenkins-OSA-empty" transform="translate(-936.000000, -335.000000)"> <g id="Group-2" transform="translate(683.000000, 179.000000)"> <g id="Group" transform="translate(81.000000, 155.202941)"> <g id="Group-3" transform="translate(171.000000, 0.000000)"> <g transform="translate(2.000606, 1.714748)"> <path d="M24.3114123,0.619831205 L44.98533,32.7440758 L44.98533,32.7440758 C45.2842135,33.208497 45.1500186,33.8272778 44.6855974,34.1261613 C44.5242092,34.2300245 44.336342,34.2852522 44.1444209,34.2852522 L1.8977196,34.2852522 L1.8977196,34.2852522 C1.34543485,34.2852522 0.897719599,33.837537 0.897719599,33.2852522 C0.897719599,33.0866799 0.956838199,32.8926033 1.0675421,32.7277531 L22.6403257,0.60350849 L22.6403257,0.60350849 C22.948224,0.145014117 23.569508,0.0229318695 24.0280024,0.330830157 C24.1411852,0.406837189 24.2376306,0.50518529 24.3114123,0.619831205 Z" id="Triangle" stroke="#373050" stroke-width="2"/> <rect id="Rectangle-6" fill="#373050" x="21.9993936" y="11.2852522" width="3" height="13" rx="1.5"/> <path d="M23.4993936,26.2852522 L23.4993936,26.2852522 L23.4993936,26.2852522 C24.3278207,26.2852522 24.9993936,26.9568251 24.9993936,27.7852522 L24.9993936,27.7852522 L24.9993936,27.7852522 C24.9993936,28.6136794 24.3278207,29.2852522 23.4993936,29.2852522 L23.4993936,29.2852522 L23.4993936,29.2852522 C22.6709664,29.2852522 21.9993936,28.6136794 21.9993936,27.7852522 L21.9993936,27.7852522 L21.9993936,27.7852522 C21.9993936,26.9568251 22.6709664,26.2852522 23.4993936,26.2852522 Z" id="Rectangle-6-Copy" fill="#373050"/> </g> </g> </g> </g> </g> </g> </svg>' +
+                '<div class="sast-error-text">Scan Failed</div>' +
+                '</div>'
+        //---------------------------------------------------------- summary ---------------------------------------------------------------
+        if (!sastResultsReady) {
+            document.getElementById("summary-results").setAttribute("style", "display:none");
+            document.getElementById("sast-failed-error").innerHTML = sastErrorMsg;
 
-        //---------------------------------------------------------- sast ---------------------------------------------------------------
-        if (sastResultsReady) {
+        }
+        else {
+            document.getElementById("sast-failed-error").setAttribute("style", "display:none");
+
+
             try {
                 //link
                 document.getElementById("sast-summary-html-link").setAttribute("href", sastScanResultsLink);
@@ -1640,8 +1753,6 @@
                             '</div>' +
                             '</a>';
                 }
-                document.getElementById("onSastError").setAttribute("style", "display:none");
-                document.getElementById("scanErrorMessage").setAttribute("style", "display:none");
 
                 //set bars height and count
                 document.getElementById("bar-count-high").innerHTML = highCount;
@@ -1693,12 +1804,22 @@
                 }
             }
         }
-        else {
-            document.getElementById("results-report").setAttribute("style", "display:none");
-        }
 
-        //---------------------------------------------------------- osa ---------------------------------------------------------------
-        if (osaEnabled) {
+        if (!osaEnabled) {
+            //show only sast with large class
+            document.getElementById("osa-summary").setAttribute("style", "display:none");
+            document.getElementById("sast-summary").setAttribute("class", "sast-summary chart-large");
+        }
+        else if (!isOsaLicense) {
+            //show osa no license message
+            document.getElementById("no-scan-message-no-license").setAttribute("style", "display:inline-block");
+        }
+        else if (!isOsaSuccess) {
+            //todo show osa failed message
+            document.getElementById("no-scan-message-osa-failed").setAttribute("style", "display:inline-block");
+        }
+        //both are successful
+        else {
             try {
                 //link
                 document.getElementById("osa-summary-html-link").setAttribute("href", osaHtmlPath);
@@ -1731,7 +1852,6 @@
             catch (e) {
                 console.error("Element missing in OSA summary section " + e.message);
             }
-
             //if threshold is enabled
             if (osaThresholdsEnabled) {
                 try {
@@ -1769,10 +1889,6 @@
                     console.error("Element missing in OSA threshold section " + e.message);
                 }
             }
-        }
-        else {
-            document.getElementById("osa-summary").setAttribute("style", "display:none");
-            document.getElementById("sast-summary").setAttribute("class", "sast-summary chart-large");
         }
 
         //---------------------------------------------------------- full reports ---------------------------------------------------------------
@@ -2030,10 +2146,10 @@
 
             //add rows to table
             var row;
-        for (i = 0; i &lt; severityCveList.length; i++) {
-        row = table.insertRow(i + 1);
-        row.insertCell(0).innerHTML = severityCveList[i].name;
-        row.insertCell(1).innerHTML = severityCveList[i].count;
+            for (i = 0; i &lt; severityCveList.length; i++) {
+                row = table.insertRow(i + 1);
+                row.insertCell(0).innerHTML = severityCveList[i].name;
+                row.insertCell(1).innerHTML = severityCveList[i].count;
 
             }
         }
@@ -2096,7 +2212,7 @@
             var severityTitle = generateCveTableTitle(severity);
 
             //generate table headers
-            var tableHeadersNames = {h1: "Vulnerability Type", h2: "Publish Date", h3: "Library"};
+            var tableHeadersNames = {h1: "Vulnerability", h2: "Publish Date", h3: "Library"};
             var tableHeadersElement = generateCveTableHeaders(tableHeadersNames);
 
             //get container and create table element in it
@@ -2114,8 +2230,8 @@
             for (i = 0; i &lt; severityCveList.length; i++) {
                 row = table.insertRow(i + 1);
                 row.insertCell(0).innerHTML = severityCveList[i].cveName;
-        row.insertCell(1).innerHTML = severityCveList[i].publishDate;
-        row.insertCell(2).innerHTML = severityCveList[i].libraryName;
+                row.insertCell(1).innerHTML = severityCveList[i].publishDate;
+                row.insertCell(2).innerHTML = severityCveList[i].libraryName;
 
             }
         }
