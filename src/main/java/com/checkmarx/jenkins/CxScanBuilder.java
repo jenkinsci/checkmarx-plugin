@@ -673,6 +673,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 return;
             }
 
+            jobConsoleLogger.info("\n----------------------------Executing CxSAST scan:----------------------------\n");
             //If there no project under the project name a new project will be created
             cxWSResponseRunID = submitScan(run, workspace, cxWebService, listener);
             projectId = cxWSResponseRunID.getProjectID();
@@ -690,50 +691,60 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 return;
             }
 
-            long scanId = cxWebService.trackScanProgress(cxWSResponseRunID, usernameToUse, passwordToUse, descriptor.getScanTimeOutEnabled(), descriptor.getScanTimeoutDuration());
+            long scanId = 0;
+            try {
+                scanId = cxWebService.trackScanProgress(cxWSResponseRunID, usernameToUse, passwordToUse, descriptor.getScanTimeOutEnabled(), descriptor.getScanTimeoutDuration());
+            }catch (Exception e){
+                jobConsoleLogger.error("Error while retrieving SAST scan: " + e.getMessage());
+            }
+
+            CxScanResult cxScanResult;
+            boolean isSASTThresholdFailedTheBuild = false;
+            ThresholdConfig thresholdConfig = createThresholdConfig();
+            thresholdsError = new StringBuilder();
 
             if (scanId == 0) {
+                printSastFailedScan();
                 run.setResult(Result.UNSTABLE);
-                return;
+                if(projectId == 0) {
+                    return;
+                }
+                cxScanResult = new CxScanResult(run, serverUrlToUse, projectId , shouldRunAsynchronous);
+            }else {
+
+                reportResponse = cxWebService.generateScanReport(scanId, CxWSReportType.XML);
+                File xmlReportFile = new File(checkmarxBuildDir, "ScanReport.xml");
+                cxWebService.retrieveScanReport(reportResponse.getID(), xmlReportFile, CxWSReportType.XML);
+
+                if (generatePdfReport) {
+                    reportResponse = cxWebService.generateScanReport(scanId, CxWSReportType.PDF);
+                    File pdfReportFile = new File(checkmarxBuildDir, CxScanResult.PDF_REPORT_NAME);
+                    cxWebService.retrieveScanReport(reportResponse.getID(), pdfReportFile, CxWSReportType.PDF);
+                }
+
+
+                cxScanResult = addScanResultAction(run, serverUrlToUse, shouldRunAsynchronous, xmlReportFile);
+                cxScanResult.setScanId(scanId);
+                // Set scan results to environment
+                EnvVarAction envVarAction = new EnvVarAction();
+                envVarAction.setCxSastResults(cxScanResult);
+                run.addAction(envVarAction);
+
+                // Set scan thresholds for the summery.jelly
+                if (isSASThresholdEffectivelyEnabled()) {
+                    cxScanResult.setThresholds(thresholdConfig);
+                }
+
+
+                isSASTThresholdFailedTheBuild = ((descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || isVulnerabilityThresholdEnabled())
+                        && isThresholdCrossed(thresholdConfig, cxScanResult.getHighCount(), cxScanResult.getMediumCount(), cxScanResult.getLowCount(), "CxSAST ");
+                printScanResult(cxScanResult);
             }
-
-            reportResponse = cxWebService.generateScanReport(scanId, CxWSReportType.XML);
-            File xmlReportFile = new File(checkmarxBuildDir, "ScanReport.xml");
-            cxWebService.retrieveScanReport(reportResponse.getID(), xmlReportFile, CxWSReportType.XML);
-
-            if (generatePdfReport) {
-                reportResponse = cxWebService.generateScanReport(scanId, CxWSReportType.PDF);
-                File pdfReportFile = new File(checkmarxBuildDir, CxScanResult.PDF_REPORT_NAME);
-                cxWebService.retrieveScanReport(reportResponse.getID(), pdfReportFile, CxWSReportType.PDF);
-            }
-
-
-            CxScanResult cxScanResult = addScanResultAction(run, serverUrlToUse, shouldRunAsynchronous, xmlReportFile);
-            cxScanResult.setScanId(scanId);
-            // Set scan results to environment
-            EnvVarAction envVarAction = new EnvVarAction();
-            envVarAction.setCxSastResults(cxScanResult);
-            run.addAction(envVarAction);
-
-            //CxSAST Thresholds
-            thresholdsError = new StringBuilder();
-            ThresholdConfig thresholdConfig = createThresholdConfig();
-
-            // Set scan thresholds for the summery.jelly
-            if (isSASThresholdEffectivelyEnabled()) {
-                cxScanResult.setThresholds(thresholdConfig);
-            }
-
-
-            boolean isSASTThresholdFailedTheBuild = ((descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || isVulnerabilityThresholdEnabled())
-                    && isThresholdCrossed(thresholdConfig, cxScanResult.getHighCount(), cxScanResult.getMediumCount(), cxScanResult.getLowCount(), "CxSAST ");
-            printScanResult(cxScanResult);
-
             //OSA scan
             boolean isOSAThresholdFailedTheBuild = false;
 
             if (osaEnabled) {
-
+                jobConsoleLogger.info("\n----------------------------Executing CxOSA analysis:----------------------------\n");
                 OsaScanResult osaScanResult = null;
                 osaScanResult = analyzeOpenSources(run, workspace, serverUrlToUseNotNull, usernameToUse, passwordToUse, cxWebService, listener, shouldRunAsynchronous);
 
@@ -759,6 +770,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     //OSA Threshold
                     isOSAThresholdFailedTheBuild = cxScanResult.getOsaScanResult() != null && ((descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || isVulnerabilityThresholdEnabled())
                             && isThresholdCrossed(osaThresholdConfig, cxScanResult.getOsaScanResult().getOsaHighCount(), cxScanResult.getOsaScanResult().getOsaMediumCount(), cxScanResult.getOsaScanResult().getOsaLowCount(), "OSA ");
+                }else {
+                    printOsaFailedScan();
                 }
             }
 
@@ -948,6 +961,20 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         jobConsoleLogger.info(sb.toString());
     }
 
+    private void printSastFailedScan(){
+        printFailedScan("CxSAST scan");
+    }
+
+    private void printOsaFailedScan(){
+        printFailedScan("CxOSA analysis");
+    }
+
+    private void printFailedScan(String failedComponentName){
+        jobConsoleLogger.error("---------------------------------------------------------------------");
+        jobConsoleLogger.error("----------------------" + failedComponentName + " has failed.---------------------------");
+        jobConsoleLogger.error("---------------------------------------------------------------------\n");
+    }
+
     private void copyReportsToWorkspace(FilePath workspace, File checkmarxBuildDir) {
 
         String remoteDirPath = workspace.getRemote() + "/" + REPORTS_FOLDER;
@@ -1101,7 +1128,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             CxWSResponseRunID cxWSResponseRunId = sastScan.scan(getGroupId(), zipFile, isThisBuildIncremental);
             zipFile.delete();
             jobConsoleLogger.info("Temporary file deleted");
-            jobConsoleLogger.info("\nScan job submitted successfully\n");
+            jobConsoleLogger.info("Scan job submitted successfully\n");
             return cxWSResponseRunId;
 
         } catch (Zipper.MaxZipSizeReached e) {
@@ -1147,9 +1174,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         isThisBuildIncremental = isThisBuildIncremental(run.getNumber());
 
         if (isThisBuildIncremental) {
-            jobConsoleLogger.info("\nScan job started in incremental scan mode\n");
+            jobConsoleLogger.info("Scan job started in incremental scan mode");
         } else {
-            jobConsoleLogger.info("\nScan job started in full scan mode\n");
+            jobConsoleLogger.info("Scan job started in full scan mode");
         }
     }
 
