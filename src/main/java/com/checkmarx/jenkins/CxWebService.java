@@ -47,7 +47,7 @@ public class CxWebService {
 
     private static final String CHECKMARX_SERVER_WAS_NOT_FOUND_ON_THE_SPECIFIED_ADRESS = "Checkmarx server was not found on the specified adress";
     private static final int WEBSERVICE_API_VERSION = 1;
-    private static final String CXWSRESOLVER_PATH = "/cxwebinterface/cxwsresolver.asmx";
+    private static final String CXWSRESOLVER_PATH = "/CxWebInterface/cxwsresolver.asmx";
     private static final int LCID = 1033; // English
     private static final int MILISECONDS_IN_MINUTE = 1000 * 60;
 
