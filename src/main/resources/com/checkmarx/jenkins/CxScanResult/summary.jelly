@@ -703,7 +703,6 @@
 
 
     <j:if test="${it.showResults}">
-        <j:if test="${it.resultIsValid}">
 
             <div class="cx-report">
 
@@ -1572,11 +1571,6 @@
                 </div>
             </div>
 
-        </j:if>
-        <j:if test="${!it.resultIsValid}">
-            <p>Scan finished with the following error:</p>
-            <p>${it.errorMessage}</p>
-        </j:if>
     </j:if>
 
     <script>
@@ -1634,7 +1628,7 @@
         var osaEnabled = verifyVar([${it.osaEnabled}]);
 
         var isOsaLicense = verifyVar([${it.osaScanResult.isOsaLicense}]);
-        var isOsaSuccess = isOsaFeature;
+        var isOsaSuccess = verifyVar([${it.osaScanResult.isOsaSuccessful}]);
 
         //libraries - Legacy form
         var osaVulnerableAndOutdatedLibs = verifyVar([${it.osaVulnerableAndOutdatedLibs}]);
@@ -1810,12 +1804,12 @@
             document.getElementById("osa-summary").setAttribute("style", "display:none");
             document.getElementById("sast-summary").setAttribute("class", "sast-summary chart-large");
         }
-        else if (!isOsaLicense) {
+        else if (isOsaLicense == false) {
             //show osa no license message
             document.getElementById("no-scan-message-no-license").setAttribute("style", "display:inline-block");
         }
-        else if (!isOsaSuccess) {
-            //todo show osa failed message
+        else if (isOsaSuccess == false) {
+            //show osa failed message
             document.getElementById("no-scan-message-osa-failed").setAttribute("style", "display:inline-block");
         }
         //both are successful
