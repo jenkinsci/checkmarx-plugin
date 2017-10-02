@@ -47,7 +47,7 @@ public class CxScanResult implements Action {
 
     private File pdfReport;
     public static final String PDF_REPORT_NAME = "ScanReport.pdf";
-
+    private boolean osaSuccessful;
 
 
     public CxScanResult(Run<?, ?> owner, String serverUrl, long projectId, boolean scanRanAsynchronous) {
@@ -55,7 +55,7 @@ public class CxScanResult implements Action {
         this.scanRanAsynchronous = scanRanAsynchronous;
         this.owner = owner;
         this.serverUrl = serverUrl;
-        this.resultIsValid = true;
+        this.resultIsValid = false;
         this.errorMessage = "No Scan Results"; // error message to appear if results were not parsed
         this.highQueryResultList = new LinkedList<>();
         this.mediumQueryResultList = new LinkedList<>();
@@ -551,4 +551,11 @@ public class CxScanResult implements Action {
         this.osaLowThreshold = osaLowThreshold;
     }
 
+    public void setOsaSuccessful(boolean osaSuccessful) {
+        this.osaSuccessful = osaSuccessful;
+    }
+
+    public boolean isOsaSuccessful() {
+        return osaSuccessful;
+    }
 }

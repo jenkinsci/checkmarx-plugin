@@ -630,6 +630,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         CxWebService cxWebService = null;
         CxWSCreateReportResponse reportResponse = null;
 
+        //todo - refactor this better - take out the parameters but leave logic where it was originally
+        String serverUrlToUse = "";
+        String usernameToUse = "";
+        String passwordToUse = "";
+        boolean shouldRunAsynchronous = false;
+        File xmlReportFile = null;
+
         try {
             File checkmarxBuildDir = new File(run.getRootDir(), "checkmarx");
             checkmarxBuildDir.mkdir();
@@ -643,9 +650,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                         "Visit plugin configuration page to disable this skip.");
                 return;
             }
-            final String serverUrlToUse = isUseOwnServerCredentials() ? getServerUrl() : descriptor.getServerUrl();
-            final String usernameToUse = isUseOwnServerCredentials() ? getUsername() : descriptor.getUsername();
-            final String passwordToUse = isUseOwnServerCredentials() ? getPasswordPlainText() : descriptor.getPasswordPlainText();
+            serverUrlToUse = isUseOwnServerCredentials() ? getServerUrl() : descriptor.getServerUrl();
+            usernameToUse = isUseOwnServerCredentials() ? getUsername() : descriptor.getUsername();
+            passwordToUse = isUseOwnServerCredentials() ? getPasswordPlainText() : descriptor.getPasswordPlainText();
 
             String serverUrlToUseNotNull = serverUrlToUse != null ? serverUrlToUse : "";
 
@@ -676,7 +683,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             cxWSResponseRunID = submitScan(run, workspace, cxWebService, listener);
             projectId = cxWSResponseRunID.getProjectID();
 
-            boolean shouldRunAsynchronous = scanShouldRunAsynchronous(descriptor);
+            shouldRunAsynchronous = scanShouldRunAsynchronous(descriptor);
+
             if (shouldRunAsynchronous) {
                 logAsyncMessage(serverUrlToUse);
                 addScanResultAction(run, serverUrlToUse, shouldRunAsynchronous, null);
@@ -684,7 +692,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     try {
                         analyzeOpenSources(run, workspace, serverUrlToUseNotNull, usernameToUse, passwordToUse, cxWebService, listener, shouldRunAsynchronous);
                     } catch (Exception ignored) {
-                        //todo catch reson for failure
+                        //todo catch reason for failure
                     }
                 }
                 return;
@@ -697,8 +705,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 return;
             }
 
+            //create report file for putting in workspace to enable sending it by email through Jenkins
             reportResponse = cxWebService.generateScanReport(scanId, CxWSReportType.XML);
-            File xmlReportFile = new File(checkmarxBuildDir, "ScanReport.xml");
+            xmlReportFile = new File(checkmarxBuildDir, "ScanReport.xml");
             cxWebService.retrieveScanReport(reportResponse.getID(), xmlReportFile, CxWSReportType.XML);
 
             if (generatePdfReport) {
@@ -710,10 +719,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             CxScanResult cxScanResult = addScanResultAction(run, serverUrlToUse, shouldRunAsynchronous, xmlReportFile);
             cxScanResult.setScanId(scanId);
-            // Set scan results to environment
-            EnvVarAction envVarAction = new EnvVarAction();
-            envVarAction.setCxSastResults(cxScanResult);
-            run.addAction(envVarAction);
+
 
             //CxSAST Thresholds
             thresholdsError = new StringBuilder();
@@ -733,17 +739,19 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             boolean isOSAThresholdFailedTheBuild = false;
 
             if (osaEnabled) {
+                cxScanResult.setOsaEnabled(true);
 
-                OsaScanResult osaScanResult = null;
-                osaScanResult = analyzeOpenSources(run, workspace, serverUrlToUseNotNull, usernameToUse, passwordToUse, cxWebService, listener, shouldRunAsynchronous);
+                OsaScanResult osaScanResult = analyzeOpenSources(run, workspace, serverUrlToUseNotNull, usernameToUse, passwordToUse, cxWebService, listener, shouldRunAsynchronous);
 
                 if (osaScanResult != null) {
-                    //todo: when CxResult + ui report legacy code will be removed, stop using this as a flag for osa scan execution success
+                    //todo: when CxResult + ui report legacy code will be removed, stop using this eas a flag for osa scan execution success
                     //(meaning - move the line below up [under the line "if (osaEnabled)"] and start using the existence of osaScanResult object to decide weather to present osa results)
-                    cxScanResult.setOsaEnabled(true);
-
                     cxScanResult.setOsaScanResult(osaScanResult);
+
+
                     if (osaScanResult.isOsaLicense()) {
+
+                        cxScanResult.setOsaSuccessful(true);
 
                         ThresholdConfig osaThresholdConfig = createOsaThresholdConfig();
                         // Set scan thresholds for the summery.jelly
@@ -760,8 +768,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                         isOSAThresholdFailedTheBuild = cxScanResult.getOsaScanResult() != null && ((descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || isVulnerabilityThresholdEnabled())
                                 && isThresholdCrossed(osaThresholdConfig, cxScanResult.getOsaScanResult().getOsaHighCount(), cxScanResult.getOsaScanResult().getOsaMediumCount(), cxScanResult.getOsaScanResult().getOsaLowCount(), "OSA ");
                     }
+                } else {
+                    cxScanResult.setOsaSuccessful(false);
                 }
             }
+
+            // Set scan results to environment
+            EnvVarAction envVarAction = new EnvVarAction();
+            envVarAction.setCxSastResults(cxScanResult);
+            run.addAction(envVarAction);
 
             generateHtmlReport(checkmarxBuildDir, cxScanResult);
             jobConsoleLogger.info("Copying reports to workspace");
@@ -782,6 +797,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             return;
         } catch (IOException | WebServiceException e) {
+
+            addScanResultAction(run, serverUrlToUse, shouldRunAsynchronous, xmlReportFile);
+
             if (useUnstableOnError(descriptor)) {
                 run.setResult(Result.UNSTABLE);
                 jobConsoleLogger.error(e.getMessage(), e);
@@ -824,10 +842,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             //run script
             context.runScript(jellyTemplate, xmlOutput);
             xmlOutput.flush();
+            jobConsoleLogger.info("HTML report created successfully");
         } catch (Exception e) {
             jobConsoleLogger.error("Failed to generate HTML report", e);
         }
-        jobConsoleLogger.info("HTML report created successfully");
     }
 
     private void createOsaJsonReports(OsaScanResult osaScanResult, File checkmarxBuildDir) {
@@ -978,6 +996,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         if (xmlReportFile != null) {
             SastResultParser sastResultParser = new SastResultParser(jobConsoleLogger, serverUrlToUse);
             SastScanResult sastScanResult = sastResultParser.readScanXMLReport(xmlReportFile);
+            sastScanResult.setResultIsValid(true);
             cxScanResult.setSastScanResult(sastScanResult);
         }
         run.addAction(cxScanResult);
