@@ -16,7 +16,6 @@
             position: relative;
             width: 50%;
             margin-left: 3%;
-            overflow: hidden;
         }
         .aui-item.details {
             width: 530px;
@@ -92,7 +91,6 @@
             position: relative;
             margin-right: 3%;
             width: 50%;
-            overflow: hidden;
         }
 
         .results-report .detailed-report .report-link {
@@ -111,6 +109,9 @@
 
         .results-report .summary-section .title-links {
             border-bottom: solid 1px #d5d5d5;
+        }
+
+        .results-report .summary-section .sast .title-links {
             max-width: 475px;
         }
 
@@ -681,6 +682,9 @@
             display: block;
         }
 
+        .chart-large .no-scan-message-container {
+            height: 100%;
+        }
         .no-scan-message-container {
             display: none;
             position: absolute;
@@ -1644,7 +1648,7 @@
         var osaEnabled = verifyVar([${it.osaEnabled}]);
 
         var isOsaLicense = verifyVar([${it.osaScanResult.isOsaLicense}]);
-        var isOsaSuccess = verifyVar([${it.isOsaSuccessful}]);
+        var isOsaSuccess = verifyVar([${it.osaSuccessful}]);
 
         //libraries - Legacy form
         var osaVulnerableAndOutdatedLibs = verifyVar([${it.osaVulnerableAndOutdatedLibs}]);
