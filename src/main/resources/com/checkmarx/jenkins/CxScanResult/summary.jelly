@@ -137,6 +137,10 @@
             padding: 0 8px;
         }
 
+        .results-report .sast-summary.chart-large .title-links {
+            max-width: 100%;
+        }
+
         .results-report .sast-summary.chart-large {
             width: 100%;
             margin-bottom: 50px;
@@ -148,7 +152,6 @@
             max-width: 709px;
             margin-right: auto;
             margin-left: auto;
-            /*margin-left: calc(250px + 8%);*/
         }
 
         .results-report .sast-summary.chart-large .chart li span {
