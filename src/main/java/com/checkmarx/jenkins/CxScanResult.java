@@ -47,7 +47,7 @@ public class CxScanResult implements Action {
 
     private File pdfReport;
     public static final String PDF_REPORT_NAME = "ScanReport.pdf";
-    private boolean osaSuccessful;
+    private boolean osaSuccessful; //osa fails flag for jelly
 
 
     public CxScanResult(Run<?, ?> owner, String serverUrl, long projectId, boolean scanRanAsynchronous) {
@@ -55,7 +55,7 @@ public class CxScanResult implements Action {
         this.scanRanAsynchronous = scanRanAsynchronous;
         this.owner = owner;
         this.serverUrl = serverUrl;
-        this.resultIsValid = false;
+        this.resultIsValid = false; //sast fails flag for jelly
         this.errorMessage = "No Scan Results"; // error message to appear if results were not parsed
         this.highQueryResultList = new LinkedList<>();
         this.mediumQueryResultList = new LinkedList<>();
