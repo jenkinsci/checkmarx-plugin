@@ -4,6 +4,20 @@
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
     <style>
+        .high-new-scans {
+            height: 50%;
+            background: linear-gradient(45deg, white 25%,
+            #373050 25%, #373050 50%,
+            white 50%, white 75%,
+            #373050 75%);
+            background-size: 4px 4px;
+        }
+
+        .high-recurrent-scans {
+            height: 50%;
+            background-color: #373050;
+        }
+
         .summary-results {
             display: flex;
             /*padding-top: 34px;*/
@@ -208,7 +222,6 @@
         .results-report .chart span {
             margin-left: 25%;
             display: block;
-            background: #d1ecfa;
             animation: draw 1s ease-in-out;
         }
 
@@ -251,7 +264,6 @@
 
         .results-report .chart .bar-1 {
             position: relative;
-            background-color: #373050;
         }
 
         .results-report .chart .bar-2 {
@@ -800,9 +812,9 @@
 
                                         <span class="bar-1" id="bar-high">
                                             <div id="tooltip-high"></div>
+                                            <div id="high-new-scans" class="high-new-scans"></div>
+                                            <div id="high-recurrent-scans" class="high-recurrent-scans"></div>
                                         </span>
-
-
 
 
                                         <div class="bar-title-container">
