@@ -10,13 +10,16 @@
             /*padding-bottom: 25px;*/
             position: relative;
             width: 100%;
+            min-width: 635px;
         }
+
         .results-report .osa-summary {
             margin: 0;
             position: relative;
             width: 50%;
             margin-left: 3%;
         }
+
         .aui-item.details {
             width: 530px;
         }
@@ -65,6 +68,7 @@
             z-index: 3;
             position: relative;
         }
+
         .sast-error-container {
             position: absolute;
             right: 50%;
@@ -80,6 +84,7 @@
             line-height: 22px;
             margin-top: 17px;
         }
+
         .results-report .summary-report-title {
             font-size: 24px;
             font-weight: 400;
@@ -685,6 +690,7 @@
         .chart-large .no-scan-message-container {
             height: 100%;
         }
+
         .no-scan-message-container {
             display: none;
             position: absolute;
@@ -736,7 +742,28 @@
                                 <div id="no-scan-message-sast-failed" class="no-scan-message-container sast-scan-failed">
                                     <div class="no-scan-message">
                                         <div class="no-scan-message-icon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="48px" height="37px" viewBox="0 0 48 37" version="1.1"> <!-- Generator: Sketch 45.2 (43514) - http:/*www.bohemiancoding.com/sketch -->*/ <title>scan_failed</title> <desc>Created with Sketch.</desc> <defs/> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Jenkins-OSA-empty" transform="translate(-936.000000, -335.000000)"> <g id="Group-2" transform="translate(683.000000, 179.000000)"> <g id="Group" transform="translate(81.000000, 155.202941)"> <g id="Group-3" transform="translate(171.000000, 0.000000)"> <g transform="translate(2.000606, 1.714748)"> <path d="M24.3114123,0.619831205 L44.98533,32.7440758 L44.98533,32.7440758 C45.2842135,33.208497 45.1500186,33.8272778 44.6855974,34.1261613 C44.5242092,34.2300245 44.336342,34.2852522 44.1444209,34.2852522 L1.8977196,34.2852522 L1.8977196,34.2852522 C1.34543485,34.2852522 0.897719599,33.837537 0.897719599,33.2852522 C0.897719599,33.0866799 0.956838199,32.8926033 1.0675421,32.7277531 L22.6403257,0.60350849 L22.6403257,0.60350849 C22.948224,0.145014117 23.569508,0.0229318695 24.0280024,0.330830157 C24.1411852,0.406837189 24.2376306,0.50518529 24.3114123,0.619831205 Z" id="Triangle" stroke="#373050" stroke-width="2"/> <rect id="Rectangle-6" fill="#373050" x="21.9993936" y="11.2852522" width="3" height="13" rx="1.5"/> <path d="M23.4993936,26.2852522 L23.4993936,26.2852522 L23.4993936,26.2852522 C24.3278207,26.2852522 24.9993936,26.9568251 24.9993936,27.7852522 L24.9993936,27.7852522 L24.9993936,27.7852522 C24.9993936,28.6136794 24.3278207,29.2852522 23.4993936,29.2852522 L23.4993936,29.2852522 L23.4993936,29.2852522 C22.6709664,29.2852522 21.9993936,28.6136794 21.9993936,27.7852522 L21.9993936,27.7852522 L21.9993936,27.7852522 C21.9993936,26.9568251 22.6709664,26.2852522 23.4993936,26.2852522 Z" id="Rectangle-6-Copy" fill="#373050"/> </g> </g> </g> </g> </g> </g> </svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="48px" height="37px" viewBox="0 0 48 37"
+                                                 version="1.1"> <!-- Generator: Sketch 45.2 (43514) - http:/*www.bohemiancoding.com/sketch -->*/ <title>scan_failed</title>
+                                                <desc>Created with Sketch.</desc>
+                                                <defs/>
+                                                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                    <g id="Jenkins-OSA-empty" transform="translate(-936.000000, -335.000000)">
+                                                        <g id="Group-2" transform="translate(683.000000, 179.000000)">
+                                                            <g id="Group" transform="translate(81.000000, 155.202941)">
+                                                                <g id="Group-3" transform="translate(171.000000, 0.000000)">
+                                                                    <g transform="translate(2.000606, 1.714748)">
+                                                                        <path d="M24.3114123,0.619831205 L44.98533,32.7440758 L44.98533,32.7440758 C45.2842135,33.208497 45.1500186,33.8272778 44.6855974,34.1261613 C44.5242092,34.2300245 44.336342,34.2852522 44.1444209,34.2852522 L1.8977196,34.2852522 L1.8977196,34.2852522 C1.34543485,34.2852522 0.897719599,33.837537 0.897719599,33.2852522 C0.897719599,33.0866799 0.956838199,32.8926033 1.0675421,32.7277531 L22.6403257,0.60350849 L22.6403257,0.60350849 C22.948224,0.145014117 23.569508,0.0229318695 24.0280024,0.330830157 C24.1411852,0.406837189 24.2376306,0.50518529 24.3114123,0.619831205 Z"
+                                                                              id="Triangle" stroke="#373050" stroke-width="2"/>
+                                                                        <rect id="Rectangle-6" fill="#373050" x="21.9993936" y="11.2852522" width="3" height="13" rx="1.5"/>
+                                                                        <path d="M23.4993936,26.2852522 L23.4993936,26.2852522 L23.4993936,26.2852522 C24.3278207,26.2852522 24.9993936,26.9568251 24.9993936,27.7852522 L24.9993936,27.7852522 L24.9993936,27.7852522 C24.9993936,28.6136794 24.3278207,29.2852522 23.4993936,29.2852522 L23.4993936,29.2852522 L23.4993936,29.2852522 C22.6709664,29.2852522 21.9993936,28.6136794 21.9993936,27.7852522 L21.9993936,27.7852522 L21.9993936,27.7852522 C21.9993936,26.9568251 22.6709664,26.2852522 23.4993936,26.2852522 Z"
+                                                                              id="Rectangle-6-Copy" fill="#373050"/>
+                                                                    </g>
+                                                                </g>
+                                                            </g>
+                                                        </g>
+                                                    </g>
+                                                </g>
+                                            </svg>
                                         </div>
                                         <div class="no-scan-message-text">SAST Scan Failed</div>
                                     </div>
@@ -764,11 +791,20 @@
                                 <div class="threshold-exceeded-compliance" id="threshold-exceeded-compliance"></div>
                                 <ul class="chart">
 
+
                                     <!--high-->
                                     <li>
-                                <span class="bar-1" id="bar-high">
-                                    <div id="tooltip-high"></div>
-                                </span>
+
+
+
+
+                                        <span class="bar-1" id="bar-high">
+                                            <div id="tooltip-high"></div>
+                                        </span>
+
+
+
+
                                         <div class="bar-title-container">
                                             <div class="bar-title-icon">
                                                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -893,6 +929,8 @@
                                     </li>
                                 </ul>
                             </div>
+
+
                         </div>
 
                         <div class="osa-summary" id="osa-summary">
@@ -903,7 +941,28 @@
                                 <div id="no-scan-message-osa-failed" class="no-scan-message-container osa-scan-failed">
                                     <div class="no-scan-message">
                                         <div class="no-scan-message-icon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="48px" height="37px" viewBox="0 0 48 37" version="1.1"> <!-- Generator: Sketch 45.2 (43514) - http:/*www.bohemiancoding.com/sketch -->*/ <title>scan_failed</title> <desc>Created with Sketch.</desc> <defs/> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Jenkins-OSA-empty" transform="translate(-936.000000, -335.000000)"> <g id="Group-2" transform="translate(683.000000, 179.000000)"> <g id="Group" transform="translate(81.000000, 155.202941)"> <g id="Group-3" transform="translate(171.000000, 0.000000)"> <g transform="translate(2.000606, 1.714748)"> <path d="M24.3114123,0.619831205 L44.98533,32.7440758 L44.98533,32.7440758 C45.2842135,33.208497 45.1500186,33.8272778 44.6855974,34.1261613 C44.5242092,34.2300245 44.336342,34.2852522 44.1444209,34.2852522 L1.8977196,34.2852522 L1.8977196,34.2852522 C1.34543485,34.2852522 0.897719599,33.837537 0.897719599,33.2852522 C0.897719599,33.0866799 0.956838199,32.8926033 1.0675421,32.7277531 L22.6403257,0.60350849 L22.6403257,0.60350849 C22.948224,0.145014117 23.569508,0.0229318695 24.0280024,0.330830157 C24.1411852,0.406837189 24.2376306,0.50518529 24.3114123,0.619831205 Z" id="Triangle" stroke="#373050" stroke-width="2"/> <rect id="Rectangle-6" fill="#373050" x="21.9993936" y="11.2852522" width="3" height="13" rx="1.5"/> <path d="M23.4993936,26.2852522 L23.4993936,26.2852522 L23.4993936,26.2852522 C24.3278207,26.2852522 24.9993936,26.9568251 24.9993936,27.7852522 L24.9993936,27.7852522 L24.9993936,27.7852522 C24.9993936,28.6136794 24.3278207,29.2852522 23.4993936,29.2852522 L23.4993936,29.2852522 L23.4993936,29.2852522 C22.6709664,29.2852522 21.9993936,28.6136794 21.9993936,27.7852522 L21.9993936,27.7852522 L21.9993936,27.7852522 C21.9993936,26.9568251 22.6709664,26.2852522 23.4993936,26.2852522 Z" id="Rectangle-6-Copy" fill="#373050"/> </g> </g> </g> </g> </g> </g> </svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="48px" height="37px" viewBox="0 0 48 37"
+                                                 version="1.1"> <!-- Generator: Sketch 45.2 (43514) - http:/*www.bohemiancoding.com/sketch -->*/ <title>scan_failed</title>
+                                                <desc>Created with Sketch.</desc>
+                                                <defs/>
+                                                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                    <g id="Jenkins-OSA-empty" transform="translate(-936.000000, -335.000000)">
+                                                        <g id="Group-2" transform="translate(683.000000, 179.000000)">
+                                                            <g id="Group" transform="translate(81.000000, 155.202941)">
+                                                                <g id="Group-3" transform="translate(171.000000, 0.000000)">
+                                                                    <g transform="translate(2.000606, 1.714748)">
+                                                                        <path d="M24.3114123,0.619831205 L44.98533,32.7440758 L44.98533,32.7440758 C45.2842135,33.208497 45.1500186,33.8272778 44.6855974,34.1261613 C44.5242092,34.2300245 44.336342,34.2852522 44.1444209,34.2852522 L1.8977196,34.2852522 L1.8977196,34.2852522 C1.34543485,34.2852522 0.897719599,33.837537 0.897719599,33.2852522 C0.897719599,33.0866799 0.956838199,32.8926033 1.0675421,32.7277531 L22.6403257,0.60350849 L22.6403257,0.60350849 C22.948224,0.145014117 23.569508,0.0229318695 24.0280024,0.330830157 C24.1411852,0.406837189 24.2376306,0.50518529 24.3114123,0.619831205 Z"
+                                                                              id="Triangle" stroke="#373050" stroke-width="2"/>
+                                                                        <rect id="Rectangle-6" fill="#373050" x="21.9993936" y="11.2852522" width="3" height="13" rx="1.5"/>
+                                                                        <path d="M23.4993936,26.2852522 L23.4993936,26.2852522 L23.4993936,26.2852522 C24.3278207,26.2852522 24.9993936,26.9568251 24.9993936,27.7852522 L24.9993936,27.7852522 L24.9993936,27.7852522 C24.9993936,28.6136794 24.3278207,29.2852522 23.4993936,29.2852522 L23.4993936,29.2852522 L23.4993936,29.2852522 C22.6709664,29.2852522 21.9993936,28.6136794 21.9993936,27.7852522 L21.9993936,27.7852522 L21.9993936,27.7852522 C21.9993936,26.9568251 22.6709664,26.2852522 23.4993936,26.2852522 Z"
+                                                                              id="Rectangle-6-Copy" fill="#373050"/>
+                                                                    </g>
+                                                                </g>
+                                                            </g>
+                                                        </g>
+                                                    </g>
+                                                </g>
+                                            </svg>
                                         </div>
                                         <div class="no-scan-message-text">OSA Scan Failed</div>
                                     </div>
@@ -958,7 +1017,7 @@
                                     <div id="osa-summary-pdf-link" class="link-to-result"></div>
                                 </div>
                             </div>
-                            <div class="osa-results">
+                            <div class="osa-results" id="osa-results">
                                 <div class="osa-libraries">
                                     <div class="osa-libraries-title">Libraries:</div>
                                     <div class="libraries-vulnerable">
@@ -1051,6 +1110,8 @@
                                         </div>
                                     </div>
                                 </div>
+
+
                                 <div class="osa-chart">
                                     <div class="threshold-exceeded-compliance" id="osa-threshold-exceeded-compliance"></div>
                                     <ul class="osa-chart chart">
@@ -1189,6 +1250,8 @@
                                         </li>
                                     </ul>
                                 </div>
+
+
                             </div>
                         </div>
                     </div>
@@ -1824,6 +1887,7 @@
         else if (isOsaLicense == false) {
             //show osa no license message
             document.getElementById("no-scan-message-no-license").setAttribute("style", "display:inline-block");
+            document.getElementById("osa-results").setAttribute("style", "visibility:hidden");
         }
         else if (isOsaSuccess != true) {
             //show osa failed message
