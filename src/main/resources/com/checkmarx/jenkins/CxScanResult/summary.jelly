@@ -1736,8 +1736,11 @@
 
         //cve lists - New (8.4.2 and up)
         var highCveList = verifyVar([${it.sastScanResult.highQueryResultsJson}]);
+        var highNewCount = 2; //todo - get real number from java
         var medCveList = verifyVar([${it.sastScanResult.mediumQueryResultsJson}]);
+        var medNewCount = 4; //todo - get real number from java
         var lowCveList = verifyVar([${it.sastScanResult.lowQueryResultsJson}]);
+        var lowNewCount = 6; //todo - get real number from java
 
 
         //-------------------------- osa vars --------------------------------------
@@ -1844,8 +1847,6 @@
         //---------------------------------------------------------- summary ---------------------------------------------------------------
         if (!sastResultsReady) {
             document.getElementById("no-scan-message-sast-failed").setAttribute("style", "display:inline-block");
-
-
         }
         else {
             try {
@@ -1866,16 +1867,27 @@
                             '</a>';
                 }
 
-                //set bars height and count
+                //-------------- bars ------------
+                //set bars count
                 document.getElementById("bar-count-high").innerHTML = highCount;
                 document.getElementById("bar-count-med").innerHTML = medCount;
                 document.getElementById("bar-count-low").innerHTML = lowCount;
 
+                //set bars height
                 var maxCount = Math.max(highCount, medCount, lowCount);
                 var maxHeight = maxCount * 100 / 90;
                 document.getElementById("bar-high").setAttribute("style", "height:" + highCount * 100 / maxHeight + "%");
                 document.getElementById("bar-med").setAttribute("style", "height:" + medCount * 100 / maxHeight + "%");
                 document.getElementById("bar-low").setAttribute("style", "height:" + lowCount * 100 / maxHeight + "%");
+
+
+                //-------------- NEW bars ------------
+                //set NEW bars count
+                document.getElementById("new-bar-count-high").innerHTML = highNewCount + " NEW";
+                document.getElementById("new-bar-count-medium").innerHTML = medNewCount + " NEW";
+                document.getElementById("new-bar-count-low").innerHTML = lowNewCount + " NEW";
+
+
             } catch (e) {
                 console.error("Element missing in SAST summary section " + e.message);
             }
