@@ -6,8 +6,6 @@
     <style>
         .summary-results {
             display: flex;
-            /*padding-top: 34px;*/
-            /*padding-bottom: 25px;*/
             position: relative;
             width: 100%;
             min-width: 635px;
@@ -208,7 +206,6 @@
         .results-report .chart span {
             margin-left: 25%;
             display: block;
-            background: #d1ecfa;
             animation: draw 1s ease-in-out;
         }
 
@@ -1892,6 +1889,7 @@
         else if (isOsaSuccess != true) {
             //show osa failed message
             document.getElementById("no-scan-message-osa-failed").setAttribute("style", "display:inline-block");
+            document.getElementById("osa-results").setAttribute("style", "visibility:hidden");
         }
         //both are successful
         else {
@@ -1908,12 +1906,13 @@
                         'PDF Report' +
                         '</div>' +
                         '</a>';
-                //set bars height and count
+
+                //set bars count
                 document.getElementById("osa-bar-count-high").innerHTML = osaHighCount;
                 document.getElementById("osa-bar-count-med").innerHTML = osaMedCount;
                 document.getElementById("osa-bar-count-low").innerHTML = osaLowCount;
 
-
+                //set bars height
                 var osaMaxCount = Math.max(osaHighCount, osaMedCount, osaLowCount);
                 var osaMaxHeight = osaMaxCount * 100 / 90;
 
