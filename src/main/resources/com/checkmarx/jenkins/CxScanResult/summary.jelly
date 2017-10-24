@@ -784,7 +784,8 @@
 
 
                             </div>
-                            <div class="summary-chart">
+
+                            <div class="summary-chart" id="sast-results">
                                 <div class="threshold-exceeded-compliance" id="threshold-exceeded-compliance"></div>
                                 <ul class="chart">
 
@@ -1107,7 +1108,6 @@
                                         </div>
                                     </div>
                                 </div>
-
 
                                 <div class="osa-chart">
                                     <div class="threshold-exceeded-compliance" id="osa-threshold-exceeded-compliance"></div>
@@ -1803,6 +1803,7 @@
         //---------------------------------------------------------- summary ---------------------------------------------------------------
         if (!sastResultsReady) {
             document.getElementById("no-scan-message-sast-failed").setAttribute("style", "display:inline-block");
+            document.getElementById("sast-results").setAttribute("style", "visibility:hidden");
 
 
         }
