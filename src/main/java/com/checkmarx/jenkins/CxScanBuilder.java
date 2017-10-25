@@ -956,7 +956,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         DescriptorImpl descriptor = getDescriptor();
         if (shouldUseGlobalThreshold() && (descriptor.getHighThresholdEnforcement() != null || descriptor.getMediumThresholdEnforcement() != null || descriptor.getLowThresholdEnforcement() != null)) {
             return true;
-        } else if (this.isVulnerabilityThresholdEnabled() && (this.getHighThreshold() != null && this.getMediumThreshold() != null && this.getLowThreshold() != null)) {
+        } else if (this.isVulnerabilityThresholdEnabled() && (this.getHighThreshold() != null || this.getMediumThreshold() != null || this.getLowThreshold() != null)) {
             return true;
         }
         return false;
