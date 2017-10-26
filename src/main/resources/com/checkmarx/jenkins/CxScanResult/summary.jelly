@@ -4,7 +4,53 @@
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
     <style>
+        .recurrent-legend {
+            margin-right: 15px;
+        }
+        .legend-color-box.recurrent-legend-color {
+            background-color: #372F51;
+        }
 
+        .legend-color-box.new-legend-color {
+            background: linear-gradient(45deg, white 25%, #373050 25%, #373050 50%, white 50%, white 75%, #373050 75%);
+            background-size: 4px 4px;
+        }
+        .legend-color-box {
+            width: 16px;
+            height: 16px;
+            margin-right: 10px;
+        }
+        .legend-text {
+            color: #9B9B9B;
+            font-family: Roboto, sans-serif;
+            font-size: 14px;
+            line-height: 16px;
+        }
+        .legend-item {
+            display: flex;
+            margin-top: auto;
+            margin-bottom: auto;
+            margin-left: auto;
+        }
+        .chart-legend {
+            display: inline-flex;
+            height: 100%;
+            margin:auto;
+        }
+        .chart-legend-container {
+            align-items: center;
+            width: 50%;
+            text-align: right;
+        }
+        .results-report .threshold-exceeded-compliance {
+            width: 50%;
+        }
+        .top-of-chart {
+            display: flex;
+            max-width: 475px;
+            min-width: 330px;
+            width: 100%;
+        }
         .new-bar-title-container {
             font-weight: bold;
             background-color: #f2f2f2;
@@ -21,8 +67,7 @@
             position: absolute;
         }
 
-
-        .high-new-scans {
+        .new-scans {
             background: linear-gradient(45deg, white 25%,
             #373050 25%, #373050 50%,
             white 50%, white 75%,
@@ -814,7 +859,27 @@
                             </div>
 
                             <div class="summary-chart" id="sast-results">
-                                <div class="threshold-exceeded-compliance" id="threshold-exceeded-compliance"></div>
+                                <div class="top-of-chart">
+                                    <div class="threshold-exceeded-compliance" id="threshold-exceeded-compliance"></div>
+
+                                    <div class="chart-legend-container">
+                                    <div class="chart-legend">
+
+                                        <div class="legend-item recurrent-legend">
+                                            <div class="legend-color-box recurrent-legend-color"></div>
+                                            <div class="legend-text recurrent-legend-text">Recurrent</div>
+                                        </div>
+                                        <div class="legend-item new-legend">
+                                            <div class="legend-color-box new-legend-color"></div>
+                                            <div class="legend-text new-legend-text">New</div>
+                                        </div>
+
+                                    </div>
+                                    </div>
+                                </div>
+
+
+
                                 <ul class="chart">
 
 
@@ -822,7 +887,7 @@
                                     <li>
                                         <span class="bar-1" id="bar-high">
                                             <div id="tooltip-high"></div>
-                                            <div id="high-new-scans" class="high-new-scans"></div>
+                                            <div id="new-scans" class="new-scans"></div>
                                             <div id="high-recurrent-scans" class="high-recurrent-scans"></div>
                                         </span>
 
@@ -880,6 +945,8 @@
                                     <li>
                                         <span class="bar-2" id="bar-med">
                                             <div id="tooltip-med"></div>
+                                            <div id="med-new-scans" class="new-scans"></div>
+                                            <div id="med-recurrent-scans" class="high-recurrent-scans"></div>
                                         </span>
 
 
@@ -923,41 +990,43 @@
                                     <li>
                                         <span class="bar-3" id="bar-low">
                                             <div id="tooltip-low"></div>
+                                            <div id="low-new-scans" class="new-scans"></div>
+                                            <div id="low-recurrent-scans" class="high-recurrent-scans"></div>
                                         </span>
                                         <div class="bar-title-wrapper">
                                             <div class="bar-title-container">
-                                            <div class="bar-title-icon">
-                                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                                                     width="16" height="19" viewBox="0 0 16 19">
-                                                    <title>Low</title>
-                                                    <defs>
-                                                        <path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z"
-                                                              id="sast-low-path-1"/>
-                                                        <path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z"
-                                                              id="sast-low-path-2"/>
-                                                    </defs>
-                                                    <g fill="none" fill-rule="evenodd">
-                                                        <path d="M7.96 17.32L8 .015l-6.5 1s-.96 4.5-.96 8.75c1.272 4.602 5.968 9.25 5.968 9.25h.163l1.29-1.695z"
-                                                              fill="#EDEFF5"/>
-                                                        <mask id="sast-low-mask-1" fill="#fff">
-                                                            <use xlink:href="#sast-low-path-1"/>
-                                                        </mask>
-                                                        <use fill="#FFEB3B" xlink:href="#sast-low-path-1"/>
-                                                        <path stroke="#E4D200"
-                                                              d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.342.48 2.682.488 3.924V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38C.634 5.6.786 4.51.992 3.4c.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/>
-                                                        <path fill="#DDCE00" mask="url(#sast-low-mask-1)" d="M8-8h10v32H8z"/>
-                                                        <mask id="sast-low-mask-2" fill="#fff">
-                                                            <use xlink:href="#sast-low-path-2"/>
-                                                        </mask>
-                                                        <path stroke="#E4D200"
-                                                              d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.342.48 2.682.488 3.924V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38C.634 5.6.786 4.51.992 3.4c.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/>
-                                                        <path fill="#605900" mask="url(#sast-low-mask-2)" d="M5.54 12h5.33v-1.7H7.48V5H5.54"/>
-                                                    </g>
-                                                </svg>
+                                                <div class="bar-title-icon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                                         width="16" height="19" viewBox="0 0 16 19">
+                                                        <title>Low</title>
+                                                        <defs>
+                                                            <path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z"
+                                                                  id="sast-low-path-1"/>
+                                                            <path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z"
+                                                                  id="sast-low-path-2"/>
+                                                        </defs>
+                                                        <g fill="none" fill-rule="evenodd">
+                                                            <path d="M7.96 17.32L8 .015l-6.5 1s-.96 4.5-.96 8.75c1.272 4.602 5.968 9.25 5.968 9.25h.163l1.29-1.695z"
+                                                                  fill="#EDEFF5"/>
+                                                            <mask id="sast-low-mask-1" fill="#fff">
+                                                                <use xlink:href="#sast-low-path-1"/>
+                                                            </mask>
+                                                            <use fill="#FFEB3B" xlink:href="#sast-low-path-1"/>
+                                                            <path stroke="#E4D200"
+                                                                  d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.342.48 2.682.488 3.924V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38C.634 5.6.786 4.51.992 3.4c.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/>
+                                                            <path fill="#DDCE00" mask="url(#sast-low-mask-1)" d="M8-8h10v32H8z"/>
+                                                            <mask id="sast-low-mask-2" fill="#fff">
+                                                                <use xlink:href="#sast-low-path-2"/>
+                                                            </mask>
+                                                            <path stroke="#E4D200"
+                                                                  d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.342.48 2.682.488 3.924V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38C.634 5.6.786 4.51.992 3.4c.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/>
+                                                            <path fill="#605900" mask="url(#sast-low-mask-2)" d="M5.54 12h5.33v-1.7H7.48V5H5.54"/>
+                                                        </g>
+                                                    </svg>
+                                                </div>
+                                                <div class="bar-title">Low -</div>
+                                                <div class="bar-count" id="bar-count-low"></div>
                                             </div>
-                                            <div class="bar-title">Low -</div>
-                                            <div class="bar-count" id="bar-count-low"></div>
-                                        </div>
                                             <div id="new-bar-count-low" class="new-bar-title-container"></div>
                                         </div>
                                     </li>
@@ -1021,7 +1090,8 @@
                                                             <path d="M15.7377037,46.5 L43.9431037,46.5" id="osa-failed-Line-5" stroke="#979797" stroke-linecap="square"/>
                                                             <path d="M0.5,1.5 L55.4181209,56.4181209" id="osa-failed-Line-6" stroke="#F6F7FA" stroke-width="3"
                                                                   stroke-linecap="square"/>
-                                                            <path d="M2.5,0.5 L57.4181209,55.4181209" id="osa-failed-Line-7" stroke="#382F50" stroke-width="2" stroke-linecap="square"/>
+                                                            <path d="M2.5,0.5 L57.4181209,55.4181209" id="osa-failed-Line-7" stroke="#382F50" stroke-width="2"
+                                                                  stroke-linecap="square"/>
                                                         </g>
                                                     </g>
                                                 </g>
@@ -1735,11 +1805,11 @@
 
         //counts - Legacy form
         var highCount = verifyVar([${it.highCount}]);
-        var highNewCount = 40; //todo - get real number from server
+        var highNewCount = 1; //todo - get real number from server
         var medCount = verifyVar([${it.mediumCount}]);
-        var medNewCount = 4; //todo - get real number from server
+        var medNewCount = 0; //todo - get real number from server
         var lowCount = verifyVar([${it.lowCount}]);
-        var lowNewCount = 6; //todo - get real number from server
+        var lowNewCount = 190; //todo - get real number from server
 
         //cve lists - New (8.4.2 and up)
         var highCveList = verifyVar([${it.sastScanResult.highQueryResultsJson}]);
@@ -1899,20 +1969,29 @@
                 var medRecurrentCount = medCount - medNewCount;
                 var lowRecurrentCount = lowCount - lowNewCount;
                 document.getElementById("high-recurrent-scans").setAttribute("style", "height:" + highRecurrentCount * 100 / highCount + "%");
-//                document.getElementById("med-recurrent-scans").setAttribute("style", "height:" + medRecurrent * 100 / medTotal + "%");
-//                document.getElementById("low-recurrent-scans").setAttribute("style", "height:" + lowRecurrent * 100 / lowTotal + "%");
+                document.getElementById("med-recurrent-scans").setAttribute("style", "height:" + medRecurrentCount * 100 / medCount + "%");
+                document.getElementById("low-recurrent-scans").setAttribute("style", "height:" + lowRecurrentCount * 100 / lowCount + "%");
 
-                //set NEW bars height
+                //------------set NEW bars height-------------
+                //high
                 var highNewHeightPercentage = highNewCount * 100 / highCount;
                 var highNewMinHeight = highNewCount === 0 ? 0 : 10;
-                document.getElementById("high-new-scans").setAttribute("style", "height:" + highNewHeightPercentage + "%; min-height:" + highNewMinHeight + "px");
+                document.getElementById("new-scans").setAttribute("style", "height:" + highNewHeightPercentage + "%; min-height:" + highNewMinHeight + "px");
+
+                //med
+                var medNewHeightPercentage = medNewCount * 100 / medCount;
+                var medNewMinHeight = medNewCount === 0 ? 0 : 10;
+                document.getElementById("med-new-scans").setAttribute("style", "height:" + medNewHeightPercentage + "%; min-height:" + medNewMinHeight + "px");
+
+                //low
+                var lowNewHeightPercentage = lowNewCount * 100 / lowCount;
+                var lowNewMinHeight = lowNewCount === 0 ? 0 : 10;
+                document.getElementById("low-new-scans").setAttribute("style", "height:" + lowNewHeightPercentage + "%; min-height:" + lowNewMinHeight + "px");
 
                 //set NEW bars count
                 document.getElementById("new-bar-count-high").innerHTML = highNewCount + " NEW";
                 document.getElementById("new-bar-count-medium").innerHTML = medNewCount + " NEW";
                 document.getElementById("new-bar-count-low").innerHTML = lowNewCount + " NEW";
-
-
 
 
             } catch (e) {
@@ -2142,9 +2221,6 @@
         else {
             document.getElementById("osa-full").setAttribute("style", "display: none");
         }
-
-
-
 
 
         //---------------functions----------------
