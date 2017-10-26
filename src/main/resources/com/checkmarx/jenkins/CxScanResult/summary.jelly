@@ -7,13 +7,14 @@
 
         .new-bar-title-container {
             font-weight: bold;
-            background-color: lightgray;
+            background-color: #f2f2f2;
             text-align: center;
             border-radius: 8px;
             width: fit-content;
             line-height: 19px;
             padding: 1px 5px;
             margin: auto;
+            color: #373050;
         }
 
         .bar-title-wrapper {
@@ -22,7 +23,6 @@
 
 
         .high-new-scans {
-            height: 50%;
             background: linear-gradient(45deg, white 25%,
             #373050 25%, #373050 50%,
             white 50%, white 75%,
@@ -31,7 +31,6 @@
         }
 
         .high-recurrent-scans {
-            height: 50%;
             background-color: #373050;
         }
 
@@ -231,6 +230,7 @@
 
         .results-report .chart li span {
             max-width: 20px;
+            overflow: hidden;
         }
 
         .results-report .chart span {
@@ -872,9 +872,7 @@
                                                 <div class="bar-title">High -</div>
                                                 <div class="bar-count" id="bar-count-high"></div>
                                             </div>
-                                            <div id="new-bar-count-high" class="new-bar-title-container">
-                                                2 NEW
-                                            </div>
+                                            <div id="new-bar-count-high" class="new-bar-title-container"></div>
                                         </div>
                                     </li>
 
@@ -917,9 +915,7 @@
                                                 <div class="bar-title">Medium -</div>
                                                 <div class="bar-count" id="bar-count-med"></div>
                                             </div>
-                                            <div id="new-bar-count-medium" class="new-bar-title-container">
-                                                2 NEW
-                                            </div>
+                                            <div id="new-bar-count-medium" class="new-bar-title-container"></div>
                                         </div>
                                     </li>
 
@@ -962,9 +958,7 @@
                                             <div class="bar-title">Low -</div>
                                             <div class="bar-count" id="bar-count-low"></div>
                                         </div>
-                                            <div id="new-bar-count-low" class="new-bar-title-container">
-                                                2 NEW
-                                            </div>
+                                            <div id="new-bar-count-low" class="new-bar-title-container"></div>
                                         </div>
                                     </li>
                                 </ul>
@@ -1741,16 +1735,16 @@
 
         //counts - Legacy form
         var highCount = verifyVar([${it.highCount}]);
+        var highNewCount = 40; //todo - get real number from server
         var medCount = verifyVar([${it.mediumCount}]);
+        var medNewCount = 4; //todo - get real number from server
         var lowCount = verifyVar([${it.lowCount}]);
+        var lowNewCount = 6; //todo - get real number from server
 
         //cve lists - New (8.4.2 and up)
         var highCveList = verifyVar([${it.sastScanResult.highQueryResultsJson}]);
-        var highNewCount = 2; //todo - get real number from java
         var medCveList = verifyVar([${it.sastScanResult.mediumQueryResultsJson}]);
-        var medNewCount = 4; //todo - get real number from java
         var lowCveList = verifyVar([${it.sastScanResult.lowQueryResultsJson}]);
-        var lowNewCount = 6; //todo - get real number from java
 
 
         //-------------------------- osa vars --------------------------------------
@@ -1886,19 +1880,39 @@
                 document.getElementById("bar-count-med").innerHTML = medCount;
                 document.getElementById("bar-count-low").innerHTML = lowCount;
 
-                //set bars height
+                //------set bars height------------
+                //graphs max height
                 var maxCount = Math.max(highCount, medCount, lowCount);
                 var maxHeight = maxCount * 100 / 90;
-                document.getElementById("bar-high").setAttribute("style", "height:" + highCount * 100 / maxHeight + "%");
-                document.getElementById("bar-med").setAttribute("style", "height:" + medCount * 100 / maxHeight + "%");
-                document.getElementById("bar-low").setAttribute("style", "height:" + lowCount * 100 / maxHeight + "%");
 
+//                total height - new + recurrent
+                var highTotalHeight = highCount * 100 / maxHeight;
+                var medTotalHeight = medCount * 100 / maxHeight;
+                var lowTotalHeight = lowCount * 100 / maxHeight;
 
-                //-------------- NEW bars ------------
+                document.getElementById("bar-high").setAttribute("style", "height:" + highTotalHeight + "%");
+                document.getElementById("bar-med").setAttribute("style", "height:" + medTotalHeight + "%");
+                document.getElementById("bar-low").setAttribute("style", "height:" + lowTotalHeight + "%");
+
+//                recurrent height
+                var highRecurrentCount = highCount - highNewCount;
+                var medRecurrentCount = medCount - medNewCount;
+                var lowRecurrentCount = lowCount - lowNewCount;
+                document.getElementById("high-recurrent-scans").setAttribute("style", "height:" + highRecurrentCount * 100 / highCount + "%");
+//                document.getElementById("med-recurrent-scans").setAttribute("style", "height:" + medRecurrent * 100 / medTotal + "%");
+//                document.getElementById("low-recurrent-scans").setAttribute("style", "height:" + lowRecurrent * 100 / lowTotal + "%");
+
+                //set NEW bars height
+                var highNewHeightPercentage = highNewCount * 100 / highCount;
+                var highNewMinHeight = highNewCount === 0 ? 0 : 10;
+                document.getElementById("high-new-scans").setAttribute("style", "height:" + highNewHeightPercentage + "%; min-height:" + highNewMinHeight + "px");
+
                 //set NEW bars count
                 document.getElementById("new-bar-count-high").innerHTML = highNewCount + " NEW";
                 document.getElementById("new-bar-count-medium").innerHTML = medNewCount + " NEW";
                 document.getElementById("new-bar-count-low").innerHTML = lowNewCount + " NEW";
+
+
 
 
             } catch (e) {
@@ -2130,7 +2144,10 @@
         }
 
 
-        //functions
+
+
+
+        //---------------functions----------------
         function tooltipGenerator(severity) {
             var threshold = 0;
             var count = 0;
