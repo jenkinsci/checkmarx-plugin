@@ -779,9 +779,9 @@
                                                                     <g transform="translate(2.000606, 1.714748)">
                                                                         <path d="M24.3114123,0.619831205 L44.98533,32.7440758 L44.98533,32.7440758 C45.2842135,33.208497 45.1500186,33.8272778 44.6855974,34.1261613 C44.5242092,34.2300245 44.336342,34.2852522 44.1444209,34.2852522 L1.8977196,34.2852522 L1.8977196,34.2852522 C1.34543485,34.2852522 0.897719599,33.837537 0.897719599,33.2852522 C0.897719599,33.0866799 0.956838199,32.8926033 1.0675421,32.7277531 L22.6403257,0.60350849 L22.6403257,0.60350849 C22.948224,0.145014117 23.569508,0.0229318695 24.0280024,0.330830157 C24.1411852,0.406837189 24.2376306,0.50518529 24.3114123,0.619831205 Z"
                                                                               id="Triangle" stroke="#373050" stroke-width="2"/>
-                                                                        <rect id="Rectangle-6" fill="#373050" x="21.9993936" y="11.2852522" width="3" height="13" rx="1.5"/>
+                                                                        <rect id="Rectangle-1" fill="#373050" x="21.9993936" y="11.2852522" width="3" height="13" rx="1.5"/>
                                                                         <path d="M23.4993936,26.2852522 L23.4993936,26.2852522 L23.4993936,26.2852522 C24.3278207,26.2852522 24.9993936,26.9568251 24.9993936,27.7852522 L24.9993936,27.7852522 L24.9993936,27.7852522 C24.9993936,28.6136794 24.3278207,29.2852522 23.4993936,29.2852522 L23.4993936,29.2852522 L23.4993936,29.2852522 C22.6709664,29.2852522 21.9993936,28.6136794 21.9993936,27.7852522 L21.9993936,27.7852522 L21.9993936,27.7852522 C21.9993936,26.9568251 22.6709664,26.2852522 23.4993936,26.2852522 Z"
-                                                                              id="Rectangle-6-Copy" fill="#373050"/>
+                                                                              id="Rectangle-1-Copy" fill="#373050"/>
                                                                     </g>
                                                                 </g>
                                                             </g>
@@ -812,7 +812,8 @@
 
 
                             </div>
-                            <div class="summary-chart">
+
+                            <div class="summary-chart" id="sast-results">
                                 <div class="threshold-exceeded-compliance" id="threshold-exceeded-compliance"></div>
                                 <ul class="chart">
 
@@ -877,7 +878,7 @@
                                         </div>
                                     </li>
 
-                                    <!--medium-->
+                                    <!--sast-medium-->
                                     <li>
                                         <span class="bar-2" id="bar-med">
                                             <div id="tooltip-med"></div>
@@ -922,7 +923,7 @@
                                         </div>
                                     </li>
 
-                                    <!--low-->
+                                    <!--sast-low-->
                                     <li>
                                         <span class="bar-3" id="bar-low">
                                             <div id="tooltip-low"></div>
@@ -931,29 +932,30 @@
                                             <div class="bar-title-container">
                                             <div class="bar-title-icon">
                                                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                                                     width="16" height="19" viewBox="0 0 16 19"><title>Low</title>
+                                                     width="16" height="19" viewBox="0 0 16 19">
+                                                    <title>Low</title>
                                                     <defs>
                                                         <path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z"
-                                                              id="a"/>
+                                                              id="sast-low-path-1"/>
                                                         <path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z"
-                                                              id="c"/>
+                                                              id="sast-low-path-2"/>
                                                     </defs>
                                                     <g fill="none" fill-rule="evenodd">
                                                         <path d="M7.96 17.32L8 .015l-6.5 1s-.96 4.5-.96 8.75c1.272 4.602 5.968 9.25 5.968 9.25h.163l1.29-1.695z"
                                                               fill="#EDEFF5"/>
-                                                        <mask id="b" fill="#fff">
-                                                            <use xlink:href="#a"/>
+                                                        <mask id="sast-low-mask-1" fill="#fff">
+                                                            <use xlink:href="#sast-low-path-1"/>
                                                         </mask>
-                                                        <use fill="#FFEB3B" xlink:href="#a"/>
+                                                        <use fill="#FFEB3B" xlink:href="#sast-low-path-1"/>
                                                         <path stroke="#E4D200"
                                                               d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.342.48 2.682.488 3.924V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38C.634 5.6.786 4.51.992 3.4c.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/>
-                                                        <path fill="#DDCE00" mask="url(#b)" d="M8-8h10v32H8z"/>
-                                                        <mask id="d" fill="#fff">
-                                                            <use xlink:href="#c"/>
+                                                        <path fill="#DDCE00" mask="url(#sast-low-mask-1)" d="M8-8h10v32H8z"/>
+                                                        <mask id="sast-low-mask-2" fill="#fff">
+                                                            <use xlink:href="#sast-low-path-2"/>
                                                         </mask>
                                                         <path stroke="#E4D200"
                                                               d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.342.48 2.682.488 3.924V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38C.634 5.6.786 4.51.992 3.4c.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/>
-                                                        <path fill="#605900" mask="url(#d)" d="M5.54 12h5.33v-1.7H7.48V5H5.54"/>
+                                                        <path fill="#605900" mask="url(#sast-low-mask-2)" d="M5.54 12h5.33v-1.7H7.48V5H5.54"/>
                                                     </g>
                                                 </svg>
                                             </div>
@@ -967,15 +969,13 @@
                                     </li>
                                 </ul>
                             </div>
-
-
                         </div>
 
                         <div class="osa-summary" id="osa-summary">
                             <div class="summary-report-title osa">
                                 <div class="summary-title-text osa">CxOSA Vulnerabilities &amp; Libraries</div>
 
-
+                                <!--osa-failed-->
                                 <div id="no-scan-message-osa-failed" class="no-scan-message-container osa-scan-failed">
                                     <div class="no-scan-message">
                                         <div class="no-scan-message-icon">
@@ -1015,19 +1015,19 @@
                                                 <title>licence_no</title>
                                                 <desc>Created with Sketch.</desc>
                                                 <defs/>
-                                                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                                    <g id="Icons" transform="translate(-143.000000, -293.000000)">
-                                                        <g id="licence_no" transform="translate(145.000000, 294.000000)">
-                                                            <rect id="Rectangle-2" stroke="#382F50" stroke-linecap="square" x="8" y="1" width="42" height="55"/>
-                                                            <polygon id="Rectangle-3" fill="#382F50" points="35 1 45 1 45 21 40 16.5 35 21"/>
-                                                            <path d="M15.5,9.5 L29.5,9.5" id="Line" stroke="#979797" stroke-linecap="square"/>
-                                                            <path d="M15.5,17.5 L29.5,17.5" id="Line-Copy" stroke="#979797" stroke-linecap="square"/>
-                                                            <path d="M15.7377037,26.5 L43.9431037,26.5" id="Line-Copy-2" stroke="#979797" stroke-linecap="square"/>
-                                                            <path d="M15.7377037,36.5 L43.9431037,36.5" id="Line-Copy-4" stroke="#979797" stroke-linecap="square"/>
-                                                            <path d="M15.7377037,46.5 L43.9431037,46.5" id="Line-Copy-5" stroke="#979797" stroke-linecap="square"/>
-                                                            <path d="M0.5,1.5 L55.4181209,56.4181209" id="Line-Copy-3" stroke="#F6F7FA" stroke-width="3"
+                                                <g id="osa-failed-Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                    <g id="osa-failed-Icons" transform="translate(-143.000000, -293.000000)">
+                                                        <g id="osa-failed-licence_no" transform="translate(145.000000, 294.000000)">
+                                                            <rect id="osa-failed-Rectangle-1" stroke="#382F50" stroke-linecap="square" x="8" y="1" width="42" height="55"/>
+                                                            <polygon id="osa-failed-Rectangle-2" fill="#382F50" points="35 1 45 1 45 21 40 16.5 35 21"/>
+                                                            <path d="M15.5,9.5 L29.5,9.5" id="osa-failed-Line-1" stroke="#979797" stroke-linecap="square"/>
+                                                            <path d="M15.5,17.5 L29.5,17.5" id="osa-failed-Line-2" stroke="#979797" stroke-linecap="square"/>
+                                                            <path d="M15.7377037,26.5 L43.9431037,26.5" id="osa-failed-3" stroke="#979797" stroke-linecap="square"/>
+                                                            <path d="M15.7377037,36.5 L43.9431037,36.5" id="osa-failed-Line-4" stroke="#979797" stroke-linecap="square"/>
+                                                            <path d="M15.7377037,46.5 L43.9431037,46.5" id="osa-failed-Line-5" stroke="#979797" stroke-linecap="square"/>
+                                                            <path d="M0.5,1.5 L55.4181209,56.4181209" id="osa-failed-Line-6" stroke="#F6F7FA" stroke-width="3"
                                                                   stroke-linecap="square"/>
-                                                            <path d="M2.5,0.5 L57.4181209,55.4181209" id="Line" stroke="#382F50" stroke-width="2" stroke-linecap="square"/>
+                                                            <path d="M2.5,0.5 L57.4181209,55.4181209" id="osa-failed-Line-7" stroke="#382F50" stroke-width="2" stroke-linecap="square"/>
                                                         </g>
                                                     </g>
                                                 </g>
@@ -1061,36 +1061,39 @@
                                     <div class="libraries-vulnerable">
                                         <div class="libraries-icon-number">
                                             <div class="libraries-vulnerable-icon">
+
+                                                <!--osa-libs-->
                                                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                                                      height="31px" version="1.1" viewBox="0 0 47 31" width="47px">
-                                                    <title>lib
-                                                        Vulnerabilities Icon</title>
+                                                    <title>lib Vulnerabilities Icon</title>
                                                     <desc>Created with Sketch.</desc>
                                                     <defs>
-                                                        <path id="path-14"
+                                                        <path id="osa-libs-path-1"
                                                               d="M25,31 L4,31 C1.94360167,31 0,29.0245324 0,27 L0,8 L0,3 C0,1.48550257 1.46424259,0 3,0 L9,0 C9.88514832,0 11.1635669,0.937415809 12,2 L12,4 L34,4 C36.0604107,4.42857143 38,6.41548071 38,9 L38,11"/>
-                                                        <mask height="31" maskUnits="objectBoundingBox" id="mask-14" width="38"
+                                                        <mask height="31" maskUnits="objectBoundingBox"
+                                                              id="osa-libs-mask-1" width="38"
                                                               maskContentUnits="userSpaceOnUse" fill="white" x="0" y="0">
-                                                            <use xlink:href="#path-14"/>
+                                                            <use xlink:href="#osa-libs-path-1"/>
                                                         </mask>
                                                     </defs>
-                                                    <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
-                                                        <g transform="translate(-518.000000, -646.000000)" id="Jenkins">
-                                                            <g transform="translate(270.000000, 646.000000)" id="OSA">
+                                                    <g stroke-width="1" fill-rule="evenodd"
+                                                       id="osa-libs-Page-1" stroke="none" fill="none">
+                                                        <g transform="translate(-518.000000, -646.000000)" id="osa-libs-vulnerable-1">
+                                                            <g transform="translate(270.000000, 646.000000)" id="osa-libs-vulnerable-2">
                                                                 <g transform="translate(248.000000, 0.000000)"
-                                                                   id="Lib-Vulnerabilities">
-                                                                    <g id="lib-Vulnerabilities-Icon">
-                                                                        <use mask="url(#mask-14)" stroke-width="4"
-                                                                             id="Combined-Shape"
-                                                                             stroke="#362F53" xlink:href="#path-14"/>
-                                                                        <g transform="translate(26.600000, 14.233021)" id="Alert">
-                                                                            <path id="Page-1"
+                                                                   id="osa-libs-vulnerable-3">
+                                                                    <g id="osa-libs-Vulnerabilities-Icon">
+                                                                        <use mask="url(#osa-libs-mask-1)" stroke-width="4"
+                                                                             id="osa-libs-use-1"
+                                                                             stroke="#362F53" xlink:href="#osa-libs-path-1"/>
+                                                                        <g transform="translate(26.600000, 14.233021)" id="osa-libs-Alert">
+                                                                            <path id="osa-libs-Page-2"
                                                                                   d="M9.71486676,1.21470909 C10.3018963,0.274949219 11.2197722,0.29932009 11.7612462,1.26246584 L19.4943093,15.0176364 C20.037464,15.9837716 19.5847058,16.7669789 18.4769973,16.7669789 L2.0007805,16.7669789 C0.895779941,16.7669789 0.477014275,16.0033396 1.06291102,15.0653932 L9.71486676,1.21470909 Z"
                                                                                   fill="#DA2945"/>
-                                                                            <rect height="5" id="Rectangle-5" width="2"
+                                                                            <rect height="5" id="osa-libs-Rectangle-1" width="2"
                                                                                   fill="#FFFFFF"
                                                                                   x="9.4" y="5.76697892"/>
-                                                                            <rect height="2" id="Rectangle-6" width="2"
+                                                                            <rect height="2" id="osa-libs-Rectangle-2" width="2"
                                                                                   fill="#FFFFFF"
                                                                                   x="9.4" y="11.7669789"/>
                                                                         </g>
@@ -1107,31 +1110,35 @@
                                             Vulnerable and Outdated Libraries
                                         </div>
                                     </div>
+
+
+                                    <!--osa-libs-ok-->
                                     <div class="libraries-ok">
                                         <div class="libraries-icon-number">
                                             <div class="libraries-ok-icon">
                                                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                                                      height="31px" version="1.1" viewBox="0 0 47 31" width="47px">
-                                                    <title>
-                                                        Icon</title>
+                                                    <title>Icon</title>
                                                     <desc>Created with Sketch.</desc>
                                                     <defs>
-                                                        <path id="path-5"
+                                                        <path id="osa-libs-ok-path-1"
                                                               d="M28,31 L4,31 C1.99474908,31 0,29.0245324 0,27 L0,8 L0,3 C0,1.48550257 1.50277529,0 3,0 L9,0 C10.1452838,0 11.457345,0.937415809 12,2 L13,4 L35,4 C37.0093689,4.42857143 39,6.41548071 39,9 L39,11"/>
-                                                        <mask height="31" maskUnits="objectBoundingBox" id="mask-5" width="39"
+                                                        <mask height="31" maskUnits="objectBoundingBox"
+                                                              id="osa-libs-ok-mask-1" width="39"
                                                               maskContentUnits="userSpaceOnUse" fill="white" x="0" y="0">
-                                                            <use xlink:href="#path-5"/>
+                                                            <use xlink:href="#osa-libs-ok-path-1"/>
                                                         </mask>
                                                     </defs>
-                                                    <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
-                                                        <g transform="translate(-848.000000, -651.000000)" id="Jenkins">
-                                                            <g transform="translate(270.000000, 646.000000)" id="OSA">
-                                                                <g transform="translate(578.000000, 5.000000)" id="Lib-OK">
-                                                                    <g id="Icon">
-                                                                        <use mask="url(#mask-5)" stroke-width="4"
-                                                                             id="Combined-Shape-Copy"
-                                                                             stroke="#362F53" xlink:href="#path-5"/>
-                                                                        <path id="Combined-Shape"
+                                                    <g stroke-width="1" fill-rule="evenodd"
+                                                       id="osa-libs-ok-Page-1" stroke="none" fill="none">
+                                                        <g transform="translate(-848.000000, -651.000000)" id="osa-libs-ok-1">
+                                                            <g transform="translate(270.000000, 646.000000)" id="osa-libs-ok-mask-2">
+                                                                <g transform="translate(578.000000, 5.000000)" id="osa-libs-OK">
+                                                                    <g id="osa-libs-ok-Icon">
+                                                                        <use mask="url(#osa-libs-ok-mask-1)" stroke-width="4"
+                                                                             id="osa-libs-ok-use-1"
+                                                                             stroke="#362F53" xlink:href="#osa-libs-ok-path-1"/>
+                                                                        <path id="osa-libs-ok-path-2"
                                                                               d="M46.4529784,18.9030304 C46.8068562,19.8686359 47,20.9117624 47,22 C47,26.9705627 42.9705627,31 38,31 C33.0294373,31 29,26.9705627 29,22 C29,17.0294373 33.0294373,13 38,13 C40.393622,13 42.5689975,13.934425 44.1812437,15.4583924 L37.6904269,21.8965709 L35.079173,19.3040452 L32.1948583,22.1475069 L37.6899611,27.6031981 L46.4529784,18.9030304 Z"
                                                                               fill="#8EBE15"/>
                                                                     </g>
@@ -1149,14 +1156,14 @@
                                     </div>
                                 </div>
 
-
                                 <div class="osa-chart">
                                     <div class="threshold-exceeded-compliance" id="osa-threshold-exceeded-compliance"></div>
                                     <ul class="osa-chart chart">
+                                        <!--osa-high-->
                                         <li>
-                                    <span class="bar-1" id="osa-bar-high">
-                                        <div id="osa-tooltip-high"></div>
-                                    </span>
+                                            <span class="bar-1" id="osa-bar-high">
+                                                <div id="osa-tooltip-high"></div>
+                                            </span>
                                             <div class="bar-title-container">
                                                 <div class="bar-title-icon">
                                                     <svg xmlns="http://www.w3.org/2000/svg"
@@ -1168,32 +1175,32 @@
                                                         <desc>Created with Sketch.</desc>
                                                         <defs>
                                                             <path d="M1,1 L8,0 L15,1 C15,1 16,4.01515152 16,7 C16,13.0151515 10.6766131,18.2701936 10.6766131,18.2701936 C10.30293,18.6732545 9.55664682,19 8.9906311,19 L7.0093689,19 C6.45190985,19 5.70245907,18.6673641 5.33497024,18.2411641 C5.33497024,18.2411641 3.70193273e-12,12.5151515 3.63797881e-12,8 C7.03437308e-13,4.82765152 1,1 1,1 Z"
-                                                                  id="path-1"/>
+                                                                  id="osa-high-path-1"/>
                                                             <path d="M1,1 L8,0 L15,1 C15,1 16,4.01515152 16,7 C16,13.0151515 10.6766131,18.2701936 10.6766131,18.2701936 C10.30293,18.6732545 9.55664682,19 8.9906311,19 L7.0093689,19 C6.45190985,19 5.70245907,18.6673641 5.33497024,18.2411641 C5.33497024,18.2411641 3.70193273e-12,12.5151515 3.63797881e-12,8 C7.03437308e-13,4.82765152 1,1 1,1 Z"
-                                                                  id="path-3"/>
+                                                                  id="osa-high-path-2"/>
                                                         </defs>
-                                                        <g id="Page-1" stroke="none" stroke-width="1" fill="none"
+                                                        <g id="osa-high-Page-1" stroke="none" stroke-width="1" fill="none"
                                                            fill-rule="evenodd">
-                                                            <g id="Icons" transform="translate(-47.000000, -88.000000)">
-                                                                <g id="High" transform="translate(47.000000, 88.000000)">
-                                                                    <g id="Vonerability-High">
-                                                                        <mask id="mask-2" fill="white">
-                                                                            <use xlink:href="#path-1"/>
+                                                            <g id="osa-high-Icons" transform="translate(-47.000000, -88.000000)">
+                                                                <g id="osa-high-High" transform="translate(47.000000, 88.000000)">
+                                                                    <g id="osa-high-Vonerability">
+                                                                        <mask id="osa-high-mask-1" fill="white">
+                                                                            <use xlink:href="#osa-high-path-1"/>
                                                                         </mask>
-                                                                        <g id="Rectangle-10">
+                                                                        <g id="osa-high-Rectangle-1">
                                                                             <use fill="#D82D49" fill-rule="evenodd"
-                                                                                 xlink:href="#path-1"/>
+                                                                                 xlink:href="#osa-high-path-1"/>
                                                                             <path stroke="#BB1A34" stroke-width="1"
                                                                                   d="M1.4041953,1.44733409 L8,0.505076272 L14.6160396,1.45022478 C14.6341112,1.51124347 14.6539641,1.5795116 14.6753578,1.65465958 C14.7899552,2.05719756 14.9047222,2.50600605 15.0118679,2.98897331 C15.3098751,4.33226343 15.4915175,5.67204692 15.4997158,6.91419406 C15.4999523,6.95710967 15.4999523,6.95710967 15.5,7 C15.5,9.52090451 14.5340777,12.111589 12.9179883,14.6199787 C12.3484584,15.5039663 11.7377754,16.313821 11.1275564,17.0311249 C10.9144997,17.2815702 10.7170402,17.5022391 10.5403911,17.6908777 C10.4358029,17.8025645 10.3623853,17.8778048 10.3253512,17.9143634 C10.0291161,18.2331673 9.41484636,18.5 8.9906311,18.5 L7.0093689,18.5 C6.59080843,18.5 5.98194778,18.2258269 5.71364227,17.9146561 C5.66213668,17.8588317 5.58703389,17.7761053 5.4807125,17.6555634 C5.30200204,17.4529504 5.10247221,17.2193106 4.88735491,16.9580823 C4.27213719,16.2109907 3.656779,15.394289 3.08320773,14.5359605 C2.09721248,13.0604546 1.34127053,11.6205479 0.906388115,10.2835472 C0.639104683,9.46181216 0.5,8.69692293 0.5,8 C0.5,7.56658708 0.519280284,7.10494686 0.556403808,6.61890492 C0.63408435,5.60186781 0.786470164,4.51217341 0.991682584,3.40118912 C1.09968656,2.81647439 1.21542088,2.26333889 1.3310756,1.7595034 C1.35796875,1.64234673 1.3824953,1.53794489 1.4041953,1.44733409 Z"/>
                                                                         </g>
-                                                                        <rect id="Rectangle-22" fill="#BB1A34" mask="url(#mask-2)"
+                                                                        <rect id="osa-high-Rectangle-2" fill="#BB1A34" mask="url(#osa-high-mask-1)"
                                                                               x="8" y="0" width="8" height="20"/>
-                                                                        <mask id="mask-4" fill="white">
-                                                                            <use xlink:href="#path-3"/>
+                                                                        <mask id="osa-high-mask-2" fill="white">
+                                                                            <use xlink:href="#osa-high-path-2"/>
                                                                         </mask>
                                                                         <path stroke="#BB1A34"
                                                                               d="M1.4041953,1.44733409 L8,0.505076272 L14.6160396,1.45022478 C14.6341112,1.51124347 14.6539641,1.5795116 14.6753578,1.65465958 C14.7899552,2.05719756 14.9047222,2.50600605 15.0118679,2.98897331 C15.3098751,4.33226343 15.4915175,5.67204692 15.4997158,6.91419406 C15.4999523,6.95710967 15.4999523,6.95710967 15.5,7 C15.5,9.52090451 14.5340777,12.111589 12.9179883,14.6199787 C12.3484584,15.5039663 11.7377754,16.313821 11.1275564,17.0311249 C10.9144997,17.2815702 10.7170402,17.5022391 10.5403911,17.6908777 C10.4358029,17.8025645 10.3623853,17.8778048 10.3253512,17.9143634 C10.0291161,18.2331673 9.41484636,18.5 8.9906311,18.5 L7.0093689,18.5 C6.59080843,18.5 5.98194778,18.2258269 5.71364227,17.9146561 C5.66213668,17.8588317 5.58703389,17.7761053 5.4807125,17.6555634 C5.30200204,17.4529504 5.10247221,17.2193106 4.88735491,16.9580823 C4.27213719,16.2109907 3.656779,15.394289 3.08320773,14.5359605 C2.09721248,13.0604546 1.34127053,11.6205479 0.906388115,10.2835472 C0.639104683,9.46181216 0.5,8.69692293 0.5,8 C0.5,7.56658708 0.519280284,7.10494686 0.556403808,6.61890492 C0.63408435,5.60186781 0.786470164,4.51217341 0.991682584,3.40118912 C1.09968656,2.81647439 1.21542088,2.26333889 1.3310756,1.7595034 C1.35796875,1.64234673 1.3824953,1.53794489 1.4041953,1.44733409 Z"/>
-                                                                        <polygon id="H" fill="#FFFFFF" mask="url(#mask-4)"
+                                                                        <polygon id="osa-high-H" fill="#FFFFFF" mask="url(#osa-high-Rectangle-2)"
                                                                                  points="5 12 7 12 7 9.5 9 9.5 9 12 11 12 11 5 9 5 9 7.5 7 7.5 7 5 5 5"/>
                                                                     </g>
                                                                 </g>
@@ -1215,28 +1222,28 @@
                                                 <div class="bar-title-icon">
                                                     <svg xmlns="http://www.w3.org/2000/svg"
                                                          xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="20"
-                                                         viewBox="0 0 16 20"><title>
-                                                        Low</title>
+                                                         viewBox="0 0 16 20">
+                                                        <title>Med</title>
                                                         <defs>
                                                             <path d="M1 1.053L8 0l7 1.053s1 3.173 1 6.315c0 6.332-5.346 11.89-5.346 11.89-.36.41-1.097.742-1.663.742H7.01c-.558 0-1.3-.34-1.652-.77 0 0-5.358-6.056-5.358-10.81 0-3.338 1-7.367 1-7.367z"
-                                                                  id="a"/>
+                                                                  id="osa-medium-path-1"/>
                                                             <path d="M1 1.053L8 0l7 1.053s1 3.173 1 6.315c0 6.332-5.346 11.89-5.346 11.89-.36.41-1.097.742-1.663.742H7.01c-.558 0-1.3-.34-1.652-.77 0 0-5.358-6.056-5.358-10.81 0-3.338 1-7.367 1-7.367z"
-                                                                  id="c"/>
+                                                                  id="osa-medium-path-2"/>
                                                         </defs>
                                                         <g fill="none" fill-rule="evenodd">
-                                                            <mask id="b" fill="#fff">
-                                                                <use xlink:href="#a"/>
+                                                            <mask id="osa-medium-mask-1" fill="#fff">
+                                                                <use xlink:href="#osa-medium-path-1"/>
                                                             </mask>
-                                                            <use fill="#FFAC00" xlink:href="#a"/>
+                                                            <use fill="#FFAC00" xlink:href="#osa-medium-path-1"/>
                                                             <path stroke="#E49B16"
                                                                   d="M1.41 1.497L8 .507l6.61.993c.02.067.04.144.064.228.114.425.23.898.337 1.407.3 1.418.48 2.83.49 4.143v.09c0 2.665-.972 5.404-2.6 8.06-.57.934-1.185 1.79-1.8 2.55-.213.264-.412.498-.59.698-.105.118-.18.198-.216.237-.282.32-.882.587-1.302.587H7.01c-.414 0-1.01-.277-1.266-.587-.05-.06-.126-.146-.233-.274-.18-.216-.38-.464-.594-.74-.62-.79-1.237-1.654-1.814-2.56-.982-1.55-1.74-3.06-2.18-4.463C.645 9.994.5 9.17.5 8.42c0-.457.02-.944.057-1.457.077-1.072.23-2.22.435-3.392.11-.614.224-1.197.34-1.73L1.41 1.5z"/>
-                                                            <path fill="#D79201" mask="url(#b)" d="M8 0h8v20H8z"/>
-                                                            <mask id="d" fill="#fff">
-                                                                <use xlink:href="#c"/>
+                                                            <path fill="#D79201" mask="url(#osa-medium-mask-1)" d="M8 0h8v20H8z"/>
+                                                            <mask id="osa-medium-mask-2" fill="#fff">
+                                                                <use xlink:href="#osa-medium-path-2"/>
                                                             </mask>
                                                             <path stroke="#D49100"
                                                                   d="M1.41 1.497L8 .507l6.61.993c.02.067.04.144.064.228.114.425.23.898.337 1.407.3 1.418.48 2.83.49 4.143v.09c0 2.665-.972 5.404-2.6 8.06-.57.934-1.185 1.79-1.8 2.55-.213.264-.412.498-.59.698-.105.118-.18.198-.216.237-.282.32-.882.587-1.302.587H7.01c-.414 0-1.01-.277-1.266-.587-.05-.06-.126-.146-.233-.274-.18-.216-.38-.464-.594-.74-.62-.79-1.237-1.654-1.814-2.56-.982-1.55-1.74-3.06-2.18-4.463C.645 9.994.5 9.17.5 8.42c0-.457.02-.944.057-1.457.077-1.072.23-2.22.435-3.392.11-.614.224-1.197.34-1.73L1.41 1.5z"/>
-                                                            <path fill="#472F00" mask="url(#d)"
+                                                            <path fill="#472F00" mask="url(#osa-medium-mask-2)"
                                                                   d="M4.28 12.632h1.9v-4.21l1.78 2.862H8L9.79 8.4v4.232h1.93v-7.37H9.67L8 8.117 6.33 5.263H4.28"/>
                                                         </g>
                                                     </svg>
@@ -1248,37 +1255,37 @@
 
                                         <!--osa low-->
                                         <li>
-                                    <span class="bar-3" id="osa-bar-low">
-                                        <div id="osa-tooltip-low"></div>
-                                    </span>
+                                            <span class="bar-3" id="osa-bar-low">
+                                                <div id="osa-tooltip-low"></div>
+                                            </span>
                                             <div class="bar-title-container">
                                                 <div class="bar-title-icon">
                                                     <svg xmlns="http://www.w3.org/2000/svg"
                                                          xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="19"
-                                                         viewBox="0 0 16 19"><title>
-                                                        Low</title>
+                                                         viewBox="0 0 16 19">
+                                                        <title>Low</title>
                                                         <defs>
                                                             <path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z"
-                                                                  id="a"/>
+                                                                  id="osa-low-path-1"/>
                                                             <path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z"
-                                                                  id="c"/>
+                                                                  id="osa-low-path-2"/>
                                                         </defs>
                                                         <g fill="none" fill-rule="evenodd">
                                                             <path d="M7.96 17.32L8 .015l-6.5 1s-.96 4.5-.96 8.75c1.272 4.602 5.968 9.25 5.968 9.25h.163l1.29-1.695z"
                                                                   fill="#EDEFF5"/>
-                                                            <mask id="b" fill="#fff">
-                                                                <use xlink:href="#a"/>
+                                                            <mask id="osa-low-mask-1" fill="#fff">
+                                                                <use xlink:href="#osa-low-path-1"/>
                                                             </mask>
-                                                            <use fill="#FFEB3B" xlink:href="#a"/>
+                                                            <use fill="#FFEB3B" xlink:href="#osa-low-path-1"/>
                                                             <path stroke="#E4D200"
                                                                   d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.34.48 2.68.488 3.923V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38.078-1.02.23-2.11.436-3.22.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/>
-                                                            <path fill="#DDCE00" mask="url(#b)" d="M8-8h10v32H8z"/>
-                                                            <mask id="d" fill="#fff">
-                                                                <use xlink:href="#c"/>
+                                                            <path fill="#DDCE00" mask="url(#osa-low-mask-1)" d="M8-8h10v32H8z"/>
+                                                            <mask id="osa-low-mask-2" fill="#fff">
+                                                                <use xlink:href="#osa-low-path-2"/>
                                                             </mask>
                                                             <path stroke="#E4D200"
                                                                   d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.34.48 2.68.488 3.923V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38.078-1.02.23-2.11.436-3.22.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/>
-                                                            <path fill="#605900" mask="url(#d)" d="M5.54 12h5.33v-1.7H7.48V5H5.54"/>
+                                                            <path fill="#605900" mask="url(#osa-low-mask-2)" d="M5.54 12h5.33v-1.7H7.48V5H5.54"/>
                                                         </g>
                                                     </svg>
                                                 </div>
@@ -1288,13 +1295,10 @@
                                         </li>
                                     </ul>
                                 </div>
-
-
                             </div>
                         </div>
                     </div>
                 </div>
-
 
                 <div id="sast-full" class="sast-full full-results-section">
                     <div class="summary-table-row cxsast-full">
@@ -1336,28 +1340,27 @@
                                     <div class="full-start-end-icon">
                                         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                                              height="26px" version="1.1" viewBox="0 0 23 26" width="23px">
-                                            <title>
-                                                Icon</title>
+                                            <title>Icon</title>
                                             <desc>Created with Sketch.</desc>
                                             <defs>
-                                                <rect height="23" rx="1.6" id="full-start-path" width="23" x="0" y="2"/>
-                                                <mask height="23" maskUnits="objectBoundingBox" id="full-start-mask" width="23"
+                                                <rect height="23" rx="1.6" id="sast-full-start-rect" width="23" x="0" y="2"/>
+                                                <mask height="23" maskUnits="objectBoundingBox" id="full-start-mask-1" width="23"
                                                       maskContentUnits="userSpaceOnUse" fill="white" x="0"
                                                       y="0">
-                                                    <use xlink:href="#full-start-path"/>
+                                                    <use xlink:href="#sast-full-start-rect"/>
                                                 </mask>
                                             </defs>
-                                            <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
-                                                <g transform="translate(-684.000000, -708.000000)" id="Jenkins"
+                                            <g stroke-width="1" fill-rule="evenodd" id="sast-full-start-Page-1" stroke="none" fill="none">
+                                                <g transform="translate(-684.000000, -708.000000)" id="sast-full-start-1"
                                                    stroke="#373050">
-                                                    <g transform="translate(273.000000, 695.000000)" id="CxSAST">
-                                                        <g transform="translate(411.000000, 9.000000)" id="Group-2-Copy">
-                                                            <g transform="translate(0.000000, 5.000000)" id="Icon">
-                                                                <use mask="url(#full-start-mask)" stroke-width="4"
-                                                                     id="Rectangle-22" xlink:href="#full-start-path"/>
-                                                                <path stroke-width="2" id="Line" d="M5,0 L5,2.99971994"
+                                                    <g transform="translate(273.000000, 695.000000)" id="sast-full-start-2">
+                                                        <g transform="translate(411.000000, 9.000000)" id="sast-full-start-3">
+                                                            <g transform="translate(0.000000, 5.000000)" id="sast-full-start-Icon">
+                                                                <use mask="url(#full-start-mask-1)" stroke-width="4"
+                                                                     id="sast-full-start-Rectangle-1" xlink:href="#sast-full-start-rect"/>
+                                                                <path stroke-width="2" id="sast-full-start-Line-1" d="M5,0 L5,2.99971994"
                                                                       stroke-linecap="square"/>
-                                                                <path stroke-width="2" id="Line-Copy" d="M18,0 L18,2.99971994"
+                                                                <path stroke-width="2" id="sast-full-start-Line-2" d="M18,0 L18,2.99971994"
                                                                       stroke-linecap="square"/>
                                                             </g>
                                                         </g>
@@ -1376,33 +1379,34 @@
                                     </div>
                                 </div>
 
-                                <!--end-->
+                                <!--sast-full-end-->
                                 <div class="full-end">
                                     <div class="full-start-end-icon">
                                         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                                              height="26px" version="1.1" viewBox="0 0 23 26" width="23px">
-                                            <title>
-                                                Icon</title>
+                                            <title>Icon</title>
                                             <desc>Created with Sketch.</desc>
                                             <defs>
-                                                <rect height="23" rx="1.6" id="full-start-path" width="23" x="0" y="2"/>
-                                                <mask height="23" maskUnits="objectBoundingBox" id="full-start-mask" width="23"
+                                                <rect height="23" rx="1.6" id="sast-full-end-rect" width="23" x="0" y="2"/>
+                                                <mask height="23" maskUnits="objectBoundingBox"
+                                                      id="sast-full-end-mask" width="23"
                                                       maskContentUnits="userSpaceOnUse" fill="white" x="0"
                                                       y="0">
-                                                    <use xlink:href="#full-start-path"/>
+                                                    <use xlink:href="#sast-full-end-rect"/>
                                                 </mask>
                                             </defs>
-                                            <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
-                                                <g transform="translate(-684.000000, -708.000000)" id="Jenkins"
-                                                   stroke="#373050">
-                                                    <g transform="translate(273.000000, 695.000000)" id="CxSAST">
-                                                        <g transform="translate(411.000000, 9.000000)" id="Group-2-Copy">
-                                                            <g transform="translate(0.000000, 5.000000)" id="Icon">
-                                                                <use mask="url(#full-start-mask)" stroke-width="4"
-                                                                     id="Rectangle-22" xlink:href="#full-start-path"/>
-                                                                <path stroke-width="2" id="Line" d="M5,0 L5,2.99971994"
+                                            <g stroke-width="1" fill-rule="evenodd" id="sast-full-end-Page-1" stroke="none" fill="none">
+                                                <g transform="translate(-684.000000, -708.000000)" id="sast-full-end-1" stroke="#373050">
+                                                    <g transform="translate(273.000000, 695.000000)" id="sast-full-end-2">
+                                                        <g transform="translate(411.000000, 9.000000)" id="sast-full-end-3">
+                                                            <g transform="translate(0.000000, 5.000000)" id="sast-full-end-Icon">
+                                                                <use mask="url(#sast-full-end-mask)" stroke-width="4"
+                                                                     id="sast-full-end-use" xlink:href="#sast-full-end-rect"/>
+                                                                <path stroke-width="2"
+                                                                      id="sast-full-end-Line-1" d="M5,0 L5,2.99971994"
                                                                       stroke-linecap="square"/>
-                                                                <path stroke-width="2" id="Line-Copy" d="M18,0 L18,2.99971994"
+                                                                <path stroke-width="2"
+                                                                      id="sast-full-end-Line-2" d="M18,0 L18,2.99971994"
                                                                       stroke-linecap="square"/>
                                                             </g>
                                                         </g>
@@ -1421,31 +1425,31 @@
                                     </div>
                                 </div>
 
-                                <!--sast files-->
+                                <!--sast-full-files-->
                                 <div class="full-files">
                                     <div class="full-start-end-icon files-icon">
                                         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                                              height="26px" version="1.1" viewBox="0 0 21 26" width="21px">
-                                            <title>
-                                                file</title>
+                                            <title>file</title>
                                             <desc>Created with Sketch.</desc>
                                             <defs>
-                                                <path id="files-path"
+                                                <path id="sast-full-files-path"
                                                       d="M15.5147186,0 L1.99456145,0 C0.90234375,0 0,0.89408944 0,1.99700466 L0,24.0029953 C0,25.1050211 0.892995579,26 1.99456145,26 L19.0054385,26 C20.0976562,26 21,25.1059106 21,24.0029953 L21,5.43446766 L20.9745931,5.45987452 L15.5147186,5.55111512e-16 Z"/>
-                                                <mask height="26" maskUnits="objectBoundingBox" id="files-mask" width="21"
+                                                <mask height="26" maskUnits="objectBoundingBox"
+                                                      id="sast-full-files-mask" width="21"
                                                       maskContentUnits="userSpaceOnUse" fill="white" x="0" y="0">
-                                                    <use xlink:href="#files-path"/>
+                                                    <use xlink:href="#sast-full-files-path"/>
                                                 </mask>
                                             </defs>
-                                            <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
-                                                <g transform="translate(-847.000000, -709.000000)" id="Jenkins">
-                                                    <g transform="translate(273.000000, 695.000000)" id="CxSAST">
-                                                        <g transform="translate(574.000000, 9.000000)" id="Group-3">
-                                                            <g transform="translate(0.000000, 5.000000)" id="file">
-                                                                <use mask="url(#files-mask)" stroke-width="4"
-                                                                     id="Combined-Shape" stroke="#373050"
-                                                                     xlink:href="#files-path"/>
-                                                                <path id="Combined-Shape"
+                                            <g stroke-width="1" fill-rule="evenodd" id="sast-full-files-Page-1" stroke="none" fill="none">
+                                                <g transform="translate(-847.000000, -709.000000)" id="sast-full-files-1">
+                                                    <g transform="translate(273.000000, 695.000000)" id="sast-full-files-2">
+                                                        <g transform="translate(574.000000, 9.000000)" id="sast-full-files-3">
+                                                            <g transform="translate(0.000000, 5.000000)" id="sast-full-files-4">
+                                                                <use mask="url(#sast-full-files-mask)" stroke-width="4"
+                                                                     id="sast-full-files-use" stroke="#373050"
+                                                                     xlink:href="#sast-full-files-path"/>
+                                                                <path id="sast-full-files-path-2"
                                                                       d="M13.8888889,0 L14.7777778,0 L21,7 L21,7.5 L21,8 L13,8 L13,0 L13.8888889,0 Z"
                                                                       fill="#373050"/>
                                                             </g>
@@ -1465,29 +1469,31 @@
                                     </div>
                                 </div>
 
-                                <!--sast loc-->
+                                <!--sast-full-loc-->
                                 <div class="full-loc">
                                     <div class="full-start-end-icon loc-icon">
                                         <svg xmlns="http://www.w3.org/2000/svg" xmlns:svgjs="http://www.w3.org/2000/svg"
                                              xmlns:xlink="http://www.w3.org/1999/xlink" height="29"
-                                             id="SvgjsSvg1018"
-                                             version="1.1" viewBox="0 0 29 29" width="29"><title>Icon</title>
+                                             id="sast-full-loc-svg"
+                                             version="1.1" viewBox="0 0 29 29" width="29">
+                                            <title>Icon</title>
                                             <desc>Created with Avocode.</desc>
-                                            <defs id="SvgjsDefs1019"/>
+                                            <defs id="sast-full-loc-defs"/>
                                             <path stroke-miterlimit="50" transform="matrix(1,0,0,1,-1012,-1365)"
-                                                  stroke-width="2" id="SvgjsPath1020" fill-opacity="0"
+                                                  stroke-width="2"
+                                                  id="sast-full-loc-path-1" fill-opacity="0"
                                                   stroke-dasharray="0"
                                                   d="M1032 1368L1039.95 1378.76L1032 1389.51 " stroke-opacity="1" fill="#ffffff"
                                                   stroke="#373050" stroke-linecap="round"
                                                   stroke-linejoin="round"/>
                                             <path stroke-miterlimit="50" transform="matrix(1,0,0,1,-1012,-1365)"
-                                                  stroke-width="2" id="SvgjsPath1021" fill-opacity="0"
+                                                  stroke-width="2" id="sast-full-loc-path-2" fill-opacity="0"
                                                   stroke-dasharray="0"
                                                   d="M1020.95 1368L1013 1378.76L1020.95 1389.51 " stroke-opacity="1"
                                                   fill="#ffffff" stroke="#373050" stroke-linecap="round"
                                                   stroke-linejoin="round"/>
                                             <path stroke-miterlimit="50" transform="matrix(1,0,0,1,-1012,-1365)"
-                                                  stroke-width="2" id="SvgjsPath1022" fill-opacity="0"
+                                                  stroke-width="2" id="sast-full-loc-path-3" fill-opacity="0"
                                                   stroke-dasharray="0"
                                                   d="M1028.86 1366L1022.9999999999999 1392.54 " stroke-opacity="1"
                                                   fill="#ffffff" stroke="#373050" stroke-linecap="round"
@@ -1518,7 +1524,7 @@
 
                 </div>
 
-
+                <!--osa-full-->
                 <div class="osa-full full-results-section">
                     <div class="summary-table-row cxosa-full" id="osa-full">
                         <div class="title-column">
@@ -1532,8 +1538,11 @@
                                         <a class="html-report" id="osa-html-link">
                                             <div class="link-to-result">
                                                 <div class="results-link-icon link-icon">
+
+                                                    <!--osa-full-->
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="14"
-                                                         viewBox="0 0 12 14"><title>analize</title>
+                                                         viewBox="0 0 12 14">
+                                                        <title>analize</title>
                                                         <g fill="none" fill-rule="evenodd">
                                                             <circle stroke="#4A90E2" stroke-width="2" cx="5" cy="5" r="4"/>
                                                             <path fill="#4A90E2"
@@ -1552,33 +1561,32 @@
                         <div class="main-column">
                             <div class="full-start-end">
 
-                                <!--osa start-->
+                                <!--osa-full-start-->
                                 <div class="full-start">
                                     <div class="full-start-end-icon">
                                         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                                              height="26px" version="1.1" viewBox="0 0 23 26" width="23px">
-                                            <title>
-                                                Icon</title>
+                                            <title>Icon</title>
                                             <desc>Created with Sketch.</desc>
                                             <defs>
-                                                <rect height="23" rx="1.6" id="full-start-path" width="23" x="0" y="2"/>
-                                                <mask height="23" maskUnits="objectBoundingBox" id="full-start-mask" width="23"
+                                                <rect height="23" rx="1.6" id="osa-full-start-rect" width="23" x="0" y="2"/>
+                                                <mask height="23" maskUnits="objectBoundingBox" id="osa-full-start-mask" width="23"
                                                       maskContentUnits="userSpaceOnUse" fill="white" x="0"
                                                       y="0">
-                                                    <use xlink:href="#full-start-path"/>
+                                                    <use xlink:href="#osa-full-start-rect"/>
                                                 </mask>
                                             </defs>
-                                            <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
-                                                <g transform="translate(-684.000000, -708.000000)" id="Jenkins"
+                                            <g stroke-width="1" fill-rule="evenodd" id="osa-full-start-Page-1" stroke="none" fill="none">
+                                                <g transform="translate(-684.000000, -708.000000)" id="osa-full-start-1"
                                                    stroke="#373050">
-                                                    <g transform="translate(273.000000, 695.000000)" id="CxSAST">
-                                                        <g transform="translate(411.000000, 9.000000)" id="Group-2-Copy">
-                                                            <g transform="translate(0.000000, 5.000000)" id="Icon">
-                                                                <use mask="url(#full-start-mask)" stroke-width="4"
-                                                                     id="Rectangle-22" xlink:href="#full-start-path"/>
-                                                                <path stroke-width="2" id="Line" d="M5,0 L5,2.99971994"
+                                                    <g transform="translate(273.000000, 695.000000)" id="osa-full-start-2">
+                                                        <g transform="translate(411.000000, 9.000000)" id="osa-full-start-3">
+                                                            <g transform="translate(0.000000, 5.000000)" id="osa-full-start-Icon">
+                                                                <use mask="url(#osa-full-start-mask)" stroke-width="4"
+                                                                     id="osa-full-start-use" xlink:href="#osa-full-end-rect"/>
+                                                                <path stroke-width="2" id="osa-full-start-Line-1" d="M5,0 L5,2.99971994"
                                                                       stroke-linecap="square"/>
-                                                                <path stroke-width="2" id="Line-Copy" d="M18,0 L18,2.99971994"
+                                                                <path stroke-width="2" id="osa-full-start-Line-2" d="M18,0 L18,2.99971994"
                                                                       stroke-linecap="square"/>
                                                             </g>
                                                         </g>
@@ -1597,33 +1605,33 @@
                                     </div>
                                 </div>
 
-                                <!--osa end-->
+                                <!--osa-full-end-->
                                 <div class="full-end">
                                     <div class="full-start-end-icon">
                                         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                                              height="26px" version="1.1" viewBox="0 0 23 26" width="23px">
-                                            <title>
-                                                Icon</title>
+                                            <title>Icon</title>
                                             <desc>Created with Sketch.</desc>
                                             <defs>
-                                                <rect height="23" rx="1.6" id="full-start-path" width="23" x="0" y="2"/>
-                                                <mask height="23" maskUnits="objectBoundingBox" id="full-start-mask" width="23"
+                                                <rect height="23" rx="1.6" id="osa-full-end-rect" width="23" x="0" y="2"/>
+                                                <mask height="23" maskUnits="objectBoundingBox" id="osa-full-end-mask" width="23"
                                                       maskContentUnits="userSpaceOnUse" fill="white" x="0"
                                                       y="0">
-                                                    <use xlink:href="#full-start-path"/>
+                                                    <use xlink:href="#osa-full-end-rect"/>
                                                 </mask>
                                             </defs>
-                                            <g stroke-width="1" fill-rule="evenodd" id="Page-1" stroke="none" fill="none">
-                                                <g transform="translate(-684.000000, -708.000000)" id="Jenkins"
+                                            <g stroke-width="1" fill-rule="evenodd"
+                                               id="osa-full-end-Page-1" stroke="none" fill="none">
+                                                <g transform="translate(-684.000000, -708.000000)" id="osa-full-end-1"
                                                    stroke="#373050">
-                                                    <g transform="translate(273.000000, 695.000000)" id="CxSAST">
-                                                        <g transform="translate(411.000000, 9.000000)" id="Group-2-Copy">
-                                                            <g transform="translate(0.000000, 5.000000)" id="Icon">
-                                                                <use mask="url(#full-start-mask)" stroke-width="4"
-                                                                     id="Rectangle-22" xlink:href="#full-start-path"/>
-                                                                <path stroke-width="2" id="Line" d="M5,0 L5,2.99971994"
+                                                    <g transform="translate(273.000000, 695.000000)" id="osa-full-end-2">
+                                                        <g transform="translate(411.000000, 9.000000)" id="osa-full-end-3">
+                                                            <g transform="translate(0.000000, 5.000000)" id="osa-full-end-Icon">
+                                                                <use mask="url(#osa-full-end-mask)" stroke-width="4"
+                                                                     id="osa-full-end-mask-use" xlink:href="#osa-full-end-rect"/>
+                                                                <path stroke-width="2" id="osa-full-end-mask-Line-1" d="M5,0 L5,2.99971994"
                                                                       stroke-linecap="square"/>
-                                                                <path stroke-width="2" id="Line-Copy" d="M18,0 L18,2.99971994"
+                                                                <path stroke-width="2" id="osa-full-end-Line-2" d="M18,0 L18,2.99971994"
                                                                       stroke-linecap="square"/>
                                                             </g>
                                                         </g>
@@ -1642,17 +1650,18 @@
                                     </div>
                                 </div>
 
-                                <!--osa files-->
+                                <!--osa-full-files-->
                                 <div class="full-files">
                                     <div class="full-start-end-icon">
                                         <svg xmlns="http://www.w3.org/2000/svg" xmlns:svgjs="http://svgjs.com/svgjs"
                                              xmlns:xlink="http://www.w3.org/1999/xlink" height="27"
-                                             id="SvgjsSvg1029"
-                                             version="1.1" viewBox="0 0 32 27" width="32"><title>Combined Shape</title>
+                                             id="osa-full-files-svg"
+                                             version="1.1" viewBox="0 0 32 27" width="32">
+                                            <title>Combined Shape</title>
                                             <desc>Created with Avocode.</desc>
-                                            <defs id="SvgjsDefs1030">
-                                                <clipPath id="SvgjsClipPath1033">
-                                                    <path id="SvgjsPath1032"
+                                            <defs id="osa-full-files-defs">
+                                                <clipPath id="osa-full-files-clipPath-1">
+                                                    <path id="osa-full-files-Path-1"
                                                           d="M848 2095C848 2094.82964 848.0142 2094.6626 848.04148 2094.5C848.0142 2094.3374 848 2094.17036 848 2094V2091C848 2089.34315 849.34315 2088 851 2088H857C858.65685 2088 860.29137 2089.31116 860.65079 2090.92856L860.8888900000001 2092H877.0000000000001C878.6568500000001 2092 880.0000000000001 2093.34315 880.0000000000001 2095V2112C880.0000000000001 2113.65685 878.6568500000001 2115 877.0000000000001 2115H851.0000000000001C849.3431500000002 2115 848.0000000000001 2113.65685 848.0000000000001 2112Z "
                                                           fill="#ffffff"/>
                                                 </clipPath>
@@ -1662,8 +1671,9 @@
                                                   stroke-opacity="1" stroke="#373050" stroke-linecap="butt"
                                                   stroke-linejoin="miter" stroke-miterlimit="50"
                                                   transform="matrix(1,0,0,1,-848,-2088)"
-                                                  stroke-width="4" id="SvgjsPath1031" fill-opacity="0" fill="#ffffff"
-                                                  clip-path="url(&quot;#SvgjsClipPath1033&quot;)"/>
+                                                  stroke-width="4"
+                                                  id="osa-full-files-Path-2" fill-opacity="0" fill="#ffffff"
+                                                  clip-path="url(#osa-full-files-clipPath-1)"/>
                                         </svg>
                                     </div>
                                     <div class="full-start-end-text-date">
@@ -1847,6 +1857,9 @@
         //---------------------------------------------------------- summary ---------------------------------------------------------------
         if (!sastResultsReady) {
             document.getElementById("no-scan-message-sast-failed").setAttribute("style", "display:inline-block");
+            document.getElementById("sast-results").setAttribute("style", "visibility:hidden");
+
+
         }
         else {
             try {
@@ -2177,9 +2190,9 @@
             var severityNameTtl;
             var severityCountTtl;
 
-            var svgHighIcon = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="19" viewBox="0 0 16 19"><title>Med</title><defs><path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-5.323 11.27-5.323 11.27-.374.403-1.12.73-1.686.73H7.01c-.558 0-1.308-.333-1.675-.76C5.335 18.24 0 12.516 0 8c0-3.172 1-7 1-7z" id="a"/><path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-5.323 11.27-5.323 11.27-.374.403-1.12.73-1.686.73H7.01c-.558 0-1.308-.333-1.675-.76C5.335 18.24 0 12.516 0 8c0-3.172 1-7 1-7z" id="c"/></defs><g fill="none" fill-rule="evenodd"><mask id="b" fill="#fff"><use xlink:href="#a"/></mask><use fill="#D82D49" xlink:href="#a"/><path stroke="#BB1A34" d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.342.48 2.682.488 3.924V7c0 2.52-.966 5.112-2.582 7.62-.57.884-1.18 1.694-1.79 2.41-.214.252-.41.472-.588.66-.104.113-.178.188-.215.224-.296.32-.91.586-1.334.586H7.01c-.42 0-1.028-.274-1.296-.585-.052-.056-.127-.14-.233-.26-.178-.202-.378-.436-.593-.697-.615-.747-1.23-1.564-1.804-2.422C2.097 13.06 1.34 11.62.906 10.284.64 9.462.5 8.697.5 8c0-.433.02-.895.056-1.38C.634 5.6.786 4.51.992 3.4c.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/><path fill="#BB1A34" mask="url(#b)" d="M8 0h8v20H8z"/><mask id="d" fill="#fff"><use xlink:href="#c"/></mask><path stroke="#BB1A34" d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.342.48 2.682.488 3.924V7c0 2.52-.966 5.112-2.582 7.62-.57.884-1.18 1.694-1.79 2.41-.214.252-.41.472-.588.66-.104.113-.178.188-.215.224-.296.32-.91.586-1.334.586H7.01c-.42 0-1.028-.274-1.296-.585-.052-.056-.127-.14-.233-.26-.178-.202-.378-.436-.593-.697-.615-.747-1.23-1.564-1.804-2.422C2.097 13.06 1.34 11.62.906 10.284.64 9.462.5 8.697.5 8c0-.433.02-.895.056-1.38C.634 5.6.786 4.51.992 3.4c.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/><path fill="#FFF" mask="url(#d)" d="M5 12h2V9.5h2V12h2V5H9v2.5H7V5H5"/></g></svg>';
-            var svgMedIcon = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="20" viewBox="0 0 16 20"><title>Low</title><defs><path d="M1 1.053L8 0l7 1.053s1 3.173 1 6.315c0 6.332-5.346 11.89-5.346 11.89-.36.41-1.097.742-1.663.742H7.01c-.558 0-1.3-.34-1.652-.77 0 0-5.358-6.056-5.358-10.81 0-3.338 1-7.367 1-7.367z" id="a"/><path d="M1 1.053L8 0l7 1.053s1 3.173 1 6.315c0 6.332-5.346 11.89-5.346 11.89-.36.41-1.097.742-1.663.742H7.01c-.558 0-1.3-.34-1.652-.77 0 0-5.358-6.056-5.358-10.81 0-3.338 1-7.367 1-7.367z" id="c"/></defs><g fill="none" fill-rule="evenodd"><mask id="b" fill="#fff"><use xlink:href="#a"/></mask><use fill="#FFAC00" xlink:href="#a"/><path stroke="#E49B16" d="M1.41 1.497L8 .507l6.61.993c.02.067.04.144.064.228.114.425.23.898.337 1.407.3 1.418.48 2.83.49 4.143v.09c0 2.665-.972 5.404-2.6 8.06-.57.934-1.185 1.79-1.8 2.55-.213.264-.412.498-.59.698-.105.118-.18.198-.216.237-.282.32-.882.587-1.302.587H7.01c-.414 0-1.01-.277-1.266-.587-.05-.06-.126-.146-.233-.274-.18-.216-.38-.464-.594-.74-.62-.79-1.237-1.654-1.814-2.56-.982-1.55-1.74-3.06-2.18-4.463C.645 9.994.5 9.17.5 8.42c0-.457.02-.944.057-1.457.077-1.072.23-2.22.435-3.392.11-.614.224-1.197.34-1.73L1.41 1.5z"/><path fill="#D79201" mask="url(#b)" d="M8 0h8v20H8z"/><mask id="d" fill="#fff"><use xlink:href="#c"/></mask><path stroke="#D49100" d="M1.41 1.497L8 .507l6.61.993c.02.067.04.144.064.228.114.425.23.898.337 1.407.3 1.418.48 2.83.49 4.143v.09c0 2.665-.972 5.404-2.6 8.06-.57.934-1.185 1.79-1.8 2.55-.213.264-.412.498-.59.698-.105.118-.18.198-.216.237-.282.32-.882.587-1.302.587H7.01c-.414 0-1.01-.277-1.266-.587-.05-.06-.126-.146-.233-.274-.18-.216-.38-.464-.594-.74-.62-.79-1.237-1.654-1.814-2.56-.982-1.55-1.74-3.06-2.18-4.463C.645 9.994.5 9.17.5 8.42c0-.457.02-.944.057-1.457.077-1.072.23-2.22.435-3.392.11-.614.224-1.197.34-1.73L1.41 1.5z"/><path fill="#472F00" mask="url(#d)" d="M4.28 12.632h1.9v-4.21l1.78 2.862H8L9.79 8.4v4.232h1.93v-7.37H9.67L8 8.117 6.33 5.263H4.28"/></g></svg>';
-            var svgLowIcon = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="19" viewBox="0 0 16 19"><title>Low</title><defs><path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z" id="a"/><path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z" id="c"/></defs><g fill="none" fill-rule="evenodd"><path d="M7.96 17.32L8 .015l-6.5 1s-.96 4.5-.96 8.75c1.272 4.602 5.968 9.25 5.968 9.25h.163l1.29-1.695z" fill="#EDEFF5"/><mask id="b" fill="#fff"><use xlink:href="#a"/></mask><use fill="#FFEB3B" xlink:href="#a"/><path stroke="#E4D200" d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.34.48 2.68.488 3.923V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38.078-1.02.23-2.11.436-3.22.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/><path fill="#DDCE00" mask="url(#b)" d="M8-8h10v32H8z"/><mask id="d" fill="#fff"><use xlink:href="#c"/></mask><path stroke="#E4D200" d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.34.48 2.68.488 3.923V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38.078-1.02.23-2.11.436-3.22.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/><path fill="#605900" mask="url(#d)" d="M5.54 12h5.33v-1.7H7.48V5H5.54"/></g></svg>';
+            var svgHighIcon = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="19" viewBox="0 0 16 19"><title>High</title><defs><path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-5.323 11.27-5.323 11.27-.374.403-1.12.73-1.686.73H7.01c-.558 0-1.308-.333-1.675-.76C5.335 18.24 0 12.516 0 8c0-3.172 1-7 1-7z" id="sast-full-high-path-1"/><path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-5.323 11.27-5.323 11.27-.374.403-1.12.73-1.686.73H7.01c-.558 0-1.308-.333-1.675-.76C5.335 18.24 0 12.516 0 8c0-3.172 1-7 1-7z" id="sast-full-high-path-2"/></defs><g fill="none" fill-rule="evenodd"><mask id="sast-full-high-mask-1" fill="#fff"><use xlink:href="#sast-full-high-path-1"/></mask><use fill="#D82D49" xlink:href="#sast-full-high-path-1"/><path stroke="#BB1A34" d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.342.48 2.682.488 3.924V7c0 2.52-.966 5.112-2.582 7.62-.57.884-1.18 1.694-1.79 2.41-.214.252-.41.472-.588.66-.104.113-.178.188-.215.224-.296.32-.91.586-1.334.586H7.01c-.42 0-1.028-.274-1.296-.585-.052-.056-.127-.14-.233-.26-.178-.202-.378-.436-.593-.697-.615-.747-1.23-1.564-1.804-2.422C2.097 13.06 1.34 11.62.906 10.284.64 9.462.5 8.697.5 8c0-.433.02-.895.056-1.38C.634 5.6.786 4.51.992 3.4c.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/><path fill="#BB1A34" mask="url(#sast-full-high-mask-1)" d="M8 0h8v20H8z"/><mask id="sast-full-high-mask-2" fill="#fff"><use xlink:href="#sast-full-high-path-2"/></mask><path stroke="#BB1A34" d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.342.48 2.682.488 3.924V7c0 2.52-.966 5.112-2.582 7.62-.57.884-1.18 1.694-1.79 2.41-.214.252-.41.472-.588.66-.104.113-.178.188-.215.224-.296.32-.91.586-1.334.586H7.01c-.42 0-1.028-.274-1.296-.585-.052-.056-.127-.14-.233-.26-.178-.202-.378-.436-.593-.697-.615-.747-1.23-1.564-1.804-2.422C2.097 13.06 1.34 11.62.906 10.284.64 9.462.5 8.697.5 8c0-.433.02-.895.056-1.38C.634 5.6.786 4.51.992 3.4c.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/><path fill="#FFF" mask="url(#sast-full-high-mask-2)" d="M5 12h2V9.5h2V12h2V5H9v2.5H7V5H5"/></g></svg>';
+            var svgMedIcon = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="20" viewBox="0 0 16 20"><title>Med</title><defs><path d="M1 1.053L8 0l7 1.053s1 3.173 1 6.315c0 6.332-5.346 11.89-5.346 11.89-.36.41-1.097.742-1.663.742H7.01c-.558 0-1.3-.34-1.652-.77 0 0-5.358-6.056-5.358-10.81 0-3.338 1-7.367 1-7.367z" id="sast-full-med-path-1"/><path d="M1 1.053L8 0l7 1.053s1 3.173 1 6.315c0 6.332-5.346 11.89-5.346 11.89-.36.41-1.097.742-1.663.742H7.01c-.558 0-1.3-.34-1.652-.77 0 0-5.358-6.056-5.358-10.81 0-3.338 1-7.367 1-7.367z" id="sast-full-med-path-2"/></defs><g fill="none" fill-rule="evenodd"><mask id="sast-full-med-mask-1" fill="#fff"><use xlink:href="#sast-full-med-path-1"/></mask><use fill="#FFAC00" xlink:href="#sast-full-med-path-1"/><path stroke="#E49B16" d="M1.41 1.497L8 .507l6.61.993c.02.067.04.144.064.228.114.425.23.898.337 1.407.3 1.418.48 2.83.49 4.143v.09c0 2.665-.972 5.404-2.6 8.06-.57.934-1.185 1.79-1.8 2.55-.213.264-.412.498-.59.698-.105.118-.18.198-.216.237-.282.32-.882.587-1.302.587H7.01c-.414 0-1.01-.277-1.266-.587-.05-.06-.126-.146-.233-.274-.18-.216-.38-.464-.594-.74-.62-.79-1.237-1.654-1.814-2.56-.982-1.55-1.74-3.06-2.18-4.463C.645 9.994.5 9.17.5 8.42c0-.457.02-.944.057-1.457.077-1.072.23-2.22.435-3.392.11-.614.224-1.197.34-1.73L1.41 1.5z"/><path fill="#D79201" mask="url(#sast-full-med-mask-1)" d="M8 0h8v20H8z"/><mask id="sast-full-med-mask-2" fill="#fff"><use xlink:href="#sast-full-med-path-2"/></mask><path stroke="#D49100" d="M1.41 1.497L8 .507l6.61.993c.02.067.04.144.064.228.114.425.23.898.337 1.407.3 1.418.48 2.83.49 4.143v.09c0 2.665-.972 5.404-2.6 8.06-.57.934-1.185 1.79-1.8 2.55-.213.264-.412.498-.59.698-.105.118-.18.198-.216.237-.282.32-.882.587-1.302.587H7.01c-.414 0-1.01-.277-1.266-.587-.05-.06-.126-.146-.233-.274-.18-.216-.38-.464-.594-.74-.62-.79-1.237-1.654-1.814-2.56-.982-1.55-1.74-3.06-2.18-4.463C.645 9.994.5 9.17.5 8.42c0-.457.02-.944.057-1.457.077-1.072.23-2.22.435-3.392.11-.614.224-1.197.34-1.73L1.41 1.5z"/><path fill="#472F00" mask="url(#sast-full-med-mask-2)" d="M4.28 12.632h1.9v-4.21l1.78 2.862H8L9.79 8.4v4.232h1.93v-7.37H9.67L8 8.117 6.33 5.263H4.28"/></g></svg>';
+            var svgLowIcon = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="19" viewBox="0 0 16 19"><title>Low</title><defs><path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z" id="sast-full-low-path-1"/><path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z" id="sast-full-low-path-2"/></defs><g fill="none" fill-rule="evenodd"><path d="M7.96 17.32L8 .015l-6.5 1s-.96 4.5-.96 8.75c1.272 4.602 5.968 9.25 5.968 9.25h.163l1.29-1.695z" fill="#EDEFF5"/><mask id="sast-full-low-mask-1" fill="#fff"><use xlink:href="#sast-full-low-path-1"/></mask><use fill="#FFEB3B" xlink:href="#sast-full-low-path-1"/><path stroke="#E4D200" d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.34.48 2.68.488 3.923V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38.078-1.02.23-2.11.436-3.22.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/><path fill="#DDCE00" mask="url(#sast-full-low-mask-1)" d="M8-8h10v32H8z"/><mask id="sast-full-low-mask-2" fill="#fff"><use xlink:href="#sast-full-low-path-2"/></mask><path stroke="#E4D200" d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.34.48 2.68.488 3.923V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38.078-1.02.23-2.11.436-3.22.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/><path fill="#605900" mask="url(#sast-full-low-mask-2)" d="M5.54 12h5.33v-1.7H7.48V5H5.54"/></g></svg>';
 
             switch (severity) {
                 case SEVERITY.HIGH:
