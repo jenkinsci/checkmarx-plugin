@@ -275,7 +275,7 @@
 
         .results-report .chart li span {
             max-width: 20px;
-            overflow: hidden;
+            /*overflow: hidden;*/
         }
 
         .results-report .chart span {
@@ -1805,7 +1805,7 @@
 
         //counts - Legacy form
         var highCount = verifyVar([${it.highCount}]);
-        var highNewCount = 1; //todo - get real number from server
+        var highNewCount = 70; //todo - get real number from server
         var medCount = verifyVar([${it.mediumCount}]);
         var medNewCount = 0; //todo - get real number from server
         var lowCount = verifyVar([${it.lowCount}]);
@@ -1966,9 +1966,10 @@
 
 //                recurrent height
                 var highRecurrentCount = highCount - highNewCount;
+                var highRecurrentPercent = highRecurrentCount * 100 / highCount;
                 var medRecurrentCount = medCount - medNewCount;
                 var lowRecurrentCount = lowCount - lowNewCount;
-                document.getElementById("high-recurrent-scans").setAttribute("style", "height:" + highRecurrentCount * 100 / highCount + "%");
+                document.getElementById("high-recurrent-scans").setAttribute("style", "height:calc(" + highRecurrentPercent + "% - 10px");
                 document.getElementById("med-recurrent-scans").setAttribute("style", "height:" + medRecurrentCount * 100 / medCount + "%");
                 document.getElementById("low-recurrent-scans").setAttribute("style", "height:" + lowRecurrentCount * 100 / lowCount + "%");
 
