@@ -270,7 +270,7 @@
             position: relative;
             display: table-cell;
             vertical-align: bottom;
-            height: 200px;
+            height: 238px;
         }
 
         .results-report .chart li span {
@@ -887,7 +887,7 @@
                                     <li>
                                         <span class="bar-1" id="bar-high">
                                             <div id="tooltip-high"></div>
-                                            <div id="new-scans" class="new-scans"></div>
+                                            <div id="high-new-scans" class="new-scans"></div>
                                             <div id="high-recurrent-scans" class="high-recurrent-scans"></div>
                                         </span>
 
@@ -1809,7 +1809,7 @@
         var medCount = verifyVar([${it.mediumCount}]);
         var medNewCount = 0; //todo - get real number from server
         var lowCount = verifyVar([${it.lowCount}]);
-        var lowNewCount = 190; //todo - get real number from server
+        var lowNewCount = 1; //todo - get real number from server
 
         //cve lists - New (8.4.2 and up)
         var highCveList = verifyVar([${it.sastScanResult.highQueryResultsJson}]);
@@ -1954,40 +1954,62 @@
                 //graphs max height
                 var maxCount = Math.max(highCount, medCount, lowCount);
                 var maxHeight = maxCount * 100 / 90;
+                var minimalVisibilityHeight = 5;
+                var totalHeightPx = 238;
 
-//                total height - new + recurrent
-                var highTotalHeight = highCount * 100 / maxHeight;
-                var medTotalHeight = medCount * 100 / maxHeight;
-                var lowTotalHeight = lowCount * 100 / maxHeight;
+                //---------high vulnarabilities
+                //total height - new + recurrent
+                var highTotalHeightPx = highCount  / maxHeight  * totalHeightPx;
+                document.getElementById("bar-high").setAttribute("style", "height:" + highTotalHeightPx + "px");
 
-                document.getElementById("bar-high").setAttribute("style", "height:" + highTotalHeight + "%");
-                document.getElementById("bar-med").setAttribute("style", "height:" + medTotalHeight + "%");
-                document.getElementById("bar-low").setAttribute("style", "height:" + lowTotalHeight + "%");
+                //new high
+                var highNewHeightPx = highNewCount / highCount * highTotalHeightPx;
+                //if new height is between 1 and 9 - give it a minimum height and if theres enough spce in total height
+                if(isNewNeedChange(highTotalHeightPx, highNewHeightPx, minimalVisibilityHeight)) {
+                    highNewHeightPx = minimalVisibilityHeight;
+                }
+                document.getElementById("high-new-scans").setAttribute("style", "height:" + highNewHeightPx + "px");
 
-//                recurrent height
-                var highRecurrentCount = highCount - highNewCount;
-                var highRecurrentPercent = highRecurrentCount * 100 / highCount;
-                var medRecurrentCount = medCount - medNewCount;
-                var lowRecurrentCount = lowCount - lowNewCount;
-                document.getElementById("high-recurrent-scans").setAttribute("style", "height:calc(" + highRecurrentPercent + "% - 10px");
-                document.getElementById("med-recurrent-scans").setAttribute("style", "height:" + medRecurrentCount * 100 / medCount + "%");
-                document.getElementById("low-recurrent-scans").setAttribute("style", "height:" + lowRecurrentCount * 100 / lowCount + "%");
+                //recurrent high
+                var highRecurrentPx = highTotalHeightPx - highNewHeightPx;
+                document.getElementById("high-recurrent-scans").setAttribute("style", "height:" + highRecurrentPx + "px");
 
-                //------------set NEW bars height-------------
-                //high
-                var highNewHeightPercentage = highNewCount * 100 / highCount;
-                var highNewMinHeight = highNewCount === 0 ? 0 : 10;
-                document.getElementById("new-scans").setAttribute("style", "height:" + highNewHeightPercentage + "%; min-height:" + highNewMinHeight + "px");
 
-                //med
-                var medNewHeightPercentage = medNewCount * 100 / medCount;
-                var medNewMinHeight = medNewCount === 0 ? 0 : 10;
-                document.getElementById("med-new-scans").setAttribute("style", "height:" + medNewHeightPercentage + "%; min-height:" + medNewMinHeight + "px");
+                //---------med vulnarabilities
+                //total height - new + recurrent
+                var medTotalHeightPx = medCount  / maxHeight  * totalHeightPx;
+                document.getElementById("bar-med").setAttribute("style", "height:" + medTotalHeightPx + "px");
 
-                //low
-                var lowNewHeightPercentage = lowNewCount * 100 / lowCount;
-                var lowNewMinHeight = lowNewCount === 0 ? 0 : 10;
-                document.getElementById("low-new-scans").setAttribute("style", "height:" + lowNewHeightPercentage + "%; min-height:" + lowNewMinHeight + "px");
+                //new med
+                var medNewHeightPx = medNewCount / medCount * medTotalHeightPx;
+                if(isNewNeedChange(medTotalHeightPx, medNewHeightPx, minimalVisibilityHeight)) {
+                    medNewHeightPx = minimalVisibilityHeight;
+                }
+                document.getElementById("med-new-scans").setAttribute("style", "height:" + medNewHeightPx + "px");
+
+                //recurrent med
+                var medRecurrentPx = medTotalHeightPx - medNewHeightPx;
+                document.getElementById("med-recurrent-scans").setAttribute("style", "height:" + medRecurrentPx + "px");
+
+
+                //---------low vulnarabilities
+                //total height - new + recurrent
+                var lowTotalHeightPx = lowCount  / maxHeight  * totalHeightPx;
+                document.getElementById("bar-low").setAttribute("style", "height:" + lowTotalHeightPx + "px");
+
+                //new low
+                var lowNewHeightPx = lowNewCount / lowCount * lowTotalHeightPx;
+                if(isNewNeedChange(lowTotalHeightPx, lowNewHeightPx, minimalVisibilityHeight)) {
+                    lowNewHeightPx = minimalVisibilityHeight;
+                }
+                document.getElementById("low-new-scans").setAttribute("style", "height:" + lowNewHeightPx + "px");
+
+                //recurrent low
+                var lowRecurrentPx = lowTotalHeightPx - lowNewHeightPx;
+                document.getElementById("low-recurrent-scans").setAttribute("style", "height:" + lowRecurrentPx + "px");
+
+
+
 
                 //set NEW bars count
                 document.getElementById("new-bar-count-high").innerHTML = highNewCount + " NEW";
@@ -2516,6 +2538,18 @@
         function adjustDateFormat(date) {
             return date.substr(0, 10) + " " + date.substr(11);
         }
+        function isNewMinHeight(highNewHeightPx, minimalVisibilityHeight) {
+            return highNewHeightPx &gt; 0 &amp;&amp; highNewHeightPx &lt; minimalVisibilityHeight;
+        }
+
+        function isTotalHeightEnough(highTotalHeightPx, minimalVisibilityHeight) {
+            return highTotalHeightPx &gt; minimalVisibilityHeight * 2
+        }
+
+        function isNewNeedChange(highTotalHeightPx, highNewHeightPx, minimalVisibilityHeight) {
+            return isNewMinHeight(highNewHeightPx, minimalVisibilityHeight) &amp;&amp; isTotalHeightEnough(highTotalHeightPx, minimalVisibilityHeight);
+        }
+
 
     </script>
 
