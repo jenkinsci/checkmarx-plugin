@@ -15,6 +15,10 @@ public class SastScanResult {
     private Integer lowCount;
     private Integer infoCount;
 
+    private Integer newHighCount;
+    private Integer newMediumCount;
+    private Integer newLowCount;
+
     private LinkedList<QueryResult> highQueryResultList;
     private LinkedList<QueryResult> mediumQueryResultList;
     private LinkedList<QueryResult> lowQueryResultList;
@@ -80,6 +84,18 @@ public class SastScanResult {
     public void setInfoCount(int infoCount) {
         this.infoCount = infoCount;
     }
+
+    public Integer getNewHighCount() { return newHighCount; }
+
+    public void setNewHighCount(Integer newHighCount) { this.newHighCount = newHighCount; }
+
+    public Integer getNewMediumCount() { return newMediumCount; }
+
+    public void setNewMediumCount(Integer newMediumCount) { this.newMediumCount = newMediumCount; }
+
+    public Integer getNewLowCount() { return newLowCount; }
+
+    public void setNewLowCount(Integer newLowCount) { this.newLowCount = newLowCount; }
 
     public LinkedList<QueryResult> getHighQueryResultList() {
         return highQueryResultList;
@@ -198,9 +214,5 @@ public class SastScanResult {
     public void setScanType(@Nullable String scanType) {
         this.scanType = scanType;
     }
-
-
-
-
 
 }

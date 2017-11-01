@@ -63,20 +63,12 @@ public class CxProjectResult implements Action {
 
     @Override
     public String getDisplayName() {
-        if (isShowResults()) {
-            return "Checkmarx Last Scan Results";
-        } else {
-            return null;
-        }
+      return null;
     }
 
     @Override
     public String getIconFileName() {
-        if (isShowResults()) {
-            return getIconPath() + "CxIcon24x24.png";
-        } else {
-            return null;
-        }
+        return null;
     }
 
     @NotNull

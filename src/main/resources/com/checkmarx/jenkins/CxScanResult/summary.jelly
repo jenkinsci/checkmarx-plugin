@@ -4,6 +4,101 @@
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
     <style>
+
+        .recurrent-legend {
+            margin-right: 15px;
+        }
+
+        .legend-color-box.recurrent-legend-color {
+            background-color: #372F51;
+        }
+
+        .legend-color-box.new-legend-color {
+            background: linear-gradient(45deg, white 25%, #373050 25%, #373050 50%, white 50%, white 75%, #373050 75%);
+            background-size: 4px 4px;
+        }
+
+        .legend-color-box {
+            width: 16px;
+            height: 16px;
+            margin-right: 10px;
+        }
+
+        .legend-text {
+            color: #9B9B9B;
+            font-family: Roboto, sans-serif;
+            font-size: 14px;
+            line-height: 16px;
+        }
+
+        .legend-item {
+            display: flex;
+            margin-top: auto;
+            margin-bottom: auto;
+            margin-left: auto;
+        }
+
+        .chart-legend {
+            display: inline-flex;
+            height: 100%;
+            margin: auto;
+        }
+
+        .chart-legend-container {
+            align-items: center;
+            width: 50%;
+            text-align: right;
+        }
+
+        .results-report .threshold-exceeded-compliance {
+            width: 50%;
+        }
+
+        .results-report .sast-summary.chart-large .top-of-chart {
+            max-width: 709px;
+        }
+        .top-of-chart {
+            display: flex;
+            max-width: 475px;
+            min-width: 330px;
+            width: 100%;
+        }
+
+        .results-report .sast-summary.chart-large .new-bar-title-container {
+            margin-left: 25%;
+        }
+        .new-bar-title-container {
+            font-weight: bold;
+            background-color: #f2f2f2;
+            text-align: center;
+            border-radius: 8px;
+            width: fit-content;
+            line-height: 19px;
+            padding: 1px 5px;
+            margin: auto;
+            color: #373050;
+        }
+
+        .bar-title-wrapper {
+            position: absolute;
+        }
+
+        .results-report .sast-summary.chart-large .bar-title-wrapper {
+            width: 100%;
+        }
+
+        .new-scans {
+            background: linear-gradient(45deg, white 25%,
+            #373050 25%, #373050 50%,
+            white 50%, white 75%,
+            #373050 75%);
+            background-size: 4px 4px;
+        }
+
+        .recurrent-scans {
+            background-color: #373050;
+        }
+
         .summary-results {
             display: flex;
             position: relative;
@@ -163,7 +258,6 @@
         }
 
         .results-report .sast-summary.chart-large .chart .bar-title-container {
-            position: absolute;
             margin-left: 27%;
             padding-top: 21px;
             display: inline-flex;
@@ -196,11 +290,12 @@
             position: relative;
             display: table-cell;
             vertical-align: bottom;
-            height: 200px;
+            height: 238px;
         }
 
         .results-report .chart li span {
             max-width: 20px;
+            /*overflow: hidden;*/
         }
 
         .results-report .chart span {
@@ -227,6 +322,9 @@
             position: absolute;
         }
 
+        .results-report .sast-summary.chart-large .bar-title-icon {
+            width: 30px;
+        }
         .results-report .bar-title-icon {
             margin-right: 6px;
             height: 20px;
@@ -235,7 +333,6 @@
         }
 
         .results-report .chart .bar-title-container {
-            position: absolute;
             margin-left: 25%;
             transform: translate(-25%, 0);
             padding-top: 21px;
@@ -246,17 +343,7 @@
             align-items: center;
         }
 
-        .results-report .chart .bar-1 {
-            position: relative;
-            background-color: #373050;
-        }
-
-        .results-report .chart .bar-2 {
-            position: relative;
-            background-color: #373050;
-        }
-
-        .results-report .chart .bar-3 {
+        .results-report .chart .bar-3, .results-report .chart .bar-2, .results-report .chart .bar-1 {
             position: relative;
             background-color: #373050;
         }
@@ -780,67 +867,86 @@
 
                             </div>
 
+                            <!--sast-chart-->
                             <div class="summary-chart" id="sast-results">
-                                <div class="threshold-exceeded-compliance" id="threshold-exceeded-compliance"></div>
+                                <div class="top-of-chart">
+                                    <div class="threshold-exceeded-compliance" id="threshold-exceeded-compliance"></div>
+
+                                    <div id="sast-legend-container" class="chart-legend-container">
+                                        <div class="chart-legend">
+
+                                            <div class="legend-item recurrent-legend">
+                                                <div class="legend-color-box recurrent-legend-color"></div>
+                                                <div class="legend-text recurrent-legend-text">Recurrent</div>
+                                            </div>
+                                            <div class="legend-item new-legend">
+                                                <div class="legend-color-box new-legend-color"></div>
+                                                <div class="legend-text new-legend-text">New</div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+
                                 <ul class="chart">
 
 
                                     <!--high-->
                                     <li>
-
-
-
-
                                         <span class="bar-1" id="bar-high">
                                             <div id="tooltip-high"></div>
+                                            <div id="high-new-scans" class="new-scans"></div>
+                                            <div id="high-recurrent-scans" class="recurrent-scans"></div>
                                         </span>
 
 
-
-                                        <!--sast-high-->
-                                        <div class="bar-title-container">
-                                            <div class="bar-title-icon">
-                                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                                                     width="16px" height="19px" viewBox="0 0 16 19" version="1.1">
-                                                    <!-- Generator: Sketch 43.2 (39069) - http://www.bohemiancoding.com/sketch -->
-                                                    <title>High</title>
-                                                    <desc>Created with Sketch.</desc>
-                                                    <defs>
-                                                        <path d="M1,1 L8,0 L15,1 C15,1 16,4.01515152 16,7 C16,13.0151515 10.6766131,18.2701936 10.6766131,18.2701936 C10.30293,18.6732545 9.55664682,19 8.9906311,19 L7.0093689,19 C6.45190985,19 5.70245907,18.6673641 5.33497024,18.2411641 C5.33497024,18.2411641 3.70193273e-12,12.5151515 3.63797881e-12,8 C7.03437308e-13,4.82765152 1,1 1,1 Z"
-                                                              id="sast-high-path-1"/>
-                                                        <path d="M1,1 L8,0 L15,1 C15,1 16,4.01515152 16,7 C16,13.0151515 10.6766131,18.2701936 10.6766131,18.2701936 C10.30293,18.6732545 9.55664682,19 8.9906311,19 L7.0093689,19 C6.45190985,19 5.70245907,18.6673641 5.33497024,18.2411641 C5.33497024,18.2411641 3.70193273e-12,12.5151515 3.63797881e-12,8 C7.03437308e-13,4.82765152 1,1 1,1 Z"
-                                                              id="sast-high-path-2"/>
-                                                    </defs>
-                                                    <g id="sast-high-Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                                        <g id="sast-high-Icons" transform="translate(-47.000000, -88.000000)">
-                                                            <g id="High" transform="translate(47.000000, 88.000000)">
-                                                                <g id="Vonerability-High-sast">
-                                                                    <mask id="sast-high-mask-1" fill="white">
-                                                                        <use xlink:href="#sast-high-path-1"/>
-                                                                    </mask>
-                                                                    <g id="sast-high-Rectangle-1">
-                                                                        <use fill="#D82D49" fill-rule="evenodd"
-                                                                             xlink:href="#sast-high-path-1"/>
-                                                                        <path stroke="#BB1A34" stroke-width="1"
+                                        <div class="bar-title-wrapper">
+                                            <div class="bar-title-container">
+                                                <div class="bar-title-icon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                                         width="16px" height="19px" viewBox="0 0 16 19" version="1.1">
+                                                        <!-- Generator: Sketch 43.2 (39069) - http://www.bohemiancoding.com/sketch -->
+                                                        <title>Med</title>
+                                                        <desc>Created with Sketch.</desc>
+                                                        <defs>
+                                                            <path d="M1,1 L8,0 L15,1 C15,1 16,4.01515152 16,7 C16,13.0151515 10.6766131,18.2701936 10.6766131,18.2701936 C10.30293,18.6732545 9.55664682,19 8.9906311,19 L7.0093689,19 C6.45190985,19 5.70245907,18.6673641 5.33497024,18.2411641 C5.33497024,18.2411641 3.70193273e-12,12.5151515 3.63797881e-12,8 C7.03437308e-13,4.82765152 1,1 1,1 Z"
+                                                                  id="path-1"/>
+                                                            <path d="M1,1 L8,0 L15,1 C15,1 16,4.01515152 16,7 C16,13.0151515 10.6766131,18.2701936 10.6766131,18.2701936 C10.30293,18.6732545 9.55664682,19 8.9906311,19 L7.0093689,19 C6.45190985,19 5.70245907,18.6673641 5.33497024,18.2411641 C5.33497024,18.2411641 3.70193273e-12,12.5151515 3.63797881e-12,8 C7.03437308e-13,4.82765152 1,1 1,1 Z"
+                                                                  id="path-3"/>
+                                                        </defs>
+                                                        <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                                            <g id="Icons" transform="translate(-47.000000, -88.000000)">
+                                                                <g id="High" transform="translate(47.000000, 88.000000)">
+                                                                    <g id="Vonerability-High">
+                                                                        <mask id="mask-2" fill="white">
+                                                                            <use xlink:href="#path-1"/>
+                                                                        </mask>
+                                                                        <g id="Rectangle-10">
+                                                                            <use fill="#D82D49" fill-rule="evenodd"
+                                                                                 xlink:href="#path-1"/>
+                                                                            <path stroke="#BB1A34" stroke-width="1"
+                                                                                  d="M1.4041953,1.44733409 L8,0.505076272 L14.6160396,1.45022478 C14.6341112,1.51124347 14.6539641,1.5795116 14.6753578,1.65465958 C14.7899552,2.05719756 14.9047222,2.50600605 15.0118679,2.98897331 C15.3098751,4.33226343 15.4915175,5.67204692 15.4997158,6.91419406 C15.4999523,6.95710967 15.4999523,6.95710967 15.5,7 C15.5,9.52090451 14.5340777,12.111589 12.9179883,14.6199787 C12.3484584,15.5039663 11.7377754,16.313821 11.1275564,17.0311249 C10.9144997,17.2815702 10.7170402,17.5022391 10.5403911,17.6908777 C10.4358029,17.8025645 10.3623853,17.8778048 10.3253512,17.9143634 C10.0291161,18.2331673 9.41484636,18.5 8.9906311,18.5 L7.0093689,18.5 C6.59080843,18.5 5.98194778,18.2258269 5.71364227,17.9146561 C5.66213668,17.8588317 5.58703389,17.7761053 5.4807125,17.6555634 C5.30200204,17.4529504 5.10247221,17.2193106 4.88735491,16.9580823 C4.27213719,16.2109907 3.656779,15.394289 3.08320773,14.5359605 C2.09721248,13.0604546 1.34127053,11.6205479 0.906388115,10.2835472 C0.639104683,9.46181216 0.5,8.69692293 0.5,8 C0.5,7.56658708 0.519280284,7.10494686 0.556403808,6.61890492 C0.63408435,5.60186781 0.786470164,4.51217341 0.991682584,3.40118912 C1.09968656,2.81647439 1.21542088,2.26333889 1.3310756,1.7595034 C1.35796875,1.64234673 1.3824953,1.53794489 1.4041953,1.44733409 Z"/>
+                                                                        </g>
+                                                                        <rect id="Rectangle-22" fill="#BB1A34" mask="url(#mask-2)" x="8"
+                                                                              y="0" width="8" height="20"/>
+                                                                        <mask id="mask-4" fill="white">
+                                                                            <use xlink:href="#path-3"/>
+                                                                        </mask>
+                                                                        <path stroke="#BB1A34"
                                                                               d="M1.4041953,1.44733409 L8,0.505076272 L14.6160396,1.45022478 C14.6341112,1.51124347 14.6539641,1.5795116 14.6753578,1.65465958 C14.7899552,2.05719756 14.9047222,2.50600605 15.0118679,2.98897331 C15.3098751,4.33226343 15.4915175,5.67204692 15.4997158,6.91419406 C15.4999523,6.95710967 15.4999523,6.95710967 15.5,7 C15.5,9.52090451 14.5340777,12.111589 12.9179883,14.6199787 C12.3484584,15.5039663 11.7377754,16.313821 11.1275564,17.0311249 C10.9144997,17.2815702 10.7170402,17.5022391 10.5403911,17.6908777 C10.4358029,17.8025645 10.3623853,17.8778048 10.3253512,17.9143634 C10.0291161,18.2331673 9.41484636,18.5 8.9906311,18.5 L7.0093689,18.5 C6.59080843,18.5 5.98194778,18.2258269 5.71364227,17.9146561 C5.66213668,17.8588317 5.58703389,17.7761053 5.4807125,17.6555634 C5.30200204,17.4529504 5.10247221,17.2193106 4.88735491,16.9580823 C4.27213719,16.2109907 3.656779,15.394289 3.08320773,14.5359605 C2.09721248,13.0604546 1.34127053,11.6205479 0.906388115,10.2835472 C0.639104683,9.46181216 0.5,8.69692293 0.5,8 C0.5,7.56658708 0.519280284,7.10494686 0.556403808,6.61890492 C0.63408435,5.60186781 0.786470164,4.51217341 0.991682584,3.40118912 C1.09968656,2.81647439 1.21542088,2.26333889 1.3310756,1.7595034 C1.35796875,1.64234673 1.3824953,1.53794489 1.4041953,1.44733409 Z"/>
+                                                                        <polygon id="H" fill="#FFFFFF" mask="url(#mask-4)"
+                                                                                 points="5 12 7 12 7 9.5 9 9.5 9 12 11 12 11 5 9 5 9 7.5 7 7.5 7 5 5 5"/>
                                                                     </g>
-                                                                    <rect id="sast-high-Rectangle-2" fill="#BB1A34" mask="url(#sast-high-mask-1)" x="8"
-                                                                          y="0" width="8" height="20"/>
-                                                                    <mask id="mask-14" fill="white">
-                                                                        <use xlink:href="#sast-high-path-2"/>
-                                                                    </mask>
-                                                                    <path stroke="#BB1A34"
-                                                                          d="M1.4041953,1.44733409 L8,0.505076272 L14.6160396,1.45022478 C14.6341112,1.51124347 14.6539641,1.5795116 14.6753578,1.65465958 C14.7899552,2.05719756 14.9047222,2.50600605 15.0118679,2.98897331 C15.3098751,4.33226343 15.4915175,5.67204692 15.4997158,6.91419406 C15.4999523,6.95710967 15.4999523,6.95710967 15.5,7 C15.5,9.52090451 14.5340777,12.111589 12.9179883,14.6199787 C12.3484584,15.5039663 11.7377754,16.313821 11.1275564,17.0311249 C10.9144997,17.2815702 10.7170402,17.5022391 10.5403911,17.6908777 C10.4358029,17.8025645 10.3623853,17.8778048 10.3253512,17.9143634 C10.0291161,18.2331673 9.41484636,18.5 8.9906311,18.5 L7.0093689,18.5 C6.59080843,18.5 5.98194778,18.2258269 5.71364227,17.9146561 C5.66213668,17.8588317 5.58703389,17.7761053 5.4807125,17.6555634 C5.30200204,17.4529504 5.10247221,17.2193106 4.88735491,16.9580823 C4.27213719,16.2109907 3.656779,15.394289 3.08320773,14.5359605 C2.09721248,13.0604546 1.34127053,11.6205479 0.906388115,10.2835472 C0.639104683,9.46181216 0.5,8.69692293 0.5,8 C0.5,7.56658708 0.519280284,7.10494686 0.556403808,6.61890492 C0.63408435,5.60186781 0.786470164,4.51217341 0.991682584,3.40118912 C1.09968656,2.81647439 1.21542088,2.26333889 1.3310756,1.7595034 C1.35796875,1.64234673 1.3824953,1.53794489 1.4041953,1.44733409 Z"/>
-                                                                    <polygon id="sast-high-H" fill="#FFFFFF" mask="url(#mask-14)"
-                                                                             points="5 12 7 12 7 9.5 9 9.5 9 12 11 12 11 5 9 5 9 7.5 7 7.5 7 5 5 5"/>
                                                                 </g>
                                                             </g>
                                                         </g>
-                                                    </g>
-                                                </svg>
+                                                    </svg>
+                                                </div>
+                                                <div class="bar-title">High -</div>
+                                                <div class="bar-count" id="bar-count-high"></div>
                                             </div>
-                                            <div class="bar-title">High -</div>
-                                            <div class="bar-count" id="bar-count-high"></div>
+                                            <div id="new-bar-count-high" class="new-bar-title-container"></div>
                                         </div>
                                     </li>
 
@@ -848,38 +954,44 @@
                                     <li>
                                         <span class="bar-2" id="bar-med">
                                             <div id="tooltip-med"></div>
+                                            <div id="med-new-scans" class="new-scans"></div>
+                                            <div id="med-recurrent-scans" class="recurrent-scans"></div>
                                         </span>
-                                        <div class="bar-title-container">
-                                            <div class="bar-title-icon">
-                                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                                                     width="16" height="20" viewBox="0 0 16 20">
-                                                    <title>Med</title>
-                                                    <defs>
-                                                        <path d="M1 1.053L8 0l7 1.053s1 3.173 1 6.315c0 6.332-5.346 11.89-5.346 11.89-.36.41-1.097.742-1.663.742H7.01c-.558 0-1.3-.34-1.652-.77 0 0-5.358-6.056-5.358-10.81 0-3.338 1-7.367 1-7.367z"
-                                                              id="sast-medium-path-1"/>
-                                                        <path d="M1 1.053L8 0l7 1.053s1 3.173 1 6.315c0 6.332-5.346 11.89-5.346 11.89-.36.41-1.097.742-1.663.742H7.01c-.558 0-1.3-.34-1.652-.77 0 0-5.358-6.056-5.358-10.81 0-3.338 1-7.367 1-7.367z"
-                                                              id="sast-medium-path-2"/>
-                                                    </defs>
-                                                    <g fill="none" fill-rule="evenodd">
-                                                        <mask id="sast-medium-mask-1" fill="#fff">
-                                                            <use xlink:href="#sast-medium-path-1"/>
-                                                        </mask>
-                                                        <use fill="#FFAC00" xlink:href="#sast-medium-path-1"/>
-                                                        <path stroke="#E49B16"
-                                                              d="M1.41 1.497L8 .507l6.61.993c.02.067.04.144.064.228.114.425.23.898.337 1.407.3 1.418.48 2.83.49 4.143v.09c0 2.665-.973 5.404-2.6 8.06-.572.934-1.186 1.79-1.8 2.55-.214.264-.413.498-.59.698-.106.118-.18.198-.217.237-.282.32-.882.587-1.302.587H7.01c-.414 0-1.01-.277-1.266-.587-.05-.06-.126-.146-.233-.274-.18-.215-.38-.463-.595-.74-.62-.79-1.237-1.653-1.814-2.56C2.12 13.79 1.363 12.28.923 10.877.644 9.994.5 9.17.5 8.42c0-.457.02-.944.057-1.457.077-1.072.23-2.22.435-3.392.11-.615.224-1.198.34-1.73l.077-.343z"/>
-                                                        <path fill="#D79201" mask="url(#sast-medium-mask-1)" d="M8 0h8v20H8z"/>
-                                                        <mask id="sast-medium-mask-2" fill="#fff">
-                                                            <use xlink:href="#sast-medium-path-2"/>
-                                                        </mask>
-                                                        <path stroke="#D49100"
-                                                              d="M1.41 1.497L8 .507l6.61.993c.02.067.04.144.064.228.114.425.23.898.337 1.407.3 1.418.48 2.83.49 4.143v.09c0 2.665-.973 5.404-2.6 8.06-.572.934-1.186 1.79-1.8 2.55-.214.264-.413.498-.59.698-.106.118-.18.198-.217.237-.282.32-.882.587-1.302.587H7.01c-.414 0-1.01-.277-1.266-.587-.05-.06-.126-.146-.233-.274-.18-.215-.38-.463-.595-.74-.62-.79-1.237-1.653-1.814-2.56C2.12 13.79 1.363 12.28.923 10.877.644 9.994.5 9.17.5 8.42c0-.457.02-.944.057-1.457.077-1.072.23-2.22.435-3.392.11-.615.224-1.198.34-1.73l.077-.343z"/>
-                                                        <path fill="#472F00" mask="url(#sast-medium-mask-2)"
-                                                              d="M4.28 12.632h1.9v-4.21l1.78 2.862H8L9.79 8.4v4.232h1.93v-7.37H9.67L8 8.117 6.33 5.263H4.28"/>
-                                                    </g>
-                                                </svg>
+
+
+                                        <div class="bar-title-wrapper">
+                                            <div class="bar-title-container">
+                                                <div class="bar-title-icon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                                         width="16" height="20" viewBox="0 0 16 20"><title>Low</title>
+                                                        <defs>
+                                                            <path d="M1 1.053L8 0l7 1.053s1 3.173 1 6.315c0 6.332-5.346 11.89-5.346 11.89-.36.41-1.097.742-1.663.742H7.01c-.558 0-1.3-.34-1.652-.77 0 0-5.358-6.056-5.358-10.81 0-3.338 1-7.367 1-7.367z"
+                                                                  id="a"/>
+                                                            <path d="M1 1.053L8 0l7 1.053s1 3.173 1 6.315c0 6.332-5.346 11.89-5.346 11.89-.36.41-1.097.742-1.663.742H7.01c-.558 0-1.3-.34-1.652-.77 0 0-5.358-6.056-5.358-10.81 0-3.338 1-7.367 1-7.367z"
+                                                                  id="c"/>
+                                                        </defs>
+                                                        <g fill="none" fill-rule="evenodd">
+                                                            <mask id="b" fill="#fff">
+                                                                <use xlink:href="#a"/>
+                                                            </mask>
+                                                            <use fill="#FFAC00" xlink:href="#a"/>
+                                                            <path stroke="#E49B16"
+                                                                  d="M1.41 1.497L8 .507l6.61.993c.02.067.04.144.064.228.114.425.23.898.337 1.407.3 1.418.48 2.83.49 4.143v.09c0 2.665-.973 5.404-2.6 8.06-.572.934-1.186 1.79-1.8 2.55-.214.264-.413.498-.59.698-.106.118-.18.198-.217.237-.282.32-.882.587-1.302.587H7.01c-.414 0-1.01-.277-1.266-.587-.05-.06-.126-.146-.233-.274-.18-.215-.38-.463-.595-.74-.62-.79-1.237-1.653-1.814-2.56C2.12 13.79 1.363 12.28.923 10.877.644 9.994.5 9.17.5 8.42c0-.457.02-.944.057-1.457.077-1.072.23-2.22.435-3.392.11-.615.224-1.198.34-1.73l.077-.343z"/>
+                                                            <path fill="#D79201" mask="url(#b)" d="M8 0h8v20H8z"/>
+                                                            <mask id="d" fill="#fff">
+                                                                <use xlink:href="#c"/>
+                                                            </mask>
+                                                            <path stroke="#D49100"
+                                                                  d="M1.41 1.497L8 .507l6.61.993c.02.067.04.144.064.228.114.425.23.898.337 1.407.3 1.418.48 2.83.49 4.143v.09c0 2.665-.973 5.404-2.6 8.06-.572.934-1.186 1.79-1.8 2.55-.214.264-.413.498-.59.698-.106.118-.18.198-.217.237-.282.32-.882.587-1.302.587H7.01c-.414 0-1.01-.277-1.266-.587-.05-.06-.126-.146-.233-.274-.18-.215-.38-.463-.595-.74-.62-.79-1.237-1.653-1.814-2.56C2.12 13.79 1.363 12.28.923 10.877.644 9.994.5 9.17.5 8.42c0-.457.02-.944.057-1.457.077-1.072.23-2.22.435-3.392.11-.615.224-1.198.34-1.73l.077-.343z"/>
+                                                            <path fill="#472F00" mask="url(#d)"
+                                                                  d="M4.28 12.632h1.9v-4.21l1.78 2.862H8L9.79 8.4v4.232h1.93v-7.37H9.67L8 8.117 6.33 5.263H4.28"/>
+                                                        </g>
+                                                    </svg>
+                                                </div>
+                                                <div class="bar-title">Medium -</div>
+                                                <div class="bar-count" id="bar-count-med"></div>
                                             </div>
-                                            <div class="bar-title">Medium -</div>
-                                            <div class="bar-count" id="bar-count-med"></div>
+                                            <div id="new-bar-count-medium" class="new-bar-title-container"></div>
                                         </div>
                                     </li>
 
@@ -887,42 +999,49 @@
                                     <li>
                                         <span class="bar-3" id="bar-low">
                                             <div id="tooltip-low"></div>
+                                            <div id="low-new-scans" class="new-scans"></div>
+                                            <div id="low-recurrent-scans" class="recurrent-scans"></div>
                                         </span>
-                                        <div class="bar-title-container">
-                                            <div class="bar-title-icon">
-                                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                                                     width="16" height="19" viewBox="0 0 16 19">
-                                                    <title>Low</title>
-                                                    <defs>
-                                                        <path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z"
-                                                              id="sast-low-path-1"/>
-                                                        <path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z"
-                                                              id="sast-low-path-2"/>
-                                                    </defs>
-                                                    <g fill="none" fill-rule="evenodd">
-                                                        <path d="M7.96 17.32L8 .015l-6.5 1s-.96 4.5-.96 8.75c1.272 4.602 5.968 9.25 5.968 9.25h.163l1.29-1.695z"
-                                                              fill="#EDEFF5"/>
-                                                        <mask id="sast-low-mask-1" fill="#fff">
-                                                            <use xlink:href="#sast-low-path-1"/>
-                                                        </mask>
-                                                        <use fill="#FFEB3B" xlink:href="#sast-low-path-1"/>
-                                                        <path stroke="#E4D200"
-                                                              d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.342.48 2.682.488 3.924V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38C.634 5.6.786 4.51.992 3.4c.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/>
-                                                        <path fill="#DDCE00" mask="url(#sast-low-mask-1)" d="M8-8h10v32H8z"/>
-                                                        <mask id="sast-low-mask-2" fill="#fff">
-                                                            <use xlink:href="#sast-low-path-2"/>
-                                                        </mask>
-                                                        <path stroke="#E4D200"
-                                                              d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.342.48 2.682.488 3.924V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38C.634 5.6.786 4.51.992 3.4c.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/>
-                                                        <path fill="#605900" mask="url(#sast-low-mask-2)" d="M5.54 12h5.33v-1.7H7.48V5H5.54"/>
-                                                    </g>
-                                                </svg>
+                                        <div class="bar-title-wrapper">
+                                            <div class="bar-title-container">
+                                                <div class="bar-title-icon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                                         width="16" height="19" viewBox="0 0 16 19">
+                                                        <title>Low</title>
+                                                        <defs>
+                                                            <path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z"
+                                                                  id="sast-low-path-1"/>
+                                                            <path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z"
+                                                                  id="sast-low-path-2"/>
+                                                        </defs>
+                                                        <g fill="none" fill-rule="evenodd">
+                                                            <path d="M7.96 17.32L8 .015l-6.5 1s-.96 4.5-.96 8.75c1.272 4.602 5.968 9.25 5.968 9.25h.163l1.29-1.695z"
+                                                                  fill="#EDEFF5"/>
+                                                            <mask id="sast-low-mask-1" fill="#fff">
+                                                                <use xlink:href="#sast-low-path-1"/>
+                                                            </mask>
+                                                            <use fill="#FFEB3B" xlink:href="#sast-low-path-1"/>
+                                                            <path stroke="#E4D200"
+                                                                  d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.342.48 2.682.488 3.924V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38C.634 5.6.786 4.51.992 3.4c.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/>
+                                                            <path fill="#DDCE00" mask="url(#sast-low-mask-1)" d="M8-8h10v32H8z"/>
+                                                            <mask id="sast-low-mask-2" fill="#fff">
+                                                                <use xlink:href="#sast-low-path-2"/>
+                                                            </mask>
+                                                            <path stroke="#E4D200"
+                                                                  d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.342.48 2.682.488 3.924V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38C.634 5.6.786 4.51.992 3.4c.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/>
+                                                            <path fill="#605900" mask="url(#sast-low-mask-2)" d="M5.54 12h5.33v-1.7H7.48V5H5.54"/>
+                                                        </g>
+                                                    </svg>
+                                                </div>
+                                                <div class="bar-title">Low -</div>
+                                                <div class="bar-count" id="bar-count-low"></div>
                                             </div>
-                                            <div class="bar-title">Low -</div>
-                                            <div class="bar-count" id="bar-count-low"></div>
+                                            <div id="new-bar-count-low" class="new-bar-title-container"></div>
                                         </div>
                                     </li>
                                 </ul>
+
+
                             </div>
                         </div>
 
@@ -982,7 +1101,8 @@
                                                             <path d="M15.7377037,46.5 L43.9431037,46.5" id="osa-failed-Line-5" stroke="#979797" stroke-linecap="square"/>
                                                             <path d="M0.5,1.5 L55.4181209,56.4181209" id="osa-failed-Line-6" stroke="#F6F7FA" stroke-width="3"
                                                                   stroke-linecap="square"/>
-                                                            <path d="M2.5,0.5 L57.4181209,55.4181209" id="osa-failed-Line-7" stroke="#382F50" stroke-width="2" stroke-linecap="square"/>
+                                                            <path d="M2.5,0.5 L57.4181209,55.4181209" id="osa-failed-Line-7" stroke="#382F50" stroke-width="2"
+                                                                  stroke-linecap="square"/>
                                                         </g>
                                                     </g>
                                                 </g>
@@ -1010,10 +1130,7 @@
                                     <div id="osa-summary-pdf-link" class="link-to-result"></div>
                                 </div>
                             </div>
-
-
                             <div class="osa-results" id="osa-results">
-
                                 <div class="osa-libraries">
                                     <div class="osa-libraries-title">Libraries:</div>
                                     <div class="libraries-vulnerable">
@@ -1115,143 +1232,185 @@
                                 </div>
 
                                 <div class="osa-chart">
-                                    <div class="threshold-exceeded-compliance" id="osa-threshold-exceeded-compliance"></div>
+                                    <div class="top-of-chart">
+                                        <div class="threshold-exceeded-compliance" id="osa-threshold-exceeded-compliance"></div>
+
+                                        <div id="osa-legend-container" class="chart-legend-container">
+                                            <div class="chart-legend">
+
+                                                <div class="legend-item recurrent-legend">
+                                                    <div class="legend-color-box recurrent-legend-color"></div>
+                                                    <div class="legend-text recurrent-legend-text">Recurrent</div>
+                                                </div>
+                                                <div class="legend-item new-legend">
+                                                    <div class="legend-color-box new-legend-color"></div>
+                                                    <div class="legend-text new-legend-text">New</div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+
                                     <ul class="osa-chart chart">
+
+
                                         <!--osa-high-->
                                         <li>
                                             <span class="bar-1" id="osa-bar-high">
                                                 <div id="osa-tooltip-high"></div>
+                                                <div id="osa-high-new-scans" class="new-scans"></div>
+                                                <div id="osa-high-recurrent-scans" class="recurrent-scans"></div>
                                             </span>
-                                            <div class="bar-title-container">
-                                                <div class="bar-title-icon">
-                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                         xmlns:xlink="http://www.w3.org/1999/xlink" width="16px" height="19px"
-                                                         viewBox="0 0 16 19"
-                                                         version="1.1">
-                                                        <!-- Generator: Sketch 43.2 (39069) - http://www.bohemiancoding.com/sketch -->
-                                                        <title>Med</title>
-                                                        <desc>Created with Sketch.</desc>
-                                                        <defs>
-                                                            <path d="M1,1 L8,0 L15,1 C15,1 16,4.01515152 16,7 C16,13.0151515 10.6766131,18.2701936 10.6766131,18.2701936 C10.30293,18.6732545 9.55664682,19 8.9906311,19 L7.0093689,19 C6.45190985,19 5.70245907,18.6673641 5.33497024,18.2411641 C5.33497024,18.2411641 3.70193273e-12,12.5151515 3.63797881e-12,8 C7.03437308e-13,4.82765152 1,1 1,1 Z"
-                                                                  id="osa-high-path-1"/>
-                                                            <path d="M1,1 L8,0 L15,1 C15,1 16,4.01515152 16,7 C16,13.0151515 10.6766131,18.2701936 10.6766131,18.2701936 C10.30293,18.6732545 9.55664682,19 8.9906311,19 L7.0093689,19 C6.45190985,19 5.70245907,18.6673641 5.33497024,18.2411641 C5.33497024,18.2411641 3.70193273e-12,12.5151515 3.63797881e-12,8 C7.03437308e-13,4.82765152 1,1 1,1 Z"
-                                                                  id="osa-high-path-2"/>
-                                                        </defs>
-                                                        <g id="osa-high-Page-1" stroke="none" stroke-width="1" fill="none"
-                                                           fill-rule="evenodd">
-                                                            <g id="osa-high-Icons" transform="translate(-47.000000, -88.000000)">
-                                                                <g id="osa-high-High" transform="translate(47.000000, 88.000000)">
-                                                                    <g id="osa-high-Vonerability">
-                                                                        <mask id="osa-high-mask-1" fill="white">
-                                                                            <use xlink:href="#osa-high-path-1"/>
-                                                                        </mask>
-                                                                        <g id="osa-high-Rectangle-1">
-                                                                            <use fill="#D82D49" fill-rule="evenodd"
-                                                                                 xlink:href="#osa-high-path-1"/>
-                                                                            <path stroke="#BB1A34" stroke-width="1"
+
+                                            <div class="bar-title-wrapper">
+                                                <div class="bar-title-container">
+                                                    <div class="bar-title-icon">
+                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                             xmlns:xlink="http://www.w3.org/1999/xlink" width="16px" height="19px"
+                                                             viewBox="0 0 16 19"
+                                                             version="1.1">
+                                                            <!-- Generator: Sketch 43.2 (39069) - http://www.bohemiancoding.com/sketch -->
+                                                            <title>Med</title>
+                                                            <desc>Created with Sketch.</desc>
+                                                            <defs>
+                                                                <path d="M1,1 L8,0 L15,1 C15,1 16,4.01515152 16,7 C16,13.0151515 10.6766131,18.2701936 10.6766131,18.2701936 C10.30293,18.6732545 9.55664682,19 8.9906311,19 L7.0093689,19 C6.45190985,19 5.70245907,18.6673641 5.33497024,18.2411641 C5.33497024,18.2411641 3.70193273e-12,12.5151515 3.63797881e-12,8 C7.03437308e-13,4.82765152 1,1 1,1 Z"
+                                                                      id="osa-high-path-1"/>
+                                                                <path d="M1,1 L8,0 L15,1 C15,1 16,4.01515152 16,7 C16,13.0151515 10.6766131,18.2701936 10.6766131,18.2701936 C10.30293,18.6732545 9.55664682,19 8.9906311,19 L7.0093689,19 C6.45190985,19 5.70245907,18.6673641 5.33497024,18.2411641 C5.33497024,18.2411641 3.70193273e-12,12.5151515 3.63797881e-12,8 C7.03437308e-13,4.82765152 1,1 1,1 Z"
+                                                                      id="osa-high-path-2"/>
+                                                            </defs>
+                                                            <g id="osa-high-Page-1" stroke="none" stroke-width="1" fill="none"
+                                                               fill-rule="evenodd">
+                                                                <g id="osa-high-Icons" transform="translate(-47.000000, -88.000000)">
+                                                                    <g id="osa-high-High" transform="translate(47.000000, 88.000000)">
+                                                                        <g id="osa-high-Vonerability">
+                                                                            <mask id="osa-high-mask-1" fill="white">
+                                                                                <use xlink:href="#osa-high-path-1"/>
+                                                                            </mask>
+                                                                            <g id="osa-high-Rectangle-1">
+                                                                                <use fill="#D82D49" fill-rule="evenodd"
+                                                                                     xlink:href="#osa-high-path-1"/>
+                                                                                <path stroke="#BB1A34" stroke-width="1"
+                                                                                      d="M1.4041953,1.44733409 L8,0.505076272 L14.6160396,1.45022478 C14.6341112,1.51124347 14.6539641,1.5795116 14.6753578,1.65465958 C14.7899552,2.05719756 14.9047222,2.50600605 15.0118679,2.98897331 C15.3098751,4.33226343 15.4915175,5.67204692 15.4997158,6.91419406 C15.4999523,6.95710967 15.4999523,6.95710967 15.5,7 C15.5,9.52090451 14.5340777,12.111589 12.9179883,14.6199787 C12.3484584,15.5039663 11.7377754,16.313821 11.1275564,17.0311249 C10.9144997,17.2815702 10.7170402,17.5022391 10.5403911,17.6908777 C10.4358029,17.8025645 10.3623853,17.8778048 10.3253512,17.9143634 C10.0291161,18.2331673 9.41484636,18.5 8.9906311,18.5 L7.0093689,18.5 C6.59080843,18.5 5.98194778,18.2258269 5.71364227,17.9146561 C5.66213668,17.8588317 5.58703389,17.7761053 5.4807125,17.6555634 C5.30200204,17.4529504 5.10247221,17.2193106 4.88735491,16.9580823 C4.27213719,16.2109907 3.656779,15.394289 3.08320773,14.5359605 C2.09721248,13.0604546 1.34127053,11.6205479 0.906388115,10.2835472 C0.639104683,9.46181216 0.5,8.69692293 0.5,8 C0.5,7.56658708 0.519280284,7.10494686 0.556403808,6.61890492 C0.63408435,5.60186781 0.786470164,4.51217341 0.991682584,3.40118912 C1.09968656,2.81647439 1.21542088,2.26333889 1.3310756,1.7595034 C1.35796875,1.64234673 1.3824953,1.53794489 1.4041953,1.44733409 Z"/>
+                                                                            </g>
+                                                                            <rect id="osa-high-Rectangle-2" fill="#BB1A34" mask="url(#osa-high-mask-1)"
+                                                                                  x="8" y="0" width="8" height="20"/>
+                                                                            <mask id="osa-high-mask-2" fill="white">
+                                                                                <use xlink:href="#osa-high-path-2"/>
+                                                                            </mask>
+                                                                            <path stroke="#BB1A34"
                                                                                   d="M1.4041953,1.44733409 L8,0.505076272 L14.6160396,1.45022478 C14.6341112,1.51124347 14.6539641,1.5795116 14.6753578,1.65465958 C14.7899552,2.05719756 14.9047222,2.50600605 15.0118679,2.98897331 C15.3098751,4.33226343 15.4915175,5.67204692 15.4997158,6.91419406 C15.4999523,6.95710967 15.4999523,6.95710967 15.5,7 C15.5,9.52090451 14.5340777,12.111589 12.9179883,14.6199787 C12.3484584,15.5039663 11.7377754,16.313821 11.1275564,17.0311249 C10.9144997,17.2815702 10.7170402,17.5022391 10.5403911,17.6908777 C10.4358029,17.8025645 10.3623853,17.8778048 10.3253512,17.9143634 C10.0291161,18.2331673 9.41484636,18.5 8.9906311,18.5 L7.0093689,18.5 C6.59080843,18.5 5.98194778,18.2258269 5.71364227,17.9146561 C5.66213668,17.8588317 5.58703389,17.7761053 5.4807125,17.6555634 C5.30200204,17.4529504 5.10247221,17.2193106 4.88735491,16.9580823 C4.27213719,16.2109907 3.656779,15.394289 3.08320773,14.5359605 C2.09721248,13.0604546 1.34127053,11.6205479 0.906388115,10.2835472 C0.639104683,9.46181216 0.5,8.69692293 0.5,8 C0.5,7.56658708 0.519280284,7.10494686 0.556403808,6.61890492 C0.63408435,5.60186781 0.786470164,4.51217341 0.991682584,3.40118912 C1.09968656,2.81647439 1.21542088,2.26333889 1.3310756,1.7595034 C1.35796875,1.64234673 1.3824953,1.53794489 1.4041953,1.44733409 Z"/>
+                                                                            <polygon id="osa-high-H" fill="#FFFFFF" mask="url(#osa-high-Rectangle-2)"
+                                                                                     points="5 12 7 12 7 9.5 9 9.5 9 12 11 12 11 5 9 5 9 7.5 7 7.5 7 5 5 5"/>
                                                                         </g>
-                                                                        <rect id="osa-high-Rectangle-2" fill="#BB1A34" mask="url(#osa-high-mask-1)"
-                                                                              x="8" y="0" width="8" height="20"/>
-                                                                        <mask id="osa-high-mask-2" fill="white">
-                                                                            <use xlink:href="#osa-high-path-2"/>
-                                                                        </mask>
-                                                                        <path stroke="#BB1A34"
-                                                                              d="M1.4041953,1.44733409 L8,0.505076272 L14.6160396,1.45022478 C14.6341112,1.51124347 14.6539641,1.5795116 14.6753578,1.65465958 C14.7899552,2.05719756 14.9047222,2.50600605 15.0118679,2.98897331 C15.3098751,4.33226343 15.4915175,5.67204692 15.4997158,6.91419406 C15.4999523,6.95710967 15.4999523,6.95710967 15.5,7 C15.5,9.52090451 14.5340777,12.111589 12.9179883,14.6199787 C12.3484584,15.5039663 11.7377754,16.313821 11.1275564,17.0311249 C10.9144997,17.2815702 10.7170402,17.5022391 10.5403911,17.6908777 C10.4358029,17.8025645 10.3623853,17.8778048 10.3253512,17.9143634 C10.0291161,18.2331673 9.41484636,18.5 8.9906311,18.5 L7.0093689,18.5 C6.59080843,18.5 5.98194778,18.2258269 5.71364227,17.9146561 C5.66213668,17.8588317 5.58703389,17.7761053 5.4807125,17.6555634 C5.30200204,17.4529504 5.10247221,17.2193106 4.88735491,16.9580823 C4.27213719,16.2109907 3.656779,15.394289 3.08320773,14.5359605 C2.09721248,13.0604546 1.34127053,11.6205479 0.906388115,10.2835472 C0.639104683,9.46181216 0.5,8.69692293 0.5,8 C0.5,7.56658708 0.519280284,7.10494686 0.556403808,6.61890492 C0.63408435,5.60186781 0.786470164,4.51217341 0.991682584,3.40118912 C1.09968656,2.81647439 1.21542088,2.26333889 1.3310756,1.7595034 C1.35796875,1.64234673 1.3824953,1.53794489 1.4041953,1.44733409 Z"/>
-                                                                        <polygon id="osa-high-H" fill="#FFFFFF" mask="url(#osa-high-Rectangle-2)"
-                                                                                 points="5 12 7 12 7 9.5 9 9.5 9 12 11 12 11 5 9 5 9 7.5 7 7.5 7 5 5 5"/>
                                                                     </g>
                                                                 </g>
                                                             </g>
-                                                        </g>
-                                                    </svg>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="bar-title">High -</div>
+                                                    <div class="bar-count" id="osa-bar-count-high"></div>
                                                 </div>
-                                                <div class="bar-title">High -</div>
-                                                <div class="bar-count" id="osa-bar-count-high"></div>
+                                                <div id="osa-new-bar-count-high" class="new-bar-title-container"></div>
+
                                             </div>
                                         </li>
 
-                                        <!--osa medium-->
+
+                                        <!--osa-medium-->
                                         <li>
-                                    <span class="bar-2" id="osa-bar-med">
-                                        <div id="osa-tooltip-med"></div>
-                                    </span>
-                                            <div class="bar-title-container">
-                                                <div class="bar-title-icon">
-                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                         xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="20"
-                                                         viewBox="0 0 16 20">
-                                                        <title>Med</title>
-                                                        <defs>
-                                                            <path d="M1 1.053L8 0l7 1.053s1 3.173 1 6.315c0 6.332-5.346 11.89-5.346 11.89-.36.41-1.097.742-1.663.742H7.01c-.558 0-1.3-.34-1.652-.77 0 0-5.358-6.056-5.358-10.81 0-3.338 1-7.367 1-7.367z"
-                                                                  id="osa-medium-path-1"/>
-                                                            <path d="M1 1.053L8 0l7 1.053s1 3.173 1 6.315c0 6.332-5.346 11.89-5.346 11.89-.36.41-1.097.742-1.663.742H7.01c-.558 0-1.3-.34-1.652-.77 0 0-5.358-6.056-5.358-10.81 0-3.338 1-7.367 1-7.367z"
-                                                                  id="osa-medium-path-2"/>
-                                                        </defs>
-                                                        <g fill="none" fill-rule="evenodd">
-                                                            <mask id="osa-medium-mask-1" fill="#fff">
-                                                                <use xlink:href="#osa-medium-path-1"/>
-                                                            </mask>
-                                                            <use fill="#FFAC00" xlink:href="#osa-medium-path-1"/>
-                                                            <path stroke="#E49B16"
-                                                                  d="M1.41 1.497L8 .507l6.61.993c.02.067.04.144.064.228.114.425.23.898.337 1.407.3 1.418.48 2.83.49 4.143v.09c0 2.665-.972 5.404-2.6 8.06-.57.934-1.185 1.79-1.8 2.55-.213.264-.412.498-.59.698-.105.118-.18.198-.216.237-.282.32-.882.587-1.302.587H7.01c-.414 0-1.01-.277-1.266-.587-.05-.06-.126-.146-.233-.274-.18-.216-.38-.464-.594-.74-.62-.79-1.237-1.654-1.814-2.56-.982-1.55-1.74-3.06-2.18-4.463C.645 9.994.5 9.17.5 8.42c0-.457.02-.944.057-1.457.077-1.072.23-2.22.435-3.392.11-.614.224-1.197.34-1.73L1.41 1.5z"/>
-                                                            <path fill="#D79201" mask="url(#osa-medium-mask-1)" d="M8 0h8v20H8z"/>
-                                                            <mask id="osa-medium-mask-2" fill="#fff">
-                                                                <use xlink:href="#osa-medium-path-2"/>
-                                                            </mask>
-                                                            <path stroke="#D49100"
-                                                                  d="M1.41 1.497L8 .507l6.61.993c.02.067.04.144.064.228.114.425.23.898.337 1.407.3 1.418.48 2.83.49 4.143v.09c0 2.665-.972 5.404-2.6 8.06-.57.934-1.185 1.79-1.8 2.55-.213.264-.412.498-.59.698-.105.118-.18.198-.216.237-.282.32-.882.587-1.302.587H7.01c-.414 0-1.01-.277-1.266-.587-.05-.06-.126-.146-.233-.274-.18-.216-.38-.464-.594-.74-.62-.79-1.237-1.654-1.814-2.56-.982-1.55-1.74-3.06-2.18-4.463C.645 9.994.5 9.17.5 8.42c0-.457.02-.944.057-1.457.077-1.072.23-2.22.435-3.392.11-.614.224-1.197.34-1.73L1.41 1.5z"/>
-                                                            <path fill="#472F00" mask="url(#osa-medium-mask-2)"
-                                                                  d="M4.28 12.632h1.9v-4.21l1.78 2.862H8L9.79 8.4v4.232h1.93v-7.37H9.67L8 8.117 6.33 5.263H4.28"/>
-                                                        </g>
-                                                    </svg>
+                                            <span class="bar-2" id="osa-bar-med">
+                                                <div id="osa-tooltip-med"></div>
+                                                <div id="osa-med-new-scans" class="new-scans"></div>
+                                                <div id="osa-med-recurrent-scans" class="recurrent-scans"></div>
+                                            </span>
+                                            <div class="bar-title-wrapper">
+                                                <div class="bar-title-container">
+                                                    <div class="bar-title-icon">
+                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                             xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="20"
+                                                             viewBox="0 0 16 20">
+                                                            <title>Med</title>
+                                                            <defs>
+                                                                <path d="M1 1.053L8 0l7 1.053s1 3.173 1 6.315c0 6.332-5.346 11.89-5.346 11.89-.36.41-1.097.742-1.663.742H7.01c-.558 0-1.3-.34-1.652-.77 0 0-5.358-6.056-5.358-10.81 0-3.338 1-7.367 1-7.367z"
+                                                                      id="osa-medium-path-1"/>
+                                                                <path d="M1 1.053L8 0l7 1.053s1 3.173 1 6.315c0 6.332-5.346 11.89-5.346 11.89-.36.41-1.097.742-1.663.742H7.01c-.558 0-1.3-.34-1.652-.77 0 0-5.358-6.056-5.358-10.81 0-3.338 1-7.367 1-7.367z"
+                                                                      id="osa-medium-path-2"/>
+                                                            </defs>
+                                                            <g fill="none" fill-rule="evenodd">
+                                                                <mask id="osa-medium-mask-1" fill="#fff">
+                                                                    <use xlink:href="#osa-medium-path-1"/>
+                                                                </mask>
+                                                                <use fill="#FFAC00" xlink:href="#osa-medium-path-1"/>
+                                                                <path stroke="#E49B16"
+                                                                      d="M1.41 1.497L8 .507l6.61.993c.02.067.04.144.064.228.114.425.23.898.337 1.407.3 1.418.48 2.83.49 4.143v.09c0 2.665-.972 5.404-2.6 8.06-.57.934-1.185 1.79-1.8 2.55-.213.264-.412.498-.59.698-.105.118-.18.198-.216.237-.282.32-.882.587-1.302.587H7.01c-.414 0-1.01-.277-1.266-.587-.05-.06-.126-.146-.233-.274-.18-.216-.38-.464-.594-.74-.62-.79-1.237-1.654-1.814-2.56-.982-1.55-1.74-3.06-2.18-4.463C.645 9.994.5 9.17.5 8.42c0-.457.02-.944.057-1.457.077-1.072.23-2.22.435-3.392.11-.614.224-1.197.34-1.73L1.41 1.5z"/>
+                                                                <path fill="#D79201" mask="url(#osa-medium-mask-1)" d="M8 0h8v20H8z"/>
+                                                                <mask id="osa-medium-mask-2" fill="#fff">
+                                                                    <use xlink:href="#osa-medium-path-2"/>
+                                                                </mask>
+                                                                <path stroke="#D49100"
+                                                                      d="M1.41 1.497L8 .507l6.61.993c.02.067.04.144.064.228.114.425.23.898.337 1.407.3 1.418.48 2.83.49 4.143v.09c0 2.665-.972 5.404-2.6 8.06-.57.934-1.185 1.79-1.8 2.55-.213.264-.412.498-.59.698-.105.118-.18.198-.216.237-.282.32-.882.587-1.302.587H7.01c-.414 0-1.01-.277-1.266-.587-.05-.06-.126-.146-.233-.274-.18-.216-.38-.464-.594-.74-.62-.79-1.237-1.654-1.814-2.56-.982-1.55-1.74-3.06-2.18-4.463C.645 9.994.5 9.17.5 8.42c0-.457.02-.944.057-1.457.077-1.072.23-2.22.435-3.392.11-.614.224-1.197.34-1.73L1.41 1.5z"/>
+                                                                <path fill="#472F00" mask="url(#osa-medium-mask-2)"
+                                                                      d="M4.28 12.632h1.9v-4.21l1.78 2.862H8L9.79 8.4v4.232h1.93v-7.37H9.67L8 8.117 6.33 5.263H4.28"/>
+                                                            </g>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="bar-title">Medium -</div>
+                                                    <div class="bar-count" id="osa-bar-count-med"></div>
                                                 </div>
-                                                <div class="bar-title">Medium -</div>
-                                                <div class="bar-count" id="osa-bar-count-med"></div>
+                                                <div id="osa-new-bar-count-med" class="new-bar-title-container"></div>
+
                                             </div>
                                         </li>
 
-                                        <!--osa low-->
+                                        <!--osa-low-->
                                         <li>
                                             <span class="bar-3" id="osa-bar-low">
                                                 <div id="osa-tooltip-low"></div>
+                                                <div id="osa-low-new-scans" class="new-scans"></div>
+                                                <div id="osa-low-recurrent-scans" class="recurrent-scans"></div>
                                             </span>
-                                            <div class="bar-title-container">
-                                                <div class="bar-title-icon">
-                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                         xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="19"
-                                                         viewBox="0 0 16 19">
-                                                        <title>Low</title>
-                                                        <defs>
-                                                            <path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z"
-                                                                  id="osa-low-path-1"/>
-                                                            <path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z"
-                                                                  id="osa-low-path-2"/>
-                                                        </defs>
-                                                        <g fill="none" fill-rule="evenodd">
-                                                            <path d="M7.96 17.32L8 .015l-6.5 1s-.96 4.5-.96 8.75c1.272 4.602 5.968 9.25 5.968 9.25h.163l1.29-1.695z"
-                                                                  fill="#EDEFF5"/>
-                                                            <mask id="osa-low-mask-1" fill="#fff">
-                                                                <use xlink:href="#osa-low-path-1"/>
-                                                            </mask>
-                                                            <use fill="#FFEB3B" xlink:href="#osa-low-path-1"/>
-                                                            <path stroke="#E4D200"
-                                                                  d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.34.48 2.68.488 3.923V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38.078-1.02.23-2.11.436-3.22.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/>
-                                                            <path fill="#DDCE00" mask="url(#osa-low-mask-1)" d="M8-8h10v32H8z"/>
-                                                            <mask id="osa-low-mask-2" fill="#fff">
-                                                                <use xlink:href="#osa-low-path-2"/>
-                                                            </mask>
-                                                            <path stroke="#E4D200"
-                                                                  d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.34.48 2.68.488 3.923V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38.078-1.02.23-2.11.436-3.22.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/>
-                                                            <path fill="#605900" mask="url(#osa-low-mask-2)" d="M5.54 12h5.33v-1.7H7.48V5H5.54"/>
-                                                        </g>
-                                                    </svg>
+                                            <div class="bar-title-wrapper">
+                                                <div class="bar-title-container">
+                                                    <div class="bar-title-icon">
+                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                             xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="19"
+                                                             viewBox="0 0 16 19">
+                                                            <title>Low</title>
+                                                            <defs>
+                                                                <path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z"
+                                                                      id="osa-low-path-1"/>
+                                                                <path d="M1 1l7-1 7 1s1 3.015 1 6c0 6.015-6 12-6 12H6S0 12.515 0 8c0-3.172 1-7 1-7z"
+                                                                      id="osa-low-path-2"/>
+                                                            </defs>
+                                                            <g fill="none" fill-rule="evenodd">
+                                                                <path d="M7.96 17.32L8 .015l-6.5 1s-.96 4.5-.96 8.75c1.272 4.602 5.968 9.25 5.968 9.25h.163l1.29-1.695z"
+                                                                      fill="#EDEFF5"/>
+                                                                <mask id="osa-low-mask-1" fill="#fff">
+                                                                    <use xlink:href="#osa-low-path-1"/>
+                                                                </mask>
+                                                                <use fill="#FFEB3B" xlink:href="#osa-low-path-1"/>
+                                                                <path stroke="#E4D200"
+                                                                      d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.34.48 2.68.488 3.923V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38.078-1.02.23-2.11.436-3.22.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/>
+                                                                <path fill="#DDCE00" mask="url(#osa-low-mask-1)" d="M8-8h10v32H8z"/>
+                                                                <mask id="osa-low-mask-2" fill="#fff">
+                                                                    <use xlink:href="#osa-low-path-2"/>
+                                                                </mask>
+                                                                <path stroke="#E4D200"
+                                                                      d="M1.404 1.447L8 .505l6.616.945.06.205c.114.402.23.85.336 1.334.298 1.34.48 2.68.488 3.923V7c0 2.515-1.09 5.243-2.916 7.978-.644.966-1.335 1.863-2.026 2.667-.24.28-.465.53-.665.745-.04.04-.074.077-.105.11H6.222l-.105-.118c-.202-.23-.427-.492-.67-.785-.694-.837-1.388-1.744-2.035-2.687-.89-1.298-1.62-2.56-2.128-3.738C.772 9.982.5 8.912.5 8c0-.433.02-.895.056-1.38.078-1.02.23-2.11.436-3.22.108-.584.223-1.137.34-1.64.026-.118.05-.222.072-.313z"/>
+                                                                <path fill="#605900" mask="url(#osa-low-mask-2)" d="M5.54 12h5.33v-1.7H7.48V5H5.54"/>
+                                                            </g>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="bar-title">Low -</div>
+                                                    <div class="bar-count" id="osa-bar-count-low"></div>
                                                 </div>
-                                                <div class="bar-title">Low -</div>
-                                                <div class="bar-count" id="osa-bar-count-low"></div>
+                                                <div id="osa-new-bar-count-low" class="new-bar-title-container"></div>
                                             </div>
                                         </li>
                                     </ul>
+
+
                                 </div>
                             </div>
                         </div>
@@ -1702,6 +1861,11 @@
         var medCount = verifyVar([${it.mediumCount}]);
         var lowCount = verifyVar([${it.lowCount}]);
 
+        //new counts
+        var highNewCount = verifyVar([${it.sastScanResult.newHighCount}]);
+        var medNewCount = verifyVar([${it.sastScanResult.newMediumCount}]);
+        var lowNewCount = verifyVar([${it.sastScanResult.newLowCount}]);
+
         //cve lists - New (8.4.2 and up)
         var highCveList = verifyVar([${it.sastScanResult.highQueryResultsJson}]);
         var medCveList = verifyVar([${it.sastScanResult.mediumQueryResultsJson}]);
@@ -1735,8 +1899,11 @@
 
         //counts - Legacy form
         var osaHighCount = verifyVar([${it.osaHighCount}]);
+        var osaHighNewCount = undefined; //todo - get real number from server when supported by WhiteSource
         var osaMedCount = verifyVar([${it.osaMediumCount}]);
+        var osaMedNewCount = undefined; //todo - get real number from server when supported by WhiteSource
         var osaLowCount = verifyVar([${it.osaLowCount}]);
+        var osaLowNewCount = undefined; //todo - get real number from server when supported by WhiteSource
 
         //cve lists - New (8.4.2 and up)
         var osaHighCveList = verifyVar([${it.osaScanResult.highCvesList}]);
@@ -1835,16 +2002,21 @@
                             '</a>';
                 }
 
-                //set bars height and count
-                document.getElementById("bar-count-high").innerHTML = highCount;
-                document.getElementById("bar-count-med").innerHTML = medCount;
-                document.getElementById("bar-count-low").innerHTML = lowCount;
 
-                var maxCount = Math.max(highCount, medCount, lowCount);
-                var maxHeight = maxCount * 100 / 90;
-                document.getElementById("bar-high").setAttribute("style", "height:" + highCount * 100 / maxHeight + "%");
-                document.getElementById("bar-med").setAttribute("style", "height:" + medCount * 100 / maxHeight + "%");
-                document.getElementById("bar-low").setAttribute("style", "height:" + lowCount * 100 / maxHeight + "%");
+
+                //-------------- SAST chart ------------
+                //SAST legend
+                if(highNewCount == undefined &amp;&amp; medNewCount == undefined &amp;&amp; lowNewCount == undefined) {
+                    document.getElementById("sast-legend-container").style.visibility = 'hidden';
+                }
+
+                // SAST bars
+                setSastBarsCount();
+                setSastBarsHeight();
+                if(highNewCount != undefined &amp;&amp; medNewCount != undefined &amp;&amp; lowNewCount != undefined) {
+                    setSastNewCount();
+                }
+
             } catch (e) {
                 console.error("Element missing in SAST summary section " + e.message);
             }
@@ -1917,21 +2089,19 @@
                         '</div>' +
                         '</a>';
 
-                //set bars count
-                document.getElementById("osa-bar-count-high").innerHTML = osaHighCount;
-                document.getElementById("osa-bar-count-med").innerHTML = osaMedCount;
-                document.getElementById("osa-bar-count-low").innerHTML = osaLowCount;
+                //-------------- OSA chart ------------
+                //OSA legend
+                if(osaHighNewCount == undefined &amp;&amp; osaMedNewCount == undefined &amp;&amp; osaLowNewCount == undefined) {
+                    document.getElementById("osa-legend-container").style.visibility = 'hidden';
+                }
 
-                //set bars height
-                var osaMaxCount = Math.max(osaHighCount, osaMedCount, osaLowCount);
-                var osaMaxHeight = osaMaxCount * 100 / 90;
-
-                document.getElementById("osa-bar-high").setAttribute("style", "height:" + osaHighCount * 100 / osaMaxHeight + "%");
-                document.getElementById("osa-bar-med").setAttribute("style", "height:" + osaMedCount * 100 / osaMaxHeight + "%");
-                document.getElementById("osa-bar-low").setAttribute("style", "height:" + osaLowCount * 100 / osaMaxHeight + "%");
-
-                document.getElementById("vulnerable-libraries").innerHTML = numberWithCommas(osaVulnerableAndOutdatedLibs);
-                document.getElementById("ok-libraries").innerHTML = numberWithCommas(okLibraries);
+                //OSA bars
+                setOsaBarsCount();
+                setOsaBarsHeight();
+                setOsaLibraries();
+                if(osaHighNewCount != undefined &amp;&amp; osaMedNewCount != undefined &amp;&amp; osaLowNewCount != undefined) {
+                    setOsaNewCount();
+                }
             }
             catch (e) {
                 console.error("Element missing in OSA summary section " + e.message);
@@ -2074,7 +2244,7 @@
         }
 
 
-        //functions
+        //---------------functions----------------
         function tooltipGenerator(severity) {
             var threshold = 0;
             var count = 0;
@@ -2365,6 +2535,172 @@
 
         function adjustDateFormat(date) {
             return date.substr(0, 10) + " " + date.substr(11);
+        }
+        function isNewMinHeight(highNewHeightPx, minimalVisibilityHeight) {
+            return highNewHeightPx &gt; 0 &amp;&amp; highNewHeightPx &lt; minimalVisibilityHeight;
+        }
+
+        function isTotalHeightEnough(highTotalHeightPx, minimalVisibilityHeight) {
+            return highTotalHeightPx &gt; minimalVisibilityHeight * 2
+        }
+
+        function isNewNeedChange(highTotalHeightPx, highNewHeightPx, minimalVisibilityHeight) {
+            return isNewMinHeight(highNewHeightPx, minimalVisibilityHeight) &amp;&amp; isTotalHeightEnough(highTotalHeightPx, minimalVisibilityHeight);
+        }
+
+        function setSastBarsCount() {
+            document.getElementById("bar-count-high").innerHTML = highCount;
+            document.getElementById("bar-count-med").innerHTML = medCount;
+            document.getElementById("bar-count-low").innerHTML = lowCount;
+        }
+
+        function setOsaBarsCount() {
+            document.getElementById("osa-bar-count-high").innerHTML = osaHighCount;
+            document.getElementById("osa-bar-count-med").innerHTML = osaMedCount;
+            document.getElementById("osa-bar-count-low").innerHTML = osaLowCount;
+        }
+
+        function setSastNewCount() {
+            document.getElementById("new-bar-count-high").innerHTML = highNewCount + " NEW";
+            document.getElementById("new-bar-count-medium").innerHTML = medNewCount + " NEW";
+            document.getElementById("new-bar-count-low").innerHTML = lowNewCount + " NEW";
+        }
+
+        function setOsaNewCount() {
+            document.getElementById("osa-new-bar-count-high").innerHTML = osaHighNewCount + " NEW";
+            document.getElementById("osa-new-bar-count-med").innerHTML = osaMedNewCount + " NEW";
+            document.getElementById("osa-new-bar-count-low").innerHTML = osaLowNewCount + " NEW";
+        }
+
+        function setSastBarsHeight() {
+            //graphs max height
+            var maxCount = Math.max(highCount, medCount, lowCount);
+            var maxHeight = maxCount * 100 / 90;
+            var minimalVisibilityHeight = 5;
+            var totalHeightPx = 238;
+
+            //---------high vulnarabilities
+            //total height - new + recurrent
+            var highTotalHeightPx = highCount / maxHeight * totalHeightPx;
+            document.getElementById("bar-high").setAttribute("style", "height:" + highTotalHeightPx + "px");
+            if(highNewCount != undefined) {
+                //new high
+                var highNewHeightPx = highNewCount / highCount * highTotalHeightPx;
+                //if new height is between 1 and 9 - give it a minimum height and if theres enough spce in total height
+                if (isNewNeedChange(highTotalHeightPx, highNewHeightPx, minimalVisibilityHeight)) {
+                    highNewHeightPx = minimalVisibilityHeight;
+                }
+                document.getElementById("high-new-scans").setAttribute("style", "height:" + highNewHeightPx + "px");
+
+                //recurrent high
+                var highRecurrentPx = highTotalHeightPx - highNewHeightPx;
+                document.getElementById("high-recurrent-scans").setAttribute("style", "height:" + highRecurrentPx + "px");
+            }
+
+
+            //---------med vulnarabilities
+            //total height - new + recurrent
+            var medTotalHeightPx = medCount / maxHeight * totalHeightPx;
+            document.getElementById("bar-med").setAttribute("style", "height:" + medTotalHeightPx + "px");
+
+            if(medNewCount != undefined) {
+                //new med
+                var medNewHeightPx = medNewCount / medCount * medTotalHeightPx;
+                if (isNewNeedChange(medTotalHeightPx, medNewHeightPx, minimalVisibilityHeight)) {
+                    medNewHeightPx = minimalVisibilityHeight;
+                }
+                document.getElementById("med-new-scans").setAttribute("style", "height:" + medNewHeightPx + "px");
+
+                //recurrent med
+                var medRecurrentPx = medTotalHeightPx - medNewHeightPx;
+                document.getElementById("med-recurrent-scans").setAttribute("style", "height:" + medRecurrentPx + "px");
+            }
+
+            //---------low vulnarabilities
+            //total height - new + recurrent
+            var lowTotalHeightPx = lowCount / maxHeight * totalHeightPx;
+            document.getElementById("bar-low").setAttribute("style", "height:" + lowTotalHeightPx + "px");
+
+            if(lowNewCount != undefined) {
+                //new low
+                var lowNewHeightPx = lowNewCount / lowCount * lowTotalHeightPx;
+                if (isNewNeedChange(lowTotalHeightPx, lowNewHeightPx, minimalVisibilityHeight)) {
+                    lowNewHeightPx = minimalVisibilityHeight;
+                }
+                document.getElementById("low-new-scans").setAttribute("style", "height:" + lowNewHeightPx + "px");
+
+                //recurrent low
+                var lowRecurrentPx = lowTotalHeightPx - lowNewHeightPx;
+                document.getElementById("low-recurrent-scans").setAttribute("style", "height:" + lowRecurrentPx + "px");
+            }
+        }
+
+        function setOsaLibraries() {
+            document.getElementById("vulnerable-libraries").innerHTML = numberWithCommas(osaVulnerableAndOutdatedLibs);
+            document.getElementById("ok-libraries").innerHTML = numberWithCommas(okLibraries);
+        }
+
+        function setOsaBarsHeight() {
+            //graphs max height
+            var osaMaxCount = Math.max(osaHighCount, osaMedCount, osaLowCount);
+            var osaMaxHeight = osaMaxCount * 100 / 90;
+            var minimalVisibilityHeight = 5;
+            var totalHeightPx = 238;
+
+            //---------high vulnarabilities
+            //total height - new + recurrent
+            var highTotalHeightPx = osaHighCount / osaMaxHeight * totalHeightPx;
+            document.getElementById("osa-bar-high").setAttribute("style", "height:" + highTotalHeightPx + "px");
+
+            if(osaHighNewCount != undefined) {
+                //new high
+                var highNewHeightPx = osaHighNewCount / osaHighCount * highTotalHeightPx;
+                //if new height is between 1 and 9 - give it a minimum height and if theres enough spce in total height
+                if (isNewNeedChange(highTotalHeightPx, highNewHeightPx, minimalVisibilityHeight)) {
+                    highNewHeightPx = minimalVisibilityHeight;
+                }
+                document.getElementById("osa-high-new-scans").setAttribute("style", "height:" + highNewHeightPx + "px");
+
+                //recurrent high
+                var highRecurrentPx = highTotalHeightPx - highNewHeightPx;
+                document.getElementById("osa-high-recurrent-scans").setAttribute("style", "height:" + highRecurrentPx + "px");
+            }
+
+            //---------med vulnarabilities
+            //total height - new + recurrent
+            var medTotalHeightPx = osaMedCount / osaMaxHeight * totalHeightPx;
+            document.getElementById("osa-bar-med").setAttribute("style", "height:" + medTotalHeightPx + "px");
+
+            if(osaMedNewCount != undefined) {
+                //new med
+                var medNewHeightPx = osaMedNewCount / osaMedCount * medTotalHeightPx;
+                if (isNewNeedChange(medTotalHeightPx, medNewHeightPx, minimalVisibilityHeight)) {
+                    medNewHeightPx = minimalVisibilityHeight;
+                }
+                document.getElementById("osa-med-new-scans").setAttribute("style", "height:" + medNewHeightPx + "px");
+
+                //recurrent med
+                var medRecurrentPx = medTotalHeightPx - medNewHeightPx;
+                document.getElementById("osa-med-recurrent-scans").setAttribute("style", "height:" + medRecurrentPx + "px");
+            }
+
+            //---------low vulnarabilities
+            //total height - new + recurrent
+            var lowTotalHeightPx = osaLowCount / osaMaxHeight * totalHeightPx;
+            document.getElementById("osa-bar-low").setAttribute("style", "height:" + lowTotalHeightPx + "px");
+
+            if(osaLowNewCount != undefined) {
+                //new low
+                var lowNewHeightPx = osaLowNewCount / osaLowCount * lowTotalHeightPx;
+                if (isNewNeedChange(lowTotalHeightPx, lowNewHeightPx, minimalVisibilityHeight)) {
+                    lowNewHeightPx = minimalVisibilityHeight;
+                }
+                document.getElementById("osa-low-new-scans").setAttribute("style", "height:" + lowNewHeightPx + "px");
+
+                //recurrent low
+                var lowRecurrentPx = lowTotalHeightPx - lowNewHeightPx;
+                document.getElementById("osa-low-recurrent-scans").setAttribute("style", "height:" + lowRecurrentPx + "px");
+            }
         }
 
     </script>
