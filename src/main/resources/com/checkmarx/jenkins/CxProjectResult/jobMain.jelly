@@ -1873,11 +1873,14 @@
 
         //counts - Legacy form
         var highCount = verifyVar([${it.lastSynchronousBuildAction.highCount}]);
-        var highNewCount = 2; //todo - get real number from server
         var medCount = verifyVar([${it.lastSynchronousBuildAction.mediumCount}]);
-        var medNewCount = 0; //todo - get real number from server
         var lowCount = verifyVar([${it.lastSynchronousBuildAction.lowCount}]);
-        var lowNewCount = 1; //todo - get real number from server
+
+        //new counts
+        var highNewCount = verifyVar([${it.lastSynchronousBuildAction.sastScanResult.newHighCount}]);
+        var medNewCount = verifyVar([${it.lastSynchronousBuildAction.sastScanResult.newMediumCount}]);
+        var lowNewCount = verifyVar([${it.lastSynchronousBuildAction.sastScanResult.newLowCount}]);
+
 
         //cve lists - New (8.4.2 and up)
         var highCveList = verifyVar([${it.lastSynchronousBuildAction.sastScanResult.highQueryResultsJson}]);
