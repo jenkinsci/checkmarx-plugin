@@ -4,6 +4,7 @@
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
     <style>
+
         .recurrent-legend {
             margin-right: 15px;
         }
@@ -342,16 +343,7 @@
             align-items: center;
         }
 
-        .results-report .chart .bar-1 {
-            position: relative;
-        }
-
-        .results-report .chart .bar-2 {
-            position: relative;
-            background-color: #373050;
-        }
-
-        .results-report .chart .bar-3 {
+        .results-report .chart .bar-3, .results-report .chart .bar-2, .results-report .chart .bar-1 {
             position: relative;
             background-color: #373050;
         }
@@ -885,7 +877,7 @@
                                 <div class="top-of-chart">
                                     <div class="threshold-exceeded-compliance" id="threshold-exceeded-compliance"></div>
 
-                                    <div class="chart-legend-container">
+                                    <div id="sast-legend-container" class="chart-legend-container">
                                         <div class="chart-legend">
 
                                             <div class="legend-item recurrent-legend">
@@ -1248,7 +1240,7 @@
                                     <div class="top-of-chart">
                                         <div class="threshold-exceeded-compliance" id="osa-threshold-exceeded-compliance"></div>
 
-                                        <div class="chart-legend-container">
+                                        <div id="osa-legend-container" class="chart-legend-container">
                                             <div class="chart-legend">
 
                                                 <div class="legend-item recurrent-legend">
@@ -1912,11 +1904,11 @@
 
         //counts - Legacy form
         var osaHighCount = verifyVar([${it.osaHighCount}]);
-        var osaHighNewCount = 1; //todo - get real number from server
+        var osaHighNewCount = undefined; //todo - get real number from server when supported by WhiteSource
         var osaMedCount = verifyVar([${it.osaMediumCount}]);
-        var osaMedNewCount = 3; //todo - get real number from server
+        var osaMedNewCount = undefined; //todo - get real number from server when supported by WhiteSource
         var osaLowCount = verifyVar([${it.osaLowCount}]);
-        var osaLowNewCount = 0; //todo - get real number from server
+        var osaLowNewCount = undefined; //todo - get real number from server when supported by WhiteSource
 
         //cve lists - New (8.4.2 and up)
         var osaHighCveList = verifyVar([${it.osaScanResult.highCvesList}]);
@@ -2017,13 +2009,18 @@
 
 
 
-                //-------------- SAST bars ------------
+                //-------------- SAST chart ------------
+                //SAST legend
+                if(highNewCount == undefined &amp;&amp; medNewCount == undefined &amp;&amp; lowNewCount == undefined) {
+                    document.getElementById("sast-legend-container").style.visibility = 'hidden';
+                }
+
+                // SAST bars
                 setSastBarsCount();
                 setSastBarsHeight();
-                setSastNewCount();
-
-
-
+                if(highNewCount != undefined &amp;&amp; medNewCount != undefined &amp;&amp; lowNewCount != undefined) {
+                    setSastNewCount();
+                }
 
             } catch (e) {
                 console.error("Element missing in SAST summary section " + e.message);
@@ -2097,11 +2094,19 @@
                         '</div>' +
                         '</a>';
 
-                //-------------- OSA bars ------------
+                //-------------- OSA chart ------------
+                //OSA legend
+                if(osaHighNewCount == undefined &amp;&amp; osaMedNewCount == undefined &amp;&amp; osaLowNewCount == undefined) {
+                    document.getElementById("osa-legend-container").style.visibility = 'hidden';
+                }
+
+                //OSA bars
                 setOsaBarsCount();
                 setOsaBarsHeight();
                 setOsaLibraries();
-                setOsaNewCount();
+                if(osaHighNewCount != undefined &amp;&amp; osaMedNewCount != undefined &amp;&amp; osaLowNewCount != undefined) {
+                    setOsaNewCount();
+                }
             }
             catch (e) {
                 console.error("Element missing in OSA summary section " + e.message);
@@ -2583,18 +2588,19 @@
             //total height - new + recurrent
             var highTotalHeightPx = highCount / maxHeight * totalHeightPx;
             document.getElementById("bar-high").setAttribute("style", "height:" + highTotalHeightPx + "px");
+            if(highNewCount != undefined) {
+                //new high
+                var highNewHeightPx = highNewCount / highCount * highTotalHeightPx;
+                //if new height is between 1 and 9 - give it a minimum height and if theres enough spce in total height
+                if (isNewNeedChange(highTotalHeightPx, highNewHeightPx, minimalVisibilityHeight)) {
+                    highNewHeightPx = minimalVisibilityHeight;
+                }
+                document.getElementById("high-new-scans").setAttribute("style", "height:" + highNewHeightPx + "px");
 
-            //new high
-            var highNewHeightPx = highNewCount / highCount * highTotalHeightPx;
-            //if new height is between 1 and 9 - give it a minimum height and if theres enough spce in total height
-            if (isNewNeedChange(highTotalHeightPx, highNewHeightPx, minimalVisibilityHeight)) {
-                highNewHeightPx = minimalVisibilityHeight;
+                //recurrent high
+                var highRecurrentPx = highTotalHeightPx - highNewHeightPx;
+                document.getElementById("high-recurrent-scans").setAttribute("style", "height:" + highRecurrentPx + "px");
             }
-            document.getElementById("high-new-scans").setAttribute("style", "height:" + highNewHeightPx + "px");
-
-            //recurrent high
-            var highRecurrentPx = highTotalHeightPx - highNewHeightPx;
-            document.getElementById("high-recurrent-scans").setAttribute("style", "height:" + highRecurrentPx + "px");
 
 
             //---------med vulnarabilities
@@ -2602,44 +2608,42 @@
             var medTotalHeightPx = medCount / maxHeight * totalHeightPx;
             document.getElementById("bar-med").setAttribute("style", "height:" + medTotalHeightPx + "px");
 
-            //new med
-            var medNewHeightPx = medNewCount / medCount * medTotalHeightPx;
-            if (isNewNeedChange(medTotalHeightPx, medNewHeightPx, minimalVisibilityHeight)) {
-                medNewHeightPx = minimalVisibilityHeight;
+            if(medNewCount != undefined) {
+                //new med
+                var medNewHeightPx = medNewCount / medCount * medTotalHeightPx;
+                if (isNewNeedChange(medTotalHeightPx, medNewHeightPx, minimalVisibilityHeight)) {
+                    medNewHeightPx = minimalVisibilityHeight;
+                }
+                document.getElementById("med-new-scans").setAttribute("style", "height:" + medNewHeightPx + "px");
+
+                //recurrent med
+                var medRecurrentPx = medTotalHeightPx - medNewHeightPx;
+                document.getElementById("med-recurrent-scans").setAttribute("style", "height:" + medRecurrentPx + "px");
             }
-            document.getElementById("med-new-scans").setAttribute("style", "height:" + medNewHeightPx + "px");
-
-            //recurrent med
-            var medRecurrentPx = medTotalHeightPx - medNewHeightPx;
-            document.getElementById("med-recurrent-scans").setAttribute("style", "height:" + medRecurrentPx + "px");
-
 
             //---------low vulnarabilities
             //total height - new + recurrent
             var lowTotalHeightPx = lowCount / maxHeight * totalHeightPx;
             document.getElementById("bar-low").setAttribute("style", "height:" + lowTotalHeightPx + "px");
 
-            //new low
-            var lowNewHeightPx = lowNewCount / lowCount * lowTotalHeightPx;
-            if (isNewNeedChange(lowTotalHeightPx, lowNewHeightPx, minimalVisibilityHeight)) {
-                lowNewHeightPx = minimalVisibilityHeight;
+            if(lowNewCount != undefined) {
+                //new low
+                var lowNewHeightPx = lowNewCount / lowCount * lowTotalHeightPx;
+                if (isNewNeedChange(lowTotalHeightPx, lowNewHeightPx, minimalVisibilityHeight)) {
+                    lowNewHeightPx = minimalVisibilityHeight;
+                }
+                document.getElementById("low-new-scans").setAttribute("style", "height:" + lowNewHeightPx + "px");
+
+                //recurrent low
+                var lowRecurrentPx = lowTotalHeightPx - lowNewHeightPx;
+                document.getElementById("low-recurrent-scans").setAttribute("style", "height:" + lowRecurrentPx + "px");
             }
-            document.getElementById("low-new-scans").setAttribute("style", "height:" + lowNewHeightPx + "px");
-
-            //recurrent low
-            var lowRecurrentPx = lowTotalHeightPx - lowNewHeightPx;
-            document.getElementById("low-recurrent-scans").setAttribute("style", "height:" + lowRecurrentPx + "px");
-
-
         }
 
         function setOsaLibraries() {
             document.getElementById("vulnerable-libraries").innerHTML = numberWithCommas(osaVulnerableAndOutdatedLibs);
             document.getElementById("ok-libraries").innerHTML = numberWithCommas(okLibraries);
         }
-
-
-
 
         function setOsaBarsHeight() {
             //graphs max height
@@ -2653,59 +2657,56 @@
             var highTotalHeightPx = osaHighCount / osaMaxHeight * totalHeightPx;
             document.getElementById("osa-bar-high").setAttribute("style", "height:" + highTotalHeightPx + "px");
 
-            //new high
-            var highNewHeightPx = osaHighNewCount / osaHighCount * highTotalHeightPx;
-            //if new height is between 1 and 9 - give it a minimum height and if theres enough spce in total height
-            if (isNewNeedChange(highTotalHeightPx, highNewHeightPx, minimalVisibilityHeight)) {
-                highNewHeightPx = minimalVisibilityHeight;
+            if(osaHighNewCount != undefined) {
+                //new high
+                var highNewHeightPx = osaHighNewCount / osaHighCount * highTotalHeightPx;
+                //if new height is between 1 and 9 - give it a minimum height and if theres enough spce in total height
+                if (isNewNeedChange(highTotalHeightPx, highNewHeightPx, minimalVisibilityHeight)) {
+                    highNewHeightPx = minimalVisibilityHeight;
+                }
+                document.getElementById("osa-high-new-scans").setAttribute("style", "height:" + highNewHeightPx + "px");
+
+                //recurrent high
+                var highRecurrentPx = highTotalHeightPx - highNewHeightPx;
+                document.getElementById("osa-high-recurrent-scans").setAttribute("style", "height:" + highRecurrentPx + "px");
             }
-            document.getElementById("osa-high-new-scans").setAttribute("style", "height:" + highNewHeightPx + "px");
-
-            //recurrent high
-            var highRecurrentPx = highTotalHeightPx - highNewHeightPx;
-            document.getElementById("osa-high-recurrent-scans").setAttribute("style", "height:" + highRecurrentPx + "px");
-
 
             //---------med vulnarabilities
             //total height - new + recurrent
             var medTotalHeightPx = osaMedCount / osaMaxHeight * totalHeightPx;
             document.getElementById("osa-bar-med").setAttribute("style", "height:" + medTotalHeightPx + "px");
 
-            //new med
-            var medNewHeightPx = osaMedNewCount / osaMedCount * medTotalHeightPx;
-            if (isNewNeedChange(medTotalHeightPx, medNewHeightPx, minimalVisibilityHeight)) {
-                medNewHeightPx = minimalVisibilityHeight;
+            if(osaMedNewCount != undefined) {
+                //new med
+                var medNewHeightPx = osaMedNewCount / osaMedCount * medTotalHeightPx;
+                if (isNewNeedChange(medTotalHeightPx, medNewHeightPx, minimalVisibilityHeight)) {
+                    medNewHeightPx = minimalVisibilityHeight;
+                }
+                document.getElementById("osa-med-new-scans").setAttribute("style", "height:" + medNewHeightPx + "px");
+
+                //recurrent med
+                var medRecurrentPx = medTotalHeightPx - medNewHeightPx;
+                document.getElementById("osa-med-recurrent-scans").setAttribute("style", "height:" + medRecurrentPx + "px");
             }
-            document.getElementById("osa-med-new-scans").setAttribute("style", "height:" + medNewHeightPx + "px");
-
-            //recurrent med
-            var medRecurrentPx = medTotalHeightPx - medNewHeightPx;
-            document.getElementById("osa-med-recurrent-scans").setAttribute("style", "height:" + medRecurrentPx + "px");
-
 
             //---------low vulnarabilities
             //total height - new + recurrent
             var lowTotalHeightPx = osaLowCount / osaMaxHeight * totalHeightPx;
             document.getElementById("osa-bar-low").setAttribute("style", "height:" + lowTotalHeightPx + "px");
 
-            //new low
-            var lowNewHeightPx = osaLowNewCount / osaLowCount * lowTotalHeightPx;
-            if (isNewNeedChange(lowTotalHeightPx, lowNewHeightPx, minimalVisibilityHeight)) {
-                lowNewHeightPx = minimalVisibilityHeight;
+            if(osaLowNewCount != undefined) {
+                //new low
+                var lowNewHeightPx = osaLowNewCount / osaLowCount * lowTotalHeightPx;
+                if (isNewNeedChange(lowTotalHeightPx, lowNewHeightPx, minimalVisibilityHeight)) {
+                    lowNewHeightPx = minimalVisibilityHeight;
+                }
+                document.getElementById("osa-low-new-scans").setAttribute("style", "height:" + lowNewHeightPx + "px");
+
+                //recurrent low
+                var lowRecurrentPx = lowTotalHeightPx - lowNewHeightPx;
+                document.getElementById("osa-low-recurrent-scans").setAttribute("style", "height:" + lowRecurrentPx + "px");
             }
-            document.getElementById("osa-low-new-scans").setAttribute("style", "height:" + lowNewHeightPx + "px");
-
-            //recurrent low
-            var lowRecurrentPx = lowTotalHeightPx - lowNewHeightPx;
-            document.getElementById("osa-low-recurrent-scans").setAttribute("style", "height:" + lowRecurrentPx + "px");
-
-
         }
-
-
-
-
-
 
     </script>
 
