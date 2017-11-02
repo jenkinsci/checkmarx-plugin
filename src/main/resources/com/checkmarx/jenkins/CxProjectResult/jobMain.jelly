@@ -4,70 +4,78 @@
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
     <style>
-
-        .recurrent-legend {
+        #cx-report {
+            animation: fadein 2s;
+        }
+        @keyframes fadein {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+        .cx-report .recurrent-legend {
             margin-right: 15px;
         }
 
-        .legend-color-box.recurrent-legend-color {
+        .cx-report .legend-color-box.recurrent-legend-color {
             background-color: #372F51;
         }
 
-        .legend-color-box.new-legend-color {
+        .cx-report .legend-color-box.new-legend-color {
             background: linear-gradient(45deg, white 25%, #373050 25%, #373050 50%, white 50%, white 75%, #373050 75%);
             background-size: 4px 4px;
         }
 
-        .legend-color-box {
+        .cx-report .legend-color-box {
             width: 16px;
             height: 16px;
             margin-right: 10px;
         }
 
-        .legend-text {
+        .cx-report .legend-text {
             color: #9B9B9B;
             font-family: Roboto, sans-serif;
             font-size: 14px;
             line-height: 16px;
         }
 
-        .legend-item {
+        .cx-report .legend-item {
             display: flex;
             margin-top: auto;
             margin-bottom: auto;
             margin-left: auto;
         }
 
-        .chart-legend {
+        .cx-report .chart-legend {
             display: inline-flex;
             height: 100%;
             margin: auto;
         }
 
-        .chart-legend-container {
+        .cx-report .chart-legend-container {
             align-items: center;
             width: 50%;
             text-align: right;
         }
 
-        .results-report .threshold-exceeded-compliance {
+        .cx-report .results-report .threshold-exceeded-compliance {
             width: 50%;
         }
 
-        .results-report .sast-summary.chart-large .top-of-chart {
+        .cx-report .results-report .sast-summary.chart-large .top-of-chart {
             max-width: 709px;
         }
-        .top-of-chart {
+
+        .cx-report .top-of-chart {
             display: flex;
             max-width: 475px;
             min-width: 330px;
             width: 100%;
         }
 
-        .results-report .sast-summary.chart-large .new-bar-title-container {
+        .cx-report .results-report .sast-summary.chart-large .new-bar-title-container {
             margin-left: 25%;
         }
-        .new-bar-title-container {
+
+        .cx-report .new-bar-title-container {
             font-weight: bold;
             background-color: #f2f2f2;
             text-align: center;
@@ -79,15 +87,15 @@
             color: #373050;
         }
 
-        .bar-title-wrapper {
+        .cx-report .bar-title-wrapper {
             position: absolute;
         }
 
-        .results-report .sast-summary.chart-large .bar-title-wrapper {
+        .cx-report .results-report .sast-summary.chart-large .bar-title-wrapper {
             width: 100%;
         }
 
-        .new-scans {
+        .cx-report .new-scans {
             background: linear-gradient(45deg, white 25%,
             #373050 25%, #373050 50%,
             white 50%, white 75%,
@@ -95,29 +103,29 @@
             background-size: 4px 4px;
         }
 
-        .recurrent-scans {
+        .cx-report .recurrent-scans {
             background-color: #373050;
         }
 
-        .summary-results {
+        .cx-report .summary-results {
             display: flex;
             position: relative;
             width: 100%;
             min-width: 635px;
         }
 
-        .results-report .osa-summary {
+        .cx-report .results-report .osa-summary {
             margin: 0;
             position: relative;
             width: 50%;
             margin-left: 3%;
         }
 
-        .aui-item.details {
+        .cx-report .aui-item.details {
             width: 530px;
         }
 
-        .results-report {
+        .cx-report .results-report {
             max-width: 1196px;
         }
 
@@ -126,9 +134,6 @@
             margin-right: 35px;
             margin-left: 35px;
             max-width: 1196px;
-        }
-
-        .report-title {
         }
 
         .cx-report .cx-report-title {
@@ -142,19 +147,19 @@
             color: #373050;
         }
 
-        .summary-title-text {
+        .cx-report .summary-title-text {
             white-space: nowrap;
             font-weight: bold;
         }
 
-        .results-report .summary-section {
+        .cx-report .results-report .summary-section {
             display: flex;
             padding-top: 34px;
             padding-bottom: 25px;
             position: relative;
         }
 
-        .sast-failed-error {
+        .cx-report .sast-failed-error {
             height: 512px;
             width: 100%;
             background-color: #F2F2F2;
@@ -162,7 +167,7 @@
             position: relative;
         }
 
-        .sast-error-container {
+        .cx-report .sast-error-container {
             position: absolute;
             right: 50%;
             top: 50%;
@@ -170,7 +175,7 @@
             text-align: center;
         }
 
-        .sast-error-text {
+        .cx-report .sast-error-text {
             color: #382F50;
             font-family: Roboto, sans-serif;
             font-size: 15px;
@@ -178,26 +183,26 @@
             margin-top: 17px;
         }
 
-        .results-report .summary-report-title {
+        .cx-report .results-report .summary-report-title {
             font-size: 24px;
             font-weight: 400;
             padding-bottom: 21px;
             color: #373050;
         }
 
-        .results-report .sast-summary {
+        .cx-report .results-report .sast-summary {
             position: relative;
             margin-right: 3%;
             width: 50%;
         }
 
-        .results-report .detailed-report .report-link {
+        .cx-report .results-report .detailed-report .report-link {
             color: #4A90E2;
             font-size: 14px;
             padding: 15px 2px;
         }
 
-        .results-report .title-links {
+        .cx-report .results-report .title-links {
             display: flex;
             color: #4A90E2;
             font-size: 14px;
@@ -205,59 +210,59 @@
             align-items: center;
         }
 
-        .results-report .summary-section .title-links {
+        .cx-report .results-report .summary-section .title-links {
             border-bottom: solid 1px #d5d5d5;
         }
 
-        .results-report .summary-section .sast .title-links {
+        .cx-report .results-report .summary-section .sast .title-links {
             max-width: 475px;
         }
 
-        .link-icon {
+        .cx-report .link-icon {
             align-items: center;
             display: inline-flex;
         }
 
-        .summary-section .link-to-result {
+        .cx-report .summary-section .link-to-result {
             display: inline-flex;
             align-items: center;
         }
 
-        .link-to-result {
+        .cx-report .link-to-result {
             display: flex;
             align-items: center;
         }
 
-        .summary-link-text {
+        .cx-report .summary-link-text {
             padding: 0 8px;
         }
 
-        .link-text {
+        .cx-report .link-text {
             padding: 0 8px;
         }
 
-        .results-report .sast-summary.chart-large .title-links {
+        .cx-report .results-report .sast-summary.chart-large .title-links {
             max-width: 100%;
         }
 
-        .results-report .sast-summary.chart-large {
+        .cx-report .results-report .sast-summary.chart-large {
             width: 100%;
             margin-bottom: 50px;
             margin-left: 24%;
             max-width: 709px;
         }
 
-        .results-report .sast-summary.chart-large .chart {
+        .cx-report .results-report .sast-summary.chart-large .chart {
             max-width: 709px;
             margin-right: auto;
             margin-left: auto;
         }
 
-        .results-report .sast-summary.chart-large .chart li span {
+        .cx-report .results-report .sast-summary.chart-large .chart li span {
             max-width: 53px;
         }
 
-        .results-report .sast-summary.chart-large .chart .bar-title-container {
+        .cx-report .results-report .sast-summary.chart-large .chart .bar-title-container {
             margin-left: 27%;
             padding-top: 21px;
             display: inline-flex;
@@ -266,12 +271,12 @@
             color: #444444;
         }
 
-        .results-report .sast-summary.chart-large .chart .bar-title {
+        .cx-report .results-report .sast-summary.chart-large .chart .bar-title {
             text-align: center;
             width: 100%;
         }
 
-        .results-report .chart {
+        .cx-report .results-report .chart {
             display: table;
             table-layout: fixed;
             max-width: 475px;
@@ -286,53 +291,54 @@
             border-bottom: solid #979797 2px;
         }
 
-        .results-report .chart li {
+        .cx-report .results-report .chart li {
             position: relative;
             display: table-cell;
             vertical-align: bottom;
             height: 238px;
         }
 
-        .results-report .chart li span {
+        .cx-report .results-report .chart li span {
             max-width: 20px;
             /*overflow: hidden;*/
         }
 
-        .results-report .chart span {
+        .cx-report .results-report .chart span {
             margin-left: 25%;
             display: block;
             animation: draw 1s ease-in-out;
         }
 
-        .results-report .sast-summary.chart-large .chart .bar-count {
+        .cx-report .results-report .sast-summary.chart-large .chart .bar-count {
             /*width: 53px;*/
         }
 
-        .results-report .chart .bar-count {
+        .cx-report .results-report .chart .bar-count {
             margin-left: 4px;
             font-size: 14px;
         }
 
-        .results-report .chart .bar-title {
+        .cx-report .results-report .chart .bar-title {
             font-size: 14px;
             white-space: nowrap;
         }
 
-        .results-report .bar-title-icon svg {
+        .cx-report .results-report .bar-title-icon svg {
             position: absolute;
         }
 
-        .results-report .sast-summary.chart-large .bar-title-icon {
+        .cx-report .results-report .sast-summary.chart-large .bar-title-icon {
             width: 30px;
         }
-        .results-report .bar-title-icon {
+
+        .cx-report .results-report .bar-title-icon {
             margin-right: 6px;
             height: 20px;
             width: 16px;
             text-align: left;
         }
 
-        .results-report .chart .bar-title-container {
+        .cx-report .results-report .chart .bar-title-container {
             margin-left: 25%;
             transform: translate(-25%, 0);
             padding-top: 21px;
@@ -343,16 +349,18 @@
             align-items: center;
         }
 
-        .results-report .chart .bar-3, .results-report .chart .bar-2, .results-report .chart .bar-1 {
+        .cx-report .results-report .chart .bar-3,
+        .cx-report .results-report .chart .bar-2,
+        .cx-report .results-report .chart .bar-1 {
             position: relative;
             background-color: #373050;
         }
 
-        .results-report .threshold-exceeded-compliance {
+        .cx-report .results-report .threshold-exceeded-compliance {
         }
 
-        .results-report .threshold-exceeded,
-        .results-report .threshold-compliance {
+        .cx-report .results-report .threshold-exceeded,
+        .cx-report .results-report .threshold-compliance {
             display: inline-flex;
             font-size: 14px;
             font-weight: normal;
@@ -360,33 +368,30 @@
             padding: 4px 9px;
         }
 
-        .threshold-exceeded {
+        .cx-report .threshold-exceeded {
             background-color: #DA2945;
             color: white;
             border-radius: 2px;
             font-weight: bold;
         }
 
-        .results-report .threshold-exceeded-text,
-        .results-report .threshold-compliance-text {
+        .cx-report .results-report .threshold-exceeded-text,
+        .cx-report .results-report .threshold-compliance-text {
 
         }
 
-        .results-report .threshold-exceeded-icon,
-        .results-report .threshold-compliance-icon {
+        .cx-report .results-report .threshold-exceeded-icon,
+        .cx-report .results-report .threshold-compliance-icon {
             display: inline-flex;
             padding-right: 6px;
             margin: auto 0;
         }
 
-        .results-report .threshold-exceeded-text {
-        }
-
-        .results-report .threshold-compliance-text {
+        .cx-report .results-report .threshold-compliance-text {
             color: #21bf3f;
         }
 
-        .results-report .osa-libraries {
+        .cx-report .results-report .osa-libraries {
             text-align: left;
             margin-right: 35px;
             background-color: #f2f2f2;
@@ -396,58 +401,58 @@
             /*can be 30*/
         }
 
-        .results-report .osa-libraries-title {
+        .cx-report .results-report .osa-libraries-title {
             font-size: 14px;
             font-weight: 600;
             padding-bottom: 25px;
         }
 
-        .results-report .libraries-vulnerable {
+        .cx-report .results-report .libraries-vulnerable {
             overflow: hidden;
             margin-bottom: 34px;
         }
 
-        .results-report .libraries-ok {
+        .cx-report .results-report .libraries-ok {
             overflow: hidden;
         }
 
-        .results-report .libraries-vulnerable-number,
-        .results-report .libraries-ok-number {
+        .cx-report .results-report .libraries-vulnerable-number,
+        .cx-report .results-report .libraries-ok-number {
             font-size: 18px;
             margin: auto auto auto 10px;
         }
 
-        .results-report .libraries-vulnerable-icon,
-        .results-report .libraries-ok-icon {
+        .cx-report .results-report .libraries-vulnerable-icon,
+        .cx-report .results-report .libraries-ok-icon {
             font-size: 18px;
         }
 
-        .results-report .libraries-vulnerable-text,
-        .results-report .libraries-ok-text {
+        .cx-report .results-report .libraries-vulnerable-text,
+        .cx-report .results-report .libraries-ok-text {
             font-size: 14px;
             line-height: 20px;
         }
 
-        .results-report .libraries-icon-number {
+        .cx-report .results-report .libraries-icon-number {
             display: flex;
             margin-bottom: 13px;
         }
 
-        .results-report .osa-results {
+        .cx-report .results-report .osa-results {
             display: flex;
         }
 
-        .results-report .threshold-line {
+        .cx-report .results-report .threshold-line {
             width: 20px;
             border-bottom: dashed white 1px;
             padding-right: 3px;
         }
 
-        .results-report .chart-large .threshold-line {
+        .cx-report .results-report .chart-large .threshold-line {
             width: 53px;
         }
 
-        .results-report .threshold-tooltip {
+        .cx-report .results-report .threshold-tooltip {
             display: flex;
             transform: translate(0, 50%);
             font-size: 14px;
@@ -461,13 +466,13 @@
             border: 1px solid #979797;
         }
 
-        .results-report .threshold-tooltip .tooltip-number {
+        .cx-report .results-report .threshold-tooltip .tooltip-number {
             padding-right: 4px;
             padding-left: 6px;
             line-height: normal;
         }
 
-        .results-report .threshold-tooltip::before {
+        .cx-report .results-report .threshold-tooltip::before {
             content: "";
             position: absolute;
             width: 6px;
@@ -480,61 +485,57 @@
             background-color: white;
         }
 
-        .results-report .tooltip-container {
+        .cx-report .results-report .tooltip-container {
             position: absolute;
             display: inline-flex;
         }
 
-        .full-results-section {
+        .cx-report .full-results-section {
             border-top: solid 2px #373050;
         }
 
-        .full-results-section,
-        .summary-section {
-        }
-
-        .summary-table-row {
+        .cx-report .summary-table-row {
             white-space: nowrap;
             display: inline-flex;
             width: 100%;
         }
 
-        .summary-table-row.cxosa,
-        .summary-table-row.cxsast {
+        .cx-report .summary-table-row.cxosa,
+        .cx-report .summary-table-row.cxsast {
             display: inline-flex;
         }
 
-        table {
+        .cx-report table {
             border-collapse: collapse;
         }
 
-        table td,
-        table th {
+        .cx-report table td,
+        .cx-report table th {
             border: solid transparent;
         }
 
-        .top-padding td {
+        .cx-report .top-padding td {
             padding-top: 59px;
         }
 
-        td {
+        .cx-report td {
             border-color: transparent;
         }
 
-        .title-column,
-        .main-column {
+        .cx-report .title-column,
+        .cx-report .main-column {
             padding: 59px 0;
             line-height: 25px;
             display: inline-block;
         }
 
-        .main-column {
+        .cx-report .main-column {
             width: 77%;
             /*max-width: 709px;*/
             min-width: 500px;
         }
 
-        .title-column {
+        .cx-report .title-column {
             margin-right: 4%;
             vertical-align: top;
             height: 100%;
@@ -544,7 +545,7 @@
             min-width: 155px;
         }
 
-        .summary-title {
+        .cx-report .summary-title {
             border-bottom: solid #979797 1px;
             color: white;
             background-color: #373050;
@@ -552,22 +553,22 @@
             padding: 5px 13px;
         }
 
-        .sum1 {
+        .cx-report .sum1 {
             font-size: 24px;
             font-weight: 500;
         }
 
-        .sum2 {
+        .cx-report .sum2 {
             font-size: 16px;
         }
 
-        .sum-line1 {
+        .cx-report .sum-line1 {
             width: 100%;
             height: 1px;
             background-color: #979797;
         }
 
-        .graph-title {
+        .cx-report .graph-title {
             font-weight: 500;
             font-size: 16px;
             display: table-cell;
@@ -575,77 +576,75 @@
             /*width: 75%;*/
         }
 
-        .graph {
+        .cx-report .graph {
             position: relative;
             text-align: left;
             line-height: 25px;
         }
 
-        .graph-top {
+        .cx-report .graph-top {
             display: table;
             vertical-align: middle;
         }
 
-        .detailed-report {
+        .cx-report .detailed-report {
             margin-top: 12px;
             display: block;
             /*padding: 0 11px;*/
         }
 
-        .detailed-report-ttl {
+        .cx-report .detailed-report-ttl {
             font-size: 14px;
         }
 
-        .download-detailed-report {
+        .cx-report .download-detailed-report {
             color: #9b9b9b;
             font-size: 14px;
         }
 
-        .download-icon,
-        .download-icon,
-        .link-text {
+        .cx-report .download-icon,
+        .cx-report .link-text {
             display: inline-flex;
         }
 
-        .download-icon {
+        .cx-report .download-icon {
             margin-right: 9px;
         }
 
-        .download-icon > svg {
+        .cx-report .download-icon > svg {
             vertical-align: sub;
         }
 
-
-        .download-cx-report {
+        .cx-report .download-cx-report {
             font-size: 16px;
             padding-bottom: 5px;
         }
 
-        .pdf-report.download-icon,
-        .html-report.download-icon {
+        .cx-report .pdf-report.download-icon,
+        .cx-report .html-report.download-icon {
             margin-right: 6px;
         }
 
-        .summary-section .html-report {
+        .cx-report .summary-section .html-report {
             margin-right: 10px;
             border-right: solid 1px #d5d5d5;
         }
 
-        .link-to-result a {
+        .cx-report .link-to-result a {
             display: inline-flex;
             align-items: center;
         }
 
-        .title-links a {
+        .cx-report .title-links a {
             color: #4A90E2;
             text-decoration: none;
         }
 
-        .report-link {
+        .cx-report .report-link {
             line-height: 28px;
         }
 
-        .full-start-end {
+        .cx-report .full-start-end {
             display: inline-flex;
             text-align: left;
             width: 100%;
@@ -654,38 +653,38 @@
             padding-top: 6px;
         }
 
-        .full-start-end-icon {
+        .cx-report .full-start-end-icon {
             margin: 4px 7px 0 0;
         }
 
-        .full-start,
-        .full-end,
-        .full-files,
-        .full-loc {
+        .cx-report .full-start,
+        .cx-report .full-end,
+        .cx-report .full-files,
+        .cx-report .full-loc {
             display: inline-flex;
             line-height: 18px;
             margin-right: 63px;
         }
 
-        .full-loc {
+        .cx-report .full-loc {
             display: inline-block;
         }
 
-        .full-loc > div {
+        .cx-report .full-loc > div {
             display: inline-block;
         }
 
-        .osa-downloads a,
-        .sast-downloads a {
+        .cx-report .osa-downloads a,
+        .cx-report .sast-downloads a {
             color: #4A90E2;
             text-decoration: none;
         }
 
-        .full-downloads {
+        .cx-report .full-downloads {
             white-space: normal;
         }
 
-        .full-severity-title {
+        .cx-report .full-severity-title {
             display: flex;
             text-align: left;
             margin-top: 45px;
@@ -693,33 +692,33 @@
             font-size: 16px;
         }
 
-        .full-severity-title .severity-title-name {
+        .cx-report .full-severity-title .severity-title-name {
             display: inline-block;
             font-size: 16px;
             margin: 0 10px;
         }
 
-        .full-severity-title .severity-count {
+        .cx-report .full-severity-title .severity-count {
             display: inline-block;
         }
 
-        .full-severity-title .severity-icon {
+        .cx-report .full-severity-title .severity-icon {
             align-items: center;
             display: inline-flex;
         }
 
-        table.cve-table {
+        .cx-report table.cve-table {
             width: 100%;
             box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
         }
 
-        table.cve-table th,
-        table.cve-table td {
+        .cx-report table.cve-table th,
+        .cx-report table.cve-table td {
             border: 1px solid transparent;
             text-align: left;
         }
 
-        table.cve-table th {
+        .cx-report table.cve-table th {
             border-bottom: 1px solid #d5d5d5;
             font-size: 14px;
             color: #9b9b9b;
@@ -727,7 +726,7 @@
             padding: 2px 11px;
         }
 
-        table.cve-table td {
+        .cx-report table.cve-table td {
             font-weight: 500;
             font-size: 16px;
             color: #373050;
@@ -735,43 +734,38 @@
             padding: 11px;
         }
 
-        table.cve-table td.sast-cve-table-high,
-        table.cve-table td.sast-cve-table-med,
-        table.cve-table td.sast-cve-table-low {
+        .cx-report table.cve-table td.sast-cve-table-high,
+        .cx-report table.cve-table td.sast-cve-table-med,
+        .cx-report table.cve-table td.sast-cve-table-low {
             max-width: 19px;
         }
 
-        table.cve-table.sast-cve-table td:last-child,
-        table.cve-table.sast-cve-table th:last-child {
+        .cx-report table.cve-table.sast-cve-table td:last-child,
+        .cx-report table.cve-table.sast-cve-table th:last-child {
             padding-right: 20px;
             text-align: right;
         }
 
-        table.cve-table.osa-cve-table td:last-child,
-        table.cve-table.osa-cve-table th:last-child {
+        .cx-report table.cve-table.osa-cve-table td:last-child,
+        .cx-report table.cve-table.osa-cve-table th:last-child {
             width: 32%;
         }
 
-        .summary-row {
-            display: flex;
-            border-bottom: solid 2px #373050;
-            padding: 35px 47px 80px 85px;
-        }
-
-        .error-msg {
+        .cx-report .error-msg {
             display: block;
             padding: 4% 0;
         }
 
-        .aui-message.error, .aui-message-error {
+        .cx-report .aui-message.error,
+        .cx-report .aui-message-error {
             display: block;
         }
 
-        .chart-large .no-scan-message-container {
+        .cx-report .chart-large .no-scan-message-container {
             height: 100%;
         }
 
-        .no-scan-message-container {
+        .cx-report .no-scan-message-container {
             display: none;
             position: absolute;
             height: calc(100% - 50px);
@@ -782,11 +776,11 @@
             margin-bottom: 21px;
         }
 
-        .no-scan-message-icon {
+        .cx-report .no-scan-message-icon {
             padding: 27px;
         }
 
-        .no-scan-message {
+        .cx-report .no-scan-message {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -796,29 +790,19 @@
             text-align: center;
             width: 89%;
         }
-
-
     </style>
 
-
     <j:if test="${it.lastSynchronousBuildAction.showResults}">
-
-        <div class="cx-report">
-
+        <div id="cx-report" class="cx-report">
             <div class="report-title">
                 <div class="cx-report-title">Checkmarx Report</div>
             </div>
-
-
             <div id="results-report" class="results-report">
-
-
                 <div class="summary-section">
                     <div id="summary-results" class="summary-results">
                         <div class="sast-summary" id="sast-summary">
                             <div class="summary-report-title sast">
                                 <div class="summary-title-text sast">CxSAST Vulnerabilities Status</div>
-
                                 <div id="no-scan-message-sast-failed" class="no-scan-message-container sast-scan-failed">
                                     <div class="no-scan-message">
                                         <div class="no-scan-message-icon">
@@ -845,10 +829,10 @@
                                                 </g>
                                             </svg>
                                         </div>
-                                        <div class="no-scan-message-text">SAST Scan Failed</div>
+                                        <div class="no-scan-message-text">SAST scan failed</div>
                                     </div>
                                 </div>
-                                <div class="title-links">
+                                <div id="sast-title-links" class="title-links">
                                     <div class="link-to-result summary-link">
                                         <a class="html-report" id="sast-summary-html-link">
                                             <div class="results-link-icon link-icon">
@@ -864,18 +848,14 @@
                                     </div>
                                     <div id="sast-summary-pdf-link" class="link-to-result"></div>
                                 </div>
-
-
                             </div>
 
                             <!--sast-chart-->
                             <div class="summary-chart" id="sast-results">
                                 <div class="top-of-chart">
                                     <div class="threshold-exceeded-compliance" id="threshold-exceeded-compliance"></div>
-
                                     <div id="sast-legend-container" class="chart-legend-container">
                                         <div class="chart-legend">
-
                                             <div class="legend-item recurrent-legend">
                                                 <div class="legend-color-box recurrent-legend-color"></div>
                                                 <div class="legend-text recurrent-legend-text">Recurrent</div>
@@ -884,15 +864,11 @@
                                                 <div class="legend-color-box new-legend-color"></div>
                                                 <div class="legend-text new-legend-text">New</div>
                                             </div>
-
                                         </div>
                                     </div>
                                 </div>
 
-
                                 <ul class="chart">
-
-
                                     <!--high-->
                                     <li>
                                         <span class="bar-1" id="bar-high">
@@ -900,7 +876,6 @@
                                             <div id="high-new-scans" class="new-scans"></div>
                                             <div id="high-recurrent-scans" class="recurrent-scans"></div>
                                         </span>
-
 
                                         <div class="bar-title-wrapper">
                                             <div class="bar-title-container">
@@ -958,7 +933,6 @@
                                             <div id="med-new-scans" class="new-scans"></div>
                                             <div id="med-recurrent-scans" class="recurrent-scans"></div>
                                         </span>
-
 
                                         <div class="bar-title-wrapper">
                                             <div class="bar-title-container">
@@ -1041,8 +1015,6 @@
                                         </div>
                                     </li>
                                 </ul>
-
-
                             </div>
                         </div>
 
@@ -1077,7 +1049,7 @@
                                                 </g>
                                             </svg>
                                         </div>
-                                        <div class="no-scan-message-text">OSA Scan Failed</div>
+                                        <div class="no-scan-message-text">OSA scan failed</div>
                                     </div>
                                 </div>
 
@@ -1109,11 +1081,11 @@
                                                 </g>
                                             </svg>
                                         </div>
-                                        <div class="no-scan-message-text">OSA License is not enabled. Please contact you Checkmarx Administrator</div>
+                                        <div class="no-scan-message-text">OSA license is not enabled. Please contact your Checkmarx administrator</div>
                                     </div>
                                 </div>
 
-                                <div class="title-links">
+                                <div id="osa-title-links" class="title-links">
                                     <div class="link-to-result summary-link">
                                         <a class="html-report" id="osa-summary-html-link">
                                             <div class="results-link-icon link-icon">
@@ -1137,7 +1109,6 @@
                                     <div class="libraries-vulnerable">
                                         <div class="libraries-icon-number">
                                             <div class="libraries-vulnerable-icon">
-
                                                 <!--osa-libs-->
                                                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                                                      height="31px" version="1.1" viewBox="0 0 47 31" width="47px">
@@ -1187,7 +1158,6 @@
                                         </div>
                                     </div>
 
-
                                     <!--osa-libs-ok-->
                                     <div class="libraries-ok">
                                         <div class="libraries-icon-number">
@@ -1235,10 +1205,8 @@
                                 <div class="osa-chart">
                                     <div class="top-of-chart">
                                         <div class="threshold-exceeded-compliance" id="osa-threshold-exceeded-compliance"></div>
-
                                         <div id="osa-legend-container" class="chart-legend-container">
                                             <div class="chart-legend">
-
                                                 <div class="legend-item recurrent-legend">
                                                     <div class="legend-color-box recurrent-legend-color"></div>
                                                     <div class="legend-text recurrent-legend-text">Recurrent</div>
@@ -1247,15 +1215,11 @@
                                                     <div class="legend-color-box new-legend-color"></div>
                                                     <div class="legend-text new-legend-text">New</div>
                                                 </div>
-
                                             </div>
                                         </div>
                                     </div>
 
-
                                     <ul class="osa-chart chart">
-
-
                                         <!--osa-high-->
                                         <li>
                                             <span class="bar-1" id="osa-bar-high">
@@ -1313,10 +1277,8 @@
                                                     <div class="bar-count" id="osa-bar-count-high"></div>
                                                 </div>
                                                 <div id="osa-new-bar-count-high" class="new-bar-title-container"></div>
-
                                             </div>
                                         </li>
-
 
                                         <!--osa-medium-->
                                         <li>
@@ -1410,8 +1372,6 @@
                                             </div>
                                         </li>
                                     </ul>
-
-
                                 </div>
                             </div>
                         </div>
@@ -1446,7 +1406,6 @@
                                         </a>
                                     </div>
                                     <div id="sast-full-pdf-link" class="link-to-result"></div>
-
                                 </div>
                             </div>
                         </div>
@@ -1491,9 +1450,7 @@
                                         <div class="full-start-end-text">
                                             Start:
                                         </div>
-                                        <div class="full-start-end-date" id="sast-full-start-date">
-
-                                        </div>
+                                        <div class="full-start-end-date" id="sast-full-start-date"></div>
                                     </div>
                                 </div>
 
@@ -1537,9 +1494,7 @@
                                         <div class="full-start-end-text">
                                             End:
                                         </div>
-                                        <div class="full-start-end-date" id="sast-full-end-date">
-
-                                        </div>
+                                        <div class="full-start-end-date" id="sast-full-end-date"></div>
                                     </div>
                                 </div>
 
@@ -1581,9 +1536,7 @@
                                         <div class="full-start-end-text">
                                             Files:
                                         </div>
-                                        <div class="full-start-end-date" id="sast-full-files">
-
-                                        </div>
+                                        <div class="full-start-end-date" id="sast-full-files"></div>
                                     </div>
                                 </div>
 
@@ -1622,24 +1575,15 @@
                                         <div class="full-start-end-text">
                                             Code Lines:
                                         </div>
-                                        <div class="full-start-end-date" id="sast-full-loc">
-
-                                        </div>
+                                        <div class="full-start-end-date" id="sast-full-loc"></div>
                                     </div>
                                 </div>
                             </div>
-                            <div id="sast-cve-table-high-container">
-
-                            </div>
-                            <div id="sast-cve-table-med-container">
-
-                            </div>
-                            <div id="sast-cve-table-low-container">
-
-                            </div>
+                            <div id="sast-cve-table-high-container"></div>
+                            <div id="sast-cve-table-med-container"></div>
+                            <div id="sast-cve-table-low-container"></div>
                         </div>
                     </div>
-
                 </div>
 
                 <!--osa-full-->
@@ -1717,9 +1661,7 @@
                                         <div class="full-start-end-text">
                                             Start:
                                         </div>
-                                        <div class="full-start-end-date" id="osa-full-start-date">
-
-                                        </div>
+                                        <div class="full-start-end-date" id="osa-full-start-date"></div>
                                     </div>
                                 </div>
 
@@ -1762,9 +1704,7 @@
                                         <div class="full-start-end-text">
                                             End:
                                         </div>
-                                        <div class="full-start-end-date" id="osa-full-end-date">
-
-                                        </div>
+                                        <div class="full-start-end-date" id="osa-full-end-date"></div>
                                     </div>
                                 </div>
 
@@ -1798,28 +1738,19 @@
                                         <div class="full-start-end-text">
                                             Libraries:
                                         </div>
-                                        <div class="full-start-end-date" id="osa-full-files">
-
-                                        </div>
+                                        <div class="full-start-end-date" id="osa-full-files"></div>
                                     </div>
                                 </div>
                             </div>
-                            <div id="osa-cve-table-high-container">
-
-                            </div>
-                            <div id="osa-cve-table-med-container">
-
-                            </div>
-                            <div id="osa-cve-table-low-container">
-
-                            </div>
+                            <div id="osa-cve-table-high-container"></div>
+                            <div id="osa-cve-table-med-container"></div>
+                            <div id="osa-cve-table-low-container"></div>
                         </div>
                     </div>
                 </div>
 
             </div>
         </div>
-
     </j:if>
 
     <script>
@@ -1975,14 +1906,13 @@
         var sastErrorMsg =
                 '<div class="sast-error-container">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="48px" height="37px" viewBox="0 0 48 37" version="1.1"> <!-- Generator: Sketch 45.2 (43514) - http:/*www.bohemiancoding.com/sketch -->*/ <title>scan_failed</title> <desc>Created with Sketch.</desc> <defs/> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Jenkins-OSA-empty" transform="translate(-936.000000, -335.000000)"> <g id="Group-2" transform="translate(683.000000, 179.000000)"> <g id="Group" transform="translate(81.000000, 155.202941)"> <g id="Group-3" transform="translate(171.000000, 0.000000)"> <g transform="translate(2.000606, 1.714748)"> <path d="M24.3114123,0.619831205 L44.98533,32.7440758 L44.98533,32.7440758 C45.2842135,33.208497 45.1500186,33.8272778 44.6855974,34.1261613 C44.5242092,34.2300245 44.336342,34.2852522 44.1444209,34.2852522 L1.8977196,34.2852522 L1.8977196,34.2852522 C1.34543485,34.2852522 0.897719599,33.837537 0.897719599,33.2852522 C0.897719599,33.0866799 0.956838199,32.8926033 1.0675421,32.7277531 L22.6403257,0.60350849 L22.6403257,0.60350849 C22.948224,0.145014117 23.569508,0.0229318695 24.0280024,0.330830157 C24.1411852,0.406837189 24.2376306,0.50518529 24.3114123,0.619831205 Z" id="Triangle" stroke="#373050" stroke-width="2"/> <rect id="Rectangle-6" fill="#373050" x="21.9993936" y="11.2852522" width="3" height="13" rx="1.5"/> <path d="M23.4993936,26.2852522 L23.4993936,26.2852522 L23.4993936,26.2852522 C24.3278207,26.2852522 24.9993936,26.9568251 24.9993936,27.7852522 L24.9993936,27.7852522 L24.9993936,27.7852522 C24.9993936,28.6136794 24.3278207,29.2852522 23.4993936,29.2852522 L23.4993936,29.2852522 L23.4993936,29.2852522 C22.6709664,29.2852522 21.9993936,28.6136794 21.9993936,27.7852522 L21.9993936,27.7852522 L21.9993936,27.7852522 C21.9993936,26.9568251 22.6709664,26.2852522 23.4993936,26.2852522 Z" id="Rectangle-6-Copy" fill="#373050"/> </g> </g> </g> </g> </g> </g> </svg>' +
-                '<div class="sast-error-text">Scan Failed</div>' +
+                '<div class="sast-error-text">Scan failed</div>' +
                 '</div>'
         //---------------------------------------------------------- summary ---------------------------------------------------------------
         if (!sastResultsReady) {
             document.getElementById("no-scan-message-sast-failed").setAttribute("style", "display:inline-block");
             document.getElementById("sast-results").setAttribute("style", "visibility:hidden");
-
-
+            document.getElementById("sast-title-links").setAttribute("style", "visibility:hidden");
         }
         else {
             try {
@@ -2004,19 +1934,16 @@
                 }
 
 
-
                 //-------------- SAST chart ------------
-
                 //SAST legend
-                if(highNewCount == undefined &amp;&amp; medNewCount == undefined &amp;&amp; lowNewCount == undefined) {
-
+                if (highNewCount == undefined &amp;&amp; medNewCount == undefined &amp;&amp; lowNewCount == undefined) {
                     document.getElementById("sast-legend-container").style.visibility = 'hidden';
                 }
 
                 // SAST bars
                 setSastBarsCount();
                 setSastBarsHeight();
-                if(highNewCount != undefined &amp;&amp; medNewCount != undefined &amp;&amp; lowNewCount != undefined) {
+                if (highNewCount != undefined &amp;&amp; medNewCount != undefined &amp;&amp; lowNewCount != undefined) {
                     setSastNewCount();
                 }
 
@@ -2070,11 +1997,13 @@
             //show osa no license message
             document.getElementById("no-scan-message-no-license").setAttribute("style", "display:inline-block");
             document.getElementById("osa-results").setAttribute("style", "visibility:hidden");
+            document.getElementById("osa-title-links").setAttribute("style", "visibility:hidden");
         }
         else if (isOsaSuccess != true) {
             //show osa failed message
             document.getElementById("no-scan-message-osa-failed").setAttribute("style", "display:inline-block");
             document.getElementById("osa-results").setAttribute("style", "visibility:hidden");
+            document.getElementById("osa-title-links").setAttribute("style", "visibility:hidden");
         }
         //both are successful
         else {
@@ -2094,8 +2023,7 @@
 
                 //-------------- OSA chart ------------
                 //OSA legend
-                if(osaHighNewCount == undefined &amp;&amp; osaMedNewCount == undefined &amp;&amp; osaLowNewCount == undefined) {
-
+                if (osaHighNewCount == undefined &amp;&amp; osaMedNewCount == undefined &amp;&amp; osaLowNewCount == undefined) {
                     document.getElementById("osa-legend-container").style.visibility = 'hidden';
                 }
 
@@ -2103,7 +2031,7 @@
                 setOsaBarsCount();
                 setOsaBarsHeight();
                 setOsaLibraries();
-                if(osaHighNewCount != undefined &amp;&amp; osaMedNewCount != undefined &amp;&amp; osaLowNewCount != undefined) {
+                if (osaHighNewCount != undefined &amp;&amp; osaMedNewCount != undefined &amp;&amp; osaLowNewCount != undefined) {
                     setOsaNewCount();
                 }
             }
@@ -2389,7 +2317,7 @@
             var severityTitle = generateCveTableTitle(severity);
 
             //generate table headers
-            var tableHeadersNames = {h1: "Vulnerability Type", h2: "##"};
+            var tableHeadersNames = {h1: "Vulnerability", h2: "##"};
             var tableHeadersElement = generateCveTableHeaders(tableHeadersNames);
 
             //get container and create table element in it
@@ -2587,7 +2515,7 @@
             //total height - new + recurrent
             var highTotalHeightPx = highCount / maxHeight * totalHeightPx;
             document.getElementById("bar-high").setAttribute("style", "height:" + highTotalHeightPx + "px");
-            if(highNewCount != undefined) {
+            if (highNewCount != undefined) {
                 //new high
                 var highNewHeightPx = highNewCount / highCount * highTotalHeightPx;
                 //if new height is between 1 and 9 - give it a minimum height and if theres enough spce in total height
@@ -2601,12 +2529,13 @@
                 document.getElementById("high-recurrent-scans").setAttribute("style", "height:" + highRecurrentPx + "px");
             }
 
+
             //---------med vulnarabilities
             //total height - new + recurrent
             var medTotalHeightPx = medCount / maxHeight * totalHeightPx;
             document.getElementById("bar-med").setAttribute("style", "height:" + medTotalHeightPx + "px");
 
-            if(medNewCount != undefined) {
+            if (medNewCount != undefined) {
                 //new med
                 var medNewHeightPx = medNewCount / medCount * medTotalHeightPx;
                 if (isNewNeedChange(medTotalHeightPx, medNewHeightPx, minimalVisibilityHeight)) {
@@ -2624,7 +2553,7 @@
             var lowTotalHeightPx = lowCount / maxHeight * totalHeightPx;
             document.getElementById("bar-low").setAttribute("style", "height:" + lowTotalHeightPx + "px");
 
-            if(lowNewCount != undefined) {
+            if (lowNewCount != undefined) {
                 //new low
                 var lowNewHeightPx = lowNewCount / lowCount * lowTotalHeightPx;
                 if (isNewNeedChange(lowTotalHeightPx, lowNewHeightPx, minimalVisibilityHeight)) {
@@ -2643,7 +2572,6 @@
             document.getElementById("ok-libraries").innerHTML = numberWithCommas(okLibraries);
         }
 
-
         function setOsaBarsHeight() {
             //graphs max height
             var osaMaxCount = Math.max(osaHighCount, osaMedCount, osaLowCount);
@@ -2656,7 +2584,7 @@
             var highTotalHeightPx = osaHighCount / osaMaxHeight * totalHeightPx;
             document.getElementById("osa-bar-high").setAttribute("style", "height:" + highTotalHeightPx + "px");
 
-            if(osaHighNewCount != undefined) {
+            if (osaHighNewCount != undefined) {
                 //new high
                 var highNewHeightPx = osaHighNewCount / osaHighCount * highTotalHeightPx;
                 //if new height is between 1 and 9 - give it a minimum height and if theres enough spce in total height
@@ -2675,7 +2603,7 @@
             var medTotalHeightPx = osaMedCount / osaMaxHeight * totalHeightPx;
             document.getElementById("osa-bar-med").setAttribute("style", "height:" + medTotalHeightPx + "px");
 
-            if(osaMedNewCount != undefined) {
+            if (osaMedNewCount != undefined) {
                 //new med
                 var medNewHeightPx = osaMedNewCount / osaMedCount * medTotalHeightPx;
                 if (isNewNeedChange(medTotalHeightPx, medNewHeightPx, minimalVisibilityHeight)) {
@@ -2693,7 +2621,7 @@
             var lowTotalHeightPx = osaLowCount / osaMaxHeight * totalHeightPx;
             document.getElementById("osa-bar-low").setAttribute("style", "height:" + lowTotalHeightPx + "px");
 
-            if(osaLowNewCount != undefined) {
+            if (osaLowNewCount != undefined) {
                 //new low
                 var lowNewHeightPx = osaLowNewCount / osaLowCount * lowTotalHeightPx;
                 if (isNewNeedChange(lowTotalHeightPx, lowNewHeightPx, minimalVisibilityHeight)) {
