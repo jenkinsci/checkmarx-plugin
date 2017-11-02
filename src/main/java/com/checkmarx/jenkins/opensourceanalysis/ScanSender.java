@@ -21,8 +21,21 @@ public class ScanSender {
         this.projectId = projectId;
     }
 
-    public void sendAsync(FilePath sourceCodeZip) throws Exception {
+    public OsaScanResult sendAsync(FilePath sourceCodeZip, LibrariesAndCVEsExtractor librariesAndCVEsExtractor) throws Exception {
         createScan(sourceCodeZip);
+        ScanDetails latestScanDetails = osaScanClient.getLatestScanId(projectId);
+
+        if(latestScanDetails != null) {
+            GetOpenSourceSummaryResponse getOpenSourceSummaryResponse = getOpenSourceSummary(latestScanDetails.getId());
+            OsaScanResult osaScanResult = new OsaScanResult();
+            osaScanResult.setScanId(latestScanDetails.getId());
+            osaScanResult.setOsaScanStartAndEndTimes(latestScanDetails);
+            osaScanResult.setOsaResults(getOpenSourceSummaryResponse);
+            osaScanResult.setOsaLicense(true);
+            librariesAndCVEsExtractor.getAndSetLibrariesAndCVEsToScanResult(osaScanResult);
+            return osaScanResult;
+        }
+        return null;
     }
 
     public OsaScanResult sendOsaScanAndGetResults(FilePath sourceCodeZip) throws Exception {

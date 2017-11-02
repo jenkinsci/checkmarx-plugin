@@ -57,8 +57,8 @@ public class ScanService {
             sourceCodeZip = zipOpenSourceCode();
             if (asynchronousScan) {
                 logger.info(OSA_RUN_SUBMITTED);
-                scanSender.sendAsync(sourceCodeZip);
-                return null;
+                return scanSender.sendAsync(sourceCodeZip, librariesAndCVEsExtractor);
+
             } else {
                 logger.info(OSA_RUN_STARTED);
                 osaScanResult = scanSender.sendOsaScanAndGetResults(sourceCodeZip);

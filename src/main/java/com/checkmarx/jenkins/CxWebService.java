@@ -6,6 +6,27 @@ import com.checkmarx.jenkins.xmlresponseparser.RunIncrementalScanXmlResponsePars
 import com.checkmarx.jenkins.xmlresponseparser.RunScanAndAddToProjectXmlResponseParser;
 import com.checkmarx.jenkins.xmlresponseparser.XmlResponseParser;
 import com.checkmarx.ws.CxJenkinsWebService.*;
+import com.checkmarx.ws.CxJenkinsWebService.ConfigurationSet;
+import com.checkmarx.ws.CxJenkinsWebService.Credentials;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSBasicRepsonse;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSCreateReportResponse;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSReportRequest;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSReportStatusResponse;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSReportType;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseConfigSetList;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseGroupList;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseLoginData;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponsePresetList;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseProjectsDisplayData;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseRunID;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseScanResults;
+import com.checkmarx.ws.CxJenkinsWebService.CxWSResponseScanStatus;
+import com.checkmarx.ws.CxJenkinsWebService.Group;
+import com.checkmarx.ws.CxJenkinsWebService.LocalCodeContainer;
+import com.checkmarx.ws.CxJenkinsWebService.Preset;
+import com.checkmarx.ws.CxJenkinsWebService.ProjectDisplayData;
+import com.checkmarx.ws.CxJenkinsWebService.ProjectSettings;
+import com.checkmarx.ws.CxSDKWebService.*;
 import com.checkmarx.ws.CxWSResolver.CxClientType;
 import com.checkmarx.ws.CxWSResolver.CxWSResolver;
 import com.checkmarx.ws.CxWSResolver.CxWSResolverSoap;
@@ -54,6 +75,7 @@ public class CxWebService {
     private static final int XML_WRITING_BUFFER_IN_BYTES = 52428800; // 50 MB
     private String sessionId;
     private CxJenkinsWebServiceSoap cxJenkinsWebServiceSoap;
+    private CxSDKWebServiceSoap cxSDKWebServiceSoap;
     private final URL webServiceUrl;
 
     public CxWebService(@NotNull final String serverUrl, CxPluginLogger cxPluginLogger) throws MalformedURLException, AbortException {
@@ -64,10 +86,14 @@ public class CxWebService {
         validateServerUrl(serverUrl);
 
         CxWSResolverSoap cxWSResolverSoap = getCxWSResolverSoap(serverUrl);
-        webServiceUrl = getWebServiceUrl(cxWSResolverSoap);
+        webServiceUrl = getWebServiceUrl(cxWSResolverSoap, CxClientType.JENKINS);
 
         CxJenkinsWebService cxJenkinsWebService = new CxJenkinsWebService(webServiceUrl);
         cxJenkinsWebServiceSoap = getJenkinsWebServiceSoap(cxJenkinsWebService);
+
+        URL sdkWebServiceUrl = getWebServiceUrl(cxWSResolverSoap, CxClientType.SDK);
+        CxSDKWebService cxSDKWebService = new CxSDKWebService(sdkWebServiceUrl);
+        cxSDKWebServiceSoap = getSDKWebServiceSoap(cxSDKWebService);
     }
 
     private CxJenkinsWebServiceSoap getJenkinsWebServiceSoap(CxJenkinsWebService cxJenkinsWebService) {
@@ -76,9 +102,14 @@ public class CxWebService {
         return jenkinsWebServiceSoap;
     }
 
-    private URL getWebServiceUrl(CxWSResolverSoap cxWSResolverSoap) throws AbortException, MalformedURLException {
-        CxWSResponseDiscovery cxWSResponseDiscovery = cxWSResolverSoap.getWebServiceUrl(CxClientType.JENKINS,
-                WEBSERVICE_API_VERSION);
+    private CxSDKWebServiceSoap getSDKWebServiceSoap(CxSDKWebService cxSDKWebService) {
+        CxSDKWebServiceSoap sdkWebServiceSoap = cxSDKWebService.getCxSDKWebServiceSoap();
+        setClientTimeout((BindingProvider) sdkWebServiceSoap, CxConfig.getRequestTimeOutDuration());
+        return sdkWebServiceSoap;
+    }
+
+    private URL getWebServiceUrl(CxWSResolverSoap cxWSResolverSoap, CxClientType type) throws AbortException, MalformedURLException {
+        CxWSResponseDiscovery cxWSResponseDiscovery = cxWSResolverSoap.getWebServiceUrl(type, WEBSERVICE_API_VERSION);
         if (!cxWSResponseDiscovery.isIsSuccesfull()) {
             String message = "Failed to resolve Checkmarx webservice url: " + cxWSResponseDiscovery.getErrorMessage();
             logger.error(message);
@@ -187,6 +218,27 @@ public class CxWebService {
             throw new AbortException(message);
         }
         return cxWSResponseScanStatus;
+    }
+
+    public long getLatestScanId(long projectId) throws AbortException {
+
+        assert sessionId != null : "Trying to get scan status before login";
+        CxWSResponseProjectScannedDisplayData projectScannedDisplayData = cxSDKWebServiceSoap.getProjectScannedDisplayData(sessionId);
+        if (!projectScannedDisplayData.isIsSuccesfull()) {
+            String message = "Error received from Checkmarx server: " + projectScannedDisplayData.getErrorMessage();
+            logger.error(message);
+            throw new AbortException(message);
+        }
+
+        List<ProjectScannedDisplayData> projectList = projectScannedDisplayData.getProjectScannedList().getProjectScannedDisplayData();
+
+        List<ProjectScannedDisplayData> filtered = filter(having(on(ProjectScannedDisplayData.class).getProjectID(), Matchers.equalTo(projectId)), projectList);
+
+        if(filtered.size() > 0) {
+            return filtered.get(0).getLastScanID();
+        }
+
+        return 0;
     }
 
     /**

@@ -41,14 +41,10 @@ public class CxProjectResult implements Action {
 
     public CxScanResult getLastSynchronousBuildAction() {
         AbstractBuild<?, ?> r = this.owner.getLastBuild();
-        while (r != null) {
-
-            CxScanResult a = r.getAction(CxScanResult.class);
-            if (a != null && !a.isScanRanAsynchronous()) {
-                return a;
-            }
-            r = r.getPreviousBuild();
+        if(r != null) {
+            return r.getAction(CxScanResult.class);
         }
+
         return null;
     }
 
@@ -93,11 +89,6 @@ public class CxProjectResult implements Action {
 
     public boolean isResultAvailable() {
         return getLastSynchronousBuildAction() != null;
-    }
-
-    public boolean isLastBuildAsynchronous() {
-        CxScanResult action = getLastBuildAction();
-        return action != null && action.isScanRanAsynchronous();
     }
 
     private CxScanResult getLastBuildAction() {

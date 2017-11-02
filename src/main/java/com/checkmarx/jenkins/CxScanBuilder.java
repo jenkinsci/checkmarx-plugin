@@ -687,10 +687,26 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             shouldRunAsynchronous = scanShouldRunAsynchronous(descriptor);
             if (shouldRunAsynchronous) {
                 logAsyncMessage(serverUrlToUse);
-                addScanResultAction(run, serverUrlToUse, shouldRunAsynchronous, null);
+
+                long latestScanId = cxWebService.getLatestScanId(projectId);
+                CxScanResult cxScanResult = null;
+                if(latestScanId > 0) {
+                    //get the result of the latest scan bxbx
+                    reportResponse = cxWebService.generateScanReport(latestScanId, CxWSReportType.XML);
+                    xmlReportFile = new File(checkmarxBuildDir, "ScanReport.xml");
+                    cxWebService.retrieveScanReport(reportResponse.getID(), xmlReportFile, CxWSReportType.XML);
+                    cxScanResult = addScanResultAction(run, serverUrlToUse, shouldRunAsynchronous, xmlReportFile);
+                    cxScanResult.setScanId(latestScanId);
+                }
+
                 if (osaEnabled) {
                     try {
-                        analyzeOpenSources(run, workspace, serverUrlToUseNotNull, usernameToUse, passwordToUse, cxWebService, listener, shouldRunAsynchronous);
+                        OsaScanResult osaScanResult = analyzeOpenSources(run, workspace, serverUrlToUseNotNull, usernameToUse, passwordToUse, cxWebService, listener, shouldRunAsynchronous);
+                        if(cxScanResult != null && osaScanResult != null) {
+                            cxScanResult.setOsaScanResult(osaScanResult);
+                            cxScanResult.setOsaEnabled(true);
+                            cxScanResult.setOsaSuccessful(true);
+                        }
                     } catch (Exception ignored) {
                         //todo catch reason for failure
                     }

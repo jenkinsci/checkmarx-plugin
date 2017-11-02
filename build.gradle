@@ -61,7 +61,8 @@ wsdl2java {
 	wsdlDir = file("src/main/config/com/checkmarx/jenkins/CxWebService") // define to support incremental build
 	wsdlsToGenerate = [
 		['-mark-generated', '-p', 'com.checkmarx.ws.CxWSResolver', '-client', "${wsdlDir}" + '/cxwsresolver.wsdl'],
-		['-mark-generated', '-p', 'com.checkmarx.ws.CxJenkinsWebService', '-client', "${wsdlDir}" + '/CxJenkinsWebService.wsdl']
+		['-mark-generated', '-p', 'com.checkmarx.ws.CxJenkinsWebService', '-client', "${wsdlDir}" + '/CxJenkinsWebService.wsdl'],
+		['-mark-generated', '-p', 'com.checkmarx.ws.CxSDKWebService', '-client', "${wsdlDir}" + '/CxSDKWebService.wsdl']
 	]
 	cxfVersion = "3.1.4"
 }

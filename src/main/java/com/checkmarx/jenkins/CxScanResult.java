@@ -47,6 +47,7 @@ public class CxScanResult implements Action {
 
     private File pdfReport;
     public static final String PDF_REPORT_NAME = "ScanReport.pdf";
+    public static final String OSA_PDF_REPORT_NAME = "OSAReport.pdf";
     private boolean osaSuccessful; //osa fails flag for jelly
 
 
@@ -123,7 +124,7 @@ public class CxScanResult implements Action {
     public boolean isShowResults() {
         @Nullable
         CxScanBuilder.DescriptorImpl descriptor = (CxScanBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(CxScanBuilder.class);
-        return descriptor != null && !descriptor.isHideResults() && !isScanRanAsynchronous();
+        return descriptor != null && !descriptor.isHideResults();
     }
 
     public boolean isOsaEnabled() {
@@ -188,12 +189,18 @@ public class CxScanResult implements Action {
         outputStream.close();
     }
 
+    public boolean isOsaPdfReportReady() {
+        File buildDirectory = owner.getRootDir();
+        File osaPDFReport = new File(buildDirectory, "/checkmarx/" + OSA_PDF_REPORT_NAME);
+        return osaPDFReport.exists();
+    }
+
     public void doOsaPdfReport(StaplerRequest req, StaplerResponse rsp) throws IOException {
 
         rsp.setContentType("application/pdf");
         ServletOutputStream outputStream = rsp.getOutputStream();
         File buildDirectory = owner.getRootDir();
-        File a = new File(buildDirectory, "/checkmarx/" + "OSAReport.pdf");
+        File a = new File(buildDirectory, "/checkmarx/" + OSA_PDF_REPORT_NAME);
 
         IOUtils.copy(a, outputStream);
 

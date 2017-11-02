@@ -51,6 +51,7 @@ public class OsaScanClient implements Closeable {
     private static final String AUTHENTICATION_PATH = "auth/login";
     private static final String ANALYZE_SUMMARY_PATH = "osa/reports";
     private static final String ANALYZE_PATH = "projects/{projectId}/scans";
+    private static final String LATEST_SCAN_RESULTS = "osa/scans";
     private static final String SCAN_STATUS_PATH = "osa/scans/{scanId}";
     private static final String LIBRARIES_PATH = "osa/libraries";
     private static final String CVEs_PATH = "osa/vulnerabilities";
@@ -358,5 +359,31 @@ public class OsaScanClient implements Closeable {
     @Override
     public void close() {
         client.close();
+    }
+
+    public ScanDetails getLatestScanId(long projectId) {
+        Invocation invocation = root.path(LATEST_SCAN_RESULTS).queryParam("projectId", projectId).request()
+                .header(CX_ORIGIN_HEADER, CX_ORIGIN_VALUE)
+                .cookie(cookies.get(CX_COOKIE))
+                .cookie(CSRF_COOKIE, cookies.get(CSRF_COOKIE).getValue())
+                .header(CSRF_COOKIE, cookies.get(CSRF_COOKIE).getValue()).buildGet();
+
+        Response response = invocation.invoke();
+        validateResponse(response, Response.Status.OK, "Failed to get OSA latest scan list");
+
+        try {
+            List<ScanDetails> scanDetails = mapper.readValue(response.readEntity(String.class), new TypeReference<List<ScanDetails>>(){});
+            for (ScanDetails sd: scanDetails) {
+                if("Succeeded".equals(sd.getState().getName())) {
+                    return sd;
+                }
+            }
+
+        } catch (IOException e) {
+            return null;
+        }
+
+        return null;
+
     }
 }

@@ -718,7 +718,7 @@
     </style>
 
 
-    <j:if test="${it.showResults}">
+    <j:if test="${it.showResults &amp;&amp; !it.scanRanAsynchronous}">
 
         <div class="cx-report">
 
@@ -1736,6 +1736,7 @@
 
         //links
         var osaSummaryResultsLink = '${it.osaProjectStateUrl}';
+        var osaPDFReady = ${it.lastSynchronousBuildAction.osaPdfReportReady};
         var osaPDFLink = '${app.rootUrl}${it.owner.url}${it.urlName}' + "/osaPdfReport";
 
         //counts - Legacy form
@@ -1827,7 +1828,7 @@
                 document.getElementById("sast-summary-html-link").setAttribute("href", sastScanResultsLink);
                 document.getElementById("sast-code-viewer-link").setAttribute("href", sastScanResultsLink);
                 //only if pdf Report is ready
-                if (sastPDFLink) {
+                if (sastPDFLink &amp;&amp; pdfReportReady) {
                     document.getElementById("sast-summary-pdf-link").innerHTML =
 
                             '<a class="pdf-report" href="' + sastPDFLink + '">' +
@@ -1911,8 +1912,8 @@
             try {
                 //link
                 document.getElementById("osa-summary-html-link").setAttribute("href", osaHtmlPath);
-                document.getElementById("osa-summary-pdf-link").innerHTML =
-
+                if(osaPDFReady) {
+                    document.getElementById("osa-summary-pdf-link").innerHTML =
                         '<a class="pdf-report" href="' + osaPDFLink + '">' +
                         '<div class="link-icon">' +
                         '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="16" viewBox="0 0 13 16"><title>PDF icon</title><g fill="none" fill-rule="evenodd"><path d="M8.55 0H8v5h5V4L9.097 0H8.55z" fill="#4A90E2"/><path d="M.5.5h8.387L12.5 4.204V15.5H.5V.5z" stroke="#4A90E2"/><text font-family="Roboto-Black, Roboto" font-size="5" font-weight="700" fill="#4A90E2"><tspan x="1.889" y="11">PDF</tspan></text></g></svg>' +
@@ -1921,6 +1922,7 @@
                         'PDF Report' +
                         '</div>' +
                         '</a>';
+                }
 
                 //set bars count
                 document.getElementById("osa-bar-count-high").innerHTML = osaHighCount;
@@ -1985,7 +1987,7 @@
             try {
                 //sast links
                 document.getElementById("sast-code-viewer-link").setAttribute("href", sastScanResultsLink);
-                if (sastPDFLink) {
+                if (sastPDFLink &amp;&amp; pdfReportReady) {
                     document.getElementById("sast-full-pdf-link").innerHTML =
 
                             '<a class="pdf-report full" href="' + sastPDFLink + '">' +
@@ -2036,8 +2038,8 @@
             try {
                 //osa links
                 document.getElementById("osa-html-link").setAttribute("href", osaHtmlPath);
-                document.getElementById("osa-full-pdf-link").innerHTML =
-
+                if(osaPDFReady) {
+                    document.getElementById("osa-full-pdf-link").innerHTML =
                         '<a class="pdf-report full" href="' + osaPDFLink + '">' +
                         '<div class="link-icon">' +
                         '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="16" viewBox="0 0 13 16"><title>PDF icon</title><g fill="none" fill-rule="evenodd"><path d="M8.55 0H8v5h5V4L9.097 0H8.55z" fill="#4A90E2"/><path d="M.5.5h8.387L12.5 4.204V15.5H.5V.5z" stroke="#4A90E2"/><text font-family="Roboto-Black, Roboto" font-size="5" font-weight="700" fill="#4A90E2"><tspan x="1.889" y="11">PDF</tspan></text></g></svg>' +
@@ -2046,6 +2048,7 @@
                         'PDF Report' +
                         '</div>' +
                         '</a>';
+                }
 
                 //osa info
                 document.getElementById("osa-full-start-date").innerHTML = osaStartDate;

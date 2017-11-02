@@ -34,6 +34,7 @@
         }
 
         .report-title {
+
         }
 
         .cx-report .cx-report-title {
@@ -714,13 +715,20 @@
             width: 89%;
         }
 
+        .async-note{
+            font-size: 20px;
+            display:inline-block;
+            color: #373050;
+        }
+
 
     </style>
-
 
     <j:if test="${it.lastSynchronousBuildAction.showResults}">
 
         <div class="cx-report">
+
+            <div id="async-note" class="async-note"></div>
 
             <div class="report-title">
                 <div class="cx-report-title">Checkmarx Report</div>
@@ -1687,6 +1695,9 @@
             OSA_LOW: {value: 5, name: "low"}
         };
 
+        var isAsync = ${it.lastSynchronousBuildAction.scanRanAsynchronous};
+
+
         //-------------------------- sast vars --------------------------------------
         var sastResultsReady = verifyVar([${it.lastSynchronousBuildAction.resultIsValid}]);
         var pdfReportReady = verifyVar([${it.lastSynchronousBuildAction.pdfReportReady}]);
@@ -1736,6 +1747,7 @@
 
         //links
         var osaSummaryResultsLink = '${it.lastSynchronousBuildAction.osaProjectStateUrl}';
+        var osaPDFReady = ${it.lastSynchronousBuildAction.osaPdfReportReady};
         var osaPDFLink = '${app.rootUrl}${it.lastSynchronousBuildAction.owner.url}${it.lastSynchronousBuildAction.urlName}' + "/osaPdfReport";
 
         //counts - Legacy form
@@ -1813,7 +1825,18 @@
                 '<div class="sast-error-container">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="48px" height="37px" viewBox="0 0 48 37" version="1.1"> <!-- Generator: Sketch 45.2 (43514) - http:/*www.bohemiancoding.com/sketch -->*/ <title>scan_failed</title> <desc>Created with Sketch.</desc> <defs/> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Jenkins-OSA-empty" transform="translate(-936.000000, -335.000000)"> <g id="Group-2" transform="translate(683.000000, 179.000000)"> <g id="Group" transform="translate(81.000000, 155.202941)"> <g id="Group-3" transform="translate(171.000000, 0.000000)"> <g transform="translate(2.000606, 1.714748)"> <path d="M24.3114123,0.619831205 L44.98533,32.7440758 L44.98533,32.7440758 C45.2842135,33.208497 45.1500186,33.8272778 44.6855974,34.1261613 C44.5242092,34.2300245 44.336342,34.2852522 44.1444209,34.2852522 L1.8977196,34.2852522 L1.8977196,34.2852522 C1.34543485,34.2852522 0.897719599,33.837537 0.897719599,33.2852522 C0.897719599,33.0866799 0.956838199,32.8926033 1.0675421,32.7277531 L22.6403257,0.60350849 L22.6403257,0.60350849 C22.948224,0.145014117 23.569508,0.0229318695 24.0280024,0.330830157 C24.1411852,0.406837189 24.2376306,0.50518529 24.3114123,0.619831205 Z" id="Triangle" stroke="#373050" stroke-width="2"/> <rect id="Rectangle-6" fill="#373050" x="21.9993936" y="11.2852522" width="3" height="13" rx="1.5"/> <path d="M23.4993936,26.2852522 L23.4993936,26.2852522 L23.4993936,26.2852522 C24.3278207,26.2852522 24.9993936,26.9568251 24.9993936,27.7852522 L24.9993936,27.7852522 L24.9993936,27.7852522 C24.9993936,28.6136794 24.3278207,29.2852522 23.4993936,29.2852522 L23.4993936,29.2852522 L23.4993936,29.2852522 C22.6709664,29.2852522 21.9993936,28.6136794 21.9993936,27.7852522 L21.9993936,27.7852522 L21.9993936,27.7852522 C21.9993936,26.9568251 22.6709664,26.2852522 23.4993936,26.2852522 Z" id="Rectangle-6-Copy" fill="#373050"/> </g> </g> </g> </g> </g> </g> </svg>' +
                 '<div class="sast-error-text">Scan Failed</div>' +
-                '</div>'
+                '</div>';
+
+        var asyncNote =
+                    '<div class="note-title">Note:</div>' +
+                    '<div>Job is configured to run Checkmarx scan asynchronously. Specific build scan result cannot be displayed in this mode. Displayed results are of the previous successful scan</div>' +
+
+        //----------------------------------------------- async run notification -----------------------------------------------------------
+
+        if(isAsync) {
+            document.getElementById("async-note").innerHTML = asyncNote;
+        }
+
         //---------------------------------------------------------- summary ---------------------------------------------------------------
         if (!sastResultsReady) {
             document.getElementById("no-scan-message-sast-failed").setAttribute("style", "display:inline-block");
@@ -1827,7 +1850,7 @@
                 document.getElementById("sast-summary-html-link").setAttribute("href", sastScanResultsLink);
                 document.getElementById("sast-code-viewer-link").setAttribute("href", sastScanResultsLink);
                 //only if pdf Report is ready
-                if (sastPDFLink) {
+                if (sastPDFLink &amp;&amp; pdfReportReady) {
                     document.getElementById("sast-summary-pdf-link").innerHTML =
 
                             '<a class="pdf-report" href="' + sastPDFLink + '">' +
@@ -1911,8 +1934,9 @@
             try {
                 //link
                 document.getElementById("osa-summary-html-link").setAttribute("href", osaHtmlPath);
-                document.getElementById("osa-summary-pdf-link").innerHTML =
 
+                if(osaPDFReady) {
+                    document.getElementById("osa-summary-pdf-link").innerHTML =
                         '<a class="pdf-report" href="' + osaPDFLink + '">' +
                         '<div class="link-icon">' +
                         '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="16" viewBox="0 0 13 16"><title>PDF icon</title><g fill="none" fill-rule="evenodd"><path d="M8.55 0H8v5h5V4L9.097 0H8.55z" fill="#4A90E2"/><path d="M.5.5h8.387L12.5 4.204V15.5H.5V.5z" stroke="#4A90E2"/><text font-family="Roboto-Black, Roboto" font-size="5" font-weight="700" fill="#4A90E2"><tspan x="1.889" y="11">PDF</tspan></text></g></svg>' +
@@ -1921,6 +1945,8 @@
                         'PDF Report' +
                         '</div>' +
                         '</a>';
+                }
+
 
                 //set bars count
                 document.getElementById("osa-bar-count-high").innerHTML = osaHighCount;
@@ -1985,7 +2011,7 @@
             try {
                 //sast links
                 document.getElementById("sast-code-viewer-link").setAttribute("href", sastScanResultsLink);
-                if (sastPDFLink) {
+                if (sastPDFLink &amp;&amp; pdfReportReady) {
                     document.getElementById("sast-full-pdf-link").innerHTML =
 
                             '<a class="pdf-report full" href="' + sastPDFLink + '">' +
@@ -2036,16 +2062,18 @@
             try {
                 //osa links
                 document.getElementById("osa-html-link").setAttribute("href", osaHtmlPath);
-                document.getElementById("osa-full-pdf-link").innerHTML =
+                if(osaPDFReady) {
+                    document.getElementById("osa-full-pdf-link").innerHTML =
+                    '<a class="pdf-report full" href="' + osaPDFLink + '">' +
+                    '<div class="link-icon">' +
+                    '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="16" viewBox="0 0 13 16"><title>PDF icon</title><g fill="none" fill-rule="evenodd"><path d="M8.55 0H8v5h5V4L9.097 0H8.55z" fill="#4A90E2"/><path d="M.5.5h8.387L12.5 4.204V15.5H.5V.5z" stroke="#4A90E2"/><text font-family="Roboto-Black, Roboto" font-size="5" font-weight="700" fill="#4A90E2"><tspan x="1.889" y="11">PDF</tspan></text></g></svg>' +
+                    '</div>' +
+                    '<div class="link-text">' +
+                    'PDF Report' +
+                    '</div>' +
+                    '</a>';
+                }
 
-                        '<a class="pdf-report full" href="' + osaPDFLink + '">' +
-                        '<div class="link-icon">' +
-                        '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="16" viewBox="0 0 13 16"><title>PDF icon</title><g fill="none" fill-rule="evenodd"><path d="M8.55 0H8v5h5V4L9.097 0H8.55z" fill="#4A90E2"/><path d="M.5.5h8.387L12.5 4.204V15.5H.5V.5z" stroke="#4A90E2"/><text font-family="Roboto-Black, Roboto" font-size="5" font-weight="700" fill="#4A90E2"><tspan x="1.889" y="11">PDF</tspan></text></g></svg>' +
-                        '</div>' +
-                        '<div class="link-text">' +
-                        'PDF Report' +
-                        '</div>' +
-                        '</a>';
 
                 //osa info
                 document.getElementById("osa-full-start-date").innerHTML = osaStartDate;
