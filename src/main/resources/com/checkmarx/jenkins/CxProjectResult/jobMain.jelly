@@ -719,9 +719,24 @@
             font-size: 20px;
             display:inline-block;
             color: #373050;
+            margin-top: 40px;
+            margin-bottom: 40px;
+            border: 1px solid #373050;
+            padding: 20px;
+            vertical-align: top;
         }
 
-
+        .async-note-title {
+            display: inline-block;
+            vertical-align: top;
+            width: 10%;
+            font-weight: bold;
+        }
+        .async-note-body {
+            display: inline-block;
+            width: 90%;
+            vertical-align: top;
+        }
     </style>
 
     <j:if test="${it.lastSynchronousBuildAction.showResults}">
@@ -1828,8 +1843,8 @@
                 '</div>';
 
         var asyncNote =
-                    '<div class="note-title">Note:</div>' +
-                    '<div>Job is configured to run Checkmarx scan asynchronously. Specific build scan result cannot be displayed in this mode. Displayed results are of the previous successful scan</div>' +
+                    '<div class="async-note-title">Note:</div>' +
+                    '<div class="async-note-body">Job is configured to run Checkmarx scan asynchronously. Specific build scan result cannot be displayed in this mode. Displayed results are of the previous successful scan</div>';
 
         //----------------------------------------------- async run notification -----------------------------------------------------------
 
