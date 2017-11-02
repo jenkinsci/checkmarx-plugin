@@ -53,6 +53,9 @@ public class SastResultParser {
             sastScanResult.setMediumCount(0);
             sastScanResult.setLowCount(0);
             sastScanResult.setInfoCount(0);
+            sastScanResult.setNewHighCount(0);
+            sastScanResult.setNewMediumCount(0);
+            sastScanResult.setNewLowCount(0);
 
             saxParser.parse(scanXMLReport, handler);
 
@@ -90,16 +93,23 @@ public class SastResultParser {
                         currentQueryNumOfResults++;
                         @Nullable
                         String severity = attributes.getValue("SeverityIndex");
+                        boolean isNew = attributes.getValue("Status").equals("New");
                         if (severity != null) {
                             if (severity.equals(HIGH.xmlParseString)) {
                                 sastScanResult.setHighCount(sastScanResult.getHighCount() + 1);
-
+                                if(isNew){
+                                    sastScanResult.setNewHighCount(sastScanResult.getNewHighCount() + 1);
+                                }
                             } else if (severity.equals(MEDIUM.xmlParseString)) {
                                 sastScanResult.setMediumCount(sastScanResult.getMediumCount() + 1);
-
+                                if(isNew){
+                                    sastScanResult.setNewMediumCount(sastScanResult.getNewMediumCount() + 1);
+                                }
                             } else if (severity.equals(LOW.xmlParseString)) {
                                 sastScanResult.setLowCount(sastScanResult.getLowCount() + 1);
-
+                                if(isNew){
+                                    sastScanResult.setNewLowCount(sastScanResult.getNewLowCount() + 1);
+                                }
                             } else if (severity.equals(INFO.xmlParseString)) {
                                 sastScanResult.setInfoCount(sastScanResult.getInfoCount() + 1);
                             }

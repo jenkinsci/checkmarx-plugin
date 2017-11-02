@@ -76,7 +76,7 @@ public class CxScanResult implements Action {
         this.sastThresholdConfig = thresholdConfig;
         this.setThresholdsEnabled(true);
         //todo erase when legacy code is no longer needed
-       initializeSastLegacyThresholdVariables(thresholdConfig);
+        initializeSastLegacyThresholdVariables(thresholdConfig);
     }
 
     public String getLargeIconFileName() {
@@ -89,20 +89,14 @@ public class CxScanResult implements Action {
 
     @Override
     public String getIconFileName() {
-        if (isShowResults()) {
-            return getIconPath() + "CxIcon24x24.png";
-        } else {
-            return null;
-        }
+        return null;
+
     }
 
     @Override
     public String getDisplayName() {
-        if (isShowResults()) {
-            return "Checkmarx Scan Results";
-        } else {
-            return null;
-        }
+        return null;
+
     }
 
     @Override
@@ -256,7 +250,7 @@ public class CxScanResult implements Action {
         return serverUrl + "/CxWebClient/portal#/projectState/" + projectId + "/OSA";
     }
 
-//    http://localhost/CxWebClient/ViewerMain.aspx?scanid=1030692&projectid=40565
+    //    http://localhost/CxWebClient/ViewerMain.aspx?scanid=1030692&projectid=40565
     public String getCodeViewerUrl() {
         return serverUrl + "/CxWebClient/ViewerMain.aspx";
     }
@@ -269,7 +263,7 @@ public class CxScanResult implements Action {
         this.osaScanResult = osaScanResult;
 
         //todo erase when legacy code is no longer needed
-        if(osaScanResult.isOsaLicense()) {
+        if (osaScanResult.isOsaLicense()) {
             initializeOsaLegacyVariables(osaScanResult);
         }
     }
@@ -297,19 +291,19 @@ public class CxScanResult implements Action {
         boolean ret = isThresholdExceededByLevel(sastScanResult.getHighCount(), sastThresholdConfig.getHighSeverity());
         ret |= isThresholdExceededByLevel(sastScanResult.getMediumCount(), sastThresholdConfig.getMediumSeverity());
         ret |= isThresholdExceededByLevel(sastScanResult.getLowCount(), sastThresholdConfig.getLowSeverity());
-       return ret;
+        return ret;
     }
 
     public boolean isOsaThresholdExceeded() {
         boolean ret = isThresholdExceededByLevel(osaScanResult.getOsaHighCount(), osaThresholdConfig.getHighSeverity());
         ret |= isThresholdExceededByLevel(osaScanResult.getOsaMediumCount(), osaThresholdConfig.getMediumSeverity());
         ret |= isThresholdExceededByLevel(osaScanResult.getOsaLowCount(), osaThresholdConfig.getLowSeverity());
-       return ret;
+        return ret;
     }
 
-    private boolean isThresholdExceededByLevel(int count, Integer threshold){
+    private boolean isThresholdExceededByLevel(int count, Integer threshold) {
         boolean ret = false;
-        if (threshold != null && count > threshold){
+        if (threshold != null && count > threshold) {
             ret = true;
         }
         return ret;
@@ -349,27 +343,27 @@ public class CxScanResult implements Action {
     private String errorMessage;
 
 
-    public void initializeSastLegacyVariables(SastScanResult sastScanResult){
-         this.highCount = sastScanResult.getHighCount();
-         this.mediumCount = sastScanResult.getMediumCount();
-         this.lowCount = sastScanResult.getLowCount();
-         this.infoCount = sastScanResult.getInfoCount();
+    public void initializeSastLegacyVariables(SastScanResult sastScanResult) {
+        this.highCount = sastScanResult.getHighCount();
+        this.mediumCount = sastScanResult.getMediumCount();
+        this.lowCount = sastScanResult.getLowCount();
+        this.infoCount = sastScanResult.getInfoCount();
 
-         this.highQueryResultList = sastScanResult.getHighQueryResultList();
-         this.mediumQueryResultList = sastScanResult.getMediumQueryResultList();
-         this.lowQueryResultList = sastScanResult.getLowQueryResultList();
-         this.infoQueryResultList = sastScanResult.getInfoQueryResultList();
+        this.highQueryResultList = sastScanResult.getHighQueryResultList();
+        this.mediumQueryResultList = sastScanResult.getMediumQueryResultList();
+        this.lowQueryResultList = sastScanResult.getLowQueryResultList();
+        this.infoQueryResultList = sastScanResult.getInfoQueryResultList();
 
-         this.resultDeepLink = sastScanResult.getResultDeepLink();
-         this.scanStart = sastScanResult.getScanStart();
-         this.scanEnd = sastScanResult.getScanEnd();
-         this.linesOfCodeScanned = sastScanResult.getLinesOfCodeScanned();
-         this.filesScanned = sastScanResult.getFilesScanned();
-         this.scanType = sastScanResult.getScanType();
+        this.resultDeepLink = sastScanResult.getResultDeepLink();
+        this.scanStart = sastScanResult.getScanStart();
+        this.scanEnd = sastScanResult.getScanEnd();
+        this.linesOfCodeScanned = sastScanResult.getLinesOfCodeScanned();
+        this.filesScanned = sastScanResult.getFilesScanned();
+        this.scanType = sastScanResult.getScanType();
 
-         this.resultIsValid = sastScanResult.isResultIsValid();
-         this.errorMessage = sastScanResult.getErrorMessage();
-     }
+        this.resultIsValid = sastScanResult.isResultIsValid();
+        this.errorMessage = sastScanResult.getErrorMessage();
+    }
 
     public int getHighCount() {
         return highCount;
@@ -448,8 +442,8 @@ public class CxScanResult implements Action {
     private int osaVulnerableAndOutdatedLibs;
     private int osaNoVulnerabilityLibs;
 
-    public void initializeOsaLegacyVariables(OsaScanResult osaScanResult){
-        if(osaScanResult != null) {
+    public void initializeOsaLegacyVariables(OsaScanResult osaScanResult) {
+        if (osaScanResult != null) {
             this.osaHighCount = osaScanResult.getOsaHighCount();
             this.osaMediumCount = osaScanResult.getOsaMediumCount();
             this.osaLowCount = osaScanResult.getOsaLowCount();
@@ -492,13 +486,13 @@ public class CxScanResult implements Action {
     @Nullable
     private Integer osaLowThreshold;
 
-    private void initializeSastLegacyThresholdVariables(ThresholdConfig thresholdConfig){
+    private void initializeSastLegacyThresholdVariables(ThresholdConfig thresholdConfig) {
         this.setHighThreshold(thresholdConfig.getHighSeverity());
         this.setMediumThreshold(thresholdConfig.getMediumSeverity());
         this.setLowThreshold(thresholdConfig.getLowSeverity());
     }
 
-    private void initializeOsaLegacyThresholdVariables(ThresholdConfig thresholdConfig){
+    private void initializeOsaLegacyThresholdVariables(ThresholdConfig thresholdConfig) {
         this.setOsaHighThreshold(thresholdConfig.getHighSeverity());
         this.setOsaMediumThreshold(thresholdConfig.getMediumSeverity());
         this.setOsaLowThreshold(thresholdConfig.getLowSeverity());
