@@ -1830,7 +1830,7 @@
 
         //links
         var osaSummaryResultsLink = '${it.osaProjectStateUrl}';
-        var osaPDFReady = ${it.lastSynchronousBuildAction.osaPdfReportReady};
+        var osaPDFReady = verifyVar([${it.osaPdfReportReady}]);
         var osaPDFLink = '${app.rootUrl}${it.owner.url}${it.urlName}' + "/osaPdfReport";
 
         //counts - Legacy form

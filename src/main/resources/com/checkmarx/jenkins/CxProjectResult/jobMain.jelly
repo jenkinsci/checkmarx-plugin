@@ -817,7 +817,7 @@
     <j:if test="${it.lastSynchronousBuildAction.showResults}">
 
         <div id="cx-report" class="cx-report">
-            <div id="async-note" class="async-note"></div>
+            <div id="async-note"></div>
             <div class="report-title">
                 <div class="cx-report-title">Checkmarx Report</div>
             </div>
@@ -1854,7 +1854,7 @@
 
         //links
         var osaSummaryResultsLink = '${it.lastSynchronousBuildAction.osaProjectStateUrl}';
-        var osaPDFReady = ${it.lastSynchronousBuildAction.osaPdfReportReady};
+        var osaPDFReady = verifyVar([${it.lastSynchronousBuildAction.osaPdfReportReady}]);
         var osaPDFLink = '${app.rootUrl}${it.lastSynchronousBuildAction.owner.url}${it.lastSynchronousBuildAction.urlName}' + "/osaPdfReport";
 
         //counts - Legacy form
@@ -1938,8 +1938,8 @@
                 '</div>';
 
         var asyncNote =
-        '<div class="async-note-title">Note:</div>' +
-        '<div class="async-note-body">Job is configured to run Checkmarx scan asynchronously. Specific build scan result cannot be displayed in this mode. Displayed results are of the previous successful scan</div>';
+        '<div class="async-note"><div class="async-note-title">Note:</div>' +
+        '<div class="async-note-body">Job is configured to run Checkmarx scan asynchronously. Specific build scan result cannot be displayed in this mode. Displayed results are of the previous successful scan</div></div>';
 
         //----------------------------------------------- async run notification -----------------------------------------------------------
 
