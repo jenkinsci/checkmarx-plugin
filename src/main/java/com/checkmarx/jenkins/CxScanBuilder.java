@@ -11,6 +11,11 @@ import com.checkmarx.jenkins.web.client.OsaScanClient;
 import com.checkmarx.jenkins.web.contracts.ProjectContract;
 import com.checkmarx.jenkins.web.model.AuthenticationRequest;
 import com.checkmarx.ws.CxJenkinsWebService.*;
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import hudson.*;
 import hudson.console.HyperlinkNote;
 import hudson.model.*;
@@ -40,6 +45,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -69,6 +75,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private String username;
     @Nullable
     private String password;
+
+    private String credentialsId;
+
     @Nullable
     private String projectName;
     @Nullable
@@ -168,6 +177,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             @Nullable String serverUrl,
             @Nullable String username,
             @Nullable String password,
+            String credentialsId,
             String projectName,
             long projectId,
             String buildStep,
@@ -204,6 +214,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.serverUrl = serverUrl;
         this.username = username;
         this.password = Secret.fromString(password).getEncryptedValue();
+        this.credentialsId = credentialsId;
         // Workaround for compatibility with Conditional BuildStep Plugin
         this.projectName = (projectName == null) ? buildStep : projectName;
         this.projectId = projectId;
@@ -279,6 +290,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     public String getPasswordPlainText() {
         return Secret.fromString(password).getPlainText();
+    }
+
+    public String getCredentialsId() {
+        return credentialsId;
+    }
+
+    public void setCredentialsId(String credentialsId) {
+        this.credentialsId = credentialsId;
     }
 
     @Nullable
@@ -649,11 +668,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                         "Visit plugin configuration page to disable this skip.");
                 return;
             }
-            serverUrlToUse = isUseOwnServerCredentials() ? getServerUrl() : descriptor.getServerUrl();
-            usernameToUse = isUseOwnServerCredentials() ? getUsername() : descriptor.getUsername();
-            passwordToUse = isUseOwnServerCredentials() ? getPasswordPlainText() : descriptor.getPasswordPlainText();
 
-
+            CxCredentials cxCredentials = CxCredentials.resolveCredentials(this, descriptor, run);
+            serverUrlToUse = cxCredentials.getServerUrl();
+            usernameToUse = cxCredentials.getUsername();
+            passwordToUse = cxCredentials.getPassword();
             String serverUrlToUseNotNull = serverUrlToUse != null ? serverUrlToUse : "";
 
             cxWebService = new CxWebService(serverUrlToUseNotNull, jobConsoleLogger);
@@ -1318,6 +1337,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         @Nullable
         private String password;
 
+        private String credentialsId;
+
         private boolean prohibitProjectCreation;
         private boolean hideResults;
         private boolean enableCertificateValidation;
@@ -1388,6 +1409,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         @Nullable
         public String getPasswordPlainText(String password) {
             return Secret.fromString(password).getPlainText();
+        }
+
+        public String getCredentialsId() {
+            return credentialsId;
+        }
+
+        public void setCredentialsId(String credentialsId) {
+            this.credentialsId = credentialsId;
         }
 
         public boolean isProhibitProjectCreation() {
@@ -1537,12 +1566,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         // Provides a description string to be displayed near "Use default server credentials"
         // configuration option
         public String getCredentialsDescription() {
-            if (getServerUrl() == null || getServerUrl().isEmpty() ||
-                    getUsername() == null || getUsername().isEmpty()) {
+            if (getServerUrl() == null || getServerUrl().isEmpty()) {
                 return "not set";
             }
 
-            return "Server URL: " + getServerUrl() + " username: " + getUsername();
+            return "Server URL: " + getServerUrl() + ", Credentials Id: " + getCredentialsId();
 
         }
 
@@ -1563,7 +1591,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 	     *  shared state to avoid synchronization issues.
 	     */
         public FormValidation doCheckOsaEnabled(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl, @QueryParameter final String password,
-                                                @QueryParameter final String username, @QueryParameter final boolean osaEnabled, @QueryParameter final String timestamp) {
+                                                @QueryParameter final String username, @QueryParameter final boolean osaEnabled, @QueryParameter final String timestamp, @QueryParameter final String credentialsId) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             CxWebService cxWebService = null;
 
@@ -1572,7 +1600,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
 
             try {
-                cxWebService = prepareLoggedInWebservice(useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password));
+                CxCredentials credentials = CxCredentials.resolveCredentials(!useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password), credentialsId, this);
+                cxWebService = prepareLoggedInWebservice(credentials);
             } catch (Exception e) {
                 STATIC_LOGGER.error(e.getMessage(), e);
                 return FormValidation.ok();
@@ -1605,10 +1634,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 	     *  shared state to avoid synchronization issues.
 	     */
         public FormValidation doTestConnection(@QueryParameter final String serverUrl, @QueryParameter final String password,
-                                               @QueryParameter final String username, @QueryParameter final String timestamp) {
+                                               @QueryParameter final String username, @QueryParameter final String timestamp, @QueryParameter final String credentialsId) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
+            CxCredentials credentials = CxCredentials.resolveCredentials(true, serverUrl, username, getPasswordPlainText(password), credentialsId, this);
             CxWebService cxWebService = null;
             try {
+                //there is no need to extract the serverUrl from the CxCredentials. here we use specific credentials
                 cxWebService = new CxWebService(serverUrl, STATIC_LOGGER);
             } catch (Exception e) {
                 STATIC_LOGGER.error(e.getMessage(), e);
@@ -1616,7 +1647,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
 
             try {
-                cxWebService.login(username, getPasswordPlainText(password));
+                cxWebService.login(credentials.getUsername(), credentials.getPassword());
                 return FormValidation.ok("Success");
 
             } catch (Exception e) {
@@ -1629,19 +1660,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
 	     *  shared state to avoid synchronization issues.
 	     */
-        private CxWebService prepareLoggedInWebservice(boolean useOwnServerCredentials,
-                                                       String serverUrl,
-                                                       String username,
-                                                       String password)
+        private CxWebService prepareLoggedInWebservice(CxCredentials credentials)
                 throws AbortException, MalformedURLException {
-            String serverUrlToUse = !useOwnServerCredentials ? serverUrl : getServerUrl();
-            String usernameToUse = !useOwnServerCredentials ? username : getUsername();
-            String passwordToUse = !useOwnServerCredentials ? getPasswordPlainText(password) : getPasswordPlainText();
 
-            STATIC_LOGGER.info("prepareLoggedInWebservice: server: " + serverUrlToUse + " user: " + usernameToUse);
+            STATIC_LOGGER.info("prepareLoggedInWebservice: server: " + credentials.getServerUrl() + " user: " + credentials.getUsername());
 
-            CxWebService cxWebService = new CxWebService(serverUrlToUse, STATIC_LOGGER);
-            cxWebService.login(usernameToUse, passwordToUse);
+            CxWebService cxWebService = new CxWebService(credentials.getServerUrl(), STATIC_LOGGER);
+            cxWebService.login(credentials.getUsername(), credentials.getPassword());
             return cxWebService;
         }
 
@@ -1650,12 +1675,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *  shared state to avoid synchronization issues.
          */
         public ComboBoxModel doFillProjectNameItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
-                                                    @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String timestamp) {
+                                                    @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String timestamp, @QueryParameter final String credentialsId) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ComboBoxModel projectNames = new ComboBoxModel();
 
             try {
-                final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password));
+                CxCredentials credentials = CxCredentials.resolveCredentials(!useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password), credentialsId, this);
+                final CxWebService cxWebService = prepareLoggedInWebservice(credentials);
 
                 List<ProjectDisplayData> projectsDisplayData = cxWebService.getProjectsDisplayData();
                 for (ProjectDisplayData pd : projectsDisplayData) {
@@ -1678,11 +1704,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         public FormValidation doCheckProjectName(@AncestorInPath AbstractProject project, @QueryParameter final String projectName, @QueryParameter final boolean useOwnServerCredentials,
                                                  @QueryParameter final String serverUrl, @QueryParameter final String username, @QueryParameter final String password,
-                                                 @QueryParameter final String groupId, @QueryParameter final String timestamp) {
+                                                 @QueryParameter final String groupId, @QueryParameter final String timestamp, @QueryParameter final String credentialsId) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 
             try {
-                final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password));
+                CxCredentials credentials = CxCredentials.resolveCredentials(!useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password), credentialsId, this);
+                final CxWebService cxWebService = prepareLoggedInWebservice(credentials);
 
                 if (msGuid.matcher(groupId).matches()) {
                     String resolvedProjectName = projectName;
@@ -1736,11 +1763,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 	     *  shared state to avoid synchronization issues.
 	     */
         public ListBoxModel doFillPresetItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
-                                              @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String timestamp) {
+                                              @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String timestamp, @QueryParameter final String credentialsId) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
             try {
-                final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password));
+                CxCredentials credentials = CxCredentials.resolveCredentials(!useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password), credentialsId, this);
+                final CxWebService cxWebService = prepareLoggedInWebservice(credentials);
 
                 final List<Preset> presets = cxWebService.getPresets();
                 for (Preset p : presets) {
@@ -1777,11 +1805,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         public ListBoxModel doFillSourceEncodingItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
-                                                      @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String timestamp) {
+                                                      @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String timestamp, @QueryParameter final String credentialsId) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
             try {
-                final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password));
+
+                CxCredentials credentials = CxCredentials.resolveCredentials(!useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password), credentialsId, this);
+                final CxWebService cxWebService = prepareLoggedInWebservice(credentials);
 
                 final List<ConfigurationSet> sourceEncodings = cxWebService.getSourceEncodings();
                 for (ConfigurationSet cs : sourceEncodings) {
@@ -1806,11 +1836,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 	     */
 
         public ListBoxModel doFillGroupIdItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
-                                               @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String timestamp) {
+                                               @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String timestamp, @QueryParameter final String credentialsId) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
             try {
-                final CxWebService cxWebService = prepareLoggedInWebservice(useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password));
+                CxCredentials credentials = CxCredentials.resolveCredentials(!useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password), credentialsId, this);
+                final CxWebService cxWebService = prepareLoggedInWebservice(credentials);
                 final List<Group> groups = cxWebService.getAssociatedGroups();
                 for (Group group : groups) {
                     listBoxModel.add(new ListBoxModel.Option(group.getGroupName(), group.getID()));
@@ -2022,6 +2053,25 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         public void setLockVulnerabilitySettings(boolean lockVulnerabilitySettings) {
             this.lockVulnerabilitySettings = lockVulnerabilitySettings;
+        }
+
+        public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String credentialsId) {
+            StandardListBoxModel result = new StandardListBoxModel();
+            if (item == null) {
+                if (!Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER)) {
+                    return result.add(credentialsId);
+                }
+            } else {
+                if (!item.hasPermission(Item.EXTENDED_READ)
+                        && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
+                    return result.add(credentialsId);
+                }
+            }
+
+            return result
+                    .withEmptySelection()
+                    .withAll(CredentialsProvider.lookupCredentials(StandardUsernamePasswordCredentials.class, item, null, Collections.<DomainRequirement>emptyList()))
+                    .withMatching(CredentialsMatchers.withId(credentialsId));
         }
 
     }

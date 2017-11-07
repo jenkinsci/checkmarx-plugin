@@ -1,5 +1,5 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:c="/lib/credentials" xmlns:d="jelly:define" xmlns:l="/lib/layout"
 	xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 	<!-- This Jelly script is used to produce the global configuration option. Jenkins uses a set of tag libraries 
 		to provide uniformity in forms. To determine where this tag is defined, first check the namespace URI, and then 
@@ -20,13 +20,14 @@
 			<f:textbox />
 		</f:entry>
 
-		<f:entry title="Default Username" field="username">
-			<f:textbox />
+		<f:entry field="credentialsId" title="${%Credentials}">
+			<c:select />
 		</f:entry>
 
-		<f:entry title="Default Password" field="password">
-			<f:password />
-		</f:entry>
+		<f:invisibleEntry>
+			<f:readOnlyTextbox field="username"/>
+			<f:readOnlyTextbox field="password"/>
+		</f:invisibleEntry>
 
 		<f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
 			with="serverUrl,username,password,timestamp" />

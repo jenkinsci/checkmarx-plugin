@@ -1,5 +1,5 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:c="/lib/credentials" xmlns:l="/lib/layout"
 	xmlns:t="/lib/hudson" xmlns:f="/lib/form" descriptor="${it.descriptor}">
 	<!-- This jelly script is used for per-project configuration. -->
 
@@ -17,6 +17,10 @@
 
             <!-- Creates a text field that shows the value of the "name" property. When submitted, it will be passed to the
                 corresponding constructor parameter. -->
+            <f:invisibleEntry>
+                <f:readOnlyTextbox field="username"/>
+                <f:readOnlyTextbox field="password"/>
+            </f:invisibleEntry>
             <f:optionalBlock title="Use default server credentials (${descriptor.credentialsDescription})"
                 inline="true" field="useOwnServerCredentials" negative="true"
                 checked="${instance==null?true:!instance.useOwnServerCredentials}">
@@ -25,15 +29,12 @@
                     <f:textbox default="${descriptor.serverUrl}" />
                 </f:entry>
 
-                <f:entry title="Username" field="username">
-                    <f:textbox default="${descriptor.username}" />
+                <f:entry field="credentialsId" title="${%Credentials}">
+                    <c:select />
                 </f:entry>
 
-                <f:entry title="Password" field="password">
-                    <f:password />
-                </f:entry>
                 <f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
-                    with="serverUrl,username,password,timestamp" />
+                    with="serverUrl,username,password,timestamp,credentialsId" />
             </f:optionalBlock>
 
             <f:entry title="Checkmarx project name" description="Existing projects appear in a completion list when server url is provided (up to 20)">
