@@ -520,6 +520,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     @DataBoundSetter
     public void setPresetSpecified(boolean presetSpecified) {
+        // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         this.presetSpecified = presetSpecified;
     }
 
