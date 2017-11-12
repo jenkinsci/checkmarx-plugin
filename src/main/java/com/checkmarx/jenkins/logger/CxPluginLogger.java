@@ -51,7 +51,7 @@ public class CxPluginLogger implements Serializable {
     }
 
     public void error(String message, Throwable error) {
-        loggingDevice.error( message+"\n\n"+ Arrays.toString(error.getStackTrace())+"\n\n");
+        loggingDevice.error( message+"\n\n"+error.toString()+"\n\n"+ Arrays.toString(error.getStackTrace())+"\n\n");
     }
 
     private class JavaLoggingDevice implements LoggingDevice{
