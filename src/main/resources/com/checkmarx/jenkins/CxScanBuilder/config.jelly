@@ -29,6 +29,12 @@
                     <f:textbox default="${descriptor.serverUrl}" />
                 </f:entry>
 
+                <j:if test="${instance.isOldCredentials()}">
+                    <f:block>
+                        <div style="font-weight: bold; padding: 8px;">You are currently using the Checkmarx credential method. To switch to the new Jenkins Credential method, click Add and select your new credentials.</div>
+                    </f:block>
+                </j:if>
+
                 <f:entry field="credentialsId" title="${%Credentials}">
                     <c:select />
                 </f:entry>

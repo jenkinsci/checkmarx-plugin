@@ -1306,6 +1306,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return allowedCauses.isEmpty();
     }
 
+    public boolean isOldCredentials() {
+        return StringUtils.isEmpty(credentialsId) && (username != null || password != null);
+    }
+
 
     //////////////////////////////////////////////////////////////////////////////////////////////
     //
@@ -1570,7 +1574,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 return "not set";
             }
 
-            return "Server URL: " + getServerUrl() + ", Credentials Id: " + getCredentialsId();
+            return "Server URL: " + getServerUrl();
 
         }
 
@@ -1692,6 +1696,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 return projectNames;
 
             } catch (Exception e) {
+                STATIC_LOGGER.error("Failed to populate project list: " + e.toString());
                 STATIC_LOGGER.info("Projects list: empty");
                 return projectNames; // Return empty list of project names
             }
@@ -1779,6 +1784,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 return listBoxModel;
 
             } catch (Exception e) {
+                STATIC_LOGGER.error("Failed to populate preset list: " + e.toString());
                 STATIC_LOGGER.info("Presets list: empty");
                 String message = "Provide Checkmarx server credentials to see presets list";
                 listBoxModel.add(new ListBoxModel.Option(message, message));
@@ -1851,6 +1857,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 return listBoxModel;
 
             } catch (Exception e) {
+                STATIC_LOGGER.error("Failed to populate team list: " + e.toString());
                 STATIC_LOGGER.info("Associated groups: empty");
                 String message = "Provide Checkmarx server credentials to see teams list";
                 listBoxModel.add(new ListBoxModel.Option(message, message));
@@ -2072,6 +2079,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     .withEmptySelection()
                     .withAll(CredentialsProvider.lookupCredentials(StandardUsernamePasswordCredentials.class, item, null, Collections.<DomainRequirement>emptyList()))
                     .withMatching(CredentialsMatchers.withId(credentialsId));
+        }
+
+        public boolean isOldCredentials() {
+            return StringUtils.isEmpty(credentialsId) && (username != null || password != null);
         }
 
     }
