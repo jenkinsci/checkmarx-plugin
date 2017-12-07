@@ -720,6 +720,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
                 if (osaEnabled) {
                     try {
+                        jobConsoleLogger.info("Starting OSA Scan");
                         OsaScanResult osaScanResult = analyzeOpenSources(run, workspace, serverUrlToUseNotNull, usernameToUse, passwordToUse, cxWebService, listener, shouldRunAsynchronous);
                         if(cxScanResult != null && osaScanResult != null) {
                             cxScanResult.setOsaScanResult(osaScanResult);
@@ -943,10 +944,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         boolean useGlobalThreshold = shouldUseGlobalThreshold();
         sb.append("----------------------------Configurations:-----------------------------").append("\n");
         if (isUseOwnServerCredentials()) {
-            sb.append("username: ").append(getUsername()).append("\n");
+            sb.append("credentialsId: ").append(getCredentialsId()).append("\n");
             sb.append("url: ").append(getServerUrl()).append("\n");
         } else {
-            sb.append("username: ").append(descriptor.getUsername()).append("\n");
+            sb.append("credentialsId: ").append(descriptor.getCredentialsId()).append("\n");
             sb.append("url: ").append(descriptor.getServerUrl()).append("\n");
         }
         sb.append("projectName: ").append(getProjectName()).append("\n");

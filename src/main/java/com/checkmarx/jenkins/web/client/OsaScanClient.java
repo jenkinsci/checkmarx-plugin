@@ -1,29 +1,11 @@
 package com.checkmarx.jenkins.web.client;
 
 import com.checkmarx.jenkins.logger.CxPluginLogger;
+import com.checkmarx.jenkins.opensourceanalysis.OSAFile;
 import com.checkmarx.jenkins.web.model.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.InputStreamBody;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.glassfish.jersey.media.multipart.FormDataBodyPart;
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
-import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
-import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
-import org.jetbrains.annotations.NotNull;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -32,10 +14,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -47,10 +26,11 @@ public class OsaScanClient implements Closeable {
 
     private transient CxPluginLogger logger = new CxPluginLogger();
 
-    private static final String ROOT_PATH = "CxRestAPI/";
+    private static final String ROOT_PATH = "cxrestapi/";
     private static final String AUTHENTICATION_PATH = "auth/login";
+    private static final String CREATE_SCAN_PATH = "osa/scans";
+
     private static final String ANALYZE_SUMMARY_PATH = "osa/reports";
-    private static final String ANALYZE_PATH = "projects/{projectId}/scans";
     private static final String LATEST_SCAN_RESULTS = "osa/scans";
     private static final String SCAN_STATUS_PATH = "osa/scans/{scanId}";
     private static final String LIBRARIES_PATH = "osa/libraries";
@@ -61,7 +41,6 @@ public class OsaScanClient implements Closeable {
     private static final String ACCEPT_HEADER = "Accept";
     private static final String CX_ORIGIN_HEADER = "cxOrigin";
     private static final String CX_ORIGIN_VALUE = "Jenkins";
-    private static final String OSA_ZIPPED_FILE_KEY_NAME = "OSAZippedSourceCode";
 
     private static final int ITEMS_PER_PAGE = 10;
     private AuthenticationRequest authenticationRequest;
@@ -79,78 +58,16 @@ public class OsaScanClient implements Closeable {
         cookies = login();
     }
 
-    public CreateScanResponse createScanLargeFileWorkaround(CreateScanRequest request) throws IOException {
+    public CreateScanResponse createScan(long projectId, List<OSAFile> osaFileList) {
 
-        //create httpclient
-        CookieStore cookieStore = new BasicCookieStore();
-        HttpClient apacheClient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
-
-        //create login request
-        HttpPost loginPost = new HttpPost(root.getUri() + AUTHENTICATION_PATH);
-        String json = mapper.writeValueAsString(authenticationRequest);
-        StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
-        loginPost.setEntity(requestEntity);
-
-        //send login request
-        HttpResponse loginResponse = apacheClient.execute(loginPost);
-
-        //validate login response
-        validateApacheHttpClientResponse(loginResponse, 200, "Failed to authenticate");
-
-
-        //create OSA scan request
-        HttpPost post = new HttpPost(root.getUri() + ANALYZE_PATH.replace("{projectId}", String.valueOf(request.getProjectId())));
-        InputStreamBody streamBody = new InputStreamBody(request.getZipFile().read(), ContentType.APPLICATION_OCTET_STREAM, OSA_ZIPPED_FILE_KEY_NAME);
-        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-        builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-        builder.addPart(OSA_ZIPPED_FILE_KEY_NAME, streamBody);
-        HttpEntity entity = builder.build();
-        post.setEntity(entity);
-
-        //set csrf header and cookies
-        for (org.apache.http.cookie.Cookie c : cookieStore.getCookies()) {
-            if (CSRF_COOKIE.equals(c.getName())) {
-                post.addHeader(CSRF_COOKIE, c.getValue());
-            }
-        }
-        Header[] setCookies = loginResponse.getHeaders("Set-Cookie");
-        StringBuilder cookies = new StringBuilder();
-        for (Header h : setCookies) {
-            cookies.append(h.getValue()).append(";");
-        }
-        post.addHeader("cookie", cookies.toString());
-
-        //send scan request
-        HttpResponse response = apacheClient.execute(post);
-
-        //verify scan request
-        validateApacheHttpClientResponse(response, 202, "Failed to create OSA scan");
-
-        //extract response as object and return the link
-        String createScanResponseBody = IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset());
-        CreateScanResponse createScanResponse = mapper.readValue(createScanResponseBody, CreateScanResponse.class);
-        return createScanResponse;
-    }
-
-    private void validateApacheHttpClientResponse(HttpResponse response, int status, String message) {
-        if (response.getStatusLine().getStatusCode() != status) {
-            String responseBody = extractResponseBody(response);
-            responseBody = responseBody.replace("{", "").replace("}", "").replace(System.lineSeparator(), " ").replace("  ", "");
-            throw new WebApplicationException(message + ": " + "status code: " + response.getStatusLine().getStatusCode() + ". error:" + responseBody);
-        }
-    }
-
-
-    public CreateScanResponse createScan(CreateScanRequest request) throws IOException {
-        final MultiPart multipart = createScanMultiPartRequest(request);
+        CreateOSAScanRequest req = new CreateOSAScanRequest(projectId, CX_ORIGIN_VALUE, osaFileList);
         logger.info("sending request for osa scan");
-        Invocation invocation = root.path(ANALYZE_PATH)
-                .resolveTemplate("projectId", request.getProjectId())
+        Invocation invocation = root.path(CREATE_SCAN_PATH)
                 .request()
                 .cookie(cookies.get(CX_COOKIE))
                 .cookie(CSRF_COOKIE, cookies.get(CSRF_COOKIE).getValue())
                 .header(CSRF_COOKIE, cookies.get(CSRF_COOKIE).getValue())
-                .buildPost(Entity.entity(multipart, multipart.getMediaType()));
+                .buildPost(Entity.entity(req, MediaType.APPLICATION_JSON));
         Response response = invokeRequest(invocation);
         validateResponse(response, Response.Status.ACCEPTED, "fail create OSA scan");
         return response.readEntity(CreateScanResponse.class);
@@ -253,22 +170,6 @@ public class OsaScanClient implements Closeable {
                 .header(CSRF_COOKIE, cookies.get(CSRF_COOKIE).getValue()).buildGet();
     }
 
-    private MultiPart createScanMultiPartRequest(CreateScanRequest request) throws IOException {
-        InputStream read = request.getZipFile().read();
-
-        final StreamDataBodyPart filePart = new StreamDataBodyPart(OSA_ZIPPED_FILE_KEY_NAME, read);
-        return new FormDataMultiPart()
-                .bodyPart(new FormDataBodyPart("origin", Integer.toString(CreateScanRequest.JENKINS_ORIGIN)))
-                .bodyPart(filePart);
-
-    }
-
-    @NotNull
-    private File getFileFromRequest(CreateScanRequest request) {
-        return new File(request.getZipFile().getRemote());
-    }
-
-    //todo: make wait handler part of scan sender and move waiting logic out of client
     public ScanDetails waitForScanToFinish(String scanId) throws InterruptedException {
         Map<String, NewCookie> cookies = login();
         Invocation invocation = root.path(SCAN_STATUS_PATH).resolveTemplate("scanId", scanId)
@@ -346,14 +247,6 @@ public class OsaScanClient implements Closeable {
 
     private Response ThrowFailedToConnectCxServerError() {
         throw new WebApplicationException(FAILED_TO_CONNECT_CX_SERVER_ERROR);
-    }
-
-    private String extractResponseBody(HttpResponse response) {
-        try {
-            return IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset());
-        } catch (IOException e) {
-            return "";
-        }
     }
 
     @Override

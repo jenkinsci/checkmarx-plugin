@@ -4,11 +4,11 @@ import com.checkmarx.jenkins.CxConfig;
 import com.checkmarx.jenkins.CxWebService;
 import com.checkmarx.jenkins.OsaScanResult;
 import com.checkmarx.jenkins.filesystem.FolderPattern;
-import com.checkmarx.jenkins.filesystem.zip.CxZip;
-import com.checkmarx.jenkins.filesystem.zip.Zipper;
 import com.checkmarx.jenkins.logger.CxPluginLogger;
 import hudson.FilePath;
-import org.apache.commons.io.FileUtils;
+import hudson.model.TaskListener;
+
+import java.util.List;
 
 /**
  * @author tsahi
@@ -24,26 +24,27 @@ public class ScanService {
     public static final String NO_LICENSE_ERROR = "Open Source Analysis License is not enabled for this project. Please contact your CxSAST Administrator";
     private DependencyFolder dependencyFolder;
     private CxWebService webServiceClient;
-    private final CxZip cxZip;
+    private final FilePath workspace;
     private final FolderPattern folderPattern;
     private ScanResultsPresenter scanResultsPresenter;
     private ScanSender scanSender;
+    private TaskListener taskListener;
     private LibrariesAndCVEsExtractor librariesAndCVEsExtractor;
 
     public ScanService(ScanServiceTools scanServiceTools) {
         this.dependencyFolder = scanServiceTools.getDependencyFolder();
         this.webServiceClient = scanServiceTools.getWebServiceClient();
-        this.cxZip = new CxZip(scanServiceTools.getWorkspace(), scanServiceTools.getListener());
+        this.workspace = scanServiceTools.getWorkspace();
         this.folderPattern = new FolderPattern(scanServiceTools.getRun(), scanServiceTools.getListener());
         this.scanResultsPresenter = new ScanResultsPresenter(scanServiceTools.getListener());
         this.scanSender = new ScanSender(scanServiceTools.getOsaScanClient(), scanServiceTools.getProjectId());
         this.librariesAndCVEsExtractor = new LibrariesAndCVEsExtractor(scanServiceTools.getOsaScanClient());
         this.logger = new CxPluginLogger(scanServiceTools.getListener());
+        this.taskListener = scanServiceTools.getListener();
     }
 
     public OsaScanResult scan(boolean asynchronousScan) {
         OsaScanResult osaScanResult;
-        FilePath sourceCodeZip = null;
 
         try {
             osaScanResult = new OsaScanResult();
@@ -54,38 +55,28 @@ public class ScanService {
                 return osaScanResult;
             }
 
-            sourceCodeZip = zipOpenSourceCode();
+            String combinedFilterPattern = folderPattern.generatePattern(dependencyFolder.getInclude(), dependencyFolder.getExclude());
+            OSAScanner osaScanner = new OSAScanner(CxConfig.getOsaSupportedExtensions(), CxConfig.getOsaExtractableExtensions(), combinedFilterPattern, taskListener);
+            OsaScannerCallable scannerCallable = new OsaScannerCallable(osaScanner, taskListener);
+            logger.info("Scanning for OSA compatible files");
+            List<OSAFile> osaFileList = workspace.act(scannerCallable);// calls to osaScanner.scanFiles()
+            logger.info("Found "+osaFileList.size()+" Compatible Files for OSA Scan");
+
             if (asynchronousScan) {
                 logger.info(OSA_RUN_SUBMITTED);
-                return scanSender.sendAsync(sourceCodeZip, librariesAndCVEsExtractor);
+                return scanSender.sendAsync(osaFileList, librariesAndCVEsExtractor);
 
             } else {
                 logger.info(OSA_RUN_STARTED);
-                osaScanResult = scanSender.sendOsaScanAndGetResults(sourceCodeZip);
+                osaScanResult = scanSender.sendOsaScanAndGetResults(osaFileList);
                 osaScanResult.setOsaLicense(true);
                 logger.info(OSA_RUN_ENDED);
                 scanResultsPresenter.printResultsToOutput(osaScanResult.getOpenSourceSummaryResponse());
             }
-        } catch (Zipper.MaxZipSizeReached zipSizeReached) {
-            exposeZippingLogToJobConsole(zipSizeReached);
-            logger.error("Open Source Analysis failed: When zipping file " + zipSizeReached.getCurrentZippedFileName() + ", reached maximum upload size limit of "
-                                                                    + FileUtils.byteCountToDisplaySize(CxConfig.maxOSAZipSize()) + "\n");
-            return null;
-        } catch (Zipper.NoFilesToZip noFilesToZip) {
-            exposeZippingLogToJobConsole(noFilesToZip);
-            logger.error("Open Source Analysis failed: No files to scan");
-            return null;
-        } catch (Zipper.ZipperException zipException) {
-            exposeZippingLogToJobConsole(zipException);
-            logger.error("Open Source Analysis failed: " + zipException.getMessage(), zipException);
-            return null;
+
         } catch (Exception e) {
             logger.error("Open Source Analysis failed: " + e.getMessage(), e);
             return null;
-        } finally {
-            if(sourceCodeZip != null) {
-                deleteTemporaryFile(sourceCodeZip);
-            }
         }
         librariesAndCVEsExtractor.getAndSetLibrariesAndCVEsToScanResult(osaScanResult);
         return osaScanResult;
@@ -95,27 +86,5 @@ public class ScanService {
         return webServiceClient.isOsaLicenseValid();
     }
 
-    private FilePath zipOpenSourceCode() throws Exception {
-        String combinedFilterPattern = folderPattern.generatePattern(dependencyFolder.getInclude(), dependencyFolder.getExclude());
-        return cxZip.zipSourceCode(combinedFilterPattern);
-    }
-
-    private void exposeZippingLogToJobConsole(Zipper.ZipperException zipperException){
-        logger.info(zipperException.getZippingDetails().getZippingLog());
-    }
-
-    private void deleteTemporaryFile(FilePath file) {
-        try {
-            if (file.exists()) {
-                if (file.delete()) {
-                    logger.info("Temporary file deleted");
-                } else {
-                    logger.info("Fail to delete temporary file");
-                }
-            }
-        } catch (Exception e) {
-            logger.error("Fail to delete temporary file", e);
-        }
-    }
 
 }

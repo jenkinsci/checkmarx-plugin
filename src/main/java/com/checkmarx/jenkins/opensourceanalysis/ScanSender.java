@@ -1,11 +1,11 @@
 package com.checkmarx.jenkins.opensourceanalysis;
 import com.checkmarx.jenkins.OsaScanResult;
 import com.checkmarx.jenkins.web.client.OsaScanClient;
-import com.checkmarx.jenkins.web.model.CreateScanRequest;
 import com.checkmarx.jenkins.web.model.CreateScanResponse;
 import com.checkmarx.jenkins.web.model.GetOpenSourceSummaryResponse;
 import com.checkmarx.jenkins.web.model.ScanDetails;
-import hudson.FilePath;
+
+import java.util.List;
 
 
 /**
@@ -21,8 +21,8 @@ public class ScanSender {
         this.projectId = projectId;
     }
 
-    public OsaScanResult sendAsync(FilePath sourceCodeZip, LibrariesAndCVEsExtractor librariesAndCVEsExtractor) throws Exception {
-        createScan(sourceCodeZip);
+    public OsaScanResult sendAsync(List<OSAFile> osaFileList, LibrariesAndCVEsExtractor librariesAndCVEsExtractor) throws Exception {
+        createScan(osaFileList);
         ScanDetails latestScanDetails = osaScanClient.getLatestScanId(projectId);
 
         if(latestScanDetails != null) {
@@ -38,9 +38,9 @@ public class ScanSender {
         return null;
     }
 
-    public OsaScanResult sendOsaScanAndGetResults(FilePath sourceCodeZip) throws Exception {
+    public OsaScanResult sendOsaScanAndGetResults(List<OSAFile> osaFileList) throws Exception {
         OsaScanResult osaScanResult = new OsaScanResult();
-        CreateScanResponse createScanResponse = createScan(sourceCodeZip);
+        CreateScanResponse createScanResponse = createScan(osaFileList);
         osaScanResult.setScanId(createScanResponse.getScanId());
         ScanDetails scanDetails = waitForScanToFinish(createScanResponse.getScanId());
         GetOpenSourceSummaryResponse getOpenSourceSummaryResponse = getOpenSourceSummary(createScanResponse.getScanId());
@@ -49,9 +49,8 @@ public class ScanSender {
         return osaScanResult;
     }
 
-    private CreateScanResponse createScan(FilePath zipFile) throws Exception {
-        CreateScanRequest scanRequest = new CreateScanRequest(projectId, zipFile);
-        return osaScanClient.createScanLargeFileWorkaround(scanRequest);
+    private CreateScanResponse createScan(List<OSAFile> osaFileList) throws Exception {
+        return osaScanClient.createScan(projectId, osaFileList);
     }
 
     private ScanDetails waitForScanToFinish(String scanId) throws InterruptedException {

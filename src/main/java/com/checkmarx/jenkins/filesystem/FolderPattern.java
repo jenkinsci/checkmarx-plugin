@@ -51,7 +51,7 @@ public class FolderPattern {
                 result.append(prefix);
                 result.append("!**/");
                 result.append(p);
-                result.append("/**/*");
+                result.append("/**");
                 prefix = ", ";
             }
         }
