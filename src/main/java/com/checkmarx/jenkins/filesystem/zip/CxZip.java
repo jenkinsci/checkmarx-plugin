@@ -1,6 +1,5 @@
 package com.checkmarx.jenkins.filesystem.zip;
 
-import com.checkmarx.jenkins.filesystem.zip.callable.OsaZipperCallable;
 import com.checkmarx.jenkins.filesystem.zip.callable.SastZipperCallable;
 import com.checkmarx.jenkins.filesystem.zip.dto.CxZipResult;
 import com.checkmarx.jenkins.logger.CxPluginLogger;
@@ -41,19 +40,6 @@ public class CxZip implements Serializable {
         final CxZipResult zipResult = zipFileAndGetResult(workspace, sastZipperCallable);
 
         logZippingCompletionSummery(zipResult, "Temporary file with zipped and base64 encoded sources", 64);
-
-        return zipResult.getTempFile();
-    }
-
-    public FilePath zipSourceCode(String filterPattern) throws Exception {
-        if (workspace == null) {
-            throw new Exception(CANNOT_FIND_WORKSPACE);
-        }
-
-        logger.info("Started zipping files for OSA, this may take a while.");
-        OsaZipperCallable osaZipperCallable = new OsaZipperCallable(filterPattern);
-        final CxZipResult zipResult = zipFileAndGetResult(workspace, osaZipperCallable);
-        logZippingCompletionSummery(zipResult, "Temporary zip file",1);
 
         return zipResult.getTempFile();
     }
