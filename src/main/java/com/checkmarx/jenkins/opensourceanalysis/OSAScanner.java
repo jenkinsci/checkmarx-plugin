@@ -31,6 +31,7 @@ public class OSAScanner implements Serializable {
 
     private String[] supportedExtensions;
     private String[] extractableExtensions;
+    private String[] bothExtensions;
 
     private List<String> inclusions = new ArrayList<String>();
     private List<String> exclusions = new ArrayList<String>();
@@ -45,6 +46,7 @@ public class OSAScanner implements Serializable {
     public OSAScanner(@Nonnull String supportedExtensions, @Nonnull String extractableExtensions, @Nullable String filterPatterns, TaskListener listener) {
         this.supportedExtensions = supportedExtensions.split("\\s*,\\s*");//split by comma and trim (spaces + newline)
         this.extractableExtensions = extractableExtensions.split("\\s*,\\s*");
+        this.bothExtensions = ArrayUtils.addAll(this.supportedExtensions, this.extractableExtensions);
         if(StringUtils.isNotEmpty(filterPatterns)) {
             setFilterPatterns(filterPatterns);
         }
@@ -100,12 +102,11 @@ public class OSAScanner implements Serializable {
 
         for(File file : files) {
             String virtualFullPath = virtualPath + getRelativePath(baseDir, file);
-            boolean candidate = isCandidate(virtualFullPath);
-            if(candidate) {
+            if(isCandidate(virtualFullPath, supportedExtensions)) {
                 addSha1(file, ret);
             }
 
-            if(candidate && isExtractable(file.getName())) {
+            if(isCandidate(virtualFullPath, extractableExtensions)) {
                 //this directory should be created by the extractToTempDir() if there is any files to extract
                 File nestedTempDir = new File (tempDir.getAbsolutePath() + "/" + file.getName() + "_extracted");
 
@@ -139,7 +140,7 @@ public class OSAScanner implements Serializable {
             for (Object fileHeader1 : fileHeaders) {
                 FileHeader fileHeader = (FileHeader) fileHeader1;
                 String fileName = fileHeader.getFileName();
-                if (!fileHeader.isDirectory() && (isExtractable(fileName) || isCandidate(virtualPath + "/" + fileName, supportedExtensions))) {
+                if (!fileHeader.isDirectory() && isCandidate(virtualPath + "/" + fileName, bothExtensions)) {
                     filtered.add(fileHeader);
                 }
             }
@@ -194,9 +195,13 @@ public class OSAScanner implements Serializable {
      * @param relativePath
      * @return
      */
-    private boolean isCandidate(String relativePath) {
+    private boolean isCandidate(String relativePath, String[] extensions) {
         relativePath = relativePath.replaceAll("\\\\", "/");
         boolean isMatch = true;
+
+        if(!FilenameUtils.isExtension(relativePath, extensions)) {
+            return false;
+        }
 
 
         for (String exclusion : exclusions) {
@@ -215,11 +220,6 @@ public class OSAScanner implements Serializable {
         }
 
         return isMatch;
-    }
-
-    //matched by supported extensions and include/exclude filters
-    private boolean isCandidate(String relativePath, String[] supportedExtensions) {
-        return FilenameUtils.isExtension(relativePath, supportedExtensions) && isCandidate(relativePath);
     }
 
     //calculate sha1 of file, and add the filename + sha1 to the output parameter ret

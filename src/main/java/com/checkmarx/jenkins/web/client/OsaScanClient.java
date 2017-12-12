@@ -231,13 +231,11 @@ public class OsaScanClient implements Closeable {
         try {
             return invocation.invoke();
         } catch (ProcessingException exc) {
-            return ThrowFailedToConnectCxServerError();
+            return ThrowFailedToConnectCxServerError(exc);
         }
     }
 
     private void validateResponse(Response response, Response.Status expectedStatus, String message) throws WebApplicationException {
-        if (response.getStatus() == Response.Status.SERVICE_UNAVAILABLE.getStatusCode())
-            ThrowFailedToConnectCxServerError();
         if (response.getStatus() != expectedStatus.getStatusCode()) {
             String responseBody = response.readEntity(String.class);
             responseBody = responseBody.replace("{", "").replace("}", "").replace(System.lineSeparator(), " ").replace("  ", "");
@@ -245,8 +243,8 @@ public class OsaScanClient implements Closeable {
         }
     }
 
-    private Response ThrowFailedToConnectCxServerError() {
-        throw new WebApplicationException(FAILED_TO_CONNECT_CX_SERVER_ERROR);
+    private Response ThrowFailedToConnectCxServerError(Exception e) {
+        throw new WebApplicationException(FAILED_TO_CONNECT_CX_SERVER_ERROR + ": " + e.toString());
     }
 
     @Override
