@@ -73,7 +73,7 @@ public class CxWebService {
     private static final int MILISECONDS_IN_MINUTE = 1000 * 60;
 
     private static final int XML_WRITING_BUFFER_IN_BYTES = 52428800; // 50 MB
-    private String sessionId;
+    private static String  sessionId;
     private CxJenkinsWebServiceSoap cxJenkinsWebServiceSoap;
     private CxSDKWebServiceSoap cxSDKWebServiceSoap;
     private final URL webServiceUrl;
@@ -189,6 +189,10 @@ public class CxWebService {
         requestContext.put("javax.xml.ws.client.connectionTimeout", milliseconds);
         requestContext.put("javax.xml.ws.client.receiveTimeout", milliseconds);
         requestContext.put("timeout", milliseconds); // IBM
+    }
+
+    public boolean isLoggedIn() {
+        return sessionId != null;
     }
 
     public void login(@Nullable String username, @Nullable String password) throws AbortException {
