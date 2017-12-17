@@ -233,6 +233,13 @@
                                             <f:entry title="Low severity vulnerabilities threshold" field="lowThreshold">
                                                 <f:number clazz="positive-number" min="0" step="1" default="" />
                                             </f:entry>
+
+                                            <f:optionalBlock title="Fail the build for new issues" inline="true" field="failBuildOnNewResults">
+                                                <f:entry title="Fail for the following severity or greater" field="failBuildOnNewSeverity">
+                                                    <f:select field="failBuildOnNewSeverity" />
+                                                </f:entry>
+                                            </f:optionalBlock>
+
                                             <f:entry title="OSA high severity vulnerabilities threshold" field="osaHighThreshold">
                                                 <f:number clazz="positive-number" min="0" step="1" default="" />
                                             </f:entry>
@@ -259,6 +266,13 @@
                                     <f:entry title="Low severity vulnerabilities threshold" field="lowThreshold">
                                         <f:number clazz="positive-number" min="0" step="1" default="" />
                                     </f:entry>
+
+                                    <f:optionalBlock title="Fail the build for new issues" inline="true" field="failBuildOnNewResults">
+                                        <f:entry title="Fail for the following severity or greater" field="failBuildOnNewSeverity">
+                                            <f:select field="failBuildOnNewSeverity" />
+                                        </f:entry>
+                                    </f:optionalBlock>
+
                                     <f:entry title="OSA high severity vulnerabilities threshold" field="osaHighThreshold">
                                         <f:number clazz="positive-number" min="0" step="1" default="" />
                                     </f:entry>

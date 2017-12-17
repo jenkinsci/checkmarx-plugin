@@ -44,6 +44,7 @@ public class CxScanResult implements Action {
     private boolean osaThresholdsEnabled = false;
     private ThresholdConfig sastThresholdConfig;
     private ThresholdConfig osaThresholdConfig;
+    private boolean isThresholdForNewResultExceeded = false;
 
     private File pdfReport;
     public static final String PDF_REPORT_NAME = "ScanReport.pdf";
@@ -77,6 +78,10 @@ public class CxScanResult implements Action {
         this.setThresholdsEnabled(true);
         //todo erase when legacy code is no longer needed
         initializeSastLegacyThresholdVariables(thresholdConfig);
+    }
+
+    public void setThresholdForNewResultExceeded(boolean thresholdForNewResultExceeded) {
+        isThresholdForNewResultExceeded = thresholdForNewResultExceeded;
     }
 
     public String getLargeIconFileName() {
@@ -284,6 +289,10 @@ public class CxScanResult implements Action {
 
     public long getScanId() {
         return scanId;
+    }
+
+    public boolean getIsThresholdForNewResultExceeded() {
+        return isThresholdForNewResultExceeded;
     }
 
 

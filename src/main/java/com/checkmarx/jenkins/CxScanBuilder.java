@@ -121,6 +121,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private Integer mediumThreshold;
     @Nullable
     private Integer lowThreshold;
+
+    private boolean failBuildOnNewResults;
+
+    private String failBuildOnNewSeverity;
+
     private boolean generatePdfReport;
 
     private boolean osaEnabled;
@@ -200,6 +205,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             @Nullable Integer highThreshold,
             @Nullable Integer mediumThreshold,
             @Nullable Integer lowThreshold,
+            boolean failBuildOnNewResults,
+            String failBuildOnNewSeverity,
             boolean osaEnabled,
             @Nullable Integer osaHighThreshold,
             @Nullable Integer osaMediumThreshold,
@@ -238,6 +245,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.highThreshold = highThreshold;
         this.mediumThreshold = mediumThreshold;
         this.lowThreshold = lowThreshold;
+        this.failBuildOnNewResults = failBuildOnNewResults;
+        this.failBuildOnNewSeverity = failBuildOnNewSeverity;
         this.osaEnabled = osaEnabled;
         this.osaHighThreshold = osaHighThreshold;
         this.osaMediumThreshold = osaMediumThreshold;
@@ -406,6 +415,22 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     public Integer getLowThreshold() {
         return lowThreshold;
+    }
+
+    public String getFailBuildOnNewSeverity() {
+        return failBuildOnNewSeverity;
+    }
+
+    public void setFailBuildOnNewSeverity(String failBuildOnNewSeverity) {
+        this.failBuildOnNewSeverity = failBuildOnNewSeverity;
+    }
+
+    public boolean isFailBuildOnNewResults() {
+        return failBuildOnNewResults;
+    }
+
+    public void setFailBuildOnNewResults(boolean failBuildOnNewResults) {
+        this.failBuildOnNewResults = failBuildOnNewResults;
     }
 
     public boolean isOsaEnabled() {
@@ -743,6 +768,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             CxScanResult cxScanResult;
             boolean isSASTThresholdFailedTheBuild = false;
+            boolean isSASTNewResultsFailedTheBuild = false;
             ThresholdConfig thresholdConfig = createThresholdConfig();
             thresholdsError = new StringBuilder();
             //if scan failed
@@ -787,6 +813,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
                 isSASTThresholdFailedTheBuild = ((descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || isVulnerabilityThresholdEnabled())
                         && isThresholdCrossed(thresholdConfig, cxScanResult.getHighCount(), cxScanResult.getMediumCount(), cxScanResult.getLowCount(), "CxSAST ");
+                isSASTNewResultsFailedTheBuild = !shouldUseGlobalThreshold() && isFailBuildOnNewResults() && isThresholdForNewResultExceeded(cxScanResult);
+
+                if(isSASTNewResultsFailedTheBuild) {
+                    cxScanResult.setThresholdsEnabled(true);//so "Threshold Exceeded" would be shown in the report
+                }
+
                 printScanResult(cxScanResult);
             }
             //OSA scan
@@ -832,12 +864,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             envVarAction.setCxSastResults(cxScanResult);
             run.addAction(envVarAction);
 
-            generateHtmlReport(checkmarxBuildDir, cxScanResult);
+            if(scanId != 0) {//don't generate HTML report if the scan has failed
+                generateHtmlReport(checkmarxBuildDir, cxScanResult);
+            }
             jobConsoleLogger.info("Copying reports to workspace");
             copyReportsToWorkspace(workspace, checkmarxBuildDir);
 
             //If one of the scan's threshold was crossed - fail the build
-            if (isSASTThresholdFailedTheBuild || isOSAThresholdFailedTheBuild) {
+            if (isSASTThresholdFailedTheBuild || isOSAThresholdFailedTheBuild || isSASTNewResultsFailedTheBuild) {
                 run.setResult(thresholdConfig.getBuildStatus());
                 jobConsoleLogger.info("*************************");
                 jobConsoleLogger.info("The Build Failed due to: ");
@@ -1159,6 +1193,39 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret |= isThresholdCrossedByLevel(medium, thresholdConfig.getMediumSeverity(), scanType + "medium");
         ret |= isThresholdCrossedByLevel(low, thresholdConfig.getLowSeverity(), scanType + "low");
         return ret;
+    }
+
+    private boolean isThresholdForNewResultExceeded(CxScanResult scanResult) {
+
+        boolean exceeded = false;
+        String severity = StringUtils.defaultString(failBuildOnNewSeverity);
+        SastScanResult sastScanResult = scanResult.getSastScanResult();
+
+        if("LOW".equals(severity)) {
+            if(sastScanResult.getNewLowCount() > 0) {
+                thresholdsError.append("One or More New Results of Low Severity\n");
+                exceeded = true;
+            }
+            severity = "MEDIUM";
+        }
+
+        if("MEDIUM".equals(severity)) {
+            if(sastScanResult.getNewMediumCount() > 0) {
+                thresholdsError.append("One or More New Results of Medium Severity\n");
+                exceeded = true;
+            }
+            severity = "HIGH";
+        }
+
+        if("HIGH".equals(severity)) {
+            if(sastScanResult.getNewHighCount() > 0) {
+                thresholdsError.append("One or More New Results of High Severity\n");
+                exceeded = true;
+            }
+        }
+
+        scanResult.setThresholdForNewResultExceeded(exceeded);
+        return exceeded;
     }
 
     private boolean isThresholdCrossedByLevel(int result, Integer threshold, String vulnerabilityLevel) {
@@ -1866,6 +1933,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 listBoxModel.add(new ListBoxModel.Option(message, message));
                 return listBoxModel; // Return empty list of project names
             }
+
+        }
+
+        public ListBoxModel doFillFailBuildOnNewSeverityItems() {
+            ListBoxModel listBoxModel = new ListBoxModel();
+            listBoxModel.add(new ListBoxModel.Option("High", "HIGH"));
+            listBoxModel.add(new ListBoxModel.Option("Medium", "MEDIUM"));
+            listBoxModel.add(new ListBoxModel.Option("Low", "LOW"));
+            return listBoxModel;
 
         }
 

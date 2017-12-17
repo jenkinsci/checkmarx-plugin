@@ -1786,6 +1786,9 @@
         var medThreshold = verifyVar([${it.mediumThreshold}]);
         var lowThreshold = verifyVar([${it.lowThreshold}]);
 
+        //threshold for new exceeded
+        var isThresholdForNewResultExceeded = verifyVar([${it.isThresholdForNewResultExceeded}]);
+
         //links
         var sastScanResultsLink = '${it.codeViewerUrl}?scanid=${it.scanId}&amp;projectid=${it.projectId}';
         var sastPDFLink = '${app.rootUrl}${it.owner.url}${it.urlName}${it.pdfReportUrl}';
@@ -1976,6 +1979,9 @@
                         isThresholdExceeded = true;
                     }
 
+                    if (isThresholdForNewResultExceeded) {
+                        isThresholdExceeded = true;
+                    }
 
                     //if threshold exceeded
                     if (isThresholdExceeded) {

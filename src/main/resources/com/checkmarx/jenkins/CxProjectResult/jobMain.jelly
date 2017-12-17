@@ -1796,7 +1796,7 @@
             OSA_LOW: {value: 5, name: "low"}
         };
 
-        var isAsync = ${it.lastSynchronousBuildAction.scanRanAsynchronous};
+        var isAsync = verifyVar([${it.lastSynchronousBuildAction.scanRanAsynchronous}]);
 
 
         //-------------------------- sast vars --------------------------------------
@@ -1808,6 +1808,9 @@
         var highThreshold = verifyVar([${it.lastSynchronousBuildAction.highThreshold}]);
         var medThreshold = verifyVar([${it.lastSynchronousBuildAction.mediumThreshold}]);
         var lowThreshold = verifyVar([${it.lastSynchronousBuildAction.lowThreshold}]);
+
+        //threshold for new exceeded
+        var isThresholdForNewResultExceeded = verifyVar([${it.lastSynchronousBuildAction.isThresholdForNewResultExceeded}]);
 
         //links
         var sastScanResultsLink = '${it.lastSynchronousBuildAction.codeViewerUrl}?scanid=${it.lastSynchronousBuildAction.scanId}&amp;projectid=${it.lastSynchronousBuildAction.projectId}';
@@ -2007,6 +2010,10 @@
 
                     if (lowThreshold != null &amp;&amp; lowCount > lowThreshold) {
                         document.getElementById("tooltip-low").innerHTML = tooltipGenerator(SEVERITY.LOW);
+                        isThresholdExceeded = true;
+                    }
+
+                    if (isThresholdForNewResultExceeded) {
                         isThresholdExceeded = true;
                     }
 
