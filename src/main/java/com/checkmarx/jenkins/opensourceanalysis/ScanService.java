@@ -5,9 +5,12 @@ import com.checkmarx.jenkins.CxWebService;
 import com.checkmarx.jenkins.OsaScanResult;
 import com.checkmarx.jenkins.filesystem.FolderPattern;
 import com.checkmarx.jenkins.logger.CxPluginLogger;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.FilePath;
 import hudson.model.TaskListener;
+import org.apache.commons.io.FileUtils;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -61,6 +64,7 @@ public class ScanService {
             logger.info("Scanning for OSA compatible files");
             List<OSAFile> osaFileList = workspace.act(scannerCallable);// calls to osaScanner.scanFiles()
             logger.info("Found "+osaFileList.size()+" Compatible Files for OSA Scan");
+            writeToOsaListToTemp(osaFileList);
 
             if (asynchronousScan) {
                 logger.info(OSA_RUN_SUBMITTED);
@@ -80,6 +84,18 @@ public class ScanService {
         }
         librariesAndCVEsExtractor.getAndSetLibrariesAndCVEsToScanResult(osaScanResult);
         return osaScanResult;
+    }
+
+    private void writeToOsaListToTemp(List<OSAFile> osaFileList) {
+        try {
+            File temp = new File(FileUtils.getTempDirectory(), "CxOSAFileList.json");
+            ObjectMapper om = new ObjectMapper();
+            om.writeValue(temp, osaFileList);
+            logger.info("OSA file list saved to file: ["+temp.getAbsolutePath()+"]");
+        } catch (Exception e) {
+            logger.info("Failed to write OSA file list to temp directory: " + e.getMessage());
+        }
+
     }
 
     private boolean validLicense() {
