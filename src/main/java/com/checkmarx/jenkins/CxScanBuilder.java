@@ -1738,9 +1738,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             STATIC_LOGGER.info("prepareLoggedInWebservice: server: " + credentials.getServerUrl() + " user: " + credentials.getUsername());
 
             CxWebService cxWebService = new CxWebService(credentials.getServerUrl(), STATIC_LOGGER);
-            if(!cxWebService.isLoggedIn()) {
-                cxWebService.login(credentials.getUsername(), credentials.getPassword());
-            }
+            cxWebService.login(credentials.getUsername(), credentials.getPassword());
             return cxWebService;
         }
 
