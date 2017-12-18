@@ -234,7 +234,7 @@
                                                 <f:number clazz="positive-number" min="0" step="1" default="" />
                                             </f:entry>
 
-                                            <f:optionalBlock title="Fail the build for new issues" inline="true" field="failBuildOnNewResults">
+                                            <f:optionalBlock title="Fail the build for new SAST vulnerabilities" inline="true" field="failBuildOnNewResults">
                                                 <f:entry title="Fail for the following severity or greater" field="failBuildOnNewSeverity">
                                                     <f:select field="failBuildOnNewSeverity" />
                                                 </f:entry>
@@ -267,7 +267,7 @@
                                         <f:number clazz="positive-number" min="0" step="1" default="" />
                                     </f:entry>
 
-                                    <f:optionalBlock title="Fail the build for new issues" inline="true" field="failBuildOnNewResults">
+                                    <f:optionalBlock title="Fail the build for new SAST vulnerabilities" inline="true" field="failBuildOnNewResults">
                                         <f:entry title="Fail for the following severity or greater" field="failBuildOnNewSeverity">
                                             <f:select field="failBuildOnNewSeverity" />
                                         </f:entry>
