@@ -826,7 +826,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
                 isSASTThresholdFailedTheBuild = ((descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || isVulnerabilityThresholdEnabled())
                         && isThresholdCrossed(thresholdConfig, cxScanResult.getHighCount(), cxScanResult.getMediumCount(), cxScanResult.getLowCount(), "CxSAST ");
-                isSASTNewResultsFailedTheBuild = !shouldUseGlobalThreshold() && isFailBuildOnNewResults() && isThresholdForNewResultExceeded(cxScanResult);
+                isSASTNewResultsFailedTheBuild = !shouldUseGlobalThreshold() && isVulnerabilityThresholdEnabled() && isFailBuildOnNewResults() && isThresholdForNewResultExceeded(cxScanResult);
 
                 if(isSASTNewResultsFailedTheBuild) {
                     cxScanResult.setThresholdsEnabled(true);//so "Threshold Exceeded" would be shown in the report

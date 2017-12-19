@@ -67,7 +67,7 @@ public class CxZip implements Serializable {
 
     private void logZippingCompletionSummery(CxZipResult zipResult, String tempFileDescription, int base) throws IOException, InterruptedException {
         logger.info("Zipping complete with " + zipResult.getZippingDetails().getNumOfZippedFiles() + " files, total compressed size: " +
-                FileUtils.byteCountToDisplaySize(zipResult.getTempFile().length() / base)); // We print here the size of compressed sources before encoding to base
+                FileUtils.byteCountToDisplaySize(zipResult.getTempFile().length())); // We print here the size of compressed sources before encoding to base
         logger.info(tempFileDescription+" was created at: " + zipResult.getTempFile().getRemote());
     }
 
