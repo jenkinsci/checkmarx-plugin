@@ -140,6 +140,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private String includeOpenSourceFolders;
     @Nullable
     private String excludeOpenSourceFolders;
+    @Nullable
+    private String osaArchiveIncludePatterns;
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Private variables
@@ -216,6 +218,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             String vulnerabilityThresholdResult,
             @Nullable String includeOpenSourceFolders,
             @Nullable String excludeOpenSourceFolders,
+            @Nullable String osaArchiveIncludePatterns,
             boolean avoidDuplicateProjectScans) {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
@@ -254,6 +257,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.generatePdfReport = generatePdfReport;
         this.includeOpenSourceFolders = includeOpenSourceFolders;
         this.excludeOpenSourceFolders = excludeOpenSourceFolders;
+        this.osaArchiveIncludePatterns = osaArchiveIncludePatterns;
         this.thresholdSettings = thresholdSettings;
         if (vulnerabilityThresholdResult != null) {
             this.vulnerabilityThresholdResult = Result.fromString(vulnerabilityThresholdResult);
@@ -480,6 +484,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     public String getIncludeOpenSourceFolders() {
         return includeOpenSourceFolders;
+    }
+
+    @Nullable
+    public String getOsaArchiveIncludePatterns() {
+        return osaArchiveIncludePatterns;
+    }
+
+    public void setOsaArchiveIncludePatterns(@Nullable String osaArchiveIncludePatterns) {
+        this.osaArchiveIncludePatterns = osaArchiveIncludePatterns;
     }
 
     public boolean isGeneratePdfReport() {
@@ -1126,7 +1139,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private ScanServiceTools initScanServiceTools(OsaScanClient scanClient, Run<?, ?> run, FilePath workspace, CxWebService webServiceClient, TaskListener listener) {
         ScanServiceTools scanServiceTools = new ScanServiceTools();
         scanServiceTools.setOsaScanClient(scanClient);
-        DependencyFolder folders = new DependencyFolder(includeOpenSourceFolders, excludeOpenSourceFolders);
+        DependencyFolder folders = new DependencyFolder(includeOpenSourceFolders, excludeOpenSourceFolders, osaArchiveIncludePatterns);
         scanServiceTools.setDependencyFolder(folders);
         scanServiceTools.setRun(run);
         scanServiceTools.setListener(listener);
@@ -1394,6 +1407,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
         public static final String DEFAULT_FILTER_PATTERNS = CxConfig.defaultFilterPattern();
+        public static final String DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS = CxConfig.getDefaultOsaArchiveIncludePatterns();
+
         public static final int FULL_SCAN_CYCLE_MIN = 1;
         public static final int FULL_SCAN_CYCLE_MAX = 99;
 

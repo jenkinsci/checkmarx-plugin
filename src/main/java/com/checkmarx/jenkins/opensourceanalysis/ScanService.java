@@ -1,6 +1,5 @@
 package com.checkmarx.jenkins.opensourceanalysis;
 
-import com.checkmarx.jenkins.CxConfig;
 import com.checkmarx.jenkins.CxWebService;
 import com.checkmarx.jenkins.OsaScanResult;
 import com.checkmarx.jenkins.filesystem.FolderPattern;
@@ -59,7 +58,7 @@ public class ScanService {
             }
 
             String combinedFilterPattern = folderPattern.generatePattern(dependencyFolder.getInclude(), dependencyFolder.getExclude());
-            OSAScanner osaScanner = new OSAScanner(CxConfig.getOsaSupportedExtensions(), CxConfig.getOsaExtractableExtensions(), combinedFilterPattern, taskListener);
+            OSAScanner osaScanner = new OSAScanner(combinedFilterPattern, dependencyFolder.getArchiveIncludePatterns(), taskListener);
             OsaScannerCallable scannerCallable = new OsaScannerCallable(osaScanner, taskListener);
             logger.info("Scanning for OSA compatible files");
             List<OSAFile> osaFileList = workspace.act(scannerCallable);// calls to osaScanner.scanFiles()

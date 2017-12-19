@@ -6,10 +6,12 @@ package com.checkmarx.jenkins.opensourceanalysis;
 public class DependencyFolder {
     private String include;
     private String exclude;
+    private String archiveIncludePatterns;
 
-    public DependencyFolder(String include, String exclude){
+    public DependencyFolder(String include, String exclude, String osaArchiveIncludePatterns){
         this.include = include;
         this.exclude = exclude;
+        this.archiveIncludePatterns = osaArchiveIncludePatterns;
     }
 
     public String getInclude(){
@@ -18,5 +20,9 @@ public class DependencyFolder {
 
     public String getExclude(){
         return exclude;
+    }
+
+    public String getArchiveIncludePatterns() {
+        return archiveIncludePatterns;
     }
 }

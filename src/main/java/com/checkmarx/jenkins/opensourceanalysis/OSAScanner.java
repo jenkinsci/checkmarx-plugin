@@ -15,13 +15,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.tools.ant.types.selectors.SelectorUtils;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class OSAScanner implements Serializable {
@@ -29,24 +29,31 @@ public class OSAScanner implements Serializable {
     private TaskListener listener;
 
 
-    private String[] supportedExtensions;
-    private String[] extractableExtensions;
-    private String[] bothExtensions;
+    private static final String[] SUPPORTED_EXTENSIONS =
+            {"jar", "war", "ear", "aar", "dll", "exe", "msi", "nupkg", "egg", "whl", "tar.gz", "gem", "deb", "udeb",
+            "dmg", "drpm", "rpm", "pkg.tar.xz", "swf", "swc", "air", "apk", "zip", "gzip", "tar.bz2", "tgz", "c", "cc", "cp", "cpp", "css", "c++", "h", "hh", "hpp",
+            "hxx", "h++", "m", "mm", "pch", "c#", "cs", "csharp", "go", "goc", "js", "plx", "pm", "ph", "cgi", "fcgi", "psgi", "al", "perl", "t", "p6m", "p6l", "nqp,6pl", "6pm",
+            "p6", "php", "py", "rb", "swift", "clj", "cljx", "cljs", "cljc"};
 
+    private static final String[] EXTRACTABLE_EXTENSIONS = {"jar", "war", "ear", "sca", "gem", "whl", "egg", "tar", "tar.gz", "tgz", "zip", "rar"};
+    private static final String[] ALL_EXTENSIONS = ArrayUtils.addAll(SUPPORTED_EXTENSIONS, EXTRACTABLE_EXTENSIONS);
+
+
+    private List<String> archiveInclude = new ArrayList<String>();
     private List<String> inclusions = new ArrayList<String>();
     private List<String> exclusions = new ArrayList<String>();
 
 
     /**
      *
-     * @param supportedExtensions - comma separated values of extensions to calculate sha1's
-     * @param extractableExtensions - comma separated values of extensions to extract and search for files within
-     * @param filterPatterns - comma separated values of wildcard patterns. pattern prefixed with ! - means exclusion
+     * @param filterPatterns - comma separated values of wildcard patterns - determines which files to calculate sha1
+     *                          pattern prefixed with ! - means exclusion
+     * @param archiveInclude - comma separated values of wildcard patterns - determines which files to extract
      */
-    public OSAScanner(@Nonnull String supportedExtensions, @Nonnull String extractableExtensions, @Nullable String filterPatterns, TaskListener listener) {
-        this.supportedExtensions = supportedExtensions.split("\\s*,\\s*");//split by comma and trim (spaces + newline)
-        this.extractableExtensions = extractableExtensions.split("\\s*,\\s*");
-        this.bothExtensions = ArrayUtils.addAll(this.supportedExtensions, this.extractableExtensions);
+    public OSAScanner(@Nonnull String filterPatterns, @Nonnull String archiveInclude, TaskListener listener) {
+        if(StringUtils.isNotEmpty(archiveInclude)) {
+            this.archiveInclude = Arrays.asList(archiveInclude.split("\\s*,\\s*"));
+        }
         if(StringUtils.isNotEmpty(filterPatterns)) {
             setFilterPatterns(filterPatterns);
         }
@@ -70,7 +77,7 @@ public class OSAScanner implements Serializable {
         try {
             extractTempDir = createExtractTempDir(baseTempDir);
             return scanFilesRecursive(baseDir, extractTempDir, "", depth);
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new CxOSAException("Failed to scan directory for OSA files: " + e.getMessage(), e);
 
         } finally {
@@ -102,11 +109,11 @@ public class OSAScanner implements Serializable {
 
         for(File file : files) {
             String virtualFullPath = virtualPath + getRelativePath(baseDir, file);
-            if(isCandidate(virtualFullPath, supportedExtensions)) {
+            if(isCandidateForSha1(virtualFullPath)) {
                 addSha1(file, ret);
             }
 
-            if(isCandidate(virtualFullPath, extractableExtensions)) {
+            if(isCandidateForExtract(virtualFullPath)) {
                 //this directory should be created by the extractToTempDir() if there is any files to extract
                 File nestedTempDir = new File (tempDir.getAbsolutePath() + "/" + file.getName() + "_extracted");
 
@@ -125,7 +132,7 @@ public class OSAScanner implements Serializable {
 
     //list file compatible to OSA, and the files that are extractable
     private List<File> getFiles(File baseDir) {
-        return new ArrayList<File>(FileUtils.listFiles(baseDir, ArrayUtils.addAll(supportedExtensions, extractableExtensions), true));
+        return new ArrayList<File>(FileUtils.listFiles(baseDir, ALL_EXTENSIONS, true));
     }
 
     //extract the OSA compatible files and archives to temporary directory. also filters by includes/excludes
@@ -140,7 +147,7 @@ public class OSAScanner implements Serializable {
             for (Object fileHeader1 : fileHeaders) {
                 FileHeader fileHeader = (FileHeader) fileHeader1;
                 String fileName = fileHeader.getFileName();
-                if (!fileHeader.isDirectory() && isCandidate(virtualPath + "/" + fileName, bothExtensions)) {
+                if (!fileHeader.isDirectory() && (isCandidateForSha1(virtualPath + "/" + fileName) || isCandidateForExtract(virtualPath + "/" + fileName))) {
                     filtered.add(fileHeader);
                 }
             }
@@ -175,12 +182,18 @@ public class OSAScanner implements Serializable {
         return nestedTempDir.exists();
     }
 
-    private boolean isExtractable(String fileName) {
-        return FilenameUtils.isExtension(fileName, extractableExtensions);
+    private boolean isCandidateForSha1(String relativePath) {
+        return isCandidate(relativePath, SUPPORTED_EXTENSIONS, inclusions, exclusions);
+    }
+
+    private boolean isCandidateForExtract(String relativePath) {
+        return isCandidate(relativePath, EXTRACTABLE_EXTENSIONS, archiveInclude, null);
     }
 
     /**
      * flow:
+     *
+     * 0. no match for extension -> return false
      * 1. no include, no exclude -> don't filter. return true
      * 2. no include, yes exclude -> return isExcludeMatch(file) ? false : true
      * 3. yes include, no exclude -> return isIncludeMatch(file) ?  true : false
@@ -195,7 +208,7 @@ public class OSAScanner implements Serializable {
      * @param relativePath
      * @return
      */
-    private boolean isCandidate(String relativePath, String[] extensions) {
+    private boolean isCandidate(String relativePath, String[] extensions, List<String> includeFilter, List<String> excludeFilter) {
         relativePath = relativePath.replaceAll("\\\\", "/");
         boolean isMatch = true;
 
@@ -203,15 +216,16 @@ public class OSAScanner implements Serializable {
             return false;
         }
 
-
-        for (String exclusion : exclusions) {
-            if(SelectorUtils.matchPath(exclusion, relativePath, false)) {
-                return false;
+        if(excludeFilter != null) {
+            for (String exclusion : excludeFilter) {
+                if(SelectorUtils.matchPath(exclusion, relativePath, false)) {
+                    return false;
+                }
             }
         }
 
-        if(inclusions.size() > 0) {
-            for (String inclusion : inclusions) {
+        if(includeFilter.size() > 0) {
+            for (String inclusion : includeFilter) {
                 if(SelectorUtils.matchPath(inclusion, relativePath, false)) {
                     return true;
                 }

@@ -17,8 +17,7 @@ public class CxConfig {
 	private static final String CONFIGURATION_MAX_ZIP_SIZE_KEY = "MaxZipSizeBytes";
 	private static final String CONFIGURATION_MAX_OSA_ZIP_SIZE_KEY = "MaxOSAZipSizeBytes";
 	private static final String CONFIGURATION_DEFAULT_FILTER_PATTERN_KEY = "DefaultFilterPattern";
-	private static final String OSA_SUPPORTED_EXTENSIONS = "OSASupportedExtensions";
-	private static final String OSA_EXTRACTABLE_EXTENSIONS = "OSAExtractableExtensions";
+	private static final String DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS= "DefaultOSAArchiveIncludePatterns";
 
 	static {
 		configuration = new Properties();
@@ -60,11 +59,7 @@ public class CxConfig {
 		return Integer.parseInt(configuration.getProperty(REQUEST_TIME_OUT_DURATION_SEC));
 	}
 
-	public static String getOsaSupportedExtensions() {
-		return configuration.getProperty(OSA_SUPPORTED_EXTENSIONS);
-	}
-
-	public static String getOsaExtractableExtensions() {
-		return configuration.getProperty(OSA_EXTRACTABLE_EXTENSIONS);
+	public static String getDefaultOsaArchiveIncludePatterns() {
+		return configuration.getProperty(DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS);
 	}
 }

@@ -120,6 +120,9 @@
             <f:entry title="Exclude folders" field="excludeOpenSourceFolders">
                 <f:textbox/>
             </f:entry>
+            <f:entry title="Archive include patterns" field="osaArchiveIncludePatterns">
+                <f:textbox default="${descriptor.DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS}"/>
+            </f:entry>
 
         </f:optionalBlock>
       </f:section>
