@@ -263,17 +263,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             this.vulnerabilityThresholdResult = Result.fromString(vulnerabilityThresholdResult);
         }
         this.avoidDuplicateProjectScans = avoidDuplicateProjectScans;
-        init();
-    }
-
-    private void init() {
-        updateJobOnGlobalConfigChange();
-    }
-
-    private void updateJobOnGlobalConfigChange() {
-        if (!getDescriptor().isForcingVulnerabilityThresholdEnabled() && shouldUseGlobalThreshold()) {
-            vulnerabilityThresholdEnabled = false;
-        }
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -405,7 +394,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     public boolean isVulnerabilityThresholdEnabled() {
-        updateJobOnGlobalConfigChange();
         return vulnerabilityThresholdEnabled;
     }
 
@@ -824,9 +812,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 }
 
 
-                isSASTThresholdFailedTheBuild = ((descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || isVulnerabilityThresholdEnabled())
-                        && isThresholdCrossed(thresholdConfig, cxScanResult.getHighCount(), cxScanResult.getMediumCount(), cxScanResult.getLowCount(), "CxSAST ");
-                isSASTNewResultsFailedTheBuild = !shouldUseGlobalThreshold() && isVulnerabilityThresholdEnabled() && isFailBuildOnNewResults() && isThresholdForNewResultExceeded(cxScanResult);
+                isSASTThresholdFailedTheBuild = isSASThresholdEffectivelyEnabled() && isThresholdCrossed(thresholdConfig, cxScanResult.getHighCount(), cxScanResult.getMediumCount(), cxScanResult.getLowCount(), "CxSAST ");
+                isSASTNewResultsFailedTheBuild = shouldUseJobThreshold() && isFailBuildOnNewResults() && isThresholdForNewResultExceeded(cxScanResult);
 
                 if(isSASTNewResultsFailedTheBuild) {
                     cxScanResult.setThresholdsEnabled(true);//so "Threshold Exceeded" would be shown in the report
@@ -863,8 +850,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
 
                         //OSA Threshold
-                        isOSAThresholdFailedTheBuild = cxScanResult.getOsaScanResult() != null && ((descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || isVulnerabilityThresholdEnabled())
-                                && isThresholdCrossed(osaThresholdConfig, cxScanResult.getOsaScanResult().getOsaHighCount(), cxScanResult.getOsaScanResult().getOsaMediumCount(), cxScanResult.getOsaScanResult().getOsaLowCount(), "OSA ");
+                        isOSAThresholdFailedTheBuild = isOsaThresholdEffectivelyEnabled() && isThresholdCrossed(osaThresholdConfig, cxScanResult.getOsaScanResult().getOsaHighCount(), cxScanResult.getOsaScanResult().getOsaMediumCount(), cxScanResult.getOsaScanResult().getOsaLowCount(), "OSA ");
                     }
                 } else {
                     printOsaFailedScan();
@@ -989,6 +975,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private void printConfiguration(DescriptorImpl descriptor) {
         StringBuilder sb = new StringBuilder();
         boolean useGlobalThreshold = shouldUseGlobalThreshold();
+        boolean useJobThreshold = shouldUseJobThreshold();
         sb.append("----------------------------Configurations:-----------------------------").append("\n");
         if (isUseOwnServerCredentials()) {
             sb.append("credentialsId: ").append(getCredentialsId()).append("\n");
@@ -1012,7 +999,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             sb.append("highSeveritiesThreshold: ").append(descriptor.getHighThresholdEnforcement()).append("\n");
             sb.append("mediumSeveritiesThreshold: ").append(descriptor.getMediumThresholdEnforcement()).append("\n");
             sb.append("lowSeveritiesThreshold: ").append(descriptor.getLowThresholdEnforcement()).append("\n");
-        } else if (isSASThresholdEffectivelyEnabled()) {
+        } else if (useJobThreshold) {
             sb.append("highSeveritiesThreshold: ").append(getHighThreshold()).append("\n");
             sb.append("mediumSeveritiesThreshold: ").append(getMediumThreshold()).append("\n");
             sb.append("lowSeveritiesThreshold: ").append(getLowThreshold()).append("\n");
@@ -1024,7 +1011,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 sb.append("osaHighSeveritiesThreshold: ").append(descriptor.getOsaHighThresholdEnforcement()).append("\n");
                 sb.append("osaMediumSeveritiesThreshold: ").append(descriptor.getOsaMediumThresholdEnforcement()).append("\n");
                 sb.append("osaLowSeveritiesThreshold: ").append(descriptor.getOsaLowThresholdEnforcement()).append("\n");
-            } else if (isOsaThresholdEffectivelyEnabled()) {
+            } else if (useJobThreshold) {
                 sb.append("osaHighSeveritiesThreshold: ").append(getOsaHighThreshold()).append("\n");
                 sb.append("osaMediumSeveritiesThreshold: ").append(getOsaMediumThreshold()).append("\n");
                 sb.append("osaLowSeveritiesThreshold: ").append(getOsaLowThreshold()).append("\n");
@@ -1039,7 +1026,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         DescriptorImpl descriptor = getDescriptor();
         if (shouldUseGlobalThreshold() && (descriptor.getHighThresholdEnforcement() != null || descriptor.getMediumThresholdEnforcement() != null || descriptor.getLowThresholdEnforcement() != null)) {
             return true;
-        } else if (this.isVulnerabilityThresholdEnabled() && (this.getHighThreshold() != null || this.getMediumThreshold() != null || this.getLowThreshold() != null)) {
+        } else if (shouldUseJobThreshold() && (this.getHighThreshold() != null || this.getMediumThreshold() != null || this.getLowThreshold() != null)) {
             return true;
         }
         return false;
@@ -1049,7 +1036,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         DescriptorImpl descriptor = getDescriptor();
         if (shouldUseGlobalThreshold() && (descriptor.getOsaHighThresholdEnforcement() != null || descriptor.getOsaMediumThresholdEnforcement() != null || descriptor.getOsaLowThresholdEnforcement() != null)) {
             return true;
-        } else if (this.isVulnerabilityThresholdEnabled() && (this.getOsaHighThreshold() != null && this.getOsaMediumThreshold() != null && this.getOsaLowThreshold() != null)) {
+        } else if (shouldUseJobThreshold() && (this.getOsaHighThreshold() != null || this.getOsaMediumThreshold() != null || this.getOsaLowThreshold() != null)) {
             return true;
         }
         return false;
@@ -1058,9 +1045,21 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private void printScanResult(CxScanResult scanResult) {
         StringBuilder sb = new StringBuilder();
         sb.append("\n---------------------Checkmarx Scan Results(CxSAST)-------------------------").append("\n");
-        sb.append("High Severity Results: ").append(scanResult.getHighCount()).append("\n");
-        sb.append("Medium Severity Results: ").append(scanResult.getMediumCount()).append("\n");
-        sb.append("Low Severity Results: ").append(scanResult.getLowCount()).append("\n");
+        sb.append("High Severity Results: ").append(scanResult.getHighCount());
+        if(scanResult.getSastScanResult().getNewHighCount() > 0) {
+          sb.append(" (").append(scanResult.getSastScanResult().getNewHighCount()).append(" new)");
+        }
+        sb.append("\n");
+        sb.append("Medium Severity Results: ").append(scanResult.getMediumCount());
+        if(scanResult.getSastScanResult().getNewMediumCount() > 0) {
+            sb.append(" (").append(scanResult.getSastScanResult().getNewMediumCount()).append(" new)");
+        }
+        sb.append("\n");
+        sb.append("Low Severity Results: ").append(scanResult.getLowCount());
+        if(scanResult.getSastScanResult().getNewLowCount() > 0) {
+            sb.append(" (").append(scanResult.getSastScanResult().getNewLowCount()).append(" new)");
+        }
+        sb.append("\n");
         sb.append("Info Severity Results: ").append(scanResult.getInfoCount()).append("\n");
         sb.append("----------------------------------------------------------------------------").append("\n");
 
@@ -1185,7 +1184,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     private boolean shouldUseGlobalThreshold() {
         final DescriptorImpl descriptor = getDescriptor();
-        return descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings() || "global".equals(getThresholdSettings());
+        //locked by global or (job threshold enabled and points to 'global' and global is enabled)
+        return (descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || (isVulnerabilityThresholdEnabled() && "global".equals(getThresholdSettings()) && descriptor.isForcingVulnerabilityThresholdEnabled());
+    }
+
+    private boolean shouldUseJobThreshold() {
+        final DescriptorImpl descriptor = getDescriptor();
+        //not locked by global and job threshold enabled and points to 'job'
+        return !(descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) && (isVulnerabilityThresholdEnabled() && "job".equals(getThresholdSettings()));
     }
 
 
@@ -1216,7 +1222,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         if("LOW".equals(severity)) {
             if(sastScanResult.getNewLowCount() > 0) {
-                thresholdsError.append("One or More New Results of Low Severity\n");
+                thresholdsError.append("One or more new results of low severity\n");
                 exceeded = true;
             }
             severity = "MEDIUM";
@@ -1224,7 +1230,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         if("MEDIUM".equals(severity)) {
             if(sastScanResult.getNewMediumCount() > 0) {
-                thresholdsError.append("One or More New Results of Medium Severity\n");
+                thresholdsError.append("One or more new results of medium severity\n");
                 exceeded = true;
             }
             severity = "HIGH";
@@ -1232,7 +1238,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         if("HIGH".equals(severity)) {
             if(sastScanResult.getNewHighCount() > 0) {
-                thresholdsError.append("One or More New Results of High Severity\n");
+                thresholdsError.append("One or more New results of high severity\n");
                 exceeded = true;
             }
         }
