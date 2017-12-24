@@ -2,12 +2,17 @@ package com.checkmarx.jenkins.opensourceanalysis;
 
 import com.checkmarx.jenkins.exception.CxOSAException;
 import hudson.model.TaskListener;
+import com.github.junrar.testutil.ExtractArchive;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.FileHeader;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.ArrayUtils;
@@ -15,10 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.tools.ant.types.selectors.SelectorUtils;
 
 import javax.annotation.Nonnull;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,12 +33,19 @@ public class OSAScanner implements Serializable {
 
     private static final String[] SUPPORTED_EXTENSIONS =
             {"jar", "war", "ear", "aar", "dll", "exe", "msi", "nupkg", "egg", "whl", "tar.gz", "gem", "deb", "udeb",
-            "dmg", "drpm", "rpm", "pkg.tar.xz", "swf", "swc", "air", "apk", "zip", "gzip", "tar.bz2", "tgz", "c", "cc", "cp", "cpp", "css", "c++", "h", "hh", "hpp",
-            "hxx", "h++", "m", "mm", "pch", "c#", "cs", "csharp", "go", "goc", "js", "plx", "pm", "ph", "cgi", "fcgi", "psgi", "al", "perl", "t", "p6m", "p6l", "nqp,6pl", "6pm",
-            "p6", "php", "py", "rb", "swift", "clj", "cljx", "cljs", "cljc"};
+                    "dmg", "drpm", "rpm", "pkg.tar.xz", "swf", "swc", "air", "apk", "zip", "gzip", "tar.bz2", "tgz", "c", "cc", "cp", "cpp", "css", "c++", "h", "hh", "hpp",
+                    "hxx", "h++", "m", "mm", "pch", "c#", "cs", "csharp", "go", "goc", "js", "plx", "pm", "ph", "cgi", "fcgi", "psgi", "al", "perl", "t", "p6m", "p6l", "nqp,6pl", "6pm",
+                    "p6", "php", "py", "rb", "swift", "clj", "cljx", "cljs", "cljc"};
 
     private static final String[] EXTRACTABLE_EXTENSIONS = {"jar", "war", "ear", "sca", "gem", "whl", "egg", "tar", "tar.gz", "tgz", "zip", "rar"};
     private static final String[] ALL_EXTENSIONS = ArrayUtils.addAll(SUPPORTED_EXTENSIONS, EXTRACTABLE_EXTENSIONS);
+    private static final String[] ZIP_EXTENSIONS = {"zip", "jar", "war", "ear", "egg", "whl", "sca"};
+    private static final String[] TAR_EXTENSIONS = {"tar", "gem"};
+    private static final String[] GZ_EXTENSIONS = {"tgz", "tar.gz"};
+    private static final String[] TAR_AND_GZ_EXTENSIONS = ArrayUtils.addAll(TAR_EXTENSIONS, GZ_EXTENSIONS);
+    private static final String[] RAR_EXTENSIONS = {"rar"};
+
+
 
 
     private List<String> archiveInclude = new ArrayList<String>();
@@ -136,7 +145,27 @@ public class OSAScanner implements Serializable {
     }
 
     //extract the OSA compatible files and archives to temporary directory. also filters by includes/excludes
-    private boolean extractToTempDir(File nestedTempDir, File zip, String virtualPath)  {
+    private boolean extractToTempDir(File nestedTempDir, File archive, String virtualPath)  {
+
+        //uses zip4j
+        if(isExtension(archive.getName(), ZIP_EXTENSIONS)) {
+            return extractZipToTempDir(nestedTempDir, archive, virtualPath);
+        }
+
+        //uses common-compression
+        if(isExtension(archive.getName(),TAR_AND_GZ_EXTENSIONS)) {
+            return extractTarOrGZToTempDir(nestedTempDir, archive, virtualPath);
+        }
+
+        //uses junrar
+        if(isExtension(archive.getName(), RAR_EXTENSIONS)) {
+            return extractRarToTempDir(nestedTempDir, archive);
+        }
+
+        return nestedTempDir.exists();
+    }
+
+    private boolean extractZipToTempDir(File nestedTempDir, File zip, String virtualPath)  {
 
         try {
             ZipFile zipFile = new ZipFile(zip);
@@ -182,6 +211,58 @@ public class OSAScanner implements Serializable {
         return nestedTempDir.exists();
     }
 
+    private boolean extractTarOrGZToTempDir(File nestedTempDir, File tar, String virtualPath)  {
+        ArchiveInputStream tarInputStream = null;
+        try {
+            tarInputStream = getArchiveInputStream(tar);
+            ArchiveEntry entry;
+            while ((entry = tarInputStream.getNextEntry()) != null) {
+                String fileName = entry.getName();
+                if (!entry.isDirectory() && (isCandidateForSha1(virtualPath + "/" + fileName) || isCandidateForExtract(virtualPath + "/" + fileName))) {
+                    byte[] buffer = new byte[(int) entry.getSize()];
+                    tarInputStream.read(buffer, 0, buffer.length);
+                    FileUtils.writeByteArrayToFile(new File(nestedTempDir +"/" + fileName), buffer);
+                }
+            }
+
+        } catch (IOException e) {
+            listener.getLogger().println("Failed to extract archive: ["+tar.getAbsolutePath()+"]: " + e.getMessage());
+
+        } finally {
+            IOUtils.closeQuietly(tarInputStream);
+        }
+
+        return nestedTempDir.exists();
+    }
+
+    private ArchiveInputStream getArchiveInputStream(File archive) throws IOException {
+        if(isExtension(archive.getName(), TAR_EXTENSIONS)) {
+            return new TarArchiveInputStream(new FileInputStream(archive));
+        }
+
+        if(isExtension(archive.getName(), GZ_EXTENSIONS)) {
+            return  new TarArchiveInputStream(
+                    new GzipCompressorInputStream(
+                            new BufferedInputStream(
+                                    new FileInputStream(archive))));
+        }
+
+        return new ZipArchiveInputStream(new FileInputStream(archive));
+    }
+    private boolean extractRarToTempDir(File nestedTempDir, File rar)  {
+
+        //create the temp dir to extract to
+        nestedTempDir.mkdirs();
+        if(!nestedTempDir.exists()) {
+            listener.getLogger().println("Failed to extract archive: ["+rar.getAbsolutePath()+"]: failed to create temp dir: ["+nestedTempDir.getAbsolutePath()+"]");
+            return false;
+        }
+
+        ExtractArchive.extractArchive(rar, nestedTempDir);
+
+        return nestedTempDir.exists();
+    }
+
     private boolean isCandidateForSha1(String relativePath) {
         return isCandidate(relativePath, SUPPORTED_EXTENSIONS, inclusions, exclusions);
     }
@@ -212,7 +293,7 @@ public class OSAScanner implements Serializable {
         relativePath = relativePath.replaceAll("\\\\", "/");
         boolean isMatch = true;
 
-        if(!FilenameUtils.isExtension(relativePath, extensions)) {
+        if(!isExtension(relativePath, extensions)) {
             return false;
         }
 
@@ -267,6 +348,16 @@ public class OSAScanner implements Serializable {
         }
 
         return extractTempDir;
+    }
+
+
+    private boolean isExtension(String filename, String[] extensions) {
+        for (String extension : extensions) {
+            if(filename.endsWith("." + extension)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     //convert comma separated values to include/exclude lists.
