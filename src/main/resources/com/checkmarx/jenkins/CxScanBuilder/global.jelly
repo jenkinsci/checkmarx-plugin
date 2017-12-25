@@ -63,14 +63,14 @@
 				<f:enum>${it.displayName}</f:enum>
 			</f:entry>
 
-			<f:entry title="High severity vulnerabilities threshold" field="highThresholdEnforcement">
+			<f:entry title="SAST High severity vulnerabilities threshold" field="highThresholdEnforcement">
 				<f:number clazz="positive-number" min="0" step="1" default="" />
 			</f:entry>
 
-			<f:entry title="Medium severity vulnerabilities threshold" field="mediumThresholdEnforcement">
+			<f:entry title="SAST Medium severity vulnerabilities threshold" field="mediumThresholdEnforcement">
 				<f:number clazz="positive-number" min="0" step="1" default="" />
 			</f:entry>
-			<f:entry title="Low severity vulnerabilities threshold" field="lowThresholdEnforcement">
+			<f:entry title="SAST Low severity vulnerabilities threshold" field="lowThresholdEnforcement">
 				<f:number clazz="positive-number" min="0" step="1" default="" />
 			</f:entry>
             <f:entry title="OSA high severity vulnerabilities threshold" field="osaHighThresholdEnforcement">

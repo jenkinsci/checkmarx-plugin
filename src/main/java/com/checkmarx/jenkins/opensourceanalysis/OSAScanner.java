@@ -249,6 +249,7 @@ public class OSAScanner implements Serializable {
 
         return new ZipArchiveInputStream(new FileInputStream(archive));
     }
+
     private boolean extractRarToTempDir(File nestedTempDir, File rar)  {
 
         //create the temp dir to extract to

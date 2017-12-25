@@ -5,7 +5,6 @@ import com.checkmarx.jenkins.opensourceanalysis.OSAFile;
 import com.checkmarx.jenkins.web.model.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -15,9 +14,7 @@ import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by zoharby on 09/01/2017.
@@ -51,9 +48,17 @@ public class OsaScanClient implements Closeable {
 
     Map<String, NewCookie> cookies;
 
+    private ClientRequestFilter clientRequestFilter = new ClientRequestFilter() {
+        public void filter(ClientRequestContext clientRequestContext) throws IOException {
+            Object contentType = clientRequestContext.getHeaders().getFirst("Content-Type");
+            String header = contentType == null ? "v=1" : contentType + ";v=1";
+            clientRequestContext.getHeaders().putSingle("Content-Type", header);
+        }
+    };
+
     public OsaScanClient(String hostname, AuthenticationRequest authenticationRequest) {
         this.authenticationRequest = authenticationRequest;
-        client = ClientBuilder.newBuilder().register(MultiPartFeature.class).build();
+        client = ClientBuilder.newBuilder().register(clientRequestFilter).build();
         root = client.target(hostname.trim()).path(ROOT_PATH);
         cookies = login();
     }

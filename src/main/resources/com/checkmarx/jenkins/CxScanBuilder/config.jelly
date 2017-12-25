@@ -120,7 +120,7 @@
             <f:entry title="Exclude folders" field="excludeOpenSourceFolders">
                 <f:textbox/>
             </f:entry>
-            <f:entry title="Archive include patterns" field="osaArchiveIncludePatterns">
+            <f:entry title="Archive extract patterns" field="osaArchiveIncludePatterns">
                 <f:textbox default="${descriptor.DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS}"/>
             </f:entry>
 
@@ -150,13 +150,13 @@
                         <f:readOnlyTextbox value="Setting Locked by Administrator (${descriptor.JobGlobalStatusOnThresholdViolation})" />
                     </f:entry>
 
-                    <f:entry title="High severity vulnerabilities threshold">
+                    <f:entry title="SAST High severity vulnerabilities threshold">
                         <f:readOnlyTextbox value="${descriptor.highThresholdEnforcement}" />
                     </f:entry>
-                    <f:entry title="Medium severity vulnerabilities threshold">
+                    <f:entry title="SAST Medium severity vulnerabilities threshold">
                         <f:readOnlyTextbox value="${descriptor.mediumThresholdEnforcement}" />
                     </f:entry>
-                    <f:entry title="Low severity vulnerabilities threshold">
+                    <f:entry title="SAST Low severity vulnerabilities threshold">
                         <f:readOnlyTextbox value="${descriptor.lowThresholdEnforcement}" />
                     </f:entry>
                     <f:entry title="OSA high severity vulnerabilities threshold">
@@ -200,13 +200,13 @@
                                                 <f:readOnlyTextbox value="${descriptor.JobGlobalStatusOnThresholdViolation.displayName}" />
                                             </f:entry>
 
-                                            <f:entry title="High severity vulnerabilities threshold">
+                                            <f:entry title="SAST High severity vulnerabilities threshold">
                                                 <f:readOnlyTextbox value="${descriptor.highThresholdEnforcement}" />
                                             </f:entry>
-                                            <f:entry title="Medium severity vulnerabilities threshold">
+                                            <f:entry title="SAST Medium severity vulnerabilities threshold">
                                                 <f:readOnlyTextbox value="${descriptor.mediumThresholdEnforcement}" />
                                             </f:entry>
-                                            <f:entry title="Low severity vulnerabilities threshold">
+                                            <f:entry title="SAST Low severity vulnerabilities threshold">
                                                 <f:readOnlyTextbox value="${descriptor.lowThresholdEnforcement}" />
                                             </f:entry>
                                             <f:entry title="OSA high severity vulnerabilities threshold">
@@ -227,13 +227,13 @@
                                             <f:entry title="Build status when results exceed threshold:" field="vulnerabilityThresholdResult">
                                                 <f:select />
                                             </f:entry>
-                                            <f:entry title="High severity vulnerabilities threshold" field="highThreshold">
+                                            <f:entry title="SAST High severity vulnerabilities threshold" field="highThreshold">
                                                 <f:number clazz="positive-number" min="0" step="1" default="" />
                                             </f:entry>
-                                            <f:entry title="Medium severity vulnerabilities threshold" field="mediumThreshold">
+                                            <f:entry title="SAST Medium severity vulnerabilities threshold" field="mediumThreshold">
                                                 <f:number clazz="positive-number" min="0" step="1" default="" />
                                             </f:entry>
-                                            <f:entry title="Low severity vulnerabilities threshold" field="lowThreshold">
+                                            <f:entry title="SAST Low severity vulnerabilities threshold" field="lowThreshold">
                                                 <f:number clazz="positive-number" min="0" step="1" default="" />
                                             </f:entry>
 
@@ -260,13 +260,13 @@
                                     <f:entry title="Build status when results exceed threshold:" field="vulnerabilityThresholdResult">
                                         <f:select />
                                     </f:entry>
-                                    <f:entry title="High severity vulnerabilities threshold" field="highThreshold">
+                                    <f:entry title="SAST High severity vulnerabilities threshold" field="highThreshold">
                                         <f:number clazz="positive-number" min="0" step="1" default="" />
                                     </f:entry>
-                                    <f:entry title="Medium severity vulnerabilities threshold" field="mediumThreshold">
+                                    <f:entry title="SAST Medium severity vulnerabilities threshold" field="mediumThreshold">
                                         <f:number clazz="positive-number" min="0" step="1" default="" />
                                     </f:entry>
-                                    <f:entry title="Low severity vulnerabilities threshold" field="lowThreshold">
+                                    <f:entry title="SAST Low severity vulnerabilities threshold" field="lowThreshold">
                                         <f:number clazz="positive-number" min="0" step="1" default="" />
                                     </f:entry>
 
