@@ -46,19 +46,11 @@ public class OsaScanClient implements Closeable {
 
     private ObjectMapper mapper = new ObjectMapper();
 
-    Map<String, NewCookie> cookies;
-
-    private ClientRequestFilter clientRequestFilter = new ClientRequestFilter() {
-        public void filter(ClientRequestContext clientRequestContext) throws IOException {
-            Object contentType = clientRequestContext.getHeaders().getFirst("Content-Type");
-            String header = contentType == null ? "v=1" : contentType + ";v=1";
-            clientRequestContext.getHeaders().putSingle("Content-Type", header);
-        }
-    };
+    private Map<String, NewCookie> cookies;
 
     public OsaScanClient(String hostname, AuthenticationRequest authenticationRequest) {
         this.authenticationRequest = authenticationRequest;
-        client = ClientBuilder.newBuilder().register(clientRequestFilter).build();
+        client = ClientBuilder.newBuilder().build();
         root = client.target(hostname.trim()).path(ROOT_PATH);
         cookies = login();
     }

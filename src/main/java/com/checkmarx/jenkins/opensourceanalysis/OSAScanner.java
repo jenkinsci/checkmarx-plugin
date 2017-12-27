@@ -124,7 +124,7 @@ public class OSAScanner implements Serializable {
 
             if(isCandidateForExtract(virtualFullPath)) {
                 //this directory should be created by the extractToTempDir() if there is any files to extract
-                File nestedTempDir = new File (tempDir.getAbsolutePath() + "/" + file.getName() + "_extracted");
+                File nestedTempDir = new File (tempDir.getAbsolutePath() + "/" + file.getName() + "_");
 
                 boolean extracted = extractToTempDir(nestedTempDir, file, virtualFullPath);
                 if(!extracted) {
