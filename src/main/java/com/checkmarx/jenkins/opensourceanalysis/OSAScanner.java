@@ -1,8 +1,10 @@
 package com.checkmarx.jenkins.opensourceanalysis;
 
 import com.checkmarx.jenkins.exception.CxOSAException;
+import com.github.junrar.Archive;
+import com.github.junrar.exception.RarException;
+import com.github.junrar.impl.FileVolumeManager;
 import hudson.model.TaskListener;
-import com.github.junrar.testutil.ExtractArchive;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.FileHeader;
@@ -159,7 +161,7 @@ public class OSAScanner implements Serializable {
 
         //uses junrar
         if(isExtension(archive.getName(), RAR_EXTENSIONS)) {
-            return extractRarToTempDir(nestedTempDir, archive);
+            return extractRarToTempDir(nestedTempDir, archive, virtualPath);
         }
 
         return nestedTempDir.exists();
@@ -250,16 +252,54 @@ public class OSAScanner implements Serializable {
         return new ZipArchiveInputStream(new FileInputStream(archive));
     }
 
-    private boolean extractRarToTempDir(File nestedTempDir, File rar)  {
+    private boolean extractRarToTempDir(File nestedTempDir, File rar, String virtualPath)  {
 
-        //create the temp dir to extract to
-        nestedTempDir.mkdirs();
-        if(!nestedTempDir.exists()) {
-            listener.getLogger().println("Failed to extract archive: ["+rar.getAbsolutePath()+"]: failed to create temp dir: ["+nestedTempDir.getAbsolutePath()+"]");
-            return false;
+        Archive archive = null;
+
+        try {
+            archive = new Archive(new FileVolumeManager(rar));
+
+            List<com.github.junrar.rarfile.FileHeader> fileHeaders = archive.getFileHeaders();
+            List<com.github.junrar.rarfile.FileHeader> filtered = new ArrayList<com.github.junrar.rarfile.FileHeader>();
+
+            for (com.github.junrar.rarfile.FileHeader fileHeader : fileHeaders) {
+
+                String fileName = fileHeader.getFileNameString();
+                if (!fileHeader.isDirectory() && (isCandidateForSha1(virtualPath + "/" + fileName) || isCandidateForExtract(virtualPath + "/" + fileName))) {
+                    filtered.add(fileHeader);
+                }
+            }
+
+            //now, extract the relevant files (if any):
+            if (filtered.size() < 1) {
+                return false;
+            }
+
+            //create the temp dir to extract to
+            nestedTempDir.mkdirs();
+            if(!nestedTempDir.exists()) {
+                listener.getLogger().println("Failed to extract archive: [" + rar.getAbsolutePath() + "]: failed to create temp dir: [" + nestedTempDir.getAbsolutePath() + "]");
+                return false;
+            }
+
+            //extract
+            for (com.github.junrar.rarfile.FileHeader fileHeader : filtered) {
+                try {
+                    InputStream headerInputStream = archive.getInputStream(fileHeader);
+                    File destinationFile = new File(nestedTempDir + "/" + fileHeader.getFileNameString());
+                    FileUtils.copyInputStreamToFile(headerInputStream, destinationFile);
+                } catch (RarException e) {
+                    listener.getLogger().println("Failed to extract archive: [" + rar.getAbsolutePath() + "]: " + e.getMessage());
+                }
+            }
+
+        } catch (RarException e) {
+            listener.getLogger().println("Failed to extract archive: ["+rar.getAbsolutePath()+"]: " + e.getMessage());
+        } catch (IOException e) {
+            listener.getLogger().println("Failed to extract archive: ["+rar.getAbsolutePath()+"]: " + e.getMessage());
+        }  finally {
+            IOUtils.closeQuietly(archive);
         }
-
-        ExtractArchive.extractArchive(rar, nestedTempDir);
 
         return nestedTempDir.exists();
     }
