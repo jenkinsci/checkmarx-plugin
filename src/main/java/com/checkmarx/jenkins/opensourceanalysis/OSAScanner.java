@@ -201,12 +201,14 @@ public class OSAScanner implements Serializable {
                 try {
                     zipFile.extractFile(fileHeader, nestedTempDir.getAbsolutePath());
                 } catch (ZipException e) {
-                    listener.getLogger().println("Failed to extract archive: ["+zip.getAbsolutePath()+"]: " + e.getMessage());
+                    String message = e.getMessage().contains("Negative seek offset") ? "Missing or empty archive file" : e.getMessage();
+                    listener.getLogger().println("Failed to extract archive: ["+zip.getAbsolutePath()+"]: " + message);
                 }
             }
 
         } catch (ZipException e) {
-            listener.getLogger().println("Failed to extract archive: ["+zip.getAbsolutePath()+"]: " + e.getMessage());
+            String message = e.getMessage().contains("Negative seek offset") ? "Missing or empty archive file" : e.getMessage();
+            listener.getLogger().println("Failed to extract archive: ["+zip.getAbsolutePath()+"]: " + message);
             return false;
         }
 
