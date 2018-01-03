@@ -2405,6 +2405,11 @@
                     break;
             }
 
+            //create uniquness by key: cve + libraryId
+            var osaCveMap = {};
+            for (i = 0; i &lt; severityCveList.length; i++) {
+                osaCveMap[severityCveList[i].cveName + "," + severityCveList[i].libraryId] = severityCveList[i];
+            }
 
             //generate table title
             var severityTitle = generateCveTableTitle(severity);
@@ -2425,12 +2430,13 @@
 
             //add rows to table
             var row;
-            for (i = 0; i &lt; severityCveList.length; i++) {
-                row = table.insertRow(i + 1);
-                row.insertCell(0).innerHTML = severityCveList[i].cveName;
-                row.insertCell(1).innerHTML = severityCveList[i].publishDate;
-                row.insertCell(2).innerHTML = severityCveList[i].libraryName;
-
+            var i = 1;
+            for (var key in osaCveMap) {
+                row = table.insertRow(i);
+                row.insertCell(0).innerHTML = osaCveMap[key].cveName;
+                row.insertCell(1).innerHTML = osaCveMap[key].publishDate;
+                row.insertCell(2).innerHTML = osaCveMap[key].libraryName;
+                i++;
             }
         }
 
