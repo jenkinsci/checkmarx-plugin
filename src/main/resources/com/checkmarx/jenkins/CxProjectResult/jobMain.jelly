@@ -1412,7 +1412,7 @@
                                 <div class="full-downloads sast-downloads">
                                     <!--html-->
                                     <div class="report-link link-to-result">
-                                        <a class="pdf-report" id="sast-code-viewer-link">
+                                        <a class="pdf-report" id="sast-code-viewer-link" target="_top">
                                             <div class="link-to-result">
                                                 <div class="results-link-icon link-icon">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="14"
