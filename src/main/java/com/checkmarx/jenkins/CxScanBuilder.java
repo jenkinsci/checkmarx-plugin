@@ -1191,7 +1191,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private boolean shouldUseJobThreshold() {
         final DescriptorImpl descriptor = getDescriptor();
         //not locked by global and job threshold enabled and points to 'job'
-        return !(descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) && (isVulnerabilityThresholdEnabled() && "job".equals(getThresholdSettings()));
+        return !(descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) && isVulnerabilityThresholdEnabled();
     }
 
 
