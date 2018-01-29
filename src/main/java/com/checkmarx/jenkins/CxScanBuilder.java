@@ -845,10 +845,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
                         createOsaJsonReports(osaScanResult, checkmarxBuildDir);
 
-                        //retrieve osa scan results pdf + html
-                        getOSAReports(cxScanResult.getOsaScanResult().getScanId(), serverUrlToUseNotNull, usernameToUse, passwordToUse, checkmarxBuildDir);
-
-
                         //OSA Threshold
                         isOSAThresholdFailedTheBuild = isOsaThresholdEffectivelyEnabled() && isThresholdCrossed(osaThresholdConfig, cxScanResult.getOsaScanResult().getOsaHighCount(), cxScanResult.getOsaScanResult().getOsaMediumCount(), cxScanResult.getOsaScanResult().getOsaLowCount(), "OSA ");
                     }
@@ -943,24 +939,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         writeStringToWorkspaceFile("osa libraries json report", osaLibrariesJsonReport, osaScanResult.getOsaFullLibraryList());
         File osaCvesJsonReport = new File(checkmarxBuildDir, "OSAVulnerabilities.json");
         writeStringToWorkspaceFile("osa Vulnerabilities json report", osaCvesJsonReport, osaScanResult.getOsaFullCVEsList());
-    }
-
-
-    private void getOSAReports(String scanId, String serverUrl, String username, String password, File checkmarxBuildDir) {
-        jobConsoleLogger.info("retrieving osa report files");
-        AuthenticationRequest authReq = new AuthenticationRequest(username, password);
-        OsaScanClient scanClient = new OsaScanClient(serverUrl, authReq);
-        String osaScanHtmlResults = scanClient.getOSAScanHtmlResults(scanId);
-        File osaHtmlReport = new File(checkmarxBuildDir, "OSAReport.html");
-        writeStringToWorkspaceFile("osa html report", osaHtmlReport, osaScanHtmlResults);
-        byte[] osaScanPdfResults = scanClient.getOSAScanPdfResults(scanId);
-        File osaPdfReport = new File(checkmarxBuildDir, "OSAReport.pdf");
-        try {
-            FileUtils.writeByteArrayToFile(osaPdfReport, osaScanPdfResults);
-        } catch (IOException e) {
-            jobConsoleLogger.error("fail to write osa pdf report to [" + osaPdfReport.getAbsolutePath() + "]");
-        }
-        jobConsoleLogger.info("osa report file [" + osaPdfReport.getAbsolutePath() + "] generated successfully");
     }
 
     private void writeStringToWorkspaceFile(String dataDescription, File workspaceFile, String dataString) {

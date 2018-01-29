@@ -188,38 +188,6 @@ public class CxScanResult implements Action {
         outputStream.close();
     }
 
-    public boolean isOsaPdfReportReady() {
-        File buildDirectory = owner.getRootDir();
-        File osaPDFReport = new File(buildDirectory, "/checkmarx/" + OSA_PDF_REPORT_NAME);
-        return osaPDFReport.exists();
-    }
-
-    public void doOsaPdfReport(StaplerRequest req, StaplerResponse rsp) throws IOException {
-
-        rsp.setContentType("application/pdf");
-        ServletOutputStream outputStream = rsp.getOutputStream();
-        File buildDirectory = owner.getRootDir();
-        File a = new File(buildDirectory, "/checkmarx/" + OSA_PDF_REPORT_NAME);
-
-        IOUtils.copy(a, outputStream);
-
-        outputStream.flush();
-        outputStream.close();
-    }
-
-
-    public void doOsaHtmlReport(StaplerRequest req, StaplerResponse rsp) throws IOException {
-        rsp.setContentType("text/html");
-        ServletOutputStream outputStream = rsp.getOutputStream();
-        File buildDirectory = owner.getRootDir();
-        File a = new File(buildDirectory, "/checkmarx/" + "OSAReport.html");
-
-        IOUtils.copy(a, outputStream);
-
-        outputStream.flush();
-        outputStream.close();
-    }
-
     /**
      * Gets the test result of the previous build, if it's recorded, or null.
      */
@@ -252,7 +220,7 @@ public class CxScanResult implements Action {
     }
 
     public String getOsaProjectStateUrl() {
-        return serverUrl + "/CxWebClient/portal#/projectState/" + projectId + "/OSA";
+        return serverUrl + "/CxWebClient/SPA/#/viewer/project/" + projectId;
     }
 
     //    http://localhost/CxWebClient/ViewerMain.aspx?scanid=1030692&projectid=40565

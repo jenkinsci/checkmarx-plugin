@@ -1,7 +1,6 @@
 package com.checkmarx.jenkins.web.client;
 
 import com.checkmarx.jenkins.logger.CxPluginLogger;
-import com.checkmarx.jenkins.opensourceanalysis.OSAFile;
 import com.checkmarx.jenkins.web.model.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,7 +24,7 @@ public class OsaScanClient implements Closeable {
 
     private static final String ROOT_PATH = "cxrestapi/";
     private static final String AUTHENTICATION_PATH = "auth/login";
-    private static final String CREATE_SCAN_PATH = "osa/scans";
+    private static final String CREATE_SCAN_PATH = "osa/inventory";
 
     private static final String ANALYZE_SUMMARY_PATH = "osa/reports";
     private static final String LATEST_SCAN_RESULTS = "osa/scans";
@@ -48,16 +47,24 @@ public class OsaScanClient implements Closeable {
 
     private Map<String, NewCookie> cookies;
 
+    private ClientRequestFilter clientRequestFilter = new ClientRequestFilter() {
+        public void filter(ClientRequestContext clientRequestContext) throws IOException {
+            Object contentType = clientRequestContext.getHeaders().getFirst("Content-Type");
+            String header = contentType == null ? "v=1" : contentType + ";v=1";
+            clientRequestContext.getHeaders().putSingle("Content-Type", header);
+        }
+    };
+
     public OsaScanClient(String hostname, AuthenticationRequest authenticationRequest) {
         this.authenticationRequest = authenticationRequest;
-        client = ClientBuilder.newBuilder().build();
+        client = ClientBuilder.newBuilder().register(clientRequestFilter).build();
         root = client.target(hostname.trim()).path(ROOT_PATH);
         cookies = login();
     }
 
-    public CreateScanResponse createScan(long projectId, List<OSAFile> osaFileList) {
+    public CreateScanResponse createScan(long projectId, String osaDependenciesJson) {
 
-        CreateOSAScanRequest req = new CreateOSAScanRequest(projectId, CX_ORIGIN_VALUE, osaFileList);
+        CreateOSAScanRequest req = new CreateOSAScanRequest(projectId, osaDependenciesJson);
         logger.info("sending request for osa scan");
         Invocation invocation = root.path(CREATE_SCAN_PATH)
                 .request()
@@ -66,7 +73,7 @@ public class OsaScanClient implements Closeable {
                 .header(CSRF_COOKIE, cookies.get(CSRF_COOKIE).getValue())
                 .buildPost(Entity.entity(req, MediaType.APPLICATION_JSON));
         Response response = invokeRequest(invocation);
-        validateResponse(response, Response.Status.ACCEPTED, "fail create OSA scan");
+        validateResponse(response, Response.Status.CREATED, "Failed to create OSA scan");
         return response.readEntity(CreateScanResponse.class);
     }
 
@@ -76,22 +83,6 @@ public class OsaScanClient implements Closeable {
         Response response = invokeRequest(invocation);
         validateResponse(response, Response.Status.OK, "fail get OSA scan summary results");
         return response.readEntity(GetOpenSourceSummaryResponse.class);
-    }
-
-    public String getOSAScanHtmlResults(String scanId) {
-        Invocation invocation = getSummeryByAcceptHeaderInvocation(scanId, "text/html");
-        logger.info("sending request for JSON report");
-        Response response = invokeRequest(invocation);
-        validateResponse(response, Response.Status.OK, "fail get OSA scan html results");
-        return response.readEntity(String.class);
-    }
-
-    public byte[] getOSAScanPdfResults(String scanId) {
-        Invocation invocation = getSummeryByAcceptHeaderInvocation(scanId, "application/pdf");
-        logger.info("sending request for PDF report");
-        Response response = invokeRequest(invocation);
-        validateResponse(response, Response.Status.OK, "fail get OSA scan pdf results");
-        return response.readEntity(byte[].class);
     }
 
     public List<Library> getScanResultLibraries(String scanId) {

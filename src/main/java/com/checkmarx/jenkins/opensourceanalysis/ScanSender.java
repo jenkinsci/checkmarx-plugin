@@ -21,8 +21,8 @@ public class ScanSender {
         this.projectId = projectId;
     }
 
-    public OsaScanResult sendAsync(List<OSAFile> osaFileList, LibrariesAndCVEsExtractor librariesAndCVEsExtractor) throws Exception {
-        createScan(osaFileList);
+    public OsaScanResult sendAsync(String osaDependenciesJson, LibrariesAndCVEsExtractor librariesAndCVEsExtractor) throws Exception {
+        createScan(osaDependenciesJson);
         ScanDetails latestScanDetails = osaScanClient.getLatestScanId(projectId);
 
         if(latestScanDetails != null) {
@@ -38,9 +38,9 @@ public class ScanSender {
         return null;
     }
 
-    public OsaScanResult sendOsaScanAndGetResults(List<OSAFile> osaFileList) throws Exception {
+    public OsaScanResult sendOsaScanAndGetResults(String osaDependenciesJson) throws Exception {
         OsaScanResult osaScanResult = new OsaScanResult();
-        CreateScanResponse createScanResponse = createScan(osaFileList);
+        CreateScanResponse createScanResponse = createScan(osaDependenciesJson);
         osaScanResult.setScanId(createScanResponse.getScanId());
         ScanDetails scanDetails = waitForScanToFinish(createScanResponse.getScanId());
         GetOpenSourceSummaryResponse getOpenSourceSummaryResponse = getOpenSourceSummary(createScanResponse.getScanId());
@@ -49,8 +49,8 @@ public class ScanSender {
         return osaScanResult;
     }
 
-    private CreateScanResponse createScan(List<OSAFile> osaFileList) throws Exception {
-        return osaScanClient.createScan(projectId, osaFileList);
+    private CreateScanResponse createScan(String osaDependenciesJson) throws Exception {
+        return osaScanClient.createScan(projectId, osaDependenciesJson);
     }
 
     private ScanDetails waitForScanToFinish(String scanId) throws InterruptedException {

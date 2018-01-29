@@ -29,6 +29,10 @@ public class CVE {
     String sourceFileName;//:"SourceFileName 1",
     @JsonProperty("libraryId")
     String libraryId;//:"36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
+    @JsonProperty("state")
+    State state;//:"36b32b00-9ee6-4e2f-85c9-3f03f26519a9"
+    @JsonProperty("commentsAmount")
+    Integer commentsAmount;
 
     //Added after request
     @JsonProperty("libraryName")
@@ -120,5 +124,21 @@ public class CVE {
 
     public void setLibraryName(String libraryName) {
         this.libraryName = libraryName;
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
+
+    public Integer getCommentsAmount() {
+        return commentsAmount;
+    }
+
+    public void setCommentsAmount(Integer commentsAmount) {
+        this.commentsAmount = commentsAmount;
     }
 }

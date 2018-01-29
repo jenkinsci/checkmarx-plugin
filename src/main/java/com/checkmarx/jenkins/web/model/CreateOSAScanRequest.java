@@ -1,9 +1,7 @@
 package com.checkmarx.jenkins.web.model;
 
-import com.checkmarx.jenkins.opensourceanalysis.OSAFile;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonRawValue;
 
 
 public class CreateOSAScanRequest {
@@ -11,16 +9,12 @@ public class CreateOSAScanRequest {
     @JsonProperty("ProjectId")
     private long projectId;
 
-    @JsonProperty("Origin")
-    private String origin;
+    @JsonProperty("Content")
+    private Content content;
 
-    @JsonProperty("HashedFilesList")
-    private List<OSAFile> hashedFilesList;
-
-    public CreateOSAScanRequest(long projectId, String origin, List<OSAFile> hashedFilesList) {
+    public CreateOSAScanRequest(long projectId, String content) {
         this.projectId = projectId;
-        this.hashedFilesList = hashedFilesList;
-        this.origin = origin;
+        this.content = new Content(content);
     }
 
     public long getProjectId() {
@@ -31,19 +25,11 @@ public class CreateOSAScanRequest {
         this.projectId = projectId;
     }
 
-    public String getOrigin() {
-        return origin;
+    public Content getContent() {
+        return content;
     }
 
-    public void setOrigin(String origin) {
-        this.origin = origin;
-    }
-
-    public List<OSAFile> getHashedFilesList() {
-        return hashedFilesList;
-    }
-
-    public void setHashedFilesList(List<OSAFile> hashedFilesList) {
-        this.hashedFilesList = hashedFilesList;
+    public void setContent(Content content) {
+        this.content = content;
     }
 }
