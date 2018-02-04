@@ -34,6 +34,7 @@ public class ScanService {
     private ScanResultsPresenter scanResultsPresenter;
     private ScanSender scanSender;
     private LibrariesAndCVEsExtractor librariesAndCVEsExtractor;
+    private boolean runInstallBeforeScan;
 
     public ScanService(ScanServiceTools scanServiceTools) {
         this.dependencyFolder = scanServiceTools.getDependencyFolder();
@@ -44,6 +45,7 @@ public class ScanService {
         this.scanSender = new ScanSender(scanServiceTools.getOsaScanClient(), scanServiceTools.getProjectId());
         this.librariesAndCVEsExtractor = new LibrariesAndCVEsExtractor(scanServiceTools.getOsaScanClient());
         this.logger = new CxPluginLogger(scanServiceTools.getListener());
+        this.runInstallBeforeScan = scanServiceTools.isRunInstallBeforeScan();
     }
 
     public OsaScanResult scan(boolean asynchronousScan) {
@@ -59,7 +61,7 @@ public class ScanService {
             }
 
             String combinedFilterPattern = folderPattern.generatePattern(dependencyFolder.getInclude(), dependencyFolder.getExclude());
-            Properties scannerProperties = generateOSAScanConfiguration(combinedFilterPattern, dependencyFolder.getArchiveIncludePatterns());
+            Properties scannerProperties = generateOSAScanConfiguration(combinedFilterPattern, dependencyFolder.getArchiveIncludePatterns(), runInstallBeforeScan);
             OsaScannerCallable scannerCallable = new OsaScannerCallable(scannerProperties);
             logger.info("Scanning for OSA compatible files");
             String osaDependenciesJson = workspace.act(scannerCallable);
@@ -99,7 +101,7 @@ public class ScanService {
         return webServiceClient.isOsaLicenseValid();
     }
 
-    private Properties generateOSAScanConfiguration(String filterPatterns, String archiveIncludes) {
+    private Properties generateOSAScanConfiguration(String filterPatterns, String archiveIncludes, boolean runInstallBeforeScan) {
         Properties ret = new Properties();
         List<String> inclusions = new ArrayList<String>();
         List<String> exclusions = new ArrayList<String>();
@@ -131,8 +133,11 @@ public class ScanService {
         }
 
         ret.put("archiveExtractionDepth", "4");
-        ret.put("npm.runPreStep", "true");
-        ret.put("bower.runPreStep", "true");
+
+        if(runInstallBeforeScan) {
+            ret.put("npm.runPreStep", "true");
+            ret.put("bower.runPreStep", "true");
+        }
 
         return ret;
     }

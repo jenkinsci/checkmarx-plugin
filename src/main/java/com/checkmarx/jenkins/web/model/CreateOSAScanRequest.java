@@ -1,8 +1,6 @@
 package com.checkmarx.jenkins.web.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonRawValue;
-
 
 public class CreateOSAScanRequest {
 

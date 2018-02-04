@@ -143,6 +143,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     private String osaArchiveIncludePatterns;
 
+    @Nullable
+    private boolean osaInstallBeforeScan;
+
     //////////////////////////////////////////////////////////////////////////////////////
     // Private variables
     //////////////////////////////////////////////////////////////////////////////////////
@@ -219,6 +222,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             @Nullable String includeOpenSourceFolders,
             @Nullable String excludeOpenSourceFolders,
             @Nullable String osaArchiveIncludePatterns,
+            boolean osaInstallBeforeScan,
             boolean avoidDuplicateProjectScans) {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
@@ -258,6 +262,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.includeOpenSourceFolders = includeOpenSourceFolders;
         this.excludeOpenSourceFolders = excludeOpenSourceFolders;
         this.osaArchiveIncludePatterns = osaArchiveIncludePatterns;
+        this.osaInstallBeforeScan = osaInstallBeforeScan;
         this.thresholdSettings = thresholdSettings;
         if (vulnerabilityThresholdResult != null) {
             this.vulnerabilityThresholdResult = Result.fromString(vulnerabilityThresholdResult);
@@ -481,6 +486,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     public void setOsaArchiveIncludePatterns(@Nullable String osaArchiveIncludePatterns) {
         this.osaArchiveIncludePatterns = osaArchiveIncludePatterns;
+    }
+
+    @Nullable
+    public boolean isOsaInstallBeforeScan() {
+        return osaInstallBeforeScan;
+    }
+
+    public void setOsaInstallBeforeScan(@Nullable boolean osaInstallBeforeScan) {
+        this.osaInstallBeforeScan = osaInstallBeforeScan;
     }
 
     public boolean isGeneratePdfReport() {
@@ -1123,6 +1137,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         scanServiceTools.setProjectId(projectId);
         scanServiceTools.setWebServiceClient(webServiceClient);
         scanServiceTools.setWorkspace(workspace);
+        scanServiceTools.setRunInstallBeforeScan(osaInstallBeforeScan);
         return scanServiceTools;
     }
 

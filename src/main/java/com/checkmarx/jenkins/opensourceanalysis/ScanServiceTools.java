@@ -19,6 +19,15 @@ public class ScanServiceTools {
     private Run<?, ?> run;
     private TaskListener listener;
     private long projectId;
+    private boolean runInstallBeforeScan;
+
+    public boolean isRunInstallBeforeScan() {
+        return runInstallBeforeScan;
+    }
+
+    public void setRunInstallBeforeScan(boolean runInstallBeforeScan) {
+        this.runInstallBeforeScan = runInstallBeforeScan;
+    }
 
     public FilePath getWorkspace() {
         return workspace;
