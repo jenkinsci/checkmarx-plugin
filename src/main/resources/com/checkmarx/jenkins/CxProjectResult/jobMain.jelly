@@ -2179,16 +2179,16 @@
 
             try {
                 //generate full reports
-                if (osaHighCount == 0 &amp;&amp; osaMedCount == 0 &amp;&amp; osaLowCount == 0) {
+                if (osaHighCveList.length == 0 &amp;&amp; osaMedCveList.length == 0 &amp;&amp; osaLowCveList.length == 0) {
                     document.getElementById("osa-full").setAttribute("style", "display: none");
                 } else {
-                    if (osaHighCount > 0) {
+                    if (osaHighCveList.length > 0) {
                         generateCveTable(SEVERITY.OSA_HIGH);
                     }
-                    if (osaMedCount > 0) {
+                    if (osaMedCveList.length > 0) {
                         generateCveTable(SEVERITY.OSA_MED);
                     }
-                    if (osaLowCount > 0) {
+                    if (osaLowCveList.length > 0) {
                         generateCveTable(SEVERITY.OSA_LOW);
                     }
                 }
