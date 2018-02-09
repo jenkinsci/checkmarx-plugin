@@ -19,3 +19,4 @@ bin/
 #Jenkins specific out
 *.hpi
 classes/
+/.nb-gradle/

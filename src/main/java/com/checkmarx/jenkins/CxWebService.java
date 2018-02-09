@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 import static ch.lambdaj.Lambda.*;
+import com.checkmarx.jenkins.utils.CxProxyUtility;
 
 /**
  * Wraps all Web services invocations
@@ -45,7 +46,7 @@ public class CxWebService {
 
     private transient CxPluginLogger logger;
 
-    private static final String CHECKMARX_SERVER_WAS_NOT_FOUND_ON_THE_SPECIFIED_ADRESS = "Checkmarx server was not found on the specified adress";
+    private static final String CHECKMARX_SERVER_WAS_NOT_FOUND_ON_THE_SPECIFIED_ADRESS = "Checkmarx server was not found on the specified address";
     private static final int WEBSERVICE_API_VERSION = 1;
     private static final String CXWSRESOLVER_PATH = "/cxwebinterface/cxwsresolver.asmx";
     private static final int LCID = 1033; // English
@@ -54,15 +55,36 @@ public class CxWebService {
     private static final int XML_WRITING_BUFFER_IN_BYTES = 52428800; // 50 MB
     private String sessionId;
     private CxJenkinsWebServiceSoap cxJenkinsWebServiceSoap;
-    private final URL webServiceUrl;
-
-    public CxWebService(@NotNull final String serverUrl, CxPluginLogger cxPluginLogger) throws MalformedURLException, AbortException {
+    private URL webServiceUrl;
+    
+    public CxWebService(@NotNull final String serverUrl, CxPluginLogger cxPluginLogger) 
+            throws MalformedURLException, AbortException {
+        
         this.logger = cxPluginLogger;
 
+        setupConnection(serverUrl);
+        CxProxyUtility.configureProxy(serverUrl, logger);
+        initializeServices(serverUrl);
+    }
+
+    // called only for test connection when global config hasn't been saved
+    public CxWebService(@NotNull final String serverUrl, 
+            boolean useProxy, String proxyHost, Integer proxyPort, 
+            CxPluginLogger cxPluginLogger) throws MalformedURLException, AbortException {
+        
+        this.logger = cxPluginLogger;
+
+        setupConnection(serverUrl);
+        CxProxyUtility.configureProxy(serverUrl, useProxy, proxyHost, proxyPort, logger);
+        initializeServices(serverUrl);
+    }
+    
+    private void setupConnection(String serverUrl) throws AbortException, MalformedURLException {
         disableCertificateValidation();
-
         validateServerUrl(serverUrl);
+    }
 
+    private void initializeServices(String serverUrl) throws MalformedURLException, AbortException {
         CxWSResolverSoap cxWSResolverSoap = getCxWSResolverSoap(serverUrl);
         webServiceUrl = getWebServiceUrl(cxWSResolverSoap);
 
@@ -704,4 +726,5 @@ public class CxWebService {
     public CxWSResponseScanStatusArray getQueuedScans() {
         return cxJenkinsWebServiceSoap.getScansStatuses(sessionId);
     }
+
 }

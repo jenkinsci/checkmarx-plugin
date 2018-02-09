@@ -1251,6 +1251,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         @Nullable
         private String password;
 
+        // Proxy settings
+        private boolean useProxy;
+        @Nullable
+        private String proxyHost;
+        @Nullable
+        private Integer proxyPort;
+
         private boolean prohibitProjectCreation;
         private boolean hideResults;
         private boolean enableCertificateValidation;
@@ -1278,7 +1285,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private boolean scanTimeOutEnabled;
         private double scanTimeoutDuration; // In Hours.
         private boolean lockVulnerabilitySettings = true;
-
+        
         private final transient Pattern msGuid = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
 
         public DescriptorImpl() {
@@ -1321,6 +1328,32 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         @Nullable
         public String getPasswordPlainText(String password) {
             return Secret.fromString(password).getPlainText();
+        }
+        
+        public boolean isUseProxy() {
+            return this.useProxy;
+        }
+        
+        public void setUseProxy(boolean useProxy) {
+            this.useProxy = useProxy;
+        }
+
+        @Nullable
+        public String getProxyHost() {
+            return this.proxyHost;
+        }
+        
+        public void setProxyHost(@Nullable String proxyHost) {
+            this.proxyHost = proxyHost;
+        }
+        
+        @Nullable
+        public Integer getProxyPort() {
+            return this.proxyPort;
+        }
+        
+        public void setProxyPort(@Nullable Integer proxyPort) {
+            this.proxyPort = proxyPort;
         }
 
         public boolean isProhibitProjectCreation() {
@@ -1456,7 +1489,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 this.scanTimeoutDuration = scanTimeoutDurationInMinutes / (double) 60;
             }
         }
-
+        
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
             return true;
@@ -1538,11 +1571,30 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 	     *  shared state to avoid synchronization issues.
 	     */
         public FormValidation doTestConnection(@QueryParameter final String serverUrl, @QueryParameter final String password,
-                                               @QueryParameter final String username, @QueryParameter final String timestamp) {
+                                               @QueryParameter final String username,  @QueryParameter Boolean useProxy,
+                                               @QueryParameter final String proxyHost, @QueryParameter final String proxyPort,
+                                               @QueryParameter final String timestamp) {
+            //validate params
+            if (StringUtils.isEmpty(serverUrl))
+                return FormValidation.error("Server URL must be supplied");
+            if (StringUtils.isEmpty(username))
+                return FormValidation.error("Username must be supplied");
+            if (StringUtils.isEmpty(password))
+                return FormValidation.error("Password must be supplied");
+            if (useProxy != null && useProxy.booleanValue()) {
+                if (StringUtils.isEmpty(proxyHost))
+                    return FormValidation.error("Proxy host must be supplied");
+            }
+
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             CxWebService cxWebService = null;
+            Integer port = null;
+            if (useProxy && StringUtils.isNumeric(proxyPort)) {
+                port = Integer.parseInt(proxyPort);
+            }
+                
             try {
-                cxWebService = new CxWebService(serverUrl, STATIC_LOGGER);
+                cxWebService = new CxWebService(serverUrl, useProxy, proxyHost, port, STATIC_LOGGER);
             } catch (Exception e) {
                  STATIC_LOGGER.error(e.getMessage(), e);
                 return FormValidation.error(e.getMessage());
@@ -1551,7 +1603,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             try {
                 cxWebService.login(username, getPasswordPlainText(password));
                 return FormValidation.ok("Success");
-
             } catch (Exception e) {
                 return FormValidation.error(e.getMessage());
             }
@@ -1628,6 +1679,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                         resolvedProjectName = ev.expand(projectName);
                     }
                     CxWSBasicRepsonse cxWSBasicRepsonse = cxWebService.validateProjectName(resolvedProjectName, groupId);
+                    STATIC_LOGGER.info(cxWSBasicRepsonse.getErrorMessage());
                     if (cxWSBasicRepsonse.isIsSuccesfull()) {
                         return FormValidation.ok("Project Name Validated Successfully");
                     } else {
