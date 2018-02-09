@@ -175,7 +175,7 @@ public class OsaScanClient implements Closeable {
         Boolean scanFinished = false;
         while (!scanFinished){
             Response response = invokeRequest(invocation);
-            validateResponse(response, Response.Status.OK, "error occured while waiting for scan to finish");
+            validateResponse(response, Response.Status.OK, "error occurred while waiting for scan to finish");
             scanStatusResponse = response.readEntity(ScanDetails.class);
             if (isScanFinished(scanStatusResponse)){
                 scanFinished = true;
