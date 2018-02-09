@@ -7,6 +7,7 @@ import hudson.model.TaskListener;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
@@ -51,7 +52,8 @@ public class CxPluginLogger implements Serializable {
     }
 
     public void error(String message, Throwable error) {
-        loggingDevice.error( message+"\n\n"+ Arrays.toString(error.getStackTrace())+"\n\n");
+        //loggingDevice.error( message+"\n\n"+ Arrays.toString(error.getStackTrace())+"\n\n");
+        loggingDevice.error(message, error);
     }
 
     private class JavaLoggingDevice implements LoggingDevice{
@@ -67,6 +69,11 @@ public class CxPluginLogger implements Serializable {
         @Override
         public void error(String message) {
             STATIC_LOGGER.info(ERROR_PRE_TEXT + message);
+        }
+
+        @Override
+        public void error(String message, Throwable t) {
+            STATIC_LOGGER.log(Level.WARNING, ERROR_PRE_TEXT + message, t);
         }
     }
 
@@ -85,6 +92,12 @@ public class CxPluginLogger implements Serializable {
 
         @Override
         public void error(String message) {
+            this.listener.getLogger().println(ERROR_PRE_TEXT + message);
+        }
+
+        @Override
+        public void error(String message, Throwable t) {
+            //TODO: log Throwable t
             this.listener.getLogger().println(ERROR_PRE_TEXT + message);
         }
     }

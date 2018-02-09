@@ -126,7 +126,7 @@ public class CxProxyUtility {
                 final InetAddress addr = InetAddress.getByName(proxyHost);
                 final SocketAddress sa = new InetSocketAddress(addr, proxyPort);
                 return new Proxy(Type.HTTP, sa);
-            } catch (UnknownHostException ex) {
+            } catch (Exception ex) {
                 final String msg = "Proxy address is malformed.  Correct and retry.";
                 logger.error(msg, ex);
                 throw new AbortException(msg);

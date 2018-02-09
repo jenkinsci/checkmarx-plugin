@@ -1581,9 +1581,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 return FormValidation.error("Username must be supplied");
             if (StringUtils.isEmpty(password))
                 return FormValidation.error("Password must be supplied");
-            if (useProxy != null && useProxy.booleanValue()) {
+            if (useProxy != null && useProxy) {
                 if (StringUtils.isEmpty(proxyHost))
                     return FormValidation.error("Proxy host must be supplied");
+                else if (proxyHost.contains("://"))
+                    return FormValidation.error("Please remove the url protocol from the proxy host");
             }
 
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache

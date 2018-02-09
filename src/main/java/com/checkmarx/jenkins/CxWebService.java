@@ -163,7 +163,9 @@ public class CxWebService {
                 throw new AbortException(CHECKMARX_SERVER_WAS_NOT_FOUND_ON_THE_SPECIFIED_ADRESS);
             }
         } catch (IOException e) {
-            logger.error(CHECKMARX_SERVER_WAS_NOT_FOUND_ON_THE_SPECIFIED_ADRESS, e);
+            String msg = String.format("%s : Cause:\n%s", 
+                    CHECKMARX_SERVER_WAS_NOT_FOUND_ON_THE_SPECIFIED_ADRESS, e.toString());
+            logger.error(msg, e);
             throw new AbortException(CHECKMARX_SERVER_WAS_NOT_FOUND_ON_THE_SPECIFIED_ADRESS);
         }
     }
