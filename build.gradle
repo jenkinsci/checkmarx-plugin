@@ -43,10 +43,8 @@ dependencies {
 			'org.apache.httpcomponents:httpmime:4.4.1',
 			'com.google.guava:guava:21.0'
 
-	compile('org.whitesource:whitesource-fs-agent:18.1.2-SNAPSHOT') {
+	compile('org.whitesource:whitesource-fs-agent:18.1.3') {
 		exclude group:'javax.xml.bind', module: 'jaxb-api'
-		exclude group:'org.whitesource', module: 'wss-agent-api-client'
-		exclude group:'org.springframework', module: 'spring-web'
 		exclude group:'ch.qos.logback', module: 'logback-classic'
 		exclude group: 'org.slf4j', module: 'slf4j-api'
 		exclude group: 'org.codehaus.plexus', module: 'plexus-container-default'
