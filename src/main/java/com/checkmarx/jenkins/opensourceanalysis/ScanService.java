@@ -5,12 +5,8 @@ import com.checkmarx.jenkins.OsaScanResult;
 import com.checkmarx.jenkins.filesystem.FolderPattern;
 import com.checkmarx.jenkins.logger.CxPluginLogger;
 import hudson.FilePath;
-import hudson.model.TaskListener;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.File;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -35,8 +31,10 @@ public class ScanService {
     private ScanSender scanSender;
     private LibrariesAndCVEsExtractor librariesAndCVEsExtractor;
     private boolean runInstallBeforeScan;
+    private ScanServiceTools scanServiceTools;
 
     public ScanService(ScanServiceTools scanServiceTools) {
+        this.scanServiceTools = scanServiceTools;
         this.dependencyFolder = scanServiceTools.getDependencyFolder();
         this.webServiceClient = scanServiceTools.getWebServiceClient();
         this.workspace = scanServiceTools.getWorkspace();
@@ -62,10 +60,9 @@ public class ScanService {
 
             String combinedFilterPattern = folderPattern.generatePattern(dependencyFolder.getInclude(), dependencyFolder.getExclude());
             Properties scannerProperties = generateOSAScanConfiguration(combinedFilterPattern, dependencyFolder.getArchiveIncludePatterns(), runInstallBeforeScan);
-            OsaScannerCallable scannerCallable = new OsaScannerCallable(scannerProperties);
+            OsaScannerCallable scannerCallable = new OsaScannerCallable(scannerProperties, scanServiceTools.getListener());
             logger.info("Scanning for OSA compatible files");
             String osaDependenciesJson = workspace.act(scannerCallable);
-            writeToOsaListToTemp(osaDependenciesJson);
 
             if (asynchronousScan) {
                 logger.info(OSA_RUN_SUBMITTED);
@@ -85,16 +82,6 @@ public class ScanService {
         }
         librariesAndCVEsExtractor.getAndSetLibrariesAndCVEsToScanResult(osaScanResult);
         return osaScanResult;
-    }
-
-    private void writeToOsaListToTemp(String osaDependenciesJson) {
-        try {
-            File temp = new File(FileUtils.getTempDirectory(), "CxOSAFileList.json");
-            FileUtils.writeStringToFile(temp, osaDependenciesJson, Charset.defaultCharset());
-            logger.info("OSA file list saved to file: ["+temp.getAbsolutePath()+"]");
-        } catch (Exception e) {
-            logger.info("Failed to write OSA file list to temp directory: " + e.getMessage());
-        }
     }
 
     private boolean validLicense() {
