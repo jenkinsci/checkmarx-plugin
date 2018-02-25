@@ -2126,7 +2126,7 @@
             document.getElementById("sast-full").setAttribute("style", "display: none");
         }
 
-        if (isOsaFullReady) {
+        if (osaEnabled &amp;&amp; isOsaFullReady) {
             try {
                 //osa links
                 document.getElementById("osa-html-link").setAttribute("href", osaSummaryResultsLink);
