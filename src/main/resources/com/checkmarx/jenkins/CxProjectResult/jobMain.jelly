@@ -1901,8 +1901,8 @@
         var osaEndDate = verifyVar(["${it.lastSynchronousBuildAction.osaScanResult.osaScanEndTime}"]);
 
         var isOsaFullReady =
-                osaStartDate != ' ' &amp;&amp;
-                osaEndDate != ' ';
+                osaStartDate != '' &amp;&amp;
+                osaEndDate != '';
 
         var osaNumFiles = okLibraries + osaVulnerableAndOutdatedLibs;
 
