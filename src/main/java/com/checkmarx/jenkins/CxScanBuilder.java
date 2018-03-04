@@ -1267,7 +1267,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             CxWSResponseRunID cxWSResponseRunId = sastScan.scan(getGroupId(), zipFile, isThisBuildIncremental);
             zipFile.delete();
             jobConsoleLogger.info("Temporary file deleted");
-            jobConsoleLogger.info("Scan job submitted successfully\n");
+            jobConsoleLogger.info("Scan job submitted successfully");
             return cxWSResponseRunId;
 
         } catch (Zipper.MaxZipSizeReached e) {
