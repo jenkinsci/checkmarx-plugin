@@ -43,7 +43,7 @@ dependencies {
 			'org.apache.httpcomponents:httpmime:4.4.1',
 			'com.google.guava:guava:21.0'
 
-	compile('org.whitesource:whitesource-fs-agent:18.1.3') {
+	compile('org.whitesource:whitesource-fs-agent:18.3.1-SNAPSHOT') {
 		exclude group:'javax.xml.bind', module: 'jaxb-api'
 		exclude group:'ch.qos.logback', module: 'logback-classic'
 		exclude group: 'org.slf4j', module: 'slf4j-api'
