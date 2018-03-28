@@ -76,7 +76,7 @@ public class CxCredentials {
     }
 
 
-    public static CxCredentials resolveCredentials(boolean useOwnServerCredentials, String serverUrl, String username, String password, String credentialsId, CxScanBuilder.DescriptorImpl descriptor) {
+    public static CxCredentials resolveCredentials(boolean useOwnServerCredentials, String serverUrl, String username, String password, String credentialsId, CxScanBuilder.DescriptorImpl descriptor, Item item) {
 
         CxCredentials ret = new CxCredentials();
         if (useOwnServerCredentials) {
@@ -85,7 +85,7 @@ public class CxCredentials {
 
                 StandardUsernamePasswordCredentials c = CredentialsMatchers.firstOrNull(CredentialsProvider.lookupCredentials(
                                 StandardUsernamePasswordCredentials.class,
-                                (Item)null,
+                                item,
                                 null,
                                 Collections.<DomainRequirement>emptyList()),
                         CredentialsMatchers.withId(credentialsId));
@@ -106,7 +106,7 @@ public class CxCredentials {
 
                 StandardUsernamePasswordCredentials c = CredentialsMatchers.firstOrNull(CredentialsProvider.lookupCredentials(
                         StandardUsernamePasswordCredentials.class,
-                        (Item)null,
+                        item,
                         null,
                         Collections.<DomainRequirement>emptyList()),
                         CredentialsMatchers.withId(descriptor.getCredentialsId()));
