@@ -56,6 +56,7 @@ dependencies {
 
 
 	testCompile 'junit:junit:4.12',
+			'org.eclipse.sisu:org.eclipse.sisu.plexus:0.0.0.M5',
 			'org.jmockit:jmockit:1.16'
 
 	// Fails with Gradle 2.12 and up without it. Related to https://issues.jenkins-ci.org/browse/JENKINS-17129
