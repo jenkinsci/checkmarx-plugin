@@ -44,7 +44,7 @@ dependencies {
 			'com.google.guava:guava:21.0'
 
 	compile('org.whitesource:whitesource-fs-agent:18.3.1') {
-		exclude group:'xml-apis', module: 'xml-apis'
+		exclude group:'guru.nidi', module: 'graphviz-java'
 		exclude group:'org.simpleframework', module: 'simple-xml'
 		exclude group:'javax.xml.bind', module: 'jaxb-api'
 		exclude group:'ch.qos.logback', module: 'logback-classic'
