@@ -38,6 +38,8 @@ public class ScanService {
                     "hxx", "h++", "m", "mm", "pch", "java", "c#", "cs", "csharp", "go", "goc", "js", "plx", "pm", "ph", "cgi", "fcgi", "psgi", "al", "perl", "t", "p6m", "p6l", "nqp,6pl", "6pm",
                     "p6", "php", "py", "rb", "swift", "clj", "cljx", "cljs", "cljc"};
 
+    private static final String INCLUDE_ALL_EXTENSIONS = "**/**";
+
     public static final String DEFAULT_ARCHIVE_INCLUDES = "**/.*jar,**/*.war,**/*.ear,**/*.sca,**/*.gem,**/*.whl,**/*.egg,**/*.tar,**/*.tar.gz,**/*.tgz,**/*.zip,**/*.rar";
 
     public ScanService(ScanServiceTools scanServiceTools) {
@@ -116,6 +118,8 @@ public class ScanService {
 
         if(StringUtils.isNotEmpty(includesString)) {
             ret.put("includes",includesString);
+        } else {
+            ret.put("includes",INCLUDE_ALL_EXTENSIONS);
         }
 
         if(StringUtils.isNotEmpty(excludesString)) {

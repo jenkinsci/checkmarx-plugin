@@ -45,10 +45,10 @@ dependencies {
 
 	compile('org.whitesource:whitesource-fs-agent:18.3.1') {
 		exclude group:'guru.nidi', module: 'graphviz-java'
-		exclude group:'org.simpleframework', module: 'simple-xml'
 		exclude group:'javax.xml.bind', module: 'jaxb-api'
 		exclude group:'ch.qos.logback', module: 'logback-classic'
 		exclude group: 'org.slf4j', module: 'slf4j-api'
+
 	}
 
 	optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.3@jar',
