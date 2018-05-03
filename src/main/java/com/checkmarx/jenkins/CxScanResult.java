@@ -1,12 +1,17 @@
 package com.checkmarx.jenkins;
 
-import com.checkmarx.jenkins.logger.CxPluginLogger;
+import com.checkmarx.jenkins.legacy8_7.OsaScanResult;
+import com.checkmarx.jenkins.legacy8_7.QueryResult;
+import com.checkmarx.jenkins.legacy8_7.SastScanResult;
+import com.checkmarx.jenkins.legacy8_7.ThresholdConfig;
+import com.cx.restclient.configuration.CxScanConfig;
+import com.cx.restclient.sast.dto.SASTResults;
 import hudson.PluginWrapper;
 import hudson.model.Action;
-import hudson.model.Hudson;
 import hudson.model.Run;
 import hudson.util.IOUtils;
 import jenkins.model.Jenkins;
+import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.StaplerRequest;
@@ -15,8 +20,12 @@ import org.kohsuke.stapler.StaplerResponse;
 import javax.servlet.ServletOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author denis
@@ -24,15 +33,14 @@ import java.util.List;
  */
 public class CxScanResult implements Action {
 
-    private transient CxPluginLogger logger = new CxPluginLogger();
-
     public final Run<?, ?> owner;
-    private final long projectId;
-    private final boolean scanRanAsynchronous;
-    private String serverUrl;
+    private final long projectId = 0;
+    private boolean scanRanAsynchronous = false;
+    private String serverUrl = "";
 
     private long scanId;
 
+    private Boolean sastEnabled;
     private boolean osaEnabled;
 
     //Results
@@ -51,10 +59,34 @@ public class CxScanResult implements Action {
     public static final String OSA_PDF_REPORT_NAME = "OSAReport.pdf";
     private boolean osaSuccessful; //osa fails flag for jelly
 
+    private String htmlReportName;
+
+    public String getHtmlReportName() {
+        return htmlReportName;
+    }
+
+    public void setHtmlReportName(String htmlReportName) {
+        this.htmlReportName = htmlReportName;
+    }
+
+    public CxScanResult(Run<?, ?> owner, CxScanConfig config) {
+        this.scanRanAsynchronous = !config.getSynchronous();
+        this.sastEnabled = config.getSastEnabled();
+        this.osaEnabled = config.getOsaEnabled();
+        this.owner = owner;
+    }
+
+    public void setSastResults(SASTResults results) {
+        this.highCount = results.getHigh();
+        this.mediumCount = results.getMedium();
+        this.lowCount = results.getLow();
+    }
+
+    public Boolean getSastEnabled() {
+        return sastEnabled;
+    }
 
     public CxScanResult(Run<?, ?> owner, String serverUrl, long projectId, boolean scanRanAsynchronous) {
-        this.projectId = projectId;
-        this.scanRanAsynchronous = scanRanAsynchronous;
         this.owner = owner;
         this.serverUrl = serverUrl;
         this.resultIsValid = false; //sast fails flag for jelly
@@ -186,6 +218,55 @@ public class CxScanResult implements Action {
 
         outputStream.flush();
         outputStream.close();
+    }
+
+    public static String resolveHTMLReportName(boolean sastEnabled, boolean osaEnabled) {
+        if(sastEnabled && osaEnabled) {
+            return "Report_CxSAST_CxOSA.html";
+        }
+
+        if(sastEnabled) {
+            return "Report_CxSAST.html";
+        }
+
+        if(osaEnabled) {
+            return "Report_CxOSA.html";
+        }
+
+        return "";
+    }
+
+
+
+    public String getHtmlReport() throws IOException {
+        String htmlReport;
+        File cxBuildDirectory = new File(owner.getRootDir(), "checkmarx");
+
+        //backward compatibility (up to version 8.80.0)
+        if(htmlReportName == null) {
+            File oldReport = new File(cxBuildDirectory, "report.html");
+            if(oldReport.exists()) {
+                htmlReport = FileUtils.readFileToString(oldReport, Charset.defaultCharset());
+                Pattern patt = Pattern.compile("(<div[^>]*)(\\s*/>)");
+                Matcher mattcher = patt.matcher(htmlReport);
+                if (mattcher.find()){
+                    htmlReport = mattcher.replaceAll("$1></div>");
+                }
+
+                return htmlReport;
+            }
+        }
+
+        Collection<File> files = FileUtils.listFiles(cxBuildDirectory, null, false);
+
+        for (File f: files) {
+            if(htmlReportName.equals(f.getName())) {
+                htmlReport = FileUtils.readFileToString(f, Charset.defaultCharset());
+                return htmlReport;
+            }
+        }
+
+        return "<h1>Checkmarx HTML report not found<h1>";
     }
 
     /**

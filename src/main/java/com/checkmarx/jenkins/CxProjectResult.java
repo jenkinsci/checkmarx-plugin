@@ -23,8 +23,8 @@ import org.kohsuke.stapler.StaplerResponse;
 
 import java.awt.*;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.LinkedList;
+import java.util.*;
+import java.util.List;
 
 /**
  * @author denis
@@ -45,6 +45,31 @@ public class CxProjectResult implements Action {
             return r.getAction(CxScanResult.class);
         }
 
+        return null;
+    }
+
+    public List<CxScanResult> getLastSynchronousBuildActions() {
+        AbstractBuild<?, ?> r = this.owner.getLastBuild();
+        if(r != null) {
+            return r.getActions(CxScanResult.class);
+        }
+        return null;
+    }
+
+    public CxScanResult getLastSynchronousSASTBuildAction() {
+
+        List<CxScanResult> lastSynchronousBuildActions = getLastSynchronousBuildActions();
+        if(lastSynchronousBuildActions != null) {
+            for (CxScanResult res : lastSynchronousBuildActions) {
+                if(res.getSastEnabled() == null) {//case the build is before plugin version 8.80.0
+                    return res;
+                }
+
+                else if(res.getSastEnabled()) {
+                    return res;
+                }
+            }
+        }
         return null;
     }
 
@@ -150,7 +175,7 @@ public class CxProjectResult implements Action {
 
     private CategoryDataset buildDataSet(StaplerRequest req) {
 
-        CxScanResult lastBuildAction = getLastSynchronousBuildAction();
+        CxScanResult lastBuildAction = getLastSynchronousSASTBuildAction();
         if (lastBuildAction == null) {
             // We get here is there are no builds with scan results.
             // In this case we generate an empty graph

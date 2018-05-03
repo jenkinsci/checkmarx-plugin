@@ -12,7 +12,7 @@
           </f:section>
 
 
-          <f:section title="CxSAST Scan">
+          <f:section title="Checkmarx Server Settings">
           </f:section>
 
             <!-- Creates a text field that shows the value of the "name" property. When submitted, it will be passed to the
@@ -51,62 +51,69 @@
                 <f:select />
             </f:entry>
 
-            <f:entry title="Preset" field="preset">
-                <f:select />
-            </f:entry>
 
-             <!-- GLOBAL INCLUDE\EXCLUDE -->
-            <f:radioBlock checked="${instance == null || instance.exclusionsSetting == null || instance.exclusionsSetting.equals('global')}" inline="true"
-                name="exclusionsSetting" title="Use Global Include/Exclude Settings" value="global">
-                <f:nested>
-                    <f:entry title="Exclude Folders" field="globalExcludeFolders">
-                        <f:textbox readonly="readonly"  value="${descriptor.excludeFolders}"/>
-                    </f:entry>
-                    <f:entry title="Include/Exclude Wildcard Patterns" field="globalFilterPattern">
-                        <f:textarea readonly="readonly" value="${descriptor.filterPattern}" />
-                    </f:entry>
-                </f:nested>
-            </f:radioBlock>
+    <f:section title="CxSAST Scan">
+    </f:section>
+
+    <f:optionalBlock title="Enable CxSAST scan" inline="true" field="sastEnabled" checked="${instance == null || instance.sastEnabled == null || instance.sastEnabled}">
+
+        <f:entry title="Preset" field="preset">
+            <f:select />
+        </f:entry>
+
+                 <!-- GLOBAL INCLUDE\EXCLUDE -->
+                <f:radioBlock checked="${instance == null || instance.exclusionsSetting == null || instance.exclusionsSetting.equals('global')}" inline="true"
+                    name="exclusionsSetting" title="Use Global Include/Exclude Settings" value="global">
+                    <f:nested>
+                        <f:entry title="Exclude Folders" field="globalExcludeFolders">
+                            <f:textbox readonly="readonly"  value="${descriptor.excludeFolders}"/>
+                        </f:entry>
+                        <f:entry title="Include/Exclude Wildcard Patterns" field="globalFilterPattern">
+                            <f:textarea readonly="readonly" value="${descriptor.filterPattern}" />
+                        </f:entry>
+                    </f:nested>
+                </f:radioBlock>
 
 
-             <!-- SPECIFIC INCLUDE\EXCLUDE -->
-             <f:radioBlock checked="${instance.getExclusionsSetting().equals('job')}" inline="true"
-                             name="exclusionsSetting" title="Specific Include/Exclude Settings" value="job">
-                <f:nested>
-                    <f:entry title="Exclude Folders" field="excludeFolders">
-                       <f:textbox default="${descriptor.excludeFolders}" />
-                    </f:entry>
-                   <f:entry title="Include/Exclude Wildcard Patterns" field="filterPattern">
-                       <f:textarea default="${descriptor.filterPattern}" />
+                 <!-- SPECIFIC INCLUDE\EXCLUDE -->
+                 <f:radioBlock checked="${instance.getExclusionsSetting().equals('job')}" inline="true"
+                                 name="exclusionsSetting" title="Specific Include/Exclude Settings" value="job">
+                    <f:nested>
+                        <f:entry title="Exclude Folders" field="excludeFolders">
+                           <f:textbox default="${descriptor.excludeFolders}" />
+                        </f:entry>
+                       <f:entry title="Include/Exclude Wildcard Patterns" field="filterPattern">
+                           <f:textarea default="${descriptor.filterPattern}" />
 
-                   </f:entry>
-                </f:nested>
-            </f:radioBlock>
+                       </f:entry>
+                    </f:nested>
+                </f:radioBlock>
 
-            <f:optionalBlock title="Incremental" field="incremental" inline="true" checked="${instance.incremental}">
+                <f:optionalBlock title="Incremental" field="incremental" inline="true" checked="${instance.incremental}">
 
-                <f:optionalBlock title="Schedule periodic full scans" field="fullScansScheduled" inline="true"
-                    checked="${instance.fullScansScheduled}">
-                    <f:entry
-                        title="Number of incremental scans between full scans (${descriptor.FULL_SCAN_CYCLE_MIN}-${descriptor.FULL_SCAN_CYCLE_MAX})"
-                        field="fullScanCycle">
-                        <f:number clazz="positive-number" min="${descriptor.FULL_SCAN_CYCLE_MIN}" max="${descriptor.FULL_SCAN_CYCLE_MAX}"
-                            step="1" default="10" />
-                    </f:entry>
+                    <f:optionalBlock title="Schedule periodic full scans" field="fullScansScheduled" inline="true"
+                        checked="${instance.fullScansScheduled}">
+                        <f:entry
+                            title="Number of incremental scans between full scans (${descriptor.FULL_SCAN_CYCLE_MIN}-${descriptor.FULL_SCAN_CYCLE_MAX})"
+                            field="fullScanCycle">
+                            <f:number clazz="positive-number" min="${descriptor.FULL_SCAN_CYCLE_MIN}" max="${descriptor.FULL_SCAN_CYCLE_MAX}"
+                                step="1" default="10" />
+                        </f:entry>
+                    </f:optionalBlock>
                 </f:optionalBlock>
-            </f:optionalBlock>
 
 
-            <f:entry title="Source character encoding (configuration)" field="sourceEncoding" description="Default Configuration uses UTF-8">
-                <f:select />
-            </f:entry>
+                <f:entry title="Source character encoding (configuration)" field="sourceEncoding" description="Default Configuration uses UTF-8">
+                    <f:select />
+                </f:entry>
 
-            <f:entry title="Comment" field="comment">
-                <f:textarea />
-            </f:entry>
+                <f:entry title="Comment" field="comment">
+                    <f:textarea />
+                </f:entry>
 
-            <f:optionalBlock title="Skip scan if triggered by SCM Changes" inline="true" field="skipSCMTriggers" />
-            <f:optionalBlock title="Avoid duplicate project scans in queue" inline="true" field="avoidDuplicateProjectScans" />
+        <f:optionalBlock title="Avoid duplicate project scans in queue" inline="true" field="avoidDuplicateProjectScans" />
+    </f:optionalBlock>
+    <f:optionalBlock title="Skip scan if triggered by SCM Changes" inline="true" field="skipSCMTriggers" />
 
 
 	<!-- -= OSA SCAN =- -->
@@ -137,7 +144,7 @@
 
 
 
-            <f:entry name="jobStatusOnError" title="Job status when CxSAST scan returns an error:" field="jobStatusOnError">
+            <f:entry name="jobStatusOnError" title="Job status when scan returns an error:" field="jobStatusOnError">
                     <f:enum field="jobStatusOnError">${it.displayName}</f:enum>
                 </f:entry>
 

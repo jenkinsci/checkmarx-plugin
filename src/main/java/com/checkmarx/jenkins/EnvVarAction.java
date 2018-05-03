@@ -29,6 +29,15 @@ public class EnvVarAction implements EnvironmentContributingAction {
         add(cxPrefix + "INFO", Integer.toString(cxScanResult.getInfoCount()));
     }
 
+    public void setCxSastResults(int high, int medium, int low, int info) {
+        final String cxPrefix = "CXSAST_RESULTS_";
+
+        add(cxPrefix + "HIGH", Integer.toString(high));
+        add(cxPrefix + "MEDIUM", Integer.toString(medium));
+        add(cxPrefix + "LOW", Integer.toString(low));
+        add(cxPrefix + "INFO", Integer.toString(info));
+    }
+
     public void buildEnvVars(AbstractBuild<?, ?> build, EnvVars env) {
         if (data != null) {
             env.putAll(data);

@@ -11,11 +11,7 @@ import jenkins.model.Jenkins;
  */
 public class CxConfig {
 
-	private static final String REQUEST_TIME_OUT_DURATION_SEC = "RequestTimeOutDurationSec";
-	private static final String SERVER_CALL_RETRY_NUMBER = "ServerCallRetryNumber";
 	private static Properties configuration;
-	private static final String CONFIGURATION_MAX_ZIP_SIZE_KEY = "MaxZipSizeBytes";
-	private static final String CONFIGURATION_MAX_OSA_ZIP_SIZE_KEY = "MaxOSAZipSizeBytes";
 	private static final String CONFIGURATION_DEFAULT_FILTER_PATTERN_KEY = "DefaultFilterPattern";
 	private static final String DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS= "DefaultOSAArchiveIncludePatterns";
 
@@ -26,8 +22,6 @@ public class CxConfig {
 			configuration.loadFromXML(inputStream);
 			inputStream.close();
 		} catch (Exception e) {
-			configuration.setProperty(CONFIGURATION_MAX_ZIP_SIZE_KEY, "209715200");
-			configuration.setProperty(CONFIGURATION_MAX_OSA_ZIP_SIZE_KEY, "2146483647");
 		}
 	}
 
@@ -35,28 +29,11 @@ public class CxConfig {
 		// Hides default constructor
 	}
 
-	public static long maxZipSize() {
-		return Integer.parseInt(configuration.getProperty(CONFIGURATION_MAX_ZIP_SIZE_KEY));
-	}
-
-	public static long maxOSAZipSize() {
-		return Integer.parseInt(configuration.getProperty(CONFIGURATION_MAX_OSA_ZIP_SIZE_KEY));
-	}
-
 	public static String defaultFilterPattern() {
 		return configuration.getProperty(CONFIGURATION_DEFAULT_FILTER_PATTERN_KEY);
 	}
-
 	public static String version() {
 		return Jenkins.getInstance().getPluginManager().getPlugin("checkmarx").getVersion();
-	}
-
-	public static int getServerCallRetryNumber() {
-		return Integer.parseInt(configuration.getProperty(SERVER_CALL_RETRY_NUMBER));
-	}
-
-	public static int getRequestTimeOutDuration() {
-		return Integer.parseInt(configuration.getProperty(REQUEST_TIME_OUT_DURATION_SEC));
 	}
 
 	public static String getDefaultOsaArchiveIncludePatterns() {
