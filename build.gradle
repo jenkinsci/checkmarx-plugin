@@ -30,6 +30,12 @@ targetCompatibility = 7
 test {
 	maxParallelForks = Runtime.getRuntime().availableProcessors()
 }
+//currently there is an issue with Java8 and javadocs,
+// Java 8 seems to be really strict with the JavaDoc. This is due to the new doclint for Javadoc
+//for now we disable it so we can build the project properly
+allprojects {
+	tasks.withType(Javadoc).all { enabled = false }
+}
 
 dependencies {
 	provided 'com.intellij:annotations:12.0'
