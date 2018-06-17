@@ -4,6 +4,7 @@ import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
+import com.cx.restclient.exception.CxCredentialsException;
 import hudson.model.Item;
 import hudson.model.Run;
 import org.apache.commons.lang.StringUtils;
@@ -76,10 +77,11 @@ public class CxCredentials {
     }
 
 
-    public static CxCredentials resolveCredentials(boolean useOwnServerCredentials, String serverUrl, String username, String password, String credentialsId, CxScanBuilder.DescriptorImpl descriptor, Item item) {
+    public static CxCredentials resolveCredentials(boolean useOwnServerCredentials, String serverUrl, String username, String password, String credentialsId, CxScanBuilder.DescriptorImpl descriptor, Item item) throws CxCredentialsException {
 
         CxCredentials ret = new CxCredentials();
         if (useOwnServerCredentials) {
+            validateCxCredentials(serverUrl);
             ret.setServerUrl(serverUrl);
             if (StringUtils.isNotEmpty(credentialsId)) {
 
@@ -120,6 +122,12 @@ public class CxCredentials {
                 ret.setPassword(StringUtils.defaultString(descriptor.getPasswordPlainText()));
                 return ret;
             }
+        }
+    }
+
+    public static void validateCxCredentials(String serverUrl) throws CxCredentialsException {
+        if(StringUtils.isEmpty(serverUrl)){
+            throw new CxCredentialsException("Credentials must be supplied");
         }
     }
 }

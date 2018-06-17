@@ -46,6 +46,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -974,7 +975,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         envVarAction.setCxSastResults(sastResults.getHigh(),
                 sastResults.getMedium(),
                 sastResults.getLow(),
-                sastResults.getInfo());
+                sastResults.getInformation());
         run.addAction(envVarAction);
     }
 
@@ -1371,23 +1372,32 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         public FormValidation doTestConnection(@QueryParameter final String serverUrl, @QueryParameter final String password,
                                                @QueryParameter final String username, @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
-            CxCredentials cred = CxCredentials.resolveCredentials(true, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
+
+            CxCredentials cred = null;
             CxShragaClient shragaClient = null;
             try {
+                cred = CxCredentials.resolveCredentials(true, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
                 shragaClient = new CxShragaClient(cred.getServerUrl(), cred.getUsername(), cred.getPassword(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
             } catch (Exception e) {
-                serverLog.error("Failed to init cx client", e);
-                return FormValidation.error(e.getMessage());
+                return buildError(e, "Failed to init cx client");
             }
 
             try {
                 shragaClient.login();
                 return FormValidation.ok("Success");
 
+            } catch (UnknownHostException e) {
+                return buildError(e, "Failed to login to Chekmarx server");
+
             } catch (Exception e) {
-                serverLog.error("Failed to login to Chekmarx server", e);
-                return FormValidation.error(e.getMessage());
+                return buildError(e, "Failed to login to Chekmarx server");
+
             }
+        }
+
+        private FormValidation buildError(Exception e, String errorLogMessage) {
+            serverLog.error(errorLogMessage, e);
+            return FormValidation.error(e.getMessage());
         }
 
         // Prepares a cx client object to be connected and logged in
