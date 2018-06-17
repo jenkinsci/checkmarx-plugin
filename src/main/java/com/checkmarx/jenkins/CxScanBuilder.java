@@ -728,12 +728,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         //cx server
         CxCredentials cxCredentials = CxCredentials.resolveCredentials(this, descriptor, run);
-        ret.setUrl(cxCredentials.getServerUrl());
+        ret.setUrl(cxCredentials.getServerUrl().trim());
         ret.setUsername(cxCredentials.getUsername());
         ret.setPassword(cxCredentials.getPassword());
 
         //project
-        ret.setProjectName(env.expand(projectName));
+        ret.setProjectName(env.expand(projectName.trim()));
         ret.setTeamPath(teamPath);
         ret.setTeamId(groupId);
 
