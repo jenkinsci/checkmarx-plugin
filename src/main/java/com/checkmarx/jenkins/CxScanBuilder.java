@@ -685,34 +685,36 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         //in case of async mode, do not create reports (only the report of the latest scan)
         //and don't assert threshold vulnerabilities
-        if (!config.getSynchronous()) {
+        if (config.getSynchronous()) {
             boolean fail = failTheBuild(run, config, scanResults);
             if (!fail) {
                 String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
                 cxScanResult.setHtmlReportName(reportName);
                 run.addAction(cxScanResult);
             }
+
+            //create sast reports
+            SASTResults sastResults = scanResults.getSastResults();
+            if (sastResults.isSastResultsReady()) {
+                createSastReports(sastResults, checkmarxBuildDir);
+                addEnvVarAction(run, sastResults);
+                cxScanResult.setSastResults(sastResults);
+            }
+
+            //create osa reports
+            OSAResults osaResults = scanResults.getOsaResults();
+            if (osaResults.isOsaResultsReady()) {
+                createOsaReports(scanResults.getOsaResults(), checkmarxBuildDir);
+            }
+
+            //generate html report
+            String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
+            cxScanResult.setHtmlReportName(reportName);
+            run.addAction(cxScanResult);
             return;
         }
 
-        //create sast reports
-        SASTResults sastResults = scanResults.getSastResults();
-        if (sastResults.isSastResultsReady()) {
-            createSastReports(sastResults, checkmarxBuildDir);
-            addEnvVarAction(run, sastResults);
-            cxScanResult.setSastResults(sastResults);
-        }
 
-        //create osa reports
-        OSAResults osaResults = scanResults.getOsaResults();
-        if (osaResults.isOsaResultsReady()) {
-            createOsaReports(scanResults.getOsaResults(), checkmarxBuildDir);
-        }
-
-        //generate html report
-        String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
-        cxScanResult.setHtmlReportName(reportName);
-        run.addAction(cxScanResult);
 
         //check if scans created and run successfully, assert vulnerabilities, fails the build with configured result status, and prints the failure reason
         failTheBuild(run, config, scanResults);
@@ -797,7 +799,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             boolean useGlobalThreshold = shouldUseGlobalThreshold();
             boolean useJobThreshold = shouldUseJobThreshold();
-            ret.setSastThresholdsEnabled(useGlobalThreshold || useJobThreshold);
+            ret.setOsaThresholdsEnabled(useGlobalThreshold || useJobThreshold);
 
             if (useGlobalThreshold) {
                 ret.setOsaHighThreshold(descriptor.getOsaHighThresholdEnforcement());
@@ -922,6 +924,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         StringBuilder thresholdsFailDescription = new StringBuilder();
         boolean thresholdExceeded = false;
         boolean sastNewResultsExceeded = false;
+
 
         if (config.getSynchronous()) {
             thresholdExceeded = ShragaUtils.isThresholdExceeded(config, scanResults.getSastResults(), scanResults.getOsaResults(), thresholdsFailDescription);
