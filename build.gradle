@@ -2,6 +2,7 @@ buildscript {
 	repositories {
 		jcenter()
 		maven { url 'http://repo.jenkins-ci.org/releases/' }
+		maven { url 'http://cx-artifactory:8081/artifactory/libs-release/' }
 	}
 	dependencies {
 		classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.18.1',
@@ -21,6 +22,8 @@ apply plugin: 'provided-base'
 repositories {
 	jcenter()
 	maven { url 'http://repo.jenkins-ci.org/releases/' }
+	maven { url 'http://cx-artifactory:8081/artifactory/libs-release/' }
+	maven { url 'http://cx-artifactory:8081/artifactory/libs-snapshot' }
 }
 
 test {
