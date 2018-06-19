@@ -688,6 +688,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         if (config.getSynchronous()) {
             boolean fail = failTheBuild(run, config, scanResults);
             if (!fail) {
+                //generate html report
                 String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
                 cxScanResult.setHtmlReportName(reportName);
                 run.addAction(cxScanResult);
@@ -706,11 +707,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             if (osaResults.isOsaResultsReady()) {
                 createOsaReports(scanResults.getOsaResults(), checkmarxBuildDir);
             }
-
-            //generate html report
-            String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
-            cxScanResult.setHtmlReportName(reportName);
-            run.addAction(cxScanResult);
             return;
         }
 
@@ -999,6 +995,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         try {
             String remoteFilePath = remoteDirPath + "/" + file.getName();
+            log.info("Copying file [" + file.getName() + "] to workspace [" + remoteFilePath + "]");
             FilePath remoteFile = new FilePath(workspace.getChannel(), remoteFilePath);
             fis = new FileInputStream(file);
             remoteFile.copyFrom(fis);
