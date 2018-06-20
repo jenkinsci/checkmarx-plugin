@@ -65,6 +65,7 @@ import java.util.regex.Pattern;
 public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
 
+    public static final String SCAN_REPORT_XML = "ScanReport.xml";
     //////////////////////////////////////////////////////////////////////////////////////
     // Persistent plugin configuration parameters
     //////////////////////////////////////////////////////////////////////////////////////
@@ -697,7 +698,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             //create sast reports
             SASTResults sastResults = scanResults.getSastResults();
             if (sastResults.isSastResultsReady()) {
-                createSastReports(sastResults, checkmarxBuildDir);
+                createSastReports(sastResults, checkmarxBuildDir,workspace);
                 addEnvVarAction(run, sastResults);
                 cxScanResult.setSastResults(sastResults);
             }
@@ -857,10 +858,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("------------------------------------------------------------------------------------------");
     }
 
-    private void createSastReports(SASTResults sastResults, File checkmarxBuildDir) {
-        File xmlReportFile = new File(checkmarxBuildDir, "ScanReport.xml");
+    private void createSastReports(SASTResults sastResults, File checkmarxBuildDir,@Nonnull FilePath workspace) {
+        File xmlReportFile = new File(checkmarxBuildDir, SCAN_REPORT_XML);
         try {
             FileUtils.writeByteArrayToFile(xmlReportFile, sastResults.getRawXMLReport());
+            writeFileToWorkspaceReports(workspace, xmlReportFile);
         } catch (IOException e) {
             log.warn("Failed to write SAST XML report to workspace: " + e.getMessage());
         }
@@ -1377,6 +1379,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             CxShragaClient shragaClient = null;
             try {
                 cred = CxCredentials.resolveCredentials(true, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
+                CxCredentials.validateCxCredentials(cred);
                 shragaClient = new CxShragaClient(cred.getServerUrl(), cred.getUsername(), cred.getPassword(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
             } catch (Exception e) {
                 return buildError(e, "Failed to init cx client");
