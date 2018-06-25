@@ -688,12 +688,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //and don't assert threshold vulnerabilities
         if (config.getSynchronous()) {
             boolean fail = failTheBuild(run, config, scanResults);
-            if (!fail) {
-                //generate html report
-                String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
-                cxScanResult.setHtmlReportName(reportName);
-                run.addAction(cxScanResult);
-            }
+
+            //generate html report
+            String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
+            cxScanResult.setHtmlReportName(reportName);
+            run.addAction(cxScanResult);
+
 
             //create sast reports
             SASTResults sastResults = scanResults.getSastResults();
@@ -714,7 +714,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
 
         //check if scans created and run successfully, assert vulnerabilities, fails the build with configured result status, and prints the failure reason
-        failTheBuild(run, config, scanResults);
+        //failTheBuild(run, config, scanResults);
     }
 
     private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) throws IOException, InterruptedException {
