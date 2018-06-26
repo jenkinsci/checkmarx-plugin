@@ -960,7 +960,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 for (String s : lines) {
                     log.error(s);
                 }
-                run.setResult(resolvedVulnerabilityThresholdResult);
+                if(resolvedVulnerabilityThresholdResult != null) {
+                    run.setResult(resolvedVulnerabilityThresholdResult);
+                }
             }
         }
 
