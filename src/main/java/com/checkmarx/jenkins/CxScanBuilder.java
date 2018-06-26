@@ -710,6 +710,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
             return;
         }
+        //Asynchronous scan - add note message and previous build reports
+        String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
+        cxScanResult.setHtmlReportName(reportName);
+        run.addAction(cxScanResult);
 
     }
 
