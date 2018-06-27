@@ -1,0 +1,17 @@
+com.cx.restclient.osa.dto.OSAResults
+com.cx.restclient.osa.dto.OSAScanStatus
+com.cx.restclient.dto.BaseStatus
+com.cx.restclient.osa.dto.OSAScanState
+com.cx.restclient.osa.dto.OSASummaryResults
+com.cx.restclient.sast.dto.SASTResults
+com.cx.restclient.osa.dto.CVEReportTableRow
+com.cx.restclient.osa.dto.Library
+com.cx.restclient.osa.dto.CVE
+com.cx.restclient.osa.dto.Severity
+com.cx.restclient.osa.dto.State
+com.cx.restclient.sast.dto.CxXMLResults$Query
+com.cx.restclient.sast.dto.CxXMLResults$Query$Result
+com.cx.restclient.sast.dto.CxXMLResults$Query$Result$Path
+com.cx.restclient.sast.dto.CxXMLResults$Query$Result$Path$PathNode
+com.cx.restclient.sast.dto.CxXMLResults$Query$Result$Path$PathNode$Snippet
+com.cx.restclient.sast.dto.CxXMLResults$Query$Result$Path$PathNode$Snippet$Line
