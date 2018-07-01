@@ -66,6 +66,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
 
     public static final String SCAN_REPORT_XML = "ScanReport.xml";
+    public static final String OSA_SUMMERY_JSON = "OSASummery.json";
+    public static final String OSA_LIBRARIES_JSON = "OSALibraries.json";
+    public static final String OSA_VULNERABILITIES_JSON = "OSAVulnerabilities.json";
     //////////////////////////////////////////////////////////////////////////////////////
     // Persistent plugin configuration parameters
     //////////////////////////////////////////////////////////////////////////////////////
@@ -878,9 +881,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     private void createOsaReports(OSAResults osaResults, File checkmarxBuildDir) {
-        writeJsonObjectToFile(osaResults.getResults(), new File(checkmarxBuildDir, "OSASummery.json"), "OSA summery json report");
-        writeJsonObjectToFile(osaResults.getOsaLibraries(), new File(checkmarxBuildDir, "OSALibraries.json"), "OSA libraries json report");
-        writeJsonObjectToFile(osaResults.getOsaVulnerabilities(), new File(checkmarxBuildDir, "OSASummery.json"), "OSA vulnerabilities json report");
+        writeJsonObjectToFile(osaResults.getResults(), new File(checkmarxBuildDir, OSA_SUMMERY_JSON), "OSA summery json report");
+        writeJsonObjectToFile(osaResults.getOsaLibraries(), new File(checkmarxBuildDir, OSA_LIBRARIES_JSON), "OSA libraries json report");
+        writeJsonObjectToFile(osaResults.getOsaVulnerabilities(), new File(checkmarxBuildDir, OSA_VULNERABILITIES_JSON), "OSA vulnerabilities json report");
     }
 
     private String generateHTMLReport(@Nonnull FilePath workspace, File checkmarxBuildDir, CxScanConfig config, ScanResults results) {
@@ -904,7 +907,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             String json = null;
             json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObj);
             FileUtils.writeStringToFile(to, json);
-            log.info(description + " file generated successfully. location: [" + to.getAbsolutePath() + "]");
+            //log.info(description + " file generated successfully. location: [" + to.getAbsolutePath() + "]");
+            log.info("Copying file [" + to.getName() + "] to workspace [" + to.getAbsolutePath() + "]");
         } catch (Exception e) {
             log.error("Failed to write " + description + " to [" + to.getAbsolutePath() + "]");
 
