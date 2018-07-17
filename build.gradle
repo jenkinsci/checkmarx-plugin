@@ -41,7 +41,7 @@ dependencies {
 	provided 'com.intellij:annotations:12.0',
 			 'org.slf4j:slf4j-api:1.6.1'
 
-	compile	'com.checkmarx.client:checkmarx-client:8.80.0-20180620.095732-30'
+	compile	'com.checkmarx.client:checkmarx-client:8.80.0-20180717.065934-31'
 
 
 	optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.3@jar',
