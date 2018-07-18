@@ -49,7 +49,7 @@ dependencies {
 			'org.apache.httpcomponents:httpmime:4.4.1',
 			'com.google.guava:guava:21.0'
 
-	compile('org.whitesource:whitesource-fs-agent:18.3.1') {
+	compile('org.whitesource:whitesource-fs-agent:18.3.1.1') {
 		exclude group:'guru.nidi', module: 'graphviz-java'
 		exclude group:'javax.xml.bind', module: 'jaxb-api'
 		exclude group:'ch.qos.logback', module: 'logback-classic'

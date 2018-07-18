@@ -123,7 +123,7 @@
             <f:entry title="Archive extract patterns" field="osaArchiveIncludePatterns">
                 <f:textbox default="${descriptor.DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS}"/>
             </f:entry>
-            <f:optionalBlock title="Execute  NPM and Bower install packages command before Scan" inline="true" field="osaInstallBeforeScan" />
+            <f:optionalBlock title="Execute NPM install packages command before Scan" inline="true" field="osaInstallBeforeScan" />
         </f:optionalBlock>
       </f:section>
 

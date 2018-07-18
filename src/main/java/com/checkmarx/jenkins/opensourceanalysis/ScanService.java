@@ -145,7 +145,8 @@ public class ScanService {
 
         if(runInstallBeforeScan) {
             ret.put("npm.runPreStep", "true");
-            ret.put("bower.runPreStep", "true");
+            ret.put("bower.runPreStep", "false");
+            ret.put("npm.ignoreScripts", "true");
         }
 
         return ret;
