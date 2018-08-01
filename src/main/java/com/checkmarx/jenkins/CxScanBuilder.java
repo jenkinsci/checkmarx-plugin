@@ -9,6 +9,7 @@ import com.cx.restclient.CxShragaClient;
 import com.cx.restclient.common.ShragaUtils;
 import com.cx.restclient.common.summary.SummaryUtils;
 import com.cx.restclient.configuration.CxScanConfig;
+import com.cx.restclient.dto.ScanResults;
 import com.cx.restclient.dto.Team;
 import com.cx.restclient.exception.CxClientException;
 import com.cx.restclient.exception.CxTokenExpiredException;
@@ -118,6 +119,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private boolean failBuildOnNewResults;
     private String failBuildOnNewSeverity;
     private boolean generatePdfReport;
+    private boolean enableProjectPolicyEnforcement;
     private boolean osaEnabled;
     @Nullable
     private Integer osaHighThreshold;
@@ -188,6 +190,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             @Nullable Integer osaMediumThreshold,
             @Nullable Integer osaLowThreshold,
             boolean generatePdfReport,
+            boolean enableProjectPolicyEnforcement,
             String thresholdSettings,
             String vulnerabilityThresholdResult,
             @Nullable String includeOpenSourceFolders,
@@ -231,6 +234,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.osaMediumThreshold = osaMediumThreshold;
         this.osaLowThreshold = osaLowThreshold;
         this.generatePdfReport = generatePdfReport;
+        this.enableProjectPolicyEnforcement = enableProjectPolicyEnforcement;
         this.includeOpenSourceFolders = includeOpenSourceFolders;
         this.excludeOpenSourceFolders = excludeOpenSourceFolders;
         this.osaArchiveIncludePatterns = osaArchiveIncludePatterns;
@@ -477,6 +481,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return generatePdfReport;
     }
 
+    public boolean isEnableProjectPolicyEnforcement() {
+        return enableProjectPolicyEnforcement;
+    }
+
     public boolean isAvoidDuplicateProjectScans() {
         return avoidDuplicateProjectScans;
     }
@@ -612,6 +620,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setGeneratePdfReport(boolean generatePdfReport) {
         this.generatePdfReport = generatePdfReport;
+    }
+
+    @DataBoundSetter
+    public void setEnableProjectPolicyEnforcement(boolean enableProjectPolicyEnforcement) {
+        this.enableProjectPolicyEnforcement = enableProjectPolicyEnforcement;
     }
 
     @DataBoundSetter
@@ -796,6 +809,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             ret.setOsaFilterPattern(env.expand(includeOpenSourceFolders));
             ret.setOsaArchiveIncludePatterns(osaArchiveIncludePatterns);
             ret.setOsaRunInstall(osaInstallBeforeScan);
+            ret.setEnablePolicyViolations(enableProjectPolicyEnforcement);
 
             boolean useGlobalThreshold = shouldUseGlobalThreshold();
             boolean useJobThreshold = shouldUseJobThreshold();
@@ -923,18 +937,20 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         Exception osaWaitException = scanResults.getOsaWaitException();
 
         //assert vulnerabilities
-        StringBuilder thresholdsFailDescription = new StringBuilder();
+        StringBuilder failDescription = new StringBuilder();
         boolean thresholdExceeded = false;
         boolean sastNewResultsExceeded = false;
+        boolean isPolicyViolated = false;
 
 
         if (config.getSynchronous()) {
-            thresholdExceeded = ShragaUtils.isThresholdExceeded(config, scanResults.getSastResults(), scanResults.getOsaResults(), thresholdsFailDescription);
-            sastNewResultsExceeded = ShragaUtils.isThresholdForNewResultExceeded(config, scanResults.getSastResults(), thresholdsFailDescription);
+            thresholdExceeded = ShragaUtils.isThresholdExceeded(config, scanResults.getSastResults(), scanResults.getOsaResults(),  failDescription);
+            sastNewResultsExceeded = ShragaUtils.isThresholdForNewResultExceeded(config, scanResults.getSastResults(),  failDescription);
+            isPolicyViolated = ShragaUtils.isPolicyViolated(config,scanResults.getOsaResults(), failDescription);
         }
 
         boolean fail = sastCreateException != null || sastWaitException != null || osaCreateException != null || osaWaitException != null;
-        fail = fail || thresholdExceeded || sastNewResultsExceeded;
+        fail = fail || thresholdExceeded || sastNewResultsExceeded || isPolicyViolated;
 
         if (fail) {
 
@@ -963,8 +979,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 log.error("Failed to get OSA scan results: " + osaWaitException);
             }
 
-            if (thresholdExceeded || sastNewResultsExceeded) {
-                String[] lines = thresholdsFailDescription.toString().split("\\n");
+            if ( failDescription.length() > 0) {
+                String[] lines =  failDescription.toString().split("\\n");
                 for (String s : lines) {
                     log.error(s);
                 }
