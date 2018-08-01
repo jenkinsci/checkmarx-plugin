@@ -864,7 +864,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             log.info("OSA folder exclusions: " + config.getOsaFolderExclusions());
             log.info("OSA filter patterns: " + config.getOsaFilterPattern());
             log.info("OSA archive includes: " + config.getOsaArchiveIncludePatterns());
-            log.info("OSA run npm install before scan: " + config.getOsaRunInstall());
+            log.info("OSA run Execute dependency managers install packages command before Scan: " + config.getOsaRunInstall());
             log.info("OSA thresholds enabled: " + config.getOsaThresholdsEnabled());
             if (config.getOsaThresholdsEnabled()) {
                 log.info("OSA high threshold: " + config.getOsaHighThreshold());
