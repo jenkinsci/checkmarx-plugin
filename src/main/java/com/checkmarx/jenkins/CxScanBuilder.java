@@ -118,7 +118,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private boolean failBuildOnNewResults;
     private String failBuildOnNewSeverity;
     private boolean generatePdfReport;
-    private boolean enableProjectPolicyEnforcement;
     private boolean osaEnabled;
     @Nullable
     private Integer osaHighThreshold;
@@ -189,7 +188,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             @Nullable Integer osaMediumThreshold,
             @Nullable Integer osaLowThreshold,
             boolean generatePdfReport,
-            boolean enableProjectPolicyEnforcement,
             String thresholdSettings,
             String vulnerabilityThresholdResult,
             @Nullable String includeOpenSourceFolders,
@@ -233,7 +231,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.osaMediumThreshold = osaMediumThreshold;
         this.osaLowThreshold = osaLowThreshold;
         this.generatePdfReport = generatePdfReport;
-        this.enableProjectPolicyEnforcement = enableProjectPolicyEnforcement;
         this.includeOpenSourceFolders = includeOpenSourceFolders;
         this.excludeOpenSourceFolders = excludeOpenSourceFolders;
         this.osaArchiveIncludePatterns = osaArchiveIncludePatterns;
@@ -480,10 +477,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return generatePdfReport;
     }
 
-    public boolean isEnableProjectPolicyEnforcement() {
-        return enableProjectPolicyEnforcement;
-    }
-
     public boolean isAvoidDuplicateProjectScans() {
         return avoidDuplicateProjectScans;
     }
@@ -619,11 +612,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setGeneratePdfReport(boolean generatePdfReport) {
         this.generatePdfReport = generatePdfReport;
-    }
-
-    @DataBoundSetter
-    public void setEnableProjectPolicyEnforcement(boolean enableProjectPolicyEnforcement) {
-        this.enableProjectPolicyEnforcement = enableProjectPolicyEnforcement;
     }
 
     @DataBoundSetter
@@ -808,7 +796,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             ret.setOsaFilterPattern(env.expand(includeOpenSourceFolders));
             ret.setOsaArchiveIncludePatterns(osaArchiveIncludePatterns);
             ret.setOsaRunInstall(osaInstallBeforeScan);
-            ret.setEnableProjectPolicyEnforcement(enableProjectPolicyEnforcement);
 
             boolean useGlobalThreshold = shouldUseGlobalThreshold();
             boolean useJobThreshold = shouldUseJobThreshold();
@@ -939,13 +926,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         StringBuilder thresholdsFailDescription = new StringBuilder();
         boolean thresholdExceeded = false;
         boolean sastNewResultsExceeded = false;
-        boolean isPolicyViolated = false;
 
 
         if (config.getSynchronous()) {
             thresholdExceeded = ShragaUtils.isThresholdExceeded(config, scanResults.getSastResults(), scanResults.getOsaResults(), thresholdsFailDescription);
             sastNewResultsExceeded = ShragaUtils.isThresholdForNewResultExceeded(config, scanResults.getSastResults(), thresholdsFailDescription);
-            isPolicyViolated = ShragaUtils.isPolicyViolated(config,scanResults.getOsaResults(),thresholdsFailDescription);
         }
 
         boolean fail = sastCreateException != null || sastWaitException != null || osaCreateException != null || osaWaitException != null;
