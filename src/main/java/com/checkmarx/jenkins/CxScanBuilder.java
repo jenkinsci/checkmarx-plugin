@@ -779,7 +779,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 resolvedVulnerabilityThresholdResult = Result.fromString(descriptor.getJobGlobalStatusOnThresholdViolation().name());
             }
 
-            if (useJobThreshold) {
+            else if (useJobThreshold) {
                 ret.setSastHighThreshold(getHighThreshold());
                 ret.setSastMediumThreshold(getMediumThreshold());
                 ret.setSastLowThreshold(getLowThreshold());
@@ -805,12 +805,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 ret.setOsaHighThreshold(descriptor.getOsaHighThresholdEnforcement());
                 ret.setOsaMediumThreshold(descriptor.getOsaMediumThresholdEnforcement());
                 ret.setOsaLowThreshold(descriptor.getOsaLowThresholdEnforcement());
-            }
-
-            if (useJobThreshold) {
-                ret.setOsaHighThreshold(getOsaHighThreshold());
-                ret.setOsaMediumThreshold(getOsaMediumThreshold());
-                ret.setOsaLowThreshold(getOsaLowThreshold());
+            } else {
+                if (useJobThreshold) {
+                    ret.setOsaHighThreshold(getOsaHighThreshold());
+                    ret.setOsaMediumThreshold(getOsaMediumThreshold());
+                    ret.setOsaLowThreshold(getOsaLowThreshold());
+                }
             }
         }
 
@@ -938,9 +938,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         if (fail) {
 
-            run.setResult(Result.FAILURE);
             if (useUnstableOnError(getDescriptor())) {
                 run.setResult(Result.UNSTABLE);
+            }else {
+                run.setResult(Result.FAILURE);
             }
 
             log.error("********************************************");
