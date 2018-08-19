@@ -6,6 +6,7 @@ import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.cx.restclient.CxShragaClient;
+import com.cx.restclient.common.CxGlobalMessage;
 import com.cx.restclient.common.ShragaUtils;
 import com.cx.restclient.common.summary.SummaryUtils;
 import com.cx.restclient.configuration.CxScanConfig;
@@ -842,6 +843,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("is synchronous mode: " + config.getSynchronous());
         log.info("deny project creation: " + config.getDenyProject());
         log.info("SAST scan enabled: " + config.getSastEnabled());
+        log.info("Enable Project Policy Enforcement: " + config.getEnablePolicyViolations());
         if (config.getSastEnabled()) {
             log.info("preset id: " + config.getPresetId());
             log.info("SAST folder exclusions: " + config.getSastFolderExclusions());
@@ -946,7 +948,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         if (config.getSynchronous()) {
             thresholdExceeded = ShragaUtils.isThresholdExceeded(config, scanResults.getSastResults(), scanResults.getOsaResults(),  failDescription);
             sastNewResultsExceeded = ShragaUtils.isThresholdForNewResultExceeded(config, scanResults.getSastResults(),  failDescription);
-            isPolicyViolated = ShragaUtils.isPolicyViolated(config,scanResults.getOsaResults(), failDescription);
+            isPolicyViolated = isPolicyViolated(config,scanResults.getOsaResults(), failDescription);
         }
 
         boolean fail = sastCreateException != null || sastWaitException != null || osaCreateException != null || osaWaitException != null;
@@ -992,6 +994,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         return fail;
+    }
+
+    public boolean isPolicyViolated(CxScanConfig config, OSAResults osaResults, StringBuilder failDescription) {
+        boolean isPolicyViolated = config.getEnablePolicyViolations() && osaResults.getOsaViolations().size() > 0;
+        if(isPolicyViolated) {
+            failDescription.append(CxGlobalMessage.PROJECT_POLICY_VIOLATED_STATUS.getMessage()).append("\n");
+        }
+        return isPolicyViolated;
     }
 
     private void addEnvVarAction(Run<?, ?> run, SASTResults sastResults) {

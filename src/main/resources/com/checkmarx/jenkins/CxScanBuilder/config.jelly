@@ -177,6 +177,9 @@
                     </f:entry>
 
                     <f:optionalBlock title="Generate CxSAST PDF report" inline="true" field="generatePdfReport" />
+
+                    <!-- -= enableProjectPolicyEnforcement =- -->
+                    <f:optionalBlock title="Enable project's OSA policy enforcement" inline="true" field="enableProjectPolicyEnforcement" />
                 </j:when>
 
                 <!-- ** use specific configuration setting ** -->
@@ -191,6 +194,9 @@
 
                         <!-- -= Generate PDF report =- -->
                         <f:optionalBlock title="Generate CxSAST PDF report" inline="true" field="generatePdfReport" />
+
+                        <!-- -= enableProjectPolicyEnforcement =- -->
+                        <f:optionalBlock title="Enable project's OSA policy enforcement" inline="true" field="enableProjectPolicyEnforcement" />
 
                        <!-- ** Enable CxSAST vulnerability threshold ** -->
                         <f:optionalBlock title="Enable vulnerability threshold" inline="true"
@@ -296,8 +302,7 @@
                             </j:choose>
 
                         </f:optionalBlock>
-                         <!-- -= enableProjectPolicyEnforcement =- -->
-                         <f:optionalBlock title="Enable project's policy enforcement" inline="true" field="enableProjectPolicyEnforcement" />
+
 
                     </f:optionalBlock>
                 </j:otherwise>
