@@ -896,6 +896,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             writeFileToWorkspaceReports(workspace, reportFile);
         } catch (IOException | TemplateException e) {
             log.warn("Failed to generate HTML report: " + e.getMessage());
+            log.warn("Failed to generate HTML report: " + e.getMessage());
         }
         return reportName;
 
