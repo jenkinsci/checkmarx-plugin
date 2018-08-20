@@ -1145,7 +1145,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private JobGlobalStatusOnError jobGlobalStatusOnError;
         private JobGlobalStatusOnError jobGlobalStatusOnThresholdViolation = JobGlobalStatusOnError.FAILURE;
         private boolean scanTimeOutEnabled;
-        private double scanTimeoutDuration; // In Hours.
+        private Integer scanTimeoutDuration; // In minutes.
         private boolean lockVulnerabilitySettings = true;
 
         private final transient Pattern msGuid = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
@@ -1318,18 +1318,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             this.scanTimeOutEnabled = scanTimeOutEnabled;
         }
 
-        public int getScanTimeoutDuration() {
-            if (!timeoutValid(scanTimeoutDuration)) {
-                scanTimeoutDuration = 1;
-            }
-
-            return (int) Math.round(scanTimeoutDuration * 60);
+        @Nullable
+        public Integer getScanTimeoutDuration() {
+            return scanTimeoutDuration;
         }
 
-        public void setScanTimeoutDuration(int scanTimeoutDurationInMinutes) {
-            if (timeoutValid(scanTimeoutDurationInMinutes)) {
-                this.scanTimeoutDuration = scanTimeoutDurationInMinutes / (double) 60;
-            }
+        public void setScanTimeoutDuration(@Nullable Integer scanTimeoutDurationInMinutes) {
+            this.scanTimeoutDuration = scanTimeoutDurationInMinutes;
+        }
+
+        public FormValidation doCheckScanTimeoutDuration(@QueryParameter final Integer value) {
+            return timeoutValid(value);
         }
 
         @Override
@@ -1370,8 +1369,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 	     *  shared state to avoid synchronization issues.
 	     */
 
-        private boolean timeoutValid(double timeInput) {
-            return timeInput >= MINIMUM_TIMEOUT_IN_MINUTES;
+        private FormValidation timeoutValid(final Integer value) {
+            if (value == null || value >= MINIMUM_TIMEOUT_IN_MINUTES) {
+                return FormValidation.ok();
+            } else {
+                return FormValidation.error("Number must be greater than or equal to " + MINIMUM_TIMEOUT_IN_MINUTES);
+            }
         }
 
         /*
