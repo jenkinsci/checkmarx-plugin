@@ -768,6 +768,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             int configurationId = parseInt(sourceEncoding, log, "Invalid source encoding (configuration) value: [%s]. Using default configuration.", 1);
             ret.setEngineConfigurationId(configurationId);
 
+            ret.setAvoidDuplicateProjectScans(avoidDuplicateProjectScans);
+
             boolean useGlobalThreshold = shouldUseGlobalThreshold();
             boolean useJobThreshold = shouldUseJobThreshold();
             ret.setSastThresholdsEnabled(useGlobalThreshold || useJobThreshold);
