@@ -55,6 +55,7 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
                 shraga.createSASTScan();
                 sastCreated = true;
             } catch (IOException | CxClientException e) {
+                log.warn("Failed to create SAST scan: " +e.getMessage());
                 ret.setSastCreateException(e);
             }
         }
@@ -72,6 +73,7 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
                 shraga.createOSAScan();
                 osaCreated = true;
             } catch (CxClientException | IOException e) {
+                log.error("Failed to create OSA scan: " + e.getMessage());
                 ret.setOsaCreateException(e);
             } finally {
                 handler.flush();
@@ -90,6 +92,7 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
                 throw e;
 
             } catch (CxClientException | IOException e) {
+                log.error("Failed to get SAST scan results: " + e.getMessage());
                 ret.setSastWaitException(e);
             }
         }
@@ -99,6 +102,7 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
                 OSAResults osaResults = config.getSynchronous() ? shraga.waitForOSAResults() : shraga.getLatestOSAResults();
                 ret.setOsaResults(osaResults);
             } catch (CxClientException | IOException e) {
+                log.error("Failed to get OSA scan results: " + e.getMessage());
                 ret.setOsaWaitException(e);
             }
         }
