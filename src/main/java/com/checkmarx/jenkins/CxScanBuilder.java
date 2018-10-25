@@ -830,6 +830,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("is synchronous mode: " + config.getSynchronous());
         log.info("deny project creation: " + config.getDenyProject());
         log.info("SAST scan enabled: " + config.getSastEnabled());
+        log.info("Avoid duplicated project scans: " + config.isAvoidDuplicateProjectScans());
         if (config.getSastEnabled()) {
             log.info("preset id: " + config.getPresetId());
             log.info("SAST folder exclusions: " + config.getSastFolderExclusions());
