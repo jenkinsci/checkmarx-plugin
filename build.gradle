@@ -1,6 +1,7 @@
 buildscript {
 	repositories {
 		jcenter()
+		mavenCentral()
 		maven { url 'http://repo.jenkins-ci.org/releases/' }
 	}
 	dependencies {
@@ -20,8 +21,7 @@ apply plugin: 'provided-base'
 
 repositories {
 	jcenter()
-	maven { url 'http://repo.jenkins-ci.org/releases/' }
-	maven { url 'http://cx-artifactory:8081/artifactory/plugins-release-local/' }
+	mavenCentral()
 }
 
 test {
