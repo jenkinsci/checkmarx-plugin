@@ -6,7 +6,6 @@ import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.cx.restclient.CxShragaClient;
-import com.cx.restclient.common.CxGlobalMessage;
 import com.cx.restclient.common.ShragaUtils;
 import com.cx.restclient.common.summary.SummaryUtils;
 import com.cx.restclient.configuration.CxScanConfig;
@@ -716,7 +715,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             //create sast reports
             SASTResults sastResults = scanResults.getSastResults();
             if (sastResults.isSastResultsReady()) {
-                createSastReports(sastResults, checkmarxBuildDir,workspace);
+                createSastReports(sastResults, checkmarxBuildDir, workspace);
                 addEnvVarAction(run, sastResults);
                 cxScanResult.setSastResults(sastResults);
             }
@@ -792,9 +791,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 ret.setSastMediumThreshold(descriptor.getMediumThresholdEnforcement());
                 ret.setSastLowThreshold(descriptor.getLowThresholdEnforcement());
                 resolvedVulnerabilityThresholdResult = Result.fromString(descriptor.getJobGlobalStatusOnThresholdViolation().name());
-            }
-
-            else if (useJobThreshold) {
+            } else if (useJobThreshold) {
                 ret.setSastHighThreshold(getHighThreshold());
                 ret.setSastMediumThreshold(getMediumThreshold());
                 ret.setSastLowThreshold(getLowThreshold());
@@ -821,9 +818,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 ret.setOsaHighThreshold(descriptor.getOsaHighThresholdEnforcement());
                 ret.setOsaMediumThreshold(descriptor.getOsaMediumThresholdEnforcement());
                 ret.setOsaLowThreshold(descriptor.getOsaLowThresholdEnforcement());
-            }
-
-            else if (useJobThreshold) {
+            } else if (useJobThreshold) {
                 ret.setOsaHighThreshold(getOsaHighThreshold());
                 ret.setOsaMediumThreshold(getOsaMediumThreshold());
                 ret.setOsaLowThreshold(getOsaLowThreshold());
@@ -878,7 +873,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("------------------------------------------------------------------------------------------");
     }
 
-    private void createSastReports(SASTResults sastResults, File checkmarxBuildDir,@Nonnull FilePath workspace) {
+    private void createSastReports(SASTResults sastResults, File checkmarxBuildDir, @Nonnull FilePath workspace) {
         File xmlReportFile = new File(checkmarxBuildDir, SCAN_REPORT_XML);
         try {
             FileUtils.writeByteArrayToFile(xmlReportFile, sastResults.getRawXMLReport());
@@ -932,78 +927,57 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
     }
 
-    private boolean failTheBuild(Run<?, ?> run, CxScanConfig config, ScanResults scanResults) {
-
-        Exception sastCreateException = scanResults.getSastCreateException();
-        Exception sastWaitException = scanResults.getSastWaitException();
-        Exception osaCreateException = scanResults.getOsaCreateException();
-        Exception osaWaitException = scanResults.getOsaWaitException();
-
-        //assert vulnerabilities
-        StringBuilder failDescription = new StringBuilder();
-        boolean thresholdExceeded = false;
-        boolean sastNewResultsExceeded = false;
-        boolean isPolicyViolated = false;
-
-
+    private boolean failTheBuild(Run<?, ?> run, CxScanConfig config, ScanResults ret) {
+        //assert if expected exception is thrown  OR when vulnerabilities under threshold OR when policy violated
+        String buildFailureResult = "";
         if (config.getSynchronous()) {
-            thresholdExceeded = ShragaUtils.isThresholdExceeded(config, scanResults.getSastResults(), scanResults.getOsaResults(),  failDescription);
-            sastNewResultsExceeded = ShragaUtils.isThresholdForNewResultExceeded(config, scanResults.getSastResults(),  failDescription);
-            isPolicyViolated = isPolicyViolated(config,scanResults.getOsaResults(), failDescription);
-        }
-
-        boolean fail = sastCreateException != null || sastWaitException != null || osaCreateException != null || osaWaitException != null;
-        fail = fail || thresholdExceeded || sastNewResultsExceeded || isPolicyViolated;
-
-        if (fail) {
-
-            if (useUnstableOnError(getDescriptor())) {
-                run.setResult(Result.UNSTABLE);
-            }else {
-                run.setResult(Result.FAILURE);
-            }
-
-            log.error("********************************************");
-            log.error(" The Build Failed for the Following Reasons:");
-            log.error("********************************************");
-
-            if (sastCreateException != null) {
-                log.error("Failed to create SAST scan: " + sastCreateException);
-            }
-
-            if (sastWaitException != null) {
-                log.error("Failed to get SAST scan results: " + sastWaitException);
-            }
-
-            if (osaCreateException != null) {
-                log.error("Failed to create OSA scan: " + osaCreateException);
-            }
-
-            if (osaWaitException != null) {
-                log.error("Failed to get OSA scan results: " + osaWaitException);
-            }
-
-            if ( failDescription.length() > 0) {
-                String[] lines =  failDescription.toString().split("\\n");
-                for (String s : lines) {
-                    log.error(s);
-                }
-                if(resolvedVulnerabilityThresholdResult != null) {
+            buildFailureResult = ShragaUtils.getBuildFailureResult(config, ret.getSastResults(), ret.getOsaResults());
+            if (!StringUtils.isEmpty(buildFailureResult) || ret.getSastWaitException() != null || ret.getSastCreateException() != null ||
+                    ret.getOsaCreateException() != null || ret.getOsaWaitException() != null) {
+                printBuildFailure(buildFailureResult, ret, log);
+                if (resolvedVulnerabilityThresholdResult != null) {
                     run.setResult(resolvedVulnerabilityThresholdResult);
                 }
+
+                if (useUnstableOnError(getDescriptor())) {
+                    run.setResult(Result.UNSTABLE);
+                } else {
+                    run.setResult(Result.FAILURE);
+                }
+
+            }
+        }
+        return StringUtils.isEmpty(buildFailureResult);
+    }
+
+
+    private void printBuildFailure(String thDescription, ScanResults ret, CxLoggerAdapter log) {
+        log.error("********************************************");
+        log.error(" The Build Failed for the Following Reasons: ");
+        log.error("********************************************");
+
+        logError(ret.getSastCreateException());
+        logError(ret.getSastWaitException());
+        logError(ret.getOsaCreateException());
+        logError(ret.getOsaWaitException());
+
+        if (thDescription != null) {
+            String[] lines = thDescription.split("\\n");
+            for (String s : lines) {
+                log.error(s);
             }
         }
 
-        return fail;
+        log.error("-----------------------------------------------------------------------------------------\n");
+        log.error("");
     }
 
-    public boolean isPolicyViolated(CxScanConfig config, OSAResults osaResults, StringBuilder failDescription) {
-        boolean isPolicyViolated = config.getEnablePolicyViolations() && osaResults.getOsaViolations().size() > 0;
-        if(isPolicyViolated) {
-            failDescription.append(CxGlobalMessage.PROJECT_POLICY_VIOLATED_STATUS.getMessage()).append("\n");
+    private void logError(Exception ex) {
+        if (ex != null) {
+            log.error(ex.getMessage());
         }
-        return isPolicyViolated;
     }
+
 
     private void addEnvVarAction(Run<?, ?> run, SASTResults sastResults) {
         EnvVarAction envVarAction = new EnvVarAction();
@@ -1344,6 +1318,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         public void setScanTimeOutEnabled(boolean scanTimeOutEnabled) {
             this.scanTimeOutEnabled = scanTimeOutEnabled;
         }
+
         @Nullable
         public Integer getScanTimeoutDuration() {
             return scanTimeoutDuration;
@@ -1624,7 +1599,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
 		/*
-		 * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
+         * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
 		 * avoid synchronization issues.
 		 */
 
@@ -1633,7 +1608,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
 		/*
-		 * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
+         * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
 		 * avoid synchronization issues.
 		 */
 
