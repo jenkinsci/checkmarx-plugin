@@ -770,7 +770,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             ret.setSastFolderExclusions(env.expand(excludeFolders));
             ret.setSastFilterPattern(env.expand(filterPattern));
 
-            if (descriptor.getScanTimeOutEnabled() && descriptor.getScanTimeoutDuration() > 0) {
+            if (descriptor.getScanTimeOutEnabled() &&  descriptor.getScanTimeoutDuration()!=null && descriptor.getScanTimeoutDuration() > 0) {
                 ret.setSastScanTimeoutInMinutes(descriptor.getScanTimeoutDuration());
             }
 
