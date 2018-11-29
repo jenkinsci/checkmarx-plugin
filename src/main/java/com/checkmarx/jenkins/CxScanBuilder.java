@@ -752,7 +752,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setProjectName(env.expand(projectName.trim()));
         ret.setTeamPath(teamPath);
         ret.setTeamId(groupId);
-
+        ret.setJenkinsJob(run.getNumber());
         //scan control
         boolean isaAsync = !isWaitForResultsEnabled() && !(descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings());
         ret.setSynchronous(!isaAsync);
@@ -770,13 +770,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             ret.setSastFolderExclusions(env.expand(excludeFolders));
             ret.setSastFilterPattern(env.expand(filterPattern));
 
-            if (descriptor.getScanTimeOutEnabled() &&  descriptor.getScanTimeoutDuration()!=null && descriptor.getScanTimeoutDuration() > 0) {
+            if (descriptor.getScanTimeOutEnabled() && descriptor.getScanTimeoutDuration() != null && descriptor.getScanTimeoutDuration() > 0) {
                 ret.setSastScanTimeoutInMinutes(descriptor.getScanTimeoutDuration());
             }
 
             ret.setScanComment(env.expand(comment));
             ret.setIncremental(isThisBuildIncremental(run.getNumber()));
-
             ret.setGeneratePDFReport(generatePdfReport);
 
             int configurationId = parseInt(sourceEncoding, log, "Invalid source encoding (configuration) value: [%s]. Using default configuration.", 1);
@@ -808,7 +807,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             ret.setOsaFilterPattern(env.expand(includeOpenSourceFolders));
             ret.setOsaArchiveIncludePatterns(osaArchiveIncludePatterns);
             ret.setOsaRunInstall(osaInstallBeforeScan);
-            ret.setEnablePolicyViolations(enableProjectPolicyEnforcement);
 
             boolean useGlobalThreshold = shouldUseGlobalThreshold();
             boolean useJobThreshold = shouldUseJobThreshold();
@@ -825,6 +823,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
 
+        if (!ret.getSynchronous()){
+            enableProjectPolicyEnforcement = false;
+        }
+        ret.setEnablePolicyViolations(enableProjectPolicyEnforcement);
         return ret;
     }
 
@@ -834,7 +836,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("server url: " + config.getUrl());
         log.info("username: " + config.getUsername());
         log.info("project name: " + config.getProjectName());
-        log.info("team path: " + config.getTeamPath());
         log.info("team id: " + config.getTeamId());
         log.info("is synchronous mode: " + config.getSynchronous());
         log.info("deny project creation: " + config.getDenyProject());
@@ -931,7 +932,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //assert if expected exception is thrown  OR when vulnerabilities under threshold OR when policy violated
         String buildFailureResult = "";
         if (config.getSynchronous()) {
-            buildFailureResult = ShragaUtils.getBuildFailureResult(config, ret.getSastResults(), ret.getOsaResults());
+            buildFailureResult = ShragaUtils.getBuildFailureResult(config,ret.getSastResults(), ret.getOsaResults());
             if (!StringUtils.isEmpty(buildFailureResult) || ret.getSastWaitException() != null || ret.getSastCreateException() != null ||
                     ret.getOsaCreateException() != null || ret.getOsaWaitException() != null) {
                 printBuildFailure(buildFailureResult, ret, log);
@@ -1617,7 +1618,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
 		/*
-		 * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
+         * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
 		 * avoid synchronization issues.
 		 */
 

@@ -108,7 +108,6 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
         }
 
         if (config.getEnablePolicyViolations()) {
-
             shraga.printIsProjectViolated();
         }
 
