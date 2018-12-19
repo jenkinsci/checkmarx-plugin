@@ -1,3 +1,5 @@
+// *** !!!!!!**** In order to updatr this config,
+
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
@@ -13,7 +15,6 @@
         !**/*.hdml, !**/*.hsql, !**/*.ht, !**/*.hta, !**/*.htc, !**/*.htd, !**/*.war, !**/*.ear,
         !**/*.htmls, !**/*.ihtml, !**/*.mht, !**/*.mhtm, !**/*.mhtml, !**/*.ssi, !**/*.stm,
         !**/*.stml, !**/*.ttml, !**/*.txn, !**/*.xhtm, !**/*.xhtml, !**/*.class, !**/*.iml, !Checkmarx/Reports/*.*,
-        !**/node_modules/**
-    </entry>
+        !**/node_modules/**/*</entry>
     <entry key="DefaultOSAArchiveIncludePatterns">*.zip, *.war, *.ear, *.tgz</entry>
 </properties>
