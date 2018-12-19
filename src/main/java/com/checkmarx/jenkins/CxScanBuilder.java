@@ -748,7 +748,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setSastEnabled(this.sastEnabled == null || sastEnabled); //for backward compatibility, assuming if sastEnabled is not set, then sast is enabled
 
         if (ret.getSastEnabled()) {
-            int presetId = parseInt(preset, log, "Invalid presetId: [%s]. Using default preset.", 0);
+            int presetId = parseInt(preset, log, "Invalid presetId: [%s]. Using default preset.", 1);
             ret.setPresetId(presetId);
 
             String excludeFolders = isGlobalExclusions() ? descriptor.getExcludeFolders() : getExcludeFolders();
