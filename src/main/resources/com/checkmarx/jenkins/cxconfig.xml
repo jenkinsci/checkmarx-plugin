@@ -13,6 +13,6 @@
         !**/*.hdml, !**/*.hsql, !**/*.ht, !**/*.hta, !**/*.htc, !**/*.htd, !**/*.war, !**/*.ear,
         !**/*.htmls, !**/*.ihtml, !**/*.mht, !**/*.mhtm, !**/*.mhtml, !**/*.ssi, !**/*.stm,
         !**/*.stml, !**/*.ttml, !**/*.txn, !**/*.xhtm, !**/*.xhtml, !**/*.class, !**/*.iml, !Checkmarx/Reports/*.*,
-        !**/node_modules/**/*</entry>
+        !OSADependencies.json, !**/node_modules/**/*</entry>
     <entry key="DefaultOSAArchiveIncludePatterns">*.zip, *.war, *.ear, *.tgz</entry>
 </properties>
