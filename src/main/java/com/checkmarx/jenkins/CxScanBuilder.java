@@ -203,10 +203,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         // Workaround for compatibility with Conditional BuildStep Plugin
         this.projectName = (projectName == null) ? buildStep : projectName;
         this.projectId = projectId;
-        this.groupId = groupId;
+        this.groupId = (groupId!= null && !groupId.startsWith("Provide Checkmarx"))? groupId: null;;
         this.teamPath = teamPath;
         this.sastEnabled = sastEnabled;
-        this.preset = preset;
+        this.preset = (preset!= null && !preset.startsWith("Provide Checkmarx"))? preset: null;
         this.jobStatusOnError = jobStatusOnError;
         this.presetSpecified = presetSpecified;
         this.exclusionsSetting = exclusionsSetting;
