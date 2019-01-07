@@ -47,6 +47,16 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
         try {
             shraga.init();
         } catch (Exception e) {
+            if (e.getMessage().contains("Server is unavailable")) {
+                try {
+                    shraga.login();
+                } catch (CxClientException e1) {
+                    throw new IOException(e);
+                }
+                log.error("Connection Failed.");
+                log.error("Possible reason: Plugin version incompatible with CxSAST v8.7 or lower.\n" +
+                        "If your CxSAST version is v8.8 or greater, please recheck connection details or contact support.");
+            }
             throw new IOException(e);
         }
 

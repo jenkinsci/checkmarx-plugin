@@ -1409,6 +1409,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             try {
                 shragaClient.login();
+                try{
+                    shragaClient.getTeamList();
+                }catch (Exception e){
+                    return FormValidation.error("Connection Failed.\n" +
+                            "Possible reason: Plugin version incompatible with CxSAST v8.7 or lower.\n" +
+                            "If your CxSAST version is v8.8 or greater, please recheck connection details or contact support.\n");
+                }
+
                 return FormValidation.ok("Success");
 
             } catch (UnknownHostException e) {
