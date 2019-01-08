@@ -208,10 +208,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         // Workaround for compatibility with Conditional BuildStep Plugin
         this.projectName = (projectName == null) ? buildStep : projectName;
         this.projectId = projectId;
-        this.groupId = (groupId!= null && !groupId.startsWith("Provide Checkmarx"))? groupId: null;;
+        this.groupId = (groupId != null && !groupId.startsWith("Provide Checkmarx")) ? groupId : null;
+        ;
         this.teamPath = teamPath;
         this.sastEnabled = sastEnabled;
-        this.preset = (preset!= null && !preset.startsWith("Provide Checkmarx"))? preset: null;
+        this.preset = (preset != null && !preset.startsWith("Provide Checkmarx")) ? preset : null;
         this.jobStatusOnError = jobStatusOnError;
         this.presetSpecified = presetSpecified;
         this.exclusionsSetting = exclusionsSetting;
@@ -716,7 +717,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             //create sast reports
             SASTResults sastResults = scanResults.getSastResults();
             if (sastResults.isSastResultsReady()) {
-                createSastReports(sastResults, checkmarxBuildDir,workspace);
+                createSastReports(sastResults, checkmarxBuildDir, workspace);
                 addEnvVarAction(run, sastResults);
                 cxScanResult.setSastResults(sastResults);
             }
@@ -771,7 +772,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             ret.setSastFolderExclusions(env.expand(excludeFolders));
             ret.setSastFilterPattern(env.expand(filterPattern));
 
-            if (descriptor.getScanTimeOutEnabled() && descriptor.getScanTimeoutDuration()!= null &&  descriptor.getScanTimeoutDuration() > 0) {
+            if (descriptor.getScanTimeOutEnabled() && descriptor.getScanTimeoutDuration() != null && descriptor.getScanTimeoutDuration() > 0) {
                 ret.setSastScanTimeoutInMinutes(descriptor.getScanTimeoutDuration());
             }
 
@@ -792,9 +793,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 ret.setSastMediumThreshold(descriptor.getMediumThresholdEnforcement());
                 ret.setSastLowThreshold(descriptor.getLowThresholdEnforcement());
                 resolvedVulnerabilityThresholdResult = Result.fromString(descriptor.getJobGlobalStatusOnThresholdViolation().name());
-            }
-
-            else if (useJobThreshold) {
+            } else if (useJobThreshold) {
                 ret.setSastHighThreshold(getHighThreshold());
                 ret.setSastMediumThreshold(getMediumThreshold());
                 ret.setSastLowThreshold(getLowThreshold());
@@ -821,9 +820,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 ret.setOsaHighThreshold(descriptor.getOsaHighThresholdEnforcement());
                 ret.setOsaMediumThreshold(descriptor.getOsaMediumThresholdEnforcement());
                 ret.setOsaLowThreshold(descriptor.getOsaLowThresholdEnforcement());
-            }
-
-            else if (useJobThreshold) {
+            } else if (useJobThreshold) {
                 ret.setOsaHighThreshold(getOsaHighThreshold());
                 ret.setOsaMediumThreshold(getOsaMediumThreshold());
                 ret.setOsaLowThreshold(getOsaLowThreshold());
@@ -878,7 +875,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("------------------------------------------------------------------------------------------");
     }
 
-    private void createSastReports(SASTResults sastResults, File checkmarxBuildDir,@Nonnull FilePath workspace) {
+    private void createSastReports(SASTResults sastResults, File checkmarxBuildDir, @Nonnull FilePath workspace) {
         File xmlReportFile = new File(checkmarxBuildDir, SCAN_REPORT_XML);
         try {
             FileUtils.writeByteArrayToFile(xmlReportFile, sastResults.getRawXMLReport());
@@ -947,9 +944,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
 
         if (config.getSynchronous()) {
-            thresholdExceeded = ShragaUtils.isThresholdExceeded(config, scanResults.getSastResults(), scanResults.getOsaResults(),  failDescription);
-            sastNewResultsExceeded = ShragaUtils.isThresholdForNewResultExceeded(config, scanResults.getSastResults(),  failDescription);
-            isPolicyViolated = isPolicyViolated(config,scanResults.getOsaResults(), failDescription);
+            thresholdExceeded = ShragaUtils.isThresholdExceeded(config, scanResults.getSastResults(), scanResults.getOsaResults(), failDescription);
+            sastNewResultsExceeded = ShragaUtils.isThresholdForNewResultExceeded(config, scanResults.getSastResults(), failDescription);
+            isPolicyViolated = isPolicyViolated(config, scanResults.getOsaResults(), failDescription);
         }
 
         boolean fail = sastCreateException != null || sastWaitException != null || osaCreateException != null || osaWaitException != null;
@@ -959,7 +956,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             if (useUnstableOnError(getDescriptor())) {
                 run.setResult(Result.UNSTABLE);
-            }else {
+            } else {
                 run.setResult(Result.FAILURE);
             }
 
@@ -983,12 +980,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 log.error("Failed to get OSA scan results: " + osaWaitException);
             }
 
-            if ( failDescription.length() > 0) {
-                String[] lines =  failDescription.toString().split("\\n");
+            if (failDescription.length() > 0) {
+                String[] lines = failDescription.toString().split("\\n");
                 for (String s : lines) {
                     log.error(s);
                 }
-                if(resolvedVulnerabilityThresholdResult != null) {
+                if (resolvedVulnerabilityThresholdResult != null) {
                     run.setResult(resolvedVulnerabilityThresholdResult);
                 }
             }
@@ -999,7 +996,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     public boolean isPolicyViolated(CxScanConfig config, OSAResults osaResults, StringBuilder failDescription) {
         boolean isPolicyViolated = config.getEnablePolicyViolations() && osaResults.getOsaViolations().size() > 0;
-        if(isPolicyViolated) {
+        if (isPolicyViolated) {
             failDescription.append(CxGlobalMessage.PROJECT_POLICY_VIOLATED_STATUS.getMessage()).append("\n");
         }
         return isPolicyViolated;
@@ -1344,6 +1341,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         public void setScanTimeOutEnabled(boolean scanTimeOutEnabled) {
             this.scanTimeOutEnabled = scanTimeOutEnabled;
         }
+
         @Nullable
         public Integer getScanTimeoutDuration() {
             return scanTimeoutDuration;
@@ -1409,12 +1407,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             try {
                 shragaClient.login();
-                try{
+                try {
                     shragaClient.getTeamList();
-                }catch (Exception e){
+                } catch (Exception e) {
                     return FormValidation.error("Connection Failed.\n" +
                             "Possible reason: Plugin version incompatible with CxSAST v8.7 or lower.\n" +
-                            "If your CxSAST version is v8.8 or greater, please recheck connection details or contact support.\n");
+                            "If your CxSAST version is v8.8 or greater, please recheck connection details or contact support.\n" +
+                            "Error: " + e.getMessage());
                 }
 
                 return FormValidation.ok("Success");
@@ -1632,7 +1631,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
 		/*
-		 * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
+         * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
 		 * avoid synchronization issues.
 		 */
 
