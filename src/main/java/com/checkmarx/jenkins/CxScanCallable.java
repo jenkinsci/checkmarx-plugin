@@ -46,18 +46,22 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
         CxShragaClient shraga = new CxShragaClient(config, log);
         try {
             shraga.init();
-        } catch (Exception e) {
-            if (e.getMessage().contains("Server is unavailable")) {
+        } catch (Exception ex) {
+            if (ex.getMessage().contains("Server is unavailable")) {
                 try {
                     shraga.login();
-                } catch (CxClientException e1) {
+                } catch (CxClientException e) {
                     throw new IOException(e);
                 }
-                log.error("Connection Failed.");
-                log.error("Validate the provided login credentials and server URL are correct.\n" +
-                        "In addition, make sure the installed plugin version is compatible with the CxSAST version according to CxSAST release notes.");
+
+                String errorMsg = "Connection Failed.\n" +
+                        "Validate the provided login credentials and server URL are correct.\n" +
+                        "In addition, make sure the installed plugin version is compatible with the CxSAST version according to CxSAST release notes.\n" +
+                        "Error: " + ex.getMessage();
+
+                throw new IOException(errorMsg);
             }
-            throw new IOException(e);
+            throw new IOException(ex);
         }
 
         if (config.getSastEnabled()) {
@@ -65,7 +69,7 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
                 shraga.createSASTScan();
                 sastCreated = true;
             } catch (IOException | CxClientException e) {
-                log.warn("Failed to create SAST scan: " +e.getMessage());
+                log.warn("Failed to create SAST scan: " + e.getMessage());
                 ret.setSastCreateException(e);
             }
         }
@@ -96,7 +100,7 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
                 SASTResults sastResults = config.getSynchronous() ? shraga.waitForSASTResults() : shraga.getLatestSASTResults();
                 ret.setSastResults(sastResults);
             } catch (InterruptedException e) {
-                if(config.getSynchronous()) {
+                if (config.getSynchronous()) {
                     cancelScan(shraga);
                 }
                 throw e;
