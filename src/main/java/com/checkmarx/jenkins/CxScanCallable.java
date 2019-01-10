@@ -46,16 +46,27 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
         CxShragaClient shraga = new CxShragaClient(config, log);
         try {
             shraga.init();
-        } catch (Exception e) {
-            throw new IOException(e);
+        } catch (Exception ex) {
+            if (ex.getMessage().contains("Server is unavailable")) {
+                try {
+                    shraga.login();
+                } catch (CxClientException e) {
+                    throw new IOException(e);
+                }
+                String errorMsg = "Connection Failed.\n" +
+                        "Validate the provided login credentials and server URL are correct.\n" +
+                        "In addition, make sure the installed plugin version is compatible with the CxSAST version according to CxSAST release notes.\n" +
+                        "Error: " + ex.getMessage();
+                throw new IOException(errorMsg);
+            }
+            throw new IOException(ex);
         }
-
         if (config.getSastEnabled()) {
             try {
                 shraga.createSASTScan();
                 sastCreated = true;
             } catch (IOException | CxClientException e) {
-                log.error("Failed to create SAST scan: " +e.getMessage());
+                log.error("Failed to create SAST scan: " + e.getMessage());
                 ret.setSastCreateException(e);
             }
         }
@@ -86,7 +97,7 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
                 SASTResults sastResults = config.getSynchronous() ? shraga.waitForSASTResults() : shraga.getLatestSASTResults();
                 ret.setSastResults(sastResults);
             } catch (InterruptedException e) {
-                if(config.getSynchronous()) {
+                if (config.getSynchronous()) {
                     cancelScan(shraga);
                 }
                 throw e;
