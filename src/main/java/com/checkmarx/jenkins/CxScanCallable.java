@@ -53,10 +53,12 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
                 } catch (CxClientException e) {
                     throw new IOException(e);
                 }
+
                 String errorMsg = "Connection Failed.\n" +
                         "Validate the provided login credentials and server URL are correct.\n" +
                         "In addition, make sure the installed plugin version is compatible with the CxSAST version according to CxSAST release notes.\n" +
                         "Error: " + ex.getMessage();
+
                 throw new IOException(errorMsg);
             }
             throw new IOException(ex);
