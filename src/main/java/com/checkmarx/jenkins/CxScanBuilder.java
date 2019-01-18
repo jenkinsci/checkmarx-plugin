@@ -15,6 +15,7 @@ import com.cx.restclient.exception.CxClientException;
 import com.cx.restclient.exception.CxTokenExpiredException;
 import com.cx.restclient.osa.dto.OSAResults;
 import com.cx.restclient.sast.dto.CxNameObj;
+import com.cx.restclient.sast.dto.Preset;
 import com.cx.restclient.sast.dto.Project;
 import com.cx.restclient.sast.dto.SASTResults;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -762,7 +763,27 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setSastEnabled(this.sastEnabled == null || sastEnabled); //for backward compatibility, assuming if sastEnabled is not set, then sast is enabled
 
         if (ret.getSastEnabled()) {
-            int presetId = parseInt(preset, log, "Invalid presetId: [%s]. Using default preset.", 0);
+            int presetId = 7;
+            try {
+                presetId = Integer.parseInt(preset);
+            } catch (NumberFormatException nf) {
+                log.info("No presetId given. Trying to map the given label to the labels available at the Checkmarx server to get the corresponding id.");
+                CxShragaClient cxShragaClient = new CxShragaClient(cxCredentials.getServerUrl(), cxCredentials.getUsername(), cxCredentials.getPassword(), CX_ORIGIN, false, serverLog);
+
+                try {
+                    cxShragaClient.login();
+                    List<Preset> presets;
+                    presets = cxShragaClient.getPresetList();
+                    for (Preset p : presets) {
+                        if (p.getName().equalsIgnoreCase(preset)) {
+                            presetId = p.getId();
+                        }
+                    }
+                } catch (CxClientException c) {
+                    log.error("Could not retrieve labels and ids from configured Checkmarx server falling back to default preset: " + c.getMessage());
+                }
+            }
+
             ret.setPresetId(presetId);
 
             String excludeFolders = isGlobalExclusions() ? descriptor.getExcludeFolders() : getExcludeFolders();
