@@ -32,11 +32,11 @@
 
 		<f:invisibleEntry>
 			<f:readOnlyTextbox field="username"/>
-			<f:readOnlyTextbox field="password"/>
+			<f:readOnlyTextbox field="pswd"/>
 		</f:invisibleEntry>
 
 		<f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
-			with="serverUrl,username,password,timestamp,credentialsId" />
+			with="serverUrl,username,pswd,timestamp,credentialsId" />
 
 		<f:entry title="Default Exclude folders" field="excludeFolders">
             <f:textbox />
