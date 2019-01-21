@@ -746,7 +746,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         CxCredentials cxCredentials = CxCredentials.resolveCred(this, descriptor, run);
         ret.setUrl(cxCredentials.getServerUrl().trim());
         ret.setUsername(cxCredentials.getUsername());
-        ret.setPassword(cxCredentials.getPswd());
+        ret.setPassword(cxCredentials.getPssd());
 
         //project
         ret.setProjectName(env.expand(projectName.trim()));
@@ -1378,7 +1378,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             try {
                 cred = CxCredentials.resolveCred(true, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
                 CxCredentials.validateCxCredentials(cred);
-                shragaClient = new CxShragaClient(cred.getServerUrl(), cred.getUsername(), cred.getPswd(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
+                shragaClient = new CxShragaClient(cred.getServerUrl(), cred.getUsername(), cred.getPssd(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
             } catch (Exception e) {
                 return buildError(e, "Failed to init cx client");
             }
@@ -1417,7 +1417,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 	     */
         private CxShragaClient prepareLoggedInClient(CxCredentials credentials)
                 throws IOException, CxClientException, CxTokenExpiredException {
-            CxShragaClient ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPswd(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
+            CxShragaClient ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPssd(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
             ret.login();
             return ret;
         }
