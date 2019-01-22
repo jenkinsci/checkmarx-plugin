@@ -1,6 +1,6 @@
 package com.checkmarx.jenkins;
 
-import com.checkmarx.jenkins.exception.CxCredentialsException;
+import com.checkmarx.jenkins.exception.CxCredException;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
@@ -15,7 +15,7 @@ import java.util.Collections;
 
 
 //resolve between global or specific and username+pssd or credential manager
-public class CxCredentials {
+public class CxCred {
 
     private String serverUrl;
     private String username;
@@ -46,8 +46,8 @@ public class CxCredentials {
     }
 
 
-    public static CxCredentials resolveCred(CxScanBuilder cxScanBuilder, CxScanBuilder.DescriptorImpl descriptor, Run<?, ?> run) {
-        CxCredentials ret = new CxCredentials();
+    public static CxCred resolveCred(CxScanBuilder cxScanBuilder, CxScanBuilder.DescriptorImpl descriptor, Run<?, ?> run) {
+        CxCred ret = new CxCred();
         if (cxScanBuilder.isUseOwnServerCredentials()) {
             ret.setServerUrl(cxScanBuilder.getServerUrl());
             if (StringUtils.isNotEmpty(cxScanBuilder.getCredentialsId())) {
@@ -79,19 +79,19 @@ public class CxCredentials {
     }
 
 
-    public static CxCredentials resolveCred(boolean useOwnServerCredentials, String serverUrl, String username, String pssd, String credentialsId, CxScanBuilder.DescriptorImpl descriptor, Item item) throws CxCredentialsException {
+    public static CxCred resolveCred(boolean useOwnServerCredentials, String serverUrl, String username, String pssd, String credId, CxScanBuilder.DescriptorImpl descriptor, Item item) throws CxCredException {
 
-        CxCredentials ret = new CxCredentials();
+        CxCred ret = new CxCred();
         if (useOwnServerCredentials) {
             ret.setServerUrl(serverUrl);
-            if (StringUtils.isNotEmpty(credentialsId)) {
+            if (StringUtils.isNotEmpty(credId)) {
 
                 StandardUsernamePasswordCredentials c = CredentialsMatchers.firstOrNull(CredentialsProvider.lookupCredentials(
                                 StandardUsernamePasswordCredentials.class,
                                 item,
                                 null,
                                 Collections.<DomainRequirement>emptyList()),
-                        CredentialsMatchers.withId(credentialsId));
+                        CredentialsMatchers.withId(credId));
 
                 ret.setUsername(c != null ? c.getUsername() : "");
                 ret.setPssd(c != null ? c.getPassword().getPlainText() : "");
@@ -126,11 +126,11 @@ public class CxCredentials {
         }
     }
 
-    public static void validateCxCredentials(CxCredentials credentials) throws CxCredentialsException {
+    public static void validateCxCredentials(CxCred credentials) throws CxCredException {
         if(StringUtils.isEmpty(credentials.getServerUrl()) ||
                 StringUtils.isEmpty(credentials.getUsername()) ||
                 StringUtils.isEmpty((credentials.getPssd()))){
-            throw new CxCredentialsException(ErrorMessage.CHECKMARX_SERVER_CONNECTION_FAILED.getErrorMessage());
+            throw new CxCredException(ErrorMessage.CHECKMARX_SERVER_CONNECTION_FAILED.getErrorMessage());
         }
     }
 }
