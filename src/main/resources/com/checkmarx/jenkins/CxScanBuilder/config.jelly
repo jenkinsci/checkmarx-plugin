@@ -184,7 +184,7 @@
                         </f:description>
                         <!-- -= Generate Full XML report =- -->
 
-                        <f:optionalBlock title="Generate CxSAST full XML report" inline="true" field="generateXmlReport"
+                        <f:optionalBlock title="Generate a full CxSAST XML and HTML Report" inline="true" field="generateXmlReport"
                              checked="${instance==null?true:instance.generateXmlReport}" />
 
                         <!-- -= Generate PDF report =- -->
