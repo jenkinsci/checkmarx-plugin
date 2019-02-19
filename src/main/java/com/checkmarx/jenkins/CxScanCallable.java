@@ -49,16 +49,6 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
             throw new IOException(e);
         }
 
-        if (config.getSastEnabled()) {
-            try {
-                shraga.createSASTScan();
-                sastCreated = true;
-            } catch (IOException | CxClientException e) {
-                log.warn("Failed to create SAST scan: " +e.getMessage());
-                ret.setSastCreateException(e);
-            }
-        }
-
         if (config.getOsaEnabled()) {
             //---------------------------
             //we do this in order to redirect the logs from the filesystem agent component to the build console
@@ -77,6 +67,16 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
             } finally {
                 handler.flush();
                 rootLog.removeHandler(handler);
+            }
+        }
+
+        if (config.getSastEnabled()) {
+            try {
+                shraga.createSASTScan();
+                sastCreated = true;
+            } catch (IOException | CxClientException e) {
+                log.warn("Failed to create SAST scan: " +e.getMessage());
+                ret.setSastCreateException(e);
             }
         }
 

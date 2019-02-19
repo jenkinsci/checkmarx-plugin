@@ -141,15 +141,9 @@
 
     <f:section title="Build Control">
 
-
-
-
             <f:entry name="jobStatusOnError" title="Job status when scan returns an error:" field="jobStatusOnError">
                     <f:enum field="jobStatusOnError">${it.displayName}</f:enum>
                 </f:entry>
-
-
-
             <j:choose>
                 <!-- -=use only global configuration setting =- -->
                 <j:when test="${descriptor.forcingVulnerabilityThresholdEnabled and descriptor.lockVulnerabilitySettings}">
@@ -188,6 +182,10 @@
 
                         <f:description>Synchronous mode allows viewing scan results in Jenkins and setting thresholds
                         </f:description>
+                        <!-- -= Generate Full XML report =- -->
+
+                        <f:optionalBlock title="Generate CxSAST full XML report" inline="true" field="generateXmlReport"
+                             checked="${instance==null?true:instance.generateXmlReport}" />
 
                         <!-- -= Generate PDF report =- -->
                         <f:optionalBlock title="Generate CxSAST PDF report" inline="true" field="generatePdfReport" />
