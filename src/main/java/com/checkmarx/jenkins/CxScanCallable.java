@@ -63,15 +63,6 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
             }
             throw new IOException(ex);
         }
-        if (config.getSastEnabled()) {
-            try {
-                shraga.createSASTScan();
-                sastCreated = true;
-            } catch (IOException | CxClientException e) {
-                log.error("Failed to create SAST scan: " + e.getMessage());
-                ret.setSastCreateException(e);
-            }
-        }
 
         if (config.getOsaEnabled()) {
             //---------------------------
@@ -94,6 +85,15 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
             }
         }
 
+        if (config.getSastEnabled()) {
+            try {
+                shraga.createSASTScan();
+                sastCreated = true;
+            } catch (IOException | CxClientException e) {
+                log.error("Failed to create SAST scan: " + e.getMessage());
+                ret.setSastCreateException(e);
+            }
+        }
         if (sastCreated) {
             try {
                 SASTResults sastResults = config.getSynchronous() ? shraga.waitForSASTResults() : shraga.getLatestSASTResults();
