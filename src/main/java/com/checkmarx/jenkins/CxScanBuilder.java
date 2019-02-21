@@ -732,9 +732,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             if (sastResults.isSastResultsReady()) {
                 if (config.getGenerateXmlReport() == null || config.getGenerateXmlReport() == true) {
                     createSastReports(sastResults, checkmarxBuildDir, workspace);
-                    addEnvVarAction(run, sastResults);
-                    cxScanResult.setSastResults(sastResults);
                 }
+                addEnvVarAction(run, sastResults);
+                cxScanResult.setSastResults(sastResults);
             }
 
             //create osa reports
