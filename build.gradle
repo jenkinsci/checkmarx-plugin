@@ -39,7 +39,7 @@ dependencies {
 	provided 'com.intellij:annotations:12.0',
 			 'org.slf4j:slf4j-api:1.6.1'
 
-	compile	'com.checkmarx:cx-client-common:8.80.3-20190219.123316-1'
+	compile	'com.checkmarx:cx-client-common:8.80.3'
 
 
 	optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.3@jar',
