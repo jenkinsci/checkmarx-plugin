@@ -151,6 +151,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private Result vulnerabilityThresholdResult;
     private Result resolvedVulnerabilityThresholdResult;
     private boolean avoidDuplicateProjectScans;
+    private Boolean generateXmlReport = true;
     public static final int MINIMUM_TIMEOUT_IN_MINUTES = 1;
     public static final String REPORTS_FOLDER = "Checkmarx/Reports";
     public static final String CX_ORIGIN = "Jenkins";
@@ -199,7 +200,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             @Nullable String excludeOpenSourceFolders,
             @Nullable String osaArchiveIncludePatterns,
             boolean osaInstallBeforeScan,
-            boolean avoidDuplicateProjectScans) {
+            boolean avoidDuplicateProjectScans,
+            Boolean generateXmlReport) {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
         this.username = username;
@@ -247,6 +249,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             this.vulnerabilityThresholdResult = Result.fromString(vulnerabilityThresholdResult);
         }
         this.avoidDuplicateProjectScans = avoidDuplicateProjectScans;
+        this.generateXmlReport = generateXmlReport;
     }
 
     // Configuration fields getters
@@ -492,6 +495,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return avoidDuplicateProjectScans;
     }
 
+    public Boolean getGenerateXmlReport() {
+        return generateXmlReport;
+    }
+
     @DataBoundSetter
     public void setThresholdSettings(String thresholdSettings) {
         this.thresholdSettings = thresholdSettings;
@@ -651,6 +658,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
+    public void setGenerateXmlReport(Boolean generateXmlReport) {
+        this.generateXmlReport = generateXmlReport;
+    }
+
+    @DataBoundSetter
     public void setProjectId(long projectId) {
         this.projectId = projectId;
     }
@@ -716,10 +728,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             //create sast reports
             SASTResults sastResults = scanResults.getSastResults();
+
             if (sastResults.isSastResultsReady()) {
-                createSastReports(sastResults, checkmarxBuildDir, workspace);
-                addEnvVarAction(run, sastResults);
-                cxScanResult.setSastResults(sastResults);
+                if (config.getGenerateXmlReport() == null || config.getGenerateXmlReport() == true) {
+                    createSastReports(sastResults, checkmarxBuildDir, workspace);
+                    addEnvVarAction(run, sastResults);
+                    cxScanResult.setSastResults(sastResults);
+                }
             }
 
             //create osa reports
@@ -783,6 +798,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             int configurationId = parseInt(sourceEncoding, log, "Invalid source encoding (configuration) value: [%s]. Using default configuration.", 1);
             ret.setEngineConfigurationId(configurationId);
+            ret.setAvoidDuplicateProjectScans(avoidDuplicateProjectScans);
+            ret.setGenerateXmlReport(generateXmlReport);
 
             boolean useGlobalThreshold = shouldUseGlobalThreshold();
             boolean useJobThreshold = shouldUseJobThreshold();
@@ -841,7 +858,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("is synchronous mode: " + config.getSynchronous());
         log.info("deny project creation: " + config.getDenyProject());
         log.info("SAST scan enabled: " + config.getSastEnabled());
-        log.info("Enable Project Policy Enforcement: " + config.getEnablePolicyViolations());
+        log.info("avoid duplicated projects scans: " + config.isAvoidDuplicateProjectScans());
+        log.info("enable Project Policy Enforcement: " + config.getEnablePolicyViolations());
         if (config.getSastEnabled()) {
             log.info("preset id: " + config.getPresetId());
             log.info("SAST folder exclusions: " + config.getSastFolderExclusions());
@@ -849,6 +867,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             log.info("SAST timeout: " + config.getSastScanTimeoutInMinutes());
             log.info("SAST scan comment: " + config.getScanComment());
             log.info("is incremental scan: " + config.getIncremental());
+            log.info("is generate full XML report: " + config.getGenerateXmlReport());
             log.info("is generate pfd report: " + config.getGeneratePDFReport());
             log.info("source code encoding id: " + config.getEngineConfigurationId());
             log.info("SAST thresholds enabled: " + config.getSastThresholdsEnabled());
@@ -1649,7 +1668,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
 		/*
-		 * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
+         * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
 		 * avoid synchronization issues.
 		 */
 
@@ -1668,7 +1687,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
 		/*
-		 * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
+         * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
 		 * avoid synchronization issues.
 		 */
 
