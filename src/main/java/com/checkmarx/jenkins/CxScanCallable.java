@@ -47,6 +47,8 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
         try {
             shraga.init();
         } catch (Exception ex) {
+            ret.setGeneralException(ex);
+
             if (ex.getMessage().contains("Server is unavailable")) {
                 try {
                     shraga.login();
@@ -61,7 +63,11 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
 
                 throw new IOException(errorMsg);
             }
-            throw new IOException(ex);
+            if (ex.getMessage().contains("Creation of the new project")) {
+                return ret;
+            }
+
+            throw new IOException(ex.getMessage());
         }
 
         if (config.getOsaEnabled()) {
@@ -120,7 +126,7 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
             }
         }
 
-        if (config.getEnablePolicyViolations()) {
+        if (config.getEnablePolicyViolations() && (ret.getOsaResults() != null  || ret.getSastResults() != null)) {
             shraga.printIsProjectViolated();
         }
 

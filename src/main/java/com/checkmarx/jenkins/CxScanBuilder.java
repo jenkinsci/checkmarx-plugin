@@ -716,8 +716,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         //in case of async mode, do not create reports (only the report of the latest scan)
         //and don't assert threshold vulnerabilities
+
+        failTheBuild(run, config, scanResults);
         if (config.getSynchronous()) {
-            failTheBuild(run, config, scanResults);
 
             //generate html report
             String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
@@ -856,7 +857,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("project name: " + config.getProjectName());
         log.info("team id: " + config.getTeamId());
         log.info("is synchronous mode: " + config.getSynchronous());
-        log.info("deny project creation: " + config.getDenyProject());
+        log.info("deny new project creation: " + config.getDenyProject());
         log.info("SAST scan enabled: " + config.getSastEnabled());
         log.info("avoid duplicated projects scans: " + config.isAvoidDuplicateProjectScans());
         log.info("enable Project Policy Enforcement: " + config.getEnablePolicyViolations());
@@ -948,27 +949,23 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
     }
 
-    private boolean failTheBuild(Run<?, ?> run, CxScanConfig config, ScanResults ret) {
+    private void failTheBuild(Run<?, ?> run, CxScanConfig config, ScanResults ret) {
         //assert if expected exception is thrown  OR when vulnerabilities under threshold OR when policy violated
         String buildFailureResult = "";
-        if (config.getSynchronous()) {
-            buildFailureResult = ShragaUtils.getBuildFailureResult(config, ret.getSastResults(), ret.getOsaResults());
-            if (!StringUtils.isEmpty(buildFailureResult) || ret.getSastWaitException() != null || ret.getSastCreateException() != null ||
-                    ret.getOsaCreateException() != null || ret.getOsaWaitException() != null) {
-                printBuildFailure(buildFailureResult, ret, log);
-                if (resolvedVulnerabilityThresholdResult != null) {
-                    run.setResult(resolvedVulnerabilityThresholdResult);
-                }
+        buildFailureResult = ShragaUtils.getBuildFailureResult(config, ret.getSastResults(), ret.getOsaResults());
+        if (!StringUtils.isEmpty(buildFailureResult) || ret.getSastCreateException() != null || ret.getSastWaitException() != null ||
+                ret.getOsaCreateException() != null || ret.getOsaWaitException() != null || ret.getGeneralException() != null) {
+            printBuildFailure(buildFailureResult, ret, log);
+            if (resolvedVulnerabilityThresholdResult != null) {
+                run.setResult(resolvedVulnerabilityThresholdResult);
+            }
 
-                if (useUnstableOnError(getDescriptor())) {
-                    run.setResult(Result.UNSTABLE);
-                } else {
-                    run.setResult(Result.FAILURE);
-                }
-
+            if (useUnstableOnError(getDescriptor())) {
+                run.setResult(Result.UNSTABLE);
+            } else {
+                run.setResult(Result.FAILURE);
             }
         }
-        return StringUtils.isEmpty(buildFailureResult);
     }
 
 
@@ -977,6 +974,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.error(" The Build Failed for the Following Reasons: ");
         log.error("********************************************");
 
+        logError(ret.getGeneralException());
         logError(ret.getSastCreateException());
         logError(ret.getSastWaitException());
         logError(ret.getOsaCreateException());
@@ -1675,7 +1673,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
 		/*
-		 * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
+         * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
 		 * avoid synchronization issues.
 		 */
 
@@ -1689,7 +1687,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
 		/*
-		 * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
+         * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
 		 * avoid synchronization issues.
 		 */
 
@@ -1698,7 +1696,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
 		/*
-		 * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
+         * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
 		 * avoid synchronization issues.
 		 */
 
