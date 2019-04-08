@@ -42,7 +42,8 @@ dependencies {
 	provided 'com.intellij:annotations:12.0',
 			 'org.slf4j:slf4j-api:1.6.1'
 
-	compile	'com.checkmarx:cx-client-common:9.00.0-20190408.095111-30'
+	compile('com.checkmarx:cx-client-common:9.00.0-20190408.095111-30')
+
 
 
 	optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.3@jar',
@@ -51,8 +52,8 @@ dependencies {
 
 	testCompile 'junit:junit:4.12',
 			'org.eclipse.sisu:org.eclipse.sisu.plexus:0.0.0.M5',
-			'org.jmockit:jmockit:1.16',
-			'com.google.guava:guava:21.0'
+			'org.jmockit:jmockit:1.16'
+
 
 
 	// Fails with Gradle 2.12 and up without it. Related to https://issues.jenkins-ci.org/browse/JENKINS-17129
