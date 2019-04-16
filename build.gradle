@@ -16,6 +16,14 @@ apply plugin: 'eclipse'
 apply plugin: 'project-report'
 apply plugin: 'org.jenkins-ci.jpi'
 
+war {
+	doFirst {
+		manifest{
+			attributes ('Minimum-Java-Version' : "${project.targetCompatibility}")
+		}
+	}
+}
+
 
 repositories {
 	jcenter()
@@ -33,11 +41,8 @@ test {
 //for now we disable it so we can build the project properly
 allprojects {
 	tasks.withType(Javadoc).all { enabled = false }
-	tasks.withType(JavaCompile)
-	{
-		sourceCompatibility = 1.7
-		targetCompatibility = 1.7
-	}
+	sourceCompatibility = 1.7
+	targetCompatibility = 1.7
 }
 
 dependencies {
