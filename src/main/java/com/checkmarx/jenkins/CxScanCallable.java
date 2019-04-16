@@ -5,6 +5,9 @@ import com.cx.restclient.configuration.CxScanConfig;
 import com.cx.restclient.exception.CxClientException;
 import com.cx.restclient.osa.dto.OSAResults;
 import com.cx.restclient.sast.dto.SASTResults;
+
+import org.jenkinsci.remoting.RoleChecker;
+
 import hudson.FilePath;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
@@ -114,5 +117,10 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
             shraga.cancelSASTScan();
         } catch (Exception ignored) {
         }
+    }
+
+    @Override
+    public void checkRoles(RoleChecker checker) throws SecurityException {
+
     }
 }
