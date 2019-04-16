@@ -19,3 +19,5 @@ bin/
 #Jenkins specific out
 *.hpi
 classes/
+#VSCode
+.vscode/
