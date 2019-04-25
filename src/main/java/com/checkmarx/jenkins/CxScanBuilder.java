@@ -151,7 +151,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private Result vulnerabilityThresholdResult;
     private Result resolvedVulnerabilityThresholdResult;
     private boolean avoidDuplicateProjectScans;
-    private Boolean generateXmlReport = true;
+    private boolean generateXmlReport = true;
     public static final int MINIMUM_TIMEOUT_IN_MINUTES = 1;
     public static final String REPORTS_FOLDER = "Checkmarx/Reports";
     public static final String CX_ORIGIN = "Jenkins";
@@ -201,7 +201,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             @Nullable String osaArchiveIncludePatterns,
             boolean osaInstallBeforeScan,
             boolean avoidDuplicateProjectScans,
-            Boolean generateXmlReport) {
+            boolean generateXmlReport) {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
         this.username = username;
