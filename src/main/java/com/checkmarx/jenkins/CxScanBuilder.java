@@ -147,7 +147,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private Result vulnerabilityThresholdResult;
     private Result resolvedVulnerabilityThresholdResult;
     private boolean avoidDuplicateProjectScans;
-    private Boolean generateXmlReport = true;
+    private boolean generateXmlReport = true;
     public static final int MINIMUM_TIMEOUT_IN_MINUTES = 1;
     public static final String REPORTS_FOLDER = "Checkmarx/Reports";
     public static final String CX_ORIGIN = "Jenkins";
@@ -196,7 +196,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             @Nullable String osaArchiveIncludePatterns,
             boolean osaInstallBeforeScan,
             boolean avoidDuplicateProjectScans,
-            Boolean generateXmlReport) {
+            boolean generateXmlReport) {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
         this.username = username;
@@ -484,7 +484,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return avoidDuplicateProjectScans;
     }
 
-    public Boolean getGenerateXmlReport() {
+    public boolean getGenerateXmlReport() {
         return generateXmlReport;
     }
 
@@ -642,7 +642,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
-    public void setGenerateXmlReport(Boolean generateXmlReport) {
+    public void setGenerateXmlReport(boolean generateXmlReport) {
         this.generateXmlReport = generateXmlReport;
     }
 
@@ -851,7 +851,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             log.info("SAST timeout: " + config.getSastScanTimeoutInMinutes());
             log.info("SAST scan comment: " + config.getScanComment());
             log.info("is incremental scan: " + config.getIncremental());
-            log.info("is generate pfd report: " + config.getGeneratePDFReport());
+            log.info("is generate PDF report: " + config.getGeneratePDFReport());
             log.info("generate full XML report: " + config.getGenerateXmlReport());
             log.info("source code encoding id: " + config.getEngineConfigurationId());
             log.info("SAST thresholds enabled: " + config.getSastThresholdsEnabled());
