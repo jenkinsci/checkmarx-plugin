@@ -32,11 +32,11 @@
 
 		<f:invisibleEntry>
 			<f:readOnlyTextbox field="username"/>
-			<f:readOnlyTextbox field="password"/>
+			<f:readOnlyTextbox field="pssd"/>
 		</f:invisibleEntry>
 
 		<f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
-			with="serverUrl,username,password,timestamp,credentialsId" />
+			with="serverUrl,username,pssd,timestamp,credentialsId" />
 
 		<f:entry title="Default Exclude folders" field="excludeFolders">
             <f:textbox />
@@ -54,10 +54,10 @@
 			<f:enum field="jobGlobalStatusOnError">${it.displayName}</f:enum>
 		</f:entry>
 
-		<f:optionalBlock title="Set vulnerability settings for all jobs" inline="true"
+		<f:optionalBlock title="Globally Define vulnerability thresholds for all jobs" inline="true"
 			field="forcingVulnerabilityThresholdEnabled">
 
-			<f:optionalBlock title="Lock global vulnerability settings for all scans / jobs" inline="true" field="lockVulnerabilitySettings" />
+			<f:optionalBlock title="Always use the defined global vulnerability thresholds" inline="true" field="lockVulnerabilitySettings" />
 
 			<f:entry title="Build status when results exceed threshold:" field="jobGlobalStatusOnThresholdViolation">
 				<f:enum>${it.displayName}</f:enum>

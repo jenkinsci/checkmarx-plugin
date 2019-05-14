@@ -56,7 +56,6 @@ public class CxScanResult implements Action {
 
     private File pdfReport;
     public static final String PDF_REPORT_NAME = "ScanReport.pdf";
-    public static final String OSA_PDF_REPORT_NAME = "OSAReport.pdf";
     private boolean osaSuccessful; //osa fails flag for jelly
 
     private String htmlReportName;
@@ -252,7 +251,6 @@ public class CxScanResult implements Action {
                 if (mattcher.find()){
                     htmlReport = mattcher.replaceAll("$1></div>");
                 }
-
                 return htmlReport;
             }
         }

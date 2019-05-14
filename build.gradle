@@ -25,11 +25,15 @@ war {
 }
 
 
+
+
 repositories {
 	jcenter()
 	maven { url 'http://repo.jenkins-ci.org/releases/' }
 	maven { url 'http://cx-artifactory:8081/artifactory/libs-release/' }
 	maven { url 'http://cx-artifactory:8081/artifactory/libs-snapshot' }
+	maven { url 'http://cx-artifactory:8081/artifactory/plugins-release-local/' }
+	maven { url 'http://cx-artifactory:8081/artifactory/libs-snapshot-local' }
 }
 
 test {
@@ -49,7 +53,6 @@ dependencies {
 	compileOnly 'com.intellij:annotations:12.0',
 			 'org.slf4j:slf4j-api:1.6.1'
 
-	compile	'com.checkmarx:cx-client-common:8.90.4'
 
 
 	optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.3@jar',
@@ -59,6 +62,7 @@ dependencies {
 	testCompile 'junit:junit:4.12',
 			'org.eclipse.sisu:org.eclipse.sisu.plexus:0.0.0.M5',
 			'org.jmockit:jmockit:1.16'
+
 
 
 	// Fails with Gradle 2.12 and up without it. Related to https://issues.jenkins-ci.org/browse/JENKINS-17129

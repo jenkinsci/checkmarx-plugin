@@ -19,7 +19,7 @@
                 corresponding constructor parameter. -->
             <f:invisibleEntry>
                 <f:readOnlyTextbox field="username"/>
-                <f:readOnlyTextbox field="password"/>
+                <f:readOnlyTextbox field="pssd"/>
             </f:invisibleEntry>
             <f:optionalBlock title="Use default server credentials (${descriptor.credentialsDescription})"
                 inline="true" field="useOwnServerCredentials" negative="true"
@@ -40,7 +40,7 @@
                 </f:entry>
 
                 <f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
-                    with="serverUrl,username,password,timestamp,credentialsId" />
+                    with="serverUrl,username,pssd,timestamp,credentialsId" />
             </f:optionalBlock>
 
             <f:entry title="Checkmarx project name" description="Existing projects appear in a completion list when server url is provided (up to 20)">
@@ -179,15 +179,16 @@
                     <f:optionalBlock title="Generate CxSAST PDF report" inline="true" field="generatePdfReport" />
 
                     <!-- -= enableProjectPolicyEnforcement =- -->
-                    <f:optionalBlock title="Enable project's OSA policy enforcement" inline="true" field="enableProjectPolicyEnforcement" />
+                    <f:optionalBlock title="Enable Project's policy enforcement" inline="true" field="enableProjectPolicyEnforcement" />
                 </j:when>
 
                 <!-- ** use specific configuration setting ** -->
                 <j:otherwise>
 
-                    <!-- -= Generate Full XML report =- -->
-                    <f:optionalBlock title="Generate CxSAST full XML report" inline="true" field="generateXmlReport"
-                         checked="${instance==null?true:instance.generateXmlReport}" />
+                     <!-- -= Generate Full XML report =- -->
+                                        <f:optionalBlock title="Generate CxSAST full XML report" inline="true" field="generateXmlReport"
+                                             checked="${instance==null?true:instance.generateXmlReport}" />
+
 
                     <f:optionalBlock title="Enable synchronous mode" inline="true" field="waitForResultsEnabled"
                         checked="${instance==null?true:instance.waitForResultsEnabled}">
@@ -197,11 +198,12 @@
                         <f:description>Synchronous mode allows viewing scan results in Jenkins and setting thresholds
                         </f:description>
 
+
                         <!-- -= Generate PDF report =- -->
                         <f:optionalBlock title="Generate CxSAST PDF report" inline="true" field="generatePdfReport" />
 
                         <!-- -= enableProjectPolicyEnforcement =- -->
-                        <f:optionalBlock title="Enable project's OSA policy enforcement" inline="true" field="enableProjectPolicyEnforcement" />
+                        <f:optionalBlock title="Enable Project's policy enforcement" inline="true" field="enableProjectPolicyEnforcement" />
 
                        <!-- ** Enable CxSAST vulnerability threshold ** -->
                         <f:optionalBlock title="Enable vulnerability threshold" inline="true"

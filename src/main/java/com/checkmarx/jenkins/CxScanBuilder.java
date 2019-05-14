@@ -6,7 +6,6 @@ import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.cx.restclient.CxShragaClient;
-import com.cx.restclient.common.CxGlobalMessage;
 import com.cx.restclient.common.ShragaUtils;
 import com.cx.restclient.common.summary.SummaryUtils;
 import com.cx.restclient.configuration.CxScanConfig;
@@ -151,7 +150,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private Result vulnerabilityThresholdResult;
     private Result resolvedVulnerabilityThresholdResult;
     private boolean avoidDuplicateProjectScans;
-    private boolean generateXmlReport = true;
+
+    private Boolean generateXmlReport = true;
+
     public static final int MINIMUM_TIMEOUT_IN_MINUTES = 1;
     public static final String REPORTS_FOLDER = "Checkmarx/Reports";
     public static final String CX_ORIGIN = "Jenkins";
@@ -201,7 +202,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             @Nullable String osaArchiveIncludePatterns,
             boolean osaInstallBeforeScan,
             boolean avoidDuplicateProjectScans,
-            boolean generateXmlReport) {
+
+            Boolean generateXmlReport) {
+
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
         this.username = username;
@@ -211,7 +214,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.projectName = (projectName == null) ? buildStep : projectName;
         this.projectId = projectId;
         this.groupId = (groupId != null && !groupId.startsWith("Provide Checkmarx")) ? groupId : null;
-        ;
+
         this.teamPath = teamPath;
         this.sastEnabled = sastEnabled;
         this.preset = (preset != null && !preset.startsWith("Provide Checkmarx")) ? preset : null;
@@ -717,8 +720,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         //in case of async mode, do not create reports (only the report of the latest scan)
         //and don't assert threshold vulnerabilities
+
+        failTheBuild(run, config, scanResults);
         if (config.getSynchronous()) {
-            failTheBuild(run, config, scanResults);
 
             //generate html report
             String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
@@ -760,16 +764,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
 
         //cx server
-        CxCredentials cxCredentials = CxCredentials.resolveCredentials(this, descriptor, run);
+        CxCred cxCredentials = CxCred.resolveCred(this, descriptor, run);
         ret.setUrl(cxCredentials.getServerUrl().trim());
         ret.setUsername(cxCredentials.getUsername());
-        ret.setPassword(cxCredentials.getPassword());
+        ret.setPassword(cxCredentials.getPssd());
 
         //project
         ret.setProjectName(env.expand(projectName.trim()));
         ret.setTeamPath(teamPath);
         ret.setTeamId(groupId);
-
+        ret.setJenkinsJob(run.getNumber());
         //scan control
         boolean isaAsync = !isWaitForResultsEnabled() && !(descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings());
         ret.setSynchronous(!isaAsync);
@@ -793,7 +797,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             ret.setScanComment(env.expand(comment));
             ret.setIncremental(isThisBuildIncremental(run.getNumber()));
-
             ret.setGeneratePDFReport(generatePdfReport);
 
             int configurationId = parseInt(sourceEncoding, log, "Invalid source encoding (configuration) value: [%s]. Using default configuration.", 1);
@@ -827,7 +830,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             ret.setOsaFilterPattern(env.expand(includeOpenSourceFolders));
             ret.setOsaArchiveIncludePatterns(osaArchiveIncludePatterns);
             ret.setOsaRunInstall(osaInstallBeforeScan);
-            ret.setEnablePolicyViolations(enableProjectPolicyEnforcement);
 
             boolean useGlobalThreshold = shouldUseGlobalThreshold();
             boolean useJobThreshold = shouldUseJobThreshold();
@@ -844,6 +846,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
 
+        if (!ret.getSynchronous()) {
+            enableProjectPolicyEnforcement = false;
+        }
+        ret.setEnablePolicyViolations(enableProjectPolicyEnforcement);
+
         return ret;
     }
 
@@ -853,10 +860,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("server url: " + config.getUrl());
         log.info("username: " + config.getUsername());
         log.info("project name: " + config.getProjectName());
-        log.info("team path: " + config.getTeamPath());
         log.info("team id: " + config.getTeamId());
         log.info("is synchronous mode: " + config.getSynchronous());
-        log.info("deny project creation: " + config.getDenyProject());
+        log.info("deny new project creation: " + config.getDenyProject());
         log.info("SAST scan enabled: " + config.getSastEnabled());
         log.info("avoid duplicated projects scans: " + config.isAvoidDuplicateProjectScans());
         log.info("enable Project Policy Enforcement: " + config.getEnablePolicyViolations());
@@ -948,78 +954,56 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
     }
 
-    private boolean failTheBuild(Run<?, ?> run, CxScanConfig config, ScanResults scanResults) {
+    private void failTheBuild(Run<?, ?> run, CxScanConfig config, ScanResults ret) {
+        //assert if expected exception is thrown  OR when vulnerabilities under threshold OR when policy violated
+        String buildFailureResult = "";
+        buildFailureResult = ShragaUtils.getBuildFailureResult(config, ret.getSastResults(), ret.getOsaResults());
+        if (!StringUtils.isEmpty(buildFailureResult) || ret.getSastCreateException() != null || ret.getSastWaitException() != null ||
+                ret.getOsaCreateException() != null || ret.getOsaWaitException() != null || ret.getGeneralException() != null) {
+            printBuildFailure(buildFailureResult, ret, log);
+            if (resolvedVulnerabilityThresholdResult != null) {
+                run.setResult(resolvedVulnerabilityThresholdResult);
+            }
 
-        Exception sastCreateException = scanResults.getSastCreateException();
-        Exception sastWaitException = scanResults.getSastWaitException();
-        Exception osaCreateException = scanResults.getOsaCreateException();
-        Exception osaWaitException = scanResults.getOsaWaitException();
-
-        //assert vulnerabilities
-        StringBuilder failDescription = new StringBuilder();
-        boolean thresholdExceeded = false;
-        boolean sastNewResultsExceeded = false;
-        boolean isPolicyViolated = false;
-
-
-        if (config.getSynchronous()) {
-            thresholdExceeded = ShragaUtils.isThresholdExceeded(config, scanResults.getSastResults(), scanResults.getOsaResults(), failDescription);
-            sastNewResultsExceeded = ShragaUtils.isThresholdForNewResultExceeded(config, scanResults.getSastResults(), failDescription);
-            isPolicyViolated = isPolicyViolated(config, scanResults.getOsaResults(), failDescription);
-        }
-
-        boolean fail = sastCreateException != null || sastWaitException != null || osaCreateException != null || osaWaitException != null;
-        fail = fail || thresholdExceeded || sastNewResultsExceeded || isPolicyViolated;
-
-        if (fail) {
 
             if (useUnstableOnError(getDescriptor())) {
                 run.setResult(Result.UNSTABLE);
             } else {
                 run.setResult(Result.FAILURE);
             }
+        }
+    }
 
-            log.error("********************************************");
-            log.error(" The Build Failed for the Following Reasons:");
-            log.error("********************************************");
 
-            if (sastCreateException != null) {
-                log.error("Failed to create SAST scan: " + sastCreateException);
-            }
+    private void printBuildFailure(String thDescription, ScanResults ret, CxLoggerAdapter log) {
+        log.error("********************************************");
+        log.error(" The Build Failed for the Following Reasons: ");
+        log.error("********************************************");
 
-            if (sastWaitException != null) {
-                log.error("Failed to get SAST scan results: " + sastWaitException);
-            }
+        logError(ret.getGeneralException());
+        logError(ret.getSastCreateException());
+        logError(ret.getSastWaitException());
+        logError(ret.getOsaCreateException());
+        logError(ret.getOsaWaitException());
 
-            if (osaCreateException != null) {
-                log.error("Failed to create OSA scan: " + osaCreateException);
-            }
-
-            if (osaWaitException != null) {
-                log.error("Failed to get OSA scan results: " + osaWaitException);
-            }
-
-            if (failDescription.length() > 0) {
-                String[] lines = failDescription.toString().split("\\n");
-                for (String s : lines) {
-                    log.error(s);
-                }
-                if (resolvedVulnerabilityThresholdResult != null) {
-                    run.setResult(resolvedVulnerabilityThresholdResult);
-                }
+        if (thDescription != null) {
+            String[] lines = thDescription.split("\\n");
+            for (String s : lines) {
+                log.error(s);
             }
         }
 
-        return fail;
+        log.error("-----------------------------------------------------------------------------------------\n");
+        log.error("");
     }
 
-    public boolean isPolicyViolated(CxScanConfig config, OSAResults osaResults, StringBuilder failDescription) {
-        boolean isPolicyViolated = config.getEnablePolicyViolations() && osaResults.getOsaViolations().size() > 0;
-        if (isPolicyViolated) {
-            failDescription.append(CxGlobalMessage.PROJECT_POLICY_VIOLATED_STATUS.getMessage()).append("\n");
+
+    private void logError(Exception ex) {
+        if (ex != null) {
+            log.error(ex.getMessage());
         }
-        return isPolicyViolated;
     }
+
 
     private void addEnvVarAction(Run<?, ?> run, SASTResults sastResults) {
         EnvVarAction envVarAction = new EnvVarAction();
@@ -1414,12 +1398,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                @QueryParameter final String username, @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 
-            CxCredentials cred = null;
+            CxCred cred = null;
             CxShragaClient shragaClient = null;
             try {
-                cred = CxCredentials.resolveCredentials(true, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
-                CxCredentials.validateCxCredentials(cred);
-                shragaClient = new CxShragaClient(cred.getServerUrl(), cred.getUsername(), cred.getPassword(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
+                cred = CxCred.resolveCred(true, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
+                CxCred.validateCxCredentials(cred);
+                shragaClient = new CxShragaClient(cred.getServerUrl(), cred.getUsername(), cred.getPssd(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
             } catch (Exception e) {
                 return buildError(e, "Failed to init cx client");
             }
@@ -1456,9 +1440,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
 	     *  shared state to avoid synchronization issues.
 	     */
-        private CxShragaClient prepareLoggedInClient(CxCredentials credentials)
+        private CxShragaClient prepareLoggedInClient(CxCred credentials)
                 throws IOException, CxClientException, CxTokenExpiredException {
-            CxShragaClient ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPassword(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
+            CxShragaClient ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPssd(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
             ret.login();
             return ret;
         }
@@ -1473,7 +1457,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             ComboBoxModel projectNames = new ComboBoxModel();
 
             try {
-                CxCredentials credentials = CxCredentials.resolveCredentials(!useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
+                CxCred credentials = CxCred.resolveCred(!useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
                 CxShragaClient shragaClient = prepareLoggedInClient(credentials);
                 List<Project> projects = shragaClient.getAllProjects();
 
@@ -1508,7 +1492,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
             try {
-                CxCredentials credentials = CxCredentials.resolveCredentials(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
+                CxCred credentials = CxCred.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
                 CxShragaClient shragaClient = prepareLoggedInClient(credentials);
 
                 //todo import preset
@@ -1551,7 +1535,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             ListBoxModel listBoxModel = new ListBoxModel();
             try {
 
-                CxCredentials credentials = CxCredentials.resolveCredentials(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
+                CxCred credentials = CxCred.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
 
                 CxShragaClient shragaClient = prepareLoggedInClient(credentials);
                 List<CxNameObj> configurationList = shragaClient.getConfigurationSetList();
@@ -1581,7 +1565,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
             try {
-                CxCredentials credentials = CxCredentials.resolveCredentials(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
+                CxCred credentials = CxCred.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
 
                 CxShragaClient shragaClient = prepareLoggedInClient(credentials);
                 List<Team> teamList = shragaClient.getTeamList();
@@ -1696,7 +1680,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
 		/*
-		 * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
+         * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
 		 * avoid synchronization issues.
 		 */
 
@@ -1710,7 +1694,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
 		/*
-		 * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
+         * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
 		 * avoid synchronization issues.
 		 */
 
@@ -1719,7 +1703,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
 		/*
-		 * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
+         * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
 		 * avoid synchronization issues.
 		 */
 

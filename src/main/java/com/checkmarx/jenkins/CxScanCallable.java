@@ -50,6 +50,10 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
         try {
             shraga.init();
         } catch (Exception ex) {
+
+            ret.setGeneralException(ex);
+
+
             if (ex.getMessage().contains("Server is unavailable")) {
                 try {
                     shraga.login();
@@ -64,7 +68,13 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
 
                 throw new IOException(errorMsg);
             }
-            throw new IOException(ex);
+
+            if (ex.getMessage().contains("Creation of the new project")) {
+                return ret;
+            }
+
+            throw new IOException(ex.getMessage());
+
         }
 
         if (config.getOsaEnabled()) {
@@ -93,7 +103,8 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
                 shraga.createSASTScan();
                 sastCreated = true;
             } catch (IOException | CxClientException e) {
-                log.warn("Failed to create SAST scan: " + e.getMessage());
+
+                log.error("Failed to create SAST scan: " + e.getMessage());
                 ret.setSastCreateException(e);
             }
         }
@@ -121,6 +132,10 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
                 log.error("Failed to get OSA scan results: " + e.getMessage());
                 ret.setOsaWaitException(e);
             }
+        }
+
+        if (config.getEnablePolicyViolations() && (ret.getOsaResults() != null  || ret.getSastResults() != null)) {
+            shraga.printIsProjectViolated();
         }
 
         return ret;
