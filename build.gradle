@@ -18,6 +18,8 @@ apply plugin: 'project-report'
 apply plugin: 'org.jenkins-ci.jpi'
 apply plugin: 'provided-base'
 
+
+
 repositories {
 	jcenter()
 	maven { url 'http://repo.jenkins-ci.org/releases/' }
