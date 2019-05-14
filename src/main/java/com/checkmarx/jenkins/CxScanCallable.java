@@ -6,6 +6,9 @@ import com.cx.restclient.dto.ScanResults;
 import com.cx.restclient.exception.CxClientException;
 import com.cx.restclient.osa.dto.OSAResults;
 import com.cx.restclient.sast.dto.SASTResults;
+
+import org.jenkinsci.remoting.RoleChecker;
+
 import hudson.FilePath;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
@@ -47,7 +50,9 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
         try {
             shraga.init();
         } catch (Exception ex) {
+
             ret.setGeneralException(ex);
+
 
             if (ex.getMessage().contains("Server is unavailable")) {
                 try {
@@ -63,11 +68,13 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
 
                 throw new IOException(errorMsg);
             }
+
             if (ex.getMessage().contains("Creation of the new project")) {
                 return ret;
             }
 
             throw new IOException(ex.getMessage());
+
         }
 
         if (config.getOsaEnabled()) {
@@ -96,6 +103,7 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
                 shraga.createSASTScan();
                 sastCreated = true;
             } catch (IOException | CxClientException e) {
+
                 log.error("Failed to create SAST scan: " + e.getMessage());
                 ret.setSastCreateException(e);
             }
@@ -138,5 +146,10 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
             shraga.cancelSASTScan();
         } catch (Exception ignored) {
         }
+    }
+
+    @Override
+    public void checkRoles(RoleChecker checker) throws SecurityException {
+
     }
 }

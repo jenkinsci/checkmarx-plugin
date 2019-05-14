@@ -150,6 +150,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private Result vulnerabilityThresholdResult;
     private Result resolvedVulnerabilityThresholdResult;
     private boolean avoidDuplicateProjectScans;
+
     private Boolean generateXmlReport = true;
 
     public static final int MINIMUM_TIMEOUT_IN_MINUTES = 1;
@@ -201,7 +202,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             @Nullable String osaArchiveIncludePatterns,
             boolean osaInstallBeforeScan,
             boolean avoidDuplicateProjectScans,
+
             Boolean generateXmlReport) {
+
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
         this.username = username;
@@ -211,6 +214,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.projectName = (projectName == null) ? buildStep : projectName;
         this.projectId = projectId;
         this.groupId = (groupId != null && !groupId.startsWith("Provide Checkmarx")) ? groupId : null;
+
         this.teamPath = teamPath;
         this.sastEnabled = sastEnabled;
         this.preset = (preset != null && !preset.startsWith("Provide Checkmarx")) ? preset : null;
@@ -728,6 +732,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             //create sast reports
             SASTResults sastResults = scanResults.getSastResults();
+
             if (sastResults.isSastResultsReady()) {
                 if (config.getGenerateXmlReport() == null || config.getGenerateXmlReport() == true) {
                     createSastReports(sastResults, checkmarxBuildDir, workspace);
@@ -778,7 +783,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setSastEnabled(this.sastEnabled == null || sastEnabled); //for backward compatibility, assuming if sastEnabled is not set, then sast is enabled
 
         if (ret.getSastEnabled()) {
-            int presetId = parseInt(preset, log, "Invalid presetId: [%s]. Using default preset.", 0);
+            int presetId = parseInt(preset, log, "Invalid presetId: [%s]. Using default preset.", 7);
             ret.setPresetId(presetId);
 
             String excludeFolders = isGlobalExclusions() ? descriptor.getExcludeFolders() : getExcludeFolders();
@@ -960,6 +965,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 run.setResult(resolvedVulnerabilityThresholdResult);
             }
 
+
             if (useUnstableOnError(getDescriptor())) {
                 run.setResult(Result.UNSTABLE);
             } else {
@@ -990,6 +996,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.error("-----------------------------------------------------------------------------------------\n");
         log.error("");
     }
+
 
     private void logError(Exception ex) {
         if (ex != null) {
