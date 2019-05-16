@@ -7,8 +7,6 @@ import com.cx.restclient.exception.CxClientException;
 import com.cx.restclient.osa.dto.OSAResults;
 import com.cx.restclient.sast.dto.SASTResults;
 
-import org.jenkinsci.remoting.RoleChecker;
-
 import hudson.FilePath;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
@@ -134,7 +132,7 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
             }
         }
 
-        if (config.getEnablePolicyViolations() && (ret.getOsaResults() != null  || ret.getSastResults() != null)) {
+        if (config.getEnablePolicyViolations() && (ret.getOsaResults() != null || ret.getSastResults() != null)) {
             shraga.printIsProjectViolated();
         }
 
@@ -148,8 +146,8 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
         }
     }
 
-    @Override
-    public void checkRoles(RoleChecker checker) throws SecurityException {
-
-    }
+//    @Override
+//    public void checkRoles(RoleChecker checker) throws SecurityException {
+//
+//    }
 }
