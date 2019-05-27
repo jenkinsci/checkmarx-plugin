@@ -9,6 +9,7 @@ import com.cx.restclient.sast.dto.SASTResults;
 import hudson.FilePath;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
+import org.jenkinsci.remoting.RoleChecker;
 
 import java.io.File;
 import java.io.IOException;
@@ -138,5 +139,10 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
             shraga.cancelSASTScan();
         } catch (Exception ignored) {
         }
+    }
+
+    @Override
+    public void checkRoles(RoleChecker checker) throws SecurityException {
+
     }
 }
