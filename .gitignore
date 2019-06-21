@@ -12,6 +12,9 @@ target/
 bin/
 .settings/
 
+#vscode
+.vscode
+
 #IntelliJ
 .idea/
 *.iml
@@ -19,3 +22,4 @@ bin/
 #Jenkins specific out
 *.hpi
 classes/
+
