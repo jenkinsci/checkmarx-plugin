@@ -211,7 +211,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.projectName = (projectName == null) ? buildStep : projectName;
         this.projectId = projectId;
         this.groupId = (groupId != null && !groupId.startsWith("Provide Checkmarx")) ? groupId : null;
-        ;
         this.teamPath = teamPath;
         this.sastEnabled = sastEnabled;
         this.preset = (preset != null && !preset.startsWith("Provide Checkmarx")) ? preset : null;
@@ -249,7 +248,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             this.vulnerabilityThresholdResult = Result.fromString(vulnerabilityThresholdResult);
         }
         this.avoidDuplicateProjectScans = avoidDuplicateProjectScans;
-        this.generateXmlReport = generateXmlReport;
+        this.generateXmlReport = (generateXmlReport == null) ? true : generateXmlReport;
     }
 
     // Configuration fields getters
