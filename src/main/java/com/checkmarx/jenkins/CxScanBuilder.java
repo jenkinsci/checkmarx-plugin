@@ -248,7 +248,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             this.vulnerabilityThresholdResult = Result.fromString(vulnerabilityThresholdResult);
         }
         this.avoidDuplicateProjectScans = avoidDuplicateProjectScans;
-        this.generateXmlReport = generateXmlReport;
+        this.generateXmlReport = (generateXmlReport == null) ? true : generateXmlReport;
     }
 
     // Configuration fields getters
