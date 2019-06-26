@@ -48,6 +48,7 @@ public class CxCredentials {
 
     public static CxCredentials resolveCredentials(CxScanBuilder cxScanBuilder, CxScanBuilder.DescriptorImpl descriptor, Run<?, ?> run) {
         CxCredentials ret = new CxCredentials();
+        cxScanBuilder.setGenerateXmlReport((cxScanBuilder.getGenerateXmlReport() == null) ? true : cxScanBuilder.getGenerateXmlReport());
         if (cxScanBuilder.isUseOwnServerCredentials()) {
             ret.setServerUrl(cxScanBuilder.getServerUrl());
             if (StringUtils.isNotEmpty(cxScanBuilder.getCredentialsId())) {
@@ -87,10 +88,10 @@ public class CxCredentials {
             if (StringUtils.isNotEmpty(credentialsId)) {
 
                 StandardUsernamePasswordCredentials c = CredentialsMatchers.firstOrNull(CredentialsProvider.lookupCredentials(
-                                StandardUsernamePasswordCredentials.class,
-                                item,
-                                null,
-                                Collections.<DomainRequirement>emptyList()),
+                        StandardUsernamePasswordCredentials.class,
+                        item,
+                        null,
+                        Collections.<DomainRequirement>emptyList()),
                         CredentialsMatchers.withId(credentialsId));
 
                 ret.setUsername(c != null ? c.getUsername() : "");
@@ -127,9 +128,9 @@ public class CxCredentials {
     }
 
     public static void validateCxCredentials(CxCredentials credentials) throws CxCredentialsException {
-        if(StringUtils.isEmpty(credentials.getServerUrl()) ||
+        if (StringUtils.isEmpty(credentials.getServerUrl()) ||
                 StringUtils.isEmpty(credentials.getUsername()) ||
-                StringUtils.isEmpty((credentials.getPassword()))){
+                StringUtils.isEmpty((credentials.getPassword()))) {
             throw new CxCredentialsException(ErrorMessage.CHECKMARX_SERVER_CONNECTION_FAILED.getErrorMessage());
         }
     }

@@ -706,8 +706,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         //create scans and retrieve results (in jenkins agent)
-        CxScanCallable a = new CxScanCallable(config, listener);
-        ScanResults scanResults = workspace.act(a);
+        final CxScanCallable cxScanCallable = new CxScanCallable(config, listener);
+        ScanResults scanResults = workspace.act(cxScanCallable);
         CxScanResult cxScanResult = new CxScanResult(run, config);
 
         //write reports to build dir
