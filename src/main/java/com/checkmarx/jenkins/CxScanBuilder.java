@@ -759,10 +759,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
 
         //cx server
-        CxCred cxCredentials = CxCred.resolveCred(this, descriptor, run);
+        CxCredentials cxCredentials = CxCredentials.resolveCred(this, descriptor, run);
         ret.setUrl(cxCredentials.getServerUrl().trim());
         ret.setUsername(cxCredentials.getUsername());
-        ret.setPassword(cxCredentials.getPssd());
+        ret.setPassword(cxCredentials.getPassword());
 
         //project
         ret.setProjectName(env.expand(projectName.trim()));
@@ -1391,12 +1391,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                @QueryParameter final String username, @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 
-            CxCred cred = null;
+            CxCredentials cred = null;
             CxShragaClient shragaClient = null;
             try {
-                cred = CxCred.resolveCred(true, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
-                CxCred.validateCxCredentials(cred);
-                shragaClient = new CxShragaClient(cred.getServerUrl(), cred.getUsername(), cred.getPssd(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
+                cred = CxCredentials.resolveCred(true, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
+                CxCredentials.validateCxCredentials(cred);
+                shragaClient = new CxShragaClient(cred.getServerUrl(), cred.getUsername(), cred.getPassword(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
             } catch (Exception e) {
                 return buildError(e, "Failed to init cx client");
             }
@@ -1433,9 +1433,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
 	     *  shared state to avoid synchronization issues.
 	     */
-        private CxShragaClient prepareLoggedInClient(CxCred credentials)
+        private CxShragaClient prepareLoggedInClient(CxCredentials credentials)
                 throws IOException, CxClientException, CxTokenExpiredException {
-            CxShragaClient ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPssd(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
+            CxShragaClient ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPassword(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
             ret.login();
             return ret;
         }
@@ -1450,7 +1450,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             ComboBoxModel projectNames = new ComboBoxModel();
 
             try {
-                CxCred credentials = CxCred.resolveCred(!useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
+                CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
                 CxShragaClient shragaClient = prepareLoggedInClient(credentials);
                 List<Project> projects = shragaClient.getAllProjects();
 
@@ -1485,7 +1485,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
             try {
-                CxCred credentials = CxCred.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
+                CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
                 CxShragaClient shragaClient = prepareLoggedInClient(credentials);
 
                 //todo import preset
@@ -1528,7 +1528,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             ListBoxModel listBoxModel = new ListBoxModel();
             try {
 
-                CxCred credentials = CxCred.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
+                CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
 
                 CxShragaClient shragaClient = prepareLoggedInClient(credentials);
                 List<CxNameObj> configurationList = shragaClient.getConfigurationSetList();
@@ -1558,7 +1558,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
             try {
-                CxCred credentials = CxCred.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
+                CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
 
                 CxShragaClient shragaClient = prepareLoggedInClient(credentials);
                 List<Team> teamList = shragaClient.getTeamList();

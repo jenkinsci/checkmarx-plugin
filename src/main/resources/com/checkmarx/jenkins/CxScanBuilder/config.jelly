@@ -19,7 +19,7 @@
                 corresponding constructor parameter. -->
             <f:invisibleEntry>
                 <f:readOnlyTextbox field="username"/>
-                <f:readOnlyTextbox field="pssd"/>
+                <f:readOnlyTextbox field="password"/>
             </f:invisibleEntry>
             <f:optionalBlock title="Use default server credentials (${descriptor.credentialsDescription})"
                 inline="true" field="useOwnServerCredentials" negative="true"
@@ -40,7 +40,7 @@
                 </f:entry>
 
                 <f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
-                    with="serverUrl,username,pssd,timestamp,credentialsId" />
+                    with="serverUrl,username,password,timestamp,credentialsId" />
             </f:optionalBlock>
 
             <f:entry title="Checkmarx project name" description="Existing projects appear in a completion list when server url is provided (up to 20)">
