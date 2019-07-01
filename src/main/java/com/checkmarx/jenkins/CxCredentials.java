@@ -48,6 +48,7 @@ public class CxCredentials {
 
     public static CxCredentials resolveCred(CxScanBuilder cxScanBuilder, CxScanBuilder.DescriptorImpl descriptor, Run<?, ?> run) {
         CxCredentials ret = new CxCredentials();
+        cxScanBuilder.setGenerateXmlReport((cxScanBuilder.getGenerateXmlReport() == null) ? true : cxScanBuilder.getGenerateXmlReport());
         if (cxScanBuilder.isUseOwnServerCredentials()) {
             ret.setServerUrl(cxScanBuilder.getServerUrl());
             if (StringUtils.isNotEmpty(cxScanBuilder.getCredentialsId())) {
