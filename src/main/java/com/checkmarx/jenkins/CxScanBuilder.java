@@ -71,6 +71,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public static final String OSA_SUMMERY_JSON = "OSASummery.json";
     public static final String OSA_LIBRARIES_JSON = "OSALibraries.json";
     public static final String OSA_VULNERABILITIES_JSON = "OSAVulnerabilities.json";
+
+    private static final String PDF_URL_TEMPLATE = "/%scheckmarx/pdfReport";
+
     //////////////////////////////////////////////////////////////////////////////////////
     // Persistent plugin configuration parameters
     //////////////////////////////////////////////////////////////////////////////////////
@@ -714,6 +717,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         File checkmarxBuildDir = new File(run.getRootDir(), "checkmarx");
         checkmarxBuildDir.mkdir();
 
+        if (config.getGeneratePDFReport()) {
+            // run.getUrl() returns a URL path similar to job/MyJobName/124/
+            String pdfUrl = String.format(PDF_URL_TEMPLATE, run.getUrl());
+            scanResults.getSastResults().setSastPDFLink(pdfUrl);
+        }
+
         //in case of async mode, do not create reports (only the report of the latest scan)
         //and don't assert threshold vulnerabilities
 
@@ -729,7 +738,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             //create sast reports
             SASTResults sastResults = scanResults.getSastResults();
             if (sastResults.isSastResultsReady()) {
-                if (config.getGenerateXmlReport() == null || config.getGenerateXmlReport() == true) {
+                if (config.getGenerateXmlReport() == null || config.getGenerateXmlReport()) {
                     createSastReports(sastResults, checkmarxBuildDir, workspace);
                 }
                 addEnvVarAction(run, sastResults);
@@ -768,7 +777,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setProjectName(env.expand(projectName.trim()));
         ret.setTeamPath(teamPath);
         ret.setTeamId(groupId);
-        ret.setJenkinsJob(run.getNumber());
+
         //scan control
         boolean isaAsync = !isWaitForResultsEnabled() && !(descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings());
         ret.setSynchronous(!isaAsync);
