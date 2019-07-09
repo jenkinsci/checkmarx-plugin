@@ -709,8 +709,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         //create scans and retrieve results (in jenkins agent)
-        CxScanCallable a = new CxScanCallable(config, listener);
-        ScanResults scanResults = workspace.act(a);
+        CxScanCallable action = new CxScanCallable(config, listener);
+        RemoteScanInfo scanInfo = workspace.act(action);
+        ScanResults scanResults = scanInfo.getScanResults();
+
+        // We'll need this for the HTML report.
+        config.setCxARMUrl(scanInfo.getCxARMUrl());
+
         CxScanResult cxScanResult = new CxScanResult(run, config);
 
         //write reports to build dir
@@ -938,7 +943,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             FileUtils.writeStringToFile(reportFile, reportHTML, Charset.defaultCharset());
             writeFileToWorkspaceReports(workspace, reportFile);
         } catch (IOException | TemplateException e) {
-            log.warn("Failed to generate HTML report: " + e.getMessage());
+            log.error("Failed to generate HTML report.", e);
         }
         return reportName;
 
