@@ -40,8 +40,7 @@ allprojects {
 dependencies {
     provided 'com.intellij:annotations:12.0',
             'org.slf4j:slf4j-api:1.6.1'
-
-    compile 'com.checkmarx:cx-client-common:8.90.4'
+    compile 'com.checkmarx:cx-client-common:8.90.5'
 
 
     optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.3@jar',
