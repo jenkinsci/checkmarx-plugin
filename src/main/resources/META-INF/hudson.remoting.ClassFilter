@@ -1,3 +1,7 @@
+com.cx.restclient.cxArm.dto.Violation
+com.cx.restclient.cxArm.dto.Rule
+com.cx.restclient.cxArm.dto.CxArmConfig
+com.cx.restclient.cxArm.dto.CxProviders
 com.cx.restclient.osa.dto.OSAResults
 com.cx.restclient.osa.dto.OSAScanStatus
 com.cx.restclient.dto.BaseStatus
