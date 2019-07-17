@@ -11,32 +11,33 @@ import jenkins.model.Jenkins;
  */
 public class CxConfig {
 
-	private static Properties configuration;
-	private static final String CONFIGURATION_DEFAULT_FILTER_PATTERN_KEY = "DefaultFilterPattern";
-	private static final String DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS= "DefaultOSAArchiveIncludePatterns";
+    private static Properties configuration;
+    private static final String CONFIGURATION_DEFAULT_FILTER_PATTERN_KEY = "DefaultFilterPattern";
+    private static final String DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS = "DefaultOSAArchiveIncludePatterns";
 
-	static {
-		configuration = new Properties();
-		try {
-			InputStream inputStream = CxConfig.class.getResourceAsStream("cxconfig.xml");
-			configuration.loadFromXML(inputStream);
-			inputStream.close();
-		} catch (Exception e) {
-		}
-	}
+    static {
+        configuration = new Properties();
+        try {
+            InputStream inputStream = CxConfig.class.getResourceAsStream("cxconfig.xml");
+            configuration.loadFromXML(inputStream);
+            inputStream.close();
+        } catch (Exception e) {
+        }
+    }
 
-	private CxConfig() {
-		// Hides default constructor
-	}
+    private CxConfig() {
+        // Hides default constructor
+    }
 
-	public static String defaultFilterPattern() {
-		return configuration.getProperty(CONFIGURATION_DEFAULT_FILTER_PATTERN_KEY);
-	}
-	public static String version() {
-		return Jenkins.getInstance().getPluginManager().getPlugin("checkmarx").getVersion();
-	}
+    public static String defaultFilterPattern() {
+        return configuration.getProperty(CONFIGURATION_DEFAULT_FILTER_PATTERN_KEY);
+    }
 
-	public static String getDefaultOsaArchiveIncludePatterns() {
-		return configuration.getProperty(DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS);
-	}
+    public static String version() {
+        return Jenkins.getInstance().getPluginManager().getPlugin("checkmarx").getVersion();
+    }
+
+    public static String getDefaultOsaArchiveIncludePatterns() {
+        return configuration.getProperty(DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS);
+    }
 }
