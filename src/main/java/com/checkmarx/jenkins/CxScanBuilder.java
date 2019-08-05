@@ -762,7 +762,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //general
         ret.setCxOrigin("Jenkins");
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
-
+        ret.setMvnPath(descriptor.getMvnPath());
         //cx server
         CxCredentials cxCredentials = CxCredentials.resolveCred(this, descriptor, run);
         ret.setUrl(cxCredentials.getServerUrl().trim());
@@ -1145,6 +1145,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         private String credentialsId;
 
+        private String mvnPath;
+
         private boolean prohibitProjectCreation;
         private boolean hideResults;
         private boolean enableCertificateValidation;
@@ -1210,6 +1212,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         public void setPassword(@Nullable String password) {
             this.password = Secret.fromString(password).getEncryptedValue();
+        }
+
+        public String getMvnPath() {
+            return mvnPath;
+        }
+
+        public void setMvnPath(String mvnPath) {
+            this.mvnPath = mvnPath;
         }
 
         @Nullable
@@ -1390,8 +1400,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //////////////////////////////////////////////////////////////////////////////////////
         /*
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-	     *  shared state to avoid synchronization issues.
-	     */
+         *  shared state to avoid synchronization issues.
+         */
         public FormValidation doTestConnection(@QueryParameter final String serverUrl, @QueryParameter final String password,
                                                @QueryParameter final String username, @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
@@ -1428,6 +1438,24 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
 
+        public FormValidation doValidateMvnPath(@QueryParameter final String mvnPath) {
+            boolean mvnPathExists = false;
+            FilePath path = new FilePath(new File(mvnPath));
+            String errorMsg = "Was not able to access specified path";
+            try {
+                if (!path.child("mvn").exists()) {
+                    errorMsg = "Maven was not found on the specified path";
+                } else {
+                    mvnPathExists = true;
+                }
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+                errorMsg = e.getMessage();
+            }
+
+            return mvnPathExists ? FormValidation.ok("Maven is found") : FormValidation.error(errorMsg);
+        }
+
         private FormValidation buildError(Exception e, String errorLogMessage) {
             serverLog.error(errorLogMessage, e);
             return FormValidation.error(e.getMessage());
@@ -1436,8 +1464,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         // Prepares a cx client object to be connected and logged in
         /*
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-	     *  shared state to avoid synchronization issues.
-	     */
+         *  shared state to avoid synchronization issues.
+         */
         private CxShragaClient prepareLoggedInClient(CxCredentials credentials)
                 throws IOException, CxClientException, CxTokenExpiredException {
             CxShragaClient ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPassword(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
@@ -1483,8 +1511,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          */
         /*
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-	     *  shared state to avoid synchronization issues.
-	     */
+         *  shared state to avoid synchronization issues.
+         */
         public ListBoxModel doFillPresetItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
                                               @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
@@ -1517,8 +1545,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          */
         /*
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-	     *  shared state to avoid synchronization issues.
-	     */
+         *  shared state to avoid synchronization issues.
+         */
         public FormValidation doCheckFullScanCycle(@QueryParameter final int value) {
             if (value >= FULL_SCAN_CYCLE_MIN && value <= FULL_SCAN_CYCLE_MAX) {
                 return FormValidation.ok();
@@ -1555,8 +1583,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         // Provides a list of source encodings from checkmarx server for dynamic drop-down list in configuration page
         /*
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-	     *  shared state to avoid synchronization issues.
-	     */
+         *  shared state to avoid synchronization issues.
+         */
 
         public ListBoxModel doFillGroupIdItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
                                                @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
@@ -1604,55 +1632,55 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
 
-		/*
+        /*
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
-		 * avoid synchronization issues.
-		 */
+         * avoid synchronization issues.
+         */
 
         public FormValidation doCheckHighThreshold(@QueryParameter final Integer value) {
             return checkNonNegativeValue(value);
         }
 
-		/*
+        /*
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
-		 * avoid synchronization issues.
-		 */
+         * avoid synchronization issues.
+         */
 
         public FormValidation doCheckMediumThreshold(@QueryParameter final Integer value) {
             return checkNonNegativeValue(value);
         }
 
-		/*
+        /*
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
-		 * avoid synchronization issues.
-		 */
+         * avoid synchronization issues.
+         */
 
         public FormValidation doCheckLowThreshold(@QueryParameter final Integer value) {
             return checkNonNegativeValue(value);
         }
 
-		/*
+        /*
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
-		 * avoid synchronization issues.
-		 */
+         * avoid synchronization issues.
+         */
 
         public FormValidation doCheckHighThresholdEnforcement(@QueryParameter final Integer value) {
             return checkNonNegativeValue(value);
         }
 
-		/*
+        /*
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
-		 * avoid synchronization issues.
-		 */
+         * avoid synchronization issues.
+         */
 
         public FormValidation doCheckMediumThresholdEnforcement(@QueryParameter final Integer value) {
             return checkNonNegativeValue(value);
         }
 
-		/*
+        /*
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
-		 * avoid synchronization issues.
-		 */
+         * avoid synchronization issues.
+         */
 
         public FormValidation doCheckLowThresholdEnforcement(@QueryParameter final Integer value) {
             return checkNonNegativeValue(value);
@@ -1668,19 +1696,19 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return checkNonNegativeValue(value);
         }
 
-		/*
+        /*
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
-		 * avoid synchronization issues.
-		 */
+         * avoid synchronization issues.
+         */
 
         public FormValidation doCheckOsaMediumThreshold(@QueryParameter final Integer value) {
             return checkNonNegativeValue(value);
         }
 
-		/*
+        /*
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
-		 * avoid synchronization issues.
-		 */
+         * avoid synchronization issues.
+         */
 
         public FormValidation doCheckOsaLowThreshold(@QueryParameter final Integer value) {
             return checkNonNegativeValue(value);
@@ -1691,19 +1719,19 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return checkNonNegativeValue(value);
         }
 
-		/*
+        /*
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
-		 * avoid synchronization issues.
-		 */
+         * avoid synchronization issues.
+         */
 
         public FormValidation doCheckOsaMediumThresholdEnforcement(@QueryParameter final Integer value) {
             return checkNonNegativeValue(value);
         }
 
-		/*
+        /*
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
-		 * avoid synchronization issues.
-		 */
+         * avoid synchronization issues.
+         */
 
         public FormValidation doCheckOsaLowThresholdEnforcement(@QueryParameter final Integer value) {
             return checkNonNegativeValue(value);
