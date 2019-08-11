@@ -1,5 +1,8 @@
 package com.checkmarx.jenkins;
 
+import com.checkmarx.jenkins.action.CxScanConfigWrapper;
+import com.checkmarx.jenkins.action.CxScanOsaResultWrapper;
+import com.checkmarx.jenkins.action.CxScanSastResultWrapper;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
@@ -697,6 +700,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         //print configuration
         printConfiguration(config, log);
+        run.addAction(new CxScanConfigWrapper(config));
 
         //validate at least one scan type is enabled
         if (!config.getSastEnabled() && !config.getOsaEnabled()) {
@@ -727,7 +731,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             //create sast reports
             SASTResults sastResults = scanResults.getSastResults();
-
+            run.addAction(new CxScanSastResultWrapper(sastResults));
             if (sastResults.isSastResultsReady()) {
                 if (config.getGenerateXmlReport() == null || config.getGenerateXmlReport() == true) {
                     createSastReports(sastResults, checkmarxBuildDir, workspace);
@@ -738,6 +742,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             //create osa reports
             OSAResults osaResults = scanResults.getOsaResults();
+            run.addAction(new CxScanOsaResultWrapper(osaResults));
             if (osaResults.isOsaResultsReady()) {
                 createOsaReports(scanResults.getOsaResults(), checkmarxBuildDir);
             }
@@ -746,6 +751,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //Asynchronous scan - add note message and previous build reports
         String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
         cxScanResult.setHtmlReportName(reportName);
+
+        run.addAction(new CxScanSastResultWrapper(scanResults.getSastResults()));
+        run.addAction(new CxScanOsaResultWrapper(scanResults.getOsaResults()));
         run.addAction(cxScanResult);
 
     }
