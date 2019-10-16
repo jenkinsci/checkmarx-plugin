@@ -52,10 +52,10 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
 
         CxShragaClient shraga;
         if (jenkinsProxy != null) {
-            log.info("Proxy host: " + jenkinsProxy.name);
-            log.info("Proxy port: " + jenkinsProxy.port);
-            log.info("Proxy user: " + jenkinsProxy.getUserName());
-            log.info("Proxy password: " + jenkinsProxy.getPassword());
+            log.debug("Proxy host: " + jenkinsProxy.name);
+            log.debug("Proxy port: " + jenkinsProxy.port);
+            log.debug("Proxy user: " + jenkinsProxy.getUserName());
+            log.debug("Proxy password: *************");
             shraga = new CxShragaClient(config, log, jenkinsProxy.name, jenkinsProxy.port,
                     jenkinsProxy.getUserName(), jenkinsProxy.getPassword());
         } else {
