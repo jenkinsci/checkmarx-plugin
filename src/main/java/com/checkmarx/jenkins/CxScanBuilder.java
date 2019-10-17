@@ -706,11 +706,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         final CxScanCallable cxScanCallable;
         Jenkins instance = Jenkins.getInstance();
         if (instance != null && Jenkins.getInstance().proxy != null) {
-            log.info("CxScanCallable with proxy");
             ProxyConfiguration jenkinsProxy = Jenkins.getInstance().proxy;
             cxScanCallable = new CxScanCallable(config, listener, jenkinsProxy);
         } else {
-            log.info("CxScanCallable with NO proxy");
             cxScanCallable = new CxScanCallable(config, listener);
         }
         ScanResults scanResults = workspace.act(cxScanCallable);
