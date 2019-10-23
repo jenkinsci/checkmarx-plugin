@@ -108,7 +108,7 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
                     shraga.createSASTScan();
                     sastCreated = true;
                 } catch (IOException | CxClientException e) {
-                    log.warn("Failed to create SAST scan: " + e.getMessage());
+                    log.warn("Failed to create SAST scan: " + e.getMessage(), e);
                     ret.setSastCreateException(e);
                 }
             }

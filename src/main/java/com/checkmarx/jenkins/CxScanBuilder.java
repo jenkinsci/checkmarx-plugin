@@ -46,7 +46,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -987,7 +986,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             log.error("********************************************");
 
             if (sastCreateException != null) {
-                log.error("Failed to create SAST scan: " + sastCreateException);
+                log.error("Failed to create SAST scan: " + sastCreateException, sastCreateException);
             }
 
             if (sastWaitException != null) {
@@ -995,7 +994,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
 
             if (osaCreateException != null) {
-                log.error("Failed to create OSA scan: " + osaCreateException);
+                log.error("Failed to create OSA scan: " + osaCreateException, osaCreateException);
             }
 
             if (osaWaitException != null) {
