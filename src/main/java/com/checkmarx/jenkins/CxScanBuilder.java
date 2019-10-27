@@ -19,10 +19,7 @@ import com.cx.restclient.sast.dto.Project;
 import com.cx.restclient.sast.dto.SASTResults;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.TemplateException;
-import hudson.EnvVars;
-import hudson.Extension;
-import hudson.FilePath;
-import hudson.Launcher;
+import hudson.*;
 import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
@@ -48,7 +45,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -708,8 +704,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
+        Jenkins instance = Jenkins.getInstance();
+        final CxScanCallable action;
+        if (instance != null && Jenkins.getInstance().proxy != null) {
+            ProxyConfiguration jenkinsProxy = Jenkins.getInstance().proxy;
+            action = new CxScanCallable(config, listener, jenkinsProxy);
+        } else {
+            action = new CxScanCallable(config, listener);
+        }
+
         //create scans and retrieve results (in jenkins agent)
-        CxScanCallable action = new CxScanCallable(config, listener);
         RemoteScanInfo scanInfo = workspace.act(action);
         ScanResults scanResults = scanInfo.getScanResults();
 
@@ -1399,41 +1403,48 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //////////////////////////////////////////////////////////////////////////////////////
         /*
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-	     *  shared state to avoid synchronization issues.
-	     */
+         *  shared state to avoid synchronization issues.
+         */
         public FormValidation doTestConnection(@QueryParameter final String serverUrl, @QueryParameter final String password,
                                                @QueryParameter final String username, @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 
-            CxCredentials cred = null;
-            CxShragaClient shragaClient = null;
+            CxCredentials cred;
+            CxShragaClient commonClient = null;
             try {
-                cred = CxCredentials.resolveCred(true, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
-                CxCredentials.validateCxCredentials(cred);
-                shragaClient = new CxShragaClient(cred.getServerUrl(), cred.getUsername(), cred.getPassword(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
-            } catch (Exception e) {
-                return buildError(e, "Failed to init cx client");
-            }
-
-            try {
-                shragaClient.login();
                 try {
-                    shragaClient.getTeamList();
+                    cred = CxCredentials.resolveCred(true, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
+                    CxCredentials.validateCxCredentials(cred);
+                    Jenkins instance = Jenkins.getInstance();
+                    if (instance != null && instance.proxy != null) {
+                        ProxyConfiguration jenkinsProxy = instance.proxy;
+                        commonClient = new CxShragaClient(cred.getServerUrl(), cred.getUsername(), cred.getPassword(), CX_ORIGIN,
+                                !this.isEnableCertificateValidation(), serverLog, jenkinsProxy.name, jenkinsProxy.port, jenkinsProxy.getUserName(), jenkinsProxy.getPassword());
+                    } else {
+                        commonClient = new CxShragaClient(cred.getServerUrl(), cred.getUsername(), cred.getPassword(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
+                    }
                 } catch (Exception e) {
-                    return FormValidation.error("Connection Failed.\n" +
-                            "Validate the provided login credentials and server URL are correct.\n" +
-                            "In addition, make sure the installed plugin version is compatible with the CxSAST version according to CxSAST release notes.\n" +
-                            "Error: " + e.getMessage());
+                    return buildError(e, "Failed to init cx client");
                 }
 
-                return FormValidation.ok("Success");
-
-            } catch (UnknownHostException e) {
-                return buildError(e, "Failed to login to Chekmarx server");
-
-            } catch (Exception e) {
-                return buildError(e, "Failed to login to Chekmarx server");
-
+                try {
+                    commonClient.login();
+                    try {
+                        commonClient.getTeamList();
+                    } catch (Exception e) {
+                        return FormValidation.error("Connection Failed.\n" +
+                                "Validate the provided login credentials and server URL are correct.\n" +
+                                "In addition, make sure the installed plugin version is compatible with the CxSAST version according to CxSAST release notes.\n" +
+                                "Error: " + e.getMessage());
+                    }
+                    return FormValidation.ok("Success");
+                } catch (Exception e) {
+                    return buildError(e, "Failed to login to Checkmarx server");
+                }
+            } finally {
+                if (commonClient != null) {
+                    commonClient.close();
+                }
             }
         }
 
@@ -1445,11 +1456,19 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         // Prepares a cx client object to be connected and logged in
         /*
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-	     *  shared state to avoid synchronization issues.
-	     */
+         *  shared state to avoid synchronization issues.
+         */
         private CxShragaClient prepareLoggedInClient(CxCredentials credentials)
                 throws IOException, CxClientException, CxTokenExpiredException {
-            CxShragaClient ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPassword(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
+            CxShragaClient ret;
+            Jenkins instance = Jenkins.getInstance();
+            if (instance != null && Jenkins.getInstance().proxy != null) {
+                ProxyConfiguration jenkinsProxy = Jenkins.getInstance().proxy;
+                ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPassword(), CX_ORIGIN,
+                        !this.isEnableCertificateValidation(), serverLog, jenkinsProxy.name, jenkinsProxy.port, jenkinsProxy.getUserName(), jenkinsProxy.getPassword());
+            } else {
+                ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPassword(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
+            }
             ret.login();
             return ret;
         }
@@ -1462,10 +1481,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                     @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ComboBoxModel projectNames = new ComboBoxModel();
-
+            CxShragaClient shragaClient = null;
             try {
                 CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
-                CxShragaClient shragaClient = prepareLoggedInClient(credentials);
+                shragaClient = prepareLoggedInClient(credentials);
                 List<Project> projects = shragaClient.getAllProjects();
 
                 for (Project p : projects) {
@@ -1473,10 +1492,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 }
 
                 return projectNames;
-
             } catch (Exception e) {
                 serverLog.error("Failed to populate project list: " + e.toString(), e);
                 return projectNames; // Return empty list of project names
+            } finally {
+                if (shragaClient != null) {
+                    shragaClient.close();
+                }
             }
         }
 
@@ -1492,8 +1514,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          */
         /*
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-	     *  shared state to avoid synchronization issues.
-	     */
+         *  shared state to avoid synchronization issues.
+         */
         public ListBoxModel doFillPresetItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
                                               @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
@@ -1526,8 +1548,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          */
         /*
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-	     *  shared state to avoid synchronization issues.
-	     */
+         *  shared state to avoid synchronization issues.
+         */
         public FormValidation doCheckFullScanCycle(@QueryParameter final int value) {
             if (value >= FULL_SCAN_CYCLE_MIN && value <= FULL_SCAN_CYCLE_MAX) {
                 return FormValidation.ok();
@@ -1540,11 +1562,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                       @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
+            CxShragaClient shragaClient = null;
             try {
-
                 CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
 
-                CxShragaClient shragaClient = prepareLoggedInClient(credentials);
+                shragaClient = prepareLoggedInClient(credentials);
                 List<CxNameObj> configurationList = shragaClient.getConfigurationSetList();
 
                 for (CxNameObj cs : configurationList) {
@@ -1555,6 +1577,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 serverLog.error("Failed to populate source encodings list: " + e.getMessage());
                 String message = "Provide Checkmarx server credentials to see source encodings list";
                 listBoxModel.add(new ListBoxModel.Option(message, message));
+            } finally {
+                if (shragaClient != null) {
+                    shragaClient.close();
+                }
             }
 
             return listBoxModel;
@@ -1564,17 +1590,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         // Provides a list of source encodings from checkmarx server for dynamic drop-down list in configuration page
         /*
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
-	     *  shared state to avoid synchronization issues.
-	     */
+         *  shared state to avoid synchronization issues.
+         */
 
         public ListBoxModel doFillGroupIdItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
                                                @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
+            CxShragaClient shragaClient = null;
             try {
                 CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
-
-                CxShragaClient shragaClient = prepareLoggedInClient(credentials);
+                shragaClient = prepareLoggedInClient(credentials);
                 List<Team> teamList = shragaClient.getTeamList();
                 for (Team team : teamList) {
                     listBoxModel.add(new ListBoxModel.Option(team.getFullName(), team.getId()));
@@ -1587,6 +1613,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 String message = "Provide Checkmarx server credentials to see teams list";
                 listBoxModel.add(new ListBoxModel.Option(message, message));
                 return listBoxModel;
+            } finally {
+                if (shragaClient != null) {
+                    shragaClient.close();
+                }
             }
 
         }
@@ -1613,55 +1643,55 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
 
-		/*
+        /*
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
-		 * avoid synchronization issues.
-		 */
+         * avoid synchronization issues.
+         */
 
         public FormValidation doCheckHighThreshold(@QueryParameter final Integer value) {
             return checkNonNegativeValue(value);
         }
 
-		/*
+        /*
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
-		 * avoid synchronization issues.
-		 */
+         * avoid synchronization issues.
+         */
 
         public FormValidation doCheckMediumThreshold(@QueryParameter final Integer value) {
             return checkNonNegativeValue(value);
         }
 
-		/*
+        /*
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
-		 * avoid synchronization issues.
-		 */
+         * avoid synchronization issues.
+         */
 
         public FormValidation doCheckLowThreshold(@QueryParameter final Integer value) {
             return checkNonNegativeValue(value);
         }
 
-		/*
+        /*
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
-		 * avoid synchronization issues.
-		 */
+         * avoid synchronization issues.
+         */
 
         public FormValidation doCheckHighThresholdEnforcement(@QueryParameter final Integer value) {
             return checkNonNegativeValue(value);
         }
 
-		/*
+        /*
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
-		 * avoid synchronization issues.
-		 */
+         * avoid synchronization issues.
+         */
 
         public FormValidation doCheckMediumThresholdEnforcement(@QueryParameter final Integer value) {
             return checkNonNegativeValue(value);
         }
 
-		/*
+        /*
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
-		 * avoid synchronization issues.
-		 */
+         * avoid synchronization issues.
+         */
 
         public FormValidation doCheckLowThresholdEnforcement(@QueryParameter final Integer value) {
             return checkNonNegativeValue(value);
@@ -1677,19 +1707,19 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return checkNonNegativeValue(value);
         }
 
-		/*
+        /*
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
-		 * avoid synchronization issues.
-		 */
+         * avoid synchronization issues.
+         */
 
         public FormValidation doCheckOsaMediumThreshold(@QueryParameter final Integer value) {
             return checkNonNegativeValue(value);
         }
 
-		/*
+        /*
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
-		 * avoid synchronization issues.
-		 */
+         * avoid synchronization issues.
+         */
 
         public FormValidation doCheckOsaLowThreshold(@QueryParameter final Integer value) {
             return checkNonNegativeValue(value);
@@ -1700,19 +1730,19 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return checkNonNegativeValue(value);
         }
 
-		/*
+        /*
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
-		 * avoid synchronization issues.
-		 */
+         * avoid synchronization issues.
+         */
 
         public FormValidation doCheckOsaMediumThresholdEnforcement(@QueryParameter final Integer value) {
             return checkNonNegativeValue(value);
         }
 
-		/*
+        /*
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
-		 * avoid synchronization issues.
-		 */
+         * avoid synchronization issues.
+         */
 
         public FormValidation doCheckOsaLowThresholdEnforcement(@QueryParameter final Integer value) {
             return checkNonNegativeValue(value);
