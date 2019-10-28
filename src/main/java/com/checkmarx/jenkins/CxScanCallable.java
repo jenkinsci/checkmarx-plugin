@@ -48,9 +48,9 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
         boolean sastCreated = false;
         boolean osaCreated = false;
 
-        CxShragaClient shraga = new CxShragaClient(config, log);
+        CxShragaClient commonClient = new CxShragaClient(config, log);
         try {
-            shraga.init();
+            commonClient.init();
 
             // Make sure CxARMUrl is passed in the result.
             // Cannot pass CxARMUrl in the config object, because this callable can be executed on a Jenkins agent.
@@ -61,7 +61,7 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
 
             if (ex.getMessage().contains("Server is unavailable")) {
                 try {
-                    shraga.login();
+                    commonClient.login();
                 } catch (CxClientException e) {
                     throw new IOException(e);
                 }
@@ -90,7 +90,7 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
             //---------------------------
 
             try {
-                shraga.createOSAScan();
+                commonClient.createOSAScan();
                 osaCreated = true;
             } catch (CxClientException | IOException e) {
                 log.error("Failed to create OSA scan: " + e.getMessage());
@@ -103,7 +103,7 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
 
         if (config.getSastEnabled()) {
             try {
-                shraga.createSASTScan();
+                commonClient.createSASTScan();
                 sastCreated = true;
             } catch (IOException | CxClientException e) {
                 log.error("Failed to create SAST scan: " + e.getMessage());
@@ -112,11 +112,11 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
         }
         if (sastCreated) {
             try {
-                SASTResults sastResults = config.getSynchronous() ? shraga.waitForSASTResults() : shraga.getLatestSASTResults();
+                SASTResults sastResults = config.getSynchronous() ? commonClient.waitForSASTResults() : commonClient.getLatestSASTResults();
                 scanResults.setSastResults(sastResults);
             } catch (InterruptedException e) {
                 if (config.getSynchronous()) {
-                    cancelScan(shraga);
+                    cancelScan(commonClient);
                 }
                 throw e;
 
@@ -128,7 +128,7 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
 
         if (osaCreated) {
             try {
-                OSAResults osaResults = config.getSynchronous() ? shraga.waitForOSAResults() : shraga.getLatestOSAResults();
+                OSAResults osaResults = config.getSynchronous() ? commonClient.waitForOSAResults() : commonClient.getLatestOSAResults();
                 scanResults.setOsaResults(osaResults);
             } catch (CxClientException | IOException e) {
                 log.error("Failed to get OSA scan results: " + e.getMessage());
@@ -137,7 +137,7 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
         }
 
         if (config.getEnablePolicyViolations() && (scanResults.getOsaResults() != null  || scanResults.getSastResults() != null)) {
-            shraga.printIsProjectViolated();
+            commonClient.printIsProjectViolated();
         }
 
         return result;

@@ -1405,8 +1405,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                @QueryParameter final String username, @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 
-            CxCredentials cred = null;
-            CxShragaClient shragaClient = null;
+            CxCredentials cred;
+            CxShragaClient shragaClient;
             try {
                 cred = CxCredentials.resolveCred(true, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
                 CxCredentials.validateCxCredentials(cred);
