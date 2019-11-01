@@ -4,7 +4,6 @@ import java.util.jar.*
 buildscript {
 	repositories {
 		jcenter()
-		mavenCentral()
 		maven { url 'http://repo.jenkins-ci.org/releases/' }
 	}
 	dependencies {
@@ -12,7 +11,10 @@ buildscript {
 	}
 }
 
-plugins { id "no.nils.wsdl2java" version "0.8" }
+plugins { 
+	id "no.nils.wsdl2java" version "0.8" 
+	id "io.github.http-builder-ng.http-plugin" version "0.1.1"
+}
 
 apply plugin: 'java'
 apply plugin: 'idea'
@@ -31,7 +33,10 @@ war {
 
 repositories {
 	jcenter()
-	mavenCentral()
+	maven { url 'http://repo.jenkins-ci.org/releases/' }
+	maven { url 'http://cx-artifactory:8081/artifactory/libs-release/' }
+	maven { url 'http://cx-artifactory:8081/artifactory/libs-snapshot' }
+	mavenLocal ()
 }
 
 test {
@@ -51,7 +56,7 @@ dependencies {
 	compileOnly 'com.intellij:annotations:12.0',
 			 'org.slf4j:slf4j-api:1.6.1'
 
-	compile	'com.checkmarx:cx-client-common:8.80.3.PS.0003'
+	compile	'com.checkmarx:cx-client-common:8.90.5.PS.0001'
 
 
 	optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.3@jar',
@@ -60,8 +65,7 @@ dependencies {
 
 	testCompile 'junit:junit:4.12',
 			'org.eclipse.sisu:org.eclipse.sisu.plexus:0.0.0.M5',
-			'org.jmockit:jmockit:1.16',
-			'com.google.guava:guava:21.0'
+			'org.jmockit:jmockit:1.16'
 
 
 	// Fails with Gradle 2.12 and up without it. Related to https://issues.jenkins-ci.org/browse/JENKINS-17129
@@ -81,7 +85,7 @@ def rootFileName = "cx-client-common-$cxVersion"
 def jarName = rootFileName + ".jar"
 def pomName = rootFileName + ".pom"
 def groupAsPath = cxCommonClientDep.group.replaceAll ('\\.', '/')
-def localMavenCache = "~/.m2/repository/$groupAsPath/$cxCommonClientDep.name/$cxCommonClientDep.version"
+def localMavenCache = "$System.env.HOME/.m2/repository/$groupAsPath/$cxCommonClientDep.name/$cxCommonClientDep.version"
 
 
 task loadCxCommonClient (type: io.github.httpbuilderng.http.HttpTask) {
@@ -94,6 +98,7 @@ task loadCxCommonClient (type: io.github.httpbuilderng.http.HttpTask) {
 		request.uri.path = "/checkmarx-ts/Cx-Client-Common/releases/download/$cxVersion/$jarName"
 
 		println "Downloading Cx-Common-Client dependency from " + request.uri.toURI ()
+		println "Destination: $localMavenCache"
 		
 		response.when(200){ fs, body ->
 
@@ -135,7 +140,6 @@ task loadCxCommonClient (type: io.github.httpbuilderng.http.HttpTask) {
 }
 
 task makePackage (dependsOn: build, type: Zip) {
-
 	archiveFileName = "Checkmarx.JenkinsPlugin.${version}.zip"
 	destinationDirectory = file("$buildDir/dist")
 	from "$buildDir/libs/$jenkinsPlugin.shortName" + ".$jenkinsPlugin.fileExtension"
