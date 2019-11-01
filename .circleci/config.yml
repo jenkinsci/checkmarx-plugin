@@ -1,0 +1,45 @@
+version: 2
+jobs:
+  build:
+    branches:
+      only:
+        - Version_8.80
+        - Version_8.90
+    docker:
+      - image: circleci/openjdk:11-jdk
+
+    working_directory: ~/repo
+
+    environment:
+      JAVA_OPTS: -Xmx3200m
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "build.gradle" }}
+            - v1-dependencies-
+
+      - run:
+          name: Populate Maven Local with PS version of Cx-Common-Client
+          command: |
+            gradle loadCxCommonClient
+
+      - run: gradle makePackage
+
+      - run:
+          name: Move package for archive
+          command: |
+            mkdir ~/repo/artifacts
+            cp ~/repo/build/dist/*.zip ~/repo/artifacts/
+
+      - store_artifacts:
+          path: ~/repo/artifacts
+          destination: plugin_dist
+
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: v1-dependencies-{{ checksum "build.gradle" }}
+
