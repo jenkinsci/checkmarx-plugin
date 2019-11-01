@@ -69,6 +69,75 @@ dependencies {
 }
 
 
+
+// Until the Cx-Common-Client is pushed to Maven Central, this downloads the dependency
+// from the release under checkmarx-ts/Cx-Client-Common
+def cxCommonClientDep = configurations.compile.allDependencies.find {it.name == 'cx-client-common'}
+def cxVersion = cxCommonClientDep.version
+def rootFileName = "cx-client-common-$cxVersion"
+def jarName = rootFileName + ".jar"
+def pomName = rootFileName + ".pom"
+def groupAsPath = cxCommonClientDep.group.replaceAll ('\\.', '/')
+def localMavenCache = "~/.m2/repository/$groupAsPath/$cxCommonClientDep.name/$cxCommonClientDep.version"
+
+
+task loadCxCommonClient (type: io.github.httpbuilderng.http.HttpTask) {
+
+	config {
+        request.uri = 'https://github.com/'
+    }
+	
+	get {
+		request.uri.path = "/checkmarx-ts/Cx-Client-Common/releases/download/$cxVersion/$jarName"
+
+		println "Downloading Cx-Common-Client dependency from " + request.uri.toURI ()
+		
+		response.when(200){ fs, body ->
+
+			// Download the released Cx-Client-Common library
+			def curFs = FileSystems.getDefault ()
+			def outPath = curFs.getPath (localMavenCache, jarName)
+			Files.createDirectories (curFs.getPath (localMavenCache))
+
+			// Write it into the local maven cache
+			def outStream = Files.newOutputStream (outPath)
+			outStream.write (body)
+			outStream.flush ()
+			outStream.close ()
+
+			// Extract the pom.xml from the jar
+			def jar = new JarFile (outPath.toFile (), false, JarFile.OPEN_READ)
+			def pomEntry = jar.getJarEntry ("META-INF/maven/$cxCommonClientDep.group/$cxCommonClientDep.name/pom.xml")
+			def pomInStream = jar.getInputStream (pomEntry)
+
+			// Write the pom file into the local maven cache
+			def pomPath = curFs.getPath (localMavenCache, pomName)
+			def pomOutStream = Files.newOutputStream (pomPath)
+
+
+			def bufSize = 65536;
+			def copyBuff = new byte[bufSize];
+
+			while (true) {
+				def readSize = pomInStream.read (copyBuff)
+				pomOutStream.write (copyBuff, 0, readSize)
+				if (readSize < bufSize)
+					break;
+			}
+
+			pomOutStream.flush ()
+			pomOutStream.close ()
+		}
+	}
+}
+
+task makePackage (dependsOn: build, type: Zip) {
+
+	archiveFileName = "Checkmarx.JenkinsPlugin.${version}.zip"
+	destinationDirectory = file("$buildDir/dist")
+	from "$buildDir/libs/$jenkinsPlugin.shortName" + ".$jenkinsPlugin.fileExtension"
+}
+
 jenkinsPlugin {
 	// version of Jenkins core this plugin depends on
 	coreVersion = '2.143'
@@ -77,13 +146,13 @@ jenkinsPlugin {
 	shortName = 'checkmarx'
 
 	// human-readable name of plugin
-	displayName = 'Jenkins Checkmarx Plugin'
+	displayName = 'Jenkins Checkmarx Plugin (PS Supported)'
 
 	// URL for plugin on Jenkins wiki or elsewhere
 	url = 'https://wiki.jenkins-ci.org/display/JENKINS/Checkmarx+CxSAST+Plugin'
 
 	// plugin URL on GitHub, optional
-	gitHubUrl = 'https://github.com/jenkinsci/checkmarx-plugin.git'
+	gitHubUrl = 'https://github.com/checkmarx-ts/checkmarx-plugin.git'
 
 	// use the plugin class loader before the core class loader, defaults to false
 	pluginFirstClassLoader = true
