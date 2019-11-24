@@ -19,10 +19,7 @@ import com.cx.restclient.sast.dto.Project;
 import com.cx.restclient.sast.dto.SASTResults;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.TemplateException;
-import hudson.EnvVars;
-import hudson.Extension;
-import hudson.FilePath;
-import hudson.Launcher;
+import hudson.*;
 import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
@@ -48,7 +45,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -71,6 +67,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public static final String OSA_SUMMERY_JSON = "OSASummery.json";
     public static final String OSA_LIBRARIES_JSON = "OSALibraries.json";
     public static final String OSA_VULNERABILITIES_JSON = "OSAVulnerabilities.json";
+
+    private static final String PDF_URL_TEMPLATE = "/%scheckmarx/pdfReport";
+
     //////////////////////////////////////////////////////////////////////////////////////
     // Persistent plugin configuration parameters
     //////////////////////////////////////////////////////////////////////////////////////
@@ -705,8 +704,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
+        Jenkins instance = Jenkins.getInstance();
+        final CxScanCallable action;
+        if (instance != null && Jenkins.getInstance().proxy != null) {
+            ProxyConfiguration jenkinsProxy = Jenkins.getInstance().proxy;
+            action = new CxScanCallable(config, listener, jenkinsProxy);
+        } else {
+            action = new CxScanCallable(config, listener);
+        }
+
         //create scans and retrieve results (in jenkins agent)
-        CxScanCallable action = new CxScanCallable(config, listener);
         RemoteScanInfo scanInfo = workspace.act(action);
         ScanResults scanResults = scanInfo.getScanResults();
 
@@ -718,6 +725,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //write reports to build dir
         File checkmarxBuildDir = new File(run.getRootDir(), "checkmarx");
         checkmarxBuildDir.mkdir();
+
+        if (config.getGeneratePDFReport()) {
+            // run.getUrl() returns a URL path similar to job/MyJobName/124/
+            String pdfUrl = String.format(PDF_URL_TEMPLATE, run.getUrl());
+            scanResults.getSastResults().setSastPDFLink(pdfUrl);
+        }
 
         //in case of async mode, do not create reports (only the report of the latest scan)
         //and don't assert threshold vulnerabilities
@@ -734,7 +747,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             //create sast reports
             SASTResults sastResults = scanResults.getSastResults();
             if (sastResults.isSastResultsReady()) {
-                if (config.getGenerateXmlReport() == null || config.getGenerateXmlReport() == true) {
+                if (config.getGenerateXmlReport() == null || config.getGenerateXmlReport()) {
                     createSastReports(sastResults, checkmarxBuildDir, workspace);
                 }
                 addEnvVarAction(run, sastResults);
@@ -762,7 +775,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //general
         ret.setCxOrigin("Jenkins");
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
-        ret.setMvnPath(descriptor.getMvnPath());
+
         //cx server
         CxCredentials cxCredentials = CxCredentials.resolveCred(this, descriptor, run);
         ret.setUrl(cxCredentials.getServerUrl().trim());
@@ -773,7 +786,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setProjectName(env.expand(projectName.trim()));
         ret.setTeamPath(teamPath);
         ret.setTeamId(groupId);
-        ret.setJenkinsJob(run.getNumber());
+
         //scan control
         boolean isaAsync = !isWaitForResultsEnabled() && !(descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings());
         ret.setSynchronous(!isaAsync);
@@ -1145,8 +1158,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         private String credentialsId;
 
-        private String mvnPath;
-
         private boolean prohibitProjectCreation;
         private boolean hideResults;
         private boolean enableCertificateValidation;
@@ -1212,14 +1223,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         public void setPassword(@Nullable String password) {
             this.password = Secret.fromString(password).getEncryptedValue();
-        }
-
-        public String getMvnPath() {
-            return mvnPath;
-        }
-
-        public void setMvnPath(String mvnPath) {
-            this.mvnPath = mvnPath;
         }
 
         @Nullable
@@ -1406,54 +1409,43 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                @QueryParameter final String username, @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 
-            CxCredentials cred = null;
-            CxShragaClient shragaClient = null;
+            CxCredentials cred;
+            CxShragaClient commonClient = null;
             try {
-                cred = CxCredentials.resolveCred(true, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
-                CxCredentials.validateCxCredentials(cred);
-                shragaClient = new CxShragaClient(cred.getServerUrl(), cred.getUsername(), cred.getPassword(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
-            } catch (Exception e) {
-                return buildError(e, "Failed to init cx client");
-            }
-
-            try {
-                shragaClient.login();
                 try {
-                    shragaClient.getTeamList();
+                    cred = CxCredentials.resolveCred(true, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
+                    CxCredentials.validateCxCredentials(cred);
+                    Jenkins instance = Jenkins.getInstance();
+                    if (instance != null && instance.proxy != null) {
+                        ProxyConfiguration jenkinsProxy = instance.proxy;
+                        commonClient = new CxShragaClient(cred.getServerUrl(), cred.getUsername(), cred.getPassword(), CX_ORIGIN,
+                                !this.isEnableCertificateValidation(), serverLog, jenkinsProxy.name, jenkinsProxy.port, jenkinsProxy.getUserName(), jenkinsProxy.getPassword());
+                    } else {
+                        commonClient = new CxShragaClient(cred.getServerUrl(), cred.getUsername(), cred.getPassword(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
+                    }
                 } catch (Exception e) {
-                    return FormValidation.error("Connection Failed.\n" +
-                            "Validate the provided login credentials and server URL are correct.\n" +
-                            "In addition, make sure the installed plugin version is compatible with the CxSAST version according to CxSAST release notes.\n" +
-                            "Error: " + e.getMessage());
+                    return buildError(e, "Failed to init cx client");
                 }
 
-                return FormValidation.ok("Success");
-
-            } catch (UnknownHostException e) {
-                return buildError(e, "Failed to login to Chekmarx server");
-
-            } catch (Exception e) {
-                return buildError(e, "Failed to login to Chekmarx server");
-
-            }
-        }
-
-        public FormValidation doValidateMvnPath(@QueryParameter final String mvnPath) {
-            boolean mvnPathExists = false;
-            FilePath path = new FilePath(new File(mvnPath));
-            String errorMsg = "Was not able to access specified path";
-            try {
-                if (!path.child("mvn").exists()) {
-                    errorMsg = "Maven was not found on the specified path";
-                } else {
-                    mvnPathExists = true;
+                try {
+                    commonClient.login();
+                    try {
+                        commonClient.getTeamList();
+                    } catch (Exception e) {
+                        return FormValidation.error("Connection Failed.\n" +
+                                "Validate the provided login credentials and server URL are correct.\n" +
+                                "In addition, make sure the installed plugin version is compatible with the CxSAST version according to CxSAST release notes.\n" +
+                                "Error: " + e.getMessage());
+                    }
+                    return FormValidation.ok("Success");
+                } catch (Exception e) {
+                    return buildError(e, "Failed to login to Checkmarx server");
                 }
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-                errorMsg = e.getMessage();
+            } finally {
+                if (commonClient != null) {
+                    commonClient.close();
+                }
             }
-
-            return mvnPathExists ? FormValidation.ok("Maven is found") : FormValidation.error(errorMsg);
         }
 
         private FormValidation buildError(Exception e, String errorLogMessage) {
@@ -1468,7 +1460,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          */
         private CxShragaClient prepareLoggedInClient(CxCredentials credentials)
                 throws IOException, CxClientException, CxTokenExpiredException {
-            CxShragaClient ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPassword(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
+            CxShragaClient ret;
+            Jenkins instance = Jenkins.getInstance();
+            if (instance != null && Jenkins.getInstance().proxy != null) {
+                ProxyConfiguration jenkinsProxy = Jenkins.getInstance().proxy;
+                ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPassword(), CX_ORIGIN,
+                        !this.isEnableCertificateValidation(), serverLog, jenkinsProxy.name, jenkinsProxy.port, jenkinsProxy.getUserName(), jenkinsProxy.getPassword());
+            } else {
+                ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPassword(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
+            }
             ret.login();
             return ret;
         }
@@ -1481,10 +1481,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                     @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ComboBoxModel projectNames = new ComboBoxModel();
-
+            CxShragaClient shragaClient = null;
             try {
                 CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
-                CxShragaClient shragaClient = prepareLoggedInClient(credentials);
+                shragaClient = prepareLoggedInClient(credentials);
                 List<Project> projects = shragaClient.getAllProjects();
 
                 for (Project p : projects) {
@@ -1492,10 +1492,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 }
 
                 return projectNames;
-
             } catch (Exception e) {
                 serverLog.error("Failed to populate project list: " + e.toString(), e);
                 return projectNames; // Return empty list of project names
+            } finally {
+                if (shragaClient != null) {
+                    shragaClient.close();
+                }
             }
         }
 
@@ -1559,11 +1562,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                       @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
+            CxShragaClient shragaClient = null;
             try {
-
                 CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
 
-                CxShragaClient shragaClient = prepareLoggedInClient(credentials);
+                shragaClient = prepareLoggedInClient(credentials);
                 List<CxNameObj> configurationList = shragaClient.getConfigurationSetList();
 
                 for (CxNameObj cs : configurationList) {
@@ -1574,6 +1577,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 serverLog.error("Failed to populate source encodings list: " + e.getMessage());
                 String message = "Provide Checkmarx server credentials to see source encodings list";
                 listBoxModel.add(new ListBoxModel.Option(message, message));
+            } finally {
+                if (shragaClient != null) {
+                    shragaClient.close();
+                }
             }
 
             return listBoxModel;
@@ -1590,10 +1597,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
+            CxShragaClient shragaClient = null;
             try {
                 CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
-
-                CxShragaClient shragaClient = prepareLoggedInClient(credentials);
+                shragaClient = prepareLoggedInClient(credentials);
                 List<Team> teamList = shragaClient.getTeamList();
                 for (Team team : teamList) {
                     listBoxModel.add(new ListBoxModel.Option(team.getFullName(), team.getId()));
@@ -1606,6 +1613,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 String message = "Provide Checkmarx server credentials to see teams list";
                 listBoxModel.add(new ListBoxModel.Option(message, message));
                 return listBoxModel;
+            } finally {
+                if (shragaClient != null) {
+                    shragaClient.close();
+                }
             }
 
         }
