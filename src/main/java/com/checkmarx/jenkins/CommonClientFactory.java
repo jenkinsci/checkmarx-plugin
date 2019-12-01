@@ -23,6 +23,9 @@ class CommonClientFactory {
                 SCAN_ORIGIN,
                 !enableCertificateValidation);
 
+        // SAST or OSA must be enabled because server URL is specified in config.
+        scanConfig.setSastEnabled(true);
+
         return getInstance(scanConfig, log);
     }
 
@@ -34,7 +37,7 @@ class CommonClientFactory {
 
     private static void setProxy(CxScanConfig config, Logger log) {
         Jenkins instance = Jenkins.getInstance();
-        if (instance != null && instance.proxy != null) {
+        if (instance.proxy != null) {
             ProxyConfiguration jenkinsProxy = instance.proxy;
             ProxyConfig internalProxy = new ProxyConfig();
             internalProxy.setHost(jenkinsProxy.name);
