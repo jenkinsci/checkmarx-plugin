@@ -6,11 +6,13 @@ import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.cx.restclient.CxShragaClient;
-import com.cx.restclient.common.ShragaUtils;
 import com.cx.restclient.common.summary.SummaryUtils;
 import com.cx.restclient.configuration.CxScanConfig;
+import com.cx.restclient.dto.DependencyScanResults;
+import com.cx.restclient.dto.DependencyScannerType;
 import com.cx.restclient.dto.ScanResults;
 import com.cx.restclient.dto.Team;
+import com.cx.restclient.dto.scansummary.ScanSummary;
 import com.cx.restclient.exception.CxClientException;
 import com.cx.restclient.exception.CxTokenExpiredException;
 import com.cx.restclient.osa.dto.OSAResults;
@@ -19,7 +21,10 @@ import com.cx.restclient.sast.dto.Project;
 import com.cx.restclient.sast.dto.SASTResults;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.TemplateException;
-import hudson.*;
+import hudson.EnvVars;
+import hudson.Extension;
+import hudson.FilePath;
+import hudson.Launcher;
 import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
@@ -153,7 +158,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     public static final int MINIMUM_TIMEOUT_IN_MINUTES = 1;
     public static final String REPORTS_FOLDER = "Checkmarx/Reports";
-    public static final String CX_ORIGIN = "Jenkins";
 
     @DataBoundConstructor
     public CxScanBuilder(
@@ -698,20 +702,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         printConfiguration(config, log);
 
         //validate at least one scan type is enabled
-        if (!config.getSastEnabled() && !config.getOsaEnabled()) {
+        if (!config.getSastEnabled() && config.getDependencyScannerType() == DependencyScannerType.NONE) {
             log.error("Both SAST and OSA are disabled. exiting");
             run.setResult(Result.FAILURE);
             return;
         }
 
-        Jenkins instance = Jenkins.getInstance();
-        final CxScanCallable action;
-        if (instance != null && Jenkins.getInstance().proxy != null) {
-            ProxyConfiguration jenkinsProxy = Jenkins.getInstance().proxy;
-            action = new CxScanCallable(config, listener, jenkinsProxy);
-        } else {
-            action = new CxScanCallable(config, listener);
-        }
+        final CxScanCallable action = new CxScanCallable(config, listener);
 
         //create scans and retrieve results (in jenkins agent)
         RemoteScanInfo scanInfo = workspace.act(action);
@@ -755,9 +752,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
 
             //create osa reports
-            OSAResults osaResults = scanResults.getOsaResults();
-            if (osaResults.isOsaResultsReady()) {
-                createOsaReports(scanResults.getOsaResults(), checkmarxBuildDir);
+            DependencyScanResults dsResults = scanResults.getDependencyScanResults();
+            if (dsResults != null && dsResults.getOsaResults() != null && dsResults.getOsaResults().isOsaResultsReady()) {
+                createOsaReports(dsResults.getOsaResults(), checkmarxBuildDir);
             }
             return;
         }
@@ -837,7 +834,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         //osa
-        ret.setOsaEnabled(osaEnabled);
+        ret.setDependencyScannerType(osaEnabled ? DependencyScannerType.OSA : DependencyScannerType.NONE);
         if (osaEnabled) {
             ret.setOsaFolderExclusions(env.expand(excludeOpenSourceFolders));
             ret.setOsaFilterPattern(env.expand(includeOpenSourceFolders));
@@ -897,8 +894,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
 
-        log.info("OSA scan enabled: " + config.getOsaEnabled());
-        if (config.getOsaEnabled()) {
+        boolean osaEnabled = (config.getDependencyScannerType() == DependencyScannerType.OSA);
+        log.info("OSA scan enabled: " + osaEnabled);
+        if (osaEnabled) {
             log.info("OSA folder exclusions: " + config.getOsaFolderExclusions());
             log.info("OSA filter patterns: " + config.getOsaFilterPattern());
             log.info("OSA archive includes: " + config.getOsaArchiveIncludePatterns());
@@ -941,8 +939,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private String generateHTMLReport(@Nonnull FilePath workspace, File checkmarxBuildDir, CxScanConfig config, ScanResults results) {
         String reportName = null;
         try {
-            String reportHTML = SummaryUtils.generateSummary(results.getSastResults(), results.getOsaResults(), config);
-            reportName = CxScanResult.resolveHTMLReportName(config.getSastEnabled(), config.getOsaEnabled());
+            String reportHTML = SummaryUtils.generateSummary(results.getSastResults(), results.getDependencyScanResults(), config);
+            boolean osaEnabled = config.getDependencyScannerType() == DependencyScannerType.OSA;
+            reportName = CxScanResult.resolveHTMLReportName(config.getSastEnabled(), osaEnabled);
             File reportFile = new File(checkmarxBuildDir, reportName);
             FileUtils.writeStringToFile(reportFile, reportHTML, Charset.defaultCharset());
             writeFileToWorkspaceReports(workspace, reportFile);
@@ -969,11 +968,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     private void failTheBuild(Run<?, ?> run, CxScanConfig config, ScanResults ret) {
         //assert if expected exception is thrown  OR when vulnerabilities under threshold OR when policy violated
-        String buildFailureResult = "";
-        buildFailureResult = ShragaUtils.getBuildFailureResult(config, ret.getSastResults(), ret.getOsaResults());
-        if (!StringUtils.isEmpty(buildFailureResult) || ret.getSastCreateException() != null || ret.getSastWaitException() != null ||
-                ret.getOsaCreateException() != null || ret.getOsaWaitException() != null || ret.getGeneralException() != null) {
-            printBuildFailure(buildFailureResult, ret, log);
+        ScanSummary scanSummary = new ScanSummary(config, ret);
+        if (scanSummary.hasErrors() ||
+                ret.getSastCreateException() != null || ret.getSastWaitException() != null ||
+                ret.getOsaCreateException() != null || ret.getOsaWaitException() != null ||
+                ret.getGeneralException() != null) {
+            printBuildFailure(scanSummary.toString(), ret, log);
             if (resolvedVulnerabilityThresholdResult != null) {
                 run.setResult(resolvedVulnerabilityThresholdResult);
             }
@@ -1415,14 +1415,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 try {
                     cred = CxCredentials.resolveCred(true, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
                     CxCredentials.validateCxCredentials(cred);
-                    Jenkins instance = Jenkins.getInstance();
-                    if (instance != null && instance.proxy != null) {
-                        ProxyConfiguration jenkinsProxy = instance.proxy;
-                        commonClient = new CxShragaClient(cred.getServerUrl(), cred.getUsername(), cred.getPassword(), CX_ORIGIN,
-                                !this.isEnableCertificateValidation(), serverLog, jenkinsProxy.name, jenkinsProxy.port, jenkinsProxy.getUserName(), jenkinsProxy.getPassword());
-                    } else {
-                        commonClient = new CxShragaClient(cred.getServerUrl(), cred.getUsername(), cred.getPassword(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
-                    }
+                    commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(), serverLog);
                 } catch (Exception e) {
                     return buildError(e, "Failed to init cx client");
                 }
@@ -1460,15 +1453,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          */
         private CxShragaClient prepareLoggedInClient(CxCredentials credentials)
                 throws IOException, CxClientException, CxTokenExpiredException {
-            CxShragaClient ret;
-            Jenkins instance = Jenkins.getInstance();
-            if (instance != null && Jenkins.getInstance().proxy != null) {
-                ProxyConfiguration jenkinsProxy = Jenkins.getInstance().proxy;
-                ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPassword(), CX_ORIGIN,
-                        !this.isEnableCertificateValidation(), serverLog, jenkinsProxy.name, jenkinsProxy.port, jenkinsProxy.getUserName(), jenkinsProxy.getPassword());
-            } else {
-                ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPassword(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
-            }
+            CxShragaClient ret = CommonClientFactory.getInstance(credentials, this.isEnableCertificateValidation(), serverLog);
             ret.login();
             return ret;
         }
@@ -1856,6 +1841,5 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         public boolean isOldCredentials() {
             return StringUtils.isEmpty(credentialsId) && (username != null || password != null);
         }
-
     }
 }

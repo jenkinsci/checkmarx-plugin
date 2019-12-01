@@ -5,6 +5,7 @@ import com.checkmarx.jenkins.legacy8_7.QueryResult;
 import com.checkmarx.jenkins.legacy8_7.SastScanResult;
 import com.checkmarx.jenkins.legacy8_7.ThresholdConfig;
 import com.cx.restclient.configuration.CxScanConfig;
+import com.cx.restclient.dto.DependencyScannerType;
 import com.cx.restclient.sast.dto.SASTResults;
 import hudson.PluginWrapper;
 import hudson.model.Action;
@@ -71,7 +72,7 @@ public class CxScanResult implements Action {
     public CxScanResult(Run<?, ?> owner, CxScanConfig config) {
         this.scanRanAsynchronous = !config.getSynchronous();
         this.sastEnabled = config.getSastEnabled();
-        this.osaEnabled = config.getOsaEnabled();
+        this.osaEnabled = config.getDependencyScannerType() == DependencyScannerType.OSA;
         this.owner = owner;
     }
 
