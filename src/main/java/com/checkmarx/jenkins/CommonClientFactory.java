@@ -23,9 +23,6 @@ class CommonClientFactory {
                 SCAN_ORIGIN,
                 !enableCertificateValidation);
 
-        // SAST or OSA must be enabled because server URL is specified in config.
-        scanConfig.setSastEnabled(true);
-
         return getInstance(scanConfig, log);
     }
 
