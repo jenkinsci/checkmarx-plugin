@@ -104,22 +104,41 @@
     </f:optionalBlock>
     <f:optionalBlock title="Skip scan if triggered by SCM Changes" inline="true" field="skipSCMTriggers" />
 
-	<!-- -= OSA SCAN =- -->
-    <f:section title="CxOSA Scan">
-        <f:optionalBlock title="Enable OSA" inline="true" field="osaEnabled">
-            <f:entry/>
-            <f:entry title="Include/Exclude wildcard patterns" field="includeOpenSourceFolders">
-                <f:textbox/>
-            </f:entry>
-            <f:entry title="Exclude folders" field="excludeOpenSourceFolders">
-                <f:textbox/>
-            </f:entry>
-            <f:entry title="Archive extract patterns" field="osaArchiveIncludePatterns">
-                <f:textbox default="${descriptor.DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS}"/>
-            </f:entry>
-            <f:optionalBlock title="Execute dependency managers 'install packages' command before Scan" inline="true" field="osaInstallBeforeScan" />
-        </f:optionalBlock>
-    </f:section>
+    <f:section title="Dependency Scan" />
+    <f:optionalBlock title="Enable dependency scan" inline="true" checked="${instance.dependencyScannerType != 'NONE'}">
+        <f:entry title="Include/Exclude wildcard patterns" field="includeOpenSourceFolders">
+            <f:textbox />
+        </f:entry>
+        <f:entry title="Exclude folders" field="excludeOpenSourceFolders">
+            <f:textbox />
+        </f:entry>
+
+        <f:radioBlock checked="${instance.dependencyScannerType == 'OSA'}" inline="true"
+                      name="dependencyScannerType" title="Use CxOSA dependency scanner" value="OSA">
+            <f:nested>
+                <f:entry title="Archive extract patterns" field="osaArchiveIncludePatterns">
+                    <f:textbox default="${descriptor.DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS}"/>
+                </f:entry>
+                <f:optionalBlock field="osaInstallBeforeScan"
+                                 title="Execute dependency managers 'install packages' command before Scan"
+                                 inline="true" />
+            </f:nested>
+        </f:radioBlock>
+        <f:radioBlock checked="${instance.dependencyScannerType == 'SCA'}" inline="true"
+                      name="dependencyScannerType" title="Use SCA dependency scanner" value="SCA">
+            <f:nested>
+                <f:entry title="SCA server URL" field="scaServerUrl">
+                    <f:textbox default="${descriptor.DEFAULT_SCA_SERVER_URL}"/>
+                </f:entry>
+                <f:entry title="Access control server URL" field="scaAccessControlUrl">
+                    <f:textbox default="${descriptor.DEFAULT_SCA_ACCESS_CONTROL_URL}"/>
+                </f:entry>
+                <f:entry title="Credentials" field="scaCredentialsId">
+                    <c:select />
+                </f:entry>
+            </f:nested>
+        </f:radioBlock>
+    </f:optionalBlock>
 
 	<!-- -= Build Control =- -->
     <f:section title="Build Control">

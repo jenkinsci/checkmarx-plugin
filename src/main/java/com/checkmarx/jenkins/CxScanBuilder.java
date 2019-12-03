@@ -4,7 +4,6 @@ import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
-import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.cx.restclient.CxShragaClient;
 import com.cx.restclient.common.summary.SummaryUtils;
 import com.cx.restclient.configuration.CxScanConfig;
@@ -140,6 +139,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private String osaArchiveIncludePatterns;
     private boolean osaInstallBeforeScan;
 
+    private final String scaServerUrl;
+    private final String scaAccessControlUrl;
+    private final String scaCredentialsId;
+
+    private DependencyScannerType dependencyScannerType;
+
     //////////////////////////////////////////////////////////////////////////////////////
     // Private variables
     //////////////////////////////////////////////////////////////////////////////////////
@@ -204,7 +209,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             @Nullable String osaArchiveIncludePatterns,
             boolean osaInstallBeforeScan,
             boolean avoidDuplicateProjectScans,
-            Boolean generateXmlReport) {
+            Boolean generateXmlReport,
+            DependencyScannerType dependencyScannerType,
+            String scaServerUrl,
+            String scaAccessControlUrl,
+            String scaCredentialsId) {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
         this.username = username;
@@ -252,6 +261,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
         this.avoidDuplicateProjectScans = avoidDuplicateProjectScans;
         this.generateXmlReport = (generateXmlReport == null) ? true : generateXmlReport;
+
+        this.dependencyScannerType = dependencyScannerType;
+        this.scaServerUrl = scaServerUrl;
+        this.scaAccessControlUrl = scaAccessControlUrl;
+        this.scaCredentialsId = scaCredentialsId;
     }
 
     // Configuration fields getters
@@ -680,6 +694,27 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setGroupId(@Nullable String groupId) {
         this.groupId = groupId;
+    }
+
+    public String getScaServerUrl() {
+        return scaServerUrl;
+    }
+
+    public String getScaAccessControlUrl() {
+        return scaAccessControlUrl;
+    }
+
+    public String getScaCredentialsId() {
+        return scaCredentialsId;
+    }
+
+    public DependencyScannerType getDependencyScannerType() {
+         return dependencyScannerType;
+    }
+
+    @DataBoundSetter
+    public void setDependencyScannerType(DependencyScannerType dependencyScannerType) {
+        this.dependencyScannerType = dependencyScannerType;
     }
 
     @Override
@@ -1141,7 +1176,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         public static final String DEFAULT_FILTER_PATTERNS = CxConfig.defaultFilterPattern();
         public static final String DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS = CxConfig.getDefaultOsaArchiveIncludePatterns();
-
+        public static final String DEFAULT_SCA_SERVER_URL = CxConfig.getDefaultScaServerUrl();
+        public static final String DEFAULT_SCA_ACCESS_CONTROL_URL = CxConfig.getDefaultScaAccessControlUrl();
         public static final int FULL_SCAN_CYCLE_MIN = 1;
         public static final int FULL_SCAN_CYCLE_MAX = 99;
 
@@ -1820,6 +1856,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String credentialsId) {
+            return getCredentialList(item, credentialsId);
+        }
+
+        public ListBoxModel doFillScaCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String scaCredentialsId) {
+            return getCredentialList(item, scaCredentialsId);
+        }
+
+        private ListBoxModel getCredentialList(Item item, String credentialsId) {
             StandardListBoxModel result = new StandardListBoxModel();
             if (item == null) {
                 if (!Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER)) {
@@ -1832,9 +1876,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 }
             }
 
+            List<StandardUsernamePasswordCredentials> standardCredentials = CredentialsProvider.lookupCredentials(
+                    StandardUsernamePasswordCredentials.class,
+                    item,
+                    null,
+                    Collections.emptyList());
+
             return result
                     .withEmptySelection()
-                    .withAll(CredentialsProvider.lookupCredentials(StandardUsernamePasswordCredentials.class, item, null, Collections.<DomainRequirement>emptyList()))
+                    .withAll(standardCredentials)
                     .withMatching(CredentialsMatchers.withId(credentialsId));
         }
 

@@ -15,4 +15,6 @@
         !**/*.stml, !**/*.ttml, !**/*.txn, !**/*.xhtm, !**/*.xhtml, !**/*.class, !**/*.iml, !Checkmarx/Reports/*.*,
         !OSADependencies.json, !**/node_modules/**/*</entry>
     <entry key="DefaultOSAArchiveIncludePatterns">*.zip, *.war, *.ear, *.tgz</entry>
+    <entry key="DefaultSCAServerURL">https://api.lumodev.com</entry>
+    <entry key="DefaultSCAAccessControlUrl">https://v2.ac-checkmarx.com</entry>
 </properties>
