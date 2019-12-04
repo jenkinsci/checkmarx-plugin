@@ -47,7 +47,7 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
         result.setScanResults(scanResults);
 
         boolean sastCreated = false;
-        boolean osaCreated = false;
+        boolean dependencyScanCreated = false;
 
         CxShragaClient shraga = null;
         try {
@@ -95,9 +95,9 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
 
             try {
                 shraga.createDependencyScan();
-                osaCreated = true;
+                dependencyScanCreated = true;
             } catch (CxClientException e) {
-                log.error("Failed to create OSA scan: " + e.getMessage());
+                log.error("Failed to create dependency scan.", e);
                 scanResults.setOsaCreateException(e);
             } finally {
                 handler.flush();
@@ -130,7 +130,7 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
             }
         }
 
-        if (osaCreated) {
+        if (dependencyScanCreated) {
             try {
                 DependencyScanResults dsResults = config.getSynchronous() ?
                         shraga.waitForDependencyScanResults() :

@@ -47,4 +47,8 @@ public class CxConfig {
 	public static String getDefaultScaAccessControlUrl() {
 		return configuration.getProperty("DefaultSCAAccessControlUrl");
 	}
+
+	public static String getDefaultScaWebAppUrl() {
+		return configuration.getProperty("DefaultSCAWebAppUrl");
+	}
 }

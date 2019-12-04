@@ -133,8 +133,14 @@
                 <f:entry title="Access control server URL" field="scaAccessControlUrl">
                     <f:textbox default="${descriptor.DEFAULT_SCA_ACCESS_CONTROL_URL}"/>
                 </f:entry>
+                <f:entry title="SCA web app URL" field="scaWebAppUrl">
+                    <f:textbox default="${descriptor.DEFAULT_SCA_WEB_APP_URL}" />
+                </f:entry>
                 <f:entry title="Credentials" field="scaCredentialsId">
                     <c:select />
+                </f:entry>
+                <f:entry title="Tenant" field="scaTenant">
+                    <f:textbox />
                 </f:entry>
             </f:nested>
         </f:radioBlock>

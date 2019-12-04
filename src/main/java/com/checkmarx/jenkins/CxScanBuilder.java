@@ -18,6 +18,7 @@ import com.cx.restclient.osa.dto.OSAResults;
 import com.cx.restclient.sast.dto.CxNameObj;
 import com.cx.restclient.sast.dto.Project;
 import com.cx.restclient.sast.dto.SASTResults;
+import com.cx.restclient.sca.dto.SCAConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.TemplateException;
 import hudson.EnvVars;
@@ -142,6 +143,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private final String scaServerUrl;
     private final String scaAccessControlUrl;
     private final String scaCredentialsId;
+    private final String scaWebAppUrl;
+    private final String scaTenant;
 
     private DependencyScannerType dependencyScannerType;
 
@@ -213,7 +216,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             DependencyScannerType dependencyScannerType,
             String scaServerUrl,
             String scaAccessControlUrl,
-            String scaCredentialsId) {
+            String scaCredentialsId,
+            String scaWebAppUrl,
+            String scaTenant) {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
         this.username = username;
@@ -266,6 +271,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.scaServerUrl = scaServerUrl;
         this.scaAccessControlUrl = scaAccessControlUrl;
         this.scaCredentialsId = scaCredentialsId;
+        this.scaWebAppUrl = scaWebAppUrl;
+        this.scaTenant = scaTenant;
     }
 
     // Configuration fields getters
@@ -708,6 +715,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return scaCredentialsId;
     }
 
+    public String getScaWebAppUrl() {
+        return scaWebAppUrl;
+    }
+
+    public String getScaTenant() {
+        return scaTenant;
+    }
+
     public DependencyScannerType getDependencyScannerType() {
          return dependencyScannerType;
     }
@@ -738,7 +753,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         //validate at least one scan type is enabled
         if (!config.getSastEnabled() && config.getDependencyScannerType() == DependencyScannerType.NONE) {
-            log.error("Both SAST and OSA are disabled. exiting");
+            log.error("Both SAST and dependency scan are disabled. Exiting.");
             run.setResult(Result.FAILURE);
             return;
         }
@@ -868,27 +883,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
 
-        //osa
-        ret.setDependencyScannerType(osaEnabled ? DependencyScannerType.OSA : DependencyScannerType.NONE);
-        if (osaEnabled) {
-            ret.setOsaFolderExclusions(env.expand(excludeOpenSourceFolders));
-            ret.setOsaFilterPattern(env.expand(includeOpenSourceFolders));
-            ret.setOsaArchiveIncludePatterns(osaArchiveIncludePatterns);
-            ret.setOsaRunInstall(osaInstallBeforeScan);
-
-            boolean useGlobalThreshold = shouldUseGlobalThreshold();
-            boolean useJobThreshold = shouldUseJobThreshold();
-            ret.setOsaThresholdsEnabled(useGlobalThreshold || useJobThreshold);
-
-            if (useGlobalThreshold) {
-                ret.setOsaHighThreshold(descriptor.getOsaHighThresholdEnforcement());
-                ret.setOsaMediumThreshold(descriptor.getOsaMediumThresholdEnforcement());
-                ret.setOsaLowThreshold(descriptor.getOsaLowThresholdEnforcement());
-            } else if (useJobThreshold) {
-                ret.setOsaHighThreshold(getOsaHighThreshold());
-                ret.setOsaMediumThreshold(getOsaMediumThreshold());
-                ret.setOsaLowThreshold(getOsaLowThreshold());
-            }
+        // dependency scan
+        ret.setDependencyScannerType(dependencyScannerType);
+        if (dependencyScannerType != DependencyScannerType.NONE) {
+            configureDependencyScan(run, descriptor, env, ret);
         }
 
         if (!ret.getSynchronous()) {
@@ -897,6 +895,43 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setEnablePolicyViolations(enableProjectPolicyEnforcement);
 
         return ret;
+    }
+
+    private void configureDependencyScan(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxScanConfig config) {
+        config.setOsaFilterPattern(env.expand(includeOpenSourceFolders));
+        config.setOsaFolderExclusions(env.expand(excludeOpenSourceFolders));
+
+        boolean useGlobalThreshold = shouldUseGlobalThreshold();
+        boolean useJobThreshold = shouldUseJobThreshold();
+        config.setOsaThresholdsEnabled(useGlobalThreshold || useJobThreshold);
+
+        if (useGlobalThreshold) {
+            config.setOsaHighThreshold(descriptor.getOsaHighThresholdEnforcement());
+            config.setOsaMediumThreshold(descriptor.getOsaMediumThresholdEnforcement());
+            config.setOsaLowThreshold(descriptor.getOsaLowThresholdEnforcement());
+        } else if (useJobThreshold) {
+            config.setOsaHighThreshold(getOsaHighThreshold());
+            config.setOsaMediumThreshold(getOsaMediumThreshold());
+            config.setOsaLowThreshold(getOsaLowThreshold());
+        }
+
+        if (dependencyScannerType == DependencyScannerType.OSA) {
+            config.setOsaArchiveIncludePatterns(osaArchiveIncludePatterns);
+            config.setOsaRunInstall(osaInstallBeforeScan);
+        }
+        else if (dependencyScannerType == DependencyScannerType.SCA) {
+            SCAConfig scaConfig = new SCAConfig();
+            scaConfig.setApiUrl(scaServerUrl);
+            scaConfig.setAccessControlUrl(scaAccessControlUrl);
+            scaConfig.setWebAppUrl(scaWebAppUrl);
+            scaConfig.setTenant(scaTenant);
+
+            StandardUsernamePasswordCredentials credentials = CxCredentials.getCredentialsById(scaCredentialsId, run);
+            scaConfig.setUsername(credentials.getUsername());
+            scaConfig.setPassword(credentials.getPassword().getPlainText());
+
+            config.setScaConfig(scaConfig);
+        }
     }
 
     private void printConfiguration(CxScanConfig config, CxLoggerAdapter log) {
@@ -1178,6 +1213,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         public static final String DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS = CxConfig.getDefaultOsaArchiveIncludePatterns();
         public static final String DEFAULT_SCA_SERVER_URL = CxConfig.getDefaultScaServerUrl();
         public static final String DEFAULT_SCA_ACCESS_CONTROL_URL = CxConfig.getDefaultScaAccessControlUrl();
+        public static final String DEFAULT_SCA_WEB_APP_URL = CxConfig.getDefaultScaWebAppUrl();
         public static final int FULL_SCAN_CYCLE_MIN = 1;
         public static final int FULL_SCAN_CYCLE_MAX = 99;
 
