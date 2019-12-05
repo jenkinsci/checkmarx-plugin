@@ -142,6 +142,8 @@
                 <f:entry title="Tenant" field="scaTenant">
                     <f:textbox />
                 </f:entry>
+                <f:validateButton title="Test Connection" progress="Testing..." method="testScaConnection"
+                                  with="scaServerUrl,scaAccessControlUrl,scaCredentialsId,scaTenant" />
             </f:nested>
         </f:radioBlock>
     </f:optionalBlock>

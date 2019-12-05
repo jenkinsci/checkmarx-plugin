@@ -33,20 +33,26 @@ class CommonClientFactory {
     }
 
     private static void setProxy(CxScanConfig config, Logger log) {
+        ProxyConfig proxyConfig = getProxyConfig();
+        if (proxyConfig != null) {
+            log.trace("Proxy host: " + proxyConfig.getHost());
+            log.trace("Proxy port: " + proxyConfig.getPort());
+            log.trace("Proxy user: " + proxyConfig.getUsername());
+            log.trace("Proxy password: *************");
+        }
+    }
+
+    static ProxyConfig getProxyConfig() {
+        ProxyConfig internalProxy = null;
         Jenkins instance = Jenkins.getInstance();
         if (instance.proxy != null) {
             ProxyConfiguration jenkinsProxy = instance.proxy;
-            ProxyConfig internalProxy = new ProxyConfig();
+            internalProxy = new ProxyConfig();
             internalProxy.setHost(jenkinsProxy.name);
             internalProxy.setPort(jenkinsProxy.port);
             internalProxy.setUsername(jenkinsProxy.getUserName());
             internalProxy.setPassword(jenkinsProxy.getPassword());
-            config.setProxyConfig(internalProxy);
-
-            log.trace("Proxy host: " + internalProxy.getHost());
-            log.trace("Proxy port: " + internalProxy.getPort());
-            log.trace("Proxy user: " + internalProxy.getUsername());
-            log.trace("Proxy password: *************");
         }
+        return internalProxy;
     }
 }

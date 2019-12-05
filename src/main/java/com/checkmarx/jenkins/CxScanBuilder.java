@@ -4,13 +4,11 @@ import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.cx.restclient.CxShragaClient;
 import com.cx.restclient.common.summary.SummaryUtils;
 import com.cx.restclient.configuration.CxScanConfig;
-import com.cx.restclient.dto.DependencyScanResults;
-import com.cx.restclient.dto.DependencyScannerType;
-import com.cx.restclient.dto.ScanResults;
-import com.cx.restclient.dto.Team;
+import com.cx.restclient.dto.*;
 import com.cx.restclient.dto.scansummary.ScanSummary;
 import com.cx.restclient.exception.CxClientException;
 import com.cx.restclient.exception.CxTokenExpiredException;
@@ -74,6 +72,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public static final String OSA_VULNERABILITIES_JSON = "OSAVulnerabilities.json";
 
     private static final String PDF_URL_TEMPLATE = "/%scheckmarx/pdfReport";
+    private static final String REQUEST_ORIGIN = "Jenkins";
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Persistent plugin configuration parameters
@@ -820,7 +819,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         CxScanConfig ret = new CxScanConfig();
 
         //general
-        ret.setCxOrigin("Jenkins");
+        ret.setCxOrigin(REQUEST_ORIGIN);
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
 
         //cx server
@@ -926,7 +925,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             scaConfig.setWebAppUrl(scaWebAppUrl);
             scaConfig.setTenant(scaTenant);
 
-            StandardUsernamePasswordCredentials credentials = CxCredentials.getCredentialsById(scaCredentialsId, run);
+            UsernamePasswordCredentials credentials = CxCredentials.getCredentialsById(scaCredentialsId, run);
             scaConfig.setUsername(credentials.getUsername());
             scaConfig.setPassword(credentials.getPassword().getPlainText());
 
@@ -1510,6 +1509,38 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 if (commonClient != null) {
                     commonClient.close();
                 }
+            }
+        }
+
+        public FormValidation doTestScaConnection(@QueryParameter String scaServerUrl,
+                                                  @QueryParameter String scaAccessControlUrl,
+                                                  @QueryParameter String scaCredentialsId,
+                                                  @QueryParameter String scaTenant,
+                                                  @AncestorInPath Item item) {
+            try {
+
+                CxScanConfig config = new CxScanConfig();
+                config.setCxOrigin(REQUEST_ORIGIN);
+                config.setDisableCertificateValidation(!isEnableCertificateValidation());
+
+                SCAConfig scaConfig = new SCAConfig();
+                scaConfig.setAccessControlUrl(scaAccessControlUrl);
+                scaConfig.setApiUrl(scaServerUrl);
+                scaConfig.setTenant(scaTenant);
+
+                UsernamePasswordCredentials credentials = CxCredentials.getCredentialsById(scaCredentialsId, item);
+                scaConfig.setUsername(credentials.getUsername());
+                scaConfig.setPassword(credentials.getPassword().getPlainText());
+
+                config.setScaConfig(scaConfig);
+
+                ProxyConfig proxyConfig = CommonClientFactory.getProxyConfig();
+                config.setProxyConfig(proxyConfig);
+
+                CxShragaClient.testScaConnection(config, serverLog);
+                return FormValidation.ok("Success");
+            } catch (Exception e) {
+                return buildError(e, "Failed to verify SCA connection.");
             }
         }
 
