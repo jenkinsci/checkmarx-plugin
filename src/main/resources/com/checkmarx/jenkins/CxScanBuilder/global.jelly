@@ -86,14 +86,14 @@
             <f:entry title="SAST Low severity vulnerabilities threshold" field="lowThresholdEnforcement">
                 <f:number clazz="positive-number" min="0" step="1" default=""/>
             </f:entry>
-            <f:entry title="OSA high severity vulnerabilities threshold" field="osaHighThresholdEnforcement">
+            <f:entry title="Dependency scan high severity vulnerabilities threshold" field="osaHighThresholdEnforcement">
                 <f:number clazz="positive-number" min="0" step="1" default=""/>
             </f:entry>
 
-            <f:entry title="OSA medium severity vulnerabilities threshold" field="osaMediumThresholdEnforcement">
+            <f:entry title="Dependency scan medium severity vulnerabilities threshold" field="osaMediumThresholdEnforcement">
                 <f:number clazz="positive-number" min="0" step="1" default=""/>
             </f:entry>
-            <f:entry title="OSA low severity vulnerabilities threshold" field="osaLowThresholdEnforcement">
+            <f:entry title="Dependency scan low severity vulnerabilities threshold" field="osaLowThresholdEnforcement">
                 <f:number clazz="positive-number" min="0" step="1" default=""/>
             </f:entry>
         </f:optionalBlock>

@@ -168,13 +168,13 @@
                 <f:entry title="SAST Low severity vulnerabilities threshold">
                     <f:readOnlyTextbox value="${descriptor.lowThresholdEnforcement}" />
                 </f:entry>
-                <f:entry title="OSA high severity vulnerabilities threshold">
+                <f:entry title="Dependency scan high severity vulnerabilities threshold">
                     <f:readOnlyTextbox value="${descriptor.osaHighThresholdEnforcement}" />
                 </f:entry>
-                <f:entry title="OSA medium severity vulnerabilities threshold">
+                <f:entry title="Dependency scan medium severity vulnerabilities threshold">
                     <f:readOnlyTextbox value="${descriptor.osaMediumThresholdEnforcement}" />
                 </f:entry>
-                <f:entry title="OSA low severity vulnerabilities threshold">
+                <f:entry title="Dependency scan low severity vulnerabilities threshold">
                     <f:readOnlyTextbox value="${descriptor.osaLowThresholdEnforcement}" />
                 </f:entry>
 
@@ -228,13 +228,13 @@
                                         <f:entry title="SAST Low severity vulnerabilities threshold">
                                             <f:readOnlyTextbox value="${descriptor.lowThresholdEnforcement}" />
                                         </f:entry>
-                                        <f:entry title="OSA high severity vulnerabilities threshold">
+                                        <f:entry title="Dependency scan high severity vulnerabilities threshold">
                                             <f:readOnlyTextbox value="${descriptor.osaHighThresholdEnforcement}" />
                                         </f:entry>
-                                        <f:entry title="OSA medium severity vulnerabilities threshold">
+                                        <f:entry title="Dependency scan medium severity vulnerabilities threshold">
                                             <f:readOnlyTextbox value="${descriptor.osaMediumThresholdEnforcement}" />
                                         </f:entry>
-                                        <f:entry title="OSA low severity vulnerabilities threshold">
+                                        <f:entry title="Dependency scan low severity vulnerabilities threshold">
                                             <f:readOnlyTextbox value="${descriptor.osaLowThresholdEnforcement}" />
                                         </f:entry>
                                     </f:nested>
@@ -262,13 +262,13 @@
                                             </f:entry>
                                         </f:optionalBlock>
 
-                                        <f:entry title="OSA high severity vulnerabilities threshold" field="osaHighThreshold">
+                                        <f:entry title="Dependency scan high severity vulnerabilities threshold" field="osaHighThreshold">
                                             <f:number clazz="positive-number" min="0" step="1" default="" />
                                         </f:entry>
-                                        <f:entry title="OSA medium severity vulnerabilities threshold" field="osaMediumThreshold">
+                                        <f:entry title="Dependency scan medium severity vulnerabilities threshold" field="osaMediumThreshold">
                                             <f:number clazz="positive-number" min="0" step="1" default="" />
                                         </f:entry>
-                                        <f:entry title="OSA low severity vulnerabilities threshold" field="osaLowThreshold">
+                                        <f:entry title="Dependency scan low severity vulnerabilities threshold" field="osaLowThreshold">
                                             <f:number clazz="positive-number" min="0" step="1" default="" />
                                         </f:entry>
                                     </f:nested>
@@ -295,13 +295,13 @@
                                     </f:entry>
                                 </f:optionalBlock>
 
-                                <f:entry title="OSA high severity vulnerabilities threshold" field="osaHighThreshold">
+                                <f:entry title="Dependency scan high severity vulnerabilities threshold" field="osaHighThreshold">
                                     <f:number clazz="positive-number" min="0" step="1" default="" />
                                 </f:entry>
-                                <f:entry title="OSA medium severity vulnerabilities threshold" field="osaMediumThreshold">
+                                <f:entry title="Dependency scan medium severity vulnerabilities threshold" field="osaMediumThreshold">
                                     <f:number clazz="positive-number" min="0" step="1" default="" />
                                 </f:entry>
-                                <f:entry title="OSA low severity vulnerabilities threshold" field="osaLowThreshold">
+                                <f:entry title="Dependency scan low severity vulnerabilities threshold" field="osaLowThreshold">
                                     <f:number clazz="positive-number" min="0" step="1" default="" />
                                 </f:entry>
                             </j:otherwise>
