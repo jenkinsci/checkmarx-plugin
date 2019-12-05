@@ -1009,8 +1009,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         String reportName = null;
         try {
             String reportHTML = SummaryUtils.generateSummary(results.getSastResults(), results.getDependencyScanResults(), config);
-            boolean osaEnabled = config.getDependencyScannerType() == DependencyScannerType.OSA;
-            reportName = CxScanResult.resolveHTMLReportName(config.getSastEnabled(), osaEnabled);
+            reportName = CxScanResult.resolveHTMLReportName(config.getSastEnabled(), config.getDependencyScannerType());
             File reportFile = new File(checkmarxBuildDir, reportName);
             FileUtils.writeStringToFile(reportFile, reportHTML, Charset.defaultCharset());
             writeFileToWorkspaceReports(workspace, reportFile);
@@ -1018,7 +1017,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             log.error("Failed to generate HTML report.", e);
         }
         return reportName;
-
     }
 
     private void writeJsonObjectToFile(Object jsonObj, File to, String description) {
@@ -1518,7 +1516,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                   @QueryParameter String scaTenant,
                                                   @AncestorInPath Item item) {
             try {
-
                 CxScanConfig config = new CxScanConfig();
                 config.setCxOrigin(REQUEST_ORIGIN);
                 config.setDisableCertificateValidation(!isEnableCertificateValidation());
