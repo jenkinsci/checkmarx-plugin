@@ -142,7 +142,7 @@
                                    value="${descriptor.dependencyScanConfig.scaWebAppUrl}"/>
                     </f:entry>
                     <f:entry title="SCA credentials" field="scaCredentialsId">
-                        <c:select/>
+                        <c:select value="${descriptor.dependencyScanConfig.scaCredentialsId}" />
                     </f:entry>
                     <f:entry title="Tenant" field="scaTenant">
                         <f:textbox value="${descriptor.dependencyScanConfig.scaTenant}"/>

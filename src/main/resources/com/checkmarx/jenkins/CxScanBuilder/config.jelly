@@ -147,7 +147,7 @@
                                    value="${instance.dependencyScanConfig.scaWebAppUrl}"/>
                     </f:entry>
                     <f:entry title="SCA credentials" field="scaCredentialsId">
-                        <c:select/>
+                        <c:select value="${instance.dependencyScanConfig.scaCredentialsId}" />
                     </f:entry>
                     <f:entry title="Tenant" field="scaTenant">
                         <f:textbox value="${instance.dependencyScanConfig.scaTenant}"/>
