@@ -104,49 +104,61 @@
     </f:optionalBlock>
     <f:optionalBlock title="Skip scan if triggered by SCM Changes" inline="true" field="skipSCMTriggers" />
 
-    <f:section title="Dependency Scan" />
-    <f:optionalBlock title="Enable dependency scan" inline="true" checked="${instance.dependencyScannerType != 'NONE'}">
-        <f:entry title="Include/Exclude wildcard patterns" field="includeOpenSourceFolders">
-            <f:textbox />
-        </f:entry>
-        <f:entry title="Exclude folders" field="excludeOpenSourceFolders">
-            <f:textbox />
-        </f:entry>
 
-        <f:radioBlock checked="${instance.dependencyScannerType == 'OSA'}" inline="true"
-                      name="dependencyScannerType" title="Use CxOSA dependency scanner" value="OSA">
-            <f:nested>
-                <f:entry title="Archive extract patterns" field="osaArchiveIncludePatterns">
-                    <f:textbox default="${descriptor.DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS}"/>
-                </f:entry>
-                <f:optionalBlock field="osaInstallBeforeScan"
-                                 title="Execute dependency managers 'install packages' command before Scan"
-                                 inline="true" />
-            </f:nested>
-        </f:radioBlock>
-        <f:radioBlock checked="${instance.dependencyScannerType == 'SCA'}" inline="true"
-                      name="dependencyScannerType" title="Use SCA dependency scanner" value="SCA">
-            <f:nested>
-                <f:entry title="SCA server URL" field="scaServerUrl">
-                    <f:textbox default="${descriptor.DEFAULT_SCA_SERVER_URL}"/>
-                </f:entry>
-                <f:entry title="Access control server URL" field="scaAccessControlUrl">
-                    <f:textbox default="${descriptor.DEFAULT_SCA_ACCESS_CONTROL_URL}"/>
-                </f:entry>
-                <f:entry title="SCA web app URL" field="scaWebAppUrl">
-                    <f:textbox default="${descriptor.DEFAULT_SCA_WEB_APP_URL}" />
-                </f:entry>
-                <f:entry title="Credentials" field="scaCredentialsId">
-                    <c:select />
-                </f:entry>
-                <f:entry title="Tenant" field="scaTenant">
-                    <f:textbox />
-                </f:entry>
-                <f:validateButton title="Test Connection" progress="Testing..." method="testScaConnection"
-                                  with="scaServerUrl,scaAccessControlUrl,scaCredentialsId,scaTenant" />
-            </f:nested>
-        </f:radioBlock>
+    <f:section title="Dependency Scan" />
+    <f:optionalBlock title="Enable dependency scan" field="dependencyScanConfig"
+                     checked="${instance.dependencyScanConfig != null}">
+        <f:optionalBlock title="Override global dependency scan settings" name="overrideGlobalConfig"
+                         checked="${instance.dependencyScanConfig.overrideGlobalConfig}" inline="true">
+            <f:entry title="Include/Exclude wildcard patterns" field="dependencyScanPatterns">
+                <f:textbox value="${instance.dependencyScanConfig.dependencyScanPatterns}" />
+            </f:entry>
+            <f:entry title="Exclude folders" field="dependencyScanExcludeFolders">
+                <f:textbox value="${instance.dependencyScanConfig.dependencyScanExcludeFolders}" />
+            </f:entry>
+
+            <f:radioBlock checked="${instance.dependencyScanConfig.dependencyScannerType == 'OSA'}" inline="true"
+                          name="dependencyScannerType" title="Use CxOSA dependency scanner" value="OSA">
+                <f:nested>
+                    <f:entry title="Archive extract patterns" field="osaArchiveIncludePatterns">
+                        <f:textbox default="${descriptor.DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS}"
+                                   value="${instance.dependencyScanConfig.osaArchiveIncludePatterns}"/>
+                    </f:entry>
+                    <f:entry title="Execute dependency managers 'install packages' command before Scan"
+                             field="osaInstallBeforeScan">
+                        <f:checkbox checked="${instance.dependencyScanConfig.osaInstallBeforeScan}"/>
+                    </f:entry>
+                </f:nested>
+            </f:radioBlock>
+
+            <f:radioBlock checked="${instance.dependencyScanConfig.dependencyScannerType == 'SCA'}"
+                          inline="true" name="dependencyScannerType" title="Use SCA dependency scanner" value="SCA">
+                <f:nested>
+                    <f:entry title="SCA server URL" field="scaServerUrl">
+                        <f:textbox default="${descriptor.DEFAULT_SCA_SERVER_URL}"
+                                   value="${instance.dependencyScanConfig.scaServerUrl}"/>
+                    </f:entry>
+                    <f:entry title="Access control server URL" field="scaAccessControlUrl">
+                        <f:textbox default="${descriptor.DEFAULT_SCA_ACCESS_CONTROL_URL}"
+                                   value="${instance.dependencyScanConfig.scaAccessControlUrl}"/>
+                    </f:entry>
+                    <f:entry title="SCA web app URL" field="scaWebAppUrl">
+                        <f:textbox default="${descriptor.DEFAULT_SCA_WEB_APP_URL}"
+                                   value="${instance.dependencyScanConfig.scaWebAppUrl}"/>
+                    </f:entry>
+                    <f:entry title="SCA credentials" field="scaCredentialsId">
+                        <c:select/>
+                    </f:entry>
+                    <f:entry title="Tenant" field="scaTenant">
+                        <f:textbox value="${instance.dependencyScanConfig.scaTenant}"/>
+                    </f:entry>
+                    <f:validateButton title="Test Connection" progress="Testing..." method="testScaConnection"
+                                      with="scaServerUrl,scaAccessControlUrl,scaCredentialsId,scaTenant"/>
+                </f:nested>
+            </f:radioBlock>
+        </f:optionalBlock>
     </f:optionalBlock>
+
 
 	<!-- -= Build Control =- -->
     <f:section title="Build Control">

@@ -89,7 +89,6 @@
             <f:entry title="Dependency scan high severity vulnerabilities threshold" field="osaHighThresholdEnforcement">
                 <f:number clazz="positive-number" min="0" step="1" default=""/>
             </f:entry>
-
             <f:entry title="Dependency scan medium severity vulnerabilities threshold" field="osaMediumThresholdEnforcement">
                 <f:number clazz="positive-number" min="0" step="1" default=""/>
             </f:entry>
@@ -104,6 +103,55 @@
             </f:entry>
         </f:optionalBlock>
 
+        <f:optionalBlock title="Globally define dependency scan settings" field="dependencyScanConfig"
+                         checked="${descriptor.dependencyScanConfig != null}">
+            <f:entry title="Include/Exclude wildcard patterns" field="dependencyScanPatterns">
+                <f:textbox value="${descriptor.dependencyScanConfig.dependencyScanPatterns}" />
+            </f:entry>
+            <f:entry title="Exclude folders" field="dependencyScanExcludeFolders">
+                <f:textbox value="${descriptor.dependencyScanConfig.dependencyScanExcludeFolders}" />
+            </f:entry>
+
+            <f:radioBlock checked="${descriptor.dependencyScanConfig.dependencyScannerType == 'OSA'}" inline="true"
+                          name="dependencyScannerType" title="Use CxOSA dependency scanner" value="OSA">
+                <f:nested>
+                    <f:entry title="Archive extract patterns" field="osaArchiveIncludePatterns">
+                        <f:textbox default="${descriptor.DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS}"
+                                   value="${descriptor.dependencyScanConfig.osaArchiveIncludePatterns}"/>
+                    </f:entry>
+                    <f:entry title="Execute dependency managers 'install packages' command before Scan"
+                             field="osaInstallBeforeScan">
+                        <f:checkbox checked="${descriptor.dependencyScanConfig.osaInstallBeforeScan}"/>
+                    </f:entry>
+                </f:nested>
+            </f:radioBlock>
+
+            <f:radioBlock checked="${descriptor.dependencyScanConfig.dependencyScannerType == 'SCA'}"
+                          inline="true" name="dependencyScannerType" title="Use SCA dependency scanner" value="SCA">
+                <f:nested>
+                    <f:entry title="SCA server URL" field="scaServerUrl">
+                        <f:textbox default="${descriptor.DEFAULT_SCA_SERVER_URL}"
+                                   value="${descriptor.dependencyScanConfig.scaServerUrl}"/>
+                    </f:entry>
+                    <f:entry title="Access control server URL" field="scaAccessControlUrl">
+                        <f:textbox default="${descriptor.DEFAULT_SCA_ACCESS_CONTROL_URL}"
+                                   value="${descriptor.dependencyScanConfig.scaAccessControlUrl}"/>
+                    </f:entry>
+                    <f:entry title="SCA web app URL" field="scaWebAppUrl">
+                        <f:textbox default="${descriptor.DEFAULT_SCA_WEB_APP_URL}"
+                                   value="${descriptor.dependencyScanConfig.scaWebAppUrl}"/>
+                    </f:entry>
+                    <f:entry title="SCA credentials" field="scaCredentialsId">
+                        <c:select/>
+                    </f:entry>
+                    <f:entry title="Tenant" field="scaTenant">
+                        <f:textbox value="${descriptor.dependencyScanConfig.scaTenant}"/>
+                    </f:entry>
+                    <f:validateButton title="Test Connection" progress="Testing..." method="testScaConnection"
+                                      with="scaServerUrl,scaAccessControlUrl,scaCredentialsId,scaTenant"/>
+                </f:nested>
+            </f:radioBlock>
+        </f:optionalBlock>
     </f:section>
 
 </j:jelly>

@@ -14,6 +14,7 @@ import com.cx.restclient.exception.CxClientException;
 import com.cx.restclient.exception.CxTokenExpiredException;
 import com.cx.restclient.osa.dto.OSAResults;
 import com.cx.restclient.sast.dto.CxNameObj;
+import com.cx.restclient.sast.dto.Preset;
 import com.cx.restclient.sast.dto.Project;
 import com.cx.restclient.sast.dto.SASTResults;
 import com.cx.restclient.sca.dto.SCAConfig;
@@ -131,21 +132,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private Integer osaMediumThreshold;
     @Nullable
     private Integer osaLowThreshold;
-    @Nullable
-    private String includeOpenSourceFolders;//OSA include/exclude wildcard patterns
-    @Nullable
-    private String excludeOpenSourceFolders;//OSA exclude folders
-    @Nullable
-    private String osaArchiveIncludePatterns;
-    private boolean osaInstallBeforeScan;
 
-    private final String scaServerUrl;
-    private final String scaAccessControlUrl;
-    private final String scaCredentialsId;
-    private final String scaWebAppUrl;
-    private final String scaTenant;
-
-    private DependencyScannerType dependencyScannerType;
+    private DependencyScanConfig dependencyScanConfig;
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Private variables
@@ -206,18 +194,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             boolean enableProjectPolicyEnforcement,
             String thresholdSettings,
             String vulnerabilityThresholdResult,
-            @Nullable String includeOpenSourceFolders,
-            @Nullable String excludeOpenSourceFolders,
-            @Nullable String osaArchiveIncludePatterns,
-            boolean osaInstallBeforeScan,
             boolean avoidDuplicateProjectScans,
-            Boolean generateXmlReport,
-            DependencyScannerType dependencyScannerType,
-            String scaServerUrl,
-            String scaAccessControlUrl,
-            String scaCredentialsId,
-            String scaWebAppUrl,
-            String scaTenant) {
+            Boolean generateXmlReport
+    ) {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
         this.username = username;
@@ -255,23 +234,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.osaLowThreshold = osaLowThreshold;
         this.generatePdfReport = generatePdfReport;
         this.enableProjectPolicyEnforcement = enableProjectPolicyEnforcement;
-        this.includeOpenSourceFolders = includeOpenSourceFolders;
-        this.excludeOpenSourceFolders = excludeOpenSourceFolders;
-        this.osaArchiveIncludePatterns = osaArchiveIncludePatterns;
-        this.osaInstallBeforeScan = osaInstallBeforeScan;
         this.thresholdSettings = thresholdSettings;
         if (vulnerabilityThresholdResult != null) {
             this.vulnerabilityThresholdResult = Result.fromString(vulnerabilityThresholdResult);
         }
         this.avoidDuplicateProjectScans = avoidDuplicateProjectScans;
         this.generateXmlReport = (generateXmlReport == null) ? true : generateXmlReport;
-
-        this.dependencyScannerType = dependencyScannerType;
-        this.scaServerUrl = scaServerUrl;
-        this.scaAccessControlUrl = scaAccessControlUrl;
-        this.scaCredentialsId = scaCredentialsId;
-        this.scaWebAppUrl = scaWebAppUrl;
-        this.scaTenant = scaTenant;
     }
 
     // Configuration fields getters
@@ -477,34 +445,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.osaLowThreshold = osaLowThreshold;
     }
 
-    @Nullable
-    public String getExcludeOpenSourceFolders() {
-        return excludeOpenSourceFolders;
-    }
-
-    @Nullable
-    public String getIncludeOpenSourceFolders() {
-        return includeOpenSourceFolders;
-    }
-
-    @Nullable
-    public String getOsaArchiveIncludePatterns() {
-        return osaArchiveIncludePatterns;
-    }
-
-    public void setOsaArchiveIncludePatterns(@Nullable String osaArchiveIncludePatterns) {
-        this.osaArchiveIncludePatterns = osaArchiveIncludePatterns;
-    }
-
-    @Nullable
-    public boolean isOsaInstallBeforeScan() {
-        return osaInstallBeforeScan;
-    }
-
-    public void setOsaInstallBeforeScan(@Nullable boolean osaInstallBeforeScan) {
-        this.osaInstallBeforeScan = osaInstallBeforeScan;
-    }
-
     public boolean isGeneratePdfReport() {
         return generatePdfReport;
     }
@@ -660,16 +600,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
-    public void setIncludeOpenSourceFolders(@Nullable String includeOpenSourceFolders) {
-        this.includeOpenSourceFolders = includeOpenSourceFolders;
-    }
-
-    @DataBoundSetter
-    public void setExcludeOpenSourceFolders(@Nullable String excludeOpenSourceFolders) {
-        this.excludeOpenSourceFolders = excludeOpenSourceFolders;
-    }
-
-    @DataBoundSetter
     public void setJobStatusOnError(JobStatusOnError jobStatusOnError) {
         this.jobStatusOnError = jobStatusOnError;
     }
@@ -702,33 +632,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.groupId = groupId;
     }
 
-    public String getScaServerUrl() {
-        return scaServerUrl;
-    }
-
-    public String getScaAccessControlUrl() {
-        return scaAccessControlUrl;
-    }
-
-    public String getScaCredentialsId() {
-        return scaCredentialsId;
-    }
-
-    public String getScaWebAppUrl() {
-        return scaWebAppUrl;
-    }
-
-    public String getScaTenant() {
-        return scaTenant;
-    }
-
-    public DependencyScannerType getDependencyScannerType() {
-         return dependencyScannerType;
+    public DependencyScanConfig getDependencyScanConfig() {
+        return dependencyScanConfig;
     }
 
     @DataBoundSetter
-    public void setDependencyScannerType(DependencyScannerType dependencyScannerType) {
-        this.dependencyScannerType = dependencyScannerType;
+    public void setDependencyScanConfig(DependencyScanConfig dependencyScanConfig) {
+        this.dependencyScanConfig = dependencyScanConfig;
     }
 
     @Override
@@ -814,8 +724,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     }
 
-    private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) throws IOException, InterruptedException {
-
+    private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) {
         CxScanConfig ret = new CxScanConfig();
 
         //general
@@ -882,11 +791,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
 
-        // dependency scan
-        ret.setDependencyScannerType(dependencyScannerType);
-        if (dependencyScannerType != DependencyScannerType.NONE) {
-            configureDependencyScan(run, descriptor, env, ret);
-        }
+        configureDependencyScan(run, descriptor, env, ret);
 
         if (!ret.getSynchronous()) {
             enableProjectPolicyEnforcement = false;
@@ -897,8 +802,30 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     private void configureDependencyScan(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxScanConfig config) {
-        config.setOsaFilterPattern(env.expand(includeOpenSourceFolders));
-        config.setOsaFolderExclusions(env.expand(excludeOpenSourceFolders));
+        boolean dependencyScanEnabled = dependencyScanConfig != null;
+        if (!dependencyScanEnabled) {
+            config.setDependencyScannerType(DependencyScannerType.NONE);
+            return;
+        }
+
+        DependencyScanConfig effectiveConfig;
+        if (dependencyScanConfig.overrideGlobalConfig) {
+            log.info("Using job-specific dependency scan configuration.");
+            effectiveConfig = dependencyScanConfig;
+        } else {
+            log.info("Using globally defined dependency scan configuration.");
+            effectiveConfig = descriptor.getDependencyScanConfig();
+        }
+
+        if (effectiveConfig == null) {
+            config.setDependencyScannerType(DependencyScannerType.NONE);
+            return;
+        }
+
+        config.setDependencyScannerType(effectiveConfig.dependencyScannerType);
+
+        config.setOsaFilterPattern(env.expand(effectiveConfig.dependencyScanPatterns));
+        config.setOsaFolderExclusions(env.expand(effectiveConfig.dependencyScanExcludeFolders));
 
         boolean useGlobalThreshold = shouldUseGlobalThreshold();
         boolean useJobThreshold = shouldUseJobThreshold();
@@ -914,23 +841,31 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             config.setOsaLowThreshold(getOsaLowThreshold());
         }
 
-        if (dependencyScannerType == DependencyScannerType.OSA) {
-            config.setOsaArchiveIncludePatterns(osaArchiveIncludePatterns);
-            config.setOsaRunInstall(osaInstallBeforeScan);
+        if (config.getDependencyScannerType() == DependencyScannerType.OSA) {
+            config.setOsaArchiveIncludePatterns(effectiveConfig.osaArchiveIncludePatterns);
+            config.setOsaRunInstall(effectiveConfig.osaInstallBeforeScan);
         }
-        else if (dependencyScannerType == DependencyScannerType.SCA) {
-            SCAConfig scaConfig = new SCAConfig();
-            scaConfig.setApiUrl(scaServerUrl);
-            scaConfig.setAccessControlUrl(scaAccessControlUrl);
-            scaConfig.setWebAppUrl(scaWebAppUrl);
-            scaConfig.setTenant(scaTenant);
-
-            UsernamePasswordCredentials credentials = CxCredentials.getCredentialsById(scaCredentialsId, run);
-            scaConfig.setUsername(credentials.getUsername());
-            scaConfig.setPassword(credentials.getPassword().getPlainText());
-
-            config.setScaConfig(scaConfig);
+        else if (config.getDependencyScannerType() == DependencyScannerType.SCA) {
+            config.setScaConfig(getScaConfig(run, effectiveConfig));
         }
+    }
+
+    private SCAConfig getScaConfig(Run<?, ?> run, DependencyScanConfig dsConfig) {
+        SCAConfig result = new SCAConfig();
+        result.setApiUrl(dsConfig.scaServerUrl);
+        result.setAccessControlUrl(dsConfig.scaAccessControlUrl);
+        result.setWebAppUrl(dsConfig.scaWebAppUrl);
+        result.setTenant(dsConfig.scaTenant);
+
+        UsernamePasswordCredentials credentials = CxCredentials.getCredentialsById(dsConfig.scaCredentialsId, run);
+        if (credentials != null) {
+            result.setUsername(credentials.getUsername());
+            result.setPassword(credentials.getPassword().getPlainText());
+        }
+        else {
+            log.warn("SCA credentials are not specified.");
+        }
+        return result;
     }
 
     private void printConfiguration(CxScanConfig config, CxLoggerAdapter log) {
@@ -945,6 +880,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("SAST scan enabled: " + config.getSastEnabled());
         log.info("avoid duplicated projects scans: " + config.isAvoidDuplicateProjectScans());
         log.info("enable Project Policy Enforcement: " + config.getEnablePolicyViolations());
+        log.info("Dependency scanner type: " + config.getDependencyScannerType());
         if (config.getSastEnabled()) {
             log.info("preset id: " + config.getPresetId());
             log.info("SAST folder exclusions: " + config.getSastFolderExclusions());
@@ -963,20 +899,22 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
 
-        boolean osaEnabled = (config.getDependencyScannerType() == DependencyScannerType.OSA);
-        log.info("OSA scan enabled: " + osaEnabled);
-        if (osaEnabled) {
-            log.info("OSA folder exclusions: " + config.getOsaFolderExclusions());
-            log.info("OSA filter patterns: " + config.getOsaFilterPattern());
-            log.info("OSA archive includes: " + config.getOsaArchiveIncludePatterns());
-            log.info("OSA run Execute dependency managers install packages command before Scan: " + config.getOsaRunInstall());
-            log.info("OSA thresholds enabled: " + config.getOsaThresholdsEnabled());
+        if (config.getDependencyScannerType() != DependencyScannerType.NONE) {
+            log.info("Dependency scan configuration:");
+            log.info("  folder exclusions: " + config.getOsaFolderExclusions());
+            log.info("  filter patterns: " + config.getOsaFilterPattern());
+            log.info("  thresholds enabled: " + config.getOsaThresholdsEnabled());
             if (config.getOsaThresholdsEnabled()) {
-                log.info("OSA high threshold: " + config.getOsaHighThreshold());
-                log.info("OSA medium threshold: " + config.getOsaMediumThreshold());
-                log.info("OSA low threshold: " + config.getOsaLowThreshold());
+                log.info("  high threshold: " + config.getOsaHighThreshold());
+                log.info("  medium threshold: " + config.getOsaMediumThreshold());
+                log.info("  low threshold: " + config.getOsaLowThreshold());
+            }
+            if (config.getDependencyScannerType() == DependencyScannerType.OSA) {
+                log.info("  OSA archive includes: " + config.getOsaArchiveIncludePatterns());
+                log.info("  OSA run Execute dependency managers install packages command before Scan: " + config.getOsaRunInstall());
             }
         }
+
         log.info("------------------------------------------------------------------------------------------");
     }
 
@@ -1256,6 +1194,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private boolean lockVulnerabilitySettings = true;
 
         private final transient Pattern msGuid = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
+
+        private final String DEPENDENCY_SCAN_CONFIG_PROP = "dependencyScanConfig";
+        private DependencyScanConfig dependencyScanConfig;
 
         public DescriptorImpl() {
             load();
@@ -1610,9 +1551,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 CxShragaClient shragaClient = prepareLoggedInClient(credentials);
 
                 //todo import preset
-                List<com.cx.restclient.sast.dto.Preset> presets = shragaClient.getPresetList();
+                List<Preset> presets = shragaClient.getPresetList();
 
-                for (com.cx.restclient.sast.dto.Preset p : presets) {
+                for (Preset p : presets) {
                     listBoxModel.add(new ListBoxModel.Option(p.getName(), Integer.toString(p.getId())));
                 }
                 return listBoxModel;
@@ -1890,7 +1831,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             // ^Can also use req.bindJSON(this, formData);
             //  (easier when there are many fields; need set* methods for this, like setUseFrench)
 
-            req.bindJSON(this, formData.getJSONObject("checkmarx"));
+            JSONObject pluginData = formData.getJSONObject("checkmarx");
+
+            // Set dependency scan config to null when user turns off the 'Globally define dependency scan settings'
+            // option.
+            if (!pluginData.has(DEPENDENCY_SCAN_CONFIG_PROP)) {
+                pluginData.put(DEPENDENCY_SCAN_CONFIG_PROP, null);
+            }
+
+            req.bindJSON(this, pluginData);
             save();
             return super.configure(req, formData);
         }
@@ -1954,6 +1903,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         public boolean isOldCredentials() {
             return StringUtils.isEmpty(credentialsId) && (username != null || password != null);
+        }
+
+        public DependencyScanConfig getDependencyScanConfig() {
+            return dependencyScanConfig;
+        }
+
+        @DataBoundSetter
+        public void setDependencyScanConfig(DependencyScanConfig dependencyScanConfig) {
+            this.dependencyScanConfig = dependencyScanConfig;
         }
     }
 }
