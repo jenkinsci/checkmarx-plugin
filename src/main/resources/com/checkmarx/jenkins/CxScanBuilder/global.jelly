@@ -106,7 +106,8 @@
         <f:optionalBlock title="Globally define dependency scan settings" field="dependencyScanConfig"
                          checked="${descriptor.dependencyScanConfig != null}">
             <f:entry title="Include/Exclude wildcard patterns" field="dependencyScanPatterns">
-                <f:textbox value="${descriptor.dependencyScanConfig.dependencyScanPatterns}" />
+                <f:textarea value="${descriptor.dependencyScanConfig.dependencyScanPatterns}"
+                            default="${descriptor.DEFAULT_FILTER_PATTERNS}" />
             </f:entry>
             <f:entry title="Exclude folders" field="dependencyScanExcludeFolders">
                 <f:textbox value="${descriptor.dependencyScanConfig.dependencyScanExcludeFolders}" />
