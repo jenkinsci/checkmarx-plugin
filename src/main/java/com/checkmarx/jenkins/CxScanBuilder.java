@@ -889,7 +889,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             result.setPassword(credentials.getPassword().getPlainText());
         }
         else {
-            log.warn("SCA credentials are not specified.");
+            log.warn("CxSCA credentials are not specified.");
         }
         return result;
     }
@@ -1514,7 +1514,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 CxShragaClient.testScaConnection(config, serverLog);
                 return FormValidation.ok("Success");
             } catch (Exception e) {
-                return buildError(e, "Failed to verify SCA connection.");
+                return buildError(e, "Failed to verify CxSCA connection.");
             }
         }
 

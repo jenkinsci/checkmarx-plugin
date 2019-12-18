@@ -133,9 +133,9 @@
             </f:radioBlock>
 
             <f:radioBlock checked="${instance.dependencyScanConfig.dependencyScannerType == 'SCA'}"
-                          inline="true" name="dependencyScannerType" title="Use SCA dependency scanner" value="SCA">
+                          inline="true" name="dependencyScannerType" title="Use CxSCA dependency scanner" value="SCA">
                 <f:nested>
-                    <f:entry title="SCA server URL" field="scaServerUrl">
+                    <f:entry title="CxSCA server URL" field="scaServerUrl">
                         <f:textbox default="${descriptor.DEFAULT_SCA_SERVER_URL}"
                                    value="${instance.dependencyScanConfig.scaServerUrl}"/>
                     </f:entry>
@@ -143,11 +143,11 @@
                         <f:textbox default="${descriptor.DEFAULT_SCA_ACCESS_CONTROL_URL}"
                                    value="${instance.dependencyScanConfig.scaAccessControlUrl}"/>
                     </f:entry>
-                    <f:entry title="SCA web app URL" field="scaWebAppUrl">
+                    <f:entry title="CxSCA web app URL" field="scaWebAppUrl">
                         <f:textbox default="${descriptor.DEFAULT_SCA_WEB_APP_URL}"
                                    value="${instance.dependencyScanConfig.scaWebAppUrl}"/>
                     </f:entry>
-                    <f:entry title="SCA credentials" field="scaCredentialsId">
+                    <f:entry title="CxSCA credentials" field="scaCredentialsId">
                         <c:select value="${instance.dependencyScanConfig.scaCredentialsId}" />
                     </f:entry>
                     <f:entry title="Tenant" field="scaTenant">
