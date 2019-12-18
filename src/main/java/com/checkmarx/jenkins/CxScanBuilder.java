@@ -28,10 +28,7 @@ import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.triggers.SCMTrigger;
-import hudson.util.ComboBoxModel;
-import hudson.util.FormValidation;
-import hudson.util.ListBoxModel;
-import hudson.util.Secret;
+import hudson.util.*;
 import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
@@ -125,7 +122,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private String failBuildOnNewSeverity;
     private boolean generatePdfReport;
     private boolean enableProjectPolicyEnforcement;
-    private boolean osaEnabled;
     @Nullable
     private Integer osaHighThreshold;
     @Nullable
@@ -133,6 +129,21 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     private Integer osaLowThreshold;
 
+    // Fields marked as transient are preserved for backward compatibility.
+    // They are read from job config, but are not written back when the data is saved.
+    private transient boolean osaEnabled;
+    @Nullable
+    private transient String includeOpenSourceFolders;//OSA include/exclude wildcard patterns
+    @Nullable
+    private transient String excludeOpenSourceFolders;//OSA exclude folders
+    @Nullable
+    private transient String osaArchiveIncludePatterns;
+    private transient boolean osaInstallBeforeScan;
+
+    /**
+     * null value means that dependency scan is disabled.
+     */
+    @Nullable
     private DependencyScanConfig dependencyScanConfig;
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -141,8 +152,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     //server log, will NOT print to job console
     private static final JenkinsServerLogger serverLog = new JenkinsServerLogger();
+
     //Print to job console, initialized within perform
     CxLoggerAdapter log;
+
     private JobStatusOnError jobStatusOnError;
     private String exclusionsSetting;
     private String thresholdSettings;
@@ -186,7 +199,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             @Nullable Integer lowThreshold,
             boolean failBuildOnNewResults,
             String failBuildOnNewSeverity,
-            boolean osaEnabled,
             @Nullable Integer osaHighThreshold,
             @Nullable Integer osaMediumThreshold,
             @Nullable Integer osaLowThreshold,
@@ -228,7 +240,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.lowThreshold = lowThreshold;
         this.failBuildOnNewResults = failBuildOnNewResults;
         this.failBuildOnNewSeverity = failBuildOnNewSeverity;
-        this.osaEnabled = osaEnabled;
         this.osaHighThreshold = osaHighThreshold;
         this.osaMediumThreshold = osaMediumThreshold;
         this.osaLowThreshold = osaLowThreshold;
@@ -410,11 +421,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return osaEnabled;
     }
 
-    @DataBoundSetter
-    public void setOsaEnabled(boolean osaEnabled) {
-        this.osaEnabled = osaEnabled;
-    }
-
     @Nullable
     public Integer getOsaHighThreshold() {
         return osaHighThreshold;
@@ -443,6 +449,26 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setOsaLowThreshold(Integer osaLowThreshold) {
         this.osaLowThreshold = osaLowThreshold;
+    }
+
+    @Nullable
+    public String getExcludeOpenSourceFolders() {
+        return excludeOpenSourceFolders;
+    }
+
+    @Nullable
+    public String getIncludeOpenSourceFolders() {
+        return includeOpenSourceFolders;
+    }
+
+    @Nullable
+    public String getOsaArchiveIncludePatterns() {
+        return osaArchiveIncludePatterns;
+    }
+
+    @Nullable
+    public boolean isOsaInstallBeforeScan() {
+        return osaInstallBeforeScan;
     }
 
     public boolean isGeneratePdfReport() {
@@ -1129,6 +1155,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return allowedCauses.isEmpty();
     }
 
+    /**
+     * Called when this plugin is initialized during Jenkins startup. Invoked by Jenkins using reflection.
+     * Invoked when all the fields of the current object are deserialized.
+     * @return modified instance of the current object.
+     */
+    protected Object readResolve() {
+        PluginDataMigration migration = new PluginDataMigration(serverLog);
+        migration.migrate(this);
+        return this;
+    }
 
     //////////////////////////////////////////////////////////////////////////////////////////////
     //
@@ -1493,7 +1529,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *  shared state to avoid synchronization issues.
          */
         private CxShragaClient prepareLoggedInClient(CxCredentials credentials)
-                throws IOException, CxClientException, CxTokenExpiredException {
+                throws IOException, CxClientException {
             CxShragaClient ret = CommonClientFactory.getInstance(credentials, this.isEnableCertificateValidation(), serverLog);
             ret.login();
             return ret;
@@ -1797,7 +1833,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             final String url = getCurrentDescriptorByNameUrl();
 
-            String decodedUrl = null;
+            String decodedUrl;
             try {
                 decodedUrl = URLDecoder.decode(url, "UTF-8");
             } catch (UnsupportedEncodingException e) {
