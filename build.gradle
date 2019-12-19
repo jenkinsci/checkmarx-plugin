@@ -4,8 +4,8 @@ buildscript {
         maven { url 'http://repo.jenkins-ci.org/releases/' }
     }
     dependencies {
-        classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.18.1',
-                'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.+'
+        classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.35.0',
+                'com.netflix.nebula:gradle-extra-configurations-plugin:5.0.3'
     }
 }
 
@@ -16,7 +16,7 @@ apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'project-report'
 apply plugin: 'org.jenkins-ci.jpi'
-apply plugin: 'provided-base'
+apply plugin: 'nebula.provided-base'
 
 repositories {
     jcenter()
@@ -38,9 +38,10 @@ allprojects {
 }
 
 dependencies {
-    provided 'com.intellij:annotations:12.0',
+    compileOnly 'com.intellij:annotations:12.0',
             'org.slf4j:slf4j-api:1.6.1'
-    compile 'com.checkmarx:cx-client-common:8.90.8'
+
+    compile 'com.checkmarx:cx-client-common:8.90.9'
 
 
     optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.3@jar',
@@ -62,7 +63,7 @@ dependencies {
 
 jenkinsPlugin {
     // version of Jenkins core this plugin depends on
-    coreVersion = '1.579'
+    coreVersion = '2.60'
 
     // short name of the plugin, defaults to the project name without trailing '-plugin'
     shortName = 'checkmarx'

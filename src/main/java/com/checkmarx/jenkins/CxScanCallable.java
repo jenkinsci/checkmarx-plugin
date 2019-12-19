@@ -10,6 +10,7 @@ import hudson.FilePath;
 import hudson.ProxyConfiguration;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
+import org.jenkinsci.remoting.RoleChecker;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,6 +43,7 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
     public ScanResults invoke(File file, VirtualChannel channel) throws IOException, InterruptedException {
         CxLoggerAdapter log = new CxLoggerAdapter(listener.getLogger());
         config.setSourceDir(file.getAbsolutePath());
+        log.info("Running on source directory: " + file.getAbsolutePath());
         config.setReportsDir(file);
         ScanResults ret = new ScanResults();
         ret.setSastResults(new SASTResults());
@@ -148,6 +150,11 @@ public class CxScanCallable implements FilePath.FileCallable<ScanResults>, Seria
             shraga.cancelSASTScan();
         } catch (Exception ignored) {
         }
+    }
+
+    @Override
+    public void checkRoles(RoleChecker checker) throws SecurityException {
+
     }
 
 }
