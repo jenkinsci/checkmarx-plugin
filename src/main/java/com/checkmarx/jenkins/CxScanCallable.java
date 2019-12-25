@@ -27,7 +27,7 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
     private final CxScanConfig config;
     private final TaskListener listener;
 
-    public CxScanCallable(CxScanConfig config, TaskListener listener) {
+    CxScanCallable(CxScanConfig config, TaskListener listener) {
         this.config = config;
         this.listener = listener;
     }
@@ -61,27 +61,31 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
         } catch (Exception ex) {
             scanResults.setGeneralException(ex);
 
-            if (ex.getMessage().contains("Server is unavailable")) {
-                if (shraga != null) {
-                    try {
-                        shraga.login();
-                    } catch (CxClientException e) {
-                        throw new IOException(e);
+            String message = ex.getMessage();
+            // Can actually be null e.g. for NullPointerException.
+            if (message != null) {
+                if (message.contains("Server is unavailable")) {
+                    if (shraga != null) {
+                        try {
+                            shraga.login();
+                        } catch (CxClientException e) {
+                            throw new IOException(e);
+                        }
                     }
+
+                    String errorMsg = "Connection Failed.\n" +
+                            "Validate the provided login credentials and server URL are correct.\n" +
+                            "In addition, make sure the installed plugin version is compatible with the CxSAST version according to CxSAST release notes.\n" +
+                            "Error: " + message;
+
+                    throw new IOException(errorMsg);
                 }
-
-                String errorMsg = "Connection Failed.\n" +
-                        "Validate the provided login credentials and server URL are correct.\n" +
-                        "In addition, make sure the installed plugin version is compatible with the CxSAST version according to CxSAST release notes.\n" +
-                        "Error: " + ex.getMessage();
-
-                throw new IOException(errorMsg);
-            }
-            if (ex.getMessage().contains("Creation of the new project")) {
-                return result;
+                if (message.contains("Creation of the new project")) {
+                    return result;
+                }
             }
 
-            throw new IOException(ex.getMessage());
+            throw new IOException(message);
         }
 
         if (config.getDependencyScannerType() != DependencyScannerType.NONE) {

@@ -11,7 +11,6 @@ import com.cx.restclient.configuration.CxScanConfig;
 import com.cx.restclient.dto.*;
 import com.cx.restclient.dto.scansummary.ScanSummary;
 import com.cx.restclient.exception.CxClientException;
-import com.cx.restclient.exception.CxTokenExpiredException;
 import com.cx.restclient.osa.dto.OSAResults;
 import com.cx.restclient.sast.dto.CxNameObj;
 import com.cx.restclient.sast.dto.Preset;
@@ -756,6 +755,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //general
         ret.setCxOrigin(REQUEST_ORIGIN);
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
+        ret.setProxyConfig(ProxyHelper.getProxyConfig());
 
         //cx server
         CxCredentials cxCredentials = CxCredentials.resolveCred(this, descriptor, run);
@@ -939,6 +939,18 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 log.info("  OSA archive includes: " + config.getOsaArchiveIncludePatterns());
                 log.info("  OSA run Execute dependency managers install packages command before Scan: " + config.getOsaRunInstall());
             }
+        }
+
+        ProxyConfig proxyConfig = config.getProxyConfig();
+        if (proxyConfig != null) {
+            log.info("Proxy configuration:");
+            log.info("  host: " + proxyConfig.getHost());
+            log.info("  port: " + proxyConfig.getPort());
+            log.info("  user: " + proxyConfig.getUsername());
+            log.info("  password: *************");
+        }
+        else {
+            log.info("Proxy: not set");
         }
 
         log.info("------------------------------------------------------------------------------------------");
@@ -1508,7 +1520,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
                 config.setScaConfig(scaConfig);
 
-                ProxyConfig proxyConfig = CommonClientFactory.getProxyConfig();
+                ProxyConfig proxyConfig = ProxyHelper.getProxyConfig();
                 config.setProxyConfig(proxyConfig);
 
                 CxShragaClient.testScaConnection(config, serverLog);
