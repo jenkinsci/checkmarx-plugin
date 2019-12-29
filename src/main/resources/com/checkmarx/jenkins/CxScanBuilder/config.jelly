@@ -111,8 +111,7 @@
         <f:optionalBlock title="Override global dependency scan settings" name="overrideGlobalConfig"
                          checked="${instance.dependencyScanConfig.overrideGlobalConfig}" inline="true">
             <f:entry title="Include/Exclude wildcard patterns" field="dependencyScanPatterns">
-                <f:textarea value="${instance.dependencyScanConfig.dependencyScanPatterns}"
-                            default="${descriptor.DEFAULT_FILTER_PATTERNS}" />
+                <f:textarea value="${instance.dependencyScanConfig.dependencyScanPatterns}" />
             </f:entry>
             <f:entry title="Exclude folders" field="dependencyScanExcludeFolders">
                 <f:textbox value="${instance.dependencyScanConfig.dependencyScanExcludeFolders}" />
