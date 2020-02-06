@@ -39,4 +39,16 @@ public class CxConfig {
 	public static String getDefaultOsaArchiveIncludePatterns() {
 		return configuration.getProperty(DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS);
 	}
+
+	public static String getDefaultScaServerUrl() {
+		return configuration.getProperty("DefaultSCAServerURL");
+	}
+
+	public static String getDefaultScaAccessControlUrl() {
+		return configuration.getProperty("DefaultSCAAccessControlUrl");
+	}
+
+	public static String getDefaultScaWebAppUrl() {
+		return configuration.getProperty("DefaultSCAWebAppUrl");
+	}
 }

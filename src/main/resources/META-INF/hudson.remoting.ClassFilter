@@ -5,10 +5,13 @@ com.cx.restclient.cxArm.dto.CxArmConfig
 com.cx.restclient.cxArm.dto.CxProviders
 com.cx.restclient.osa.dto.OSAResults
 com.cx.restclient.osa.dto.OSAScanStatus
+com.cx.restclient.sca.dto.SCAResults
 com.cx.restclient.dto.BaseStatus
 com.cx.restclient.dto.ScanResults
+com.cx.restclient.dto.DependencyScanResults
 com.cx.restclient.osa.dto.OSAScanState
 com.cx.restclient.osa.dto.OSASummaryResults
+com.cx.restclient.sca.dto.SCASummaryResults
 com.cx.restclient.sast.dto.SASTResults
 com.cx.restclient.osa.dto.CVEReportTableRow
 com.cx.restclient.osa.dto.Library

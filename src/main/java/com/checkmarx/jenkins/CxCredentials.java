@@ -4,14 +4,14 @@ import com.checkmarx.jenkins.exception.CxCredException;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
-import com.cloudbees.plugins.credentials.domains.DomainRequirement;
+import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.cx.restclient.common.ErrorMessage;
-
 import hudson.model.Item;
 import hudson.model.Run;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Collections;
+import java.util.List;
 
 
 //resolve between global or specific and username+pssd or credential manager
@@ -52,7 +52,7 @@ public class CxCredentials {
         if (cxScanBuilder.isUseOwnServerCredentials()) {
             ret.setServerUrl(cxScanBuilder.getServerUrl());
             if (StringUtils.isNotEmpty(cxScanBuilder.getCredentialsId())) {
-                StandardUsernamePasswordCredentials c = CredentialsProvider.findCredentialById(cxScanBuilder.getCredentialsId(), StandardUsernamePasswordCredentials.class, run, Collections.<DomainRequirement>emptyList());
+                UsernamePasswordCredentials c = getCredentialsById(cxScanBuilder.getCredentialsId(), run);
                 ret.setUsername(c != null ? c.getUsername() : "");
                 ret.setPassword(c != null ? c.getPassword().getPlainText() : "");
                 return ret;
@@ -66,7 +66,7 @@ public class CxCredentials {
         } else {
             ret.setServerUrl(descriptor.getServerUrl());
             if (StringUtils.isNotEmpty(descriptor.getCredentialsId())) {
-                StandardUsernamePasswordCredentials c = CredentialsProvider.findCredentialById(descriptor.getCredentialsId(), StandardUsernamePasswordCredentials.class, run, Collections.<DomainRequirement>emptyList());
+                UsernamePasswordCredentials c = getCredentialsById(descriptor.getCredentialsId(), run);
                 ret.setUsername(c != null ? c.getUsername() : "");
                 ret.setPassword(c != null ? c.getPassword().getPlainText() : "");
                 return ret;
@@ -86,14 +86,7 @@ public class CxCredentials {
         if (useOwnServerCredentials) {
             ret.setServerUrl(serverUrl);
             if (StringUtils.isNotEmpty(credId)) {
-
-                StandardUsernamePasswordCredentials c = CredentialsMatchers.firstOrNull(CredentialsProvider.lookupCredentials(
-                                StandardUsernamePasswordCredentials.class,
-                                item,
-                                null,
-                                Collections.<DomainRequirement>emptyList()),
-                        CredentialsMatchers.withId(credId));
-
+                UsernamePasswordCredentials c = getCredentialsById(credId, item);
                 ret.setUsername(c != null ? c.getUsername() : "");
                 ret.setPassword(c != null ? c.getPassword().getPlainText() : "");
                 return ret;
@@ -107,14 +100,7 @@ public class CxCredentials {
         } else {
             ret.setServerUrl(descriptor.getServerUrl());
             if (StringUtils.isNotEmpty(descriptor.getCredentialsId())) {
-
-                StandardUsernamePasswordCredentials c = CredentialsMatchers.firstOrNull(CredentialsProvider.lookupCredentials(
-                        StandardUsernamePasswordCredentials.class,
-                        item,
-                        null,
-                        Collections.<DomainRequirement>emptyList()),
-                        CredentialsMatchers.withId(descriptor.getCredentialsId()));
-
+                UsernamePasswordCredentials c = getCredentialsById(descriptor.getCredentialsId(), item);
                 ret.setUsername(c != null ? c.getUsername() : "");
                 ret.setPassword(c != null ? c.getPassword().getPlainText() : "");
                 return ret;
@@ -125,6 +111,24 @@ public class CxCredentials {
                 return ret;
             }
         }
+    }
+
+    static UsernamePasswordCredentials getCredentialsById(String credentialsId, Run run) {
+        return CredentialsProvider.findCredentialById(
+                credentialsId,
+                StandardUsernamePasswordCredentials.class,
+                run,
+                Collections.emptyList());
+    }
+
+    static UsernamePasswordCredentials getCredentialsById(String credentialsId, Item item) {
+        List<StandardUsernamePasswordCredentials> credentials = CredentialsProvider.lookupCredentials(
+                StandardUsernamePasswordCredentials.class,
+                item,
+                null,
+                Collections.emptyList());
+
+        return CredentialsMatchers.firstOrNull(credentials, CredentialsMatchers.withId(credentialsId));
     }
 
     public static void validateCxCredentials(CxCredentials credentials) throws CxCredException {
