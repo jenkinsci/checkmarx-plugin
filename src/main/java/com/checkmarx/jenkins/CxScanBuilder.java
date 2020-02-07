@@ -780,7 +780,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //sast
         ret.setSastEnabled(this.sastEnabled == null || sastEnabled); //for backward compatibility, assuming if sastEnabled is not set, then sast is enabled
 
-        if (ret.getSastEnabled()) {
+        if (ret.getSastEnabled() != null && ret.getSastEnabled()) {
             int presetId = parseInt(preset, log, "Invalid presetId: [%s]. Using default preset.", 7);
             ret.setPresetId(presetId);
 
@@ -881,7 +881,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         log.info("OSA scan enabled: " + config.getOsaEnabled());
-        if (config.getOsaEnabled()) {
+        if (config.getOsaEnabled() != null && config.getOsaEnabled()) {
             log.info("OSA folder exclusions: " + config.getOsaFolderExclusions());
             log.info("OSA filter patterns: " + config.getOsaFilterPattern());
             log.info("OSA archive includes: " + config.getOsaArchiveIncludePatterns());
