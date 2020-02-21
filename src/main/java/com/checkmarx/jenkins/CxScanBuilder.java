@@ -11,6 +11,7 @@ import com.cx.restclient.configuration.CxScanConfig;
 import com.cx.restclient.dto.*;
 import com.cx.restclient.dto.scansummary.ScanSummary;
 import com.cx.restclient.exception.CxClientException;
+import com.cx.restclient.exception.CxTokenExpiredException;
 import com.cx.restclient.osa.dto.OSAResults;
 import com.cx.restclient.sast.dto.CxNameObj;
 import com.cx.restclient.sast.dto.Preset;
@@ -19,10 +20,7 @@ import com.cx.restclient.sast.dto.SASTResults;
 import com.cx.restclient.sca.dto.SCAConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.TemplateException;
-import hudson.EnvVars;
-import hudson.Extension;
-import hudson.FilePath;
-import hudson.Launcher;
+import hudson.*;
 import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
@@ -1518,14 +1516,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 try {
                     cred = CxCredentials.resolveCred(true, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
                     CxCredentials.validateCxCredentials(cred);
-                    Jenkins instance = Jenkins.getInstance();
-                    if (instance != null && instance.proxy != null && Boolean.parseBoolean(isProxy)) {
-                        ProxyConfiguration jenkinsProxy = instance.proxy;
-                        commonClient = new CxShragaClient(cred.getServerUrl(), cred.getUsername(), cred.getPassword(), CX_ORIGIN,
-                                !this.isEnableCertificateValidation(), serverLog, jenkinsProxy.name, jenkinsProxy.port, jenkinsProxy.getUserName(), jenkinsProxy.getPassword());
-                    } else {
-                        commonClient = new CxShragaClient(cred.getServerUrl(), cred.getUsername(), cred.getPassword(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
-                    }
+                    //todo: add proxy support
+                    commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(), serverLog);
                 } catch (Exception e) {
                     return buildError(e, "Failed to init cx client");
                 }
@@ -1593,16 +1585,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *  shared state to avoid synchronization issues.
          */
         private CxShragaClient prepareLoggedInClient(CxCredentials credentials, boolean isProxy)
-                throws IOException, CxClientException, CxTokenExpiredException {
-            CxShragaClient ret;
-            Jenkins instance = Jenkins.getInstance();
-            if (instance != null && Jenkins.getInstance().proxy != null && isProxy) {
-                ProxyConfiguration jenkinsProxy = Jenkins.getInstance().proxy;
-                ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPassword(), CX_ORIGIN,
-                        !this.isEnableCertificateValidation(), serverLog, jenkinsProxy.name, jenkinsProxy.port, jenkinsProxy.getUserName(), jenkinsProxy.getPassword());
-            } else {
-                ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPassword(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
-            }
+                throws IOException, CxClientException {
+            //todo: add proxy support
+            CxShragaClient ret = CommonClientFactory.getInstance(credentials, this.isEnableCertificateValidation(), serverLog);
             ret.login();
             return ret;
         }
