@@ -35,14 +35,16 @@
 			<f:readOnlyTextbox field="password"/>
 		</f:invisibleEntry>
 
+        <f:optionalBlock title="Use Jenkins proxy" inline="true" field="isProxy" />
+
 		<f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
-			with="serverUrl,username,password,timestamp,credentialsId" />
+			with="isProxy,serverUrl,username,password,timestamp,credentialsId" />
 
 		<f:entry title="Default Exclude folders" field="excludeFolders">
             <f:textbox />
         </f:entry>
 
-            <f:entry title="Default Include/Exclude wildcard patterns" field="filterPattern">
+        <f:entry title="Default Include/Exclude wildcard patterns" field="filterPattern">
             <f:textarea default="${descriptor.DEFAULT_FILTER_PATTERNS}" />
         </f:entry>
 
