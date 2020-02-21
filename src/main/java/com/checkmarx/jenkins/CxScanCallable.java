@@ -77,7 +77,7 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
         } catch (Exception ex) {
             scanResults.setGeneralException(ex);
 
-            if (ex.getMessage().contains("Server is unavailable")) {
+            if (ex.getMessage() != null && ex.getMessage().contains("Server is unavailable")) {
                 try {
                     shraga.login();
                 } catch (CxClientException e) {
@@ -98,7 +98,7 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
             throw new IOException(ex.getMessage());
         }
 
-        if (config.getOsaEnabled()) {
+        if (config.getOsaEnabled() != null && config.getOsaEnabled()) {
             //---------------------------
             //we do this in order to redirect the logs from the filesystem agent component to the build console
             Logger rootLog = Logger.getLogger("");
@@ -119,7 +119,7 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
             }
         }
 
-        if (config.getSastEnabled()) {
+        if (config.getSastEnabled() != null && config.getSastEnabled()) {
             try {
                 shraga.createSASTScan();
                 sastCreated = true;
