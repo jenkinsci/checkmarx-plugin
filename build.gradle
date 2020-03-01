@@ -28,6 +28,13 @@ repositories {
     maven { url 'http://cx-artifactory:8081/artifactory/libs-snapshot-local' }
 }
 
+configurations.all {
+    resolutionStrategy {
+        cacheDynamicVersionsFor 0, "seconds"
+        cacheChangingModulesFor 0, "seconds"
+    }
+}
+
 test {
     maxParallelForks = Runtime.getRuntime().availableProcessors()
 }
