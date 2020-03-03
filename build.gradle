@@ -56,14 +56,14 @@ dependencies {
     // Fails with Gradle 2.12 and up without it. Related to https://issues.jenkins-ci.org/browse/JENKINS-17129
     jenkinsTest 'org.jenkins-ci.plugins:ant:1.2@jar',
             'org.jenkins-ci.plugins:mailer:1.1@jar',
-            'org.jenkins-ci.plugins:matrix-project:1.4@jar'
+            'org.jenkins-ci.plugins:matrix-project:1.14@jar'
 
 }
 
 
 jenkinsPlugin {
     // version of Jenkins core this plugin depends on
-    coreVersion = '2.60'
+    coreVersion = '2.64'
 
     // short name of the plugin, defaults to the project name without trailing '-plugin'
     shortName = 'checkmarx'
