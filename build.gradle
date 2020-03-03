@@ -45,7 +45,7 @@ dependencies {
 
     compile 'com.checkmarx:cx-client-common:2020.1.7.SCA'
 
-    optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.3@jar',
+    optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.4@jar',
             'org.jenkins-ci.plugins:credentials:1.23@jar'
 
     testCompile 'junit:junit:4.12',
