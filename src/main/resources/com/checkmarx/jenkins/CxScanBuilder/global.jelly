@@ -39,7 +39,7 @@
             <f:readOnlyTextbox field="password"/>
         </f:invisibleEntry>
 
-        <f:optionalBlock title="Use Jenkins proxy " inline="true" field="proxy" />
+        <f:optionalBlock title="Use Jenkins proxy" inline="true" field="isProxy" />
 
 		<f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
 			with="isProxy,serverUrl,username,password,timestamp,credentialsId" />

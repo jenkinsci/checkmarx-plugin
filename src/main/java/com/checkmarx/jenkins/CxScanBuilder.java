@@ -80,7 +80,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     private String password;
     private String credentialsId;
-    private boolean proxy;
+    private Boolean isProxy = true;
     @Nullable
     private String projectName;
     @Nullable
@@ -171,7 +171,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             @Nullable String serverUrl,
             @Nullable String username,
             @Nullable String password,
-            @Nullable boolean proxy,
+            Boolean isProxy,
             String credentialsId,
             String projectName,
             long projectId,
@@ -214,7 +214,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.password = Secret.fromString(password).getEncryptedValue();
         this.credentialsId = credentialsId;
         // Workaround for compatibility with Conditional BuildStep Plugin
-        this.proxy = proxy;
+        this.isProxy = (isProxy == null) ? true : isProxy;
         this.projectName = (projectName == null) ? buildStep : projectName;
         this.projectId = projectId;
         this.groupId = (groupId != null && !groupId.startsWith("Provide Checkmarx")) ? groupId : null;
@@ -250,7 +250,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             this.vulnerabilityThresholdResult = Result.fromString(vulnerabilityThresholdResult);
         }
         this.avoidDuplicateProjectScans = avoidDuplicateProjectScans;
-        this.generateXmlReport = (generateXmlReport == null) ? Boolean.TRUE : generateXmlReport;
+        this.generateXmlReport = (generateXmlReport == null) ? true : generateXmlReport;
     }
 
     // Configuration fields getters
@@ -483,8 +483,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return avoidDuplicateProjectScans;
     }
 
-    public boolean isProxy() {
-        return proxy;
+    public Boolean isProxy() {
+        return isProxy;
     }
 
     public Boolean getGenerateXmlReport() {
@@ -645,8 +645,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
-    public void setProxy(boolean proxy) {
-        this.proxy = proxy;
+    public void setProxy(Boolean proxy) {
+        this.isProxy = proxy;
     }
 
     @DataBoundSetter
@@ -909,12 +909,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("plugin version: " + CxConfig.version());
         log.info("server url: " + config.getUrl());
         log.info("username: " + config.getUsername());
-/*        log.info("is using Jenkins server proxy: 1" + isProxy());
-        log.info("is using Jenkins server proxy: 2" + this.isProxy());
-        log.info("is using Jenkins server proxy: 3" + this.proxy);*/
-        log.info("is using Jenkins server proxy: 4" + (config.getProxyConfig()!=null));
-
-
+        log.info("is using Jenkins server proxy: " + this.isProxy);
         log.info("project name: " + config.getProjectName());
         log.info("team id: " + config.getTeamId());
         log.info("is synchronous mode: " + config.getSynchronous());
@@ -1228,7 +1223,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private String password;
 
         private String credentialsId;
-        private boolean proxy;
+        private boolean isProxy = true;
 
         private boolean prohibitProjectCreation;
         private boolean hideResults;
@@ -1314,11 +1309,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         public boolean isProxy() {
-            return this.proxy;
+            return this.isProxy;
         }
 
         public void setProxy(boolean proxy) {
-            this.proxy = proxy;
+            this.isProxy = proxy;
         }
 
         public boolean isProhibitProjectCreation() {
