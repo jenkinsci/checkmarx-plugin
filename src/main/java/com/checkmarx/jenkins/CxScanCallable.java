@@ -2,12 +2,12 @@ package com.checkmarx.jenkins;
 
 import com.cx.restclient.CxShragaClient;
 import com.cx.restclient.configuration.CxScanConfig;
-import com.cx.restclient.dto.DependencyScanResults;
-import com.cx.restclient.dto.DependencyScannerType;
 import com.cx.restclient.dto.ScanResults;
 import com.cx.restclient.exception.CxClientException;
+import com.cx.restclient.osa.dto.OSAResults;
 import com.cx.restclient.sast.dto.SASTResults;
 import hudson.FilePath;
+import hudson.ProxyConfiguration;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import org.jenkinsci.remoting.RoleChecker;
@@ -26,10 +26,17 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
 
     private final CxScanConfig config;
     private final TaskListener listener;
+    private ProxyConfiguration jenkinsProxy = null;
 
-    CxScanCallable(CxScanConfig config, TaskListener listener) {
+    public CxScanCallable(CxScanConfig config, TaskListener listener) {
         this.config = config;
         this.listener = listener;
+    }
+
+    public CxScanCallable(CxScanConfig config, TaskListener listener, ProxyConfiguration jenkinsProxy) {
+        this.config = config;
+        this.listener = listener;
+        this.jenkinsProxy = jenkinsProxy;
     }
 
     @Override
