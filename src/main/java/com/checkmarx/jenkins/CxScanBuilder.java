@@ -716,7 +716,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //create scans and retrieve results (in jenkins agent)
         final CxScanCallable cxScanCallable;
         Jenkins instance = Jenkins.getInstance();
-        if (instance != null && Jenkins.getInstance().proxy != null && this.isProxy) {
+        if (instance != null && Jenkins.getInstance().proxy != null && (useOwnServerCredentials ? this.isProxy : getDescriptor().getIsProxy())) {
             ProxyConfiguration jenkinsProxy = Jenkins.getInstance().proxy;
             cxScanCallable = new CxScanCallable(config, listener, jenkinsProxy);
         } else {
@@ -867,7 +867,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("plugin version: " + CxConfig.version());
         log.info("server url: " + config.getUrl());
         log.info("username: " + config.getUsername());
-        log.info("is using Jenkins server proxy: " + config.isProxy());
+        log.info("is using Jenkins server proxy: " + (useOwnServerCredentials ? getIsProxy(): config.isProxy()));
         log.info("project name: " + config.getProjectName());
         log.info("team path: " + config.getTeamPath());
         log.info("team id: " + config.getTeamId());
