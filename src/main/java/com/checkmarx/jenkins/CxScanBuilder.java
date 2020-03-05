@@ -493,7 +493,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return avoidDuplicateProjectScans;
     }
 
-    public Boolean isProxy() {
+    public Boolean getIsProxy() {
         return isProxy;
     }
 
@@ -778,6 +778,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setUrl(cxCredentials.getServerUrl().trim());
         ret.setUsername(cxCredentials.getUsername());
         ret.setPassword(cxCredentials.getPassword());
+        ret.setProxy(descriptor.getIsProxy());
 
         //project
         ret.setProjectName(env.expand(projectName.trim()));
@@ -866,7 +867,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("plugin version: " + CxConfig.version());
         log.info("server url: " + config.getUrl());
         log.info("username: " + config.getUsername());
-        log.info("is using Jenkins server proxy: " + this.isProxy);
+        log.info("is using Jenkins server proxy: " + config.isProxy());
         log.info("project name: " + config.getProjectName());
         log.info("team path: " + config.getTeamPath());
         log.info("team id: " + config.getTeamId());
@@ -1259,12 +1260,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             this.credentialsId = credentialsId;
         }
 
-        public boolean isProxy() {
+        public boolean getIsProxy() {
             return this.isProxy;
         }
 
-        public void setProxy(boolean proxy) {
-            this.isProxy = proxy;
+        public void setIsProxy(final boolean isProxy) {
+            this.isProxy = isProxy;
         }
 
         public boolean isProhibitProjectCreation() {
@@ -1436,7 +1437,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          */
         public FormValidation doTestConnection(@QueryParameter final String serverUrl, @QueryParameter final String password,
                                                @QueryParameter final String username, @QueryParameter final String timestamp,
-                                               @QueryParameter final String credentialsId, @QueryParameter final String isProxy, @AncestorInPath Item item) {
+                                               @QueryParameter final String credentialsId, @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 
             CxCredentials cred = null;
@@ -1446,7 +1447,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     cred = CxCredentials.resolveCredentials(true, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
                     CxCredentials.validateCxCredentials(cred);
                     Jenkins instance = Jenkins.getInstance();
-                    if (instance != null && instance.proxy != null && Boolean.parseBoolean(isProxy)) {
+                    if (instance != null && instance.proxy != null && isProxy) {
                         ProxyConfiguration jenkinsProxy = instance.proxy;
                         shragaClient = new CxShragaClient(cred.getServerUrl(), cred.getUsername(), cred.getPassword(), CX_ORIGIN,
                                 !this.isEnableCertificateValidation(), serverLog, jenkinsProxy.name, jenkinsProxy.port, jenkinsProxy.getUserName(), jenkinsProxy.getPassword());
@@ -1508,14 +1509,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *  shared state to avoid synchronization issues.
          */
         public ComboBoxModel doFillProjectNameItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
-                                                    @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String isProxy,
+                                                    @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final boolean isProxy,
                                                     @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ComboBoxModel projectNames = new ComboBoxModel();
             CxShragaClient shragaClient = null;
             try {
                 CxCredentials credentials = CxCredentials.resolveCredentials(!useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
-                shragaClient = prepareLoggedInClient(credentials, Boolean.parseBoolean(isProxy));
+                shragaClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy);
                 List<Project> projects = shragaClient.getAllProjects();
 
                 for (Project p : projects) {
@@ -1548,14 +1549,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *  shared state to avoid synchronization issues.
          */
         public ListBoxModel doFillPresetItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
-                                              @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String isProxy,
+                                              @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final boolean isProxy,
                                               @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
             CxShragaClient shragaClient = null;
             try {
                 CxCredentials credentials = CxCredentials.resolveCredentials(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
-                shragaClient = prepareLoggedInClient(credentials, Boolean.parseBoolean(isProxy));
+                shragaClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy);
 
                 //todo import preset
                 List<com.cx.restclient.sast.dto.Preset> presets = shragaClient.getPresetList();
@@ -1596,7 +1597,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         public ListBoxModel doFillSourceEncodingItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
-                                                      @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String isProxy,
+                                                      @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final boolean isProxy,
                                                       @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
@@ -1604,7 +1605,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             try {
                 CxCredentials credentials = CxCredentials.resolveCredentials(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
 
-                shragaClient = prepareLoggedInClient(credentials, Boolean.parseBoolean(isProxy));
+                shragaClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy);
                 List<CxNameObj> configurationList = shragaClient.getConfigurationSetList();
 
                 for (CxNameObj cs : configurationList) {
@@ -1632,15 +1633,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          */
 
         public ListBoxModel doFillGroupIdItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
-                                               @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String isProxy,
+                                               @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final boolean isProxy,
                                                @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
             CxShragaClient shragaClient = null;
             try {
                 CxCredentials credentials = CxCredentials.resolveCredentials(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
-
-                shragaClient = prepareLoggedInClient(credentials, Boolean.parseBoolean(isProxy));
+                shragaClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy);
                 List<Team> teamList = shragaClient.getTeamList();
                 for (Team team : teamList) {
                     listBoxModel.add(new ListBoxModel.Option(team.getFullName(), team.getId()));
