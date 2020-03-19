@@ -1164,6 +1164,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         private boolean prohibitProjectCreation;
         private boolean hideResults;
+        private boolean doNotGetReports;
         private boolean enableCertificateValidation;
         @Nullable
         private String excludeFolders;
@@ -1256,6 +1257,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         public void setHideResults(boolean hideResults) {
             this.hideResults = hideResults;
+        }
+
+        public boolean isDoNotGetReports() {
+            return doNotGetReports;
+        }
+
+        public void setDoNotGetReports(boolean doNotGetReports) {
+            this.doNotGetReports = doNotGetReports;
         }
 
         public boolean isEnableCertificateValidation() {
