@@ -4,7 +4,7 @@ buildscript {
         maven { url 'http://repo.jenkins-ci.org/releases/' }
     }
     dependencies {
-        classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.18.1',
+		classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.38.0',
                 'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.+'
     }
 }
