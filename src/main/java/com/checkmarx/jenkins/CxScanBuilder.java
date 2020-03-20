@@ -720,7 +720,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             failTheBuild(run, config, scanResults);
 
             //generate html report
-            String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
+            String reportName = descriptor.isDoNotGetReports() ? null : generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
             cxScanResult.setHtmlReportName(reportName);
             run.addAction(cxScanResult);
 
@@ -729,7 +729,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             SASTResults sastResults = scanResults.getSastResults();
 
             if (sastResults.isSastResultsReady()) {
-                if (config.getGenerateXmlReport() == null || config.getGenerateXmlReport() == true) {
+                if (!descriptor.isDoNotGetReports() &&
+                        (config.getGenerateXmlReport() == null || config.getGenerateXmlReport() == true)) {
                     createSastReports(sastResults, checkmarxBuildDir, workspace);
                 }
                 addEnvVarAction(run, sastResults);
@@ -744,7 +745,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
         //Asynchronous scan - add note message and previous build reports
-        String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
+        String reportName = descriptor.isDoNotGetReports() ? null : generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
         cxScanResult.setHtmlReportName(reportName);
         run.addAction(cxScanResult);
 
