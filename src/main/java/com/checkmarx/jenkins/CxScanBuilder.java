@@ -665,7 +665,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
-    public void setProxy(Boolean proxy) {
+    public void setIsProxy(Boolean proxy) {
         this.isProxy = proxy;
     }
 
