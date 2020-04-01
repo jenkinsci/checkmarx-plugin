@@ -5,6 +5,7 @@ import com.checkmarx.jenkins.legacy8_7.QueryResult;
 import com.checkmarx.jenkins.legacy8_7.SastScanResult;
 import com.checkmarx.jenkins.legacy8_7.ThresholdConfig;
 import com.cx.restclient.configuration.CxScanConfig;
+import com.cx.restclient.dto.DependencyScannerType;
 import com.cx.restclient.sast.dto.SASTResults;
 import hudson.PluginWrapper;
 import hudson.model.Action;
@@ -71,7 +72,7 @@ public class CxScanResult implements Action {
     public CxScanResult(Run<?, ?> owner, CxScanConfig config) {
         this.scanRanAsynchronous = !config.getSynchronous();
         this.sastEnabled = config.getSastEnabled();
-        this.osaEnabled = config.getOsaEnabled();
+        this.osaEnabled = config.getDependencyScannerType() == DependencyScannerType.OSA;
         this.owner = owner;
     }
 
@@ -219,23 +220,17 @@ public class CxScanResult implements Action {
         outputStream.close();
     }
 
-    public static String resolveHTMLReportName(boolean sastEnabled, boolean osaEnabled) {
-        if(sastEnabled && osaEnabled) {
-            return "Report_CxSAST_CxOSA.html";
+    static String resolveHTMLReportName(boolean sastEnabled, DependencyScannerType dependencyScanner) {
+        final String POSTFIX = ".html";
+        String result = "Report";
+        if (sastEnabled) {
+            result += "_CxSAST";
         }
-
-        if(sastEnabled) {
-            return "Report_CxSAST.html";
+        if (dependencyScanner != DependencyScannerType.NONE) {
+            result += "_" + dependencyScanner.getDisplayName();
         }
-
-        if(osaEnabled) {
-            return "Report_CxOSA.html";
-        }
-
-        return "";
+        return result + POSTFIX;
     }
-
-
 
     public String getHtmlReport() throws IOException {
         String htmlReport;

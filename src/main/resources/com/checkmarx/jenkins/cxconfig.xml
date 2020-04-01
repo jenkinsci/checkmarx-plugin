@@ -2,7 +2,7 @@
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
     <entry key="DefaultFilterPattern">!**/_cvs/**/*, !**/.svn/**/*, !**/.hg/**/*, !**/.git/**/*, !**/.bzr/**/*,
-        !**/bin/**/*,
+        !**/.gitgnore/**/*, !**/.gradle/**/*, !**/.checkstyle/**/*, !**/.classpath/**/*, !**/bin/**/*,
         !**/obj/**/*, !**/backup/**/*, !**/.idea/**/*, !**/*.DS_Store, !**/*.ipr, !**/*.iws,
         !**/*.bak, !**/*.tmp, !**/*.aac, !**/*.aif, !**/*.iff, !**/*.m3u, !**/*.mid, !**/*.mp3,
         !**/*.mpa, !**/*.ra, !**/*.wav, !**/*.wma, !**/*.3g2, !**/*.3gp, !**/*.asf, !**/*.asx,
@@ -12,7 +12,11 @@
         !**/*.tar.gz, !**/*.tar, !**/*.gz, !**/*.ahtm, !**/*.ahtml, !**/*.fhtml, !**/*.hdm,
         !**/*.hdml, !**/*.hsql, !**/*.ht, !**/*.hta, !**/*.htc, !**/*.htd, !**/*.war, !**/*.ear,
         !**/*.htmls, !**/*.ihtml, !**/*.mht, !**/*.mhtm, !**/*.mhtml, !**/*.ssi, !**/*.stm,
+        !**/*.bin,!**/*.lock,!**/*.svg,!**/*.obj,
         !**/*.stml, !**/*.ttml, !**/*.txn, !**/*.xhtm, !**/*.xhtml, !**/*.class, !**/*.iml, !Checkmarx/Reports/*.*,
         !OSADependencies.json, !**/node_modules/**/*</entry>
     <entry key="DefaultOSAArchiveIncludePatterns">*.zip, *.war, *.ear, *.tgz</entry>
+    <entry key="DefaultSCAServerURL">https://api.scacheckmarx.com</entry>
+    <entry key="DefaultSCAAccessControlUrl">https://v2.ac-checkmarx.com</entry>
+    <entry key="DefaultSCAWebAppUrl">https://sca.scacheckmarx.com</entry>
 </properties>

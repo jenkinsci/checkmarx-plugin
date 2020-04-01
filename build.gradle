@@ -20,6 +20,7 @@ apply plugin: 'provided-base'
 
 repositories {
     jcenter()
+    mavenLocal()        // Use this to load a custom build of Common Client from a local Maven repo.
     maven { url 'http://repo.jenkins-ci.org/releases/' }
     maven { url 'http://cx-artifactory:8081/artifactory/libs-release/' }
     maven { url 'http://cx-artifactory:8081/artifactory/libs-snapshot' }
@@ -42,9 +43,9 @@ dependencies {
     provided 'com.intellij:annotations:12.0',
             'org.slf4j:slf4j-api:1.6.1'
 
-    compile 'com.checkmarx:cx-client-common:9.20.5'
+    compile 'com.checkmarx:cx-client-common:2020.1.8.SCA'
 
-    optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.3@jar',
+    optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.4@jar',
             'org.jenkins-ci.plugins:credentials:1.23@jar'
 
 
