@@ -75,6 +75,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public static final String OSA_VULNERABILITIES_JSON = "OSAVulnerabilities.json";
 
     private static final String PDF_URL_TEMPLATE = "/%scheckmarx/pdfReport";
+    private static final String PDF_URL = "checkmarx/pdfReport";
     private static final String REQUEST_ORIGIN = "Jenkins";
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -722,7 +723,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             String path= parsedUrl.getFile();
             if(!(path.equals("/"))) {
                 //to handle this Jenkins root url,EX: http://localhost:8081/jenkins
-                Path pdfUrlPath = Paths.get(path, run.getUrl(), "checkmarx/pdfReport");
+                Path pdfUrlPath = Paths.get(path, run.getUrl(), PDF_URL);
                 scanResults.getSastResults().setSastPDFLink(pdfUrlPath.toString());
             }
             else {
