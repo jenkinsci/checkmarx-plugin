@@ -27,7 +27,10 @@ import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.triggers.SCMTrigger;
-import hudson.util.*;
+import hudson.util.ComboBoxModel;
+import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
+import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
@@ -38,16 +41,17 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.*;
+
 import javax.annotation.Nonnull;
 import java.io.File;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -709,12 +713,21 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         File checkmarxBuildDir = new File(run.getRootDir(), "checkmarx");
         checkmarxBuildDir.mkdir();
 
-        if (config.getGeneratePDFReport()) {
-             String baseUrl=Jenkins.getInstance().getRootUrl();
+     if (config.getGeneratePDFReport()) {
+
+            // run.getUrl() returns a URL path similar to job/MyJobName/124/
+            String baseUrl=Jenkins.getInstance().getRootUrl();
             URL parsedUrl= new URL(baseUrl);
-            String path=parsedUrl.getFile();
-            Path pdfUrl=Paths.get(path,run.getUrl(),"checkmarx/pdfReport");
-            scanResults.getSastResults().setSastPDFLink(pdfUrl.toString());
+            String path= parsedUrl.getFile();
+            if(path==null) {
+                String pdfUrl = String.format(PDF_URL_TEMPLATE, run.getUrl());
+                scanResults.getSastResults().setSastPDFLink(pdfUrl);
+            }
+            else {
+                Path pdfUrl = Paths.get(path, run.getUrl(), "checkmarx/pdfReport");
+                scanResults.getSastResults().setSastPDFLink(pdfUrl.toString());
+            }
+      
         }
 
         //in case of async mode, do not create reports (only the report of the latest scan)
