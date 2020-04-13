@@ -706,12 +706,20 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //write reports to build dir
         File checkmarxBuildDir = new File(run.getRootDir(), "checkmarx");
         checkmarxBuildDir.mkdir();
-
+	    
+	JenkinsLocationConfiguration globalConfig = new JenkinsLocationConfiguration();
         if (config.getGeneratePDFReport()) {
             // run.getUrl() returns a URL path similar to job/MyJobName/124/
             String pdfUrl = String.format(PDF_URL_TEMPLATE, run.getUrl());
-            scanResults.getSastResults().setSastPDFLink(pdfUrl);
+            String pdfUrl1 = String.format(PDF_URL_TEMPLATE,globalConfig.getUrl());
+            scanResults.getSastResults().setSastPDFLink(pdfUrl1);
         }
+
+   /*     if (config.getGeneratePDFReport()) {
+            // run.getUrl() returns a URL path similar to job/MyJobName/124/
+            String pdfUrl = String.format(PDF_URL_TEMPLATE, run.getUrl());
+            scanResults.getSastResults().setSastPDFLink(pdfUrl);
+        }*/
 
         //in case of async mode, do not create reports (only the report of the latest scan)
         //and don't assert threshold vulnerabilities
