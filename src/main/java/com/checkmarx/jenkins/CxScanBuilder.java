@@ -724,8 +724,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 scanResults.getSastResults().setSastPDFLink(pdfUrlPath.toString());
             }
             else {
-                Path pdfUrlPath = Paths.get(run.getUrl(), "checkmarx/pdfReport");
-                scanResults.getSastResults().setSastPDFLink(pdfUrlPath.toString());
+                String pdfUrl = String.format(PDF_URL_TEMPLATE, run.getUrl());
+                scanResults.getSastResults().setSastPDFLink(pdfUrl);
             }
         }
 
