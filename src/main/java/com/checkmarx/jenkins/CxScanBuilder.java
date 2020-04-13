@@ -29,7 +29,6 @@ import hudson.tasks.Builder;
 import hudson.triggers.SCMTrigger;
 import hudson.util.*;
 import jenkins.model.Jenkins;
-import jenkins.model.JenkinsLocationConfiguration;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
@@ -39,7 +38,6 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.*;
-
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.FileInputStream;
@@ -707,21 +705,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //write reports to build dir
         File checkmarxBuildDir = new File(run.getRootDir(), "checkmarx");
         checkmarxBuildDir.mkdir();
-	    
-	JenkinsLocationConfiguration globalConfig = new JenkinsLocationConfiguration();
-        if (config.getGeneratePDFReport()) {
-            // run.getUrl() returns a URL path similar to job/MyJobName/124/
-            String pdfUrl = String.format(PDF_URL_TEMPLATE, run.getUrl());
-            String pdfUrl1 = String.format(PDF_URL_TEMPLATE,globalConfig.getUrl());
-            scanResults.getSastResults().setSastPDFLink(pdfUrl1);
-        }
 
-      /*  if (config.getGeneratePDFReport()) {
+        if (config.getGeneratePDFReport()) {
             // run.getUrl() returns a URL path similar to job/MyJobName/124/
             String pdfUrl = String.format(PDF_URL_TEMPLATE, run.getUrl());
             scanResults.getSastResults().setSastPDFLink(pdfUrl);
         }
-*/
+
         //in case of async mode, do not create reports (only the report of the latest scan)
         //and don't assert threshold vulnerabilities
 
