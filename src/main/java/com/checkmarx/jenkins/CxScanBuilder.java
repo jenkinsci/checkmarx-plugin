@@ -714,13 +714,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         File checkmarxBuildDir = new File(run.getRootDir(), "checkmarx");
         checkmarxBuildDir.mkdir();
 
-      if (config.getGeneratePDFReport()) {
-
+       if (config.getGeneratePDFReport()) {
+            String path="";
             // run.getUrl() returns a URL path similar to job/MyJobName/124/
             //getRootUrl() will return the value of "Manage Jenkins->configuration->Jenkins URL"
             String baseUrl=Jenkins.getInstance().getRootUrl();
-            URL parsedUrl= new URL(baseUrl);
-            String path= parsedUrl.getFile();
+            if(StringUtils.isNotEmpty(baseUrl)) {
+                URL parsedUrl = new URL(baseUrl);
+                path = parsedUrl.getPath();
+            }
             if(!(path.equals("/"))) {
                 //to handle this Jenkins root url,EX: http://localhost:8081/jenkins
                 Path pdfUrlPath = Paths.get(path, run.getUrl(), PDF_URL);
