@@ -37,7 +37,7 @@ public class CxConfig {
 	}
 
 	public static String getDefaultOsaArchiveIncludePatterns() {
-		return configuration.getProperty(DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS);
+		return configuration.getProperty(DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS.trim());
 	}
 
 	public static String getDefaultScaServerUrl() {
