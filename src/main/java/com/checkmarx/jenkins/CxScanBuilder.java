@@ -890,7 +890,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         if (config.getDependencyScannerType() == DependencyScannerType.OSA) {
-            config.setOsaArchiveIncludePatterns(effectiveConfig.osaArchiveIncludePatterns);
+            config.setOsaArchiveIncludePatterns(effectiveConfig.osaArchiveIncludePatterns.trim());
             config.setOsaRunInstall(effectiveConfig.osaInstallBeforeScan);
         }
         else if (config.getDependencyScannerType() == DependencyScannerType.SCA) {
