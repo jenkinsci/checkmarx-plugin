@@ -1233,8 +1233,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         @Nullable
         private String password;
 
-        private String credentialsId;
+        public String getMvnPath() {
+            return mvnPath;
+        }
 
+        public void setMvnPath(String mvnPath) {
+            this.mvnPath = mvnPath;
+        }
+
+        private String credentialsId;
+        private String mvnPath;
         private boolean prohibitProjectCreation;
         private boolean hideResults;
         private boolean enableCertificateValidation;
@@ -1519,6 +1527,23 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     commonClient.close();
                 }
             }
+        }
+        public FormValidation doValidateMvnPath(@QueryParameter final String mvnPath) {
+            boolean mvnPathExists = false;
+            FilePath path = new FilePath(new File(mvnPath));
+            String errorMsg = "Was not able to access specified path";
+            try {
+                if (!path.child("mvn").exists()) {
+                    errorMsg = "Maven was not found on the specified path";
+                } else {
+                    mvnPathExists = true;
+                }
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+                errorMsg = e.getMessage();
+            }
+
+            return mvnPathExists ? FormValidation.ok("Maven is found") : FormValidation.error(errorMsg);
         }
 
         public FormValidation doTestScaConnection(@QueryParameter String scaServerUrl,
