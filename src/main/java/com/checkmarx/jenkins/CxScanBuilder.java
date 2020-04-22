@@ -748,6 +748,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     createSastReports(sastResults, checkmarxBuildDir, workspace);
                 }
                 addEnvVarAction(run, sastResults);
+//                run.getAction(EnvVarAction.class).buildEnvironment(run, env);
                 cxScanResult.setSastResults(sastResults);
             }
 
@@ -867,7 +868,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("plugin version: " + CxConfig.version());
         log.info("server url: " + config.getUrl());
         log.info("username: " + config.getUsername());
-        log.info("is using Jenkins server proxy: " + (useOwnServerCredentials ? getIsProxy(): config.isProxy()));
+        log.info("is using Jenkins server proxy: " + (useOwnServerCredentials ? getIsProxy() : config.isProxy()));
         log.info("project name: " + config.getProjectName());
         log.info("team path: " + config.getTeamPath());
         log.info("team id: " + config.getTeamId());
