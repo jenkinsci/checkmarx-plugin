@@ -724,21 +724,20 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         File checkmarxBuildDir = new File(run.getRootDir(), "checkmarx");
         checkmarxBuildDir.mkdir();
 
-       if (config.getGeneratePDFReport()) {
-            String path="";
+        if (config.getGeneratePDFReport()) {
+            String path = "";
             // run.getUrl() returns a URL path similar to job/MyJobName/124/
             //getRootUrl() will return the value of "Manage Jenkins->configuration->Jenkins URL"
-            String baseUrl=Jenkins.getInstance().getRootUrl();
-            if(StringUtils.isNotEmpty(baseUrl)) {
+            String baseUrl = Jenkins.getInstance().getRootUrl();
+            if (StringUtils.isNotEmpty(baseUrl)) {
                 URL parsedUrl = new URL(baseUrl);
                 path = parsedUrl.getPath();
             }
-            if(!(path.equals("/"))) {
+            if (!(path.equals("/"))) {
                 //to handle this Jenkins root url,EX: http://localhost:8081/jenkins
                 Path pdfUrlPath = Paths.get(path, run.getUrl(), PDF_URL);
                 scanResults.getSastResults().setSastPDFLink(pdfUrlPath.toString());
-            }
-            else {
+            } else {
                 //to handle this Jenkins root url,EX: http://localhost:8081/
                 String pdfUrl = String.format(PDF_URL_TEMPLATE, run.getUrl());
                 scanResults.getSastResults().setSastPDFLink(pdfUrl);
@@ -902,8 +901,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         if (config.getDependencyScannerType() == DependencyScannerType.OSA) {
             config.setOsaArchiveIncludePatterns(effectiveConfig.osaArchiveIncludePatterns.trim());
             config.setOsaRunInstall(effectiveConfig.osaInstallBeforeScan);
-        }
-        else if (config.getDependencyScannerType() == DependencyScannerType.SCA) {
+        } else if (config.getDependencyScannerType() == DependencyScannerType.SCA) {
             config.setScaConfig(getScaConfig(run, effectiveConfig));
         }
     }
@@ -919,8 +917,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         if (credentials != null) {
             result.setUsername(credentials.getUsername());
             result.setPassword(credentials.getPassword().getPlainText());
-        }
-        else {
+        } else {
             log.warn("CxSCA credentials are not specified.");
         }
         return result;
@@ -981,8 +978,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             log.info("  port: " + proxyConfig.getPort());
             log.info("  user: " + proxyConfig.getUsername());
             log.info("  password: *************");
-        }
-        else {
+        } else {
             log.info("Proxy: not set");
         }
 
@@ -1203,6 +1199,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     /**
      * Called when this plugin is initialized during Jenkins startup. Invoked by Jenkins using reflection.
      * Invoked when all the fields of the current object are deserialized.
+     *
      * @return modified instance of the current object.
      */
     protected Object readResolve() {
