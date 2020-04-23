@@ -35,8 +35,10 @@
             <c:select />
         </f:entry>
 
+        <f:optionalBlock title="Use Jenkins proxy" inline="true" field="isProxy" checked="${instance==null?true:instance.isProxy}" />
+
         <f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
-            with="serverUrl,username,password,timestamp,credentialsId" />
+           with="serverUrl,username,password,timestamp,credentialsId,isProxy" />
     </f:optionalBlock>
 
     <f:entry title="Checkmarx project name" description="Existing projects appear in a completion list when server url is provided (up to 20)">
@@ -159,7 +161,6 @@
         </f:optionalBlock>
     </f:optionalBlock>
 
-
 	<!-- -= Build Control =- -->
     <f:section title="Build Control">
         <f:entry name="jobStatusOnError" title="Job status when scan returns an error:" field="jobStatusOnError">
@@ -197,7 +198,7 @@
             </j:when>
 
             <!-- ** use specific configuration setting ** -->
-            <j:otherwise>
+          <!--  <j:otherwise> -->
                  <!-- -= Generate Full XML report =- -->
                  <f:optionalBlock title="Generate CxSAST full XML report" inline="true" field="generateXmlReport"
                                          checked="${instance==null?true:instance.generateXmlReport}" />
@@ -320,7 +321,7 @@
                         </j:choose>
                     </f:optionalBlock>
                 </f:optionalBlock>
-            </j:otherwise>
+           <!-- </j:otherwise> -->
         </j:choose>
     </f:section>
 </j:jelly>
