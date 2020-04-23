@@ -788,6 +788,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setCxOrigin(REQUEST_ORIGIN);
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
         ret.setProxyConfig(ProxyHelper.getProxyConfig());
+        ret.setMvnPath(descriptor.getMvnPath());
 
         //cx server
         CxCredentials cxCredentials = CxCredentials.resolveCred(this, descriptor, run);
@@ -1244,7 +1245,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         @Nullable
         private String password;
 
+
         private String credentialsId;
+        private String mvnPath;
         private boolean isProxy = true;
 
         private boolean prohibitProjectCreation;
@@ -1301,6 +1304,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         public void setUsername(@Nullable String username) {
             this.username = username;
+        }
+
+        public String getMvnPath() {
+            return mvnPath;
+        }
+
+        public void setMvnPath(String mvnPath) {
+            this.mvnPath = mvnPath;
         }
 
         @Nullable
@@ -1542,7 +1553,23 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 }
             }
         }
+        public FormValidation doValidateMvnPath(@QueryParameter final String mvnPath) {
+            boolean mvnPathExists = false;
+            FilePath path = new FilePath(new File(mvnPath));
+            String errorMsg = "Was not able to access specified path";
+            try {
+                if (!path.child("mvn").exists()) {
+                    errorMsg = "Maven was not found on the specified path";
+                } else {
+                    mvnPathExists = true;
+                }
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+                errorMsg = e.getMessage();
+            }
 
+            return mvnPathExists ? FormValidation.ok("Maven is found") : FormValidation.error(errorMsg);
+        }
         public FormValidation doTestScaConnection(@QueryParameter String scaServerUrl,
                                                   @QueryParameter String scaAccessControlUrl,
                                                   @QueryParameter String scaCredentialsId,
