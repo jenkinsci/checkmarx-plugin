@@ -17,7 +17,9 @@ import com.cx.restclient.sast.dto.CxNameObj;
 import com.cx.restclient.sast.dto.Preset;
 import com.cx.restclient.sast.dto.Project;
 import com.cx.restclient.sast.dto.SASTResults;
+import com.cx.restclient.sca.dto.RemoteRepositoryInfo;
 import com.cx.restclient.sca.dto.SCAConfig;
+import com.cx.restclient.sca.dto.SourceLocationType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.TemplateException;
 import hudson.*;
@@ -1584,7 +1586,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 UsernamePasswordCredentials credentials = CxCredentials.getCredentialsById(scaCredentialsId, item);
                 scaConfig.setUsername(credentials.getUsername());
                 scaConfig.setPassword(credentials.getPassword().getPlainText());
-
+                scaConfig.setSourceLocationType(SourceLocationType.LOCAL_DIRECTORY);
+                scaConfig.setRemoteRepositoryInfo(null);
                 config.setScaConfig(scaConfig);
 
                 ProxyConfig proxyConfig = ProxyHelper.getProxyConfig();
