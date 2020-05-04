@@ -195,13 +195,14 @@
 
                 <!-- -= enableProjectPolicyEnforcement =- -->
                 <f:optionalBlock title="Enable Project's policy enforcement" inline="true" field="enableProjectPolicyEnforcement" />
+                 <!-- -= Generate Full XML report =- -->
+                  <f:optionalBlock title="Generate CxSAST full XML report" inline="true" field="generateXmlReport"
+                   checked="${instance==null?true:instance.generateXmlReport}" />
             </j:when>
 
             <!-- ** use specific configuration setting ** -->
             <j:otherwise>
-                 <!-- -= Generate Full XML report =- -->
-                 <f:optionalBlock title="Generate CxSAST full XML report" inline="true" field="generateXmlReport"
-                                         checked="${instance==null?true:instance.generateXmlReport}" />
+
 
                 <f:optionalBlock title="Enable synchronous mode" inline="true" field="waitForResultsEnabled"
                     checked="${instance==null?true:instance.waitForResultsEnabled}">
