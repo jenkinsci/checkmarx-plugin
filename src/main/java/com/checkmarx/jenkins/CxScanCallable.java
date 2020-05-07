@@ -147,7 +147,7 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
             try {
                 DependencyScanResults dsResults = config.getSynchronous() ?
                         shraga.waitForDependencyScanResults() :
-                        shraga.getLatestDependencyScanResults();
+                         shraga.getLatestDependencyScanResults();
 
                 scanResults.setDependencyScanResults(dsResults);
             } catch (CxClientException e) {
