@@ -19,7 +19,7 @@ public class CxCredentials {
 
     private String serverUrl;
     private String username;
-    private String ssma;
+    private String tstWord;
 
     public String getServerUrl() {
         return serverUrl;
@@ -37,12 +37,12 @@ public class CxCredentials {
         this.username = username;
     }
 
-    public String getSsma() {
-        return ssma;
+    public String getTstWord() {
+        return tstWord;
     }
 
-    public void setSsma(String ssma) {
-        this.ssma = ssma;
+    public void setTstWord(String tstWord) {
+        this.tstWord = tstWord;
     }
 
 
@@ -54,12 +54,12 @@ public class CxCredentials {
             if (StringUtils.isNotEmpty(cxScanBuilder.getCredentialsId())) {
                 UsernamePasswordCredentials c = getCredentialsById(cxScanBuilder.getCredentialsId(), run);
                 ret.setUsername(c != null ? c.getUsername() : "");
-                ret.setSsma(c != null ? c.getPassword().getPlainText() : "");
+                ret.setTstWord(c != null ? c.getPassword().getPlainText() : "");
                 return ret;
 
             } else {
                 ret.setUsername(StringUtils.defaultString(cxScanBuilder.getUsername()));
-                ret.setSsma(StringUtils.defaultString(cxScanBuilder.getPasswordPlainText()));
+                ret.setTstWord(StringUtils.defaultString(cxScanBuilder.getPasswordPlainText()));
                 return ret;
             }
 
@@ -68,12 +68,12 @@ public class CxCredentials {
             if (StringUtils.isNotEmpty(descriptor.getCredentialsId())) {
                 UsernamePasswordCredentials c = getCredentialsById(descriptor.getCredentialsId(), run);
                 ret.setUsername(c != null ? c.getUsername() : "");
-                ret.setSsma(c != null ? c.getPassword().getPlainText() : "");
+                ret.setTstWord(c != null ? c.getPassword().getPlainText() : "");
                 return ret;
 
             } else {
                 ret.setUsername(StringUtils.defaultString(descriptor.getUsername()));
-                ret.setSsma(StringUtils.defaultString(descriptor.getPasswordPlainText()));
+                ret.setTstWord(StringUtils.defaultString(descriptor.getPasswordPlainText()));
                 return ret;
             }
         }
@@ -88,12 +88,12 @@ public class CxCredentials {
             if (StringUtils.isNotEmpty(credId)) {
                 UsernamePasswordCredentials c = getCredentialsById(credId, item);
                 ret.setUsername(c != null ? c.getUsername() : "");
-                ret.setSsma(c != null ? c.getPassword().getPlainText() : "");
+                ret.setTstWord(c != null ? c.getPassword().getPlainText() : "");
                 return ret;
 
             } else {
                 ret.setUsername(StringUtils.defaultString(username));
-                ret.setSsma(StringUtils.defaultString(pssd));
+                ret.setTstWord(StringUtils.defaultString(pssd));
                 return ret;
             }
 
@@ -102,12 +102,12 @@ public class CxCredentials {
             if (StringUtils.isNotEmpty(descriptor.getCredentialsId())) {
                 UsernamePasswordCredentials c = getCredentialsById(descriptor.getCredentialsId(), item);
                 ret.setUsername(c != null ? c.getUsername() : "");
-                ret.setSsma(c != null ? c.getPassword().getPlainText() : "");
+                ret.setTstWord(c != null ? c.getPassword().getPlainText() : "");
                 return ret;
 
             } else {
                 ret.setUsername(StringUtils.defaultString(descriptor.getUsername()));
-                ret.setSsma(StringUtils.defaultString(descriptor.getPasswordPlainText()));
+                ret.setTstWord(StringUtils.defaultString(descriptor.getPasswordPlainText()));
                 return ret;
             }
         }
@@ -134,7 +134,7 @@ public class CxCredentials {
     public static void validateCxCredentials(CxCredentials credentials) throws CxCredException {
         if(StringUtils.isEmpty(credentials.getServerUrl()) ||
                 StringUtils.isEmpty(credentials.getUsername()) ||
-                StringUtils.isEmpty((credentials.getSsma()))){
+                StringUtils.isEmpty((credentials.getTstWord()))){
             throw new CxCredException(ErrorMessage.CHECKMARX_SERVER_CONNECTION_FAILED.getErrorMessage());
         }
     }
