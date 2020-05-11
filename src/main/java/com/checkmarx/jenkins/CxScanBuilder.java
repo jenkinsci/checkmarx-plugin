@@ -11,13 +11,11 @@ import com.cx.restclient.configuration.CxScanConfig;
 import com.cx.restclient.dto.*;
 import com.cx.restclient.dto.scansummary.ScanSummary;
 import com.cx.restclient.exception.CxClientException;
-import com.cx.restclient.exception.CxTokenExpiredException;
 import com.cx.restclient.osa.dto.OSAResults;
 import com.cx.restclient.sast.dto.CxNameObj;
 import com.cx.restclient.sast.dto.Preset;
 import com.cx.restclient.sast.dto.Project;
 import com.cx.restclient.sast.dto.SASTResults;
-import com.cx.restclient.sca.dto.RemoteRepositoryInfo;
 import com.cx.restclient.sca.dto.SCAConfig;
 import com.cx.restclient.sca.dto.SourceLocationType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -795,7 +793,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         CxCredentials cxCredentials = CxCredentials.resolveCred(this, descriptor, run);
         ret.setUrl(cxCredentials.getServerUrl().trim());
         ret.setUsername(cxCredentials.getUsername());
-        ret.setPassword(cxCredentials.getPssd());
+        ret.setPassword(cxCredentials.getPassd());
 
         //project
         ret.setProjectName(env.expand(projectName.trim()));
