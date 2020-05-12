@@ -64,7 +64,7 @@ dependencies {
 
 jenkinsPlugin {
     // version of Jenkins core this plugin depends on
-    coreVersion = '2.121'
+    coreVersion = '2.222.3'
 
     // short name of the plugin, defaults to the project name without trailing '-plugin'
     shortName = 'checkmarx'
