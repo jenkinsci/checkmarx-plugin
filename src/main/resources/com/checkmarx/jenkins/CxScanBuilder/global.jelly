@@ -146,6 +146,8 @@
                     <f:entry title="CxSCA credentials" field="scaCredentialsId">
                         <c:select value="${descriptor.dependencyScanConfig.scaCredentialsId}" />
                     </f:entry>
+                    <f:description>**Note:SAML and SSO are not supported
+                      </f:description>
                     <f:entry title="Account" field="scaTenant">
                         <f:textbox value="${descriptor.dependencyScanConfig.scaTenant}"/>
                     </f:entry>

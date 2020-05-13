@@ -19,7 +19,8 @@ public class CxCredentials {
 
     private String serverUrl;
     private String username;
-    private String tstWord;
+    private CharSequence tstWord;
+
 
     public String getServerUrl() {
         return serverUrl;
@@ -37,11 +38,11 @@ public class CxCredentials {
         this.username = username;
     }
 
-    public String getTstWord() {
+    public CharSequence getTstWord() {
         return tstWord;
     }
 
-    public void setTstWord(String tstWord) {
+    public void setTstWord(CharSequence tstWord) {
         this.tstWord = tstWord;
     }
 
@@ -134,7 +135,7 @@ public class CxCredentials {
     public static void validateCxCredentials(CxCredentials credentials) throws CxCredException {
         if(StringUtils.isEmpty(credentials.getServerUrl()) ||
                 StringUtils.isEmpty(credentials.getUsername()) ||
-                StringUtils.isEmpty((credentials.getTstWord()))){
+                StringUtils.isEmpty((credentials.getTstWord().toString()))){
             throw new CxCredException(ErrorMessage.CHECKMARX_SERVER_CONNECTION_FAILED.getErrorMessage());
         }
     }

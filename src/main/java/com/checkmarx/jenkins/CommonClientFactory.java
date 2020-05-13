@@ -16,7 +16,7 @@ class CommonClientFactory {
             throws MalformedURLException, CxClientException {
         CxScanConfig scanConfig = new CxScanConfig(credentials.getServerUrl(),
                 credentials.getUsername(),
-                credentials.getTstWord(),
+                credentials.getTstWord().toString(),
                 SCAN_ORIGIN,
                 !enableCertificateValidation);
 
