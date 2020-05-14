@@ -1740,13 +1740,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          */
 
         public ListBoxModel doFillGroupIdItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
-                                               @QueryParameter final String username, @QueryParameter final String password, @QueryParameter final String isProxy,
+                                               @QueryParameter final String username, @QueryParameter final String isProxy,
                                                @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
             CxShragaClient shragaClient = null;
             try {
-                CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
+                CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, "Cx123456!", credentialsId, this, item);
                 shragaClient = prepareLoggedInClient(credentials, Boolean.parseBoolean(isProxy));
                 List<Team> teamList = shragaClient.getTeamList();
                 for (Team team : teamList) {
