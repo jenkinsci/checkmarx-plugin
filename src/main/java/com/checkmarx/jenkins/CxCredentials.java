@@ -8,6 +8,7 @@ import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.cx.restclient.common.ErrorMessage;
 import hudson.model.Item;
 import hudson.model.Run;
+import hudson.util.Secret;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Collections;
@@ -19,7 +20,7 @@ public class CxCredentials {
 
     private String serverUrl;
     private String username;
-    private CharSequence tstWord;
+    private String password;
 
 
     public String getServerUrl() {
@@ -38,12 +39,12 @@ public class CxCredentials {
         this.username = username;
     }
 
-    public CharSequence getTstWord() {
-        return tstWord;
+    public String getPassword() {
+        return Secret.fromString(password).getPlainText();
     }
 
-    public void setTstWord(CharSequence tstWord) {
-        this.tstWord = tstWord;
+    public void setPassword(String password) {
+        this.password = Secret.fromString(password).getEncryptedValue();
     }
 
 
@@ -55,12 +56,12 @@ public class CxCredentials {
             if (StringUtils.isNotEmpty(cxScanBuilder.getCredentialsId())) {
                 UsernamePasswordCredentials c = getCredentialsById(cxScanBuilder.getCredentialsId(), run);
                 ret.setUsername(c != null ? c.getUsername() : "");
-                ret.setTstWord(c != null ? c.getPassword().getPlainText() : "");
+                ret.setPassword(c != null ? c.getPassword().getPlainText() : "");
                 return ret;
 
             } else {
                 ret.setUsername(StringUtils.defaultString(cxScanBuilder.getUsername()));
-                ret.setTstWord(StringUtils.defaultString(cxScanBuilder.getPasswordPlainText()));
+                ret.setPassword(StringUtils.defaultString(cxScanBuilder.getPasswordPlainText()));
                 return ret;
             }
 
@@ -69,12 +70,12 @@ public class CxCredentials {
             if (StringUtils.isNotEmpty(descriptor.getCredentialsId())) {
                 UsernamePasswordCredentials c = getCredentialsById(descriptor.getCredentialsId(), run);
                 ret.setUsername(c != null ? c.getUsername() : "");
-                ret.setTstWord(c != null ? c.getPassword().getPlainText() : "");
+                ret.setPassword(c != null ? c.getPassword().getPlainText() : "");
                 return ret;
 
             } else {
                 ret.setUsername(StringUtils.defaultString(descriptor.getUsername()));
-                ret.setTstWord(StringUtils.defaultString(descriptor.getPasswordPlainText()));
+                ret.setPassword(StringUtils.defaultString(descriptor.getPasswordPlainText()));
                 return ret;
             }
         }
@@ -89,12 +90,12 @@ public class CxCredentials {
             if (StringUtils.isNotEmpty(credId)) {
                 UsernamePasswordCredentials c = getCredentialsById(credId, item);
                 ret.setUsername(c != null ? c.getUsername() : "");
-                ret.setTstWord(c != null ? c.getPassword().getPlainText() : "");
+                ret.setPassword(c != null ? c.getPassword().getPlainText() : "");
                 return ret;
 
             } else {
                 ret.setUsername(StringUtils.defaultString(username));
-                ret.setTstWord(StringUtils.defaultString(pssd));
+                ret.setPassword(StringUtils.defaultString(pssd));
                 return ret;
             }
 
@@ -103,12 +104,12 @@ public class CxCredentials {
             if (StringUtils.isNotEmpty(descriptor.getCredentialsId())) {
                 UsernamePasswordCredentials c = getCredentialsById(descriptor.getCredentialsId(), item);
                 ret.setUsername(c != null ? c.getUsername() : "");
-                ret.setTstWord(c != null ? c.getPassword().getPlainText() : "");
+                ret.setPassword(c != null ? c.getPassword().getPlainText() : "");
                 return ret;
 
             } else {
                 ret.setUsername(StringUtils.defaultString(descriptor.getUsername()));
-                ret.setTstWord(StringUtils.defaultString(descriptor.getPasswordPlainText()));
+                ret.setPassword(StringUtils.defaultString(descriptor.getPasswordPlainText()));
                 return ret;
             }
         }
@@ -135,7 +136,7 @@ public class CxCredentials {
     public static void validateCxCredentials(CxCredentials credentials) throws CxCredException {
         if(StringUtils.isEmpty(credentials.getServerUrl()) ||
                 StringUtils.isEmpty(credentials.getUsername()) ||
-                StringUtils.isEmpty((credentials.getTstWord().toString()))){
+                StringUtils.isEmpty((credentials.getPassword().toString()))){
             throw new CxCredException(ErrorMessage.CHECKMARX_SERVER_CONNECTION_FAILED.getErrorMessage());
         }
     }
