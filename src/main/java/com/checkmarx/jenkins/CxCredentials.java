@@ -42,7 +42,7 @@ public class CxCredentials {
         return Aes.encrypt(password, username);
     }
 
-    public void setPassword(String encryptedPassword) {
+    public void setPassword(final String encryptedPassword) {
         this.password = Aes.decrypt(encryptedPassword, username);
     }
 
