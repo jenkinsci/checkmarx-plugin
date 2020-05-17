@@ -20,7 +20,7 @@ public class CxCredentials {
 
     private String serverUrl;
     private String username;
-    private String pass;
+    private String encryptedPassword;
 
     public String getServerUrl() {
         return serverUrl;
@@ -39,11 +39,11 @@ public class CxCredentials {
     }
 
     public String getPassword() {
-        return Aes.encrypt(pass, username);
+        return encryptedPassword;
     }
 
     public void setPassword(String encryptedPassword) {
-        pass = Aes.decrypt(encryptedPassword, username);
+        this.encryptedPassword = encryptedPassword;
     }
 
     public static CxCredentials resolveCred(CxScanBuilder cxScanBuilder, CxScanBuilder.DescriptorImpl descriptor, Run<?, ?> run) {
