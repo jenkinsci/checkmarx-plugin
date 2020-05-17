@@ -40,11 +40,11 @@ public class CxCredentials {
     }
 
     public String getPassword() {
-        return Secret.fromString(password).getPlainText();
+        return password;
     }
 
     public void setPassword(String password) {
-        this.password = Secret.fromString(password).getEncryptedValue();
+        this.password = password;
     }
 
 
@@ -136,7 +136,7 @@ public class CxCredentials {
     public static void validateCxCredentials(CxCredentials credentials) throws CxCredException {
         if(StringUtils.isEmpty(credentials.getServerUrl()) ||
                 StringUtils.isEmpty(credentials.getUsername()) ||
-                StringUtils.isEmpty((credentials.getPassword().toString()))){
+                StringUtils.isEmpty((credentials.getPassword()))){
             throw new CxCredException(ErrorMessage.CHECKMARX_SERVER_CONNECTION_FAILED.getErrorMessage());
         }
     }
