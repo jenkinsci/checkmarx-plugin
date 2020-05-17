@@ -1,6 +1,7 @@
 package com.checkmarx.jenkins;
 
 import hudson.EnvVars;
+import hudson.model.AbstractBuild;
 import hudson.model.EnvironmentContributingAction;
 import hudson.model.Run;
 
@@ -40,7 +41,7 @@ public class EnvVarAction implements EnvironmentContributingAction {
         add(cxPrefix + "INFO", Integer.toString(info));
     }
 
-    public void buildEnvironment(@Nonnull Run<?, ?> run, @Nonnull EnvVars env) {
+    public void buildEnvVars(AbstractBuild<?, ?> build, EnvVars env) {
         if (data != null) {
             env.putAll(data);
         }

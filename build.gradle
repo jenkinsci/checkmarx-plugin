@@ -45,8 +45,8 @@ dependencies {
 
     compile 'com.checkmarx:cx-client-common:2020.2.10.SCA'
 
-    optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:3.4@jar',
-            'org.jenkins-ci.plugins:credentials:2.3.0@jar'
+    optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.4@jar',
+            'org.jenkins-ci.plugins:credentials:1.23@jar'
 
 
     testCompile 'junit:junit:4.12',
@@ -64,7 +64,7 @@ dependencies {
 
 jenkinsPlugin {
     // version of Jenkins core this plugin depends on
-    coreVersion = '2.77'
+    coreVersion = '2.64'
 
     // short name of the plugin, defaults to the project name without trailing '-plugin'
     shortName = 'checkmarx'
