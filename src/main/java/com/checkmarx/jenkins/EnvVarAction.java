@@ -41,7 +41,7 @@ public class EnvVarAction implements EnvironmentContributingAction {
         add(cxPrefix + "INFO", Integer.toString(info));
     }
 
-    public void buildEnvVars(AbstractBuild<?, ?> build, EnvVars env) {
+    public void buildEnvironment(@Nonnull Run<?, ?> run, @Nonnull EnvVars env) {
         if (data != null) {
             env.putAll(data);
         }
