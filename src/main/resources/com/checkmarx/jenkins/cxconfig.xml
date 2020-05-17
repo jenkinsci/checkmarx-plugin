@@ -19,4 +19,8 @@
     <entry key="DefaultSCAServerURL">https://api.scacheckmarx.com</entry>
     <entry key="DefaultSCAAccessControlUrl">https://v2.ac-checkmarx.com</entry>
     <entry key="DefaultSCAWebAppUrl">https://sca.scacheckmarx.com</entry>
+    <entry key="CharsetName">UTF-8</entry>
+    <entry key="Algorithm">SHA-1</entry>
+    <entry key="AES">AES</entry>
+    <entry key="Length">16</entry>
 </properties>
