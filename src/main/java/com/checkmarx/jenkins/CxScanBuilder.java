@@ -133,6 +133,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     private String osaArchiveIncludePatterns;
     private boolean osaInstallBeforeScan;
+    private boolean isCxServerInNoHostProxyList;
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Private variables
@@ -718,7 +719,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         Jenkins instance = Jenkins.getInstance();
         if (instance != null && Jenkins.getInstance().proxy != null && (useOwnServerCredentials ? this.isProxy : getDescriptor().getIsProxy())) {
             ProxyConfiguration jenkinsProxy = Jenkins.getInstance().proxy;
-            cxScanCallable = new CxScanCallable(config, listener, jenkinsProxy);
+            if (!(isCxURLinNoProxyHost(serverUrl, instance.proxy.getNoProxyHostPatterns()))) {
+                cxScanCallable = new CxScanCallable(config, listener, jenkinsProxy);
+            } else {
+                cxScanCallable = new CxScanCallable(config, listener);
+            }
         } else {
             cxScanCallable = new CxScanCallable(config, listener);
         }
@@ -765,6 +770,43 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         run.addAction(cxScanResult);
 
     }
+
+    /**
+     * Method validate if CxServerURL is part of 'No proxy host'
+     *
+     * @param serverUrl
+     * @param noProxyHostPatterns
+     * @return
+     */
+    private Boolean isCxURLinNoProxyHost(String serverUrl, List<Pattern> noProxyHostPatterns) {
+
+        if ((noProxyHostPatterns != null) && (!noProxyHostPatterns.isEmpty()) && (serverUrl != null) && (!serverUrl.isEmpty())) {
+
+            Pattern pattern;
+            String tempSt;
+            for (int i = 0; i < noProxyHostPatterns.size(); i++) {
+                pattern = noProxyHostPatterns.get(i);
+                tempSt = pattern.toString();
+                while ((tempSt.contains("\\")) ||
+                        (tempSt.contains("..")) ||
+                        (tempSt.contains(".*")) ||
+                        (tempSt.contains("*"))) {
+                    tempSt = tempSt.replace("\\", "");
+                    tempSt = tempSt.replace("..", ".");
+                    tempSt = tempSt.replace(".*", "");
+                    tempSt = tempSt.replace("*", "");
+                }
+
+                if (serverUrl.contains(tempSt)) {
+                    isCxServerInNoHostProxyList = true;
+                    return isCxServerInNoHostProxyList;
+                }
+            }
+        }
+        isCxServerInNoHostProxyList = false;
+        return isCxServerInNoHostProxyList;
+    }
+
 
     private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) throws IOException, InterruptedException {
 
@@ -1208,6 +1250,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private boolean scanTimeOutEnabled;
         private Integer scanTimeoutDuration; // In minutes.
         private boolean lockVulnerabilitySettings = true;
+        private boolean isCxServerInNoHostProxyList;
 
         private final transient Pattern msGuid = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
 
@@ -1429,6 +1472,42 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return String.valueOf(System.currentTimeMillis());
         }
 
+
+        /**
+         * Method validate if CxServerURL is part of 'No proxy host'
+         *
+         * @param serverUrl
+         * @param noProxyHostPatterns
+         * @return
+         */
+        public Boolean isCxURLinNoProxyHost(String serverUrl, List<Pattern> noProxyHostPatterns) {
+
+            if ((noProxyHostPatterns != null) && (!noProxyHostPatterns.isEmpty()) && (serverUrl != null) && (!serverUrl.isEmpty())) {
+                Pattern pattern;
+                String tempSt;
+                for (int i = 0; i < noProxyHostPatterns.size(); i++) {
+                    pattern = noProxyHostPatterns.get(i);
+                    tempSt = pattern.toString();
+                    while ((tempSt.contains("\\")) ||
+                            (tempSt.contains("..")) ||
+                            (tempSt.contains(".*")) ||
+                            (tempSt.contains("*"))) {
+                        tempSt = tempSt.replace("\\", "");
+                        tempSt = tempSt.replace("..", ".");
+                        tempSt = tempSt.replace(".*", "");
+                        tempSt = tempSt.replace("*", "");
+                    }
+
+                    if (serverUrl.contains(tempSt)) {
+                        isCxServerInNoHostProxyList = true;
+                        return true;
+                    }
+                }
+            }
+            isCxServerInNoHostProxyList = false;
+            return isCxServerInNoHostProxyList;
+        }
+
         //////////////////////////////////////////////////////////////////////////////////////
         // Field value validators
         //////////////////////////////////////////////////////////////////////////////////////
@@ -1448,7 +1527,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     cred = CxCredentials.resolveCredentials(true, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
                     CxCredentials.validateCxCredentials(cred);
                     Jenkins instance = Jenkins.getInstance();
-                    if (instance != null && instance.proxy != null && isProxy) {
+                    if (instance != null && instance.proxy != null && isProxy && !(isCxURLinNoProxyHost(serverUrl, instance.proxy.getNoProxyHostPatterns()))) {
                         ProxyConfiguration jenkinsProxy = instance.proxy;
                         shragaClient = new CxShragaClient(cred.getServerUrl(), cred.getUsername(), cred.getPassword(), CX_ORIGIN,
                                 !this.isEnableCertificateValidation(), serverLog, jenkinsProxy.name, jenkinsProxy.port, jenkinsProxy.getUserName(), jenkinsProxy.getPassword());
@@ -1490,14 +1569,18 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
          *  shared state to avoid synchronization issues.
          */
-        private CxShragaClient prepareLoggedInClient(CxCredentials credentials, boolean isProxy)
+        private CxShragaClient prepareLoggedInClient(CxCredentials credentials, boolean isProxy, String serverUrl)
                 throws IOException, CxClientException, CxTokenExpiredException {
             CxShragaClient ret;
             Jenkins instance = Jenkins.getInstance();
             if (instance != null && Jenkins.getInstance().proxy != null && isProxy) {
                 ProxyConfiguration jenkinsProxy = Jenkins.getInstance().proxy;
-                ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPassword(), CX_ORIGIN,
-                        !this.isEnableCertificateValidation(), serverLog, jenkinsProxy.name, jenkinsProxy.port, jenkinsProxy.getUserName(), jenkinsProxy.getPassword());
+                if (!isCxURLinNoProxyHost(serverUrl, jenkinsProxy.getNoProxyHostPatterns())) {
+                    ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPassword(), CX_ORIGIN,
+                            !this.isEnableCertificateValidation(), serverLog, jenkinsProxy.name, jenkinsProxy.port, jenkinsProxy.getUserName(), jenkinsProxy.getPassword());
+                } else {
+                    ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPassword(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
+                }
             } else {
                 ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPassword(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
             }
@@ -1517,7 +1600,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             CxShragaClient shragaClient = null;
             try {
                 CxCredentials credentials = CxCredentials.resolveCredentials(!useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
-                shragaClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy);
+                shragaClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy, serverUrl);
                 List<Project> projects = shragaClient.getAllProjects();
 
                 for (Project p : projects) {
@@ -1557,7 +1640,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             CxShragaClient shragaClient = null;
             try {
                 CxCredentials credentials = CxCredentials.resolveCredentials(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
-                shragaClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy);
+                shragaClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy, serverUrl);
 
                 //todo import preset
                 List<com.cx.restclient.sast.dto.Preset> presets = shragaClient.getPresetList();
@@ -1606,7 +1689,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             try {
                 CxCredentials credentials = CxCredentials.resolveCredentials(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
 
-                shragaClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy);
+                shragaClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy, serverUrl);
                 List<CxNameObj> configurationList = shragaClient.getConfigurationSetList();
 
                 for (CxNameObj cs : configurationList) {
@@ -1641,7 +1724,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             CxShragaClient shragaClient = null;
             try {
                 CxCredentials credentials = CxCredentials.resolveCredentials(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
-                shragaClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy);
+                shragaClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy, serverUrl);
                 List<Team> teamList = shragaClient.getTeamList();
                 for (Team team : teamList) {
                     listBoxModel.add(new ListBoxModel.Option(team.getFullName(), team.getId()));
