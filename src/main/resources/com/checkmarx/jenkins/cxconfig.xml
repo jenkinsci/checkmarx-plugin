@@ -17,7 +17,7 @@
         !OSADependencies.json, !**/node_modules/**/*</entry>
     <entry key="DefaultOSAArchiveIncludePatterns">*.zip, *.war, *.ear, *.tgz</entry>
     <entry key="DefaultSCAServerURL">https://api.scacheckmarx.com</entry>
-    <entry key="DefaultSCAAccessControlUrl">https://v2.ac-checkmarx.com</entry>
+    <entry key="DefaultSCAAccessControlUrl">https://platform.checkmarx.net</entry>
     <entry key="DefaultSCAWebAppUrl">https://sca.scacheckmarx.com</entry>
     <entry key="CharsetName">UTF-8</entry>
     <entry key="Algorithm">SHA-1</entry>
