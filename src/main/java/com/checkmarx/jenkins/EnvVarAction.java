@@ -1,6 +1,7 @@
 package com.checkmarx.jenkins;
 
 import hudson.EnvVars;
+import hudson.model.AbstractBuild;
 import hudson.model.EnvironmentContributingAction;
 import hudson.model.Run;
 

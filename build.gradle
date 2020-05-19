@@ -43,10 +43,10 @@ dependencies {
     compileOnly 'com.intellij:annotations:12.0',
             'org.slf4j:slf4j-api:1.6.1'
 
-    compile 'com.checkmarx:cx-client-common:2020.1.13.SCA'
+    compile 'com.checkmarx:cx-client-common:2020.2.12.SCA'
 
     optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.4@jar',
-            'org.jenkins-ci.plugins:credentials:1.23@jar'
+            'org.jenkins-ci.plugins:credentials:2.1.19@jar'
 
 
     testCompile 'junit:junit:4.12',

@@ -12,7 +12,6 @@ import hudson.ProxyConfiguration;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import org.jenkinsci.remoting.RoleChecker;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -147,7 +146,7 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
             try {
                 DependencyScanResults dsResults = config.getSynchronous() ?
                         shraga.waitForDependencyScanResults() :
-                        shraga.getLatestDependencyScanResults();
+                         shraga.getLatestDependencyScanResults();
 
                 scanResults.setDependencyScanResults(dsResults);
             } catch (CxClientException e) {
