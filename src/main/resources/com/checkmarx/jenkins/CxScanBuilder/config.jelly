@@ -39,7 +39,7 @@
                     <c:select />
                 </f:entry>
 
-                <f:optionalBlock title="Use Jenkins proxy" inline="true" field="isProxy" checked="${instance==null?true:instance.isProxy}" />
+                <f:optionalBlock title="Use Jenkins proxy" inline="true" field="isProxy" checked="${instance==null?false:instance.isProxy}" />
 
                 <f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
                     with="serverUrl,username,password,timestamp,credentialsId,isProxy" />

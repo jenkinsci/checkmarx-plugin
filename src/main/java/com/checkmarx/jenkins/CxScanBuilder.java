@@ -133,7 +133,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     private String osaArchiveIncludePatterns;
     private boolean osaInstallBeforeScan;
-    private boolean isCxServerInNoHostProxyList;
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Private variables
@@ -717,16 +716,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //create scans and retrieve results (in jenkins agent)
         final CxScanCallable cxScanCallable;
         Jenkins instance = Jenkins.getInstance();
-        if (instance != null && Jenkins.getInstance().proxy != null && (useOwnServerCredentials ? this.isProxy : getDescriptor().getIsProxy())) {
-            ProxyConfiguration jenkinsProxy = Jenkins.getInstance().proxy;
-            if (!(isCxURLinNoProxyHost(serverUrl, instance.proxy.getNoProxyHostPatterns()))) {
-                cxScanCallable = new CxScanCallable(config, listener, jenkinsProxy);
-            } else {
-                cxScanCallable = new CxScanCallable(config, listener);
-            }
+        if (instance != null && instance.proxy != null &&
+                (useOwnServerCredentials ? this.isProxy : getDescriptor().getIsProxy()) &&
+                !(isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))) {
+
+            cxScanCallable = new CxScanCallable(config, listener, instance.proxy);
         } else {
             cxScanCallable = new CxScanCallable(config, listener);
         }
+
         ScanResults scanResults = workspace.act(cxScanCallable);
         CxScanResult cxScanResult = new CxScanResult(run, config);
 
@@ -764,6 +762,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
             return;
         }
+
         //Asynchronous scan - add note message and previous build reports
         String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
         cxScanResult.setHtmlReportName(reportName);
@@ -784,8 +783,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             Pattern pattern;
             String tempSt;
-            for (int i = 0; i < noProxyHostPatterns.size(); i++) {
-                pattern = noProxyHostPatterns.get(i);
+            for (Pattern noProxyHostPattern : noProxyHostPatterns) {
+                pattern = noProxyHostPattern;
                 tempSt = pattern.toString();
                 while ((tempSt.contains("\\")) ||
                         (tempSt.contains("..")) ||
@@ -798,13 +797,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 }
 
                 if (serverUrl.contains(tempSt)) {
-                    isCxServerInNoHostProxyList = true;
-                    return isCxServerInNoHostProxyList;
+                    return true;
                 }
             }
         }
-        isCxServerInNoHostProxyList = false;
-        return isCxServerInNoHostProxyList;
+        return false;
     }
 
 
@@ -911,6 +908,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("server url: " + config.getUrl());
         log.info("username: " + config.getUsername());
         log.info("is using Jenkins server proxy: " + (useOwnServerCredentials ? getIsProxy() : config.isProxy()));
+        if (useOwnServerCredentials ? getIsProxy() : config.isProxy()) {
+            if (Jenkins.getInstance().proxy != null)
+                log.info("No Proxy Host: " + printNoProxyHost());
+        }
         log.info("project name: " + config.getProjectName());
         log.info("team path: " + config.getTeamPath());
         log.info("team id: " + config.getTeamId());
@@ -951,6 +952,25 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
         log.info("------------------------------------------------------------------------------------------");
+    }
+
+    private String printNoProxyHost() {
+        String noProxyHost = "";
+        ProxyConfiguration proxy = Jenkins.getInstance().proxy;
+        if (proxy.getNoProxyHostPatterns() != null) {
+            List<Pattern> noProxyHostPatterns = proxy.getNoProxyHostPatterns();
+            for (Pattern noProxyHostPattern : noProxyHostPatterns) {
+                String tempString = noProxyHostPattern.toString();
+                tempString = tempString.replace("\\.", ".").replace(".*", "*");
+                if (noProxyHost.isEmpty()) {
+                    noProxyHost = noProxyHost + tempString;
+                } else {
+                    noProxyHost = noProxyHost + ", " + tempString;
+                }
+            }
+            return noProxyHost;
+        }
+        return noProxyHost;
     }
 
     private void createSastReports(SASTResults sastResults, File checkmarxBuildDir, @Nonnull FilePath workspace) {
@@ -1250,7 +1270,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private boolean scanTimeOutEnabled;
         private Integer scanTimeoutDuration; // In minutes.
         private boolean lockVulnerabilitySettings = true;
-        private boolean isCxServerInNoHostProxyList;
 
         private final transient Pattern msGuid = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
 
@@ -1472,21 +1491,19 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return String.valueOf(System.currentTimeMillis());
         }
 
-
         /**
          * Method validate if CxServerURL is part of 'No proxy host'
-         *
          * @param serverUrl
          * @param noProxyHostPatterns
          * @return
          */
-        public Boolean isCxURLinNoProxyHost(String serverUrl, List<Pattern> noProxyHostPatterns) {
+        private Boolean isCxURLinNoProxyHost(String serverUrl, List<Pattern> noProxyHostPatterns) {
 
             if ((noProxyHostPatterns != null) && (!noProxyHostPatterns.isEmpty()) && (serverUrl != null) && (!serverUrl.isEmpty())) {
                 Pattern pattern;
                 String tempSt;
-                for (int i = 0; i < noProxyHostPatterns.size(); i++) {
-                    pattern = noProxyHostPatterns.get(i);
+                for (Pattern noProxyHostPattern : noProxyHostPatterns) {
+                    pattern = noProxyHostPattern;
                     tempSt = pattern.toString();
                     while ((tempSt.contains("\\")) ||
                             (tempSt.contains("..")) ||
@@ -1499,13 +1516,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     }
 
                     if (serverUrl.contains(tempSt)) {
-                        isCxServerInNoHostProxyList = true;
                         return true;
                     }
                 }
             }
-            isCxServerInNoHostProxyList = false;
-            return isCxServerInNoHostProxyList;
+            return false;
         }
 
         //////////////////////////////////////////////////////////////////////////////////////
@@ -1573,14 +1588,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 throws IOException, CxClientException, CxTokenExpiredException {
             CxShragaClient ret;
             Jenkins instance = Jenkins.getInstance();
-            if (instance != null && Jenkins.getInstance().proxy != null && isProxy) {
-                ProxyConfiguration jenkinsProxy = Jenkins.getInstance().proxy;
-                if (!isCxURLinNoProxyHost(serverUrl, jenkinsProxy.getNoProxyHostPatterns())) {
-                    ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPassword(), CX_ORIGIN,
-                            !this.isEnableCertificateValidation(), serverLog, jenkinsProxy.name, jenkinsProxy.port, jenkinsProxy.getUserName(), jenkinsProxy.getPassword());
-                } else {
-                    ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPassword(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
-                }
+            if (instance != null && instance.proxy != null && isProxy && !(isCxURLinNoProxyHost(serverUrl, instance.proxy.getNoProxyHostPatterns()))) {
+                ProxyConfiguration jenkinsProxy = instance.proxy;
+                ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPassword(), CX_ORIGIN,
+                        !this.isEnableCertificateValidation(), serverLog, jenkinsProxy.name, jenkinsProxy.port, jenkinsProxy.getUserName(), jenkinsProxy.getPassword());
             } else {
                 ret = new CxShragaClient(credentials.getServerUrl(), credentials.getUsername(), credentials.getPassword(), CX_ORIGIN, !this.isEnableCertificateValidation(), serverLog);
             }
@@ -1600,7 +1611,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             CxShragaClient shragaClient = null;
             try {
                 CxCredentials credentials = CxCredentials.resolveCredentials(!useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
-                shragaClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy, serverUrl);
+                shragaClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy, useOwnServerCredentials ? this.serverUrl : serverUrl);
                 List<Project> projects = shragaClient.getAllProjects();
 
                 for (Project p : projects) {
@@ -1640,7 +1651,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             CxShragaClient shragaClient = null;
             try {
                 CxCredentials credentials = CxCredentials.resolveCredentials(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
-                shragaClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy, serverUrl);
+                shragaClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy, useOwnServerCredentials ? this.serverUrl : serverUrl);
 
                 //todo import preset
                 List<com.cx.restclient.sast.dto.Preset> presets = shragaClient.getPresetList();
@@ -1689,7 +1700,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             try {
                 CxCredentials credentials = CxCredentials.resolveCredentials(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
 
-                shragaClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy, serverUrl);
+                shragaClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy, useOwnServerCredentials ? this.serverUrl : serverUrl);
                 List<CxNameObj> configurationList = shragaClient.getConfigurationSetList();
 
                 for (CxNameObj cs : configurationList) {
@@ -1724,7 +1735,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             CxShragaClient shragaClient = null;
             try {
                 CxCredentials credentials = CxCredentials.resolveCredentials(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
-                shragaClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy, serverUrl);
+                shragaClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy, useOwnServerCredentials ? this.serverUrl : serverUrl);
                 List<Team> teamList = shragaClient.getTeamList();
                 for (Team team : teamList) {
                     listBoxModel.add(new ListBoxModel.Option(team.getFullName(), team.getId()));
