@@ -24,3 +24,5 @@ com.cx.restclient.sast.dto.CxXMLResults$Query$Result$Path
 com.cx.restclient.sast.dto.CxXMLResults$Query$Result$Path$PathNode
 com.cx.restclient.sast.dto.CxXMLResults$Query$Result$Path$PathNode$Snippet
 com.cx.restclient.sast.dto.CxXMLResults$Query$Result$Path$PathNode$Snippet$Line
+com.cx.restclient.common.summary.DependencyResult
+com.cx.restclient.sca.dto.report.Finding

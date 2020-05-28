@@ -61,6 +61,7 @@ dependencies {
 
 }
 
+logging.captureStandardOutput LogLevel.INFO
 
 jenkinsPlugin {
     // version of Jenkins core this plugin depends on
