@@ -17,6 +17,7 @@ import com.cx.restclient.sast.dto.Preset;
 import com.cx.restclient.sast.dto.Project;
 import com.cx.restclient.sast.dto.SASTResults;
 import com.cx.restclient.sca.dto.SCAConfig;
+import com.cx.restclient.sca.dto.SCAResults;
 import com.cx.restclient.sca.dto.SourceLocationType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.TemplateException;
@@ -72,9 +73,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
 
     public static final String SCAN_REPORT_XML = "ScanReport.xml";
-    public static final String OSA_SUMMERY_JSON = "OSASummery.json";
+    public static final String OSA_SUMMERY_JSON = "OSASummary.json";
     public static final String OSA_LIBRARIES_JSON = "OSALibraries.json";
     public static final String OSA_VULNERABILITIES_JSON = "OSAVulnerabilities.json";
+
+    public static final String SCA_SUMMERY_JSON = "SCASummary.json";
+    public static final String SCA_LIBRARIES_JSON = "SCALibraries.json";
+    public static final String SCA_VULNERABILITIES_JSON = "SCAVulnerabilities.json";
 
     private static final String PDF_URL_TEMPLATE = "/%scheckmarx/pdfReport";
     private static final String PDF_URL = "checkmarx/pdfReport";
@@ -763,6 +768,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             DependencyScanResults dsResults = scanResults.getDependencyScanResults();
             if (dsResults != null && dsResults.getOsaResults() != null && dsResults.getOsaResults().isOsaResultsReady()) {
                 createOsaReports(dsResults.getOsaResults(), checkmarxBuildDir);
+            }else if(dsResults != null && dsResults.getScaResults() != null && dsResults.getScaResults().isScaResultReady()){
+                createScaReports(dsResults.getScaResults(),checkmarxBuildDir);
             }
             return;
         }
@@ -771,6 +778,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         cxScanResult.setHtmlReportName(reportName);
         run.addAction(cxScanResult);
 
+    }
+
+    private void createScaReports(SCAResults scaResults, File checkmarxBuildDir) {
+        writeJsonObjectToFile(scaResults.getSummary(), new File(checkmarxBuildDir, SCA_SUMMERY_JSON), "OSA summary json report");
+        writeJsonObjectToFile(scaResults.getPackages(), new File(checkmarxBuildDir, SCA_LIBRARIES_JSON), "OSA libraries json report");
+        writeJsonObjectToFile(scaResults.getFindings(), new File(checkmarxBuildDir, SCA_VULNERABILITIES_JSON), "OSA vulnerabilities json report");
     }
 
     private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) {

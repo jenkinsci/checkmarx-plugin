@@ -30,4 +30,4 @@ com.cx.restclient.sca.dto.report.SCASummaryResults
 com.cx.restclient.sca.dto.report.DependencyPathSegment
 com.cx.restclient.sca.dto.report.PackageSeverity
 com.cx.restclient.sca.dto.report.PackageUsage
-
+com.cx.restclient.common.summary.DependencyResult
