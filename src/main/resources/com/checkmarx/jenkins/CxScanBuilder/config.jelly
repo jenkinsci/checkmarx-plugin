@@ -6,316 +6,323 @@
 	<f:invisibleEntry>
 		<!-- Used for Internet Explorer cache invalidation -->
 		<f:textbox default="${descriptor.currentTime}" field="timestamp" />
-	</f:invisibleEntry>
+    </f:invisibleEntry>
 
-      <f:section title="">
-          </f:section>
+    <f:section title=""/>
 
+    <f:section title="Checkmarx Server Settings"/>
 
-          <f:section title="Checkmarx Server Settings">
-          </f:section>
+    <f:invisibleEntry>
+        <f:readOnlyTextbox field="username"/>
+        <f:readOnlyTextbox field="password"/>
+    </f:invisibleEntry>
 
-            <!-- Creates a text field that shows the value of the "name" property. When submitted, it will be passed to the
-                corresponding constructor parameter. -->
-            <f:invisibleEntry>
-                <f:readOnlyTextbox field="username"/>
-                <f:readOnlyTextbox field="password"/>
-            </f:invisibleEntry>
-            <f:optionalBlock title="Use default server credentials (${descriptor.credentialsDescription})"
-                inline="true" field="useOwnServerCredentials" negative="true"
-                checked="${instance==null?true:!instance.useOwnServerCredentials}">
+    <f:optionalBlock title="Use default server credentials (${descriptor.credentialsDescription})"
+        inline="true" field="useOwnServerCredentials" negative="true"
+        checked="${instance==null?true:!instance.useOwnServerCredentials}">
 
-                <f:entry title="Checkmarx server URL" field="serverUrl">
-                    <f:textbox default="${descriptor.serverUrl}" />
-                </f:entry>
+        <f:entry title="Checkmarx server URL" field="serverUrl">
+            <f:textbox default="${descriptor.serverUrl}" />
+        </f:entry>
 
-                <j:if test="${instance.isOldCredentials()}">
-                    <f:block>
-                        <div style="font-weight: bold; padding: 8px;">You are currently using the Checkmarx credential method. To switch to the new Jenkins Credential method, click Add and select your new credentials.</div>
-                    </f:block>
-                </j:if>
+        <j:if test="${instance.isOldCredentials()}">
+            <f:block>
+                <div style="font-weight: bold; padding: 8px;">You are currently using the Checkmarx credential method. To switch to the new Jenkins Credential method, click Add and select your new credentials.</div>
+            </f:block>
+        </j:if>
 
-                <f:entry field="credentialsId" title="${%Credentials}">
-                    <c:select />
-                </f:entry>
+        <f:entry field="credentialsId" title="${%Credentials}">
+            <c:select />
+        </f:entry>
 
-                <f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
-                    with="serverUrl,username,password,timestamp,credentialsId" />
-            </f:optionalBlock>
+        <f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
+           with="serverUrl,username,password,timestamp,credentialsId" />
+    </f:optionalBlock>
 
-            <f:entry title="Checkmarx project name" description="Existing projects appear in a completion list when server url is provided (up to 20)">
-                <f:combobox field="projectName" value="${instance.projectName == null?descriptor.defaultProjectName:instance.projectName}"/>
-            </f:entry>
+    <f:entry title="Checkmarx project name" description="Existing projects appear in a completion list when server url is provided (up to 20)">
+        <f:combobox field="projectName" value="${instance.projectName == null?descriptor.defaultProjectName:instance.projectName}"/>
+    </f:entry>
 
-            <f:entry title="Team" field="groupId">
-                <f:select />
-            </f:entry>
+    <f:entry title="Team" field="groupId">
+        <f:select />
+    </f:entry>
 
-
-    <f:section title="CxSAST Scan">
-    </f:section>
+    <f:section title="CxSAST Scan"/>
 
     <f:optionalBlock title="Enable CxSAST scan" inline="true" field="sastEnabled" checked="${instance == null || instance.sastEnabled == null || instance.sastEnabled}">
-
         <f:entry title="Preset" field="preset">
             <f:select />
         </f:entry>
 
-                 <!-- GLOBAL INCLUDE\EXCLUDE -->
-                <f:radioBlock checked="${instance == null || instance.exclusionsSetting == null || instance.exclusionsSetting.equals('global')}" inline="true"
-                    name="exclusionsSetting" title="Use Global Include/Exclude Settings" value="global">
-                    <f:nested>
-                        <f:entry title="Exclude Folders" field="globalExcludeFolders">
-                            <f:textbox readonly="readonly"  value="${descriptor.excludeFolders}"/>
-                        </f:entry>
-                        <f:entry title="Include/Exclude Wildcard Patterns" field="globalFilterPattern">
-                            <f:textarea readonly="readonly" value="${descriptor.filterPattern}" />
-                        </f:entry>
-                    </f:nested>
-                </f:radioBlock>
-
-
-                 <!-- SPECIFIC INCLUDE\EXCLUDE -->
-                 <f:radioBlock checked="${instance.getExclusionsSetting().equals('job')}" inline="true"
-                                 name="exclusionsSetting" title="Specific Include/Exclude Settings" value="job">
-                    <f:nested>
-                        <f:entry title="Exclude Folders" field="excludeFolders">
-                           <f:textbox default="${descriptor.excludeFolders}" />
-                        </f:entry>
-                       <f:entry title="Include/Exclude Wildcard Patterns" field="filterPattern">
-                           <f:textarea default="${descriptor.filterPattern}" />
-
-                       </f:entry>
-                    </f:nested>
-                </f:radioBlock>
-
-                <f:optionalBlock title="Incremental" field="incremental" inline="true" checked="${instance.incremental}">
-
-                    <f:optionalBlock title="Schedule periodic full scans" field="fullScansScheduled" inline="true"
-                        checked="${instance.fullScansScheduled}">
-                        <f:entry
-                            title="Number of incremental scans between full scans (${descriptor.FULL_SCAN_CYCLE_MIN}-${descriptor.FULL_SCAN_CYCLE_MAX})"
-                            field="fullScanCycle">
-                            <f:number clazz="positive-number" min="${descriptor.FULL_SCAN_CYCLE_MIN}" max="${descriptor.FULL_SCAN_CYCLE_MAX}"
-                                step="1" default="10" />
-                        </f:entry>
-                    </f:optionalBlock>
-                </f:optionalBlock>
-
-
-                <f:entry title="Source character encoding (configuration)" field="sourceEncoding" description="Default Configuration uses UTF-8">
-                    <f:select />
+         <!-- GLOBAL INCLUDE\EXCLUDE -->
+        <f:radioBlock checked="${instance == null || instance.exclusionsSetting == null || instance.exclusionsSetting.equals('global')}" inline="true"
+            name="exclusionsSetting" title="Use Global Include/Exclude Settings" value="global">
+            <f:nested>
+                <f:entry title="Exclude Folders" field="globalExcludeFolders">
+                    <f:textbox readonly="readonly"  value="${descriptor.excludeFolders}"/>
                 </f:entry>
-
-                <f:entry title="Comment" field="comment">
-                    <f:textarea />
+                <f:entry title="Include/Exclude Wildcard Patterns" field="globalFilterPattern">
+                    <f:textarea readonly="readonly" value="${descriptor.filterPattern}" />
                 </f:entry>
+            </f:nested>
+        </f:radioBlock>
+
+         <!-- SPECIFIC INCLUDE\EXCLUDE -->
+         <f:radioBlock checked="${instance.getExclusionsSetting().equals('job')}" inline="true"
+                         name="exclusionsSetting" title="Specific Include/Exclude Settings" value="job">
+            <f:nested>
+                <f:entry title="Exclude Folders" field="excludeFolders">
+                   <f:textbox default="${descriptor.excludeFolders}" />
+                </f:entry>
+                <f:entry title="Include/Exclude Wildcard Patterns" field="filterPattern">
+                   <f:textarea default="${descriptor.filterPattern}" />
+                </f:entry>
+            </f:nested>
+        </f:radioBlock>
+
+        <f:optionalBlock title="Incremental" field="incremental" inline="true" checked="${instance.incremental}">
+            <f:optionalBlock title="Schedule periodic full scans" field="fullScansScheduled" inline="true"
+                checked="${instance.fullScansScheduled}">
+                <f:entry
+                    title="Number of incremental scans between full scans (${descriptor.FULL_SCAN_CYCLE_MIN}-${descriptor.FULL_SCAN_CYCLE_MAX})"
+                    field="fullScanCycle">
+                    <f:number clazz="positive-number" min="${descriptor.FULL_SCAN_CYCLE_MIN}" max="${descriptor.FULL_SCAN_CYCLE_MAX}"
+                        step="1" default="10" />
+                </f:entry>
+            </f:optionalBlock>
+        </f:optionalBlock>
+
+        <f:entry title="Source character encoding (configuration)" field="sourceEncoding" description="Default Configuration uses UTF-8">
+            <f:select />
+        </f:entry>
+
+        <f:entry title="Comment" field="comment">
+            <f:textarea />
+        </f:entry>
 
         <f:optionalBlock title="Avoid duplicate project scans in queue" inline="true" field="avoidDuplicateProjectScans" />
     </f:optionalBlock>
     <f:optionalBlock title="Skip scan if triggered by SCM Changes" inline="true" field="skipSCMTriggers" />
 
 
-	<!-- -= OSA SCAN =- -->
-	  <f:section title="CxOSA Scan">
+    <f:section title="Dependency Scan" />
+    <f:optionalBlock title="Enable dependency scan" field="dependencyScanConfig"
+                     checked="${instance.dependencyScanConfig != null}">
+        <f:optionalBlock title="Override global dependency scan settings" name="overrideGlobalConfig"
+                         checked="${instance.dependencyScanConfig.overrideGlobalConfig}" inline="true">
+            <f:entry title="Include/Exclude wildcard patterns" field="dependencyScanPatterns">
+                <f:textarea value="${instance.dependencyScanConfig.dependencyScanPatterns}" />
+            </f:entry>
+            <f:entry title="Exclude folders" field="dependencyScanExcludeFolders">
+                <f:textbox value="${instance.dependencyScanConfig.dependencyScanExcludeFolders}" />
+            </f:entry>
 
-        <f:optionalBlock title="Enable OSA" inline="true" field="osaEnabled">
-            <f:entry/>
-            <f:entry title="Include/Exclude wildcard patterns" field="includeOpenSourceFolders">
-                <f:textbox/>
-            </f:entry>
-            <f:entry title="Exclude folders" field="excludeOpenSourceFolders">
-                <f:textbox/>
-            </f:entry>
-            <f:entry title="Archive extract patterns" field="osaArchiveIncludePatterns">
-                <f:textbox default="${descriptor.DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS}"/>
-            </f:entry>
-            <f:optionalBlock title="Execute dependency managers 'install packages' command before Scan" inline="true" field="osaInstallBeforeScan" />
+            <f:radioBlock checked="${instance.dependencyScanConfig.dependencyScannerType == 'OSA'}" inline="true"
+                          name="dependencyScannerType" title="Use CxOSA dependency scanner" value="OSA">
+                <f:nested>
+                    <f:entry title="Archive extract patterns" field="osaArchiveIncludePatterns">
+                        <f:textbox default="${descriptor.DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS}"
+                                   value="${instance.dependencyScanConfig.osaArchiveIncludePatterns}"/>
+                    </f:entry>
+                    <f:entry title="Execute dependency managers 'install packages' command before Scan"
+                             field="osaInstallBeforeScan">
+                        <f:checkbox checked="${instance.dependencyScanConfig.osaInstallBeforeScan}"/>
+                    </f:entry>
+                </f:nested>
+            </f:radioBlock>
+
+            <f:radioBlock checked="${instance.dependencyScanConfig.dependencyScannerType == 'SCA'}"
+                          inline="true" name="dependencyScannerType" title="Use CxSCA dependency scanner" value="SCA">
+                <f:nested>
+                    <f:entry title="CxSCA API URL" field="scaServerUrl">
+                        <f:textbox default="${descriptor.DEFAULT_SCA_SERVER_URL}"
+                                   value="${instance.dependencyScanConfig.scaServerUrl}"/>
+                    </f:entry>
+                    <f:entry title="Access control server URL" field="scaAccessControlUrl">
+                        <f:textbox default="${descriptor.DEFAULT_SCA_ACCESS_CONTROL_URL}"
+                                   value="${instance.dependencyScanConfig.scaAccessControlUrl}"/>
+                    </f:entry>
+                    <f:entry title="CxSCA web app URL" field="scaWebAppUrl">
+                        <f:textbox default="${descriptor.DEFAULT_SCA_WEB_APP_URL}"
+                                   value="${instance.dependencyScanConfig.scaWebAppUrl}"/>
+                    </f:entry>
+                    <f:entry title="CxSCA credentials" field="scaCredentialsId">
+                        <c:select value="${instance.dependencyScanConfig.scaCredentialsId}" />
+                    </f:entry>
+                    <f:description>**Note:SAML and SSO are not supported
+                     </f:description>
+                    <f:entry title="Account" field="scaTenant">
+                        <f:textbox value="${instance.dependencyScanConfig.scaTenant}"/>
+                    </f:entry>
+                    <f:validateButton title="Test Connection" progress="Testing..." method="testScaConnection"
+                                      with="scaServerUrl,scaAccessControlUrl,scaCredentialsId,scaTenant"/>
+                </f:nested>
+            </f:radioBlock>
         </f:optionalBlock>
-      </f:section>
-
+    </f:optionalBlock>
 
 	<!-- -= Build Control =- -->
-
-
-
     <f:section title="Build Control">
-
-
-
-
-            <f:entry name="jobStatusOnError" title="Job status when scan returns an error:" field="jobStatusOnError">
-                    <f:enum field="jobStatusOnError">${it.displayName}</f:enum>
+        <f:entry name="jobStatusOnError" title="Job status when scan returns an error:" field="jobStatusOnError">
+            <f:enum field="jobStatusOnError">${it.displayName}</f:enum>
+        </f:entry>
+        <j:choose>
+            <!-- -=use only global configuration setting =- -->
+            <j:when test="${descriptor.forcingVulnerabilityThresholdEnabled and descriptor.lockVulnerabilitySettings}">
+                <f:entry title="Build status when results exceed threshold:">
+                    <f:readOnlyTextbox value="Setting Locked by Administrator (${descriptor.JobGlobalStatusOnThresholdViolation})" />
+                </f:entry>
+                <f:entry title="SAST High severity vulnerabilities threshold">
+                    <f:readOnlyTextbox value="${descriptor.highThresholdEnforcement}" />
+                </f:entry>
+                <f:entry title="SAST Medium severity vulnerabilities threshold">
+                    <f:readOnlyTextbox value="${descriptor.mediumThresholdEnforcement}" />
+                </f:entry>
+                <f:entry title="SAST Low severity vulnerabilities threshold">
+                    <f:readOnlyTextbox value="${descriptor.lowThresholdEnforcement}" />
+                </f:entry>
+                <f:entry title="Dependency scan high severity vulnerabilities threshold">
+                    <f:readOnlyTextbox value="${descriptor.osaHighThresholdEnforcement}" />
+                </f:entry>
+                <f:entry title="Dependency scan medium severity vulnerabilities threshold">
+                    <f:readOnlyTextbox value="${descriptor.osaMediumThresholdEnforcement}" />
+                </f:entry>
+                <f:entry title="Dependency scan low severity vulnerabilities threshold">
+                    <f:readOnlyTextbox value="${descriptor.osaLowThresholdEnforcement}" />
                 </f:entry>
 
+                <f:optionalBlock title="Generate CxSAST PDF report" inline="true" field="generatePdfReport" />
+
+                <!-- -= enableProjectPolicyEnforcement =- -->
+                <f:optionalBlock title="Enable Project's policy enforcement" inline="true" field="enableProjectPolicyEnforcement" />
+                 <!-- -= Generate Full XML report =- -->
+                  <f:optionalBlock title="Generate CxSAST full XML report" inline="true" field="generateXmlReport"
+                   checked="${instance==null?true:instance.generateXmlReport}" />
+            </j:when>
+
+            <!-- ** use specific configuration setting ** -->
+            <j:otherwise>
 
 
-            <j:choose>
-                <!-- -=use only global configuration setting =- -->
-                <j:when test="${descriptor.forcingVulnerabilityThresholdEnabled and descriptor.lockVulnerabilitySettings}">
-                    <f:entry title="Build status when results exceed threshold:">
-                        <f:readOnlyTextbox value="Setting Locked by Administrator (${descriptor.JobGlobalStatusOnThresholdViolation})" />
-                    </f:entry>
+                <f:optionalBlock title="Enable synchronous mode" inline="true" field="waitForResultsEnabled"
+                    checked="${instance==null?true:instance.waitForResultsEnabled}">
 
-                    <f:entry title="SAST High severity vulnerabilities threshold">
-                        <f:readOnlyTextbox value="${descriptor.highThresholdEnforcement}" />
-                    </f:entry>
-                    <f:entry title="SAST Medium severity vulnerabilities threshold">
-                        <f:readOnlyTextbox value="${descriptor.mediumThresholdEnforcement}" />
-                    </f:entry>
-                    <f:entry title="SAST Low severity vulnerabilities threshold">
-                        <f:readOnlyTextbox value="${descriptor.lowThresholdEnforcement}" />
-                    </f:entry>
-                    <f:entry title="OSA high severity vulnerabilities threshold">
-                        <f:readOnlyTextbox value="${descriptor.osaHighThresholdEnforcement}" />
-                    </f:entry>
-                    <f:entry title="OSA medium severity vulnerabilities threshold">
-                        <f:readOnlyTextbox value="${descriptor.osaMediumThresholdEnforcement}" />
-                    </f:entry>
-                    <f:entry title="OSA low severity vulnerabilities threshold">
-                        <f:readOnlyTextbox value="${descriptor.osaLowThresholdEnforcement}" />
-                    </f:entry>
+                    <!-- -= Enable Synchronous Mode =- -->
 
+                    <f:description>Synchronous mode allows viewing scan results in Jenkins and setting thresholds
+                    </f:description>
+
+                    <!-- -= Generate PDF report =- -->
                     <f:optionalBlock title="Generate CxSAST PDF report" inline="true" field="generatePdfReport" />
 
                     <!-- -= enableProjectPolicyEnforcement =- -->
                     <f:optionalBlock title="Enable Project's policy enforcement" inline="true" field="enableProjectPolicyEnforcement" />
-                </j:when>
 
-                <!-- ** use specific configuration setting ** -->
-                <j:otherwise>
-                     <!-- -= Generate Full XML report =- -->
-                                        <f:optionalBlock title="Generate CxSAST full XML report" inline="true" field="generateXmlReport"
-                                             checked="${instance==null?true:instance.generateXmlReport}" />
+                   <!-- ** Enable CxSAST vulnerability threshold ** -->
+                    <f:optionalBlock title="Enable vulnerability threshold" inline="true"
+                        field="vulnerabilityThresholdEnabled">
 
-                    <f:optionalBlock title="Enable synchronous mode" inline="true" field="waitForResultsEnabled"
-                        checked="${instance==null?true:instance.waitForResultsEnabled}">
+                        <j:choose>
+                            <j:when test="${descriptor.forcingVulnerabilityThresholdEnabled}">
 
-                        <!-- -= Enable Synchronous Mode =- -->
-
-                        <f:description>Synchronous mode allows viewing scan results in Jenkins and setting thresholds
-                        </f:description>
-
-
-                        <!-- -= Generate PDF report =- -->
-                        <f:optionalBlock title="Generate CxSAST PDF report" inline="true" field="generatePdfReport" />
-
-                        <!-- -= enableProjectPolicyEnforcement =- -->
-                        <f:optionalBlock title="Enable Project's policy enforcement" inline="true" field="enableProjectPolicyEnforcement" />
-
-                       <!-- ** Enable CxSAST vulnerability threshold ** -->
-                        <f:optionalBlock title="Enable vulnerability threshold" inline="true"
-                            field="vulnerabilityThresholdEnabled">
-
-                            <j:choose>
-                                <j:when test="${descriptor.forcingVulnerabilityThresholdEnabled}">
-
-                                    <f:radioBlock checked="${instance.getThresholdSettings() == null || instance.getThresholdSettings().equals('global')}" inline="true"
-                                        name="thresholdSettings" title="Use Global Settings (${descriptor.JobGlobalStatusOnThresholdViolation.displayName})"
-                                        value="global">
-                                        <f:nested>
-                                            <f:entry title="Build status when results exceed threshold:">
-                                                <f:readOnlyTextbox value="${descriptor.JobGlobalStatusOnThresholdViolation.displayName}" />
-                                            </f:entry>
-
-                                            <f:entry title="SAST High severity vulnerabilities threshold">
-                                                <f:readOnlyTextbox value="${descriptor.highThresholdEnforcement}" />
-                                            </f:entry>
-                                            <f:entry title="SAST Medium severity vulnerabilities threshold">
-                                                <f:readOnlyTextbox value="${descriptor.mediumThresholdEnforcement}" />
-                                            </f:entry>
-                                            <f:entry title="SAST Low severity vulnerabilities threshold">
-                                                <f:readOnlyTextbox value="${descriptor.lowThresholdEnforcement}" />
-                                            </f:entry>
-                                            <f:entry title="OSA high severity vulnerabilities threshold">
-                                                <f:readOnlyTextbox value="${descriptor.osaHighThresholdEnforcement}" />
-                                            </f:entry>
-                                            <f:entry title="OSA medium severity vulnerabilities threshold">
-                                                <f:readOnlyTextbox value="${descriptor.osaMediumThresholdEnforcement}" />
-                                            </f:entry>
-                                            <f:entry title="OSA low severity vulnerabilities threshold">
-                                                <f:readOnlyTextbox value="${descriptor.osaLowThresholdEnforcement}" />
-                                            </f:entry>
-                                        </f:nested>
-                                    </f:radioBlock>
-
-                                    <f:radioBlock checked="${instance.getThresholdSettings().equals('job')}" inline="true"
-                                        name="thresholdSettings" title="Specific Scan settings" value="job">
-                                        <f:nested>
-                                            <f:entry title="Build status when results exceed threshold:" field="vulnerabilityThresholdResult">
-                                                <f:select />
-                                            </f:entry>
-                                            <f:entry title="SAST High severity vulnerabilities threshold" field="highThreshold">
-                                                <f:number clazz="positive-number" min="0" step="1" default="" />
-                                            </f:entry>
-                                            <f:entry title="SAST Medium severity vulnerabilities threshold" field="mediumThreshold">
-                                                <f:number clazz="positive-number" min="0" step="1" default="" />
-                                            </f:entry>
-                                            <f:entry title="SAST Low severity vulnerabilities threshold" field="lowThreshold">
-                                                <f:number clazz="positive-number" min="0" step="1" default="" />
-                                            </f:entry>
-
-                                            <f:optionalBlock title="Fail the build for new SAST vulnerabilities" inline="true" field="failBuildOnNewResults">
-                                                <f:entry title="Fail for the following severity or greater" field="failBuildOnNewSeverity">
-                                                    <f:select field="failBuildOnNewSeverity" />
-                                                </f:entry>
-                                            </f:optionalBlock>
-
-                                            <f:entry title="OSA high severity vulnerabilities threshold" field="osaHighThreshold">
-                                                <f:number clazz="positive-number" min="0" step="1" default="" />
-                                            </f:entry>
-                                            <f:entry title="OSA medium severity vulnerabilities threshold" field="osaMediumThreshold">
-                                                <f:number clazz="positive-number" min="0" step="1" default="" />
-                                            </f:entry>
-                                            <f:entry title="OSA low severity vulnerabilities threshold" field="osaLowThreshold">
-                                                <f:number clazz="positive-number" min="0" step="1" default="" />
-                                            </f:entry>
-                                        </f:nested>
-                                    </f:radioBlock>
-                                </j:when>
-                                <j:otherwise>
-                                    <f:description>Global settings option is disabled</f:description>
-                                    <f:entry title="Build status when results exceed threshold:" field="vulnerabilityThresholdResult">
-                                        <f:select />
-                                    </f:entry>
-                                    <f:entry title="SAST High severity vulnerabilities threshold" field="highThreshold">
-                                        <f:number clazz="positive-number" min="0" step="1" default="" />
-                                    </f:entry>
-                                    <f:entry title="SAST Medium severity vulnerabilities threshold" field="mediumThreshold">
-                                        <f:number clazz="positive-number" min="0" step="1" default="" />
-                                    </f:entry>
-                                    <f:entry title="SAST Low severity vulnerabilities threshold" field="lowThreshold">
-                                        <f:number clazz="positive-number" min="0" step="1" default="" />
-                                    </f:entry>
-
-                                    <f:optionalBlock title="Fail the build for new SAST vulnerabilities" inline="true" field="failBuildOnNewResults">
-                                        <f:entry title="Fail for the following severity or greater" field="failBuildOnNewSeverity">
-                                            <f:select field="failBuildOnNewSeverity" />
+                                <f:radioBlock checked="${instance.getThresholdSettings() == null || instance.getThresholdSettings().equals('global')}" inline="true"
+                                    name="thresholdSettings" title="Use Global Settings (${descriptor.JobGlobalStatusOnThresholdViolation.displayName})"
+                                    value="global">
+                                    <f:nested>
+                                        <f:entry title="Build status when results exceed threshold:">
+                                            <f:readOnlyTextbox value="${descriptor.JobGlobalStatusOnThresholdViolation.displayName}" />
                                         </f:entry>
-                                    </f:optionalBlock>
 
-                                    <f:entry title="OSA high severity vulnerabilities threshold" field="osaHighThreshold">
-                                        <f:number clazz="positive-number" min="0" step="1" default="" />
+                                        <f:entry title="SAST High severity vulnerabilities threshold">
+                                            <f:readOnlyTextbox value="${descriptor.highThresholdEnforcement}" />
+                                        </f:entry>
+                                        <f:entry title="SAST Medium severity vulnerabilities threshold">
+                                            <f:readOnlyTextbox value="${descriptor.mediumThresholdEnforcement}" />
+                                        </f:entry>
+                                        <f:entry title="SAST Low severity vulnerabilities threshold">
+                                            <f:readOnlyTextbox value="${descriptor.lowThresholdEnforcement}" />
+                                        </f:entry>
+                                        <f:entry title="Dependency scan high severity vulnerabilities threshold">
+                                            <f:readOnlyTextbox value="${descriptor.osaHighThresholdEnforcement}" />
+                                        </f:entry>
+                                        <f:entry title="Dependency scan medium severity vulnerabilities threshold">
+                                            <f:readOnlyTextbox value="${descriptor.osaMediumThresholdEnforcement}" />
+                                        </f:entry>
+                                        <f:entry title="Dependency scan low severity vulnerabilities threshold">
+                                            <f:readOnlyTextbox value="${descriptor.osaLowThresholdEnforcement}" />
+                                        </f:entry>
+                                    </f:nested>
+                                </f:radioBlock>
+
+                                <f:radioBlock checked="${instance.getThresholdSettings().equals('job')}" inline="true"
+                                    name="thresholdSettings" title="Specific Scan settings" value="job">
+                                    <f:nested>
+                                        <f:entry title="Build status when results exceed threshold:" field="vulnerabilityThresholdResult">
+                                            <f:select />
+                                        </f:entry>
+                                        <f:entry title="SAST High severity vulnerabilities threshold" field="highThreshold">
+                                            <f:number clazz="positive-number" min="0" step="1" default="" />
+                                        </f:entry>
+                                        <f:entry title="SAST Medium severity vulnerabilities threshold" field="mediumThreshold">
+                                            <f:number clazz="positive-number" min="0" step="1" default="" />
+                                        </f:entry>
+                                        <f:entry title="SAST Low severity vulnerabilities threshold" field="lowThreshold">
+                                            <f:number clazz="positive-number" min="0" step="1" default="" />
+                                        </f:entry>
+
+                                        <f:optionalBlock title="Fail the build for new SAST vulnerabilities" inline="true" field="failBuildOnNewResults">
+                                            <f:entry title="Fail for the following severity or greater" field="failBuildOnNewSeverity">
+                                                <f:select field="failBuildOnNewSeverity" />
+                                            </f:entry>
+                                        </f:optionalBlock>
+
+                                        <f:entry title="Dependency scan high severity vulnerabilities threshold" field="osaHighThreshold">
+                                            <f:number clazz="positive-number" min="0" step="1" default="" />
+                                        </f:entry>
+                                        <f:entry title="Dependency scan medium severity vulnerabilities threshold" field="osaMediumThreshold">
+                                            <f:number clazz="positive-number" min="0" step="1" default="" />
+                                        </f:entry>
+                                        <f:entry title="Dependency scan low severity vulnerabilities threshold" field="osaLowThreshold">
+                                            <f:number clazz="positive-number" min="0" step="1" default="" />
+                                        </f:entry>
+                                    </f:nested>
+                                </f:radioBlock>
+                            </j:when>
+                            <j:otherwise>
+                                <f:description>Global settings option is disabled</f:description>
+                                <f:entry title="Build status when results exceed threshold:" field="vulnerabilityThresholdResult">
+                                    <f:select />
+                                </f:entry>
+                                <f:entry title="SAST High severity vulnerabilities threshold" field="highThreshold">
+                                    <f:number clazz="positive-number" min="0" step="1" default="" />
+                                </f:entry>
+                                <f:entry title="SAST Medium severity vulnerabilities threshold" field="mediumThreshold">
+                                    <f:number clazz="positive-number" min="0" step="1" default="" />
+                                </f:entry>
+                                <f:entry title="SAST Low severity vulnerabilities threshold" field="lowThreshold">
+                                    <f:number clazz="positive-number" min="0" step="1" default="" />
+                                </f:entry>
+
+                                <f:optionalBlock title="Fail the build for new SAST vulnerabilities" inline="true" field="failBuildOnNewResults">
+                                    <f:entry title="Fail for the following severity or greater" field="failBuildOnNewSeverity">
+                                        <f:select field="failBuildOnNewSeverity" />
                                     </f:entry>
-                                    <f:entry title="OSA medium severity vulnerabilities threshold" field="osaMediumThreshold">
-                                        <f:number clazz="positive-number" min="0" step="1" default="" />
-                                    </f:entry>
-                                    <f:entry title="OSA low severity vulnerabilities threshold" field="osaLowThreshold">
-                                        <f:number clazz="positive-number" min="0" step="1" default="" />
-                                    </f:entry>
-                                </j:otherwise>
-                            </j:choose>
+                                </f:optionalBlock>
 
-                        </f:optionalBlock>
-
-
+                                <f:entry title="Dependency scan high severity vulnerabilities threshold" field="osaHighThreshold">
+                                    <f:number clazz="positive-number" min="0" step="1" default="" />
+                                </f:entry>
+                                <f:entry title="Dependency scan medium severity vulnerabilities threshold" field="osaMediumThreshold">
+                                    <f:number clazz="positive-number" min="0" step="1" default="" />
+                                </f:entry>
+                                <f:entry title="Dependency scan low severity vulnerabilities threshold" field="osaLowThreshold">
+                                    <f:number clazz="positive-number" min="0" step="1" default="" />
+                                </f:entry>
+                            </j:otherwise>
+                        </j:choose>
                     </f:optionalBlock>
-                </j:otherwise>
-
-            </j:choose>
+                </f:optionalBlock>
+           </j:otherwise>
+        </j:choose>
     </f:section>
-
-
-
-
 </j:jelly>

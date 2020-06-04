@@ -2,15 +2,16 @@ package com.checkmarx.jenkins;
 
 import com.cx.restclient.CxShragaClient;
 import com.cx.restclient.configuration.CxScanConfig;
+import com.cx.restclient.dto.DependencyScanResults;
+import com.cx.restclient.dto.DependencyScannerType;
 import com.cx.restclient.dto.ScanResults;
 import com.cx.restclient.exception.CxClientException;
-import com.cx.restclient.osa.dto.OSAResults;
 import com.cx.restclient.sast.dto.SASTResults;
 import hudson.FilePath;
+import hudson.ProxyConfiguration;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import org.jenkinsci.remoting.RoleChecker;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -25,10 +26,17 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
 
     private final CxScanConfig config;
     private final TaskListener listener;
+    private ProxyConfiguration jenkinsProxy = null;
 
     public CxScanCallable(CxScanConfig config, TaskListener listener) {
         this.config = config;
         this.listener = listener;
+    }
+
+    public CxScanCallable(CxScanConfig config, TaskListener listener, ProxyConfiguration jenkinsProxy) {
+        this.config = config;
+        this.listener = listener;
+        this.jenkinsProxy = jenkinsProxy;
     }
 
     @Override
@@ -42,14 +50,16 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
 
         ScanResults scanResults = new ScanResults();
         scanResults.setSastResults(new SASTResults());
-        scanResults.setOsaResults(new OSAResults());
+        scanResults.setDependencyScanResults(new DependencyScanResults());
         result.setScanResults(scanResults);
 
         boolean sastCreated = false;
-        boolean osaCreated = false;
+        boolean dependencyScanCreated = false;
 
-        CxShragaClient shraga = new CxShragaClient(config, log);
+        CxShragaClient shraga = null;
         try {
+            //todo: add proxy support in new common
+            shraga = CommonClientFactory.getInstance(config, log);
             shraga.init();
 
             // Make sure CxARMUrl is passed in the result.
@@ -59,28 +69,34 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
         } catch (Exception ex) {
             scanResults.setGeneralException(ex);
 
-            if (ex.getMessage().contains("Server is unavailable")) {
-                try {
-                    shraga.login();
-                } catch (CxClientException e) {
-                    throw new IOException(e);
+            String message = ex.getMessage();
+            // Can actually be null e.g. for NullPointerException.
+            if (message != null) {
+                if (message.contains("Server is unavailable")) {
+                    if (shraga != null) {
+                        try {
+                            shraga.login();
+                        } catch (CxClientException e) {
+                            throw new IOException(e);
+                        }
+                    }
+
+                    String errorMsg = "Connection Failed.\n" +
+                            "Validate the provided login credentials and server URL are correct.\n" +
+                            "In addition, make sure the installed plugin version is compatible with the CxSAST version according to CxSAST release notes.\n" +
+                            "Error: " + message;
+
+                    throw new IOException(errorMsg);
                 }
-
-                String errorMsg = "Connection Failed.\n" +
-                        "Validate the provided login credentials and server URL are correct.\n" +
-                        "In addition, make sure the installed plugin version is compatible with the CxSAST version according to CxSAST release notes.\n" +
-                        "Error: " + ex.getMessage();
-
-                throw new IOException(errorMsg);
-            }
-            if (ex.getMessage().contains("Creation of the new project")) {
-                return result;
+                if (message.contains("Creation of the new project")) {
+                    return result;
+                }
             }
 
-            throw new IOException(ex.getMessage());
+            throw new IOException(message);
         }
 
-        if (config.getOsaEnabled()) {
+        if (config.getDependencyScannerType() != DependencyScannerType.NONE) {
             //---------------------------
             //we do this in order to redirect the logs from the filesystem agent component to the build console
             Logger rootLog = Logger.getLogger("");
@@ -90,10 +106,10 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
             //---------------------------
 
             try {
-                shraga.createOSAScan();
-                osaCreated = true;
-            } catch (CxClientException | IOException e) {
-                log.error("Failed to create OSA scan: " + e.getMessage());
+                shraga.createDependencyScan();
+                dependencyScanCreated = true;
+            } catch (CxClientException e) {
+                log.error("Failed to create dependency scan.", e);
                 scanResults.setOsaCreateException(e);
             } finally {
                 handler.flush();
@@ -106,7 +122,7 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
                 shraga.createSASTScan();
                 sastCreated = true;
             } catch (IOException | CxClientException e) {
-                log.error("Failed to create SAST scan: " + e.getMessage());
+                log.warn("Failed to create SAST scan: " + e.getMessage(), e);
                 scanResults.setSastCreateException(e);
             }
         }
@@ -126,17 +142,20 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
             }
         }
 
-        if (osaCreated) {
+        if (dependencyScanCreated) {
             try {
-                OSAResults osaResults = config.getSynchronous() ? shraga.waitForOSAResults() : shraga.getLatestOSAResults();
-                scanResults.setOsaResults(osaResults);
-            } catch (CxClientException | IOException e) {
-                log.error("Failed to get OSA scan results: " + e.getMessage());
+                DependencyScanResults dsResults = config.getSynchronous() ?
+                        shraga.waitForDependencyScanResults() :
+                         shraga.getLatestDependencyScanResults();
+
+                scanResults.setDependencyScanResults(dsResults);
+            } catch (CxClientException e) {
+                log.error("Failed to get dependency scan results: " + e.getMessage());
                 scanResults.setOsaWaitException(e);
             }
         }
 
-        if (config.getEnablePolicyViolations() && (scanResults.getOsaResults() != null  || scanResults.getSastResults() != null)) {
+        if (config.getEnablePolicyViolations() && (scanResults.getDependencyScanResults() != null  || scanResults.getSastResults() != null)) {
             shraga.printIsProjectViolated();
         }
 

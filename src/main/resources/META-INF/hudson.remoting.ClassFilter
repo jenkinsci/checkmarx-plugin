@@ -5,8 +5,10 @@ com.cx.restclient.cxArm.dto.CxArmConfig
 com.cx.restclient.cxArm.dto.CxProviders
 com.cx.restclient.osa.dto.OSAResults
 com.cx.restclient.osa.dto.OSAScanStatus
+com.cx.restclient.sca.dto.SCAResults
 com.cx.restclient.dto.BaseStatus
 com.cx.restclient.dto.ScanResults
+com.cx.restclient.dto.DependencyScanResults
 com.cx.restclient.osa.dto.OSAScanState
 com.cx.restclient.osa.dto.OSASummaryResults
 com.cx.restclient.sast.dto.SASTResults
@@ -21,3 +23,11 @@ com.cx.restclient.sast.dto.CxXMLResults$Query$Result$Path
 com.cx.restclient.sast.dto.CxXMLResults$Query$Result$Path$PathNode
 com.cx.restclient.sast.dto.CxXMLResults$Query$Result$Path$PathNode$Snippet
 com.cx.restclient.sast.dto.CxXMLResults$Query$Result$Path$PathNode$Snippet$Line
+com.cx.restclient.sca.dto.report.Package
+com.cx.restclient.sca.dto.report.Finding
+com.cx.restclient.sca.dto.report.DependencyPath
+com.cx.restclient.sca.dto.report.SCASummaryResults
+com.cx.restclient.sca.dto.report.DependencyPathSegment
+com.cx.restclient.sca.dto.report.PackageSeverity
+com.cx.restclient.sca.dto.report.PackageUsage
+com.cx.restclient.common.summary.DependencyResult
