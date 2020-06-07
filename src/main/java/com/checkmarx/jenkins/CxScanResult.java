@@ -25,6 +25,7 @@ import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -74,6 +75,7 @@ public class CxScanResult implements Action {
         this.sastEnabled = config.getSastEnabled();
         this.osaEnabled = config.getDependencyScannerType() == DependencyScannerType.OSA;
         this.owner = owner;
+        this.resultDeepLink = "";
     }
 
     public void setSastResults(SASTResults results) {
@@ -95,6 +97,8 @@ public class CxScanResult implements Action {
         this.mediumQueryResultList = new LinkedList<>();
         this.lowQueryResultList = new LinkedList<>();
         this.infoQueryResultList = new LinkedList<>();
+        this.resultDeepLink = "";
+
     }
 
 
@@ -147,9 +151,12 @@ public class CxScanResult implements Action {
 
     @NotNull
     public String getIconPath() {
-        PluginWrapper wrapper = Jenkins.getInstance().getPluginManager().getPlugin("checkmarx");
-        return "/plugin/" + wrapper.getShortName() + "/";
-
+        return Optional.ofNullable(Jenkins.getInstance())
+                .map(Jenkins::getPluginManager)
+                .map(pm -> pm.getPlugin("checkmarx"))
+                .map(PluginWrapper::getShortName)
+                .map(shortName -> "/plugin/" + shortName + "/")
+                .orElse("");
     }
 
     public boolean isShowResults() {
@@ -253,7 +260,7 @@ public class CxScanResult implements Action {
         Collection<File> files = FileUtils.listFiles(cxBuildDirectory, null, false);
 
         for (File f: files) {
-            if(htmlReportName.equals(f.getName())) {
+            if(htmlReportName != null && htmlReportName.equals(f.getName())) {
                 htmlReport = FileUtils.readFileToString(f, Charset.defaultCharset());
                 return htmlReport;
             }

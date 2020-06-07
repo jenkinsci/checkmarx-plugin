@@ -932,7 +932,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     private void printConfiguration(CxScanConfig config, CxLoggerAdapter log) {
         log.info("---------------------------------------Configurations:------------------------------------");
-        log.info("plugin version: " + CxConfig.version());
+        log.info("plugin version: {0} " , CxConfig.version());
         log.info("server url: " + config.getUrl());
         log.info("username: " + config.getUsername());
         log.info("project name: " + config.getProjectName());
@@ -1120,7 +1120,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         try {
             String remoteFilePath = remoteDirPath + "/" + file.getName();
-            log.info("Copying file [" + file.getName() + "] to workspace [" + remoteFilePath + "]");
+            log.info("Copying file [%s] to workspace [%s]",file.getName(),remoteFilePath);
             FilePath remoteFile = new FilePath(workspace.getChannel(), remoteFilePath);
             fis = new FileInputStream(file);
             remoteFile.copyFrom(fis);
@@ -1545,7 +1545,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 }
             }
         }
-        public FormValidation doValidateMvnPath(@QueryParameter final String mvnPath) {
+        public FormValidation doValidateMvnPath(@QueryParameter final String mvnPath) throws InterruptedException {
             boolean mvnPathExists = false;
             FilePath path = new FilePath(new File(mvnPath));
             String errorMsg = "Was not able to access specified path";
@@ -1555,7 +1555,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 } else {
                     mvnPathExists = true;
                 }
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
                 errorMsg = e.getMessage();
             }

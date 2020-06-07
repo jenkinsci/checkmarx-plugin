@@ -8,9 +8,8 @@ import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.cx.restclient.common.ErrorMessage;
 import hudson.model.Item;
 import hudson.model.Run;
-import hudson.util.Secret;
 import org.apache.commons.lang.StringUtils;
-
+import org.jetbrains.annotations.NotNull;
 import java.util.Collections;
 import java.util.List;
 
@@ -51,32 +50,17 @@ public class CxCredentials {
         cxScanBuilder.setGenerateXmlReport((cxScanBuilder.getGenerateXmlReport() == null) ? true : cxScanBuilder.getGenerateXmlReport());
         if (cxScanBuilder.isUseOwnServerCredentials()) {
             ret.setServerUrl(cxScanBuilder.getServerUrl());
-            if (StringUtils.isNotEmpty(cxScanBuilder.getCredentialsId())) {
-                UsernamePasswordCredentials c = getCredentialsById(cxScanBuilder.getCredentialsId(), run);
-                ret.setUsername(c != null ? c.getUsername() : "");
-                ret.setPassword(c != null ? Aes.encrypt(c.getPassword().getPlainText(), ret.getUsername()) : "");
-                return ret;
-
-            } else {
-                ret.setUsername(StringUtils.defaultString(cxScanBuilder.getUsername()));
-                ret.setPassword(Aes.encrypt(StringUtils.defaultString(cxScanBuilder.getPasswordPlainText()), ret.getUsername()));
-                return ret;
-            }
+            return getCxCredentials(run, ret, cxScanBuilder.getCredentialsId(), cxScanBuilder.getUsername(), cxScanBuilder.getPasswordPlainText());
 
         } else {
             ret.setServerUrl(descriptor.getServerUrl());
-            if (StringUtils.isNotEmpty(descriptor.getCredentialsId())) {
-                UsernamePasswordCredentials c = getCredentialsById(descriptor.getCredentialsId(), run);
-                ret.setUsername(c != null ? c.getUsername() : "");
-                ret.setPassword(c != null ? Aes.encrypt(c.getPassword().getPlainText(), ret.getUsername()) : "");
-                return ret;
-
-            } else {
-                ret.setUsername(StringUtils.defaultString(descriptor.getUsername()));
-                ret.setPassword(Aes.encrypt(StringUtils.defaultString(descriptor.getPasswordPlainText()), ret.getUsername()));
-                return ret;
-            }
+            return getCxCredentials(run, ret, descriptor.getCredentialsId(), descriptor.getUsername(), descriptor.getPasswordPlainText());
         }
+    }
+
+    @NotNull
+    private static CxCredentials getCxCredentials(Run<?, ?> run, CxCredentials ret, String credentialsId, String username, String passwordPlainText) {
+        return getCxCredentials(username, passwordPlainText, credentialsId, ret, getCredentialsById(credentialsId, run));
     }
 
 
@@ -85,35 +69,30 @@ public class CxCredentials {
         CxCredentials ret = new CxCredentials();
         if (useOwnServerCredentials) {
             ret.setServerUrl(serverUrl);
-            if (StringUtils.isNotEmpty(credId)) {
-                UsernamePasswordCredentials c = getCredentialsById(credId, item);
-                ret.setUsername(c != null ? c.getUsername() : "");
-                ret.setPassword(c != null ? Aes.encrypt(c.getPassword().getPlainText(), ret.getUsername()) : "");
-                return ret;
-
-            } else {
-                ret.setUsername(StringUtils.defaultString(username));
-                ret.setPassword(Aes.encrypt(StringUtils.defaultString(pssd), ret.getUsername()));
-                return ret;
-            }
+            return getCxCredentials(username, pssd, credId, ret, getCredentialsById(credId, item));
 
         } else {
             ret.setServerUrl(descriptor.getServerUrl());
-            if (StringUtils.isNotEmpty(descriptor.getCredentialsId())) {
-                UsernamePasswordCredentials c = getCredentialsById(descriptor.getCredentialsId(), item);
-                ret.setUsername(c != null ? c.getUsername() : "");
-                ret.setPassword(c != null ? Aes.encrypt(c.getPassword().getPlainText(), ret.getUsername()) : "");
-                return ret;
-
-            } else {
-                ret.setUsername(StringUtils.defaultString(descriptor.getUsername()));
-                ret.setPassword(Aes.encrypt(StringUtils.defaultString(descriptor.getPasswordPlainText()), ret.getUsername()));
-                return ret;
-            }
+            return getCxCredentials(descriptor.getUsername(), descriptor.getPasswordPlainText(), descriptor.getCredentialsId(), ret, getCredentialsById(descriptor.getCredentialsId(), item));
         }
     }
 
-    static UsernamePasswordCredentials getCredentialsById(String credentialsId, Run run) {
+    @NotNull
+    private static CxCredentials getCxCredentials(String username, String pssd, String credId, CxCredentials ret, UsernamePasswordCredentials credentialsById) {
+        if (StringUtils.isNotEmpty(credId)) {
+            UsernamePasswordCredentials c = credentialsById;
+            ret.setUsername(c != null ? c.getUsername() : "");
+            ret.setPassword(c != null ? Aes.encrypt(c.getPassword().getPlainText(), ret.getUsername()) : "");
+            return ret;
+
+        } else {
+            ret.setUsername(StringUtils.defaultString(username));
+            ret.setPassword(Aes.encrypt(StringUtils.defaultString(pssd), ret.getUsername()));
+            return ret;
+        }
+    }
+
+    static UsernamePasswordCredentials getCredentialsById(String credentialsId, Run<?, ?> run) {
         return CredentialsProvider.findCredentialById(
                 credentialsId,
                 StandardUsernamePasswordCredentials.class,

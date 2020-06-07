@@ -2,8 +2,6 @@ package com.checkmarx.jenkins;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
@@ -13,7 +11,7 @@ import java.util.logging.LogRecord;
  */
 public class ComponentScanFormatter extends Formatter {
 
-    public static final String lineSeparator = System.lineSeparator();
+    public static final String LINE_SEPARATOR = System.lineSeparator();
 
     @Override
     public String format(LogRecord record) {
@@ -24,7 +22,7 @@ public class ComponentScanFormatter extends Formatter {
                 throwable = ExceptionUtils.getStackTrace(record.getThrown());
             }
 
-            return String.format("[OSA ComponentScan-%s]: %s %s" + lineSeparator,
+            return String.format("[OSA ComponentScan-%s]: %s %s" + LINE_SEPARATOR,
                     record.getLevel(),
                     message,
                     throwable);

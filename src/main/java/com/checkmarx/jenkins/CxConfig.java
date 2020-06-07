@@ -1,8 +1,10 @@
 package com.checkmarx.jenkins;
 
 import java.io.InputStream;
+import java.util.Optional;
 import java.util.Properties;
 
+import hudson.PluginWrapper;
 import jenkins.model.Jenkins;
 
 /**
@@ -40,7 +42,11 @@ public class CxConfig {
 		return configuration.getProperty(CONFIGURATION_DEFAULT_FILTER_PATTERN_KEY);
 	}
 	public static String version() {
-		return Jenkins.getInstance().getPluginManager().getPlugin("checkmarx").getVersion();
+		return Optional.ofNullable(Jenkins.getInstance())
+				.map(Jenkins::getPluginManager)
+				.map(pm -> pm.getPlugin("checkmarx"))
+				.map(PluginWrapper::getVersion)
+				.orElse("");
 	}
 
 	public static String getDefaultOsaArchiveIncludePatterns() {

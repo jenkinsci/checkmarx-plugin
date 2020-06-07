@@ -52,6 +52,7 @@ public class SastScanResult {
         this.mediumQueryResultList = new LinkedList<>();
         this.lowQueryResultList = new LinkedList<>();
         this.infoQueryResultList = new LinkedList<>();
+        this.resultDeepLink = "";
     }
 
     public Integer getHighCount() {

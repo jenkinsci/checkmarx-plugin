@@ -14,6 +14,8 @@ public class CxLoggerAdapter implements Logger {
     private static final String WARN_PREFIX = "[Cx-Warning]: ";
 
     private final PrintStream log;
+    private String TRACE_PREFIX = "[Cx-TRACE]: ";
+    ;
 
     public CxLoggerAdapter(PrintStream log) {
         this.log = log;
@@ -50,7 +52,7 @@ public class CxLoggerAdapter implements Logger {
 
     public void debug(String s, Throwable throwable) {
         log.println(DEBUG_PREFIX + s);
-        if(throwable != null) {
+        if (throwable != null) {
             throwable.printStackTrace(log);
         }
     }
@@ -61,7 +63,7 @@ public class CxLoggerAdapter implements Logger {
 
     public void info(String s, Throwable throwable) {
         log.println(INFO_PREFIX + s);
-        if(throwable != null) {
+        if (throwable != null) {
             throwable.printStackTrace(log);
         }
     }
@@ -73,18 +75,19 @@ public class CxLoggerAdapter implements Logger {
 
     public void warn(String s, Throwable throwable) {
         log.println(WARN_PREFIX + s);
-        if(throwable != null) {
+        if (throwable != null) {
             throwable.printStackTrace(log);
         }
     }
 
     public void error(String s) {
-        log.println(ERROR_PREFIX + s);
+        if (this.isErrorEnabled())
+            log.println(ERROR_PREFIX + s);
     }
 
     public void error(String s, Throwable throwable) {
         log.println(ERROR_PREFIX + s);
-        if(throwable != null) {
+        if (throwable != null) {
             throwable.printStackTrace(log);
         }
     }
@@ -108,7 +111,7 @@ public class CxLoggerAdapter implements Logger {
     }
 
     public void trace(Marker marker, String format, Object arg1, Object arg2) {
-        this.trace((String)format, (Object)arg1, (Object)arg2);
+        this.trace((String) format, (Object) arg1, (Object) arg2);
     }
 
     public void trace(Marker marker, String format, Object... arguments) {
@@ -132,7 +135,7 @@ public class CxLoggerAdapter implements Logger {
     }
 
     public void debug(Marker marker, String format, Object arg1, Object arg2) {
-        this.debug((String)format, (Object)arg1, (Object)arg2);
+        this.debug((String) format, (Object) arg1, (Object) arg2);
     }
 
     public void debug(Marker marker, String format, Object... arguments) {
@@ -156,7 +159,7 @@ public class CxLoggerAdapter implements Logger {
     }
 
     public void info(Marker marker, String format, Object arg1, Object arg2) {
-        this.info((String)format, (Object)arg1, (Object)arg2);
+        this.info((String) format, (Object) arg1, (Object) arg2);
     }
 
     public void info(Marker marker, String format, Object... arguments) {
@@ -180,7 +183,7 @@ public class CxLoggerAdapter implements Logger {
     }
 
     public void warn(Marker marker, String format, Object arg1, Object arg2) {
-        this.warn((String)format, (Object)arg1, (Object)arg2);
+        this.warn((String) format, (Object) arg1, (Object) arg2);
     }
 
     public void warn(Marker marker, String format, Object... arguments) {
@@ -204,7 +207,7 @@ public class CxLoggerAdapter implements Logger {
     }
 
     public void error(Marker marker, String format, Object arg1, Object arg2) {
-        this.error((String)format, (Object)arg1, (Object)arg2);
+        this.error((String) format, (Object) arg1, (Object) arg2);
     }
 
     public void error(Marker marker, String format, Object... arguments) {
@@ -220,74 +223,100 @@ public class CxLoggerAdapter implements Logger {
     }
 
     public void trace(String s) {
+        log.println(TRACE_PREFIX + s);
     }
 
     public void trace(String s, Object o) {
+        if (this.isTraceEnabled())
+            this.trace(String.format(s, o));
     }
 
     public void trace(String s, Object o, Object o1) {
+        if (this.isTraceEnabled())
+            this.trace(String.format(s, o));
     }
 
     public void trace(String s, Object... objects) {
+        if (this.isTraceEnabled())
+            this.trace(String.format(s, objects));
     }
 
     public void trace(String s, Throwable throwable) {
+        log.println(TRACE_PREFIX + s);
+        if (throwable != null) {
+            throwable.printStackTrace(log);
+        }
     }
 
     public void debug(String s, Object o) {
-
+        if (this.isDebugEnabled())
+            this.debug(String.format(s, o));
     }
 
     public void debug(String s, Object o, Object o1) {
+        if (this.isDebugEnabled())
+            this.debug(String.format(s, o, o1));
     }
 
     public void debug(String s, Object... objects) {
-
+        if (this.isDebugEnabled())
+            this.debug(String.format(s, objects));
     }
 
     @Override
     public void info(String format, Object arg) {
+        if (this.isInfoEnabled())
+            this.info(format, String.valueOf(arg));
 
     }
 
     @Override
     public void info(String format, Object arg1, Object arg2) {
+        if (this.isInfoEnabled())
+            this.info(String.format(format, arg1, arg2));
 
     }
 
     @Override
     public void info(String format, Object... arguments) {
-
+        if (this.isInfoEnabled())
+            this.info(String.format(format, arguments));
     }
 
     @Override
     public void warn(String format, Object arg) {
-
+        if (this.isWarnEnabled())
+            this.warn(String.format(format, arg));
     }
 
     @Override
     public void warn(String format, Object... arguments) {
-
+        if (this.isWarnEnabled())
+            this.warn(String.format(format, arguments));
     }
 
     @Override
     public void warn(String format, Object arg1, Object arg2) {
-
+        if (this.isWarnEnabled())
+            this.warn(String.format(format, arg1, arg2));
     }
 
 
     @Override
     public void error(String format, Object arg) {
-
+        if (this.isErrorEnabled())
+            this.error(String.format(format, arg));
     }
 
     @Override
     public void error(String format, Object arg1, Object arg2) {
-
+        if (this.isErrorEnabled())
+            this.error(String.format(format, arg1, arg2));
     }
 
     @Override
     public void error(String format, Object... arguments) {
-
+        if (this.isErrorEnabled())
+            this.error(String.format(format, arguments));
     }
 }
