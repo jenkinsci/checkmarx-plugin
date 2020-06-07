@@ -265,9 +265,6 @@ public class CxLoggerAdapter implements Logger {
 
     @Override
     public void info(String format, Object arg) {
-        if (this.isInfoEnabled())
-            this.info(format, String.valueOf(arg));
-
     }
 
     @Override
