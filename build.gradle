@@ -30,6 +30,7 @@ repositories {
 
 test {
     maxParallelForks = Runtime.getRuntime().availableProcessors()
+    useJUnitPlatform()
 }
 
 //currently there is an issue with Java8 and javadocs,
@@ -59,6 +60,10 @@ dependencies {
             'org.jenkins-ci.plugins:mailer:1.1@jar',
             'org.jenkins-ci.plugins:matrix-project:1.14@jar'
 
+    testImplementation('org.junit.jupiter:junit-jupiter-api:5.4.2',
+    'org.mockito:mockito-junit-jupiter:2.23.0')
+    testRuntime('org.junit.jupiter:junit-jupiter-engine:5.4.2',
+    'org.mockito:mockito-junit-jupiter:2.23.0')
 }
 
 
