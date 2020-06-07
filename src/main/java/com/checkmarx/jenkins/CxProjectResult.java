@@ -94,8 +94,12 @@ public class CxProjectResult implements Action {
 
     @NotNull
     public String getIconPath() {
-        PluginWrapper wrapper = Jenkins.getInstance().getPluginManager().getPlugin("checkmarx");
-        return "/plugin/" + wrapper.getShortName() + "/";
+        return Optional.ofNullable(Jenkins.getInstance())
+                .map(Jenkins::getPluginManager)
+                .map(pm -> pm.getPlugin("checkmarx"))
+                .map(PluginWrapper::getShortName)
+                .map(shortName -> "/plugin/" + shortName + "/")
+                .orElse("");
     }
 
     public boolean isShowResults() {

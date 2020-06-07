@@ -1545,7 +1545,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 }
             }
         }
-        public FormValidation doValidateMvnPath(@QueryParameter final String mvnPath) {
+        public FormValidation doValidateMvnPath(@QueryParameter final String mvnPath) throws InterruptedException {
             boolean mvnPathExists = false;
             FilePath path = new FilePath(new File(mvnPath));
             String errorMsg = "Was not able to access specified path";
@@ -1555,7 +1555,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 } else {
                     mvnPathExists = true;
                 }
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
                 errorMsg = e.getMessage();
             }
