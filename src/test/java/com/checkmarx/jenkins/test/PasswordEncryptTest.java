@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 public class PasswordEncryptTest {
 
-    private final String EXPECTED_PASSWORD = "Cx123456!";
+    private final String EXPECTED_PASSWORD = "Pass246!";
     private final String MESSAGE = "CxSAST Password";
 
     @Mock
@@ -22,7 +22,7 @@ public class PasswordEncryptTest {
 
     @BeforeEach
     void init() {
-        final String USERNAME = "admin@cx";
+        final String USERNAME = "my@user";
         Mockito.when(credentials.getUsername()).thenReturn(USERNAME);
         String encryptedPassword = Aes.encrypt(EXPECTED_PASSWORD, credentials.getUsername());
         Mockito.when(credentials.getPassword()).thenReturn(encryptedPassword);
@@ -37,6 +37,6 @@ public class PasswordEncryptTest {
     @Test
     void encryptDecryptPassword_InvalidProcess() {
         String actualResult = Aes.decrypt(credentials.getPassword(), credentials.getUsername());
-        assertNotEquals("Cx123456", actualResult, MESSAGE);
+        assertNotEquals("Pass245!", actualResult, MESSAGE);
     }
 }
