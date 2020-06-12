@@ -4,6 +4,7 @@ import com.cx.restclient.CxShragaClient;
 import com.cx.restclient.configuration.CxScanConfig;
 import com.cx.restclient.dto.DependencyScanResults;
 import com.cx.restclient.dto.DependencyScannerType;
+import com.cx.restclient.dto.ProxyConfig;
 import com.cx.restclient.dto.ScanResults;
 import com.cx.restclient.exception.CxClientException;
 import com.cx.restclient.sast.dto.SASTResults;
@@ -12,6 +13,7 @@ import hudson.ProxyConfiguration;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import org.jenkinsci.remoting.RoleChecker;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -45,6 +47,14 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
         CxLoggerAdapter log = new CxLoggerAdapter(listener.getLogger());
         config.setSourceDir(file.getAbsolutePath());
         config.setReportsDir(file);
+        if (jenkinsProxy != null) {
+            config.setProxyConfig(new ProxyConfig(jenkinsProxy.name, jenkinsProxy.port,
+                    jenkinsProxy.getUserName(), jenkinsProxy.getPassword(), false));
+            log.debug("Proxy host: " + jenkinsProxy.name);
+            log.debug("Proxy port: " + jenkinsProxy.port);
+            log.debug("Proxy user: " + jenkinsProxy.getUserName());
+            log.debug("Proxy password: *************");
+        }
 
         RemoteScanInfo result = new RemoteScanInfo();
 
@@ -58,7 +68,6 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
 
         CxShragaClient shraga = null;
         try {
-            //todo: add proxy support in new common
             shraga = CommonClientFactory.getInstance(config, log);
             shraga.init();
 
@@ -146,7 +155,7 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
             try {
                 DependencyScanResults dsResults = config.getSynchronous() ?
                         shraga.waitForDependencyScanResults() :
-                         shraga.getLatestDependencyScanResults();
+                        shraga.getLatestDependencyScanResults();
 
                 scanResults.setDependencyScanResults(dsResults);
             } catch (CxClientException e) {
@@ -155,7 +164,7 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
             }
         }
 
-        if (config.getEnablePolicyViolations() && (scanResults.getDependencyScanResults() != null  || scanResults.getSastResults() != null)) {
+        if (config.getEnablePolicyViolations() && (scanResults.getDependencyScanResults() != null || scanResults.getSastResults() != null)) {
             shraga.printIsProjectViolated();
         }
 
