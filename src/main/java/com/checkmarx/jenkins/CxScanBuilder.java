@@ -1712,8 +1712,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 scaConfig.setRemoteRepositoryInfo(null);
                 config.setScaConfig(scaConfig);
 
-                ProxyConfig proxyConfig = ProxyHelper.getProxyConfig();
-                config.setProxyConfig(proxyConfig);
+                try {
+                    Jenkins instance = Jenkins.getInstance();
+                    if (instance != null && instance.proxy != null && isProxy && !(isCxURLinNoProxyHost(serverUrl, instance.proxy.getNoProxyHostPatterns()))) {
+                        ProxyConfig proxyConfig = ProxyHelper.getProxyConfig();
+                        config.setProxyConfig(proxyConfig);
+                    }
+                } catch (Exception e) {
+                    return buildError(e, "Failed to init cx client");
+                }
+
 
                 CxShragaClient.testScaConnection(config, serverLog);
                 return FormValidation.ok("Success");
