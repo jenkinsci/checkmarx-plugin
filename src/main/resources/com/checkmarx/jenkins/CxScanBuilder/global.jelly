@@ -39,8 +39,10 @@
             <f:readOnlyTextbox field="password"/>
         </f:invisibleEntry>
 
-        <f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
-                          with="serverUrl,username,password,timestamp,credentialsId"/>
+        <f:optionalBlock title="Use Jenkins proxy" inline="true" field="isProxy" />
+
+		<f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
+			with="serverUrl,username,password,timestamp,credentialsId,isProxy" />
 
         <f:entry title="Maven Path" field="mvnPath">
             <f:textbox/>
