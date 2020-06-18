@@ -44,7 +44,7 @@ dependencies {
     compileOnly 'com.intellij:annotations:12.0',
             'org.slf4j:slf4j-api:1.6.1'
 
-    compile 'com.checkmarx:cx-client-common:2020.2.20.SCA'
+    compile 'com.checkmarx:cx-client-common:2020.2.21.SCA'
 
     optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.4@jar',
             'org.jenkins-ci.plugins:credentials:2.1.19@jar'
@@ -69,7 +69,7 @@ dependencies {
 
 jenkinsPlugin {
     // version of Jenkins core this plugin depends on
-    coreVersion = '2.77'
+    coreVersion = '2.222.4'
 
     // short name of the plugin, defaults to the project name without trailing '-plugin'
     shortName = 'checkmarx'
