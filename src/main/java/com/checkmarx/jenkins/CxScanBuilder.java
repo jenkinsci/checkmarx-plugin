@@ -1282,6 +1282,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         private final String DEPENDENCY_SCAN_CONFIG_PROP = "dependencyScanConfig";
         private DependencyScanConfig dependencyScanConfig;
+        @Nullable
+        private List<Team> teamList;
 
         public DescriptorImpl() {
             load();
@@ -1618,13 +1620,21 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          */
         public ComboBoxModel doFillProjectNameItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
                                                     @QueryParameter final String username, @QueryParameter final String password,
-                                                    @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
+                                                    @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item,
+                                                    @QueryParameter final String groupId) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ComboBoxModel projectNames = new ComboBoxModel();
             CxShragaClient shragaClient = null;
             try {
                 CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
                 shragaClient = prepareLoggedInClient(credentials);
+                if (teamList == null || teamList.isEmpty()) {
+                    teamList = shragaClient.getTeamList();
+                }
+                String teamName = getTeamNameById(groupId);
+                if (teamName != null) {
+                    shragaClient.setTeamPath(teamName);
+                }
                 List<Project> projects = shragaClient.getAllProjects();
 
                 for (Project p : projects) {
@@ -1658,12 +1668,20 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          */
         public ListBoxModel doFillPresetItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
                                               @QueryParameter final String username, @QueryParameter final String password,
-                                              @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
+                                              @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item,
+                                              @QueryParameter final String groupId) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
             try {
                 CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
                 CxShragaClient shragaClient = prepareLoggedInClient(credentials);
+                if (teamList == null || teamList.isEmpty()) {
+                    teamList = shragaClient.getTeamList();
+                }
+                String teamName = getTeamNameById(groupId);
+                if (teamName != null) {
+                    shragaClient.setTeamPath(teamName);
+                }
 
                 //todo import preset
                 List<Preset> presets = shragaClient.getPresetList();
@@ -1701,7 +1719,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         public ListBoxModel doFillSourceEncodingItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
                                                       @QueryParameter final String username, @QueryParameter final String password,
-                                                      @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
+                                                      @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item,
+                                                      @QueryParameter final String groupId) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
             CxShragaClient shragaClient = null;
@@ -1709,6 +1728,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
 
                 shragaClient = prepareLoggedInClient(credentials);
+                if (teamList == null || teamList.isEmpty()) {
+                    teamList = shragaClient.getTeamList();
+                }
+                String teamName = getTeamNameById(groupId);
+                if (teamName != null) {
+                    shragaClient.setTeamPath(teamName);
+                }
                 List<CxNameObj> configurationList = shragaClient.getConfigurationSetList();
 
                 for (CxNameObj cs : configurationList) {
@@ -1728,7 +1754,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return listBoxModel;
         }
 
-
         // Provides a list of source encodings from checkmarx server for dynamic drop-down list in configuration page
         /*
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
@@ -1744,7 +1769,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             try {
                 CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
                 shragaClient = prepareLoggedInClient(credentials);
-                List<Team> teamList = shragaClient.getTeamList();
+                teamList = shragaClient.getTeamList();
                 for (Team team : teamList) {
                     listBoxModel.add(new ListBoxModel.Option(team.getFullName(), team.getId()));
                 }
@@ -1761,6 +1786,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     shragaClient.close();
                 }
             }
+        }
+
+        private String getTeamNameById(String teamId) {
+            for (Team team : teamList) {
+                if (teamId.equals(team.getId())) {
+                    return team.getFullName();
+                }
+            }
+            return null;
         }
 
         public ListBoxModel doFillFailBuildOnNewSeverityItems() {
