@@ -50,7 +50,7 @@
 
 		<f:optionalBlock title="Hide results" inline="true" field="hideResults" />
 		
-		<f:optionalBlock title="Do not get reports" inline="true" field="doNotGetReports" />
+		<f:optionalBlock title="Do not generate reports" inline="true" field="doNotGenerateReports" />
 
 		<f:entry name="jobGlobalStatusOnError" title="Job status when CxSAST scan returns an error:" field="jobGlobalStatusOnError">
 			<f:enum field="jobGlobalStatusOnError">${it.displayName}</f:enum>

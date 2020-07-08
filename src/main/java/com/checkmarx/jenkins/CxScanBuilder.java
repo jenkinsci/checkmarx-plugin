@@ -720,7 +720,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             failTheBuild(run, config, scanResults);
 
             //generate html report
-            String reportName = descriptor.isDoNotGetReports() ? null : generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
+            String reportName = descriptor.isDoNotGenerateReports() ? null : generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
             cxScanResult.setHtmlReportName(reportName);
             run.addAction(cxScanResult);
 
@@ -729,7 +729,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             SASTResults sastResults = scanResults.getSastResults();
 
             if (sastResults.isSastResultsReady()) {
-                if (!descriptor.isDoNotGetReports() &&
+                if (!descriptor.isDoNotGenerateReports() &&
                         (config.getGenerateXmlReport() == null || config.getGenerateXmlReport() == true)) {
                     createSastReports(sastResults, checkmarxBuildDir, workspace);
                 }
@@ -745,7 +745,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
         //Asynchronous scan - add note message and previous build reports
-        String reportName = descriptor.isDoNotGetReports() ? null : generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
+        String reportName = descriptor.isDoNotGenerateReports() ? null : generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
         cxScanResult.setHtmlReportName(reportName);
         run.addAction(cxScanResult);
 
@@ -1165,7 +1165,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         private boolean prohibitProjectCreation;
         private boolean hideResults;
-        private boolean doNotGetReports;
+        private boolean doNotGenerateReports;
         private boolean enableCertificateValidation;
         @Nullable
         private String excludeFolders;
@@ -1260,12 +1260,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             this.hideResults = hideResults;
         }
 
-        public boolean isDoNotGetReports() {
-            return doNotGetReports;
+        public boolean isDoNotGenerateReports() {
+            return doNotGenerateReports;
         }
 
-        public void setDoNotGetReports(boolean doNotGetReports) {
-            this.doNotGetReports = doNotGetReports;
+        public void setDoNotGenerateReports(boolean doNotGenerateReports) {
+            this.doNotGenerateReports = doNotGenerateReports;
         }
 
         public boolean isEnableCertificateValidation() {
