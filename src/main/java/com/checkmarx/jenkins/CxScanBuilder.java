@@ -789,14 +789,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) {
         CxScanConfig ret = new CxScanConfig();
 
+        CxCredentials cxCredentials = CxCredentials.resolveCred(this, descriptor, run);
+
         //general
         ret.setCxOrigin(REQUEST_ORIGIN);
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
-        ret.setProxyConfig(ProxyHelper.getProxyConfig());
+        ret.setProxyConfig(ProxyHelper.getProxyConfig(cxCredentials.getServerUrl().trim()));
         ret.setMvnPath(descriptor.getMvnPath());
 
         //cx server
-        CxCredentials cxCredentials = CxCredentials.resolveCred(this, descriptor, run);
         ret.setUrl(cxCredentials.getServerUrl().trim());
         ret.setUsername(cxCredentials.getUsername());
         ret.setPassword(Aes.decrypt(cxCredentials.getPassword(), cxCredentials.getUsername()));
@@ -1584,7 +1585,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 scaConfig.setRemoteRepositoryInfo(null);
                 config.setScaConfig(scaConfig);
 
-                ProxyConfig proxyConfig = ProxyHelper.getProxyConfig();
+                ProxyConfig proxyConfig = ProxyHelper.getProxyConfig(scaServerUrl);
                 config.setProxyConfig(proxyConfig);
 
                 CxShragaClient.testScaConnection(config, serverLog);

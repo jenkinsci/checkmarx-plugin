@@ -20,7 +20,7 @@ class CommonClientFactory {
                 SCAN_ORIGIN,
                 !enableCertificateValidation);
 
-        scanConfig.setProxyConfig(ProxyHelper.getProxyConfig());
+        scanConfig.setProxyConfig(ProxyHelper.getProxyConfig(credentials.getServerUrl()));
 
         return getInstance(scanConfig, log);
     }
