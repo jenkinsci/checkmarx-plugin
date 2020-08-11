@@ -54,17 +54,17 @@ pipeline {
     }
     
     post {
-        /*always {
-            archiveArtifacts "*.zip, target/cx-client-common-${env.cxCommonVersion}.jar"
-            script {
+        always {
+            archiveArtifacts "*.zip, build/libs/*.*"
+            /*script {
                 try {
                     kit.Command_Execution_Sh("jq -n env > env.json")
                     kit.Command_Execution_Sh("curl -sb -k -v -H \"Content-type: application/json\" -XPOST http://cx-elastic01:9200/cx-client-common/_doc -d @env.json")
                 } catch (Exception e) {
                     kit.Warning_Msg("The message couldn't be pushed to elastic, error:\n" + e.toString())
                 }
-            }
-        }*/
+            }*/
+        }
         cleanup {
             cleanWs()
         }
