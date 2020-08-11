@@ -1,0 +1,39 @@
+#!/groovy
+@Library('cx-jenkins-pipeline-kit') _
+import java.time.*
+
+def workspace
+
+pipeline {
+    /*parameters {
+        string(name: "vmTemplate89",defaultValue: "${vmTemplate89}", description: "Template for 8.9 VM")
+        string(name: "vmTemplate90",defaultValue: "${vmTemplate90}", description: "Template for 9.0 VM")
+        string(name: "vmTemplate92",defaultValue: "${vmTemplate92}", description: "Template for 9.2 VM")
+        string(name: "vmTemplate93",defaultValue: "${vmTemplate93}", description: "Template for 9.3 VM")
+        string(name: "ram",defaultValue: "${ram}", description: "Server memory")
+        string(name: "cpu",defaultValue: "${cpu}", description: "")
+        string(name: "provider",defaultValue: "${provider}", description: "IAAS platform to be used")
+        string(name: "decommissionPeriod",defaultValue: "${decommissionPeriod}", description: "Decommission period")
+        string(name: "vmwareNetwork",defaultValue: "${vmwareNetwork}", description: "vmware network for new VMs")
+        choice(name: 'automationBranch', choices: ['9.0.0', 'cd-add-resources'], description: 'automation branch')
+    }*/
+    agent { node { label 'CxSDLC-Slave-CxJenkinsPlugin' } }
+    options {
+        timestamps()
+        timeout(time: 2, unit: 'HOURS')
+        //skipDefaultCheckout()
+    }
+    stages {
+
+        stage('Pipeline Info') {
+            steps {
+                script {
+                    env.PIPELINE_STATUS = "Success"
+                    env.STAGE_NAME_FAILED = "None"
+                    workspace = pwd()
+                    sh 'printenv'
+                }
+            }
+        }
+    }
+}
