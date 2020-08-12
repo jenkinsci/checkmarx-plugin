@@ -97,40 +97,42 @@ pipeline {
                             }
                         }
 
-                        parallel {
+                        stage('Jenkins Instance') {
+                            parallel {
 
-                            stage('Jenkins Java 8') {
-                                stages {
-                                    stage('Stage 1') {
-                                        steps {
-                                            script {
-                                                echo "Stage 1"
+                                stage('Jenkins Java 8') {
+                                    stages {
+                                        stage('Stage 1') {
+                                            steps {
+                                                script {
+                                                    echo "Stage 1"
+                                                }
                                             }
                                         }
-                                    }
-                                    stage('Stage 2') {
-                                        steps {
-                                            script {
-                                                echo "Stage 2"
+                                        stage('Stage 2') {
+                                            steps {
+                                                script {
+                                                    echo "Stage 2"
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            }
 
-                            stage('Jenkins Java 11') {
-                                stages {
-                                    stage('Stage 1') {
-                                        steps {
-                                            script {
-                                                echo "Stage 1"
+                                stage('Jenkins Java 11') {
+                                    stages {
+                                        stage('Stage 1') {
+                                            steps {
+                                                script {
+                                                    echo "Stage 1"
+                                                }
                                             }
                                         }
-                                    }
-                                    stage('Stage 2') {
-                                        steps {
-                                            script {
-                                                echo "stage 2"
+                                        stage('Stage 2') {
+                                            steps {
+                                                script {
+                                                    echo "stage 2"
+                                                }
                                             }
                                         }
                                     }
