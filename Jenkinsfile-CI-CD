@@ -139,10 +139,10 @@ pipeline {
                                 //    junit '**/PluginsCommonClient/target/surefire-reports/**/*.xml'
                                 //}
                                 if (ipAddress90 != null) {
-                                    node(vmName + "-9.0") {
+                                    /*node(vmName + "-9.0") {
                                         kit.zipStashInstallationLogs("CxSAST-9.0-Logs")
                                     }
-                                    unstash "CxSAST-9.0-Logs"
+                                    unstash "CxSAST-9.0-Logs"*/
                                     deleteVm(provider, ipAddress90, vmName + "-9.0")
                                 }
                             }
