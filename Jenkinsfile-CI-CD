@@ -51,6 +51,22 @@ pipeline {
                 }
             }
         }
+        
+        stage('Test CxJenkins') {
+            steps {
+                script {
+                    sh "docker run --rm --name test-${BUILD_TAG} -v ${workspace}:/usr/src/cx-jenkins -w /usr/src/cx-jenkins maven:3.6.1-jdk-8-alpine ./gradlew test"
+                }
+            }
+            post {
+                failure {
+                    script {
+                        env.PIPELINE_STATUS = "Failure"
+                        env.STAGE_NAME_FAILED="${STAGE_NAME}"
+                    }
+                }
+            }
+        }
     }
     
     post {
