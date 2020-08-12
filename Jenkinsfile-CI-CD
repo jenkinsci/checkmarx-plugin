@@ -84,7 +84,7 @@ pipeline {
 
                 stage('9.0') {
                     stages {
-                        stage('Create VM') {
+                        stage('Create CxSAST VM') {
                             steps {
                                 script {
                                     kit.Create_Vm_Terraform(vmName + "-9.0", vmTemplate90, ram, cpu, provider, decommissionPeriod, "Auto", "Plugins-CI", vmwareNetwork)
@@ -92,6 +92,47 @@ pipeline {
                                     node('install01') {
                                         kit.Create_Jenkins_Slave_On_Master(vmName + "-9.0")
                                         kit.Start_Jenkins_Slave_On_Windows_Pstools(ipAddress90, vmName + "-9.0")
+                                    }
+                                }
+                            }
+                        }
+
+                        parallel {
+
+                            stage('Jenkins Java 8') {
+                                stages {
+                                    stage('Stage 1') {
+                                        steps {
+                                            script {
+                                                echo "Stage 1"
+                                            }
+                                        }
+                                    }
+                                    stage('Stage 2') {
+                                        steps {
+                                            script {
+                                                echo "Stage 2"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            stage('Jenkins Java 11') {
+                                stages {
+                                    stage('Stage 1') {
+                                        steps {
+                                            script {
+                                                echo "Stage 1"
+                                            }
+                                        }
+                                    }
+                                    stage('Stage 2') {
+                                        steps {
+                                            script {
+                                                echo "stage 2"
+                                            }
+                                        }
                                     }
                                 }
                             }
