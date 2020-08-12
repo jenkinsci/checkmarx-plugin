@@ -74,72 +74,70 @@ pipeline {
             }
         }
 
-        stage('System Tests') {
+        stage('9.0') {
             when {
                 expression {
                     BRANCH_NAME == 'master' || BRANCH_NAME.startsWith("PR-") && CHANGE_TARGET == 'master' || BRANCH_NAME == 'add-ci-cd'
                 }
             }
-            parallel {
+            stages {
 
-                stage('9.0') {
-                    stages {
-                        stage('Create CxSAST VM') {
-                            steps {
-                                script {
-                                    kit.Create_Vm_Terraform(vmName + "-9.0", vmTemplate90, ram, cpu, provider, decommissionPeriod, "Auto", "Plugins-CI", vmwareNetwork)
-                                    ipAddress90 = kit.getIpAddress(vmName + "-9.0", provider)
-                                    node('install01') {
-                                        kit.Create_Jenkins_Slave_On_Master(vmName + "-9.0")
-                                        kit.Start_Jenkins_Slave_On_Windows_Pstools(ipAddress90, vmName + "-9.0")
+                stage('Create CxSAST VM') {
+                    steps {
+                        script {
+                            kit.Create_Vm_Terraform(vmName + "-9.0", vmTemplate90, ram, cpu, provider, decommissionPeriod, "Auto", "Plugins-CI", vmwareNetwork)
+                            ipAddress90 = kit.getIpAddress(vmName + "-9.0", provider)
+                            node('install01') {
+                                kit.Create_Jenkins_Slave_On_Master(vmName + "-9.0")
+                                kit.Start_Jenkins_Slave_On_Windows_Pstools(ipAddress90, vmName + "-9.0")
+                            }
+                        }
+                    }
+                }
+
+                stage('Jenkins Instance') {
+                    parallel {
+
+                        stage('Jenkins Java 8') {
+                            stages {
+                                stage('Stage 1') {
+                                    steps {
+                                        script {
+                                            echo "Stage 1"
+                                        }
+                                    }
+                                }
+                                stage('Stage 2') {
+                                    steps {
+                                        script {
+                                            echo "Stage 2"
+                                        }
                                     }
                                 }
                             }
                         }
 
-                        stage('Jenkins Instance') {
-                            parallel {
-
-                                stage('Jenkins Java 8') {
-                                    stages {
-                                        stage('Stage 1') {
-                                            steps {
-                                                script {
-                                                    echo "Stage 1"
-                                                }
-                                            }
-                                        }
-                                        stage('Stage 2') {
-                                            steps {
-                                                script {
-                                                    echo "Stage 2"
-                                                }
-                                            }
+                        stage('Jenkins Java 11') {
+                            stages {
+                                stage('Stage 1') {
+                                    steps {
+                                        script {
+                                            echo "Stage 1"
                                         }
                                     }
                                 }
-
-                                stage('Jenkins Java 11') {
-                                    stages {
-                                        stage('Stage 1') {
-                                            steps {
-                                                script {
-                                                    echo "Stage 1"
-                                                }
-                                            }
-                                        }
-                                        stage('Stage 2') {
-                                            steps {
-                                                script {
-                                                    echo "stage 2"
-                                                }
-                                            }
+                                stage('Stage 2') {
+                                    steps {
+                                        script {
+                                            echo "stage 2"
                                         }
                                     }
                                 }
                             }
                         }
-                        /*stage('Pull Automation Code') {
+                    }
+                }
+                /*stage('Pull Automation Code') {
                             steps {
                                 dir("${workspace}/9.0/Checkmarx-System-Test") {
                                     git branch: automationBranch, credentialsId: '15f8e7b7-6ce7-44c0-b151-84f99ffa7aed', poll: false, url: 'http://tfs2013:8080/tfs/DefaultCollection/Automation/_git/Checkmarx-System-Test'
@@ -174,28 +172,26 @@ pipeline {
                                 }
                             }
                         }*/
-                    }
-                    post {
-                        always {
-                            script {
-                                //dir("${workspace}/9.0/Checkmarx-System-Test") {
-                                //    junit '**/PluginsCommonClient/target/surefire-reports/**/*.xml'
-                                //}
-                                if (ipAddress90 != null) {
-                                    /*node(vmName + "-9.0") {
+            }
+            post {
+                always {
+                    script {
+                        //dir("${workspace}/9.0/Checkmarx-System-Test") {
+                        //    junit '**/PluginsCommonClient/target/surefire-reports/**/*.xml'
+                        //}
+                        if (ipAddress90 != null) {
+                            /*node(vmName + "-9.0") {
                                         kit.zipStashInstallationLogs("CxSAST-9.0-Logs")
                                     }
                                     unstash "CxSAST-9.0-Logs"*/
-                                    deleteVm(provider, ipAddress90, vmName + "-9.0")
-                                }
-                            }
+                            deleteVm(provider, ipAddress90, vmName + "-9.0")
                         }
-                        failure {
-                            script {
-                                env.PIPELINE_STATUS = "Failure"
-                                env.STAGE_NAME_FAILED="${STAGE_NAME}"
-                            }
-                        }
+                    }
+                }
+                failure {
+                    script {
+                        env.PIPELINE_STATUS = "Failure"
+                        env.STAGE_NAME_FAILED = "${STAGE_NAME}"
                     }
                 }
             }
