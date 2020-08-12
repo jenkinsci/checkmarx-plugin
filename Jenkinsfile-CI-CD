@@ -39,7 +39,7 @@ pipeline {
         stage('Build CxJenkins') {
             steps {
                 script {
-                    sh "docker run --rm --name build-${BUILD_TAG} -v ${workspace}:/usr/src/cx-jenkins -w /usr/src/cx-jenkins openjdk:8-jdk-alpine ./gradlew -x test clean jpi"
+                    sh "docker run --rm --name build-${BUILD_TAG} -v ${workspace}:/usr/src/cx-jenkins -w /usr/src/cx-jenkins openjdk:8-jdk-alpine ./gradlew clean jpi"
                 }
             }
             post {
