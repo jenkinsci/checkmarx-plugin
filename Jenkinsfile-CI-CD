@@ -13,18 +13,18 @@ def decommissionPeriod = "3 hour"
 def vmwareNetwork = "Lab"
 def automationBranch = "9.0.0"
 
-def performDeploymentStages(String node, String app) {
-    stage("build" + app) {
-        echo "Building the app [${app}] on node [${node}]"
-        sleep 10
+def performParallelStages(String sast, String jenkins) {
+    stage("Build-Jenkins-${jenkins}-CxSAST-${sast}") {
+        echo "Building Jenkisn [${jenkins}] on CxSAST [${sast}]"
+        sh "sleep 10"
     }
-    stage("deploy-${app}") {
-        echo "Deploying the app ${app}] on node [${node}]"
-        sleep 10
+    stage("Deploy-Jenkins-${jenkins}-CxSAST-${sast}") {
+        echo "Deploying Jenkisn ${jenkins}] on CxSAST [${sast}]"
+        sh "sleep 10"
     }
-    stage("test") {
-        echo "Testing the app [${app}] on node [${node}]"
-        sleep 10
+    stage("Test-Jenkins-${jenkins}-CxSAST-${sast}") {
+        echo "Testing Jenkisn [${jenkins}] on CxSAST [${sast}]"
+        sh "sleep 10"
     }
 }
 
@@ -116,7 +116,7 @@ pipeline {
                     for (node in params.NODES.tokenize(',')) {
                         def apps = [:]
                         for (app in params.APPS.tokenize(',')) {
-                            performDeploymentStages(node, app)
+                            performParallelStages(node, app)
                         }
                         parallel apps
                     }
