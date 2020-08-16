@@ -13,7 +13,7 @@ def decommissionPeriod = "3 hour"
 def vmwareNetwork = "Lab"
 def automationBranch = "9.0.0"
 
-def performParallelStages(String sastVer, String jenkinsVer) {
+def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
     stage("Build-Jenkins-${jenkinsVer}-CxSAST-${sastVer}") {
         echo "Building Jenkins [${jenkinsVer}] on CxSAST [${sastVer}]"
         sh "sleep 10"
@@ -125,9 +125,9 @@ pipeline {
                     parallel sasts*/
                     /*def myStages = [performParallelStages("sast1", "jenkins1"),performParallelStages("sast2", "jenkins2")]
                     parallel myStages*/
-                    /*def parallelTopLevelSteps = [:]
+                    def parallelTopLevelSteps = [:]
 
-                    parallelTopLevelSteps['8.9'] = {
+                    /*parallelTopLevelSteps['8.9'] = {
                         def parallelNestedSteps = [:]
 
                         parallelNestedSteps['Jenkins01'] = { performParallelStages("8.9", "Jenkins01") }
@@ -136,32 +136,17 @@ pipeline {
                         parallelNestedSteps['Jenkins04'] = { performParallelStages("8.9", "Jenkins04") }
 
                         parallel(parallelNestedSteps)
-                    }
+                    }*/
 
                     parallelTopLevelSteps['9.0'] = {
                         def parallelNestedSteps = [:]
 
-                        parallelNestedSteps['Jenkins01'] = { performParallelStages("9.0", "Jenkins01") }
-                        parallelNestedSteps['Jenkins02'] = { performParallelStages("9.0", "Jenkins02") }
-                        parallelNestedSteps['Jenkins03'] = { performParallelStages("9.0", "Jenkins03") }
-                        parallelNestedSteps['Jenkins04'] = { performParallelStages("9.0", "Jenkins04") }
+                        parallelNestedSteps['Jenkins01'] = { performParallelStages("9.0", ipAddress90,"Jenkins01") }
+                        parallelNestedSteps['Jenkins02'] = { performParallelStages("9.0", ipAddress90,"Jenkins02") }
+                        parallelNestedSteps['Jenkins03'] = { performParallelStages("9.0", ipAddress90,"Jenkins03") }
+                        parallelNestedSteps['Jenkins04'] = { performParallelStages("9.0", ipAddress90,"Jenkins04") }
 
                         parallel(parallelNestedSteps)
-                    }
-
-                    parallel(parallelTopLevelSteps)*/
-                    def parallelTopLevelSteps = [:]
-                    for (sast in params.sastVersions.tokenize(',')) {
-                        parallelTopLevelSteps["${sast}"] = {
-                            def parallelNestedSteps = [:]
-
-                            parallelNestedSteps['Jenkins01'] = { performParallelStages("${sast}", "Jenkins01") }
-                            parallelNestedSteps['Jenkins02'] = { performParallelStages("${sast}", "Jenkins02") }
-                            parallelNestedSteps['Jenkins03'] = { performParallelStages("${sast}", "Jenkins03") }
-                            parallelNestedSteps['Jenkins04'] = { performParallelStages("${sast}", "Jenkins04") }
-
-                            parallel(parallelNestedSteps)
-                        }
                     }
 
                     parallel(parallelTopLevelSteps)
