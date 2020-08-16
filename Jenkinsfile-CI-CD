@@ -112,7 +112,7 @@ pipeline {
         stage('parallel stage') {
             steps {
                 script {
-                    def sasts = [:]
+                    /*def sasts = [:]
                     for (sast in params.sastVersions.tokenize(',')) {
                         def jenkinses = [:]
                         sasts[sast] = {
@@ -122,7 +122,8 @@ pipeline {
                         }
                         parallel jenkinses
                     }
-                    parallel sasts
+                    parallel sasts*/
+                    parallel [performParallelStages("sast1", "jenkins1"),performParallelStages("sast2", "jenkins2")]
                 }
             }
         }
