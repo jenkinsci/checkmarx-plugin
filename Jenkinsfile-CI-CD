@@ -127,24 +127,24 @@ pipeline {
                     parallel myStages*/
                     def parallelTopLevelSteps = [:]
 
-                    parallelTopLevelSteps['A and B'] = {
+                    parallelTopLevelSteps['8.9'] = {
                         def parallelNestedSteps = [:]
 
-                        parallelNestedSteps['step A'] = { echo('A') }
-                        parallelNestedSteps['step B'] = { echo('B') }
-                        parallelNestedSteps['step C'] = { echo('C') }
-                        parallelNestedSteps['step D'] = { echo('D') }
+                        parallelNestedSteps['Jenkins01'] = { performParallelStages("8.9", "Jenkins01") }
+                        parallelNestedSteps['Jenkins02'] = { performParallelStages("8.9", "Jenkins02") }
+                        parallelNestedSteps['Jenkins03'] = { performParallelStages("8.9", "Jenkins03") }
+                        parallelNestedSteps['Jenkins04'] = { performParallelStages("8.9", "Jenkins04") }
 
                         parallel(parallelNestedSteps)
                     }
 
-                    parallelTopLevelSteps['C and D'] = {
+                    parallelTopLevelSteps['9.0'] = {
                         def parallelNestedSteps = [:]
 
-                        parallelNestedSteps['step A'] = { echo('A') }
-                        parallelNestedSteps['step B'] = { echo('B') }
-                        parallelNestedSteps['step C'] = { echo('C') }
-                        parallelNestedSteps['step D'] = { echo('D') }
+                        parallelNestedSteps['Jenkins01'] = { performParallelStages("9.0", "Jenkins01") }
+                        parallelNestedSteps['Jenkins02'] = { performParallelStages("9.0", "Jenkins02") }
+                        parallelNestedSteps['Jenkins03'] = { performParallelStages("9.0", "Jenkins03") }
+                        parallelNestedSteps['Jenkins04'] = { performParallelStages("9.0", "Jenkins04") }
 
                         parallel(parallelNestedSteps)
                     }
