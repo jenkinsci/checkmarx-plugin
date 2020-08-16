@@ -116,7 +116,7 @@ pipeline {
                     for (node in params.NODES.tokenize(',')) {
                         def apps = [:]
                         for (app in params.APPS.tokenize(',')) {
-                            performParallelStages(node, app)
+                            apps[app] = { performParallelStages(node, app) }
                         }
                         parallel apps
                     }
