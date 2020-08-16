@@ -30,8 +30,8 @@ def performParallelStages(String sast, String jenkins) {
 
 pipeline {
     parameters {
-        string(name: 'NODES', defaultValue: '1,2,3', description: 'Nodes to build, deploy and test')
-        string(name: 'APPS', defaultValue: 'app01,app02', description: 'App names')
+        string(name: 'sastVersions', defaultValue: '8.9,9.0,9.2', description: 'Nodes to build, deploy and test')
+        string(name: 'jenkinsVersions', defaultValue: 'jenkins01,jenkins02', description: 'App names')
         string(name: "vmTemplate90",defaultValue: "${vmTemplate90}", description: "Template for 9.0 VM")
         string(name: "ram",defaultValue: "${ram}", description: "Server memory")
         string(name: "cpu",defaultValue: "${cpu}", description: "")
@@ -113,10 +113,10 @@ pipeline {
             steps {
                 script {
                     def sasts = [:]
-                    for (sast in params.NODES.tokenize(',')) {
+                    for (sast in params.sastVersions.tokenize(',')) {
                         sasts[sast] = {
                             def jenkinses = [:]
-                            for (jenkins in params.APPS.tokenize(',')) {
+                            for (jenkins in params.jenkinsVersions.tokenize(',')) {
                                 jenkinses[jenkins] = { performParallelStages(sast, jenkins) }
                             }
                             parallel jenkinses
