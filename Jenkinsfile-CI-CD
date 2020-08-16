@@ -123,7 +123,8 @@ pipeline {
                         parallel jenkinses
                     }
                     parallel sasts*/
-                    parallel [performParallelStages("sast1", "jenkins1"),performParallelStages("sast2", "jenkins2")]
+                    def myStages = [performParallelStages("sast1", "jenkins1"),performParallelStages("sast2", "jenkins2")]
+                    parallel myStages
                 }
             }
         }
