@@ -28,7 +28,7 @@ def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
     }
     stage("Deploy-Jenkins-${jenkinsVer}-for-CxSAST-${sastVer}") {
         echo "Deploying Jenkins [${jenkinsVer}] for CxSAST [${sastVer}]"
-        sh "docker run --rm --name jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} jenkins/jenkins:${jenkinsVer}"
+        sh "docker run --rm -P --name jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} jenkins/jenkins:${jenkinsVer}"
     }
 }
 
@@ -145,8 +145,8 @@ pipeline {
                     parallelTopLevelSteps['9.0'] = {
                         def parallelNestedSteps = [:]
 
-                        parallelNestedSteps['Jenkins01'] = { performParallelStages("9.0", ipAddress90,"lts") }
-                        parallelNestedSteps['Jenkins02'] = { performParallelStages("9.0", ipAddress90,"lts-jdk11") }
+                        parallelNestedSteps['9.0-lts-jdk8'] = { performParallelStages("9.0", ipAddress90,"lts") }
+                        parallelNestedSteps['9.0-lts-jdk11'] = { performParallelStages("9.0", ipAddress90,"lts-jdk11") }
                         //parallelNestedSteps['Jenkins03'] = { performParallelStages("9.0", ipAddress90,"Jenkins03") }
                         //parallelNestedSteps['Jenkins04'] = { performParallelStages("9.0", ipAddress90,"Jenkins04") }
 
