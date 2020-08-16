@@ -95,7 +95,7 @@ pipeline {
         stage('Jenkins Instance') {
             parallel {
 
-                stage('Jenkins Java 8') {
+                stage('Java 8') {
                     stages {
                         stage('Stage 1') {
                             steps {
@@ -114,7 +114,7 @@ pipeline {
                     }
                 }
 
-                stage('Jenkins Java 11') {
+                stage('Java 11') {
                     stages {
                         stage('Stage 1') {
                             steps {
