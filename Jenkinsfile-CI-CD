@@ -119,8 +119,8 @@ pipeline {
                             for (jenkins in params.APPS.tokenize(',')) {
                                 jenkinses[jenkins] = { performParallelStages(sast, jenkins) }
                             }
+                            parallel jenkinses
                         }
-                        parallel jenkinses
                     }
                     parallel sasts
                 }
