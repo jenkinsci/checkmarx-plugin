@@ -123,8 +123,29 @@ pipeline {
                         parallel jenkinses
                     }
                     parallel sasts*/
-                    def myStages = [performParallelStages("sast1", "jenkins1"),performParallelStages("sast2", "jenkins2")]
-                    parallel myStages
+                    /*def myStages = [performParallelStages("sast1", "jenkins1"),performParallelStages("sast2", "jenkins2")]
+                    parallel myStages*/
+                    def parallelTopLevelSteps = [:]
+
+                    parallelTopLevelSteps['A and B'] = {
+                        def parallelNestedSteps = [:]
+
+                        parallelNestedSteps['step A'] = { echo('A') }
+                        parallelNestedSteps['step B'] = { echo('B') }
+
+                        parallel(parallelNestedSteps)
+                    }
+
+                    parallelTopLevelSteps['C and D'] = {
+                        def parallelNestedSteps = [:]
+
+                        parallelNestedSteps['step C'] = { echo('C') }
+                        parallelNestedSteps['step D'] = { echo('D') }
+
+                        parallel(parallelNestedSteps)
+                    }
+
+                    parallel(parallelTopLevelSteps)
                 }
             }
         }
