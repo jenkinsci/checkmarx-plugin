@@ -132,6 +132,8 @@ pipeline {
 
                         parallelNestedSteps['step A'] = { echo('A') }
                         parallelNestedSteps['step B'] = { echo('B') }
+                        parallelNestedSteps['step C'] = { echo('C') }
+                        parallelNestedSteps['step D'] = { echo('D') }
 
                         parallel(parallelNestedSteps)
                     }
@@ -139,6 +141,8 @@ pipeline {
                     parallelTopLevelSteps['C and D'] = {
                         def parallelNestedSteps = [:]
 
+                        parallelNestedSteps['step A'] = { echo('A') }
+                        parallelNestedSteps['step B'] = { echo('B') }
                         parallelNestedSteps['step C'] = { echo('C') }
                         parallelNestedSteps['step D'] = { echo('D') }
 
