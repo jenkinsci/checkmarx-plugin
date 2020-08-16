@@ -14,14 +14,17 @@ def vmwareNetwork = "Lab"
 def automationBranch = "9.0.0"
 
 def performDeploymentStages(String node, String app) {
-    stage("build") {
+    stage("build" + app) {
         echo "Building the app [${app}] on node [${node}]"
+        sleep 10
     }
-    stage("deploy") {
+    stage("deploy-${app}") {
         echo "Deploying the app ${app}] on node [${node}]"
+        sleep 10
     }
     stage("test") {
         echo "Testing the app [${app}] on node [${node}]"
+        sleep 10
     }
 }
 
