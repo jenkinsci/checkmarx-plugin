@@ -43,6 +43,11 @@ def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
         //sh "curl -O http://localhost:${port}/jnlpJars/jenkins-cli.jar"
         //sh "java -jar jenkins-cli.jar -s http://localhost:${port} install-plugin file:///C:\\Users\\Administrator\\checkmarx.hpi -restart"
     }
+
+    stage("Automation-Jenkins-${jenkinsVer}-for-CxSAST-${sastVer}") {
+        echo "Automation Jenkins [${jenkinsVer}] for CxSAST [${sastVer}]"
+        sleep 30
+    }
 }
 
 pipeline {
