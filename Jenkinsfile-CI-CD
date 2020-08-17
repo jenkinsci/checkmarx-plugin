@@ -29,7 +29,7 @@ def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
     stage("Deploy-Jenkins-${jenkinsVer}-for-CxSAST-${sastVer}") {
         echo "Deploying Jenkins [${jenkinsVer}] for CxSAST [${sastVer}]"
         //sh "cp -R ${WORKSPACE-LINUX}/jenkins-${jenkinsVer} ${PWD}/jenkins-${jenkinsVer}"
-        sh "docker run --rm -P --name jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} -v ${WORKSPACE-LINUX}/jenkins-${jenkinsVer}:/var/jenkins_home jenkins/jenkins:${jenkinsVer}"
+        sh "docker run --rm -P --name jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} -v /var/jenkins/workspace/jenkins-${jenkinsVer}:/var/jenkins_home jenkins/jenkins:${jenkinsVer}"
     }
 }
 
