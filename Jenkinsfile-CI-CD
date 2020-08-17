@@ -14,6 +14,7 @@ def vmwareNetwork = "Lab"
 def automationBranch = "9.0.0"
 
 def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
+    workspace = pwd()
     /*stage("Build-Jenkins-${jenkinsVer}-CxSAST-${sastVer}") {
         echo "Building Jenkins [${jenkinsVer}] on CxSAST [${sastVer}]"
         sh "sleep 10"
@@ -28,8 +29,10 @@ def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
     }*/
     stage("Deploy-Jenkins-${jenkinsVer}-for-CxSAST-${sastVer}") {
         echo "Deploying Jenkins [${jenkinsVer}] for CxSAST [${sastVer}]"
-        //sh "cp -R ${WORKSPACE-LINUX}/jenkins-${jenkinsVer} ${PWD}/jenkins-${jenkinsVer}"
-        sh "docker run --rm -P --name jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} -v /var/jenkins/workspace/jenkins-${jenkinsVer}:/var/jenkins_home jenkins/jenkins:${jenkinsVer}"
+        sh "cp -R /var/jenkins/workspace/jenkins-${jenkinsVer} ${workspace}/jenkins-${jenkinsVer}"
+        sh "docker run --rm -d -P --name jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} -v ${workspace}/jenkins-${jenkinsVer}:/var/jenkins_home jenkins/jenkins:${jenkinsVer}"
+        def port = sh (returnStdout: true, script: "docker port jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} 8080").substring(8).trim()
+        echo "PORT: ${port}"
     }
 }
 
