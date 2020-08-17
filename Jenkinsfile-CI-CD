@@ -14,7 +14,7 @@ def vmwareNetwork = "Lab"
 def automationBranch = "9.0.0"
 
 def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
-    stage("Build-Jenkins-${jenkinsVer}-CxSAST-${sastVer}") {
+    /*stage("Build-Jenkins-${jenkinsVer}-CxSAST-${sastVer}") {
         echo "Building Jenkins [${jenkinsVer}] on CxSAST [${sastVer}]"
         sh "sleep 10"
     }
@@ -25,7 +25,7 @@ def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
     stage("Test-Jenkins-${jenkinsVer}-CxSAST-${sastVer}") {
         echo "Testing Jenkins [${jenkinsVer}] on CxSAST [${sastVer}]"
         sh "sleep 10"
-    }
+    }*/
     stage("Deploy-Jenkins-${jenkinsVer}-for-CxSAST-${sastVer}") {
         echo "Deploying Jenkins [${jenkinsVer}] for CxSAST [${sastVer}]"
         sh "docker run --rm -P --name jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} -v jenkins-${jenkinsVer}:/var/jenkins_home:ro jenkins/jenkins:${jenkinsVer}"
