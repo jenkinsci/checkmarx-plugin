@@ -17,18 +17,7 @@ def automationBranch = "9.0.0"
 
 def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
     workspace = pwd()
-    /*stage("Build-Jenkins-${jenkinsVer}-CxSAST-${sastVer}") {
-        echo "Building Jenkins [${jenkinsVer}] on CxSAST [${sastVer}]"
-        sh "sleep 10"
-    }
-    stage("Deploy-Jenkins-${jenkinsVer}-CxSAST-${sastVer}") {
-        echo "Deploying Jenkins ${jenkinsVer}] on CxSAST [${sastVer}]"
-        sh "sleep 10"
-    }
-    stage("Test-Jenkins-${jenkinsVer}-CxSAST-${sastVer}") {
-        echo "Testing Jenkins [${jenkinsVer}] on CxSAST [${sastVer}]"
-        sh "sleep 10"
-    }*/
+
     stage("Deploy-Jenkins-${jenkinsVer}-for-CxSAST-${sastVer}") {
         echo "Deploying Jenkins [${jenkinsVer}] for CxSAST [${sastVer}]"
         sh "cp -R /var/jenkins/workspace/jenkins-${jenkinsVer} ${workspace}/jenkins-${jenkinsVer}"
@@ -114,7 +103,7 @@ pipeline {
             }
         }
 
-        stage('Create CxSAST 9.0 VM') {
+        stage('Create CxSAST VM') {
             when {
                 expression {
                     BRANCH_NAME == 'master' || BRANCH_NAME.startsWith("PR-") && CHANGE_TARGET == 'master' || BRANCH_NAME == 'add-ci-cd'
