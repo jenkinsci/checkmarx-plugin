@@ -107,25 +107,46 @@ pipeline {
             }
         }
 
-        /*stage('Create CxSAST 9.0 VM') {
+        stage('Create CxSAST 9.0 VM') {
             when {
                 expression {
                     BRANCH_NAME == 'master' || BRANCH_NAME.startsWith("PR-") && CHANGE_TARGET == 'master' || BRANCH_NAME == 'add-ci-cd'
                 }
             }
-            steps {
-                script {
-                    kit.Create_Vm_Terraform(vmName + "-9.0", vmTemplate90, ram, cpu, provider, decommissionPeriod, "Auto", "Plugins-CI", vmwareNetwork)
-                    ipAddress90 = kit.getIpAddress(vmName + "-9.0", provider)
-                    node('install01') {
-                        kit.Create_Jenkins_Slave_On_Master(vmName + "-9.0")
-                        kit.Start_Jenkins_Slave_On_Windows_Pstools(ipAddress90, vmName + "-9.0")
+            parallel {
+                stage('8.9') {
+                    steps {
+                        script {
+                            kit.Create_Vm_Terraform(vmName + "-8.9", vmTemplate89, ram, cpu, provider, decommissionPeriod, "Auto", "Plugins-CI", vmwareNetwork)
+                            ipAddress89 = kit.getIpAddress(vmName + "-8.9", provider)
+                            node('install01') {
+                                kit.Create_Jenkins_Slave_On_Master(vmName + "-8.9")
+                                kit.Start_Jenkins_Slave_On_Windows_Pstools(ipAddress89, vmName + "-8.9")
+                            }
+                        }
+                    }
+                }
+                stage('9.0') {
+                    steps {
+                        script {
+                            kit.Create_Vm_Terraform(vmName + "-9.0", vmTemplate90, ram, cpu, provider, decommissionPeriod, "Auto", "Plugins-CI", vmwareNetwork)
+                            ipAddress90 = kit.getIpAddress(vmName + "-9.0", provider)
+                            node('install01') {
+                                kit.Create_Jenkins_Slave_On_Master(vmName + "-9.0")
+                                kit.Start_Jenkins_Slave_On_Windows_Pstools(ipAddress90, vmName + "-9.0")
+                            }
+                        }
                     }
                 }
             }
-        }*/
+        }
 
-        stage('parallel stage') {
+        stage('System Tests') {
+            when {
+                expression {
+                    BRANCH_NAME == 'master' || BRANCH_NAME.startsWith("PR-") && CHANGE_TARGET == 'master' || BRANCH_NAME == 'add-ci-cd'
+                }
+            }
             steps {
                 script {
                     /*def sasts = [:]
@@ -217,6 +238,13 @@ pipeline {
                 //dir("${workspace}/9.0/Checkmarx-System-Test") {
                 //    junit '**/PluginsCommonClient/target/surefire-reports/**/*.xml'
                 //}
+                if (ipAddress89 != null) {
+                    /*node(vmName + "-9.0") {
+                                kit.zipStashInstallationLogs("CxSAST-9.0-Logs")
+                            }
+                            unstash "CxSAST-9.0-Logs"*/
+                    deleteVm(provider, ipAddress89, vmName + "-8.9")
+                }
                 if (ipAddress90 != null) {
                     /*node(vmName + "-9.0") {
                                 kit.zipStashInstallationLogs("CxSAST-9.0-Logs")
