@@ -30,7 +30,9 @@ def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
     stage("Deploy-Jenkins-${jenkinsVer}-for-CxSAST-${sastVer}") {
         echo "Deploying Jenkins [${jenkinsVer}] for CxSAST [${sastVer}]"
         sh "cp -R /var/jenkins/workspace/jenkins-${jenkinsVer} ${workspace}/jenkins-${jenkinsVer}"
+        sh "chmod -R 777 ${workspace}/jenkins-${jenkinsVer}"
         sh "docker run --rm -d -P --name jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} -v ${workspace}/jenkins-${jenkinsVer}:/var/jenkins_home jenkins/jenkins:${jenkinsVer}"
+        sleep 10
         sh "docker ps -a"
         def port = sh (returnStdout: true, script: "docker port jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} 8080").substring(8).trim()
         echo "PORT: ${port}"
