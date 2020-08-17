@@ -5,6 +5,7 @@ import java.time.*
 def workspace
 def vmName = "${BUILD_TAG}-CxSAST"
 def vmTemplate90 = "CxSDLC-Template-CxSAST-9-0"
+def ipAddress89
 def ipAddress90
 def ram = "12000"
 def cpu = "4"
@@ -74,7 +75,7 @@ pipeline {
             }
         }
 
-        stage('Build CxJenkins') {
+        stage('Build') {
             steps {
                 script {
                     sh "docker run --rm --name build-${BUILD_TAG} -v ${workspace}:/usr/src/cx-jenkins -v /root/.gradle:/root/.gradle -w /usr/src/cx-jenkins maven:3.6.1-jdk-8-alpine ./gradlew -x test clean jpi"
@@ -90,7 +91,7 @@ pipeline {
             }
         }
 
-        stage('Test CxJenkins') {
+        stage('Unit Tests') {
             steps {
                 script {
                     sh "docker run --rm --name test-${BUILD_TAG} -v ${workspace}:/usr/src/cx-jenkins -v /root/.gradle:/root/.gradle -w /usr/src/cx-jenkins maven:3.6.1-jdk-8-alpine ./gradlew test"
@@ -142,24 +143,20 @@ pipeline {
                     parallel myStages*/
                     def parallelTopLevelSteps = [:]
 
-                    /*parallelTopLevelSteps['8.9'] = {
+                    parallelTopLevelSteps['8.9'] = {
                         def parallelNestedSteps = [:]
 
-                        parallelNestedSteps['Jenkins01'] = { performParallelStages("8.9", "Jenkins01") }
-                        parallelNestedSteps['Jenkins02'] = { performParallelStages("8.9", "Jenkins02") }
-                        parallelNestedSteps['Jenkins03'] = { performParallelStages("8.9", "Jenkins03") }
-                        parallelNestedSteps['Jenkins04'] = { performParallelStages("8.9", "Jenkins04") }
+                        parallelNestedSteps['8.9-lts-jdk8'] = { performParallelStages("8.9", ipAddress89,"lts") }
+                        parallelNestedSteps['8.9-lts-jdk11'] = { performParallelStages("8.9", ipAddress89,"lts-jdk11") }
 
                         parallel(parallelNestedSteps)
-                    }*/
+                    }
 
                     parallelTopLevelSteps['9.0'] = {
                         def parallelNestedSteps = [:]
 
                         parallelNestedSteps['9.0-lts-jdk8'] = { performParallelStages("9.0", ipAddress90,"lts") }
                         parallelNestedSteps['9.0-lts-jdk11'] = { performParallelStages("9.0", ipAddress90,"lts-jdk11") }
-                        //parallelNestedSteps['Jenkins03'] = { performParallelStages("9.0", ipAddress90,"Jenkins03") }
-                        //parallelNestedSteps['Jenkins04'] = { performParallelStages("9.0", ipAddress90,"Jenkins04") }
 
                         parallel(parallelNestedSteps)
                     }
