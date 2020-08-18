@@ -20,6 +20,7 @@ def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
 
     stage("Deploy Jenkins-${jenkinsVer} for CxSAST-${sastVer}") {
         echo "Deploying Jenkins-${jenkinsVer} for CxSAST-${sastVer}"
+        sh "mkdir -p ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home"
         sh "cp -R /var/jenkins/workspace/jenkins-${jenkinsVer} ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home"
         sh "cp build/libs/checkmarx.hpi ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home/plugins"
         sh "chmod -R 777 ${workspace}/jenkins-${jenkinsVer}"
