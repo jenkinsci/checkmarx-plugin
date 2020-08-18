@@ -25,21 +25,23 @@ def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
         sh "cp build/libs/checkmarx.hpi ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home/plugins"
         sh "chmod -R 777 ${workspace}/jenkins-${jenkinsVer}"
         sh "docker run --rm -d -P --name deploy-jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} -v ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home:/var/jenkins_home jenkins/jenkins:${jenkinsVer}"
-        def port = sh (returnStdout: true, script: "docker port deploy-jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} 8080").substring(8).trim()
-        echo "PORT: ${port}"
-        sleep 150
+        //sleep 150
         sh "docker logs deploy-jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG}"
-        sh "docker stop deploy-jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG}"
+        //sh "docker stop deploy-jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG}"
         //sh "curl -O http://localhost:${port}/jnlpJars/jenkins-cli.jar"
         //sh "java -jar jenkins-cli.jar -s http://localhost:${port} install-plugin file:///C:\\Users\\Administrator\\checkmarx.hpi -restart"
     }
 
     stage("Pull Automation for Jenkins-${jenkinsVer}-CxSAST-${sastVer}") {
         echo "Pulling automation code for Jenkins-${jenkinsVer}-CxSAST-${sastVer}"
+        def port = sh (returnStdout: true, script: "docker port deploy-jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} 8080").substring(8).trim()
+        echo "PORT: ${port}"
         dir("${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/Checkmarx-Plugin-System-Test") {
             git branch: automationBranch, credentialsId: '15f8e7b7-6ce7-44c0-b151-84f99ffa7aed', poll: false, url: 'http://tfs2013:8080/tfs/DefaultCollection/Automation/_git/Checkmarx-Plugin-System-Test'
             sh "cp -r /var/jenkins/workspace/env ."
             sh "sed -e 's/<CxSastIpAddress>/${sastIP}/g' -i ./env/topology.xml"
+            sh "sed -e 's/<CxJenkinsIp>/localhost/g' -i ./env/topology.xml"
+            sh "sed -e 's/<CxJenkinsPort>/${port}/g' -i ./env/topology.xml"
         }
     }
 
