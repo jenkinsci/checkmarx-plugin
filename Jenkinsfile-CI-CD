@@ -25,11 +25,11 @@ def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
         sh "cp build/libs/checkmarx.hpi ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home/plugins"
         sh "chmod -R 777 ${workspace}/jenkins-${jenkinsVer}"
         sh "docker run --rm -d -P --name deploy-jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} -v ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home:/var/jenkins_home jenkins/jenkins:${jenkinsVer}"
-        def port = sh (returnStdout: true, script: "docker port jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} 8080").substring(8).trim()
+        def port = sh (returnStdout: true, script: "docker port deploy-jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} 8080").substring(8).trim()
         echo "PORT: ${port}"
         sleep 150
-        sh "docker logs jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG}"
-        sh "docker stop jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG}"
+        sh "docker logs deploy-jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG}"
+        sh "docker stop deploy-jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG}"
         //sh "curl -O http://localhost:${port}/jnlpJars/jenkins-cli.jar"
         //sh "java -jar jenkins-cli.jar -s http://localhost:${port} install-plugin file:///C:\\Users\\Administrator\\checkmarx.hpi -restart"
     }
