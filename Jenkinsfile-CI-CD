@@ -55,7 +55,7 @@ def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
     } catch (e) {
         throw e
     } finally {
-        sh "docker logs ${jenkinsContainerName}"
+        sh "docker logs ${jenkinsContainerName} > deploy-jenkins-${jenkinsVer}-sast-${sastVer}.log"
         sh "docker stop ${jenkinsContainerName}"
         junit "${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/Checkmarx-Plugin-System-Test/JenkinsTests/target/surefire-reports/**/*.xml"
     }
@@ -251,7 +251,7 @@ pipeline {
     
     post {
         always {
-            archiveArtifacts "*.zip, build/libs/*.hpi"
+            archiveArtifacts "*.zip, build/libs/*.hpi, *.log"
             script {
                 //dir("${workspace}/9.0/Checkmarx-System-Test") {
                 //    junit '**/PluginsCommonClient/target/surefire-reports/**/*.xml'
