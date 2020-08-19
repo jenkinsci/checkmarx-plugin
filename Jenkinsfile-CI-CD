@@ -25,7 +25,7 @@ def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
         sh "cp -R /var/jenkins/workspace/jenkins-${jenkinsVer} ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home"
         sh "cp build/libs/checkmarx.hpi ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home/plugins"
         sh "chmod -R 777 ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home"
-        sh "docker run --rm -d -P --name ${jenkinsContainerName} -v ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home:/var/jenkins_home jenkins/jenkins:${jenkinsVer}"
+        sh "docker run --rm --privileged -d -P --name ${jenkinsContainerName} -v ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home:/var/jenkins_home jenkins/jenkins:${jenkinsVer}"
         //sh "curl -O http://localhost:${port}/jnlpJars/jenkins-cli.jar"
         //sh "java -jar jenkins-cli.jar -s http://localhost:${port} install-plugin file:///C:\\Users\\Administrator\\checkmarx.hpi -restart"
     }
