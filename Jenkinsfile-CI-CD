@@ -17,6 +17,7 @@ def automationBranch = "9.0.0"
 
 def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
     workspace = pwd()
+    def jenkinsContainerName = "deploy-jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG}"
 
     stage("Deploy Jenkins-${jenkinsVer} for CxSAST-${sastVer}") {
         echo "Deploying Jenkins-${jenkinsVer} for CxSAST-${sastVer}"
@@ -24,34 +25,40 @@ def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
         sh "cp -R /var/jenkins/workspace/jenkins-${jenkinsVer} ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home"
         sh "cp build/libs/checkmarx.hpi ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home/plugins"
         sh "chmod -R 777 ${workspace}/jenkins-${jenkinsVer}"
-        sh "docker run --rm -d -P --name deploy-jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} -v ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home:/var/jenkins_home jenkins/jenkins:${jenkinsVer}"
-        //sleep 150
-        sh "docker logs deploy-jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG}"
-        //sh "docker stop deploy-jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG}"
+        sh "docker run --rm -d -P --name ${jenkinsContainerName} -v ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home:/var/jenkins_home jenkins/jenkins:${jenkinsVer}"
         //sh "curl -O http://localhost:${port}/jnlpJars/jenkins-cli.jar"
         //sh "java -jar jenkins-cli.jar -s http://localhost:${port} install-plugin file:///C:\\Users\\Administrator\\checkmarx.hpi -restart"
     }
 
-    stage("Pull Automation for Jenkins-${jenkinsVer}-CxSAST-${sastVer}") {
-        echo "Pulling automation code for Jenkins-${jenkinsVer}-CxSAST-${sastVer}"
-        def dockerHostIP = sh (returnStdout: true, script: "hostname -I | awk '{print \$1}'").trim()
-        //echo "dockerHostIP: ${dockerHostIP}"
-        def port = sh (returnStdout: true, script: "docker port deploy-jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} 8080").substring(8).trim()
-        //echo "PORT: ${port}"
-        dir("${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/Checkmarx-Plugin-System-Test") {
-            git branch: automationBranch, credentialsId: '15f8e7b7-6ce7-44c0-b151-84f99ffa7aed', poll: false, url: 'http://tfs2013:8080/tfs/DefaultCollection/Automation/_git/Checkmarx-Plugin-System-Test'
-            sh "cp -r /var/jenkins/workspace/env ."
-            sh "sed -e 's/<CxSastIpAddress>/${sastIP}/g' -i ./env/topology.xml"
-            sh "sed -e 's/<CxJenkinsIp>/${dockerHostIP}/g' -i ./env/topology.xml"
-            sh "sed -e 's/<CxJenkinsPort>/${port}/g' -i ./env/topology.xml"
-            //sh "cat ./env/topology.xml"
-        }
-    }
+    try {
 
-    stage("Run Problematic Global tests for Jenkins-${jenkinsVer}-CxSAST-${sastVer}") {
-        echo "Running Problematic Global tests for Jenkins-${jenkinsVer}-CxSAST-${sastVer}"
-        sh "docker run --rm --name problematic-tests-jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} -v maven-repo:/root/.m2 -v ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/Checkmarx-Plugin-System-Test:/usr/src/automation -w /usr/src/automation maven:3.6.1-jdk-8-alpine \
+        stage("Pull Automation for Jenkins-${jenkinsVer}-CxSAST-${sastVer}") {
+            echo "Pulling automation code for Jenkins-${jenkinsVer}-CxSAST-${sastVer}"
+            def dockerHostIP = sh(returnStdout: true, script: "hostname -I | awk '{print \$1}'").trim()
+            //echo "dockerHostIP: ${dockerHostIP}"
+            def port = sh(returnStdout: true, script: "docker port ${jenkinsContainerName} 8080").substring(8).trim()
+            //echo "PORT: ${port}"
+            dir("${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/Checkmarx-Plugin-System-Test") {
+                git branch: automationBranch, credentialsId: '15f8e7b7-6ce7-44c0-b151-84f99ffa7aed', poll: false, url: 'http://tfs2013:8080/tfs/DefaultCollection/Automation/_git/Checkmarx-Plugin-System-Test'
+                sh "cp -r /var/jenkins/workspace/env ."
+                sh "sed -e 's/<CxSastIpAddress>/${sastIP}/g' -i ./env/topology.xml"
+                sh "sed -e 's/<CxJenkinsIp>/${dockerHostIP}/g' -i ./env/topology.xml"
+                sh "sed -e 's/<CxJenkinsPort>/${port}/g' -i ./env/topology.xml"
+                //sh "cat ./env/topology.xml"
+            }
+        }
+
+        stage("Run Problematic Global tests for Jenkins-${jenkinsVer}-CxSAST-${sastVer}") {
+            echo "Running Problematic Global tests for Jenkins-${jenkinsVer}-CxSAST-${sastVer}"
+            sh "docker run --rm --name problematic-tests-jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} -v maven-repo:/root/.m2 -v ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/Checkmarx-Plugin-System-Test:/usr/src/automation -w /usr/src/automation maven:3.6.1-jdk-8-alpine \
             mvn -q clean test -Dtest=com.cx.automation.plugin.jenkins.sca.problematicGlobal.tests.**.* -Dtopology.xml.ref=/usr/src/automation/env/topology.xml -Denv=hardening_env -DfailIfNoTests=false -Dmaven.test.failure.ignore=false -DskipTests=false -Ddriver.browser=CHROME"
+        }
+    } catch (e) {
+        throw e
+    } finally {
+        sh "docker logs ${jenkinsContainerName}"
+        sh "docker stop ${jenkinsContainerName}"
+        junit "${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/Checkmarx-Plugin-System-Test/JenkinsTests/target/surefire-reports/**/*.xml"
     }
 }
 
