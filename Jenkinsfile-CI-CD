@@ -43,7 +43,8 @@ def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
                 sh "sed -e 's/<CxSastIpAddress>/${sastIP}/g' -i ./env/topology.xml"
                 sh "sed -e 's/<CxJenkinsIp>/${dockerHostIP}/g' -i ./env/topology.xml"
                 sh "sed -e 's/<CxJenkinsPort>/${port}/g' -i ./env/topology.xml"
-                //sh "cat ./env/topology.xml"
+                sh "sed -e 's/<CxJenkinsIp>/${dockerHostIP}/g' -i ./env/env.properties"
+                sh "sed -e 's/<CxJenkinsPort>/${port}/g' -i ./env/env.properties"
             }
         }
 
