@@ -45,8 +45,8 @@ def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
                 sh "sed -e 's/<CxJenkinsPort>/${port}/g' -i ./env/topology.xml"
                 sh "sed -e 's/<CxJenkinsIp>/${dockerHostIP}/g' -i ./env/env.properties"
                 sh "sed -e 's/<CxJenkinsPort>/${port}/g' -i ./env/env.properties"
-                sh "cat ./env/topology.xml"
-                sh "cat ./env/env.properties"
+                //sh "cat ./env/topology.xml"
+                //sh "cat ./env/env.properties"
             }
         }
 
@@ -59,10 +59,10 @@ def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
         throw e
     } finally {
         //sh "docker logs ${jenkinsContainerName}"
-        sh "docker logs ${jenkinsContainerName} | tee deploy-jenkins-${jenkinsVer}-sast-${sastVer}.log"
+        sh "docker logs ${jenkinsContainerName} &> deploy-jenkins-${jenkinsVer}-sast-${sastVer}.log"
         sh "docker stop ${jenkinsContainerName}"
         sh "find ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/Checkmarx-Plugin-System-Test/JenkinsTests/target/surefire-reports"
-        junit "${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/Checkmarx-Plugin-System-Test/JenkinsTests/target/surefire-reports/*"
+        junit "${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/Checkmarx-Plugin-System-Test/JenkinsTests/target/surefire-reports/**"
     }
 }
 
