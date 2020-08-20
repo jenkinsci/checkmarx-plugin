@@ -50,7 +50,7 @@ def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
         stage("Run Problematic Global tests for Jenkins-${jenkinsVer}-CxSAST-${sastVer}") {
             echo "Running Problematic Global tests for Jenkins-${jenkinsVer}-CxSAST-${sastVer}"
             sh "docker run --rm --name problematic-tests-jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} -v maven-repo:/root/.m2 -v ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/Checkmarx-Plugin-System-Test:/usr/src/automation -w /usr/src/automation maven:3.6.1-jdk-8-alpine \
-            mvn -q clean test -Dtest=com.cx.automation.plugin.jenkins.sca.problematicGlobal.tests.**.* -Dtopology.xml.ref=/usr/src/automation/env/topology.xml -Denv=hardening_env -DfailIfNoTests=false -Dmaven.test.failure.ignore=false -DskipTests=false -Ddriver.browser=CHROME"
+            mvn -q clean test -Dtest=com.cx.automation.plugin.jenkins.sca.problematicGlobal.tests.**.* -Dtopology.xml.ref=/usr/src/automation/env/topology.xml -Denv=hardening_env -DfailIfNoTests=false -Dmaven.test.failure.ignore=false -DskipTests=false -Ddriver.browser=CHROME surefire-report:report"
         }
     } catch (e) {
         throw e
