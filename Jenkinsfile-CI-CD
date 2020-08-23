@@ -52,7 +52,7 @@ def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
 
         stage("Run Problematic Global tests for Jenkins-${jenkinsVer}-CxSAST-${sastVer}") {
             echo "Running Problematic Global tests for Jenkins-${jenkinsVer}-CxSAST-${sastVer}"
-            sh "docker run --rm --privileged --name problematic-tests-jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} -v maven-repo:/root/.m2 -v ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/Checkmarx-Plugin-System-Test:/usr/src/automation -v /var/jenkins/workspace/chromedriver:/usr/local/bin/chromedriver:ro -w /usr/src/automation maven:3.6.1-jdk-8-alpine \
+            sh "docker run --rm --privileged --name problematic-tests-jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} -v maven-repo:/root/.m2 -v ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/Checkmarx-Plugin-System-Test:/usr/src/automation -v  ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/Checkmarx-Plugin-System-Test/env/chromedriver:/usr/local/bin/chromedriver -w /usr/src/automation maven:3.6.1-jdk-8-alpine \
             mvn -q clean test -Dtest=com.cx.automation.plugin.jenkins.sca.problematicGlobal.tests.**.* -Dtopology.xml.ref=/usr/src/automation/env/topology.xml -Denv=hardening_env -DfailIfNoTests=false -Dmaven.test.failure.ignore=false -DskipTests=false -Ddriver.browser=CHROME surefire-report:report"
         }
     } catch (e) {
@@ -62,7 +62,7 @@ def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
         sh "docker logs ${jenkinsContainerName} &> deploy-jenkins-${jenkinsVer}-sast-${sastVer}.log"
         sh "docker stop ${jenkinsContainerName}"
         sh "find ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/Checkmarx-Plugin-System-Test/JenkinsTests/target/surefire-reports"
-        junit "${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/Checkmarx-Plugin-System-Test/JenkinsTests/target/surefire-reports/**"
+        junit "${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/Checkmarx-Plugin-System-Test/JenkinsTests/target/surefire-reports/TEST-*.xml"
     }
 }
 
