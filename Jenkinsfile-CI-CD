@@ -22,7 +22,8 @@ def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
     stage("Deploy Jenkins-${jenkinsVer} for CxSAST-${sastVer}") {
         echo "Deploying Jenkins-${jenkinsVer} for CxSAST-${sastVer}"
         sh "mkdir -p ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home"
-        sh "cp -R /var/jenkins/workspace/jenkins-${jenkinsVer} ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home"
+        sh "cp -R /var/jenkins/workspace/jenkins-${jenkinsVer}/* ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home"
+        //sh "cp -a /var/jenkins/workspace/jenkins-${jenkinsVer}/. ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home/"
         sh "cp build/libs/checkmarx.hpi ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home/plugins"
         sh "chmod -R 777 ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home"
         sh "docker run --rm --privileged -d -P --name ${jenkinsContainerName} -v ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home:/var/jenkins_home jenkins/jenkins:${jenkinsVer}"
@@ -39,7 +40,7 @@ def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
             //echo "PORT: ${port}"
             dir("${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/Checkmarx-Plugin-System-Test") {
                 git branch: automationBranch, credentialsId: '15f8e7b7-6ce7-44c0-b151-84f99ffa7aed', poll: false, url: 'http://tfs2013:8080/tfs/DefaultCollection/Automation/_git/Checkmarx-Plugin-System-Test'
-                sh "cp -r /var/jenkins/workspace/env ."
+                sh "cp /var/jenkins/workspace/env ."
                 sh "sed -e 's/<CxSastIpAddress>/${sastIP}/g' -i ./env/topology.xml"
                 sh "sed -e 's/<CxJenkinsIp>/${dockerHostIP}/g' -i ./env/topology.xml"
                 sh "sed -e 's/<CxJenkinsPort>/${port}/g' -i ./env/topology.xml"
@@ -52,7 +53,7 @@ def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
 
         stage("Run Problematic Global tests for Jenkins-${jenkinsVer}-CxSAST-${sastVer}") {
             echo "Running Problematic Global tests for Jenkins-${jenkinsVer}-CxSAST-${sastVer}"
-            sh "docker run --rm --privileged --name problematic-tests-jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} -v maven-repo:/root/.m2 -v ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/Checkmarx-Plugin-System-Test:/usr/src/automation -v  ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/Checkmarx-Plugin-System-Test/env/chromedriver:/usr/local/bin/chromedriver -w /usr/src/automation maven:3.6.1-jdk-8-alpine \
+            sh "docker run --rm --privileged --name problematic-tests-jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG} -v maven-repo:/root/.m2 -v ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/Checkmarx-Plugin-System-Test:/usr/src/automation -v ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/Checkmarx-Plugin-System-Test/env/chromedriver:/usr/local/bin/chromedriver -w /usr/src/automation maven:3.6.1-jdk-8-alpine \
             mvn -q clean test -Dtest=com.cx.automation.plugin.jenkins.sca.problematicGlobal.tests.**.* -Dtopology.xml.ref=/usr/src/automation/env/topology.xml -Denv=hardening_env -DfailIfNoTests=false -Dmaven.test.failure.ignore=false -DskipTests=false -Ddriver.browser=CHROME surefire-report:report"
         }
     } catch (e) {
