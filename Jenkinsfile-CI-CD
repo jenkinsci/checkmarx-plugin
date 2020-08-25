@@ -17,35 +17,39 @@ def automationBranch = "9.0.0"
 
 def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
     workspace = pwd()
+    def dockerHostIP = sh(returnStdout: true, script: "hostname -I | awk '{print \$1}'").trim()
     def jenkinsContainerName = "deploy-jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG}"
+    def jenkinsContainerPort
 
     stage("Deploy Jenkins-${jenkinsVer} for CxSAST-${sastVer}") {
         echo "Deploying Jenkins-${jenkinsVer} for CxSAST-${sastVer}"
         sh "mkdir -p ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home"
         sh "cp -R /var/jenkins/workspace/jenkins-${jenkinsVer}/* ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home"
+        sh "cp /var/jenkins/workspace/jenkins.model.JenkinsLocationConfiguration.xml ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home"
         //sh "cp -a /var/jenkins/workspace/jenkins-${jenkinsVer}/. ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home/"
         sh "cp build/libs/checkmarx.hpi ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home/plugins"
         sh "chmod -R 777 ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home"
         sh "docker run --rm --privileged -d -P --name ${jenkinsContainerName} -v ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home:/var/jenkins_home jenkins/jenkins:${jenkinsVer}"
-        //sh "curl -O http://localhost:${port}/jnlpJars/jenkins-cli.jar"
-        //sh "java -jar jenkins-cli.jar -s http://localhost:${port} install-plugin file:///C:\\Users\\Administrator\\checkmarx.hpi -restart"
+        jenkinsContainerPort = sh(returnStdout: true, script: "docker port ${jenkinsContainerName} 8080").substring(8).trim()
+        sh "sed -e 's/CxJenkinsIP/${dockerHostIP}/g' -i ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home/jenkins.model.JenkinsLocationConfiguration.xml"
+        sh "sed -e 's/CxJenkinsPort/${jenkinsContainerPort}/g' -i ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home/jenkins.model.JenkinsLocationConfiguration.xml"
+        sh "curl -O http://${dockerHostIP}:${jenkinsContainerPort}/jnlpJars/jenkins-cli.jar"
+        sh "java -jar jenkins-cli.jar -s http://${dockerHostIP}:${jenkinsContainerPort} -auth admin:admin reload-configuration"
+        sh "cat ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home/jenkins.model.JenkinsLocationConfiguration.xml"
     }
 
     try {
         stage("Pull Automation for Jenkins-${jenkinsVer}-CxSAST-${sastVer}") {
             echo "Pulling automation code for Jenkins-${jenkinsVer}-CxSAST-${sastVer}"
-            def dockerHostIP = sh(returnStdout: true, script: "hostname -I | awk '{print \$1}'").trim()
-            //echo "dockerHostIP: ${dockerHostIP}"
-            def port = sh(returnStdout: true, script: "docker port ${jenkinsContainerName} 8080").substring(8).trim()
-            //echo "PORT: ${port}"
+
             dir("${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/Checkmarx-Plugin-System-Test") {
                 git branch: automationBranch, credentialsId: '15f8e7b7-6ce7-44c0-b151-84f99ffa7aed', poll: false, url: 'http://tfs2013:8080/tfs/DefaultCollection/Automation/_git/Checkmarx-Plugin-System-Test'
                 sh "cp -r /var/jenkins/workspace/env ."
                 sh "sed -e 's/<CxSastIpAddress>/${sastIP}/g' -i ./env/topology.xml"
                 sh "sed -e 's/<CxJenkinsIp>/${dockerHostIP}/g' -i ./env/topology.xml"
-                sh "sed -e 's/<CxJenkinsPort>/${port}/g' -i ./env/topology.xml"
+                sh "sed -e 's/<CxJenkinsPort>/${jenkinsContainerPort}/g' -i ./env/topology.xml"
                 sh "sed -e 's/<CxJenkinsIp>/${dockerHostIP}/g' -i ./env/env.properties"
-                sh "sed -e 's/<CxJenkinsPort>/${port}/g' -i ./env/env.properties"
+                sh "sed -e 's/<CxJenkinsPort>/${jenkinsContainerPort}/g' -i ./env/env.properties"
                 //sh "cat ./env/topology.xml"
                 //sh "cat ./env/env.properties"
             }
