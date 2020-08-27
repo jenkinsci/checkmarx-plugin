@@ -21,26 +21,26 @@ def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
     def jenkinsContainerName = "deploy-jenkins-${jenkinsVer}-sast-${sastVer}-${BUILD_TAG}"
     def jenkinsContainerPort
 
-    stage("Deploy Jenkins-${jenkinsVer} for CxSAST-${sastVer}") {
-        echo "Deploying Jenkins-${jenkinsVer} for CxSAST-${sastVer}"
-        sh "mkdir -p ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home"
-        sh "cp -R /var/jenkins/workspace/jenkins-${jenkinsVer}/* ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home"
-        //sh "cp -a /var/jenkins/workspace/jenkins-${jenkinsVer}/. ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home/"
-        sh "cp build/libs/checkmarx.hpi ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home/plugins"
-        sh "chmod -R 777 ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home"
-        sh "docker run --rm --privileged -d -P --name ${jenkinsContainerName} -v ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home:/var/jenkins_home jenkins/jenkins:${jenkinsVer}"
-        jenkinsContainerPort = sh(returnStdout: true, script: "docker port ${jenkinsContainerName} 8080").substring(8).trim()
-        //all the next rows not necessarily needed! check after automation will pass
-        sh "cp /var/jenkins/workspace/jenkins.model.JenkinsLocationConfiguration.xml ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home"
-        sh "sed -e 's/CxJenkinsIP/${dockerHostIP}/g' -i ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home/jenkins.model.JenkinsLocationConfiguration.xml"
-        sh "sed -e 's/CxJenkinsPort/${jenkinsContainerPort}/g' -i ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home/jenkins.model.JenkinsLocationConfiguration.xml"
-        sleep 10
-        sh "curl -O http://${dockerHostIP}:${jenkinsContainerPort}/jnlpJars/jenkins-cli.jar"
-        sh "java -jar jenkins-cli.jar -s http://${dockerHostIP}:${jenkinsContainerPort} -auth admin:admin reload-configuration"
-        //sh "cat ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home/jenkins.model.JenkinsLocationConfiguration.xml"
-    }
-
     try {
+        stage("Deploy Jenkins-${jenkinsVer} for CxSAST-${sastVer}") {
+            echo "Deploying Jenkins-${jenkinsVer} for CxSAST-${sastVer}"
+            sh "mkdir -p ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home"
+            sh "cp -R /var/jenkins/workspace/jenkins-${jenkinsVer}/* ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home"
+            //sh "cp -a /var/jenkins/workspace/jenkins-${jenkinsVer}/. ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home/"
+            sh "cp build/libs/checkmarx.hpi ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home/plugins"
+            sh "chmod -R 777 ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home"
+            sh "docker run --rm --privileged -d -P --name ${jenkinsContainerName} -v ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home:/var/jenkins_home jenkins/jenkins:${jenkinsVer}"
+            jenkinsContainerPort = sh(returnStdout: true, script: "docker port ${jenkinsContainerName} 8080").substring(8).trim()
+            //all the next rows not necessarily needed! check after automation will pass
+            sh "cp /var/jenkins/workspace/jenkins.model.JenkinsLocationConfiguration.xml ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home"
+            sh "sed -e 's/CxJenkinsIP/${dockerHostIP}/g' -i ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home/jenkins.model.JenkinsLocationConfiguration.xml"
+            sh "sed -e 's/CxJenkinsPort/${jenkinsContainerPort}/g' -i ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home/jenkins.model.JenkinsLocationConfiguration.xml"
+            sleep 15
+            sh "curl -O http://${dockerHostIP}:${jenkinsContainerPort}/jnlpJars/jenkins-cli.jar"
+            sh "java -jar jenkins-cli.jar -s http://${dockerHostIP}:${jenkinsContainerPort} -auth admin:admin reload-configuration"
+            //sh "cat ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home/jenkins.model.JenkinsLocationConfiguration.xml"
+        }
+
         stage("Pull Automation for Jenkins-${jenkinsVer}-CxSAST-${sastVer}") {
             echo "Pulling automation code for Jenkins-${jenkinsVer}-CxSAST-${sastVer}"
 
