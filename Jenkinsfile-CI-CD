@@ -87,7 +87,6 @@ def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
     } catch (e) {
         throw e
     } finally {
-        //sh "docker logs ${jenkinsContainerName}"
         sh "docker logs ${jenkinsContainerName} &> deploy-jenkins-${jenkinsVer}-sast-${sastVer}.log"
         sh "docker stop ${jenkinsContainerName}"
         //sh "cp ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/Checkmarx-Plugin-System-Test/cxBaseDataModelAuto.log ./problematic-tests-jenkins-${jenkinsVer}-sast-${sastVer}.log"
@@ -176,7 +175,7 @@ pipeline {
                 }
             }
             parallel {
-                /*stage('8.9') {
+                stage('8.9') {
                     steps {
                         script {
                             kit.Create_Vm_Terraform(vmName + "-8.9", vmTemplate89, ram, cpu, provider, decommissionPeriod, "Auto", "Plugins-CI", vmwareNetwork)
@@ -187,7 +186,7 @@ pipeline {
                             }
                         }
                     }
-                }*/
+                }
                 stage('9.0') {
                     steps {
                         script {
@@ -211,35 +210,22 @@ pipeline {
             }
             steps {
                 script {
-                    /*def sasts = [:]
-                    for (sast in params.sastVersions.tokenize(',')) {
-                        def jenkinses = [:]
-                        sasts[sast] = {
-                            for (jenkins in params.jenkinsVersions.tokenize(',')) {
-                                jenkinses[jenkins] = { performParallelStages(sast, jenkins) }
-                            }
-                        }
-                        parallel jenkinses
-                    }
-                    parallel sasts*/
-                    /*def myStages = [performParallelStages("sast1", "jenkins1"),performParallelStages("sast2", "jenkins2")]
-                    parallel myStages*/
                     def parallelTopLevelSteps = [:]
 
-                    /*parallelTopLevelSteps['8.9'] = {
+                    parallelTopLevelSteps['8.9'] = {
                         def parallelNestedSteps = [:]
 
                         parallelNestedSteps['8.9-lts-jdk8'] = { performParallelStages("8.9", ipAddress89,"lts") }
                         parallelNestedSteps['8.9-lts-jdk11'] = { performParallelStages("8.9", ipAddress89,"lts-jdk11") }
 
                         parallel(parallelNestedSteps)
-                    }*/
+                    }
 
                     parallelTopLevelSteps['9.0'] = {
                         def parallelNestedSteps = [:]
 
                         parallelNestedSteps['9.0-lts-jdk8'] = { performParallelStages("9.0", ipAddress90,"lts") }
-                        //parallelNestedSteps['9.0-lts-jdk11'] = { performParallelStages("9.0", ipAddress90,"lts-jdk11") }
+                        parallelNestedSteps['9.0-lts-jdk11'] = { performParallelStages("9.0", ipAddress90,"lts-jdk11") }
 
                         parallel(parallelNestedSteps)
                     }
@@ -248,58 +234,12 @@ pipeline {
                 }
             }
         }
-
-        /*stage('Jenkins Instance') {
-            parallel {
-
-                stage('Java 8') {
-                    stages {
-                        stage('Stage 1') {
-                            steps {
-                                script {
-                                    echo "Stage 1"
-                                }
-                            }
-                        }
-                        stage('Stage 2') {
-                            steps {
-                                script {
-                                    echo "Stage 2"
-                                }
-                            }
-                        }
-                    }
-                }
-
-                stage('Java 11') {
-                    stages {
-                        stage('Stage 1') {
-                            steps {
-                                script {
-                                    echo "Stage 1"
-                                }
-                            }
-                        }
-                        stage('Stage 2') {
-                            steps {
-                                script {
-                                    echo "stage 2"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }*/
     }
     
     post {
         always {
             archiveArtifacts "*.zip, build/libs/*.hpi, *.log"
             script {
-                //dir("${workspace}/9.0/Checkmarx-System-Test") {
-                //    junit '**/PluginsCommonClient/target/surefire-reports/**/*.xml'
-                //}
                 if (ipAddress89 != null) {
                     /*node(vmName + "-9.0") {
                                 kit.zipStashInstallationLogs("CxSAST-9.0-Logs")
