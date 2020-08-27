@@ -5,7 +5,7 @@ import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
-import com.cx.restclient.CxShragaClient;
+import com.cx.restclient.CxClientDelegator;
 import com.cx.restclient.common.summary.SummaryUtils;
 import com.cx.restclient.configuration.CxScanConfig;
 import com.cx.restclient.dto.*;
@@ -16,9 +16,10 @@ import com.cx.restclient.sast.dto.CxNameObj;
 import com.cx.restclient.sast.dto.Preset;
 import com.cx.restclient.sast.dto.Project;
 import com.cx.restclient.sast.dto.SASTResults;
-import com.cx.restclient.sca.dto.SCAConfig;
-import com.cx.restclient.sca.dto.SCAResults;
-import com.cx.restclient.sca.dto.SourceLocationType;
+import com.cx.restclient.ast.dto.sca.AstScaConfig;
+import com.cx.restclient.ast.dto.sca.AstScaResults;
+import com.cx.restclient.dto.SourceLocationType;
+import com.cx.restclient.sast.utils.LegacyClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.TemplateException;
 import hudson.*;
@@ -701,7 +702,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         printConfiguration(config, log);
 
         //validate at least one scan type is enabled
-        if (!config.getSastEnabled() && config.getDependencyScannerType() == DependencyScannerType.NONE) {
+        if (!config.isSastEnabled() && !config.isAstScaEnabled() && !config.isOsaEnabled()) {
             log.error("Both SAST and dependency scan are disabled. Exiting.");
             run.setResult(Result.FAILURE);
             return;
@@ -765,11 +766,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
 
             //create osa reports
-            DependencyScanResults dsResults = scanResults.getDependencyScanResults();
-            if (dsResults != null && dsResults.getOsaResults() != null && dsResults.getOsaResults().isOsaResultsReady()) {
-                createOsaReports(dsResults.getOsaResults(), checkmarxBuildDir);
-            }else if(dsResults != null && dsResults.getScaResults() != null && dsResults.getScaResults().isScaResultReady()){
-                createScaReports(dsResults.getScaResults(),checkmarxBuildDir);
+            OSAResults osaResults = scanResults.getOsaResults();
+            AstScaResults scaResults = scanResults.getScaResults();
+            if (osaResults != null && osaResults.isOsaResultsReady()) {
+                createOsaReports(osaResults, checkmarxBuildDir);
+            } else if (scaResults != null && scaResults.isScaResultReady()) {
+                createScaReports(scaResults, checkmarxBuildDir);
             }
             return;
         }
@@ -780,7 +782,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     }
 
-    private void createScaReports(SCAResults scaResults, File checkmarxBuildDir) {
+    private void createScaReports(AstScaResults scaResults, File checkmarxBuildDir) {
         writeJsonObjectToFile(scaResults.getSummary(), new File(checkmarxBuildDir, SCA_SUMMERY_JSON), "OSA summary json report");
         writeJsonObjectToFile(scaResults.getPackages(), new File(checkmarxBuildDir, SCA_LIBRARIES_JSON), "OSA libraries json report");
         writeJsonObjectToFile(scaResults.getFindings(), new File(checkmarxBuildDir, SCA_VULNERABILITIES_JSON), "OSA vulnerabilities json report");
@@ -814,7 +816,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //sast
         ret.setSastEnabled(this.sastEnabled == null || sastEnabled); //for backward compatibility, assuming if sastEnabled is not set, then sast is enabled
 
-        if (ret.getSastEnabled() != null && ret.getSastEnabled()) {
+        if (ret.isSastEnabled()) {
             int presetId = parseInt(preset, log, "Invalid presetId: [%s]. Using default preset.", 0);
             ret.setPresetId(presetId);
 
@@ -868,7 +870,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private void configureDependencyScan(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxScanConfig config) {
         boolean dependencyScanEnabled = dependencyScanConfig != null;
         if (!dependencyScanEnabled) {
-            config.setDependencyScannerType(DependencyScannerType.NONE);
             return;
         }
 
@@ -882,11 +883,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         if (effectiveConfig == null) {
-            config.setDependencyScannerType(DependencyScannerType.NONE);
             return;
         }
 
-        config.setDependencyScannerType(effectiveConfig.dependencyScannerType);
+        config.addScannerType(effectiveConfig.dependencyScannerType);
 
         config.setOsaFilterPattern(env.expand(effectiveConfig.dependencyScanPatterns));
         config.setOsaFolderExclusions(env.expand(effectiveConfig.dependencyScanExcludeFolders));
@@ -905,16 +905,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             config.setOsaLowThreshold(getOsaLowThreshold());
         }
 
-        if (config.getDependencyScannerType() == DependencyScannerType.OSA) {
+        if (config.isOsaEnabled()) {
             config.setOsaArchiveIncludePatterns(effectiveConfig.osaArchiveIncludePatterns.trim());
             config.setOsaRunInstall(effectiveConfig.osaInstallBeforeScan);
-        } else if (config.getDependencyScannerType() == DependencyScannerType.SCA) {
-            config.setScaConfig(getScaConfig(run, effectiveConfig));
+        } else if (config.isAstScaEnabled()) {
+            config.setAstScaConfig(getScaConfig(run, effectiveConfig));
         }
     }
 
-    private SCAConfig getScaConfig(Run<?, ?> run, DependencyScanConfig dsConfig) {
-        SCAConfig result = new SCAConfig();
+    private AstScaConfig getScaConfig(Run<?, ?> run, DependencyScanConfig dsConfig) {
+        AstScaConfig result = new AstScaConfig();
         result.setApiUrl(dsConfig.scaServerUrl);
         result.setAccessControlUrl(dsConfig.scaAccessControlUrl);
         result.setWebAppUrl(dsConfig.scaWebAppUrl);
@@ -930,20 +930,36 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return result;
     }
 
+    private ScannerType getDependencyScannerType(CxScanConfig config) {
+        ScannerType result;
+        if (config.isOsaEnabled()) {
+            result = ScannerType.OSA;
+        } else if (config.isAstScaEnabled()) {
+            result = ScannerType.AST_SCA;
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
     private void printConfiguration(CxScanConfig config, CxLoggerAdapter log) {
         log.info("---------------------------------------Configurations:------------------------------------");
-        log.info("plugin version: {0} " , CxConfig.version());
+        log.info("plugin version: {0} ", CxConfig.version());
         log.info("server url: " + config.getUrl());
         log.info("username: " + config.getUsername());
         log.info("project name: " + config.getProjectName());
         log.info("team id: " + config.getTeamId());
         log.info("is synchronous mode: " + config.getSynchronous());
         log.info("deny new project creation: " + config.getDenyProject());
-        log.info("SAST scan enabled: " + config.getSastEnabled());
+        log.info("SAST scan enabled: " + config.isSastEnabled());
         log.info("avoid duplicated projects scans: " + config.isAvoidDuplicateProjectScans());
         log.info("enable Project Policy Enforcement: " + config.getEnablePolicyViolations());
-        log.info("Dependency scanner type: " + config.getDependencyScannerType());
-        if (config.getSastEnabled()) {
+
+        ScannerType scannerType = getDependencyScannerType(config);
+        String dependencyScannerType = scannerType != null ? scannerType.name() : "NONE";
+
+        log.info("Dependency scanner type: " + dependencyScannerType);
+        if (config.isSastEnabled()) {
             log.info("preset id: " + config.getPresetId());
             log.info("SAST folder exclusions: " + config.getSastFolderExclusions());
             log.info("SAST filter pattern: " + config.getSastFilterPattern());
@@ -961,7 +977,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
 
-        if (config.getDependencyScannerType() != DependencyScannerType.NONE) {
+        if (config.isOsaEnabled() || config.isAstScaEnabled()) {
             log.info("Dependency scan configuration:");
             log.info("  folder exclusions: " + config.getOsaFolderExclusions());
             log.info("  filter patterns: " + config.getOsaFilterPattern());
@@ -971,7 +987,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 log.info("  medium threshold: " + config.getOsaMediumThreshold());
                 log.info("  low threshold: " + config.getOsaLowThreshold());
             }
-            if (config.getDependencyScannerType() == DependencyScannerType.OSA) {
+            if (config.isOsaEnabled()) {
                 log.info("  OSA archive includes: " + config.getOsaArchiveIncludePatterns());
                 log.info("  OSA run Execute dependency managers install packages command before Scan: " + config.getOsaRunInstall());
             }
@@ -1019,8 +1035,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private String generateHTMLReport(@Nonnull FilePath workspace, File checkmarxBuildDir, CxScanConfig config, ScanResults results) {
         String reportName = null;
         try {
-            String reportHTML = SummaryUtils.generateSummary(results.getSastResults(), results.getDependencyScanResults(), config);
-            reportName = CxScanResult.resolveHTMLReportName(config.getSastEnabled(), config.getDependencyScannerType());
+            String reportHTML = SummaryUtils.generateSummary(results.getSastResults(), results.getOsaResults(), results.getScaResults(), config);
+            reportName = CxScanResult.resolveHTMLReportName(config.isSastEnabled(), getDependencyScannerType(config));
             File reportFile = new File(checkmarxBuildDir, reportName);
             FileUtils.writeStringToFile(reportFile, reportHTML, Charset.defaultCharset());
             writeFileToWorkspaceReports(workspace, reportFile);
@@ -1046,7 +1062,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     private void failTheBuild(Run<?, ?> run, CxScanConfig config, ScanResults ret) {
         //assert if expected exception is thrown  OR when vulnerabilities under threshold OR when policy violated
-        ScanSummary scanSummary = new ScanSummary(config, ret);
+        ScanSummary scanSummary = new ScanSummary(config, ret.getSastResults(), ret.getOsaResults(), ret.getScaResults());
         if (scanSummary.hasErrors() ||
                 ret.getSastCreateException() != null || ret.getSastWaitException() != null ||
                 ret.getOsaCreateException() != null || ret.getOsaWaitException() != null ||
@@ -1120,7 +1136,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         try {
             String remoteFilePath = remoteDirPath + "/" + file.getName();
-            log.info("Copying file [%s] to workspace [%s]",file.getName(),remoteFilePath);
+            log.info("Copying file [%s] to workspace [%s]", file.getName(), remoteFilePath);
             FilePath remoteFile = new FilePath(workspace.getChannel(), remoteFilePath);
             fis = new FileInputStream(file);
             remoteFile.copyFrom(fis);
@@ -1514,7 +1530,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 
             CxCredentials cred;
-            CxShragaClient commonClient = null;
+            LegacyClient commonClient = null;
             try {
                 try {
                     cred = CxCredentials.resolveCred(true, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
@@ -1545,6 +1561,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 }
             }
         }
+
         public FormValidation doValidateMvnPath(@QueryParameter final String mvnPath) throws InterruptedException {
             boolean mvnPathExists = false;
             FilePath path = new FilePath(new File(mvnPath));
@@ -1562,6 +1579,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             return mvnPathExists ? FormValidation.ok("Maven is found") : FormValidation.error(errorMsg);
         }
+
         public FormValidation doTestScaConnection(@QueryParameter String scaServerUrl,
                                                   @QueryParameter String scaAccessControlUrl,
                                                   @QueryParameter String scaCredentialsId,
@@ -1572,7 +1590,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 config.setCxOrigin(REQUEST_ORIGIN);
                 config.setDisableCertificateValidation(!isEnableCertificateValidation());
 
-                SCAConfig scaConfig = new SCAConfig();
+                AstScaConfig scaConfig = new AstScaConfig();
                 scaConfig.setAccessControlUrl(scaAccessControlUrl);
                 scaConfig.setApiUrl(scaServerUrl);
                 scaConfig.setTenant(scaTenant);
@@ -1582,12 +1600,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 scaConfig.setPassword(credentials.getPassword().getPlainText());
                 scaConfig.setSourceLocationType(SourceLocationType.LOCAL_DIRECTORY);
                 scaConfig.setRemoteRepositoryInfo(null);
-                config.setScaConfig(scaConfig);
+                config.setAstScaConfig(scaConfig);
+                config.addScannerType(ScannerType.AST_SCA);
 
                 ProxyConfig proxyConfig = ProxyHelper.getProxyConfig();
                 config.setProxyConfig(proxyConfig);
 
-                CxShragaClient.testScaConnection(config, serverLog);
+                CxClientDelegator commonClient = CommonClientFactory.getClientDelegatorInstance(config, serverLog);
+                commonClient.getScaClient().testScaConnection();
                 return FormValidation.ok("Success");
             } catch (Exception e) {
                 return buildError(e, "Failed to verify CxSCA connection.");
@@ -1604,10 +1624,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
          *  shared state to avoid synchronization issues.
          */
-        private CxShragaClient prepareLoggedInClient(CxCredentials credentials)
+        private LegacyClient prepareLoggedInClient(CxCredentials credentials)
                 throws IOException, CxClientException {
             //todo: add proxy support
-            CxShragaClient ret = CommonClientFactory.getInstance(credentials, this.isEnableCertificateValidation(), serverLog);
+            LegacyClient ret = CommonClientFactory.getInstance(credentials, this.isEnableCertificateValidation(), serverLog);
             ret.login();
             return ret;
         }
@@ -1621,11 +1641,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                     @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ComboBoxModel projectNames = new ComboBoxModel();
-            CxShragaClient shragaClient = null;
+            LegacyClient commonClient = null;
             try {
                 CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
-                shragaClient = prepareLoggedInClient(credentials);
-                List<Project> projects = shragaClient.getAllProjects();
+                commonClient = prepareLoggedInClient(credentials);
+                List<Project> projects = commonClient.getAllProjects();
 
                 for (Project p : projects) {
                     projectNames.add(p.getName());
@@ -1636,8 +1656,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 serverLog.error("Failed to populate project list: " + e.toString(), e);
                 return projectNames; // Return empty list of project names
             } finally {
-                if (shragaClient != null) {
-                    shragaClient.close();
+                if (commonClient != null) {
+                    commonClient.close();
                 }
             }
         }
@@ -1663,10 +1683,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             ListBoxModel listBoxModel = new ListBoxModel();
             try {
                 CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
-                CxShragaClient shragaClient = prepareLoggedInClient(credentials);
+                LegacyClient commonClient = prepareLoggedInClient(credentials);
 
                 //todo import preset
-                List<Preset> presets = shragaClient.getPresetList();
+                List<Preset> presets = commonClient.getPresetList();
 
                 for (Preset p : presets) {
                     listBoxModel.add(new ListBoxModel.Option(p.getName(), Integer.toString(p.getId())));
@@ -1704,12 +1724,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                       @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
-            CxShragaClient shragaClient = null;
+            LegacyClient commonClient = null;
             try {
                 CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
 
-                shragaClient = prepareLoggedInClient(credentials);
-                List<CxNameObj> configurationList = shragaClient.getConfigurationSetList();
+                commonClient = prepareLoggedInClient(credentials);
+                List<CxNameObj> configurationList = commonClient.getConfigurationSetList();
 
                 for (CxNameObj cs : configurationList) {
                     listBoxModel.add(new ListBoxModel.Option(cs.getName(), Long.toString(cs.getId())));
@@ -1720,8 +1740,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 String message = "Provide Checkmarx server credentials to see source encodings list";
                 listBoxModel.add(new ListBoxModel.Option(message, message));
             } finally {
-                if (shragaClient != null) {
-                    shragaClient.close();
+                if (commonClient != null) {
+                    commonClient.close();
                 }
             }
 
@@ -1740,11 +1760,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
-            CxShragaClient shragaClient = null;
+            LegacyClient commonClient = null;
             try {
                 CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
-                shragaClient = prepareLoggedInClient(credentials);
-                List<Team> teamList = shragaClient.getTeamList();
+                commonClient = prepareLoggedInClient(credentials);
+                List<Team> teamList = commonClient.getTeamList();
                 for (Team team : teamList) {
                     listBoxModel.add(new ListBoxModel.Option(team.getFullName(), team.getId()));
                 }
@@ -1757,8 +1777,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 listBoxModel.add(new ListBoxModel.Option(message, message));
                 return listBoxModel;
             } finally {
-                if (shragaClient != null) {
-                    shragaClient.close();
+                if (commonClient != null) {
+                    commonClient.close();
                 }
             }
         }
