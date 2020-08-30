@@ -37,7 +37,7 @@ def performParallelStages(String sastVer, String sastIP, String jenkinsVer) {
             sh "sed -e 's/CxJenkinsPort/${jenkinsContainerPort}/g' -i ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home/jenkins.model.JenkinsLocationConfiguration.xml"
             //sleep 20
             //sh "curl -O http://${dockerHostIP}:${jenkinsContainerPort}/jnlpJars/jenkins-cli.jar"
-            sh "cp /var/jenkins/workspace/jenkins-cli.jar ${workspace} ."
+            sh "cp /var/jenkins/workspace/jenkins-cli.jar ."
             sh "java -jar jenkins-cli.jar -s http://${dockerHostIP}:${jenkinsContainerPort} -auth admin:admin reload-configuration"
             //sh "cat ${workspace}/jenkins-${jenkinsVer}/sast-${sastVer}/jenkins_home/jenkins.model.JenkinsLocationConfiguration.xml"
         }
