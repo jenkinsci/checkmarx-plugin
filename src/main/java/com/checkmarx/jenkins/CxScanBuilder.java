@@ -841,7 +841,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //general
         ret.setCxOrigin(REQUEST_ORIGIN);
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
-        ret.setProxyConfig(ProxyHelper.getProxyConfig());
         ret.setMvnPath(descriptor.getMvnPath());
 
         //cx server
