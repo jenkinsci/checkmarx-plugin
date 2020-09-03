@@ -719,7 +719,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         if (instance != null && instance.proxy != null &&
                 (useOwnServerCredentials ? this.isProxy : getDescriptor().getIsProxy()) &&
                 !(isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))) {
-            action = new CxScanCallable(config, listener);
+            action = new CxScanCallable(config, listener, instance.proxy);
         } else {
             action = new CxScanCallable(config, listener);
         }
