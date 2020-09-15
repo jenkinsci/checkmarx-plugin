@@ -958,7 +958,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ScannerType scannerType = getDependencyScannerType(config);
         String dependencyScannerType = scannerType != null ? scannerType.getDisplayName() : "NONE";
 
-        log.info("Dependency scanner type: " + dependencyScannerType);
+        log.info("Dependency scanner type: {}", dependencyScannerType);
         if (config.isSastEnabled()) {
             log.info("preset id: " + config.getPresetId());
             log.info("SAST folder exclusions: " + config.getSastFolderExclusions());
@@ -1052,7 +1052,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             String json = null;
             json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObj);
             FileUtils.writeStringToFile(to, json);
-            //log.info(description + " file generated successfully. location: [" + to.getAbsolutePath() + "]");
             log.info("Copying file [" + to.getName() + "] to workspace [" + to.getAbsolutePath() + "]");
         } catch (Exception e) {
             log.error("Failed to write " + description + " to [" + to.getAbsolutePath() + "]");
@@ -1143,7 +1142,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         try {
             String remoteFilePath = remoteDirPath + "/" + file.getName();
-            log.info("Copying file [%s] to workspace [%s]", file.getName(), remoteFilePath);
+            log.info("Copying file {} to workspace {}", file.getName(), remoteFilePath);
             FilePath remoteFile = new FilePath(workspace.getChannel(), remoteFilePath);
             fis = new FileInputStream(file);
             remoteFile.copyFrom(fis);
