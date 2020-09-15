@@ -3,6 +3,7 @@ package com.checkmarx.jenkins;
 
 import org.slf4j.Logger;
 import org.slf4j.Marker;
+import org.slf4j.helpers.MessageFormatter;
 
 import java.io.PrintStream;
 
@@ -12,10 +13,9 @@ public class CxLoggerAdapter implements Logger {
     private static final String DEBUG_PREFIX = "[Cx-Debug]: ";
     private static final String ERROR_PREFIX = "[Cx-Error]: ";
     private static final String WARN_PREFIX = "[Cx-Warning]: ";
+    private static final String TRACE_PREFIX = "[Cx-Trace]: ";
 
     private final PrintStream log;
-    private String TRACE_PREFIX = "[Cx-TRACE]: ";
-    ;
 
     public CxLoggerAdapter(PrintStream log) {
         this.log = log;
@@ -51,7 +51,7 @@ public class CxLoggerAdapter implements Logger {
     }
 
     public void debug(String s, Throwable throwable) {
-        log.println(DEBUG_PREFIX + s);
+        debug(s);
         if (throwable != null) {
             throwable.printStackTrace(log);
         }
@@ -62,7 +62,7 @@ public class CxLoggerAdapter implements Logger {
     }
 
     public void info(String s, Throwable throwable) {
-        log.println(INFO_PREFIX + s);
+        info(s);
         if (throwable != null) {
             throwable.printStackTrace(log);
         }
@@ -70,11 +70,10 @@ public class CxLoggerAdapter implements Logger {
 
     public void warn(String s) {
         log.println(WARN_PREFIX + s);
-
     }
 
     public void warn(String s, Throwable throwable) {
-        log.println(WARN_PREFIX + s);
+        warn(s);
         if (throwable != null) {
             throwable.printStackTrace(log);
         }
@@ -111,7 +110,7 @@ public class CxLoggerAdapter implements Logger {
     }
 
     public void trace(Marker marker, String format, Object arg1, Object arg2) {
-        this.trace((String) format, (Object) arg1, (Object) arg2);
+        this.trace(format, arg1, arg2);
     }
 
     public void trace(Marker marker, String format, Object... arguments) {
@@ -135,7 +134,7 @@ public class CxLoggerAdapter implements Logger {
     }
 
     public void debug(Marker marker, String format, Object arg1, Object arg2) {
-        this.debug((String) format, (Object) arg1, (Object) arg2);
+        this.debug(format, arg1, arg2);
     }
 
     public void debug(Marker marker, String format, Object... arguments) {
@@ -159,7 +158,7 @@ public class CxLoggerAdapter implements Logger {
     }
 
     public void info(Marker marker, String format, Object arg1, Object arg2) {
-        this.info((String) format, (Object) arg1, (Object) arg2);
+        this.info(format, arg1, arg2);
     }
 
     public void info(Marker marker, String format, Object... arguments) {
@@ -183,7 +182,7 @@ public class CxLoggerAdapter implements Logger {
     }
 
     public void warn(Marker marker, String format, Object arg1, Object arg2) {
-        this.warn((String) format, (Object) arg1, (Object) arg2);
+        this.warn(format, arg1, arg2);
     }
 
     public void warn(Marker marker, String format, Object... arguments) {
@@ -207,7 +206,7 @@ public class CxLoggerAdapter implements Logger {
     }
 
     public void error(Marker marker, String format, Object arg1, Object arg2) {
-        this.error((String) format, (Object) arg1, (Object) arg2);
+        this.error(format, arg1, arg2);
     }
 
     public void error(Marker marker, String format, Object... arguments) {
@@ -228,21 +227,21 @@ public class CxLoggerAdapter implements Logger {
 
     public void trace(String s, Object o) {
         if (this.isTraceEnabled())
-            this.trace(String.format(s, o));
+            this.trace(MessageFormatter.format(s, o).getMessage());
     }
 
     public void trace(String s, Object o, Object o1) {
         if (this.isTraceEnabled())
-            this.trace(String.format(s, o));
+            this.trace(MessageFormatter.format(s, o, o1).getMessage());
     }
 
     public void trace(String s, Object... objects) {
         if (this.isTraceEnabled())
-            this.trace(String.format(s, objects));
+            this.trace(MessageFormatter.arrayFormat(s, objects).getMessage());
     }
 
     public void trace(String s, Throwable throwable) {
-        log.println(TRACE_PREFIX + s);
+        trace(s);
         if (throwable != null) {
             throwable.printStackTrace(log);
         }
@@ -250,70 +249,70 @@ public class CxLoggerAdapter implements Logger {
 
     public void debug(String s, Object o) {
         if (this.isDebugEnabled())
-            this.debug(String.format(s, o));
+            this.debug(MessageFormatter.format(s, o).getMessage());
     }
 
     public void debug(String s, Object o, Object o1) {
         if (this.isDebugEnabled())
-            this.debug(String.format(s, o, o1));
+            this.debug(MessageFormatter.format(s, o, o1).getMessage());
     }
 
     public void debug(String s, Object... objects) {
         if (this.isDebugEnabled())
-            this.debug(String.format(s, objects));
+            this.debug(MessageFormatter.arrayFormat(s, objects).getMessage());
     }
 
     @Override
     public void info(String format, Object arg) {
+        if (this.isInfoEnabled())
+            this.info(MessageFormatter.format(format, arg).getMessage());
     }
 
     @Override
     public void info(String format, Object arg1, Object arg2) {
         if (this.isInfoEnabled())
-            this.info(String.format(format, arg1, arg2));
-
+            this.info(MessageFormatter.format(format, arg1, arg2).getMessage());
     }
 
     @Override
     public void info(String format, Object... arguments) {
         if (this.isInfoEnabled())
-            this.info(String.format(format, arguments));
+            this.info(MessageFormatter.arrayFormat(format, arguments).getMessage());
     }
 
     @Override
     public void warn(String format, Object arg) {
         if (this.isWarnEnabled())
-            this.warn(String.format(format, arg));
+            this.warn(MessageFormatter.format(format, arg).getMessage());
     }
 
     @Override
     public void warn(String format, Object... arguments) {
         if (this.isWarnEnabled())
-            this.warn(String.format(format, arguments));
+            this.warn(MessageFormatter.arrayFormat(format, arguments).getMessage());
     }
 
     @Override
     public void warn(String format, Object arg1, Object arg2) {
         if (this.isWarnEnabled())
-            this.warn(String.format(format, arg1, arg2));
+            this.warn(MessageFormatter.format(format, arg1, arg2).getMessage());
     }
-
 
     @Override
     public void error(String format, Object arg) {
         if (this.isErrorEnabled())
-            this.error(String.format(format, arg));
+            this.error(MessageFormatter.format(format, arg).getMessage());
     }
 
     @Override
     public void error(String format, Object arg1, Object arg2) {
         if (this.isErrorEnabled())
-            this.error(String.format(format, arg1, arg2));
+            this.error(MessageFormatter.format(format, arg1, arg2).getMessage());
     }
 
     @Override
     public void error(String format, Object... arguments) {
         if (this.isErrorEnabled())
-            this.error(String.format(format, arguments));
+            this.error(MessageFormatter.arrayFormat(format, arguments).getMessage());
     }
 }

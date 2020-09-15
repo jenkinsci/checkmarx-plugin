@@ -25,6 +25,10 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
     private final TaskListener listener;
     private ProxyConfiguration jenkinsProxy = null;
 
+    private Exception sastCreateEx;
+    private Exception osaCreateEx;
+    private Exception scaCreateEx;
+
     public CxScanCallable(CxScanConfig config, TaskListener listener) {
         this.config = config;
         this.listener = listener;
@@ -97,26 +101,26 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
             //---------------------------
         }
 
-        delegator.initiateScan();
+        ScanResults createScanResults = delegator.initiateScan();
+        updateCreateExceptions(createScanResults, false);
 
-        if (rootLog != null && handler != null) {
+        if (rootLog != null) {
             handler.flush();
             rootLog.removeHandler(handler);
         }
 
-        try {
-            scanResults = config.getSynchronous() ? delegator.waitForScanResults() : delegator.getLatestScanResults();
-        } catch (Exception e) {
-            if (config.getSynchronous() && config.isSastEnabled()) {
-                cancelScan(delegator);
-            }
-            throw e;
+        scanResults = config.getSynchronous() ? delegator.waitForScanResults() : delegator.getLatestScanResults();
+        updateCreateExceptions(scanResults, true);
+
+        if (config.getSynchronous() && config.isSastEnabled() && scanResults.getSastResults().getWaitException() != null) {
+            cancelScan(delegator);
         }
 
         if (config.getEnablePolicyViolations() && (scanResults.getOsaResults() != null || scanResults.getScaResults() != null || scanResults.getSastResults() != null)) {
             delegator.printIsProjectViolated(scanResults);
         }
 
+        result.setScanResults(scanResults);
         return result;
     }
 
@@ -130,5 +134,24 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
     @Override
     public void checkRoles(RoleChecker checker) throws SecurityException {
 
+    }
+
+    private void updateCreateExceptions(ScanResults results, boolean shouldAddException) {
+        boolean sastResults = results.getSastResults() != null;
+        boolean osaResults = results.getOsaResults() != null;
+        boolean scaResults = results.getScaResults() != null;
+
+        if (!shouldAddException) {
+            sastCreateEx = sastResults ? results.getSastResults().getCreateException() : null;
+            osaCreateEx = osaResults ? results.getOsaResults().getCreateException() : null;
+            scaCreateEx = scaResults ? results.getScaResults().getCreateException() : null;
+        } else {
+            if (sastResults)
+                results.getSastResults().setCreateException(sastCreateEx);
+            if (osaResults)
+                results.getOsaResults().setCreateException(osaCreateEx);
+            if (scaResults)
+                results.getScaResults().setCreateException(scaCreateEx);
+        }
     }
 }

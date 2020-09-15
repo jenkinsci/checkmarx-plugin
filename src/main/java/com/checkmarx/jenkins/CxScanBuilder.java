@@ -757,7 +757,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             //create sast reports
             SASTResults sastResults = scanResults.getSastResults();
-            if (sastResults.isSastResultsReady()) {
+            if (sastResults != null && sastResults.isSastResultsReady()) {
                 if (config.getGenerateXmlReport() == null || config.getGenerateXmlReport()) {
                     createSastReports(sastResults, checkmarxBuildDir, workspace);
                 }
@@ -944,7 +944,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     private void printConfiguration(CxScanConfig config, CxLoggerAdapter log) {
         log.info("---------------------------------------Configurations:------------------------------------");
-        log.info("plugin version: {0} ", CxConfig.version());
+        log.info("plugin version: {}", CxConfig.version());
         log.info("server url: " + config.getUrl());
         log.info("username: " + config.getUsername());
         log.info("project name: " + config.getProjectName());
@@ -956,7 +956,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("enable Project Policy Enforcement: " + config.getEnablePolicyViolations());
 
         ScannerType scannerType = getDependencyScannerType(config);
-        String dependencyScannerType = scannerType != null ? scannerType.name() : "NONE";
+        String dependencyScannerType = scannerType != null ? scannerType.getDisplayName() : "NONE";
 
         log.info("Dependency scanner type: " + dependencyScannerType);
         if (config.isSastEnabled()) {
@@ -1063,10 +1063,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private void failTheBuild(Run<?, ?> run, CxScanConfig config, ScanResults ret) {
         //assert if expected exception is thrown  OR when vulnerabilities under threshold OR when policy violated
         ScanSummary scanSummary = new ScanSummary(config, ret.getSastResults(), ret.getOsaResults(), ret.getScaResults());
-        if (scanSummary.hasErrors() ||
-                ret.getSastCreateException() != null || ret.getSastWaitException() != null ||
-                ret.getOsaCreateException() != null || ret.getOsaWaitException() != null ||
-                ret.getGeneralException() != null) {
+        if (scanSummary.hasErrors() || ret.getGeneralException() != null ||
+                (ret.getSastResults() != null && (ret.getSastResults().getCreateException() != null || ret.getSastResults().getWaitException() != null)) ||
+                (ret.getOsaResults() != null && (ret.getOsaResults().getCreateException() != null || ret.getOsaResults().getWaitException() != null)) ||
+                (ret.getScaResults() != null && (ret.getScaResults().getCreateException() != null || ret.getScaResults().getWaitException() != null))) {
             printBuildFailure(scanSummary.toString(), ret, log);
             if (resolvedVulnerabilityThresholdResult != null) {
                 run.setResult(resolvedVulnerabilityThresholdResult);
@@ -1080,17 +1080,24 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
     }
 
-
     private void printBuildFailure(String thDescription, ScanResults ret, CxLoggerAdapter log) {
         log.error("********************************************");
         log.error(" The Build Failed for the Following Reasons: ");
         log.error("********************************************");
 
         logError(ret.getGeneralException());
-        logError(ret.getSastCreateException());
-        logError(ret.getSastWaitException());
-        logError(ret.getOsaCreateException());
-        logError(ret.getOsaWaitException());
+        if (ret.getSastResults() != null) {
+            logError(ret.getSastResults().getCreateException());
+            logError(ret.getSastResults().getWaitException());
+        }
+        if (ret.getOsaResults() != null) {
+            logError(ret.getOsaResults().getCreateException());
+            logError(ret.getOsaResults().getWaitException());
+        }
+        if (ret.getScaResults() != null) {
+            logError(ret.getScaResults().getCreateException());
+            logError(ret.getScaResults().getWaitException());
+        }
 
         if (thDescription != null) {
             String[] lines = thDescription.split("\\n");
