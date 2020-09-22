@@ -5,7 +5,7 @@ import com.checkmarx.jenkins.legacy8_7.QueryResult;
 import com.checkmarx.jenkins.legacy8_7.SastScanResult;
 import com.checkmarx.jenkins.legacy8_7.ThresholdConfig;
 import com.cx.restclient.configuration.CxScanConfig;
-import com.cx.restclient.dto.DependencyScannerType;
+import com.cx.restclient.dto.ScannerType;
 import com.cx.restclient.sast.dto.SASTResults;
 import hudson.PluginWrapper;
 import hudson.model.Action;
@@ -72,8 +72,8 @@ public class CxScanResult implements Action {
 
     public CxScanResult(Run<?, ?> owner, CxScanConfig config) {
         this.scanRanAsynchronous = !config.getSynchronous();
-        this.sastEnabled = config.getSastEnabled();
-        this.osaEnabled = config.getDependencyScannerType() == DependencyScannerType.OSA;
+        this.sastEnabled = config.isSastEnabled();
+        this.osaEnabled = config.isOsaEnabled();
         this.owner = owner;
         this.resultDeepLink = "";
     }
@@ -227,13 +227,13 @@ public class CxScanResult implements Action {
         outputStream.close();
     }
 
-    static String resolveHTMLReportName(boolean sastEnabled, DependencyScannerType dependencyScanner) {
+    static String resolveHTMLReportName(boolean sastEnabled, ScannerType dependencyScanner) {
         final String POSTFIX = ".html";
         String result = "Report";
         if (sastEnabled) {
             result += "_CxSAST";
         }
-        if (dependencyScanner != DependencyScannerType.NONE) {
+        if (dependencyScanner == ScannerType.OSA || dependencyScanner == ScannerType.AST_SCA) {
             result += "_" + dependencyScanner.getDisplayName();
         }
         return result + POSTFIX;
@@ -244,13 +244,13 @@ public class CxScanResult implements Action {
         File cxBuildDirectory = new File(owner.getRootDir(), "checkmarx");
 
         //backward compatibility (up to version 8.80.0)
-        if(htmlReportName == null) {
+        if (htmlReportName == null) {
             File oldReport = new File(cxBuildDirectory, "report.html");
-            if(oldReport.exists()) {
+            if (oldReport.exists()) {
                 htmlReport = FileUtils.readFileToString(oldReport, Charset.defaultCharset());
                 Pattern patt = Pattern.compile("(<div[^>]*)(\\s*/>)");
                 Matcher mattcher = patt.matcher(htmlReport);
-                if (mattcher.find()){
+                if (mattcher.find()) {
                     htmlReport = mattcher.replaceAll("$1></div>");
                 }
                 return htmlReport;
@@ -259,8 +259,8 @@ public class CxScanResult implements Action {
 
         Collection<File> files = FileUtils.listFiles(cxBuildDirectory, null, false);
 
-        for (File f: files) {
-            if(htmlReportName != null && htmlReportName.equals(f.getName())) {
+        for (File f : files) {
+            if (htmlReportName != null && htmlReportName.equals(f.getName())) {
                 htmlReport = FileUtils.readFileToString(f, Charset.defaultCharset());
                 return htmlReport;
             }

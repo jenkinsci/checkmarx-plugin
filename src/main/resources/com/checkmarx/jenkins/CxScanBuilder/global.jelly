@@ -126,8 +126,8 @@
                 </f:nested>
             </f:radioBlock>
 
-            <f:radioBlock checked="${descriptor.dependencyScanConfig.dependencyScannerType == 'SCA'}"
-                          inline="true" name="dependencyScannerType" title="Use CxSCA dependency scanner" value="SCA">
+            <f:radioBlock checked="${descriptor.dependencyScanConfig.dependencyScannerType == 'AST_SCA'}"
+                          inline="true" name="dependencyScannerType" title="Use CxSCA dependency scanner" value="AST_SCA">
                 <f:nested>
                     <f:entry title="CxSCA API URL" field="scaServerUrl">
                         <f:textbox default="${descriptor.DEFAULT_SCA_SERVER_URL}"
