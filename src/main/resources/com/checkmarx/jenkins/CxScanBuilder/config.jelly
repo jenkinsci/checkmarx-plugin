@@ -154,6 +154,9 @@
                     <f:entry title="Account" field="scaTenant">
                         <f:textbox value="${instance.dependencyScanConfig.scaTenant}"/>
                     </f:entry>
+                    <f:entry title="SCA Environment Variables" field="scaEnvVariables">
+                        <f:textarea value="${instance.dependencyScanConfig.scaEnvVariables}"/>
+                    </f:entry>
                     <f:validateButton title="Test Connection" progress="Testing..." method="testScaConnection"
                                       with="scaServerUrl,scaAccessControlUrl,scaCredentialsId,scaTenant"/>
                 </f:nested>
