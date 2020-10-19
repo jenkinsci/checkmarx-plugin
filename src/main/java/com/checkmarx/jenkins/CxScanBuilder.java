@@ -56,9 +56,7 @@ import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -1063,9 +1061,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //assert if expected exception is thrown  OR when vulnerabilities under threshold OR when policy violated
         ScanSummary scanSummary = new ScanSummary(config, ret.getSastResults(), ret.getOsaResults(), ret.getScaResults());
         if (scanSummary.hasErrors() || ret.getGeneralException() != null ||
-                (ret.getSastResults() != null && (ret.getSastResults().getCreateException() != null || ret.getSastResults().getWaitException() != null)) ||
-                (ret.getOsaResults() != null && (ret.getOsaResults().getCreateException() != null || ret.getOsaResults().getWaitException() != null)) ||
-                (ret.getScaResults() != null && (ret.getScaResults().getCreateException() != null || ret.getScaResults().getWaitException() != null))) {
+                (ret.getSastResults() != null && ret.getSastResults().getException() != null) ||
+                (ret.getOsaResults() != null && ret.getOsaResults().getException() != null) ||
+                (ret.getScaResults() != null && ret.getScaResults().getException() != null)) {
             printBuildFailure(scanSummary.toString(), ret, log);
             if (resolvedVulnerabilityThresholdResult != null) {
                 run.setResult(resolvedVulnerabilityThresholdResult);
@@ -1085,17 +1083,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.error("********************************************");
 
         logError(ret.getGeneralException());
-        if (ret.getSastResults() != null) {
-            logError(ret.getSastResults().getCreateException());
-            logError(ret.getSastResults().getWaitException());
-        }
-        if (ret.getOsaResults() != null) {
-            logError(ret.getOsaResults().getCreateException());
-            logError(ret.getOsaResults().getWaitException());
-        }
-        if (ret.getScaResults() != null) {
-            logError(ret.getScaResults().getCreateException());
-            logError(ret.getScaResults().getWaitException());
+
+        Map<ScannerType, Results> resultsMap = ret.getResults();
+        for (Results results : resultsMap.values()) {
+            if (results != null && results.getException() != null) {
+                logError(results.getException());
+            }
         }
 
         if (thDescription != null) {

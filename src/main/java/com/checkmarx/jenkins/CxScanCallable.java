@@ -2,7 +2,9 @@ package com.checkmarx.jenkins;
 
 import com.cx.restclient.CxClientDelegator;
 import com.cx.restclient.configuration.CxScanConfig;
+import com.cx.restclient.dto.Results;
 import com.cx.restclient.dto.ScanResults;
+import com.cx.restclient.dto.ScannerType;
 import com.cx.restclient.exception.CxClientException;
 import hudson.FilePath;
 import hudson.ProxyConfiguration;
@@ -13,6 +15,9 @@ import org.jenkinsci.remoting.RoleChecker;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.StreamHandler;
@@ -24,10 +29,6 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
     private final CxScanConfig config;
     private final TaskListener listener;
     private ProxyConfiguration jenkinsProxy = null;
-
-    private Exception sastCreateEx;
-    private Exception osaCreateEx;
-    private Exception scaCreateEx;
 
     public CxScanCallable(CxScanConfig config, TaskListener listener) {
         this.config = config;
@@ -47,21 +48,22 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
         config.setReportsDir(file);
 
         RemoteScanInfo result = new RemoteScanInfo();
-        ScanResults scanResults = new ScanResults();
-        result.setScanResults(scanResults);
-
         CxClientDelegator delegator = null;
+        List<ScanResults> results = new ArrayList<>();
+
         try {
-            //todo: add proxy support in new common
             delegator = CommonClientFactory.getClientDelegatorInstance(config, log);
-            delegator.init();
+            ScanResults initResults = delegator.init();
+            results.add(initResults);
 
             // Make sure CxARMUrl is passed in the result.
             // Cannot pass CxARMUrl in the config object, because this callable can be executed on a Jenkins agent.
             // On a Jenkins agent we'll get a cloned config instead of the original object reference.
             result.setCxARMUrl(config.getCxARMUrl());
         } catch (Exception ex) {
+            ScanResults scanResults = new ScanResults();
             scanResults.setGeneralException(ex);
+            result.setScanResults(scanResults);
 
             String message = ex.getMessage();
             // Can actually be null e.g. for NullPointerException.
@@ -102,17 +104,18 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
         }
 
         ScanResults createScanResults = delegator.initiateScan();
-        updateCreateExceptions(createScanResults, false);
+        results.add(createScanResults);
 
         if (rootLog != null) {
             handler.flush();
             rootLog.removeHandler(handler);
         }
 
-        scanResults = config.getSynchronous() ? delegator.waitForScanResults() : delegator.getLatestScanResults();
-        updateCreateExceptions(scanResults, true);
+        ScanResults scanResults = config.getSynchronous() ? delegator.waitForScanResults() : delegator.getLatestScanResults();
+        results.add(scanResults);
 
-        if (config.getSynchronous() && config.isSastEnabled() && scanResults.getSastResults().getWaitException() != null) {
+        if (config.getSynchronous() && config.isSastEnabled() &&
+                ((createScanResults.getSastResults() != null && createScanResults.getSastResults().getException() != null && createScanResults.getSastResults().getScanId() > 0) || (scanResults.getSastResults() != null && scanResults.getSastResults().getException() != null))) {
             cancelScan(delegator);
         }
 
@@ -120,7 +123,8 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
             delegator.printIsProjectViolated(scanResults);
         }
 
-        result.setScanResults(scanResults);
+        ScanResults finalScanResults = getFinalScanResults(results);
+        result.setScanResults(finalScanResults);
         return result;
     }
 
@@ -136,22 +140,21 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
 
     }
 
-    private void updateCreateExceptions(ScanResults results, boolean shouldAddException) {
-        boolean sastResults = results.getSastResults() != null;
-        boolean osaResults = results.getOsaResults() != null;
-        boolean scaResults = results.getScaResults() != null;
+    private ScanResults getFinalScanResults(List<ScanResults> results) {
+        ScanResults scanResults = new ScanResults();
 
-        if (!shouldAddException) {
-            sastCreateEx = sastResults ? results.getSastResults().getCreateException() : null;
-            osaCreateEx = osaResults ? results.getOsaResults().getCreateException() : null;
-            scaCreateEx = scaResults ? results.getScaResults().getCreateException() : null;
-        } else {
-            if (sastResults)
-                results.getSastResults().setCreateException(sastCreateEx);
-            if (osaResults)
-                results.getOsaResults().setCreateException(osaCreateEx);
-            if (scaResults)
-                results.getScaResults().setCreateException(scaCreateEx);
+        for (int i = 0; i < results.size(); i++) {
+            Map<ScannerType, Results> resultsMap = results.get(i).getResults();
+            for (Map.Entry<ScannerType, Results> entry : resultsMap.entrySet()) {
+                if (entry != null && entry.getValue() != null && entry.getValue().getException() != null && scanResults.get(entry.getKey()) == null) {
+                    scanResults.put(entry.getKey(), entry.getValue());
+                }
+                if (i == results.size() - 1 && entry != null && entry.getValue() != null && entry.getValue().getException() == null) {
+                    scanResults.put(entry.getKey(), entry.getValue());
+                }
+            }
         }
+
+        return scanResults;
     }
 }
