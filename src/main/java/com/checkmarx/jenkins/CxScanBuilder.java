@@ -1057,7 +1057,29 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         } else {
             log.warn("CxSCA credentials are not specified.");
         }
+        if(StringUtils.isNotEmpty(dsConfig.scaEnvVariables))
+        {
+            result.setEnvVariables(convertStringToKeyValueMap(dsConfig.scaEnvVariables));
+        }
         return result;
+    }
+
+    private HashMap<String, String> convertStringToKeyValueMap(String envString) {
+
+        HashMap<String, String> envMap = new HashMap<>();
+        //"Key1=Val1,Key2=Val2"
+        String trimmedString = envString.replace("\"","");
+        List<String> envlist = Arrays.asList(trimmedString.split(","));
+
+        for( String variable : envlist)
+        {
+            String[] splitFromEqual = variable.split("=");
+            String key = (splitFromEqual[0]).trim();
+            String value = (splitFromEqual[1]).trim();
+            envMap.put(key, value);
+        }
+        return envMap;
+
     }
 
     private ScannerType getDependencyScannerType(CxScanConfig config) {
