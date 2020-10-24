@@ -433,6 +433,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return osaEnabled;
     }
 
+    @DataBoundSetter
+    public void setOsaEnabled(boolean osaEnabled) {
+        this.osaEnabled = osaEnabled;
+    }
+
     @Nullable
     public Integer getOsaHighThreshold() {
         return osaHighThreshold;
@@ -468,9 +473,19 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return excludeOpenSourceFolders;
     }
 
+    @DataBoundSetter
+    public void setExcludeOpenSourceFolders(@Nullable String excludeOpenSourceFolders) {
+        this.excludeOpenSourceFolders = excludeOpenSourceFolders;
+    }
+
     @Nullable
     public String getIncludeOpenSourceFolders() {
         return includeOpenSourceFolders;
+    }
+
+    @DataBoundSetter
+    public void setIncludeOpenSourceFolders(@Nullable String includeOpenSourceFolders) {
+        this.includeOpenSourceFolders = includeOpenSourceFolders;
     }
 
     @Nullable
@@ -478,9 +493,19 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return osaArchiveIncludePatterns;
     }
 
+    @DataBoundSetter
+    public void setOsaArchiveIncludePatterns(@Nullable String osaArchiveIncludePatterns) {
+        this.osaArchiveIncludePatterns = osaArchiveIncludePatterns;
+    }
+
     @Nullable
     public boolean isOsaInstallBeforeScan() {
         return osaInstallBeforeScan;
+    }
+
+    @DataBoundSetter
+    public void setOsaInstallBeforeScan(boolean osaInstallBeforeScan) {
+        this.osaInstallBeforeScan = osaInstallBeforeScan;
     }
 
     public boolean isGeneratePdfReport() {
@@ -855,6 +880,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
 
+        if (isOsaEnabled() && getDependencyScanConfig() == null) {
+            DependencyScanConfig config = new DependencyScanConfig();
+            config.overrideGlobalConfig = true;
+            config.dependencyScannerType = DependencyScannerType.OSA;
+            config.dependencyScanPatterns = getIncludeOpenSourceFolders();
+            config.dependencyScanExcludeFolders = getExcludeOpenSourceFolders();
+            config.osaArchiveIncludePatterns = getOsaArchiveIncludePatterns();
+            config.osaInstallBeforeScan = isOsaInstallBeforeScan();
+            setDependencyScanConfig(config);
+        }
+
         configureDependencyScan(run, descriptor, env, ret);
 
         if (!ret.getSynchronous()) {
@@ -884,7 +920,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
-        config.addScannerType(effectiveConfig.dependencyScannerType);
+        ScannerType scannerType = null;
+        if (effectiveConfig.dependencyScannerType == DependencyScannerType.OSA) {
+            scannerType = ScannerType.OSA;
+        } else if (effectiveConfig.dependencyScannerType == DependencyScannerType.SCA) {
+            scannerType = ScannerType.AST_SCA;
+        }
+
+        if (scannerType != null) {
+            config.addScannerType(scannerType);
+        }
 
         config.setOsaFilterPattern(env.expand(effectiveConfig.dependencyScanPatterns));
         config.setOsaFolderExclusions(env.expand(effectiveConfig.dependencyScanExcludeFolders));

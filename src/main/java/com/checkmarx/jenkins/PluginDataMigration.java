@@ -1,6 +1,5 @@
 package com.checkmarx.jenkins;
 
-import com.cx.restclient.dto.ScannerType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
@@ -43,7 +42,7 @@ class PluginDataMigration {
     private DependencyScanConfig extractDependencyScanConfig(CxScanBuilder builder) {
         DependencyScanConfig config = new DependencyScanConfig();
         config.overrideGlobalConfig = true;
-        config.dependencyScannerType = ScannerType.OSA;
+        config.dependencyScannerType = DependencyScannerType.OSA;
         config.dependencyScanPatterns = builder.getIncludeOpenSourceFolders();
         config.dependencyScanExcludeFolders = builder.getExcludeOpenSourceFolders();
         config.osaArchiveIncludePatterns = builder.getOsaArchiveIncludePatterns();
