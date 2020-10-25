@@ -56,9 +56,7 @@ import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -435,6 +433,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return osaEnabled;
     }
 
+    @DataBoundSetter
+    public void setOsaEnabled(boolean osaEnabled) {
+        this.osaEnabled = osaEnabled;
+    }
+
     @Nullable
     public Integer getOsaHighThreshold() {
         return osaHighThreshold;
@@ -470,9 +473,19 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return excludeOpenSourceFolders;
     }
 
+    @DataBoundSetter
+    public void setExcludeOpenSourceFolders(@Nullable String excludeOpenSourceFolders) {
+        this.excludeOpenSourceFolders = excludeOpenSourceFolders;
+    }
+
     @Nullable
     public String getIncludeOpenSourceFolders() {
         return includeOpenSourceFolders;
+    }
+
+    @DataBoundSetter
+    public void setIncludeOpenSourceFolders(@Nullable String includeOpenSourceFolders) {
+        this.includeOpenSourceFolders = includeOpenSourceFolders;
     }
 
     @Nullable
@@ -480,9 +493,19 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return osaArchiveIncludePatterns;
     }
 
+    @DataBoundSetter
+    public void setOsaArchiveIncludePatterns(@Nullable String osaArchiveIncludePatterns) {
+        this.osaArchiveIncludePatterns = osaArchiveIncludePatterns;
+    }
+
     @Nullable
     public boolean isOsaInstallBeforeScan() {
         return osaInstallBeforeScan;
+    }
+
+    @DataBoundSetter
+    public void setOsaInstallBeforeScan(boolean osaInstallBeforeScan) {
+        this.osaInstallBeforeScan = osaInstallBeforeScan;
     }
 
     public boolean isGeneratePdfReport() {
@@ -857,6 +880,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
 
+        if (isOsaEnabled() && getDependencyScanConfig() == null) {
+            DependencyScanConfig config = new DependencyScanConfig();
+            config.overrideGlobalConfig = true;
+            config.dependencyScannerType = DependencyScannerType.OSA;
+            config.dependencyScanPatterns = getIncludeOpenSourceFolders();
+            config.dependencyScanExcludeFolders = getExcludeOpenSourceFolders();
+            config.osaArchiveIncludePatterns = getOsaArchiveIncludePatterns();
+            config.osaInstallBeforeScan = isOsaInstallBeforeScan();
+            setDependencyScanConfig(config);
+        }
+
         configureDependencyScan(run, descriptor, env, ret);
 
         if (!ret.getSynchronous()) {
@@ -886,7 +920,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
-        config.addScannerType(effectiveConfig.dependencyScannerType);
+        ScannerType scannerType = null;
+        if (effectiveConfig.dependencyScannerType == DependencyScannerType.OSA) {
+            scannerType = ScannerType.OSA;
+        } else if (effectiveConfig.dependencyScannerType == DependencyScannerType.SCA) {
+            scannerType = ScannerType.AST_SCA;
+        }
+
+        if (scannerType != null) {
+            config.addScannerType(scannerType);
+        }
 
         config.setOsaFilterPattern(env.expand(effectiveConfig.dependencyScanPatterns));
         config.setOsaFolderExclusions(env.expand(effectiveConfig.dependencyScanExcludeFolders));
@@ -1063,9 +1106,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //assert if expected exception is thrown  OR when vulnerabilities under threshold OR when policy violated
         ScanSummary scanSummary = new ScanSummary(config, ret.getSastResults(), ret.getOsaResults(), ret.getScaResults());
         if (scanSummary.hasErrors() || ret.getGeneralException() != null ||
-                (ret.getSastResults() != null && (ret.getSastResults().getCreateException() != null || ret.getSastResults().getWaitException() != null)) ||
-                (ret.getOsaResults() != null && (ret.getOsaResults().getCreateException() != null || ret.getOsaResults().getWaitException() != null)) ||
-                (ret.getScaResults() != null && (ret.getScaResults().getCreateException() != null || ret.getScaResults().getWaitException() != null))) {
+                (ret.getSastResults() != null && ret.getSastResults().getException() != null) ||
+                (ret.getOsaResults() != null && ret.getOsaResults().getException() != null) ||
+                (ret.getScaResults() != null && ret.getScaResults().getException() != null)) {
             printBuildFailure(scanSummary.toString(), ret, log);
             if (resolvedVulnerabilityThresholdResult != null) {
                 run.setResult(resolvedVulnerabilityThresholdResult);
@@ -1085,17 +1128,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.error("********************************************");
 
         logError(ret.getGeneralException());
-        if (ret.getSastResults() != null) {
-            logError(ret.getSastResults().getCreateException());
-            logError(ret.getSastResults().getWaitException());
-        }
-        if (ret.getOsaResults() != null) {
-            logError(ret.getOsaResults().getCreateException());
-            logError(ret.getOsaResults().getWaitException());
-        }
-        if (ret.getScaResults() != null) {
-            logError(ret.getScaResults().getCreateException());
-            logError(ret.getScaResults().getWaitException());
+
+        Map<ScannerType, Results> resultsMap = ret.getResults();
+        for (Results results : resultsMap.values()) {
+            if (results != null && results.getException() != null) {
+                logError(results.getException());
+            }
         }
 
         if (thDescription != null) {

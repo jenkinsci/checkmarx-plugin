@@ -1,6 +1,5 @@
 package com.checkmarx.jenkins;
 
-import com.cx.restclient.dto.ScannerType;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -22,7 +21,7 @@ public class DependencyScanConfig {
     public String dependencyScanExcludeFolders;
 
     @DataBoundSetter
-    public ScannerType dependencyScannerType;
+    public DependencyScannerType dependencyScannerType;
 
     @DataBoundSetter
     public String osaArchiveIncludePatterns;
