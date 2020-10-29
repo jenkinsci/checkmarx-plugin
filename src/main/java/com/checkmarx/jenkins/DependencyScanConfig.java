@@ -47,6 +47,9 @@ public class DependencyScanConfig {
     @DataBoundSetter
     public String scaEnvVariables;
 
+    @DataBoundSetter
+    public String configFilePath;
+
     @DataBoundConstructor
     public DependencyScanConfig() {
     }
