@@ -160,7 +160,9 @@
                         <f:textbox value="${instance.dependencyScanConfig.scaTenant}"/>
                     </f:entry>
                     <f:entry title="SCA Environment Variables" field="scaEnvVariables">
-                        <f:textarea value="${instance.dependencyScanConfig.scaEnvVariables}"/>
+                        <f:textarea value="${instance.dependencyScanConfig.scaEnvVariables}" />
+                    </f:entry>
+                    <f:entry title="Note : To include configuration files from the package managers for the SCA scan, click on the help icon (?) for the instructions." field="scaConfigFilePath">
                     </f:entry>
                     <f:validateButton title="Test Connection" progress="Testing..." method="testScaConnection"
                                       with="scaServerUrl,scaAccessControlUrl,scaCredentialsId,scaTenant"/>
