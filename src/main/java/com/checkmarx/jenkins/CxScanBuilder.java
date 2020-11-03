@@ -95,6 +95,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     private String password;
     private String credentialsId;
+    private Boolean isProxy = true;
     @Nullable
     private String projectName;
     @Nullable
@@ -185,6 +186,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             @Nullable String serverUrl,
             @Nullable String username,
             @Nullable String password,
+            Boolean isProxy,
             String credentialsId,
             String projectName,
             long projectId,
@@ -227,6 +229,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.password = Secret.fromString(password).getEncryptedValue();
         this.credentialsId = credentialsId;
         // Workaround for compatibility with Conditional BuildStep Plugin
+        this.isProxy = (isProxy == null) ? true : isProxy;
         this.projectName = (projectName == null) ? buildStep : projectName;
         this.projectId = projectId;
         this.groupId = (groupId != null && !groupId.startsWith("Provide Checkmarx")) ? groupId : null;
@@ -520,6 +523,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return avoidDuplicateProjectScans;
     }
 
+    public Boolean isProxy() {
+        return isProxy;
+    }
 
     public Boolean getGenerateXmlReport() {
         return generateXmlReport;
@@ -679,6 +685,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
+    public void setProxy(Boolean proxy) {
+        this.isProxy = proxy;
+    }
+
+    @DataBoundSetter
     public void setProjectId(long projectId) {
         this.projectId = projectId;
     }
@@ -799,8 +810,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
         //Asynchronous scan - add note message and previous build reports
-        String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
-        cxScanResult.setHtmlReportName(reportName);
+/*        String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
+        cxScanResult.setHtmlReportName(reportName);*/
         run.addAction(cxScanResult);
 
     }
@@ -818,6 +829,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setCxOrigin(REQUEST_ORIGIN);
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
         ret.setProxyConfig(ProxyHelper.getProxyConfig());
+        ret.setProxy(isProxy);
         ret.setMvnPath(descriptor.getMvnPath());
 
         //cx server
@@ -990,6 +1002,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("plugin version: {}", CxConfig.version());
         log.info("server url: " + config.getUrl());
         log.info("username: " + config.getUsername());
+        log.info("is using Jenkins server proxy: " + this.isProxy);
         log.info("project name: " + config.getProjectName());
         log.info("team id: " + config.getTeamId());
         log.info("is synchronous mode: " + config.getSynchronous());
@@ -1308,6 +1321,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private String password;
 
         private String credentialsId;
+        private boolean isProxy = true;
         private String mvnPath;
 
         private boolean prohibitProjectCreation;
@@ -1399,6 +1413,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         public void setCredentialsId(String credentialsId) {
             this.credentialsId = credentialsId;
+        }
+
+        public boolean isProxy() {
+            return this.isProxy;
+        }
+
+        public void setProxy(boolean proxy) {
+            this.isProxy = proxy;
         }
 
         public boolean isProhibitProjectCreation() {
@@ -1570,7 +1592,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          */
         public FormValidation doTestConnection(@QueryParameter final String serverUrl, @QueryParameter final String password,
                                                @QueryParameter final String username, @QueryParameter final String timestamp,
-                                               @QueryParameter final String credentialsId, @AncestorInPath Item item) {
+                                               @QueryParameter final String credentialsId, @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 
             CxCredentials cred;
@@ -1580,7 +1602,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     cred = CxCredentials.resolveCred(true, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
                     CxCredentials.validateCxCredentials(cred);
                     //todo: add proxy support
-                    commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(), serverLog);
+                    commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(), serverLog,isProxy);
                 } catch (Exception e) {
                     return buildError(e, "Failed to init cx client");
                 }
@@ -1649,6 +1671,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
                 ProxyConfig proxyConfig = ProxyHelper.getProxyConfig();
                 config.setProxyConfig(proxyConfig);
+                config.setProxy(isProxy);
 
                 CxClientDelegator commonClient = CommonClientFactory.getClientDelegatorInstance(config, serverLog);
                 commonClient.getScaClient().testScaConnection();
@@ -1671,7 +1694,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private LegacyClient prepareLoggedInClient(CxCredentials credentials)
                 throws IOException, CxClientException {
             //todo: add proxy support
-            LegacyClient ret = CommonClientFactory.getInstance(credentials, this.isEnableCertificateValidation(), serverLog);
+            LegacyClient ret = CommonClientFactory.getInstance(credentials, this.isEnableCertificateValidation(), serverLog, isProxy);
             ret.login();
             return ret;
         }
