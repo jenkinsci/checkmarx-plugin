@@ -18,8 +18,8 @@
     </f:invisibleEntry>
 
     <f:optionalBlock title="Use default server credentials (${descriptor.credentialsDescription})"
-        inline="true" field="useOwnServerCredentials" negative="true"
-        checked="${instance==null?true:!instance.useOwnServerCredentials}">
+                     inline="true" field="useOwnServerCredentials" negative="true"
+                     checked="${instance==null?true:!instance.useOwnServerCredentials}">
 
         <f:entry title="Checkmarx server URL" field="serverUrl">
             <f:textbox default="${descriptor.serverUrl}" />
@@ -35,9 +35,7 @@
             <c:select />
         </f:entry>
 
-        <f:entry  title="Use Jenkins proxy" inline="true" field="isProxy" checked="${instance==null?true:instance.isProxy}" >
-        <f:checkbox />
-        </f:entry>
+        <f:optionalBlock title="Use Jenkins proxy" inline="true" field="isProxy" checked="${instance==null?true:instance.isProxy}" />
 
         <f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
                           with="serverUrl,username,password,timestamp,credentialsId,isProxy" />

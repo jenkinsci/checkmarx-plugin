@@ -95,6 +95,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     private String password;
     private String credentialsId;
+    @Nullable
     private Boolean isProxy = true;
     @Nullable
     private String projectName;
