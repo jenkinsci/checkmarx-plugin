@@ -842,6 +842,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setCxOrigin(REQUEST_ORIGIN);
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
         ret.setMvnPath(descriptor.getMvnPath());
+        ret.setOsaGenerateJsonReport(false);
 
         //cx server
         CxCredentials cxCredentials = CxCredentials.resolveCred(this, descriptor, run);
@@ -1698,6 +1699,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 CxScanConfig config = new CxScanConfig();
                 config.setCxOrigin(REQUEST_ORIGIN);
                 config.setDisableCertificateValidation(!isEnableCertificateValidation());
+                config.setOsaGenerateJsonReport(false);
 
                 SCAConfig scaConfig = new SCAConfig();
                 scaConfig.setAccessControlUrl(scaAccessControlUrl);
