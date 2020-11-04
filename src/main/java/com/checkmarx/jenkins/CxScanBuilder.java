@@ -87,6 +87,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     //////////////////////////////////////////////////////////////////////////////////////
     // Persistent plugin configuration parameters
     //////////////////////////////////////////////////////////////////////////////////////
+    private boolean useProxy;
     private boolean useOwnServerCredentials;
     @Nullable
     private String serverUrl;
@@ -181,6 +182,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     @DataBoundConstructor
     public CxScanBuilder(
+            boolean useProxy,
             boolean useOwnServerCredentials,
             @Nullable String serverUrl,
             @Nullable String username,
@@ -221,6 +223,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             boolean avoidDuplicateProjectScans,
             Boolean generateXmlReport
     ) {
+        this.useProxy = useProxy;
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
         this.username = username;
@@ -266,6 +269,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     // Configuration fields getters
+    public boolean isUseProxy() {
+        return useProxy;
+    }
+
     public boolean isUseOwnServerCredentials() {
         return useOwnServerCredentials;
     }
@@ -549,6 +556,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
+    public void setUseProxy(boolean useProxy) {
+        this.useProxy = useProxy;
+    }
+
+    @DataBoundSetter
     public void setUseOwnServerCredentials(boolean useOwnServerCredentials) {
         this.useOwnServerCredentials = useOwnServerCredentials;
     }
@@ -817,6 +829,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //general
         ret.setCxOrigin(REQUEST_ORIGIN);
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
+        ret.setProxy(useProxy);
         ret.setProxyConfig(ProxyHelper.getProxyConfig());
         ret.setMvnPath(descriptor.getMvnPath());
 
@@ -1036,6 +1049,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
 
+        log.info("is proxy enabled: {}", config.isProxy());
         ProxyConfig proxyConfig = config.getProxyConfig();
         if (proxyConfig != null) {
             log.info("Proxy configuration:");
@@ -1313,6 +1327,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private boolean prohibitProjectCreation;
         private boolean hideResults;
         private boolean enableCertificateValidation;
+        private boolean useProxy;
         @Nullable
         private String excludeFolders;
         @Nullable
@@ -1432,6 +1447,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 	             */
             }
             this.enableCertificateValidation = enableCertificateValidation;
+        }
+
+        public boolean isUseProxy() {
+            return useProxy;
+        }
+
+        public void setUseProxy(boolean useProxy) {
+            this.useProxy = useProxy;
         }
 
         @Nullable
@@ -1580,7 +1603,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     cred = CxCredentials.resolveCred(true, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
                     CxCredentials.validateCxCredentials(cred);
                     //todo: add proxy support
-                    commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(), serverLog);
+                    commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(), this.isUseProxy(), serverLog);
                 } catch (Exception e) {
                     return buildError(e, "Failed to init cx client");
                 }
@@ -1633,6 +1656,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 CxScanConfig config = new CxScanConfig();
                 config.setCxOrigin(REQUEST_ORIGIN);
                 config.setDisableCertificateValidation(!isEnableCertificateValidation());
+                config.setProxy(isUseProxy());
 
                 AstScaConfig scaConfig = new AstScaConfig();
                 scaConfig.setAccessControlUrl(scaAccessControlUrl);
@@ -1671,7 +1695,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private LegacyClient prepareLoggedInClient(CxCredentials credentials)
                 throws IOException, CxClientException {
             //todo: add proxy support
-            LegacyClient ret = CommonClientFactory.getInstance(credentials, this.isEnableCertificateValidation(), serverLog);
+            LegacyClient ret = CommonClientFactory.getInstance(credentials, this.isEnableCertificateValidation(), this.isUseProxy(), serverLog);
             ret.login();
             return ret;
         }

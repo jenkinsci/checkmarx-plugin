@@ -12,6 +12,9 @@
 
     <f:section title="Checkmarx Server Settings"/>
 
+    <f:optionalBlock title="Use Jenkins Proxy" inline="true"
+                                     field="useProxy" checked="true"/>
+
     <f:invisibleEntry>
         <f:readOnlyTextbox field="username"/>
         <f:readOnlyTextbox field="password"/>

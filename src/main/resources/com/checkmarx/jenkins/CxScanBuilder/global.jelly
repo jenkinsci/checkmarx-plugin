@@ -18,6 +18,9 @@
         <f:optionalBlock title="Enable TLS/SSL Server Certificate Validation" inline="true"
                          field="enableCertificateValidation"/>
 
+        <f:optionalBlock title="Use Jenkins Proxy" inline="true"
+                                 field="useProxy" checked="true"/>
+
         <f:entry title="Default Server URL" field="serverUrl">
             <f:textbox/>
         </f:entry>
