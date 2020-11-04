@@ -819,6 +819,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
         ret.setProxyConfig(ProxyHelper.getProxyConfig());
         ret.setMvnPath(descriptor.getMvnPath());
+        ret.setOsaGenerateJsonReport(false);
 
         //cx server
         CxCredentials cxCredentials = CxCredentials.resolveCred(this, descriptor, run);
