@@ -7,6 +7,7 @@ import jenkins.model.Jenkins;
 class ProxyHelper {
     /**
      * Gets proxy settings defined globally for current Jenkins instance.
+     *
      * @return Jenkins proxy settings converted to an internal object.
      */
     static ProxyConfig getProxyConfig() {

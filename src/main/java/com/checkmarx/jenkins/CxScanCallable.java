@@ -2,6 +2,7 @@ package com.checkmarx.jenkins;
 
 import com.cx.restclient.CxClientDelegator;
 import com.cx.restclient.configuration.CxScanConfig;
+import com.cx.restclient.dto.ProxyConfig;
 import com.cx.restclient.dto.Results;
 import com.cx.restclient.dto.ScanResults;
 import com.cx.restclient.dto.ScannerType;
@@ -46,6 +47,14 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
         CxLoggerAdapter log = new CxLoggerAdapter(listener.getLogger());
         config.setSourceDir(file.getAbsolutePath());
         config.setReportsDir(file);
+        if (jenkinsProxy != null) {
+            config.setProxyConfig(new ProxyConfig(jenkinsProxy.name, jenkinsProxy.port,
+                    jenkinsProxy.getUserName(), jenkinsProxy.getPassword(), false));
+            log.debug("Proxy host: " + jenkinsProxy.name);
+            log.debug("Proxy port: " + jenkinsProxy.port);
+            log.debug("Proxy user: " + jenkinsProxy.getUserName());
+            log.debug("Proxy password: *************");
+        }
 
         RemoteScanInfo result = new RemoteScanInfo();
         CxClientDelegator delegator = null;
