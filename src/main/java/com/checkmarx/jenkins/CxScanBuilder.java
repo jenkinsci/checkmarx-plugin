@@ -35,8 +35,8 @@ import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.*;
@@ -54,6 +54,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -688,6 +689,20 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.dependencyScanConfig = dependencyScanConfig;
     }
 
+    private void setFsaConfiguration(EnvVars env) {
+        for (Map.Entry<String, String> entry : env.entrySet()) {
+            if (entry.getKey().contains("CX_MAVEN_PATH") ||
+                    entry.getKey().contains("CX_GRADLE_PATH") ||
+                    entry.getKey().contains("CX_NPM_PATH") ||
+                    entry.getKey().contains("CX_COMPOSER_PATH") ||
+                    entry.getKey().contains("FSA_CONFIGURATION")) {
+                if (StringUtils.isNotEmpty(entry.getValue())) {
+                    System.setProperty(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+    }
+
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
 
@@ -702,6 +717,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //resolve configuration
         final DescriptorImpl descriptor = getDescriptor();
         EnvVars env = run.getEnvironment(listener);
+        setFsaConfiguration(env);
         CxScanConfig config = resolveConfiguration(run, descriptor, env, log);
 
         //print configuration
