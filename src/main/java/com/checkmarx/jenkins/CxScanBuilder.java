@@ -1034,11 +1034,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             // starting here
 
-
-
-
-            List<String> log = Readfile("C:\\EngineServiceScans\\Scans\\a70744b5-0b66-4928-9238-1a8f053c1fb4\\Logs\\test.log");
-
+            List<String> log = Readfile("C:\\Users\\Administrator\\Desktop\\Logs\\20201110T234653-11_a7c48c9c-7618-46f6-b3a4-89cc72b95213.log");
 
             String TotalFiles = GetDOMStatistics(log, DOMStatiscs.TotalFiles);
             String GoodFiles = GetDOMStatistics(log, DOMStatiscs.GoodFiles);
@@ -1047,16 +1043,262 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             String BadLOC = GetDOMStatistics(log, DOMStatiscs.BadLOC);
             String ScanCoverage = GetDOMStatistics(log, DOMStatiscs.ScanCoverage);
 
+            String reportLogHTML = "<head>\n" +
+                    "    <script src=\"https://kit.fontawesome.com/a076d05399.js\"></script>\n" +
+                    "</head>\n" +
+                    "<div id=\"cx-report\" class=\"cx-report\">\n" +
+                    "    <div class=\"report-title\">\n" +
+                    "        <div class=\"cx-report-title\">Checkmarx Log Report</div>\n" +
+                    "\n" +
+                    "    </div>\n" +
+                    "    <div id=\"results-report\" class=\"results-report\">\n" +
+                    "\n" +
+                    "        <div class=\"summary-section\">\n" +
+                    "            <div id=\"summary-results\" class=\"summary-results\">\n" +
+                    "\n" +
+                    "                <div class=\"sast-summary chart-large\" id=\"sast-summary\">\n" +
+                    "                    <div class=\"summary-report-title sast\">\n" +
+                    "                        <div class=\"summary-title-text sast\">CxSAST Log Status</div>\n" +
+                    "                            <div id=\"sast-title-links\" class=\"title-links\">\n" +
+                    "                            </div>\n" +
+                    "                    </div>\n" +
+                    "                        <!--sast-chart-->\n" +
+                    "                        <div class=\"summary-chart\" id=\"sast-results\">\n" +
+                    "                            <div class=\"top-of-chart\">\n" +
+                    "                            </div>\n" +
+                    "\n" +
+                    "                            <ul class=\"chart\">\n" +
+                    "                                <!--sast-high-->\n" +
+                    "                                <li>\n" +
+                    "                                        <span class=\"bar-1\" id=\"bar-high\" style=\"height: 214.2px\">\n" +
+                    "                                            <div id=\"tooltip-high\">\n" +
+                    "                                            </div>\n" +
+                    "                                            <div id=\"high-new-scans\" class=\"new-scans\"\n" +
+                    "                                                 style=\"height: 0px\"></div>\n" +
+                    "                                            <div id=\"high-recurrent-scans\" class=\"recurrent-scans\"\n" +
+                    "                                                 style=\"height: 214.2px\"></div>\n" +
+                    "                                        </span>\n" +
+                    "\n" +
+                    "                                    <div class=\"bar-title-wrapper\">\n" +
+                    "                                        <div class=\"bar-title-container\">\n" +
+                    "                                            <div class=\"bar-title\"><i class=\"fas fa-file-code\"></i> Files -</div>\n" +
+                    "                                            <div class=\"bar-count\" id=\"bar-count-high\" >" + TotalFiles +"</div> <!--VALUE-->\n" +
+                    "                                        </div>\n" +
+                    "                                    </div>\n" +
+                    "                                </li>\n" +
+                    "\n" +
+                    "                                <!--sast-medium-->\n" +
+                    "                                <li>\n" +
+                    "                                        <span class=\"bar-2\" id=\"bar-med\" style=\"height: 142.8px\">\n" +
+                    "                                                <div id=\"tooltip-med\">\n" +
+                    "                                                </div>\n" +
+                    "                                                <div id=\"med-new-scans\" class=\"new-scans\"\n" +
+                    "                                                     style=\"height: 0px\"></div>\n" +
+                    "                                                <div id=\"med-recurrent-scans\" class=\"recurrent-scans\"\n" +
+                    "                                                     style=\"height: 142.8px\"></div>\n" +
+                    "                                        </span>\n" +
+                    "                                    <div class=\"bar-title-wrapper\">\n" +
+                    "                                        <div class=\"bar-title-container\">\n" +
+                    "                                            <div class=\"bar-title\"><i class=\"fas fa-bug\"></i> Exceptions -</div>\n" +
+                    "                                            <div class=\"bar-count\" id=\"bar-count-med\">5</div> <!--VALUE-->\n" +
+                    "                                        </div>\n" +
+                    "                                    </div>\n" +
+                    "                                </li>\n" +
+                    "\n" +
+                    "                                <!--sast-low-->\n" +
+                    "                                <li>\n" +
+                    "                                        <span class=\"bar-3\" id=\"bar-low\" style=\"height: 142.8px\">\n" +
+                    "                                            <div id=\"tooltip-low\">\n" +
+                    "                                            </div>\n" +
+                    "                                            <div id=\"low-new-scans\" class=\"new-scans\"\n" +
+                    "                                                 style=\"height: 0px\"></div>\n" +
+                    "                                            <div id=\"low-recurrent-scans\" class=\"recurrent-scans\"\n" +
+                    "                                                 style=\"height: 142.8px\"></div>\n" +
+                    "                                        </span>\n" +
+                    "                                    <div class=\"bar-title-wrapper\">\n" +
+                    "                                        <div class=\"bar-title-container\">\n" +
+                    "                                            <div class=\"bar-title\"><i class=\"fas fa-object-group\"></i> DOM -</div>\n" +
+                    "                                            <div class=\"bar-count\" id=\"bar-count-low\">4</div> <!--VALUE-->\n" +
+                    "                                        </div>\n" +
+                    "                                    </div>\n" +
+                    "                                </li>\n" +
+                    "                            </ul>\n" +
+                    "                        </div>\n" +
+                    "                </div>\n" +
+                    "\n" +
+                    "    </div>\n" +
+                    "</div>\n" +
+                    "\n" +
+                    "\n" +
+                    "            <div id=\"sast-full\" class=\"sast-full full-results-section\">\n" +
+                    "                <div class=\"summary-table-row cxsast-full\">\n" +
+                    "                    <div class=\"title-column\">\n" +
+                    "                        <div class=\"summary-title\">\n" +
+                    "                            <div class=\"sum1\">CxSAST</div>\n" +
+                    "                            <div class=\"sum1\">Log Analysis</div>\n" +
+                    "                        </div>\n" +
+                    "                        <div class=\"detailed-report\">\n" +
+                    "                            <div class=\"full-downloads sast-downloads\">\n" +
+                    "                                <div class=\"report-link link-to-result\">\n" +
+                    "                                    <a href=\"http://2020hackaton/CxWebClient/ViewerMain.aspx?scanId=1000005&ProjectID=3\" class=\"pdf-report\" id=\"sast-code-viewer-link\"\n" +
+                    "                                       target=\"_top\">\n" +
+                    "                                    </a>\n" +
+                    "                                </div>\n" +
+                    "                            </div>\n" +
+                    "                        </div>\n" +
+                    "                    </div>\n" +
+                    "                    <div class=\"main-column\">\n" +
+                    "                        <div class=\"full-start-end\">\n" +
+                    "                            <div class=\"full-start\">\n" +
+                    "                                <div class=\"full-start-end-text-date\">\n" +
+                    "                                    <div class=\"full-start-end-text\">\n" +
+                    "                                        <i class=\"far fa-clock\"></i> Scan Time:\n" +
+                    "                                    </div>\n" +
+                    "                                    <div class=\"full-start-end-date\"\n" +
+                    "                                         id=\"sast-full-start-date\">2:45:21</div>   <!--VALUE-->\n" +
+                    "                                </div>\n" +
+                    "                            </div>\n" +
+                    "\n" +
+                    "                            <!--sast-full-end-->\n" +
+                    "                            <div class=\"full-end\">\n" +
+                    "                                <div class=\"full-start-end-text-date\">\n" +
+                    "                                    <div class=\"full-start-end-text\">\n" +
+                    "                                        <i class=\"fas fa-tachometer-alt\"></i> Scan Coverage:\n" +
+                    "                                    </div>\n" +
+                    "                                    <div class=\"full-start-end-date\" id=\"sast-full-end-date\">" + ScanCoverage +"</div><!--VALUE-->\n" +
+                    "                                </div>\n" +
+                    "                            </div>\n" +
+                    "\n" +
+                    "                            <!--sast-full-files-->\n" +
+                    "                            <div class=\"full-files\">\n" +
+                    "                                <div class=\"full-start-end-text-date\">\n" +
+                    "                                    <div class=\"full-start-end-text\">\n" +
+                    "                                        <i class=\"far fa-object-group\"></i> DOM Objects:\n" +
+                    "                                    </div>\n" +
+                    "                                    <div class=\"full-start-end-date\" id=\"sast-full-files\">17</div>\n" +
+                    "                                </div>\n" +
+                    "                            </div>\n" +
+                    "\n" +
+                    "                        </div>\n" +
+                    "\n" +
+                    "                            <div id=\"sast-cve-table-high-container\">\n" +
+                    "                                <div class=\"full-severity-title\">\n" +
+                    "                                    <div class=\"severity-title-name\"><i class=\"far fa-file-code\"></i> Files</i>\n" +
+                    "                                        </div>\n" +
+                    "                                </div>\n" +
+                    "                                <table id=\"sast-cve-table-high\" class=\"cve-table sast-cve-table sast-cve-table-high\">\n" +
+                    "                                    <tr>\n" +
+                    "                                        <th>Types</th>\n" +
+                    "                                        <th>##</th>\n" +
+                    "                                    </tr>\n" +
+                    "                                            <tr>\n" +
+                    "                                                <td>Total Files</td>\n" +
+                    "                                                <td>" + TotalFiles +"</td><!--VALUE-->\n" +
+                    "                                            </tr>\n" +
+                    "\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
+                    "                                                <td>Good Files</td>\n" +
+                    "                                                <td>" + GoodFiles +"</td><!--VALUE-->\n" +
+                    "                                            </tr>\n" +
+                    "                                            <tr>\n" +
+                    "                                                <td>Partially Good Files</td>\n" +
+                    "                                                <td>" + TotalFiles +"</td><!--VALUE-->\n" +
+                    "                                            </tr>\n" +
+                    "                                            <tr>\n" +
+                    "                                                <td>Bad Files</td>\n" +
+                    "                                                <td>" + BadFiles +"</td><!--VALUE-->\n" +
+                    "                                            </tr>\n" +
+                    "                                </table>\n" +
+                    "                            </div>\n" +
+                    "\n" +
+                    "                            <div id=\"sast-cve-table-medium-container\">\n" +
+                    "                                <div class=\"full-severity-title\">\n" +
+                    "                                    <div class=\"severity-title-name\"><i class=\"fas fa-code\"></i> Lines of Code</div>\n" +
+                    "                                </div>\n" +
+                    "                                <table id=\"sast-cve-table-medium\"\n" +
+                    "                                       class=\"cve-table sast-cve-table sast-cve-table-medium\">\n" +
+                    "                                    <tr>\n" +
+                    "                                        <th>Types</th>\n" +
+                    "                                        <th>##</th>\n" +
+                    "                                    </tr>\n" +
+                    "                                            <tr>\n" +
+                    "                                                <td>Total LOC</td>\n" +
+                    "                                                <td>2</td><!--VALUE-->\n" +
+                    "                                            </tr>\n" +
+                    "                                            <tr>\n" +
+                    "                                                <td>Good LOC</td>\n" +
+                    "                                                <td>" + GoodLOC +"</td><!--VALUE-->\n" +
+                    "                                            </tr>\n" +
+                    "                                            <tr>\n" +
+                    "                                                <td>Bad LOC</td>\n" +
+                    "                                                <td>" + BadLOC +"</td><!--VALUE-->\n" +
+                    "                                            </tr>\n" +
+                    "                                </table>\n" +
+                    "                            </div>\n" +
+                    "\n" +
+                    "                            <div id=\"sast-cve-table-low-container\">\n" +
+                    "                                <div class=\"full-severity-title\">\n" +
+                    "                                    <div class=\"severity-title-name\"><i class=\"fas fa-sticky-note\"></i> Messages</div>\n" +
+                    "                                </div>\n" +
+                    "                                <table id=\"sast-cve-table-low\" class=\"cve-table sast-cve-table sast-cve-table-low\">\n" +
+                    "                                    <tr>\n" +
+                    "                                        <th>Types</th>\n" +
+                    "                                        <th>##</th>\n" +
+                    "                                    </tr>\n" +
+                    "                                            <tr>\n" +
+                    "                                                <td>Exceptions</td>\n" +
+                    "                                                <td>1</td><!--VALUE-->\n" +
+                    "                                            </tr>\n" +
+                    "                                            <tr>\n" +
+                    "                                                <td>Antlr Exceptions</td>\n" +
+                    "                                                <td>1</td><!--VALUE-->\n" +
+                    "                                            </tr>\n" +
+                    "                                            <tr>\n" +
+                    "                                                <td>Error</td>\n" +
+                    "                                                <td>1</td><!--VALUE-->\n" +
+                    "                                            </tr>\n" +
+                    "                                            <tr>\n" +
+                    "                                                <td>Debug</td>\n" +
+                    "                                                <td>1</td><!--VALUE-->\n" +
+                    "                                            </tr>\n" +
+                    "                                            <tr>\n" +
+                    "                                                <td>Info</td>\n" +
+                    "                                                <td>1</td><!--VALUE-->\n" +
+                    "                                            </tr>\n" +
+                    "                                </table>\n" +
+                    "                            </div>\n" +
+                    "\n" +
+                    "                            <div id=\"sast-cve-table-low-container\">\n" +
+                    "                                <div class=\"full-severity-title\">\n" +
+                    "                                    <div class=\"severity-title-name\"><i class=\"fas fa-save\"></i> Memory</div>\n" +
+                    "                                </div>\n" +
+                    "                                <table id=\"sast-cve-table-low\" class=\"cve-table sast-cve-table sast-cve-table-low\">\n" +
+                    "                                    <tr>\n" +
+                    "                                        <th>Types</th>\n" +
+                    "                                        <th>##</th>\n" +
+                    "                                    </tr>\n" +
+                    "                                            <tr>\n" +
+                    "                                                <td>Max Memory</td>\n" +
+                    "                                                <td>1</td><!--VALUE-->\n" +
+                    "                                            </tr>\n" +
+                    "                                            <tr>\n" +
+                    "                                                <td>Average Memory</td>\n" +
+                    "                                                <td>1</td><!--VALUE-->\n" +
+                    "                                            </tr>\n" +
+                    "\n" +
+                    "                                </table>\n" +
+                    "                            </div>\n" +
+                    "                    </div>\n" +
+                    "                </div>\n" +
+                    "            </div>\n" +
+                    "\n" +
+                    "\n" +
+                    "    </div>\n" +
+                    "</div>\n" +
+                    "\n" +
+                    "</body>\n" +
+                    "</html>";
 
-            System.out.println("Total files " + TotalFiles);
-            System.out.println("Good files " + GoodFiles);
-            System.out.println("Bad files " + BadFiles);
-            System.out.println("Good loc " + GoodLOC);
-            System.out.println("Bad loc " + BadLOC);
-            System.out.println("Scan cov " + ScanCoverage);
-
-            //reportName = reportName + o que agora sacamos  "";
-
+            reportHTML = reportHTML + "\n" + reportLogHTML;
 
 
             reportName = CxScanResult.resolveHTMLReportName(config.isSastEnabled(), getDependencyScannerType(config));
@@ -1143,7 +1385,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 }
             }
         }
-        return "chupa-mos";
+        return "";
 
     }
 
