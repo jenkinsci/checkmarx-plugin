@@ -1108,7 +1108,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     "                                    <div class=\"bar-title-wrapper\">\n" +
                     "                                        <div class=\"bar-title-container\">\n" +
                     "                                            <div class=\"bar-title\"><i class=\"fas fa-file-code\"></i> Files -</div>\n" +
-                    "                                            <div class=\"bar-count\" id=\"bar-count-high\" >" + TotalFiles +"</div> <!--VALUE-->\n" +
+                    "                                            <div class=\"bar-count\" id=\"bar-count-high\" >" + resultsInfo.getTotalFiles() +"</div> <!--VALUE-->\n" +
                     "                                        </div>\n" +
                     "                                    </div>\n" +
                     "                                </li>\n" +
@@ -1126,7 +1126,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     "                                    <div class=\"bar-title-wrapper\">\n" +
                     "                                        <div class=\"bar-title-container\">\n" +
                     "                                            <div class=\"bar-title\"><i class=\"fas fa-object-group\"></i> DOM -</div>\n" +
-                    "                                            <div class=\"bar-count\" id=\"bar-count-med\">5</div> <!--VALUE-->\n" +
+                    "                                            <div class=\"bar-count\" id=\"bar-count-med\">" + resultsInfo.getNumberOfDomObjects() +"</div> <!--VALUE-->\n" +
                     "                                        </div>\n" +
                     "                                    </div>\n" +
                     "                                </li>\n" +
@@ -1144,7 +1144,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     "                                    <div class=\"bar-title-wrapper\">\n" +
                     "                                        <div class=\"bar-title-container\">\n" +
                     "                                            <div class=\"bar-title\"><i class=\"fas fa-bug\"></i> Exceptions -</div>\n" +
-                    "                                            <div class=\"bar-count\" id=\"bar-count-low\">4</div> <!--VALUE-->\n" +
+                    "                                            <div class=\"bar-count\" id=\"bar-count-low\"></div> <!--VALUE-->\n" +
                     "                                        </div>\n" +
                     "                                    </div>\n" +
                     "                                </li>\n" +
@@ -1181,7 +1181,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     "                                        <i class=\"far fa-clock\"></i> Scan Time:\n" +
                     "                                    </div>\n" +
                     "                                    <div class=\"full-start-end-date\"\n" +
-                    "                                         id=\"sast-full-start-date\">2:45:21</div>   <!--VALUE-->\n" +
+                    "                                         id=\"sast-full-start-date\">" + resultsInfo.getScanDurationPercentage() +"</div>   <!--VALUE-->\n" +
                     "                                </div>\n" +
                     "                            </div>\n" +
                     "\n" +
@@ -1191,7 +1191,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     "                                    <div class=\"full-start-end-text\">\n" +
                     "                                        <i class=\"fas fa-tachometer-alt\"></i> Scan Coverage:\n" +
                     "                                    </div>\n" +
-                    "                                    <div class=\"full-start-end-date\" id=\"sast-full-end-date\">" + ScanCoverage +"</div><!--VALUE-->\n" +
+                    "                                    <div class=\"full-start-end-date\" id=\"sast-full-end-date\">" + resultsInfo.getScanCoverage() +"</div><!--VALUE-->\n" +
                     "                                </div>\n" +
                     "                            </div>\n" +
                     "\n" +
@@ -1219,19 +1219,19 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     "                                    </tr>\n" +
                     "                                            <tr>\n" +
                     "                                                <td>Total Files</td>\n" +
-                    "                                                <td>" + TotalFiles +"</td><!--VALUE-->\n" +
+                    "                                                <td>" + resultsInfo.getTotalFiles() +"</td><!--VALUE-->\n" +
                     "                                            </tr>\n" +
                     "\t\t\t\t\t\t\t\t\t\t\t<tr>\n" +
                     "                                                <td>Good Files</td>\n" +
-                    "                                                <td>" + GoodFiles +"</td><!--VALUE-->\n" +
+                    "                                                <td>" + resultsInfo.getGoodFiles() +"</td><!--VALUE-->\n" +
                     "                                            </tr>\n" +
                     "                                            <tr>\n" +
                     "                                                <td>Partially Good Files</td>\n" +
-                    "                                                <td>" + TotalFiles +"</td><!--VALUE-->\n" +
+                    "                                                <td>" + resultsInfo.getGoodFiles() +"</td><!--VALUE-->\n" +
                     "                                            </tr>\n" +
                     "                                            <tr>\n" +
                     "                                                <td>Bad Files</td>\n" +
-                    "                                                <td>" + BadFiles +"</td><!--VALUE-->\n" +
+                    "                                                <td>" + resultsInfo.getBadFiles() +"</td><!--VALUE-->\n" +
                     "                                            </tr>\n" +
                     "                                </table>\n" +
                     "                            </div>\n" +
@@ -1248,15 +1248,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     "                                    </tr>\n" +
                     "                                            <tr>\n" +
                     "                                                <td>Total LOC</td>\n" +
-                    "                                                <td>2</td><!--VALUE-->\n" +
+                    "                                                <td>" + resultsInfo.getParsedLoc() +"</td><!--VALUE-->\n" +
                     "                                            </tr>\n" +
                     "                                            <tr>\n" +
                     "                                                <td>Good LOC</td>\n" +
-                    "                                                <td>" + GoodLOC +"</td><!--VALUE-->\n" +
+                    "                                                <td>" + resultsInfo.getGoodLoc() +"</td><!--VALUE-->\n" +
                     "                                            </tr>\n" +
                     "                                            <tr>\n" +
                     "                                                <td>Bad LOC</td>\n" +
-                    "                                                <td>" + BadLOC +"</td><!--VALUE-->\n" +
+                    "                                                <td>" + resultsInfo.getBadLoc() +"</td><!--VALUE-->\n" +
                     "                                            </tr>\n" +
                     "                                </table>\n" +
                     "                            </div>\n" +
