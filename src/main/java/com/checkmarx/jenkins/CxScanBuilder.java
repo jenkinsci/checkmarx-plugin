@@ -1043,14 +1043,43 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             String BadLOC = GetDOMStatistics(log, DOMStatiscs.BadLOC);
             String ScanCoverage = GetDOMStatistics(log, DOMStatiscs.ScanCoverage);
 
-            String reportLogHTML = "<head>\n" +
+            String reportLogHTML = "" +
+                    "\n" +
+                    "<style>\n" +
+                    "    \n" +
+                    "    .cx-report .results-report .chart .bar-4{\n" +
+                    "        position: relative;\n" +
+                    "        background-color: #00cc00;\n" +
+                    "    }\n" +
+                    "    .cx-report .results-report .chart .bar-5{\n" +
+                    "        position: relative;\n" +
+                    "        background-color: #ffff00;\n" +
+                    "    }\n" +
+                    "    .cx-report .results-report .chart .bar-6 {\n" +
+                    "        position: relative;\n" +
+                    "        background-color: #ff0000;\n" +
+                    "    }\n" +
+                    "</style>" +
+                    "<head>\n" +
                     "    <script src=\"https://kit.fontawesome.com/a076d05399.js\"></script>\n" +
                     "</head>\n" +
                     "<div id=\"cx-report\" class=\"cx-report\">\n" +
                     "    <div class=\"report-title\">\n" +
                     "        <div class=\"cx-report-title\">Checkmarx Log Report</div>\n" +
-                    "\n" +
-                    "    </div>\n" +
+                    "<div id=\"results-report\" class=\"results-report\">\n" +
+                    "        <div class=\"summary-section\">\n" +
+                    "            <div id=\"summary-results\" class=\"summary-results\">\n" +
+                    "                <div class=\"sast-summary chart-large\" id=\"sast-summary\">\n" +
+                    "                    <div class=\"summary-report-title sast\">\n" +
+                    "                        <div class=\"summary-title-text sast\">CxSAST Risk Gauge</div>\n" +
+                    "                            <div id=\"sast-title-links\" class=\"title-links\">\n" +
+                    "                            </div>\n" +
+                    "                    </div>\n" +
+                    "                    <div id=\"chart_div\" style=\"width: 400px; height: 120px;\" ></div>\n" +
+                    "            </div>\n" +
+                    "        </div>" +
+                    "</div>" +
+
                     "    <div id=\"results-report\" class=\"results-report\">\n" +
                     "\n" +
                     "        <div class=\"summary-section\">\n" +
@@ -1070,12 +1099,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     "                            <ul class=\"chart\">\n" +
                     "                                <!--sast-high-->\n" +
                     "                                <li>\n" +
-                    "                                        <span class=\"bar-1\" id=\"bar-high\" style=\"height: 214.2px\">\n" +
+                    "                                        <span class=\"bar-4\" id=\"bar-high\" style=\"height: 214.2px\">\n" +
                     "                                            <div id=\"tooltip-high\">\n" +
                     "                                            </div>\n" +
                     "                                            <div id=\"high-new-scans\" class=\"new-scans\"\n" +
                     "                                                 style=\"height: 0px\"></div>\n" +
-                    "                                            <div id=\"high-recurrent-scans\" class=\"recurrent-scans\"\n" +
+                    "                                            <div id=\"high-recurrent-scans\" \n" +
                     "                                                 style=\"height: 214.2px\"></div>\n" +
                     "                                        </span>\n" +
                     "\n" +
@@ -1089,17 +1118,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     "\n" +
                     "                                <!--sast-medium-->\n" +
                     "                                <li>\n" +
-                    "                                        <span class=\"bar-2\" id=\"bar-med\" style=\"height: 142.8px\">\n" +
+                    "                                        <span class=\"bar-5\" id=\"bar-med\" style=\"height: 142.8px\">\n" +
                     "                                                <div id=\"tooltip-med\">\n" +
                     "                                                </div>\n" +
                     "                                                <div id=\"med-new-scans\" class=\"new-scans\"\n" +
                     "                                                     style=\"height: 0px\"></div>\n" +
-                    "                                                <div id=\"med-recurrent-scans\" class=\"recurrent-scans\"\n" +
+                    "                                                <div id=\"med-recurrent-scans\" \n" +
                     "                                                     style=\"height: 142.8px\"></div>\n" +
                     "                                        </span>\n" +
                     "                                    <div class=\"bar-title-wrapper\">\n" +
                     "                                        <div class=\"bar-title-container\">\n" +
-                    "                                            <div class=\"bar-title\"><i class=\"fas fa-bug\"></i> Exceptions -</div>\n" +
+                    "                                            <div class=\"bar-title\"><i class=\"fas fa-object-group\"></i> DOM -</div>\n" +
                     "                                            <div class=\"bar-count\" id=\"bar-count-med\">5</div> <!--VALUE-->\n" +
                     "                                        </div>\n" +
                     "                                    </div>\n" +
@@ -1107,17 +1136,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     "\n" +
                     "                                <!--sast-low-->\n" +
                     "                                <li>\n" +
-                    "                                        <span class=\"bar-3\" id=\"bar-low\" style=\"height: 142.8px\">\n" +
+                    "                                        <span class=\"bar-6\" id=\"bar-low\" style=\"height: 142.8px\">\n" +
                     "                                            <div id=\"tooltip-low\">\n" +
                     "                                            </div>\n" +
                     "                                            <div id=\"low-new-scans\" class=\"new-scans\"\n" +
                     "                                                 style=\"height: 0px\"></div>\n" +
-                    "                                            <div id=\"low-recurrent-scans\" class=\"recurrent-scans\"\n" +
+                    "                                            <div id=\"low-recurrent-scans\" \n" +
                     "                                                 style=\"height: 142.8px\"></div>\n" +
                     "                                        </span>\n" +
                     "                                    <div class=\"bar-title-wrapper\">\n" +
                     "                                        <div class=\"bar-title-container\">\n" +
-                    "                                            <div class=\"bar-title\"><i class=\"fas fa-object-group\"></i> DOM -</div>\n" +
+                    "                                            <div class=\"bar-title\"><i class=\"fas fa-bug\"></i> Exceptions -</div>\n" +
                     "                                            <div class=\"bar-count\" id=\"bar-count-low\">4</div> <!--VALUE-->\n" +
                     "                                        </div>\n" +
                     "                                    </div>\n" +
@@ -1294,7 +1323,36 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     "\n" +
                     "    </div>\n" +
                     "</div>\n" +
+                    "\n    " +
+                    "<script type=\"text/javascript\" src=\"https://www.gstatic.com/charts/loader.js\"></script>\n" +
+                    "   <script type=\"text/javascript\">\n" +
+                    "      google.charts.load('current', {'packages':['gauge']});\n" +
+                    "      google.charts.setOnLoadCallback(drawChart);\n" +
                     "\n" +
+                    "      function drawChart() {\n" +
+                    "\n        " +
+                    "       var data = google.visualization.arrayToDataTable([\n" +
+                    "          ['Label', 'Value'],\n" +
+                    "          ['Risk', 80],//VALUE\n" +
+                    "          ['Memory', 55],//VALUE\n" +
+                    "          ['Queries', 68],//VALUE\n" +
+                    "          ['Exceptions', 45],//VALUE\n" +
+                    "          ['LOC', 12],//VALUE\n" +
+                    "          ['Files', 25]//VALUE\n" +
+                    "        ]);\n" +
+                    "\n" +
+                    "        var options = {\n" +
+                    "          width: 700, height: 120,\n" +
+                    "          redFrom: 90, redTo: 100,\n" +
+                    "          yellowFrom:75, yellowTo: 90,\n" +
+                    "          minorTicks: 5\n" +
+                    "        };" +
+                    "        var chart = new google.visualization.Gauge(document.getElementById('chart_div'));\n" +
+                    "\n" +
+                    "        chart.draw(data, options);\n" +
+                    "      }\n" +
+                    "    </script>" +
+
                     "</body>\n" +
                     "</html>";
 
