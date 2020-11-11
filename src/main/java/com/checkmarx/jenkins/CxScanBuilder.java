@@ -701,10 +701,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 }
             }
         }
-        if (StringUtils.isNotEmpty(comment) && comment.contains("FSA{")) {
+        String fsaVars = dependencyScanConfig != null ? dependencyScanConfig.fsaVariables : "";
+        if (StringUtils.isNotEmpty(fsaVars)) {
             try {
-                String[] fsaVars = comment.substring(comment.indexOf("FSA{") + 4, comment.indexOf("}")).split(",");
-                for (String var : fsaVars) {
+                String[] vars = fsaVars.replaceAll("[\\n\\r]", "").trim().split(",");
+                for (String var : vars) {
                     String[] entry = var.split("=");
                     System.setProperty(entry[0], entry[1]);
                 }

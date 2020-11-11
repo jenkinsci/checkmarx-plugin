@@ -122,6 +122,9 @@
             <f:radioBlock checked="${instance.dependencyScanConfig.dependencyScannerType == 'OSA'}" inline="true"
                           name="dependencyScannerType" title="Use CxOSA dependency scanner" value="OSA">
                 <f:nested>
+                    <f:entry title="FSA variables" field="fsaVariables">
+                        <f:textarea />
+                    </f:entry>
                     <f:entry title="Archive extract patterns" field="osaArchiveIncludePatterns">
                         <f:textbox default="${descriptor.DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS}"
                                    value="${instance.dependencyScanConfig.osaArchiveIncludePatterns}"/>
