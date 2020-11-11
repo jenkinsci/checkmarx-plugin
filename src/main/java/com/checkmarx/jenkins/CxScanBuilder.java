@@ -47,18 +47,13 @@ import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.*;
 
 import javax.annotation.Nonnull;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -1036,6 +1031,34 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         String reportName = null;
         try {
             String reportHTML = SummaryUtils.generateSummary(results.getSastResults(), results.getOsaResults(), results.getScaResults(), config);
+
+            // starting here
+
+
+
+
+            List<String> log = Readfile("C:\\EngineServiceScans\\Scans\\a70744b5-0b66-4928-9238-1a8f053c1fb4\\Logs\\test.log");
+
+
+            String TotalFiles = GetDOMStatistics(log, DOMStatiscs.TotalFiles);
+            String GoodFiles = GetDOMStatistics(log, DOMStatiscs.GoodFiles);
+            String BadFiles = GetDOMStatistics(log, DOMStatiscs.BadFiles);
+            String GoodLOC = GetDOMStatistics(log, DOMStatiscs.GoodLOC);
+            String BadLOC = GetDOMStatistics(log, DOMStatiscs.BadLOC);
+            String ScanCoverage = GetDOMStatistics(log, DOMStatiscs.ScanCoverage);
+
+
+            System.out.println("Total files " + TotalFiles);
+            System.out.println("Good files " + GoodFiles);
+            System.out.println("Bad files " + BadFiles);
+            System.out.println("Good loc " + GoodLOC);
+            System.out.println("Bad loc " + BadLOC);
+            System.out.println("Scan cov " + ScanCoverage);
+
+            //reportName = reportName + o que agora sacamos  "";
+
+
+
             reportName = CxScanResult.resolveHTMLReportName(config.isSastEnabled(), getDependencyScannerType(config));
             File reportFile = new File(checkmarxBuildDir, reportName);
             FileUtils.writeStringToFile(reportFile, reportHTML, Charset.defaultCharset());
@@ -1044,6 +1067,94 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             log.error("Failed to generate HTML report.", e);
         }
         return reportName;
+    }
+
+
+    public static List<String> Readfile(String filePath) throws FileNotFoundException {
+        List<String> lines = new ArrayList<>();
+        File file = new File(filePath);
+
+        if (file.exists())
+        {
+
+            Scanner reader = new Scanner(file);
+            while (reader.hasNextLine()){
+
+                String line = reader.nextLine();
+                lines.add(line);
+
+            }
+
+            reader.close();
+            return lines;
+        }
+
+        else
+        {
+            throw new FileNotFoundException("Cannot");
+        }
+    }
+
+
+    public static String GetDOMStatistics(List<String> log, DOMStatiscs type)
+    {
+        String pattern;
+        String value;
+
+        switch (type)
+        {
+            case TotalFiles:
+                pattern = "Total files\\s*(?<number>(\\d*))";
+                break;
+            case GoodFiles:
+                pattern = "Good files:\\s*(?<number>(\\d*))";
+                break;
+            case BadFiles:
+                pattern = "Bad files:\\s*(?<number>(\\d*))";
+                break;
+            case GoodLOC:
+                pattern = "Good LOC:\\s*(?<number>(\\d*))";
+                break;
+            case BadLOC:
+                pattern = "Bad LOC:\\s*(?<number>(\\d*))";
+                break;
+            case ScanCoverage:
+                pattern = "Scan coverage:\\s*(?<number>(\\d.*))";
+                break;
+            default:
+                pattern = "";
+                break;
+        }
+
+
+        if (pattern != null && !pattern.isEmpty())
+        {
+            for (String line: log)
+            {
+
+                Pattern p = Pattern.compile(pattern);//. represents single character
+                Matcher m = p.matcher(line);
+                boolean b = m.matches();
+
+                if (b) {
+
+                    value = m.group(1);
+                    return value;
+                }
+            }
+        }
+        return "chupa-mos";
+
+    }
+
+    public enum DOMStatiscs
+    {
+        TotalFiles,
+        GoodFiles,
+        BadFiles,
+        GoodLOC,
+        BadLOC,
+        ScanCoverage
     }
 
     private void writeJsonObjectToFile(Object jsonObj, File to, String description) {
