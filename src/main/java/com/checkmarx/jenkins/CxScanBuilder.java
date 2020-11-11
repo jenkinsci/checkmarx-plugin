@@ -1031,17 +1031,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         String reportName = null;
         try {
             String reportHTML = SummaryUtils.generateSummary(results.getSastResults(), results.getOsaResults(), results.getScaResults(), config);
-
-            // starting here
-
             List<String> log = Readfile("C:\\Users\\Administrator\\Desktop\\Logs\\20201110T234653-11_a7c48c9c-7618-46f6-b3a4-89cc72b95213.log");
 
-            String TotalFiles = GetDOMStatistics(log, DOMStatiscs.TotalFiles);
-            String GoodFiles = GetDOMStatistics(log, DOMStatiscs.GoodFiles);
-            String BadFiles = GetDOMStatistics(log, DOMStatiscs.BadFiles);
-            String GoodLOC = GetDOMStatistics(log, DOMStatiscs.GoodLOC);
-            String BadLOC = GetDOMStatistics(log, DOMStatiscs.BadLOC);
-            String ScanCoverage = GetDOMStatistics(log, DOMStatiscs.ScanCoverage);
+            CxResultsInfo resultsInfo = new CxResultsInfo(log);
+            resultsInfo.generateResults();
+
+            // Update HTML with resultsInfo vars
+            // For example: replace TotalFiles with resultsInfo.getTotalFiles()
+            // (...)
 
             String reportLogHTML = "" +
                     "\n" +
