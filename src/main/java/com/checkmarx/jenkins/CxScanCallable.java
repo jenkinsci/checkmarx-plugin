@@ -50,6 +50,7 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
         if (jenkinsProxy != null) {
             config.setProxyConfig(new ProxyConfig(jenkinsProxy.name, jenkinsProxy.port,
                     jenkinsProxy.getUserName(), jenkinsProxy.getPassword(), false));
+            log.debug("Proxy configuration:");
             log.debug("Proxy host: " + jenkinsProxy.name);
             log.debug("Proxy port: " + jenkinsProxy.port);
             log.debug("Proxy user: " + jenkinsProxy.getUserName());

@@ -834,7 +834,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
         cxScanResult.setHtmlReportName(reportName);
         run.addAction(cxScanResult);
-
     }
 
     private void createScaReports(AstScaResults scaResults, File checkmarxBuildDir) {
@@ -1089,7 +1088,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             log.info("SAST scan comment: " + config.getScanComment());
             log.info("is incremental scan: " + config.getIncremental());
             log.info("is generate full XML report: " + config.getGenerateXmlReport());
-            log.info("is generate pfd report: " + config.getGeneratePDFReport());
+            log.info("is generate PDF report: " + config.getGeneratePDFReport());
             log.info("source code encoding id: " + config.getEngineConfigurationId());
             log.info("SAST thresholds enabled: " + config.getSastThresholdsEnabled());
             if (config.getSastThresholdsEnabled()) {
@@ -1113,17 +1112,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 log.info("  OSA archive includes: " + config.getOsaArchiveIncludePatterns());
                 log.info("  OSA run Execute dependency managers install packages command before Scan: " + config.getOsaRunInstall());
             }
-        }
-
-        ProxyConfig proxyConfig = config.getProxyConfig();
-        if (proxyConfig != null) {
-            log.info("Proxy configuration:");
-            log.info("  host: " + proxyConfig.getHost());
-            log.info("  port: " + proxyConfig.getPort());
-            log.info("  user: " + proxyConfig.getUsername());
-            log.info("  password: *************");
-        } else {
-            log.info("Proxy: not set");
         }
 
         log.info("------------------------------------------------------------------------------------------");
@@ -1182,7 +1170,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             FileUtils.writeStringToFile(reportFile, reportHTML, Charset.defaultCharset());
             writeFileToWorkspaceReports(workspace, reportFile);
         } catch (IOException | TemplateException e) {
-            log.error("Failed to generate HTML report.", e);
+            log.error("Failed to generate HTML report. {}", e.getMessage());
+        } catch (NullPointerException e) {
+            String message = "";
+            if (results.getSastResults() != null && !results.getSastResults().isSastResultsReady()) {
+                message = "SAST results are empty.";
+            } else if (results.getOsaResults() != null && !results.getOsaResults().isOsaResultsReady()) {
+                message = "OSA results are empty.";
+            } else if (results.getScaResults() != null && !results.getScaResults().isScaResultReady()) {
+                message = "SCA results are empty.";
+            }
+            log.error("Failed to generate HTML report. {}", message);
         }
         return reportName;
     }
