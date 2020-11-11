@@ -701,6 +701,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 }
             }
         }
+        if (StringUtils.isNotEmpty(comment) && comment.contains("FSA{")) {
+            try {
+                String[] fsaVars = comment.substring(comment.indexOf("FSA{") + 4, comment.indexOf("}")).split(",");
+                for (String var : fsaVars) {
+                    String[] entry = var.split("=");
+                    System.setProperty(entry[0], entry[1]);
+                }
+            } catch (Exception e) {
+                log.warn("Fail to add comment FSA vars");
+            }
+        }
     }
 
     @Override
