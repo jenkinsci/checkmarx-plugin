@@ -715,6 +715,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     private void setFsaConfiguration(EnvVars env) {
+        // As job environment variable
         for (Map.Entry<String, String> entry : env.entrySet()) {
             if (entry.getKey().contains("CX_MAVEN_PATH") ||
                     entry.getKey().contains("CX_GRADLE_PATH") ||
@@ -724,6 +725,19 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 if (StringUtils.isNotEmpty(entry.getValue())) {
                     System.setProperty(entry.getKey(), entry.getValue());
                 }
+            }
+        }
+        // As custom field - for pipeline jobs
+        String fsaVars = dependencyScanConfig != null ? dependencyScanConfig.fsaVariables : "";
+        if (StringUtils.isNotEmpty(fsaVars)) {
+            try {
+                String[] vars = fsaVars.replaceAll("[\\n\\r]", "").trim().split(",");
+                for (String var : vars) {
+                    String[] entry = var.split("=");
+                    System.setProperty(entry[0], entry[1]);
+                }
+            } catch (Exception e) {
+                log.warn("Fail to add comment FSA vars");
             }
         }
     }
