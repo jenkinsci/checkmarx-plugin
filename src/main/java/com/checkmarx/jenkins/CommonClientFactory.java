@@ -13,7 +13,7 @@ class CommonClientFactory {
 
     static LegacyClient getInstance(CxCredentials credentials,
                                     boolean enableCertificateValidation,
-                                    Logger log)
+                                    Logger log, boolean isProxy)
             throws MalformedURLException, CxClientException {
         CxScanConfig scanConfig = new CxScanConfig(credentials.getServerUrl(),
                 credentials.getUsername(),
@@ -21,7 +21,9 @@ class CommonClientFactory {
                 SCAN_ORIGIN,
                 !enableCertificateValidation);
 
-        scanConfig.setProxyConfig(ProxyHelper.getProxyConfig());
+        if (isProxy) {
+            scanConfig.setProxyConfig(ProxyHelper.getProxyConfig());
+        }
 
         return getInstance(scanConfig, log);
     }

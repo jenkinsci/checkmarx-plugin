@@ -6,6 +6,8 @@ import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.cx.restclient.CxClientDelegator;
+import com.cx.restclient.ast.dto.sca.AstScaConfig;
+import com.cx.restclient.ast.dto.sca.AstScaResults;
 import com.cx.restclient.common.summary.SummaryUtils;
 import com.cx.restclient.configuration.CxScanConfig;
 import com.cx.restclient.dto.*;
@@ -16,17 +18,10 @@ import com.cx.restclient.sast.dto.CxNameObj;
 import com.cx.restclient.sast.dto.Preset;
 import com.cx.restclient.sast.dto.Project;
 import com.cx.restclient.sast.dto.SASTResults;
-import com.cx.restclient.ast.dto.sca.AstScaConfig;
-import com.cx.restclient.ast.dto.sca.AstScaResults;
-import com.cx.restclient.dto.SourceLocationType;
 import com.cx.restclient.sast.utils.LegacyClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.TemplateException;
 import hudson.*;
-import hudson.EnvVars;
-import hudson.Extension;
-import hudson.FilePath;
-import hudson.Launcher;
 import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
@@ -40,8 +35,8 @@ import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.*;
@@ -56,7 +51,10 @@ import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -95,6 +93,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     private String password;
     private String credentialsId;
+    private Boolean isProxy = true;
     @Nullable
     private String projectName;
     @Nullable
@@ -185,6 +184,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             @Nullable String serverUrl,
             @Nullable String username,
             @Nullable String password,
+            Boolean isProxy,
             String credentialsId,
             String projectName,
             long projectId,
@@ -227,6 +227,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.password = Secret.fromString(password).getEncryptedValue();
         this.credentialsId = credentialsId;
         // Workaround for compatibility with Conditional BuildStep Plugin
+        this.isProxy = (isProxy == null) ? true : isProxy;
         this.projectName = (projectName == null) ? buildStep : projectName;
         this.projectId = projectId;
         this.groupId = (groupId != null && !groupId.startsWith("Provide Checkmarx")) ? groupId : null;
@@ -520,6 +521,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return avoidDuplicateProjectScans;
     }
 
+    public Boolean getIsProxy() {
+        return isProxy;
+    }
 
     public Boolean getGenerateXmlReport() {
         return generateXmlReport;
@@ -679,6 +683,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
+    public void setIsProxy(Boolean proxy) {
+        this.isProxy = proxy;
+    }
+
+    @DataBoundSetter
     public void setProjectId(long projectId) {
         this.projectId = projectId;
     }
@@ -705,6 +714,34 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.dependencyScanConfig = dependencyScanConfig;
     }
 
+    private void setFsaConfiguration(EnvVars env) {
+        // As job environment variable
+        for (Map.Entry<String, String> entry : env.entrySet()) {
+            if (entry.getKey().contains("CX_MAVEN_PATH") ||
+                    entry.getKey().contains("CX_GRADLE_PATH") ||
+                    entry.getKey().contains("CX_NPM_PATH") ||
+                    entry.getKey().contains("CX_COMPOSER_PATH") ||
+                    entry.getKey().contains("FSA_CONFIGURATION")) {
+                if (StringUtils.isNotEmpty(entry.getValue())) {
+                    System.setProperty(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+        // As custom field - for pipeline jobs
+        String fsaVars = dependencyScanConfig != null ? dependencyScanConfig.fsaVariables : "";
+        if (StringUtils.isNotEmpty(fsaVars)) {
+            try {
+                String[] vars = fsaVars.replaceAll("[\\n\\r]", "").trim().split(",");
+                for (String var : vars) {
+                    String[] entry = var.split("=");
+                    System.setProperty(entry[0], entry[1]);
+                }
+            } catch (Exception e) {
+                log.warn("Fail to add comment FSA vars");
+            }
+        }
+    }
+
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
 
@@ -719,6 +756,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //resolve configuration
         final DescriptorImpl descriptor = getDescriptor();
         EnvVars env = run.getEnvironment(listener);
+        setFsaConfiguration(env);
         CxScanConfig config = resolveConfiguration(run, descriptor, env, log);
 
         //print configuration
@@ -731,7 +769,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
-        final CxScanCallable action = new CxScanCallable(config, listener);
+        Jenkins instance = Jenkins.getInstance();
+        final CxScanCallable action;
+        if (instance != null && instance.proxy != null &&
+                (useOwnServerCredentials ? this.isProxy : getDescriptor().getIsProxy()) &&
+                !(isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))) {
+            action = new CxScanCallable(config, listener, instance.proxy);
+        } else {
+            action = new CxScanCallable(config, listener);
+        }
 
         //create scans and retrieve results (in jenkins agent)
         RemoteScanInfo scanInfo = workspace.act(action);
@@ -802,7 +848,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
         cxScanResult.setHtmlReportName(reportName);
         run.addAction(cxScanResult);
-
     }
 
     private void createScaReports(AstScaResults scaResults, File checkmarxBuildDir) {
@@ -811,20 +856,62 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         writeJsonObjectToFile(scaResults.getFindings(), new File(checkmarxBuildDir, SCA_VULNERABILITIES_JSON), "OSA vulnerabilities json report");
     }
 
+    /**
+     * Method validate if CxServerURL is part of 'No proxy host'
+     *
+     * @param serverUrl
+     * @param noProxyHostPatterns
+     * @return
+     */
+    private Boolean isCxURLinNoProxyHost(String serverUrl, List<Pattern> noProxyHostPatterns) {
+
+        if ((noProxyHostPatterns != null) && (!noProxyHostPatterns.isEmpty()) && (serverUrl != null) && (!serverUrl.isEmpty())) {
+
+            Pattern pattern;
+            String tempSt;
+            for (Pattern noProxyHostPattern : noProxyHostPatterns) {
+                pattern = noProxyHostPattern;
+                tempSt = pattern.toString();
+                while ((tempSt.contains("\\")) ||
+                        (tempSt.contains("..")) ||
+                        (tempSt.contains(".*")) ||
+                        (tempSt.contains("*"))) {
+                    tempSt = tempSt.replace("\\", "");
+                    tempSt = tempSt.replace("..", ".");
+                    tempSt = tempSt.replace(".*", "");
+                    tempSt = tempSt.replace("*", "");
+                }
+
+                if (serverUrl.contains(tempSt)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) {
         CxScanConfig ret = new CxScanConfig();
 
         //general
         ret.setCxOrigin(REQUEST_ORIGIN);
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
-        ret.setProxyConfig(ProxyHelper.getProxyConfig());
         ret.setMvnPath(descriptor.getMvnPath());
+        ret.setOsaGenerateJsonReport(false);
 
         //cx server
         CxCredentials cxCredentials = CxCredentials.resolveCred(this, descriptor, run);
         ret.setUrl(cxCredentials.getServerUrl().trim());
         ret.setUsername(cxCredentials.getUsername());
         ret.setPassword(Aes.decrypt(cxCredentials.getPassword(), cxCredentials.getUsername()));
+        if (descriptor.getIsProxy()) {
+            Jenkins instance = Jenkins.getInstance();
+            if (instance != null && instance.proxy != null && (useOwnServerCredentials ? this.isProxy : getDescriptor().getIsProxy())
+                    && !(isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))) {
+                ret.setProxyConfig(new ProxyConfig(instance.proxy.name, instance.proxy.port,
+                        instance.proxy.getUserName(), instance.proxy.getPassword(), false));
+            }
+        }
 
         //project
         ret.setProjectName(env.expand(projectName.trim()));
@@ -990,6 +1077,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("plugin version: {}", CxConfig.version());
         log.info("server url: " + config.getUrl());
         log.info("username: " + config.getUsername());
+        log.info("is using Jenkins server proxy: " + (useOwnServerCredentials ? getIsProxy() : config.getProxyConfig() != null));
+        if (useOwnServerCredentials ? getIsProxy() : config.getProxyConfig() != null) {
+            if (Jenkins.getInstance().proxy != null)
+                log.info("No Proxy Host: " + printNoProxyHost());
+        }
         log.info("project name: " + config.getProjectName());
         log.info("team id: " + config.getTeamId());
         log.info("is synchronous mode: " + config.getSynchronous());
@@ -1010,7 +1102,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             log.info("SAST scan comment: " + config.getScanComment());
             log.info("is incremental scan: " + config.getIncremental());
             log.info("is generate full XML report: " + config.getGenerateXmlReport());
-            log.info("is generate pfd report: " + config.getGeneratePDFReport());
+            log.info("is generate PDF report: " + config.getGeneratePDFReport());
             log.info("source code encoding id: " + config.getEngineConfigurationId());
             log.info("SAST thresholds enabled: " + config.getSastThresholdsEnabled());
             if (config.getSastThresholdsEnabled()) {
@@ -1036,18 +1128,26 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
 
-        ProxyConfig proxyConfig = config.getProxyConfig();
-        if (proxyConfig != null) {
-            log.info("Proxy configuration:");
-            log.info("  host: " + proxyConfig.getHost());
-            log.info("  port: " + proxyConfig.getPort());
-            log.info("  user: " + proxyConfig.getUsername());
-            log.info("  password: *************");
-        } else {
-            log.info("Proxy: not set");
-        }
-
         log.info("------------------------------------------------------------------------------------------");
+    }
+
+    private String printNoProxyHost() {
+        String noProxyHost = "";
+        ProxyConfiguration proxy = Jenkins.getInstance().proxy;
+        if (proxy.getNoProxyHostPatterns() != null) {
+            List<Pattern> noProxyHostPatterns = proxy.getNoProxyHostPatterns();
+            for (Pattern noProxyHostPattern : noProxyHostPatterns) {
+                String tempString = noProxyHostPattern.toString();
+                tempString = tempString.replace("\\.", ".").replace(".*", "*");
+                if (noProxyHost.isEmpty()) {
+                    noProxyHost = noProxyHost + tempString;
+                } else {
+                    noProxyHost = noProxyHost + ", " + tempString;
+                }
+            }
+            return noProxyHost;
+        }
+        return noProxyHost;
     }
 
     private void createSastReports(SASTResults sastResults, File checkmarxBuildDir, @Nonnull FilePath workspace) {
@@ -1084,7 +1184,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             FileUtils.writeStringToFile(reportFile, reportHTML, Charset.defaultCharset());
             writeFileToWorkspaceReports(workspace, reportFile);
         } catch (IOException | TemplateException e) {
-            log.error("Failed to generate HTML report.", e);
+            log.error("Failed to generate HTML report. {}", e.getMessage());
+        } catch (NullPointerException e) {
+            String message = "";
+            if (results.getSastResults() != null && !results.getSastResults().isSastResultsReady()) {
+                message = "SAST results are empty.";
+            } else if (results.getOsaResults() != null && !results.getOsaResults().isOsaResultsReady()) {
+                message = "OSA results are empty.";
+            } else if (results.getScaResults() != null && !results.getScaResults().isScaResultReady()) {
+                message = "SCA results are empty.";
+            }
+            log.error("Failed to generate HTML report. {}", message);
         }
         return reportName;
     }
@@ -1309,6 +1419,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         private String credentialsId;
         private String mvnPath;
+        private boolean isProxy = true;
 
         private boolean prohibitProjectCreation;
         private boolean hideResults;
@@ -1399,6 +1510,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         public void setCredentialsId(String credentialsId) {
             this.credentialsId = credentialsId;
+        }
+
+        public boolean getIsProxy() {
+            return this.isProxy;
+        }
+
+        public void setIsProxy(final boolean isProxy) {
+            this.isProxy = isProxy;
         }
 
         public boolean isProhibitProjectCreation() {
@@ -1553,6 +1672,38 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         }
 
+        /**
+         * Method validate if CxServerURL is part of 'No proxy host'
+         *
+         * @param serverUrl
+         * @param noProxyHostPatterns
+         * @return
+         */
+        private Boolean isCxURLinNoProxyHost(String serverUrl, List<Pattern> noProxyHostPatterns) {
+            if ((noProxyHostPatterns != null) && (!noProxyHostPatterns.isEmpty()) && (serverUrl != null) && (!serverUrl.isEmpty())) {
+                Pattern pattern;
+                String tempSt;
+                for (Pattern noProxyHostPattern : noProxyHostPatterns) {
+                    pattern = noProxyHostPattern;
+                    tempSt = pattern.toString();
+                    while ((tempSt.contains("\\")) ||
+                            (tempSt.contains("..")) ||
+                            (tempSt.contains(".*")) ||
+                            (tempSt.contains("*"))) {
+                        tempSt = tempSt.replace("\\", "");
+                        tempSt = tempSt.replace("..", ".");
+                        tempSt = tempSt.replace(".*", "");
+                        tempSt = tempSt.replace("*", "");
+                    }
+
+                    if (serverUrl.contains(tempSt)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         /*
          * Used to fill the value of hidden timestamp textbox, which in turn is used for Internet Explorer cache invalidation
          */
@@ -1570,7 +1721,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          */
         public FormValidation doTestConnection(@QueryParameter final String serverUrl, @QueryParameter final String password,
                                                @QueryParameter final String username, @QueryParameter final String timestamp,
-                                               @QueryParameter final String credentialsId, @AncestorInPath Item item) {
+                                               @QueryParameter final String credentialsId, @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 
             CxCredentials cred;
@@ -1579,8 +1730,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 try {
                     cred = CxCredentials.resolveCred(true, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
                     CxCredentials.validateCxCredentials(cred);
-                    //todo: add proxy support
-                    commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(), serverLog);
+                    Jenkins instance = Jenkins.getInstance();
+                    if (instance != null && instance.proxy != null && isProxy && !(isCxURLinNoProxyHost(serverUrl, instance.proxy.getNoProxyHostPatterns()))) {
+                        commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(), serverLog, true);
+                    } else {
+                        commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(), serverLog, false);
+                    }
                 } catch (Exception e) {
                     return buildError(e, "Failed to init cx client");
                 }
@@ -1633,6 +1788,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 CxScanConfig config = new CxScanConfig();
                 config.setCxOrigin(REQUEST_ORIGIN);
                 config.setDisableCertificateValidation(!isEnableCertificateValidation());
+                config.setOsaGenerateJsonReport(false);
 
                 AstScaConfig scaConfig = new AstScaConfig();
                 scaConfig.setAccessControlUrl(scaAccessControlUrl);
@@ -1647,8 +1803,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 config.setAstScaConfig(scaConfig);
                 config.addScannerType(ScannerType.AST_SCA);
 
-                ProxyConfig proxyConfig = ProxyHelper.getProxyConfig();
-                config.setProxyConfig(proxyConfig);
+                try {
+                    Jenkins instance = Jenkins.getInstance();
+                    if (instance != null && instance.proxy != null && isProxy && !(isCxURLinNoProxyHost(serverUrl, instance.proxy.getNoProxyHostPatterns()))) {
+                        ProxyConfig proxyConfig = ProxyHelper.getProxyConfig();
+                        config.setProxyConfig(proxyConfig);
+                    }
+                } catch (Exception e) {
+                    return buildError(e, "Failed to init cx client");
+                }
 
                 CxClientDelegator commonClient = CommonClientFactory.getClientDelegatorInstance(config, serverLog);
                 commonClient.getScaClient().testScaConnection();
@@ -1668,10 +1831,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
          *  shared state to avoid synchronization issues.
          */
-        private LegacyClient prepareLoggedInClient(CxCredentials credentials)
+        private LegacyClient prepareLoggedInClient(CxCredentials credentials, boolean isProxy, String serverUrl)
                 throws IOException, CxClientException {
-            //todo: add proxy support
-            LegacyClient ret = CommonClientFactory.getInstance(credentials, this.isEnableCertificateValidation(), serverLog);
+            LegacyClient ret;
+            Jenkins instance = Jenkins.getInstance();
+            if (instance != null && instance.proxy != null && isProxy && !(isCxURLinNoProxyHost(serverUrl, instance.proxy.getNoProxyHostPatterns()))) {
+                ret = CommonClientFactory.getInstance(credentials, this.isEnableCertificateValidation(), serverLog, true);
+            } else {
+                ret = CommonClientFactory.getInstance(credentials, this.isEnableCertificateValidation(), serverLog, false);
+            }
             ret.login();
             return ret;
         }
@@ -1688,7 +1856,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             LegacyClient commonClient = null;
             try {
                 CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
-                commonClient = prepareLoggedInClient(credentials);
+                commonClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy, useOwnServerCredentials ? this.serverUrl : serverUrl);
                 List<Project> projects = commonClient.getAllProjects();
 
                 for (Project p : projects) {
@@ -1727,7 +1895,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             ListBoxModel listBoxModel = new ListBoxModel();
             try {
                 CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
-                LegacyClient commonClient = prepareLoggedInClient(credentials);
+                LegacyClient commonClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy, useOwnServerCredentials ? this.serverUrl : serverUrl);
 
                 //todo import preset
                 List<Preset> presets = commonClient.getPresetList();
@@ -1772,7 +1940,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             try {
                 CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
 
-                commonClient = prepareLoggedInClient(credentials);
+                commonClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy, useOwnServerCredentials ? this.serverUrl : serverUrl);
                 List<CxNameObj> configurationList = commonClient.getConfigurationSetList();
 
                 for (CxNameObj cs : configurationList) {
@@ -1807,7 +1975,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             LegacyClient commonClient = null;
             try {
                 CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
-                commonClient = prepareLoggedInClient(credentials);
+                commonClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy, useOwnServerCredentials ? this.serverUrl : serverUrl);
                 List<Team> teamList = commonClient.getTeamList();
                 for (Team team : teamList) {
                     listBoxModel.add(new ListBoxModel.Option(team.getFullName(), team.getId()));
