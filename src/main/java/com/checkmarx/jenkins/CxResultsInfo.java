@@ -111,7 +111,7 @@ public class CxResultsInfo {
         List<String> badLocRegex = Utils.getDOMStatistics(logFileLines, Utils.DOMStatiscs.BadLoc);
         List<String> numberOfDomObjectsRegex = Utils.getDOMStatistics(logFileLines, Utils.DOMStatiscs.NumberOfDomObjects);
         List<String> scanCoverageRegex = Utils.getDOMStatistics(logFileLines, Utils.DOMStatiscs.ScanCoverage);
-        //List<String> scanCoverageLocRegex = Utils.getDOMStatistics(logFileLines, Utils.DOMStatiscs.ScanCoverageLoc);
+        List<String> scanCoverageLocRegex = Utils.getDOMStatistics(logFileLines, Utils.DOMStatiscs.ScanCoverageLoc);
 
         List<String> flowStartRegex = Utils.getDOMStatistics(logFileLines, Utils.DOMStatiscs.FlowStartTime);
         List<String> flowEndRegex = Utils.getDOMStatistics(logFileLines, Utils.DOMStatiscs.FlowEndTime);
@@ -139,23 +139,23 @@ public class CxResultsInfo {
         int resolverDurationSecs = Utils.calcSecFromDateTimeString(resolverStartRegex, resolverEndRegex);
         int absIntDurationSecs = Utils.calcSecFromDateTimeString(absIntStartRegex, absIntEndRegex);
 
-        this.totalFiles = totalFilesRegex.get(0);
-        this.goodFiles = goodFilesRegex.get(0);
-        this.partiallyGoodFiles = partiallyGoodFilesRegex.get(0);
-        this.badFiles = badFilesRegex.get(0);
-        this.parsedLoc = parsedLocRegex.get(0);
-        this.goodLoc = goodLocRegex.get(0);
-        this.badLoc = badLocRegex.get(0);
-        this.numberOfDomObjects = numberOfDomObjectsRegex.get(0);
-        this.scanCoverage = scanCoverageRegex.get(0);
-        //this.scanCoverageLoc = scanCoverageLocRegex.get(0);
+        this.totalFiles = totalFilesRegex.size() > 0 ? totalFilesRegex.get(0) : "0";
+        this.goodFiles = goodFilesRegex.size() > 0 ? goodFilesRegex.get(0) : "0";
+        this.partiallyGoodFiles = partiallyGoodFilesRegex.size() > 0 ? partiallyGoodFilesRegex.get(0) : "0";
+        this.badFiles = badFilesRegex.size() > 0 ? badFilesRegex.get(0) : "0";
+        this.parsedLoc = parsedLocRegex.size() > 0 ? parsedLocRegex.get(0) : "0";
+        this.goodLoc = goodLocRegex.size() > 0 ? goodLocRegex.get(0) : "0";
+        this.badLoc = badLocRegex.size() > 0 ? badLocRegex.get(0) : "0";
+        this.numberOfDomObjects = numberOfDomObjectsRegex.size() > 0 ? numberOfDomObjectsRegex.get(0) : "0";
+        this.scanCoverage = scanCoverageRegex.size() > 0 ? scanCoverageRegex.get(0) : "0";
+        this.scanCoverageLoc = scanCoverageLocRegex.size() > 0 ? scanCoverageLocRegex.get(0) : "0";
         this.flowDurationHours = Utils.secAsTimeString(flowDurationSecs);
         this.parseDurationHours = Utils.secAsTimeString(parseDurationSecs);
         this.queryDurationHours = Utils.secAsTimeString(queryDurationSecs);
         this.scanDurationPercentage = String.format("%.2f%%", ((float)queryDurationSecs / (float)scanDurationSecs) * 100);
         this.resolverDurationHours = Utils.secAsTimeString(resolverDurationSecs);
         this.absIntDurationHours = Utils.secAsTimeString(absIntDurationSecs);
-        this.slowestQueryName = slowestQueryInfoRegex.get(0);
-        this.slowestQueryTime = slowestQueryInfoRegex.get(1);
+        this.slowestQueryName = slowestQueryInfoRegex.size() > 0 ? slowestQueryInfoRegex.get(0) : "N/A";
+        this.slowestQueryTime = slowestQueryInfoRegex.size() > 1 ? slowestQueryInfoRegex.get(1) : "N/A";
     }
 }
