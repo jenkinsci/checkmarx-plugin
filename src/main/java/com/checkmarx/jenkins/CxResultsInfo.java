@@ -111,7 +111,7 @@ public class CxResultsInfo {
         List<String> badLocRegex = Utils.getDOMStatistics(logFileLines, Utils.DOMStatiscs.BadLoc);
         List<String> numberOfDomObjectsRegex = Utils.getDOMStatistics(logFileLines, Utils.DOMStatiscs.NumberOfDomObjects);
         List<String> scanCoverageRegex = Utils.getDOMStatistics(logFileLines, Utils.DOMStatiscs.ScanCoverage);
-        List<String> scanCoverageLocRegex = Utils.getDOMStatistics(logFileLines, Utils.DOMStatiscs.ScanCoverageLoc);
+        //List<String> scanCoverageLocRegex = Utils.getDOMStatistics(logFileLines, Utils.DOMStatiscs.ScanCoverageLoc);
 
         List<String> flowStartRegex = Utils.getDOMStatistics(logFileLines, Utils.DOMStatiscs.FlowStartTime);
         List<String> flowEndRegex = Utils.getDOMStatistics(logFileLines, Utils.DOMStatiscs.FlowEndTime);
@@ -148,7 +148,7 @@ public class CxResultsInfo {
         this.badLoc = badLocRegex.get(0);
         this.numberOfDomObjects = numberOfDomObjectsRegex.get(0);
         this.scanCoverage = scanCoverageRegex.get(0);
-        this.scanCoverageLoc = scanCoverageLocRegex.get(0);
+        //this.scanCoverageLoc = scanCoverageLocRegex.get(0);
         this.flowDurationHours = Utils.secAsTimeString(flowDurationSecs);
         this.parseDurationHours = Utils.secAsTimeString(parseDurationSecs);
         this.queryDurationHours = Utils.secAsTimeString(queryDurationSecs);
