@@ -48,7 +48,7 @@ dependencies {
             'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.5',
             'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.10.5'
 
-    optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.4@jar',
+    optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:3.8@jar',
             'org.jenkins-ci.plugins:credentials:2.1.19@jar'
 
     testCompile 'junit:junit:4.13.1',
@@ -67,7 +67,7 @@ dependencies {
 }
 jenkinsPlugin {
     // version of Jenkins core this plugin depends on
-    coreVersion = '2.77'
+    coreVersion = '2.236'
 
     // short name of the plugin, defaults to the project name without trailing '-plugin'
     shortName = 'checkmarx'
