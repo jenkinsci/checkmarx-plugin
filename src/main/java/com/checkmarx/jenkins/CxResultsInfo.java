@@ -135,7 +135,7 @@ public class CxResultsInfo {
         int flowDurationSecs = Utils.calcSecFromDateTimeString(flowStartRegex, flowEndRegex);
         int parseDurationSecs = Utils.calcSecFromDateTimeString(parseStartRegex, parseEndRegex);
         int queryDurationSecs = Utils.calcSecFromDateTimeString(queryStartRegex, queryEndRegex);
-        int scanDurationSecs = Utils.calcSecFromDateTimeString(scanDurationRegex.get(scanDurationRegex.size() - 1));
+        int scanDurationSecs = scanDurationRegex.size() > 0 ? Utils.calcSecFromDateTimeString(scanDurationRegex.get(scanDurationRegex.size() - 1)) : 0;
         int resolverDurationSecs = Utils.calcSecFromDateTimeString(resolverStartRegex, resolverEndRegex);
         int absIntDurationSecs = Utils.calcSecFromDateTimeString(absIntStartRegex, absIntEndRegex);
 
