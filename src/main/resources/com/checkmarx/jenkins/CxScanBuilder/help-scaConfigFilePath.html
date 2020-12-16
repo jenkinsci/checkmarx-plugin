@@ -1,0 +1,27 @@
+Perform the below steps to include the configuration files in the SCA scan.<br>
+<br>
+1) Install the Jenkins plugin 'Config File Provider Plugin'.<br>
+
+2) Once the above plugin is installed, go to 'Manage Jenkins' -> 'Managed files' and click on 'Add new config' option.<br>
+
+3) Select the type as 'Custom' and click on 'Submit' button.<br>
+
+4) On the next page, provide an appropriate name in the 'Name' textbox that identifies your file and<br>
+   copy the contents of your config file in the 'Content' section. Click on 'Submit' and your file will be ready to use within Jenkins.<br>
+
+5) Go to the Job Configuration by clicking on 'Configure' link on your Job.<br>
+
+6) Under the 'Build Environment' section, select the checkbox named 'Provide Configuration files'<br>
+
+7) Under the 'File' dropdown option, select your desired configuration file name.<br>
+
+8) Under the 'Target' option, provide the path within the workspace where your file will be copied.<br>
+ * It has to be copied under the folder named '.cxsca.configurations'.<br>
+ * Kindly provide the original file name as mentioned in the package manager.<br>
+ * For e.g - For settings.xml, provide '.cxsca.configurations/settings.xml' as the input.<br>
+             For .npmrc file, provide '.cxsca.configurations/.npmrc'<br>
+
+9) The 'Variable' textbox and 'Replace Tokens' checkbox can be left blanked since these are required for the SCA scan.<br>
+
+10) Save the job configuration and the configuration file from the package manager will be used whenever the Job is triggered.<br>
+

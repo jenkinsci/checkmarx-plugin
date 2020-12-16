@@ -25,6 +25,7 @@ import com.cx.restclient.sast.dto.Preset;
 import com.cx.restclient.sast.dto.Project;
 import com.cx.restclient.sast.dto.SASTResults;
 import com.cx.restclient.sast.utils.LegacyClient;
+import com.cx.restclient.sca.utils.CxSCAFileSystemUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.TemplateException;
 import hudson.*;
@@ -1341,11 +1342,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             config.setOsaArchiveIncludePatterns(effectiveConfig.osaArchiveIncludePatterns.trim());
             config.setOsaRunInstall(effectiveConfig.osaInstallBeforeScan);
         } else if (config.isAstScaEnabled()) {
-            config.setAstScaConfig(getScaConfig(run, effectiveConfig));
+            config.setAstScaConfig(getScaConfig(run, env ,effectiveConfig));
         }
     }
 
-    private AstScaConfig getScaConfig(Run<?, ?> run, DependencyScanConfig dsConfig) {
+    private AstScaConfig getScaConfig(Run<?, ?> run, EnvVars env, DependencyScanConfig dsConfig) {
         AstScaConfig result = new AstScaConfig();
         result.setApiUrl(dsConfig.scaServerUrl);
         result.setAccessControlUrl(dsConfig.scaAccessControlUrl);
@@ -1359,6 +1360,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         } else {
             log.warn("CxSCA credentials are not specified.");
         }
+        if(StringUtils.isNotEmpty(dsConfig.scaEnvVariables))
+        {
+            result.setEnvVariables(CxSCAFileSystemUtils.convertStringToKeyValueMap(env.expand(dsConfig.scaEnvVariables)));
+        }
+
+        result.setConfigFilePaths(Arrays.asList(dsConfig.configFilePath));
         return result;
     }
 
