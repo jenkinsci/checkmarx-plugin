@@ -62,6 +62,7 @@
         <f:optionalBlock title="Deny new Checkmarx projects creation" inline="true" field="prohibitProjectCreation"/>
 
         <f:optionalBlock title="Hide results" inline="true" field="hideResults"/>
+        <f:optionalBlock title="Remove Html results in Async mode" inline="true" field="asyncHtmlRemoval"/>
 
         <f:entry name="jobGlobalStatusOnError" title="Job status when CxSAST scan returns an error:"
                  field="jobGlobalStatusOnError">

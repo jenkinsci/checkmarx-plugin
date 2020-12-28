@@ -844,9 +844,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
             return;
         }
+
         //Asynchronous scan - add note message and previous build reports
-        String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
-        cxScanResult.setHtmlReportName(reportName);
+        if(!descriptor.isAsyncHtmlRemoval()){
+            String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
+            cxScanResult.setHtmlReportName(reportName);
+        }
         run.addAction(cxScanResult);
     }
 
@@ -1423,6 +1426,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         private boolean prohibitProjectCreation;
         private boolean hideResults;
+        private boolean asyncHtmlRemoval;
+
         private boolean enableCertificateValidation;
         @Nullable
         private String excludeFolders;
@@ -1534,6 +1539,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         public void setHideResults(boolean hideResults) {
             this.hideResults = hideResults;
+        }
+
+        public boolean isAsyncHtmlRemoval() {
+            return asyncHtmlRemoval;
+        }
+
+        public void setAsyncHtmlRemoval(boolean asyncHtmlRemoval) {
+            this.asyncHtmlRemoval = asyncHtmlRemoval;
         }
 
         public boolean isEnableCertificateValidation() {

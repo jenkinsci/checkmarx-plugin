@@ -31,12 +31,14 @@
                 </style>
                 <div id="async-note">
                     <div class="async-note"><div class="async-note-title">Note:</div>
-                        <div class="async-note-body" id="async-note-body">Job is configured to run Checkmarx scan asynchronously. Specific build scan result cannot be displayed in this mode.<br/> Displayed results are of the previous successful scan</div></div>
+                        <div class="async-note-body" id="async-note-body">Job is configured to run Checkmarx scan asynchronously. Specific build scan result cannot be displayed in this mode</div></div>
                 </div>
             </j:if>
-            <div>
-                ${result.getHtmlReport()}
-            </div>
+            <j:if test="${result.isRemoveAsyncHtml()}">
+                <div>
+                    ${result.getHtmlReport()}
+                </div>
+            </j:if>
         </j:forEach>
     </j:if>
 

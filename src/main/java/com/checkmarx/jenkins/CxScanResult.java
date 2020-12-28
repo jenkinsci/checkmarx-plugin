@@ -165,6 +165,12 @@ public class CxScanResult implements Action {
         return descriptor != null && !descriptor.isHideResults();
     }
 
+    public boolean isRemoveAsyncHtml() {
+        @Nullable
+        CxScanBuilder.DescriptorImpl descriptor = (CxScanBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(CxScanBuilder.class);
+        return descriptor != null && !descriptor.isAsyncHtmlRemoval();
+    }
+
     public boolean isOsaEnabled() {
         return osaEnabled;
     }
