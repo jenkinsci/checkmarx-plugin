@@ -173,6 +173,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private Result vulnerabilityThresholdResult;
     private Result resolvedVulnerabilityThresholdResult;
     private boolean avoidDuplicateProjectScans;
+    private boolean addGlobalCommenToBuildCommet;
     private Boolean generateXmlReport = true;
 
     public static final int MINIMUM_TIMEOUT_IN_MINUTES = 1;
@@ -219,6 +220,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             String thresholdSettings,
             String vulnerabilityThresholdResult,
             boolean avoidDuplicateProjectScans,
+            boolean addGlobalCommenToBuildCommet,
             Boolean generateXmlReport
     ) {
         this.useOwnServerCredentials = useOwnServerCredentials;
@@ -263,6 +265,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             this.vulnerabilityThresholdResult = Result.fromString(vulnerabilityThresholdResult);
         }
         this.avoidDuplicateProjectScans = avoidDuplicateProjectScans;
+        this.addGlobalCommenToBuildCommet=addGlobalCommenToBuildCommet;
         this.generateXmlReport = (generateXmlReport == null) ? true : generateXmlReport;
     }
 
@@ -520,6 +523,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public boolean isAvoidDuplicateProjectScans() {
         return avoidDuplicateProjectScans;
     }
+    public boolean isaddGlobalCommenToBuildCommet() {
+        return addGlobalCommenToBuildCommet;
+    }
 
     public Boolean getIsProxy() {
         return isProxy;
@@ -676,7 +682,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public void setAvoidDuplicateProjectScans(boolean avoidDuplicateProjectScans) {
         this.avoidDuplicateProjectScans = avoidDuplicateProjectScans;
     }
-
+    @DataBoundSetter
+    public void setaddGlobalCommenToBuildCommet(boolean addGlobalCommenToBuildCommet) {
+        this.addGlobalCommenToBuildCommet = addGlobalCommenToBuildCommet;
+    }
     @DataBoundSetter
     public void setGenerateXmlReport(Boolean generateXmlReport) {
         this.generateXmlReport = generateXmlReport;
@@ -951,6 +960,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             boolean useGlobalThreshold = shouldUseGlobalThreshold();
             boolean useJobThreshold = shouldUseJobThreshold();
             ret.setSastThresholdsEnabled(useGlobalThreshold || useJobThreshold);
+            if(addGlobalCommenToBuildCommet)
+            {
+                ret.setScanComment(comment+" "+env.expand(descriptor.sastcomment));
+            }
 
             if (useGlobalThreshold) {
                 ret.setSastHighThreshold(descriptor.getHighThresholdEnforcement());
@@ -1429,6 +1442,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         @Nullable
         private String filterPattern;
 
+        public String getSastcomment() {
+            return sastcomment;
+        }
+
+        public void setSastcomment(String sastcomment) {
+            this.sastcomment = sastcomment;
+        }
+
+        private String sastcomment;
 
         private boolean forcingVulnerabilityThresholdEnabled;
         @Nullable
