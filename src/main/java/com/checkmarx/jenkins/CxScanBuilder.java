@@ -846,7 +846,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         //Asynchronous scan - add note message and previous build reports
-        if(!descriptor.isAsyncHtmlRemoval()){
+        if(!descriptor.isAsyncHtmlRemoval() || config.getSynchronous()){
             String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
             cxScanResult.setHtmlReportName(reportName);
         }
