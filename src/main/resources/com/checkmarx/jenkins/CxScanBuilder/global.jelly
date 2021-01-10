@@ -68,6 +68,10 @@
                  field="jobGlobalStatusOnError">
             <f:enum field="jobGlobalStatusOnError">${it.displayName}</f:enum>
         </f:entry>
+         <f:entry title="Sast Comment" field="sastcomment">
+                    <f:textarea  default=""/>
+                </f:entry>
+
 
         <f:optionalBlock title="Globally Define vulnerability thresholds for all jobs" inline="true"
                          field="forcingVulnerabilityThresholdEnabled">

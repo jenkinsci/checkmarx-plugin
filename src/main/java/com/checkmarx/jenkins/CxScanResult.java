@@ -45,7 +45,7 @@ public class CxScanResult implements Action {
     private Boolean sastEnabled;
     private boolean osaEnabled;
 
-    //Results
+    //Resultsalc
     private OsaScanResult osaScanResult;
     private SastScanResult sastScanResult;
 
