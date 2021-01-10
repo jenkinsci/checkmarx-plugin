@@ -41,6 +41,10 @@
            with="serverUrl,username,password,timestamp,credentialsId,isProxy" />
     </f:optionalBlock>
 
+    <f:optionalBlock title="Enable config as code" inline="true" field="isConfigAsCode" checked="${instance==null?true:instance.isConfigAsCode}">
+                    <div style="font-weight: bold; padding: 8px;">The following fields will be overriding by config file values if exists (project name ,team name ,sast scan settings and sca scan settings.).</div>
+    </f:optionalBlock>
+
     <f:entry title="Checkmarx project name" description="Existing projects appear in a completion list when server url is provided (up to 20)">
         <f:combobox field="projectName" value="${instance.projectName == null?descriptor.defaultProjectName:instance.projectName}"/>
     </f:entry>
