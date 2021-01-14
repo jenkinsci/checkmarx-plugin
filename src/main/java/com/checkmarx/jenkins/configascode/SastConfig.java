@@ -34,12 +34,12 @@ public class SastConfig {
         this.preset = preset;
     }
 
-    public String getConfiguration() {
+    public String getEngineConfiguration() {
         return engineConfiguration;
     }
 
-    public void setConfiguration(String configuration) {
-        this.engineConfiguration = configuration;
+    public void setEngineConfiguration(String engineConfiguration) {
+        this.engineConfiguration = engineConfiguration;
     }
 
     public String getIncludeExcludePattern() {

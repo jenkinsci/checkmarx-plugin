@@ -90,7 +90,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     // Persistent plugin configuration parameters
     //////////////////////////////////////////////////////////////////////////////////////
     private boolean useOwnServerCredentials;
-    private boolean isConfigAsCode;
+
+    private boolean configAsCode;
     @Nullable
     private String serverUrl;
     @Nullable
@@ -193,7 +194,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             @Nullable String password,
             Boolean isProxy,
             String credentialsId,
-            boolean isConfigAsCode,
+            boolean configAsCode,
             String projectName,
             long projectId,
             String buildStep,
@@ -235,7 +236,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.username = username;
         this.password = Secret.fromString(password).getEncryptedValue();
         this.credentialsId = credentialsId;
-        this.isConfigAsCode = isConfigAsCode;
+        this.configAsCode = configAsCode;
         // Workaround for compatibility with Conditional BuildStep Plugin
         this.isProxy = (isProxy == null) ? true : isProxy;
         this.projectName = (projectName == null) ? buildStep : projectName;
@@ -280,6 +281,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     // Configuration fields getters
     public boolean isUseOwnServerCredentials() {
         return useOwnServerCredentials;
+    }
+
+    public boolean isConfigAsCode() {
+        return configAsCode;
+    }
+
+    @DataBoundSetter
+    public void setConfigAsCode(boolean configAsCode) {
+        this.configAsCode = configAsCode;
     }
 
     @Nullable
@@ -531,7 +541,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public boolean isAvoidDuplicateProjectScans() {
         return avoidDuplicateProjectScans;
     }
-    public boolean isaddGlobalCommenToBuildCommet() {
+    public boolean isAddGlobalCommenToBuildCommet() {
         return addGlobalCommenToBuildCommet;
     }
 
@@ -776,7 +786,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         setFsaConfiguration(env);
         CxScanConfig config = resolveConfiguration(run, descriptor, env, log);
 
-        if (isConfigAsCode) {
+        if (configAsCode) {
             try {
                 overrideConfigAsCode(config, workspace);
             } catch (ConfigurationException e) {
@@ -904,11 +914,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         if (configProvider.hasConfiguration(CX_ORIGIN, "project"))
             configAsCodeFromFile.setProject(
-                    configProvider.getConfiguration(CX_ORIGIN,"project",String.class));
+                    configProvider.getStringConfiguration(CX_ORIGIN,"project")
+                    );
 
         if (configProvider.hasConfiguration(CX_ORIGIN, "team"))
             configAsCodeFromFile.setTeam(
-                    configProvider.getConfiguration(CX_ORIGIN,"team",String.class));
+                    configProvider.getStringConfiguration(CX_ORIGIN,"team"));
 
         if (configProvider.hasConfiguration(CX_ORIGIN, "sast"))
             configAsCodeFromFile.setSast(
@@ -925,11 +936,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         //map global
         Optional.ofNullable(configAsCodeFromFile).ifPresent(cac -> {
-            if (StringUtils.isNotEmpty(cac.getProject()))
+            if (StringUtils.isNotEmpty(cac.getProject())) {
                 scanConfig.setProjectName(cac.getProject());
+                overridesResults.put("Project Name:", String.valueOf(cac.getProject()));
+            }
 
-            if (StringUtils.isNotEmpty(cac.getTeam()))
+            if (StringUtils.isNotEmpty(cac.getTeam())) {
                 scanConfig.setTeamPath(cac.getTeam());
+                overridesResults.put("Project Name:", String.valueOf(cac.getTeam()));
+            }
         });
 
         mapSastConfiguration(Optional.ofNullable(configAsCodeFromFile.getSast()), scanConfig, overridesResults);
@@ -1013,7 +1028,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     private void mapSastConfiguration(Optional<SastConfig> sast, CxScanConfig scanConfig, Map<String, String> overridesResults) {
-        sast.map(SastConfig::getConfiguration)
+        sast.map(SastConfig::getEngineConfiguration)
                 .filter(StringUtils::isNotBlank)
                 .ifPresent(pValue -> {
                     scanConfig.setEngineConfigurationName(pValue);

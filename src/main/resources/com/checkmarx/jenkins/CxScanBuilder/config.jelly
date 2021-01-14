@@ -41,7 +41,7 @@
            with="serverUrl,username,password,timestamp,credentialsId,isProxy" />
     </f:optionalBlock>
 
-    <f:optionalBlock title="Enable config as code" inline="true" field="isConfigAsCode" checked="${instance==null?true:instance.isConfigAsCode}">
+    <f:optionalBlock title="Enable config as code" inline="true" field="configAsCode" checked="${instance==null?true:instance.configAsCode}">
                     <div style="font-weight: bold; padding: 8px;">The following fields will be overriding by config file values if exists (project name ,team name ,sast scan settings and sca scan settings.).</div>
     </f:optionalBlock>
 
