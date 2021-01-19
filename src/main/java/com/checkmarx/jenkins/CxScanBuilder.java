@@ -1146,12 +1146,47 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
         return false;
     }
+    private String getJenkinURLForTheJob(EnvVars env) {
+        String passedURL = "";
+        try {
+            String jobName = env.get("JOB_NAME");
+            jobName = URLDecoder.decode(jobName, "UTF-8");
+            String jenURL = env.get("JENKINS_URL");
+            jenURL = jenURL.substring((jenURL.lastIndexOf("://")) + 3);
+            String hostName = jenURL.substring(0, jenURL.lastIndexOf(":"));
+            passedURL = hostName + " " + jobName;
+            if(passedURL.length()>50)
+                passedURL=passedURL.substring(0,50);
+            else
+                passedURL=passedURL;
+        } catch (UnsupportedEncodingException e) {
+            log.error("Failed to get jwnkin URL of the JOB: " + e.getMessage());
+        }
+        return passedURL;
+    }
+    private String getCxOriginUrl(EnvVars env, CxLoggerAdapter log) {
+        String jenURL = env.get("JENKINS_URL");
+        String jobName = env.get("JOB_NAME");
+        try {
+            jobName = URLDecoder.decode(jobName, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            log.error("Failed to get jenkin URL of the JOB: " + e.getMessage());
+        }
 
+        String originUrl = jenURL+"job/"+jobName;
+        return originUrl;
+    }
     private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) {
         CxScanConfig ret = new CxScanConfig();
 
+        String originUrl = getCxOriginUrl(env, log);
+        ret.setCxOriginUrl(originUrl);
+        String jenkinURL = getJenkinURLForTheJob(env);
+
         //general
-        ret.setCxOrigin(REQUEST_ORIGIN);
+        ret.setCxOrigin(jenkinURL);
+        log.debug("  ORIGIN FROM JENKIN :: "+ jenkinURL);
+        log.debug("  ORIGIN URL FROM JENKIN :: "+ originUrl);
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
         ret.setMvnPath(descriptor.getMvnPath());
         ret.setOsaGenerateJsonReport(false);
