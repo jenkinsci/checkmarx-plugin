@@ -1154,7 +1154,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             jobName = URLDecoder.decode(jobName, "UTF-8");
             String jenURL = env.get("JENKINS_URL");
             jenURL = jenURL.substring((jenURL.lastIndexOf("://")) + 3);
-            String hostName = jenURL.substring(0, jenURL.lastIndexOf(":"));
+            String hostName = "";
+            if(jenURL.indexOf(":")!=-1) {
+                hostName = jenURL.substring(0, jenURL.lastIndexOf(":"));
+            } else {
+                hostName = jenURL;
+            }
             passedURL = hostName + " " + jobName;
             if(passedURL.length()>50)
                 passedURL=passedURL.substring(0,50);
