@@ -44,7 +44,7 @@ dependencies {
     compileOnly 'com.intellij:annotations:12.0',
             'org.slf4j:slf4j-api:1.6.1'
 
-    compile 'com.checkmarx:cx-client-common:2020.4.132',
+    compile 'com.checkmarx:cx-client-common:2021.1.145',
             'com.checkmarx:cx-config-provider:1.0.14',
             'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.5',
             'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.10.5'

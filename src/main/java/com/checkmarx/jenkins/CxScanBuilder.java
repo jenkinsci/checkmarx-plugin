@@ -1146,6 +1146,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
         return false;
     }
+
     private String getJenkinURLForTheJob(EnvVars env) {
         String passedURL = "";
         try {
@@ -1164,6 +1165,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
         return passedURL;
     }
+
+
     private String getCxOriginUrl(EnvVars env, CxLoggerAdapter log) {
         String jenURL = env.get("JENKINS_URL");
         String jobName = env.get("JOB_NAME");
@@ -1176,6 +1179,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         String originUrl = jenURL+"job/"+jobName;
         return originUrl;
     }
+
     private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) {
         CxScanConfig ret = new CxScanConfig();
 
@@ -1187,6 +1191,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setCxOrigin(jenkinURL);
         log.debug("  ORIGIN FROM JENKIN :: "+ jenkinURL);
         log.debug("  ORIGIN URL FROM JENKIN :: "+ originUrl);
+
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
         ret.setMvnPath(descriptor.getMvnPath());
         ret.setOsaGenerateJsonReport(false);
