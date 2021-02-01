@@ -45,7 +45,7 @@ public class CxScanResult implements Action {
     private Boolean sastEnabled;
     private boolean osaEnabled;
 
-    //Results
+    //Resultsalc
     private OsaScanResult osaScanResult;
     private SastScanResult sastScanResult;
 
@@ -163,6 +163,12 @@ public class CxScanResult implements Action {
         @Nullable
         CxScanBuilder.DescriptorImpl descriptor = (CxScanBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(CxScanBuilder.class);
         return descriptor != null && !descriptor.isHideResults();
+    }
+
+    public boolean isRemoveAsyncHtml() {
+        @Nullable
+        CxScanBuilder.DescriptorImpl descriptor = (CxScanBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(CxScanBuilder.class);
+        return descriptor != null && (!descriptor.isAsyncHtmlRemoval() || !this.scanRanAsynchronous );
     }
 
     public boolean isOsaEnabled() {

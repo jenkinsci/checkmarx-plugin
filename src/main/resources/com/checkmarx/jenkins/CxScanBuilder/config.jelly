@@ -41,6 +41,10 @@
            with="serverUrl,username,password,timestamp,credentialsId,isProxy" />
     </f:optionalBlock>
 
+    <f:optionalBlock title="Enable config as code" inline="true" field="configAsCode" checked="${instance==null?true:instance.configAsCode}">
+                    <div style="font-weight: bold; padding: 8px;">The following fields will be overriding by config file values if exists (project name ,team name ,sast scan settings and sca scan settings.).</div>
+    </f:optionalBlock>
+
     <f:entry title="Checkmarx project name" description="Existing projects appear in a completion list when server url is provided (up to 20)">
         <f:combobox field="projectName" value="${instance.projectName == null?descriptor.defaultProjectName:instance.projectName}"/>
     </f:entry>
@@ -97,10 +101,11 @@
         <f:entry title="Source character encoding (configuration)" field="sourceEncoding" description="Default Configuration uses UTF-8">
             <f:select />
         </f:entry>
-
+            <f:optionalBlock title="Allow global comment" inline="true" field="addGlobalCommenToBuildCommet" checked="true"  />
         <f:entry title="Comment" field="comment">
             <f:textarea />
         </f:entry>
+
 
         <f:optionalBlock title="Avoid duplicate project scans in queue" inline="true" field="avoidDuplicateProjectScans" />
     </f:optionalBlock>

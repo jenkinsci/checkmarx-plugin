@@ -1,5 +1,11 @@
 package com.checkmarx.jenkins;
 
+import com.checkmarx.configprovider.ConfigProvider;
+import com.checkmarx.configprovider.dto.ResourceType;
+import com.checkmarx.configprovider.dto.interfaces.ConfigReader;
+import com.checkmarx.jenkins.configascode.ConfigAsCode;
+import com.checkmarx.jenkins.configascode.SastConfig;
+import com.checkmarx.jenkins.configascode.ScaConfig;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
@@ -42,21 +48,19 @@ import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.*;
 
 import javax.annotation.Nonnull;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import javax.naming.ConfigurationException;
+import java.io.*;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * The main entry point for Checkmarx plugin. This class implements the Builder
@@ -86,6 +90,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     // Persistent plugin configuration parameters
     //////////////////////////////////////////////////////////////////////////////////////
     private boolean useOwnServerCredentials;
+
+    private boolean configAsCode;
     @Nullable
     private String serverUrl;
     @Nullable
@@ -164,6 +170,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     //server log, will NOT print to job console
     private static final JenkinsServerLogger serverLog = new JenkinsServerLogger();
 
+    private static final String CONFIG_AS_CODE_FILE_NAME = "cx.config";
     //Print to job console, initialized within perform
     CxLoggerAdapter log;
 
@@ -173,6 +180,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private Result vulnerabilityThresholdResult;
     private Result resolvedVulnerabilityThresholdResult;
     private boolean avoidDuplicateProjectScans;
+    private boolean addGlobalCommenToBuildCommet;
     private Boolean generateXmlReport = true;
 
     public static final int MINIMUM_TIMEOUT_IN_MINUTES = 1;
@@ -186,6 +194,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             @Nullable String password,
             Boolean isProxy,
             String credentialsId,
+            boolean configAsCode,
             String projectName,
             long projectId,
             String buildStep,
@@ -219,6 +228,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             String thresholdSettings,
             String vulnerabilityThresholdResult,
             boolean avoidDuplicateProjectScans,
+            boolean addGlobalCommenToBuildCommet,
             Boolean generateXmlReport
     ) {
         this.useOwnServerCredentials = useOwnServerCredentials;
@@ -226,6 +236,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.username = username;
         this.password = Secret.fromString(password).getEncryptedValue();
         this.credentialsId = credentialsId;
+        this.configAsCode = configAsCode;
         // Workaround for compatibility with Conditional BuildStep Plugin
         this.isProxy = (isProxy == null) ? true : isProxy;
         this.projectName = (projectName == null) ? buildStep : projectName;
@@ -263,12 +274,22 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             this.vulnerabilityThresholdResult = Result.fromString(vulnerabilityThresholdResult);
         }
         this.avoidDuplicateProjectScans = avoidDuplicateProjectScans;
+        this.addGlobalCommenToBuildCommet=addGlobalCommenToBuildCommet;
         this.generateXmlReport = (generateXmlReport == null) ? true : generateXmlReport;
     }
 
     // Configuration fields getters
     public boolean isUseOwnServerCredentials() {
         return useOwnServerCredentials;
+    }
+
+    public boolean isConfigAsCode() {
+        return configAsCode;
+    }
+
+    @DataBoundSetter
+    public void setConfigAsCode(boolean configAsCode) {
+        this.configAsCode = configAsCode;
     }
 
     @Nullable
@@ -520,6 +541,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public boolean isAvoidDuplicateProjectScans() {
         return avoidDuplicateProjectScans;
     }
+    public boolean isAddGlobalCommenToBuildCommet() {
+        return addGlobalCommenToBuildCommet;
+    }
 
     public Boolean getIsProxy() {
         return isProxy;
@@ -676,7 +700,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public void setAvoidDuplicateProjectScans(boolean avoidDuplicateProjectScans) {
         this.avoidDuplicateProjectScans = avoidDuplicateProjectScans;
     }
-
+    @DataBoundSetter
+    public void setaddGlobalCommenToBuildCommet(boolean addGlobalCommenToBuildCommet) {
+        this.addGlobalCommenToBuildCommet = addGlobalCommenToBuildCommet;
+    }
     @DataBoundSetter
     public void setGenerateXmlReport(Boolean generateXmlReport) {
         this.generateXmlReport = generateXmlReport;
@@ -758,6 +785,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         EnvVars env = run.getEnvironment(listener);
         setFsaConfiguration(env);
         CxScanConfig config = resolveConfiguration(run, descriptor, env, log);
+
+        if (configAsCode) {
+            try {
+                overrideConfigAsCode(config, workspace);
+            } catch (ConfigurationException e) {
+                log.warn("couldn't load config file", e.getMessage());
+            }
+        }
+
 
         //print configuration
         printConfiguration(config, log);
@@ -844,11 +880,232 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
             return;
         }
+
         //Asynchronous scan - add note message and previous build reports
-        String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
-        cxScanResult.setHtmlReportName(reportName);
+        if (!descriptor.isAsyncHtmlRemoval() || config.getSynchronous()) {
+            String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
+            cxScanResult.setHtmlReportName(reportName);
+        }
         run.addAction(cxScanResult);
     }
+
+    private void overrideConfigAsCode(CxScanConfig config, FilePath workspace) throws ConfigurationException {
+        String configFilePath =
+                workspace.getRemote() + File.separator + ".checkmarx" + File.separator + CONFIG_AS_CODE_FILE_NAME;
+        com.checkmarx.configprovider.readers.FileReader reader =
+                new com.checkmarx.configprovider.readers.FileReader(ResourceType.YAML, configFilePath);
+
+        ConfigAsCode configAsCode = getConfigAsCode(reader);
+        overrideConfigAsCode(configAsCode, config);
+    }
+
+    private ConfigAsCode getConfigAsCode(ConfigReader reader) throws ConfigurationException {
+        ConfigProvider configProvider = ConfigProvider.getInstance();
+        String CX_ORIGIN = "jenkins";
+
+        configProvider.init(CX_ORIGIN, reader);
+
+        if (!configProvider.hasAnyConfiguration(CX_ORIGIN))
+            throw new ConfigurationException(String.format("Config file %s not found or couldn't", ".checkmarx/"
+                    + CONFIG_AS_CODE_FILE_NAME));
+
+
+        ConfigAsCode configAsCodeFromFile = new ConfigAsCode();
+
+        if (configProvider.hasConfiguration(CX_ORIGIN, "project"))
+            configAsCodeFromFile.setProject(
+                    configProvider.getStringConfiguration(CX_ORIGIN,"project")
+                    );
+
+        if (configProvider.hasConfiguration(CX_ORIGIN, "team"))
+            configAsCodeFromFile.setTeam(
+                    configProvider.getStringConfiguration(CX_ORIGIN,"team"));
+
+        if (configProvider.hasConfiguration(CX_ORIGIN, "sast"))
+            configAsCodeFromFile.setSast(
+                    configProvider.getConfiguration(CX_ORIGIN, "sast", SastConfig.class));
+
+        if (configProvider.hasConfiguration(CX_ORIGIN, "sca"))
+            configAsCodeFromFile.setSca(
+                    configProvider.getConfiguration(CX_ORIGIN, "sca", ScaConfig.class));
+        return configAsCodeFromFile;
+    }
+
+    private void overrideConfigAsCode(ConfigAsCode configAsCodeFromFile, CxScanConfig scanConfig) {
+        Map<String, String> overridesResults = new HashMap<>();
+
+        //map global
+        Optional.ofNullable(configAsCodeFromFile).ifPresent(cac -> {
+            if (StringUtils.isNotEmpty(cac.getProject())) {
+                scanConfig.setProjectName(cac.getProject());
+                overridesResults.put("Project Name:", String.valueOf(cac.getProject()));
+            }
+
+            if (StringUtils.isNotEmpty(cac.getTeam())) {
+                scanConfig.setTeamPath(cac.getTeam());
+                overridesResults.put("Project Name:", String.valueOf(cac.getTeam()));
+            }
+        });
+
+        mapSastConfiguration(Optional.ofNullable(configAsCodeFromFile.getSast()), scanConfig, overridesResults);
+        mapScaConfiguration(Optional.ofNullable(configAsCodeFromFile.getSca()), scanConfig, overridesResults);
+
+        if (!overridesResults.isEmpty()) {
+            log.info("the following fields was overrides using config as code file : ");
+            overridesResults.keySet().forEach(key -> log.info(String.format("%s = %s", key, overridesResults.get(key))));
+        }
+    }
+
+
+    private void mapScaConfiguration(Optional<ScaConfig> sca, CxScanConfig scanConfig, Map<String, String> overridesResults) {
+
+        AtomicReference<String> fileInclude = new AtomicReference<>("");
+        AtomicReference<String> fileExclude = new AtomicReference<>("");
+
+        sca.map(ScaConfig::getFileExclude)
+                .filter(StringUtils::isNotBlank)
+                .ifPresent(pValue -> {
+                    fileExclude.set(pValue);
+                    overridesResults.put("Sca File Exclude", pValue);
+                });
+
+        sca.map(ScaConfig::getFileInclude)
+                .filter(StringUtils::isNotBlank)
+                .ifPresent(pValue -> {
+                    fileInclude.set(pValue);
+                    overridesResults.put("Sca File Include", pValue);
+                });
+
+        sca.map(ScaConfig::getPathExclude)
+                .filter(StringUtils::isNotBlank)
+                .ifPresent(pValue -> {
+                    scanConfig.setOsaFolderExclusions(pValue);
+                    overridesResults.put("Sca Folder Exclude", pValue);
+                });
+
+        sca.map(ScaConfig::getHigh)
+                .filter(n -> n > 0)
+                .ifPresent(pValue -> {
+                    scanConfig.setOsaThresholdsEnabled(true);
+                    scanConfig.setOsaHighThreshold(pValue);
+                    overridesResults.put("Sca High", String.valueOf(pValue));
+                });
+
+        sca.map(ScaConfig::getMedium)
+                .filter(n -> n > 0)
+                .ifPresent(pValue -> {
+                    scanConfig.setOsaThresholdsEnabled(true);
+                    scanConfig.setOsaMediumThreshold(pValue);
+                    overridesResults.put("Sca Medium", String.valueOf(pValue));
+                });
+
+        sca.map(ScaConfig::getLow)
+                .filter(n -> n > 0)
+                .ifPresent(pValue -> {
+                    scanConfig.setOsaThresholdsEnabled(true);
+                    scanConfig.setOsaLowThreshold(pValue);
+                    overridesResults.put("Sca Low", String.valueOf(pValue));
+                });
+
+        //build include/exclude file pattern
+        if (!fileExclude.get().isEmpty() || !fileInclude.get().isEmpty())
+            setDependencyScanFilterPattern(scanConfig, fileInclude.get(), fileExclude.get());
+
+    }
+
+    private void setDependencyScanFilterPattern(CxScanConfig scanConfig, String includedFiles, String excludedFiles) {
+        String filterPattern = null;
+        if (includedFiles != null) {
+            if (excludedFiles != null) {
+                filterPattern = includedFiles + ", " + excludedFiles;
+            } else
+                filterPattern = includedFiles;
+        } else if (excludedFiles != null) {
+            filterPattern = excludedFiles;
+        }
+
+        scanConfig.setOsaFilterPattern(filterPattern);
+    }
+
+    private void mapSastConfiguration(Optional<SastConfig> sast, CxScanConfig scanConfig, Map<String, String> overridesResults) {
+        sast.map(SastConfig::getEngineConfiguration)
+                .filter(StringUtils::isNotBlank)
+                .ifPresent(pValue -> {
+                    scanConfig.setEngineConfigurationName(pValue);
+                    overridesResults.put("Configuration", pValue);
+                });
+
+        sast.map(SastConfig::isIncremental)
+                .ifPresent(pValue -> {
+                    scanConfig.setIncremental(pValue);
+                    overridesResults.put("Is Incremental", String.valueOf(pValue));
+                });
+
+        sast.map(SastConfig::isPrivateScan)
+                .ifPresent(pValue -> {
+                    scanConfig.setPublic(!pValue);
+                    overridesResults.put("Is Private", String.valueOf(pValue));
+                });
+
+        sast.map(SastConfig::getLow)
+                .filter(n -> n > 0)
+                .ifPresent(pValue -> {
+                    scanConfig.setSastThresholdsEnabled(true);
+                    scanConfig.setSastLowThreshold(pValue);
+                    overridesResults.put("Low", String.valueOf(pValue));
+                });
+
+        sast.map(SastConfig::getMedium)
+                .filter(n -> n > 0)
+                .ifPresent(pValue -> {
+                    scanConfig.setSastThresholdsEnabled(true);
+                    scanConfig.setSastMediumThreshold(pValue);
+                    overridesResults.put("Medium", String.valueOf(pValue));
+                });
+
+        sast.map(SastConfig::getHigh)
+                .filter(n -> n > 0)
+                .ifPresent(pValue -> {
+                    scanConfig.setSastThresholdsEnabled(true);
+                    scanConfig.setSastHighThreshold(pValue);
+                    overridesResults.put("High", String.valueOf(pValue));
+                });
+        sast.map(SastConfig::getPreset)
+                .filter(StringUtils::isNotBlank)
+                .ifPresent(pValue -> {
+                    scanConfig.setPresetName(pValue);
+                    overridesResults.put("Preset", pValue);
+                });
+
+        sast.map(SastConfig::getExcludeFolders)
+                .filter(StringUtils::isNotBlank)
+                .ifPresent(pValue -> {
+                    if (StringUtils.isNotEmpty(scanConfig.getSastFolderExclusions())) {
+                        pValue = Stream.of(scanConfig.getSastFolderExclusions().split(","), pValue.split(","))
+                                .flatMap(x -> Arrays.stream(x))
+                                .map(String::trim)
+                                .distinct()
+                                .collect(Collectors.joining(","));
+                    }
+                    scanConfig.setSastFolderExclusions(pValue);
+                    overridesResults.put("Folder Exclusions", pValue);
+                });
+
+        sast.map(SastConfig::getIncludeExcludePattern)
+                .filter(StringUtils::isNotBlank)
+                .ifPresent(pValue -> {
+                    if (StringUtils.isNotEmpty(scanConfig.getSastFilterPattern())) {
+                        pValue = Stream.of(scanConfig.getSastFilterPattern().split(","), pValue.split(","))
+                                .flatMap(x -> Arrays.stream(x))
+                                .map(String::trim)
+                                .distinct()
+                                .collect(Collectors.joining(","));
+                    }
+                    scanConfig.setSastFilterPattern(pValue);
+                    overridesResults.put("Include/Exclude pattern", pValue);
+                });
+    }
+
 
     private void createScaReports(AstScaResults scaResults, File checkmarxBuildDir) {
         writeJsonObjectToFile(scaResults.getSummary(), new File(checkmarxBuildDir, SCA_SUMMERY_JSON), "OSA summary json report");
@@ -890,11 +1147,56 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return false;
     }
 
+    private String getJenkinURLForTheJob(EnvVars env) {
+        String passedURL = "";
+        try {
+            String jobName = env.get("JOB_NAME");
+            jobName = URLDecoder.decode(jobName, "UTF-8");
+            String jenURL = env.get("JENKINS_URL");
+            jenURL = jenURL.substring((jenURL.lastIndexOf("://")) + 3);
+            String hostName = "";
+            if(jenURL.indexOf(":")!=-1) {
+                hostName = jenURL.substring(0, jenURL.lastIndexOf(":"));
+            } else {
+                hostName = jenURL;
+            }
+            passedURL = hostName + " " + jobName;
+            if(passedURL.length()>50)
+                passedURL=passedURL.substring(0,50);
+            else
+                passedURL=passedURL;
+        } catch (UnsupportedEncodingException e) {
+            log.error("Failed to get jwnkin URL of the JOB: " + e.getMessage());
+        }
+        return passedURL;
+    }
+
+
+    private String getCxOriginUrl(EnvVars env, CxLoggerAdapter log) {
+        String jenURL = env.get("JENKINS_URL");
+        String jobName = env.get("JOB_NAME");
+        try {
+            jobName = URLDecoder.decode(jobName, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            log.error("Failed to get jenkin URL of the JOB: " + e.getMessage());
+        }
+
+        String originUrl = jenURL+"job/"+jobName;
+        return originUrl;
+    }
+
     private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) {
         CxScanConfig ret = new CxScanConfig();
 
+        String originUrl = getCxOriginUrl(env, log);
+        ret.setCxOriginUrl(originUrl);
+        String jenkinURL = getJenkinURLForTheJob(env);
+
         //general
-        ret.setCxOrigin(REQUEST_ORIGIN);
+        ret.setCxOrigin(jenkinURL);
+        log.debug("  ORIGIN FROM JENKIN :: "+ jenkinURL);
+        log.debug("  ORIGIN URL FROM JENKIN :: "+ originUrl);
+
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
         ret.setMvnPath(descriptor.getMvnPath());
         ret.setOsaGenerateJsonReport(false);
@@ -951,6 +1253,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             boolean useGlobalThreshold = shouldUseGlobalThreshold();
             boolean useJobThreshold = shouldUseJobThreshold();
             ret.setSastThresholdsEnabled(useGlobalThreshold || useJobThreshold);
+            if(addGlobalCommenToBuildCommet)
+            {
+                ret.setScanComment(comment+" "+env.expand(descriptor.sastcomment));
+            }
 
             if (useGlobalThreshold) {
                 ret.setSastHighThreshold(descriptor.getHighThresholdEnforcement());
@@ -1423,12 +1729,23 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         private boolean prohibitProjectCreation;
         private boolean hideResults;
+        private boolean asyncHtmlRemoval;
+
         private boolean enableCertificateValidation;
         @Nullable
         private String excludeFolders;
         @Nullable
         private String filterPattern;
 
+        public String getSastcomment() {
+            return sastcomment;
+        }
+
+        public void setSastcomment(String sastcomment) {
+            this.sastcomment = sastcomment;
+        }
+
+        private String sastcomment;
 
         private boolean forcingVulnerabilityThresholdEnabled;
         @Nullable
@@ -1534,6 +1851,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         public void setHideResults(boolean hideResults) {
             this.hideResults = hideResults;
+        }
+
+        public boolean isAsyncHtmlRemoval() {
+            return asyncHtmlRemoval;
+        }
+
+        public void setAsyncHtmlRemoval(boolean asyncHtmlRemoval) {
+            this.asyncHtmlRemoval = asyncHtmlRemoval;
         }
 
         public boolean isEnableCertificateValidation() {
