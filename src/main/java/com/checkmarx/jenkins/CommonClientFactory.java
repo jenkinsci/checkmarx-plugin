@@ -12,14 +12,14 @@ class CommonClientFactory {
     private static final String SCAN_ORIGIN = "Jenkins";
 
     static LegacyClient getInstance(CxCredentials credentials,
-                                    boolean enableCertificateValidation,
+                                    boolean disableCertificateValidation,
                                     Logger log, boolean isProxy)
             throws MalformedURLException, CxClientException {
         CxScanConfig scanConfig = new CxScanConfig(credentials.getServerUrl(),
                 credentials.getUsername(),
                 Aes.decrypt(credentials.getPassword(), credentials.getUsername()),
                 SCAN_ORIGIN,
-                !enableCertificateValidation);
+                disableCertificateValidation);
 
         if (isProxy) {
             scanConfig.setProxyConfig(ProxyHelper.getProxyConfig());

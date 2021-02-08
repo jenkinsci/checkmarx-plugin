@@ -16,7 +16,7 @@
         </f:invisibleEntry>
 
         <f:optionalBlock title="Enable TLS/SSL Server Certificate Validation" inline="true"
-                         field="enableCertificateValidation"/>
+                         field="disableCertificateValidation"/>
 
         <f:entry title="Default Server URL" field="serverUrl">
             <f:textbox/>

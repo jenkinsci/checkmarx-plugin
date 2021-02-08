@@ -1197,7 +1197,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.debug("  ORIGIN FROM JENKIN :: "+ jenkinURL);
         log.debug("  ORIGIN URL FROM JENKIN :: "+ originUrl);
 
-        ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
+        ret.setDisableCertificateValidation(descriptor.isDisableCertificateValidation());
         ret.setMvnPath(descriptor.getMvnPath());
         ret.setOsaGenerateJsonReport(false);
 
@@ -1731,7 +1731,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private boolean hideResults;
         private boolean asyncHtmlRemoval;
 
-        private boolean enableCertificateValidation;
+        private boolean disableCertificateValidation;
         @Nullable
         private String excludeFolders;
         @Nullable
@@ -1861,13 +1861,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             this.asyncHtmlRemoval = asyncHtmlRemoval;
         }
 
-        public boolean isEnableCertificateValidation() {
-            return enableCertificateValidation;
+        public boolean isDisableCertificateValidation() {
+            return disableCertificateValidation;
         }
 
-        public void setEnableCertificateValidation(final boolean enableCertificateValidation) {
+        public void setDisableCertificateValidation(final boolean disableCertificateValidation) {
 
-            if (!this.enableCertificateValidation && enableCertificateValidation) {
+            if (!this.disableCertificateValidation && disableCertificateValidation) {
                 /*
                 This condition in needed to re-enable immediately the verification of
 	            server certificates as the user changes the setting. This alleviates
@@ -1875,7 +1875,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 	            effect.
 	             */
             }
-            this.enableCertificateValidation = enableCertificateValidation;
+            this.disableCertificateValidation = disableCertificateValidation;
         }
 
         @Nullable
@@ -2057,9 +2057,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     CxCredentials.validateCxCredentials(cred);
                     Jenkins instance = Jenkins.getInstance();
                     if (instance != null && instance.proxy != null && isProxy && !(isCxURLinNoProxyHost(serverUrl, instance.proxy.getNoProxyHostPatterns()))) {
-                        commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(), serverLog, true);
+                        commonClient = CommonClientFactory.getInstance(cred, this.isDisableCertificateValidation(), serverLog, true);
                     } else {
-                        commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(), serverLog, false);
+                        commonClient = CommonClientFactory.getInstance(cred, this.isDisableCertificateValidation(), serverLog, false);
                     }
                 } catch (Exception e) {
                     return buildError(e, "Failed to init cx client");
@@ -2112,7 +2112,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             try {
                 CxScanConfig config = new CxScanConfig();
                 config.setCxOrigin(REQUEST_ORIGIN);
-                config.setDisableCertificateValidation(!isEnableCertificateValidation());
+                config.setDisableCertificateValidation(isDisableCertificateValidation());
                 config.setOsaGenerateJsonReport(false);
 
                 AstScaConfig scaConfig = new AstScaConfig();
@@ -2161,9 +2161,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             LegacyClient ret;
             Jenkins instance = Jenkins.getInstance();
             if (instance != null && instance.proxy != null && isProxy && !(isCxURLinNoProxyHost(serverUrl, instance.proxy.getNoProxyHostPatterns()))) {
-                ret = CommonClientFactory.getInstance(credentials, this.isEnableCertificateValidation(), serverLog, true);
+                ret = CommonClientFactory.getInstance(credentials, this.isDisableCertificateValidation(), serverLog, true);
             } else {
-                ret = CommonClientFactory.getInstance(credentials, this.isEnableCertificateValidation(), serverLog, false);
+                ret = CommonClientFactory.getInstance(credentials, this.isDisableCertificateValidation(), serverLog, false);
             }
             ret.login();
             return ret;
