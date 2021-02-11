@@ -1152,6 +1152,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         try {
             String jobName = env.get("JOB_NAME");
             jobName = URLDecoder.decode(jobName, "UTF-8");
+            jobName = jobName.replaceAll("[^.a-zA-Z0-9\\s]", " ");
             String jenURL = env.get("JENKINS_URL");
             jenURL = jenURL.substring((jenURL.lastIndexOf("://")) + 3);
             String hostName = "";
@@ -1160,13 +1161,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             } else {
                 hostName = jenURL;
             }
-            passedURL = hostName + " " + jobName;
+            passedURL = "Jenkins " + hostName + " " + jobName;
+            // 50 is the maximum number of characters allowed by SAST server
             if(passedURL.length()>50)
                 passedURL=passedURL.substring(0,50);
             else
                 passedURL=passedURL;
         } catch (UnsupportedEncodingException e) {
-            log.error("Failed to get jwnkin URL of the JOB: " + e.getMessage());
+            log.error("Failed to get Jenkins URL of the JOB: " + e.getMessage());
         }
         return passedURL;
     }
@@ -1175,12 +1177,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private String getCxOriginUrl(EnvVars env, CxLoggerAdapter log) {
         String jenURL = env.get("JENKINS_URL");
         String jobName = env.get("JOB_NAME");
-        try {
-            jobName = URLDecoder.decode(jobName, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            log.error("Failed to get jenkin URL of the JOB: " + e.getMessage());
-        }
-
         String originUrl = jenURL+"job/"+jobName;
         return originUrl;
     }
