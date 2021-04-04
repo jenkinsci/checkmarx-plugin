@@ -1251,7 +1251,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             ret.setSastThresholdsEnabled(useGlobalThreshold || useJobThreshold);
             if(addGlobalCommenToBuildCommet)
             {
-                ret.setScanComment(comment+" "+env.expand(descriptor.sastcomment));
+                if ((env.expand(descriptor.sastcomment))!= null){
+                ret.setScanComment(comment+" "+env.expand(descriptor.sastcomment));}
+                else {
+                    ret.setScanComment(comment);
+                }
             }
 
             if (useGlobalThreshold) {
