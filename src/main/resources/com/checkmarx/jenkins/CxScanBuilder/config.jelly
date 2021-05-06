@@ -164,15 +164,40 @@
                     <f:entry title="Account" field="scaTenant">
                         <f:textbox value="${instance.dependencyScanConfig.scaTenant}"/>
                     </f:entry>
+                    <f:entry title="SCA Environment Variables" field="scaEnvVariables">
+                        <f:textarea value="${instance.dependencyScanConfig.scaEnvVariables}" />
+                    </f:entry>
+                    <f:entry title="Config File Path" field="scaConfigFile">
+                        <f:textbox value="${instance.dependencyScanConfig.scaConfigFile}" />
+                    </f:entry>
+                    
                     <f:validateButton title="Test Connection" progress="Testing..." method="testScaConnection"
                                       with="scaServerUrl,scaAccessControlUrl,scaCredentialsId,scaTenant"/>
-                <f:optionalBlock title="IncludeSources" field="isIncludeSources" 
+                    <f:optionalBlock title="IncludeSources" field="isIncludeSources" 
                     inline="true"  checked="${instance.dependencyScanConfig.isIncludeSources}"/>
+                    
+                    <f:optionalBlock title="Enable exploitable path" field="isExploitablePath" 
+                    inline="true"  checked="${instance.dependencyScanConfig.isExploitablePath}">
+                    
+      			 <f:optionalBlock title="Use default SAST server credentials (${descriptor.credentialsDescription})" field="useSastDetails" 
+                    inline="true"  negative="true" checked="${instance.dependencyScanConfig.useSastDetails}">
+                    <f:entry title="SAST Server Url" field="SASTServerUrl">
+                <f:textbox value="${instance.dependencyScanConfig.SASTServerUrl}" />
+            </f:entry>
+            <f:entry title="User Name" field="SASTUserName">
+               <f:textbox value="${instance.dependencyScanConfig.SASTUserName}" />
+            </f:entry>
+            <f:entry title="Password" field="SASTPassword">
+              <f:password value="${instance.dependencyScanConfig.SASTPassword}" />
+            </f:entry>
+      </f:optionalBlock>
+    </f:optionalBlock>
                 </f:nested>
             </f:radioBlock>
         </f:optionalBlock>
+        
     </f:optionalBlock>
-
+    
 	<!-- -= Build Control =- -->
     <f:section title="Build Control">
         <f:entry name="jobStatusOnError" title="Job status when scan returns an error:" field="jobStatusOnError">

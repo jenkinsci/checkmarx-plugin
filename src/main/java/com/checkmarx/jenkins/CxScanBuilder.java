@@ -61,6 +61,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import com.cx.restclient.sca.utils.CxSCAFileSystemUtils;
 
 /**
  * The main entry point for Checkmarx plugin. This class implements the Builder
@@ -1181,7 +1182,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return originUrl;
     }
 
-    private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) {
+    private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) throws FileNotFoundException {
         CxScanConfig ret = new CxScanConfig();
 
         String originUrl = getCxOriginUrl(env, log);
@@ -1290,7 +1291,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return ret;
     }
 
-    private void configureDependencyScan(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxScanConfig config) {
+    private void configureDependencyScan(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxScanConfig config) throws FileNotFoundException {
         boolean dependencyScanEnabled = dependencyScanConfig != null;
         if (!dependencyScanEnabled) {
             return;
@@ -1341,11 +1342,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             config.setOsaArchiveIncludePatterns(effectiveConfig.osaArchiveIncludePatterns.trim());
             config.setOsaRunInstall(effectiveConfig.osaInstallBeforeScan);
         } else if (config.isAstScaEnabled()) {
-            config.setAstScaConfig(getScaConfig(run, effectiveConfig));
+            config.setAstScaConfig(getScaConfig(run,env, effectiveConfig));
         }
     }
 
-    private AstScaConfig getScaConfig(Run<?, ?> run, DependencyScanConfig dsConfig) {
+    private AstScaConfig getScaConfig(Run<?, ?> run, EnvVars env,DependencyScanConfig dsConfig) throws FileNotFoundException {
         AstScaConfig result = new AstScaConfig();
         result.setApiUrl(dsConfig.scaServerUrl);
         result.setAccessControlUrl(dsConfig.scaAccessControlUrl);
@@ -1359,6 +1360,29 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         } else {
             log.warn("CxSCA credentials are not specified.");
         }
+        String str1 = dsConfig.scaEnvVariables;
+        if(StringUtils.isNotEmpty(dsConfig.scaEnvVariables))
+        {
+           // result.setEnvVariables(CxSCAFileSystemUtils.convertStringToKeyValueMap(env.expand(dsConfig.scaEnvVariables)));
+        }
+        String filePath = dsConfig.scaConfigFile;
+        File file = new File(filePath);
+        Scanner myReader = new Scanner(file);
+        while (myReader.hasNextLine()) {
+          String data = myReader.nextLine();
+        }
+        result.setSastProjectId(projectName);
+        boolean isEx= dsConfig.isExploitablePath;
+        boolean isSast= dsConfig.useSastDetails;
+        log.debug("boolean "+isEx+" isSast  "+isSast);
+        String url = dsConfig.SASTServerUrl;
+        String user = dsConfig.SASTUserName;
+        String pass = dsConfig.SASTPassword;
+        log.debug("All the way "+url+" User  "+user+"  Password   "+pass);
+        
+        
+        //result.setConfigFilePaths(Arrays.asList(dsConfig.configFilePath));
+        
         return result;
     }
 
