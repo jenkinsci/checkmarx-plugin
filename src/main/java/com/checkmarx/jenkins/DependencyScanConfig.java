@@ -43,7 +43,10 @@ public class DependencyScanConfig {
 
     @DataBoundSetter
     public String scaTenant;
-
+    
+    @DataBoundSetter
+    public boolean isIncludeSources;
+    
     @DataBoundSetter
     public String fsaVariables;
 

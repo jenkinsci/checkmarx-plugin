@@ -1351,7 +1351,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         result.setAccessControlUrl(dsConfig.scaAccessControlUrl);
         result.setWebAppUrl(dsConfig.scaWebAppUrl);
         result.setTenant(dsConfig.scaTenant);
-
+        result.setIncludeSources(dsConfig.isIncludeSources);
         UsernamePasswordCredentials credentials = CxCredentials.getCredentialsById(dsConfig.scaCredentialsId, run);
         if (credentials != null) {
             result.setUsername(credentials.getUsername());

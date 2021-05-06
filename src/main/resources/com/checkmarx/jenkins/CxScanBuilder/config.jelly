@@ -166,6 +166,8 @@
                     </f:entry>
                     <f:validateButton title="Test Connection" progress="Testing..." method="testScaConnection"
                                       with="scaServerUrl,scaAccessControlUrl,scaCredentialsId,scaTenant"/>
+                <f:optionalBlock title="IncludeSources" field="isIncludeSources" 
+                    inline="true"  checked="${instance.dependencyScanConfig.isIncludeSources}"/>
                 </f:nested>
             </f:radioBlock>
         </f:optionalBlock>
