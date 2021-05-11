@@ -6,6 +6,7 @@ import com.checkmarx.configprovider.dto.interfaces.ConfigReader;
 import com.checkmarx.jenkins.configascode.ConfigAsCode;
 import com.checkmarx.jenkins.configascode.SastConfig;
 import com.checkmarx.jenkins.configascode.ScaConfig;
+import com.checkmarx.jenkins.exception.CxCredException;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
@@ -1275,7 +1276,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             ret.setSastThresholdsEnabled(useGlobalThreshold || useJobThreshold);
             if(addGlobalCommenToBuildCommet)
             {
-                ret.setScanComment(comment+" "+env.expand(descriptor.sastcomment));
+                if ((env.expand(descriptor.sastcomment))!= null){
+                ret.setScanComment(env.expand(comment)+" "+env.expand(descriptor.sastcomment));}
+                else {
+                    ret.setScanComment(env.expand(comment));
+                }
             }
 
             if (useGlobalThreshold) {
@@ -2219,6 +2224,9 @@ serverLog.debug("Welcome to the world ");
                 scaConfig.setTenant(scaTenant);
 
                 UsernamePasswordCredentials credentials = CxCredentials.getCredentialsById(scaCredentialsId, item);
+                if(credentials == null) {
+                	throw new CxCredException("Sca connection failed. Please recheck the account name and CxSCA credentials you provided and try again.");
+                }
                 scaConfig.setUsername(credentials.getUsername());
                 scaConfig.setPassword(credentials.getPassword().getPlainText());
                 scaConfig.setSourceLocationType(SourceLocationType.LOCAL_DIRECTORY);
@@ -2237,7 +2245,11 @@ serverLog.debug("Welcome to the world ");
                 }
 
                 CxClientDelegator commonClient = CommonClientFactory.getClientDelegatorInstance(config, serverLog);
-                commonClient.getScaClient().testScaConnection();
+                try {
+					commonClient.getScaClient().testScaConnection();
+				} catch (CxClientException e) {
+					throw new CxCredException("Sca connection failed. Please recheck the account name and CxSCA credentials you provided and try again.");
+				}
                 return FormValidation.ok("Success");
             } catch (Exception e) {
                 return buildError(e, "Failed to verify CxSCA connection.");
