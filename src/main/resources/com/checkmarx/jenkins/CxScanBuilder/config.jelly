@@ -163,14 +163,42 @@
                      </f:description>
                     <f:entry title="Account" field="scaTenant">
                         <f:textbox value="${instance.dependencyScanConfig.scaTenant}"/>
-                    </f:entry>
+                    </f:entry>  
                     <f:validateButton title="Test Connection" progress="Testing..." method="testScaConnection"
                                       with="scaServerUrl,scaAccessControlUrl,scaCredentialsId,scaTenant"/>
+                   
+                    <f:entry title="Package Manager's Config File(s) Path" field="scaConfigFile">
+                        <f:textarea value="${instance.dependencyScanConfig.scaConfigFile}" />
+                    </f:entry>
+                    
+                    <f:entry title="Private Registry Environment Variable" field="scaEnvVariables">
+                        <f:textarea value="${instance.dependencyScanConfig.scaEnvVariables}" />
+                    </f:entry>
+                   
+                    
+                    <f:optionalBlock title="Include Sources" field="isIncludeSources" 
+                    inline="true"  checked="${instance.dependencyScanConfig.isIncludeSources}"/>
+                    
+                    <f:optionalBlock title="Enable exploitable path" field="isExploitablePath" 
+                    inline="true"  checked="${instance.dependencyScanConfig.isExploitablePath}">
+      			  <f:optionalBlock title="Use default CxSAST server credentials (${descriptor.credentialsDescription})"   inline="true"  field="useSastDetails" 
+                    negative="true" checked="${instance==null||instance.useSastDetails==null?true:instance.useSastDetails}}">
+                    <f:entry title="CxSAST Server Url" field="SASTServerUrl">
+                <f:textbox default="${descriptor.serverUrl}" />
+            	</f:entry>
+            	<f:entry title="CxSAST credentials" field="sastCredentialsId">
+                 <c:select value="${instance.dependencyScanConfig.sastCredentialsId}" />
+                 </f:entry>
+                <f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
+           with="SASTServerUrl,username,password,timestamp,sastCredentialsId,isProxy" />
+      			 </f:optionalBlock>
+   			     </f:optionalBlock>
                 </f:nested>
             </f:radioBlock>
         </f:optionalBlock>
+        
     </f:optionalBlock>
-
+    
 	<!-- -= Build Control =- -->
     <f:section title="Build Control">
         <f:entry name="jobStatusOnError" title="Job status when scan returns an error:" field="jobStatusOnError">

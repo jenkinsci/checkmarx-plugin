@@ -61,6 +61,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import com.cx.restclient.sca.utils.CxSCAFileSystemUtils;
 
 /**
  * The main entry point for Checkmarx plugin. This class implements the Builder
@@ -90,6 +91,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     // Persistent plugin configuration parameters
     //////////////////////////////////////////////////////////////////////////////////////
     private boolean useOwnServerCredentials;
+    private boolean useSastDetails;
 
     private boolean configAsCode;
     @Nullable
@@ -99,6 +101,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     private String password;
     private String credentialsId;
+    private String sastCredentialsId;
     private Boolean isProxy = true;
     @Nullable
     private String projectName;
@@ -194,6 +197,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             @Nullable String password,
             Boolean isProxy,
             String credentialsId,
+            String sastCredentialsId,
             boolean configAsCode,
             String projectName,
             long projectId,
@@ -232,10 +236,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             Boolean generateXmlReport
     ) {
         this.useOwnServerCredentials = useOwnServerCredentials;
+        this.useSastDetails=useSastDetails;
         this.serverUrl = serverUrl;
         this.username = username;
         this.password = Secret.fromString(password).getEncryptedValue();
         this.credentialsId = credentialsId;
+        this.sastCredentialsId=sastCredentialsId;
         this.configAsCode = configAsCode;
         // Workaround for compatibility with Conditional BuildStep Plugin
         this.isProxy = (isProxy == null) ? true : isProxy;
@@ -283,7 +289,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return useOwnServerCredentials;
     }
 
-    public boolean isConfigAsCode() {
+    public boolean isUseSastDetails() {
+		return useSastDetails;
+	}
+
+    @DataBoundSetter
+	public void setUseSastDetails(boolean useSastDetails) {
+		this.useSastDetails = useSastDetails;
+	}
+
+	public boolean isConfigAsCode() {
         return configAsCode;
     }
 
@@ -320,7 +335,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.credentialsId = credentialsId;
     }
 
-    @Nullable
+    
+    public String getSastCredentialsId() {
+		return sastCredentialsId;
+	}
+
+	public void setSastCredentialsId(String sastCredentialsId) {
+		this.sastCredentialsId = sastCredentialsId;
+	}
+
+	@Nullable
     public String getProjectName() {
         return projectName;
     }
@@ -1341,17 +1365,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             config.setOsaArchiveIncludePatterns(effectiveConfig.osaArchiveIncludePatterns.trim());
             config.setOsaRunInstall(effectiveConfig.osaInstallBeforeScan);
         } else if (config.isAstScaEnabled()) {
-            config.setAstScaConfig(getScaConfig(run, effectiveConfig));
+            config.setAstScaConfig(getScaConfig(run,env, effectiveConfig));
         }
     }
 
-    private AstScaConfig getScaConfig(Run<?, ?> run, DependencyScanConfig dsConfig) {
+    private AstScaConfig getScaConfig(Run<?, ?> run, EnvVars env,DependencyScanConfig dsConfig)  {
         AstScaConfig result = new AstScaConfig();
         result.setApiUrl(dsConfig.scaServerUrl);
         result.setAccessControlUrl(dsConfig.scaAccessControlUrl);
         result.setWebAppUrl(dsConfig.scaWebAppUrl);
         result.setTenant(dsConfig.scaTenant);
-
+        result.setIncludeSources(dsConfig.isIncludeSources);
         UsernamePasswordCredentials credentials = CxCredentials.getCredentialsById(dsConfig.scaCredentialsId, run);
         if (credentials != null) {
             result.setUsername(credentials.getUsername());
@@ -1359,6 +1383,36 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         } else {
             log.warn("CxSCA credentials are not specified.");
         }
+        if(StringUtils.isNotEmpty(dsConfig.scaEnvVariables))
+        {
+           result.setEnvVariables(CxSCAFileSystemUtils.convertStringToKeyValueMap(env.expand(dsConfig.scaEnvVariables)));
+        }
+        String filePath = dsConfig.scaConfigFile;
+        String[] strArrayFile=filePath.split(",");
+        result.setConfigFilePaths(Arrays.asList(strArrayFile));
+        
+        if(dsConfig.isExploitablePath){
+        	if(dsConfig.useSastDetails){
+        		result.setSastProjectName(projectName);
+        		result.setSastPassword(password);
+        		result.setSastServerUrl(serverUrl);
+        		result.setSastUsername(username);
+        	}else{
+        		UsernamePasswordCredentials credentialSAST = CxCredentials.getCredentialsById(dsConfig.sastCredentialsId, run);
+                if (credentialSAST != null) {
+                    result.setSastUsername(credentialSAST.getUsername());
+                    result.setSastPassword(credentialSAST.getPassword().getPlainText());
+                } else {
+                    log.warn("CxSCA credentials are not specified.");
+                }
+        		result.setSastServerUrl(dsConfig.SASTServerUrl);
+        		
+        	}
+        }
+      
+        
+        //result.setConfigFilePaths(Arrays.asList(dsConfig.configFilePath));
+        
         return result;
     }
 
@@ -2044,7 +2098,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                @QueryParameter final String username, @QueryParameter final String timestamp,
                                                @QueryParameter final String credentialsId, @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
-
+serverLog.debug("Welcome to the world ");
             CxCredentials cred;
             LegacyClient commonClient = null;
             try {
@@ -2081,6 +2135,54 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 }
             }
         }
+        
+		public FormValidation doTestSastScaConnection(DependencyScanConfig dsConfig,
+				 @QueryParameter final String sastCredentialsId,
+				 @AncestorInPath Item item) {
+			// timestamp is not used in code, it is one of the arguments to
+			// invalidate Internet Explorer cache
+			CxCredentials cred;
+			LegacyClient commonClient = null;
+			serverLog.debug("Welcome to the mahol" );
+			try {
+				try {
+					cred = CxCredentials.resolveCred(true, serverUrl, username, getPasswordPlainText(password),
+							sastCredentialsId, this, item);
+					CxCredentials.validateCxCredentials(cred);
+					Jenkins instance = Jenkins.getInstance();
+					if (instance != null && instance.proxy != null && isProxy
+							&& !(isCxURLinNoProxyHost(serverUrl, instance.proxy.getNoProxyHostPatterns()))) {
+						commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(),
+								serverLog, true);
+					} else {
+						commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(),
+								serverLog, false);
+					}
+				} catch (Exception e) {
+					return buildError(e, "Failed to init cx client");
+				}
+
+				try {
+					commonClient.login();
+					try {
+						commonClient.getTeamList();
+					} catch (Exception e) {
+						return FormValidation.error("Connection Failed.\n"
+								+ "Validate the provided login credentials and server URL are correct.\n"
+								+ "In addition, make sure the installed plugin version is compatible with the CxSAST version according to CxSAST release notes.\n"
+								+ "Error: " + e.getMessage());
+					}
+					return FormValidation.ok("Success");
+				} catch (Exception e) {
+					return buildError(e, "Failed to login to Checkmarx server");
+				}
+			} finally {
+				if (commonClient != null) {
+					commonClient.close();
+				}
+			}
+		}
+        
 
         public FormValidation doValidateMvnPath(@QueryParameter final String mvnPath) throws InterruptedException {
             boolean mvnPathExists = false;
@@ -2543,6 +2645,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         public ListBoxModel doFillScaCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String scaCredentialsId) {
             return getCredentialList(item, scaCredentialsId);
+        }
+        public ListBoxModel doFillSastCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String sastCredentialsId) {
+            return getCredentialList(item, sastCredentialsId);
         }
 
         private ListBoxModel getCredentialList(Item item, String credentialsId) {

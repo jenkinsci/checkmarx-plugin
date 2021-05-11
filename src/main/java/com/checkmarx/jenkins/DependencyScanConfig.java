@@ -34,6 +34,27 @@ public class DependencyScanConfig {
 
     @DataBoundSetter
     public String scaAccessControlUrl;
+    
+    @DataBoundSetter
+    public String scaEnvVariables;
+    
+    @DataBoundSetter
+    public boolean useSastDetails;
+    
+    @DataBoundSetter
+    public boolean isExploitablePath;
+    
+    @DataBoundSetter
+    public String scaConfigFile;
+    
+    @DataBoundSetter
+    public String SASTServerUrl;
+    
+    @DataBoundSetter
+    public String SASTUserName;
+    
+    @DataBoundSetter
+    public String SASTPassword;
 
     @DataBoundSetter
     public String scaWebAppUrl;
@@ -43,9 +64,15 @@ public class DependencyScanConfig {
 
     @DataBoundSetter
     public String scaTenant;
-
+    
+    @DataBoundSetter
+    public boolean isIncludeSources;
+    
     @DataBoundSetter
     public String fsaVariables;
+    
+    @DataBoundSetter
+    public String sastCredentialsId;
 
     @DataBoundConstructor
     public DependencyScanConfig() {
