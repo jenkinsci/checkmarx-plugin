@@ -182,8 +182,8 @@
                     <f:optionalBlock title="Enable Exploitable Path" field="isExploitablePath" 
                     inline="true"  checked="${instance.dependencyScanConfig.isExploitablePath}">
                     
-                    <f:optionalBlock title="Use global settings (${descriptor.credentialsDescription})" field="useGlobalSastDetails" 
-                    inline="true"  negative="true" checked="${!instance.dependencyScanConfig.useGlobalSastDetails}">
+                    <f:optionalBlock title="Use global settings (${descriptor.credentialsDescription})" field="useJobLevelSastDetails" 
+                    inline="true"  negative="true" checked="${!instance.dependencyScanConfig.useJobLevelSastDetails}">
                     
                     <f:entry title="CxSAST Server Url" field="scaSastServerUrl">
                 			<f:textbox default="${descriptor.dependencyScanConfig.serverUrl}"  value="${instance.dependencyScanConfig.scaSastServerUrl}" />
@@ -197,8 +197,8 @@
                        <f:entry title="Project Full Path" field="scaSASTProjectFullPath">
                         <f:textbox value="${instance.dependencyScanConfig.scaSASTProjectFullPath}"/>
                         </f:entry>  
-                        <f:entry title="Project ID" field="scaSASTprojectID">
-                            <f:textbox checkMethod="POST" value="${instance.dependencyScanConfig.scaSASTprojectID}"/>
+                        <f:entry title="Project ID" field="scaSASTProjectID">
+                            <f:textbox checkMethod="POST" value="${instance.dependencyScanConfig.scaSASTProjectID}"/>
                         </f:entry>   
    			     	</f:optionalBlock>
                 </f:nested>

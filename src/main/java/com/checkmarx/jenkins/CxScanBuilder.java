@@ -1472,19 +1472,18 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     		scaSASTServerUrl = dsConfig.scaSastServerUrl;
 
         	if(!globalSettingsInUse){
-        		if(dsConfig.useGlobalSastDetails){
+        		if(!dsConfig.useJobLevelSastDetails){
         			scaSASTCred = CxCredentials.getCredentialsById(descriptor.getDependencyScanConfig().sastCredentialsId, run);
         			scaSASTServerUrl = descriptor.getDependencyScanConfig().scaSastServerUrl;
         		}
-        		//TODO Take Sangam's changes
-        		//derivedProjectName = dsConfig.scaSASTProjectName; 
-        		//derivedProjectId = dsConfig.scaSASTProjectId;
+        		derivedProjectName = dsConfig.scaSASTProjectFullPath; 
+        		derivedProjectId = dsConfig.scaSASTProjectID;
         	}
         	result.setSastServerUrl(scaSASTServerUrl);   	
     		result.setSastUsername(scaSASTCred.getUsername());
     		result.setSastPassword(scaSASTCred.getPassword().getPlainText());
     		result.setSastProjectName(derivedProjectName); 
-    		result.setSastProjectName(derivedProjectId); 
+    		result.setSastProjectId(derivedProjectId); 
     		        		
 		}        
         return result;
@@ -2229,8 +2228,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *         browser.
          */
         @POST
-        public FormValidation doCheckSASTprojectID(@QueryParameter String value,@QueryParameter String SASTProjectFullPath) {
-          if (StringUtil.isNullOrEmpty(value) && StringUtil.isNullOrEmpty(SASTProjectFullPath)) {
+        public FormValidation doCheckScaSASTprojectID(@QueryParameter String value,@QueryParameter String scaSASTProjectFullPath) {
+          if (StringUtil.isNullOrEmpty(value) && StringUtil.isNullOrEmpty(scaSASTProjectFullPath)) {
             return FormValidation.error("Must provide value for either 'Project Full Path' or 'Project Id'.");
           }
           return FormValidation.ok();

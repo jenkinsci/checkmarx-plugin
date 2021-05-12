@@ -42,7 +42,7 @@ public class DependencyScanConfig {
     public boolean isExploitablePath;
 
     @DataBoundSetter
-    public boolean useGlobalSastDetails;
+    public boolean useJobLevelSastDetails;
     
     @DataBoundSetter
     public String scaConfigFile;

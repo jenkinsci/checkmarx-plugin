@@ -167,9 +167,9 @@
                     <f:entry title="Private Registry Environment Variable" field="scaEnvVariables">
                         <f:textarea value="${descriptor.dependencyScanConfig.scaEnvVariables}" />
                     </f:entry>
-                <f:optionalBlock title="Enable exploitable path" field="isExploitablePath" 
+                <f:optionalBlock title="Enable Exploitable Path" field="isExploitablePath" 
                     inline="true"  checked="${descriptor.dependencyScanConfig.isExploitablePath}">
-                    <f:entry title="SAST Server Url" field="SASTServerUrl">
+                    <f:entry title="SAST Server Url" field="scaSastServerUrl">
                 <f:textbox value="${descriptor.dependencyScanConfig.scaSastServerUrl}" />
             </f:entry>
          <f:entry title="CxSAST credentials" field="sastCredentialsId">
