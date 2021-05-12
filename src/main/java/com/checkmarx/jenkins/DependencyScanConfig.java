@@ -46,6 +46,15 @@ public class DependencyScanConfig {
     
     @DataBoundSetter
     public String scaConfigFile;
+
+    @DataBoundSetter
+    public String scaSASTProjectFullPath;
+    
+    @DataBoundSetter
+    public String scaSASTProjectID;
+    
+    @DataBoundSetter
+    public String SASTUserName;
     
     @DataBoundSetter
     public String scaSastServerUrl;    

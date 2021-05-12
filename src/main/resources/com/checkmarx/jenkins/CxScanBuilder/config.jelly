@@ -179,7 +179,7 @@
                     <f:optionalBlock title="Include Sources" field="isIncludeSources" 
                     inline="true"  checked="${instance.dependencyScanConfig.isIncludeSources}"/>
                     
-                    <f:optionalBlock title="Enable exploitable path" field="isExploitablePath" 
+                    <f:optionalBlock title="Enable Exploitable Path" field="isExploitablePath" 
                     inline="true"  checked="${instance.dependencyScanConfig.isExploitablePath}">
                     
                     <f:optionalBlock title="Use global settings (${descriptor.credentialsDescription})" field="useGlobalSastDetails" 
@@ -194,13 +194,13 @@
                 		<f:validateButton title="Test Connection" progress="Testing..." method="testScaSASTConnection" 
                 			with="scaSastServerUrl,password,username,timestamp,sastCredentialsId,isProxy" />
    			     	</f:optionalBlock>
+                       <f:entry title="Project Full Path" field="scaSASTProjectFullPath">
+                        <f:textbox value="${instance.dependencyScanConfig.scaSASTProjectFullPath}"/>
+                        </f:entry>  
+                        <f:entry title="Project ID" field="scaSASTprojectID">
+                            <f:textbox checkMethod="POST" value="${instance.dependencyScanConfig.scaSASTprojectID}"/>
+                        </f:entry>   
    			     	</f:optionalBlock>
-   			     	
-
-      			 		
-      			 		
-      			 		
-      			 		
                 </f:nested>
             </f:radioBlock>
         </f:optionalBlock>
