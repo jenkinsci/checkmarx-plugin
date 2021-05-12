@@ -39,22 +39,16 @@ public class DependencyScanConfig {
     public String scaEnvVariables;
     
     @DataBoundSetter
-    public boolean useSastDetails;
-    
-    @DataBoundSetter
     public boolean isExploitablePath;
+
+    @DataBoundSetter
+    public boolean useGlobalSastDetails;
     
     @DataBoundSetter
     public String scaConfigFile;
     
     @DataBoundSetter
-    public String SASTServerUrl;
-    
-    @DataBoundSetter
-    public String SASTUserName;
-    
-    @DataBoundSetter
-    public String SASTPassword;
+    public String scaSastServerUrl;    
 
     @DataBoundSetter
     public String scaWebAppUrl;

@@ -38,7 +38,7 @@
         <f:optionalBlock title="Use Jenkins proxy" inline="true" field="isProxy" checked="${instance==null?true:instance.isProxy}" />
 
         <f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
-           with="serverUrl,username,password,timestamp,credentialsId,isProxy" />
+           with="serverUrl,password, username,timestamp,credentialsId,isProxy" />
     </f:optionalBlock>
 
     <f:optionalBlock title="Enable config as code" inline="true" field="configAsCode" checked="${instance==null?true:instance.configAsCode}">
@@ -181,18 +181,26 @@
                     
                     <f:optionalBlock title="Enable exploitable path" field="isExploitablePath" 
                     inline="true"  checked="${instance.dependencyScanConfig.isExploitablePath}">
-      			  <f:optionalBlock title="Use default CxSAST server credentials (${descriptor.credentialsDescription})"   inline="true"  field="useSastDetails" 
-                    negative="true" checked="${instance==null||instance.useSastDetails==null?true:instance.useSastDetails}}">
-                    <f:entry title="CxSAST Server Url" field="SASTServerUrl">
-                <f:textbox default="${descriptor.serverUrl}" />
-            	</f:entry>
-            	<f:entry title="CxSAST credentials" field="sastCredentialsId">
-                 <c:select value="${instance.dependencyScanConfig.sastCredentialsId}" />
-                 </f:entry>
-                <f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
-           with="SASTServerUrl,username,password,timestamp,sastCredentialsId,isProxy" />
-      			 </f:optionalBlock>
-   			     </f:optionalBlock>
+                    
+                    <f:optionalBlock title="Use global settings (${descriptor.credentialsDescription})" field="useGlobalSastDetails" 
+                    inline="true"  negative="true" checked="${!instance.dependencyScanConfig.useGlobalSastDetails}">
+                    
+                    <f:entry title="CxSAST Server Url" field="scaSastServerUrl">
+                			<f:textbox default="${descriptor.dependencyScanConfig.serverUrl}"  value="${instance.dependencyScanConfig.scaSastServerUrl}" />
+            			</f:entry>
+            			<f:entry title="CxSAST credentials" field="sastCredentialsId">
+                 			<c:select value="${instance.dependencyScanConfig.sastCredentialsId}" />
+                 		</f:entry>
+                		<f:validateButton title="Test Connection" progress="Testing..." method="testScaSASTConnection" 
+                			with="scaSastServerUrl,password,username,timestamp,sastCredentialsId,isProxy" />
+   			     	</f:optionalBlock>
+   			     	</f:optionalBlock>
+   			     	
+
+      			 		
+      			 		
+      			 		
+      			 		
                 </f:nested>
             </f:radioBlock>
         </f:optionalBlock>
@@ -362,5 +370,6 @@
                 </f:optionalBlock>
            </j:otherwise>
         </j:choose>
+        <f:optionalBlock title="Hide Debug Logs" inline="true" field="hideDebugLogs" checked="${instance==null?descriptor.hideDebugLogs:instance.hideDebugLogs}" />        
     </f:section>
 </j:jelly>

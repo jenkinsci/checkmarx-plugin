@@ -1,1 +1,9 @@
-Enter the comma(,) seperated file path for configuration 
+<div>
+This parameter is to provide configuration files of the package managers used in the project. For ex.  Settings.xml for maven, Nuget.config for Nuget, .npmrc for npm etc.
+This option is relevant for projects that use private artifactory. 
+Use CxSCA agent to perfom the scan. CxSCA agent will try to perform dependency resolution using the package manager's configuration files provided.
+Multiple comma character separated file path can be provided.  
+<p>
+Example: c:\user\.m2\settings.xml, c:\user\npm\.npmrc
+</p>
+</div>
