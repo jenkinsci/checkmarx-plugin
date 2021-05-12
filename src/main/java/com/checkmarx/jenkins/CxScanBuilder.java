@@ -37,6 +37,7 @@ import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
+import io.netty.util.internal.StringUtil;
 import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
@@ -47,6 +48,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.*;
+import org.kohsuke.stapler.verb.POST;
 
 import javax.annotation.Nonnull;
 import javax.naming.ConfigurationException;
@@ -1618,7 +1620,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.error("");
     }
 
-    private void logError(Exception ex) {
+
+	private void logError(Exception ex) {
         if (ex != null) {
             log.error(ex.getMessage());
         }
@@ -2103,7 +2106,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                @QueryParameter final String username, @QueryParameter final String timestamp,
                                                @QueryParameter final String credentialsId, @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
-serverLog.debug("Welcome to the world ");
             CxCredentials cred;
             LegacyClient commonClient = null;
             try {
@@ -2141,6 +2143,22 @@ serverLog.debug("Welcome to the world ");
             }
         }
         
+        /**
+         * Performs on-the-fly validation of the form field 'value'.
+         * 
+         * @param value
+         *            This parameter receives the value that the user has typed.
+         * @return Indicates the outcome of the validation. This is sent to the
+         *         browser.
+         */
+        @POST
+        public FormValidation doCheckSASTprojectID(@QueryParameter String value,@QueryParameter String SASTProjectFullPath) {
+          if (StringUtil.isNullOrEmpty(value) && StringUtil.isNullOrEmpty(SASTProjectFullPath)) {
+            return FormValidation.error("Must provide value for either 'Project Full Path' or 'Project Id'.");
+          }
+          return FormValidation.ok();
+        }
+        
 		public FormValidation doTestSastScaConnection(DependencyScanConfig dsConfig,
 				 @QueryParameter final String sastCredentialsId,
 				 @AncestorInPath Item item) {
@@ -2148,7 +2166,6 @@ serverLog.debug("Welcome to the world ");
 			// invalidate Internet Explorer cache
 			CxCredentials cred;
 			LegacyClient commonClient = null;
-			serverLog.debug("Welcome to the mahol" );
 			try {
 				try {
 					cred = CxCredentials.resolveCred(true, serverUrl, username, getPasswordPlainText(password),

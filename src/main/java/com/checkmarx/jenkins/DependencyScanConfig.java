@@ -51,6 +51,12 @@ public class DependencyScanConfig {
     public String SASTServerUrl;
     
     @DataBoundSetter
+    public String SASTProjectFullPath;
+    
+    @DataBoundSetter
+    public String SASTProjectID;
+    
+    @DataBoundSetter
     public String SASTUserName;
     
     @DataBoundSetter

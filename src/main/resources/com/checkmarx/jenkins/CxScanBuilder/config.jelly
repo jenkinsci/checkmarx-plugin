@@ -179,8 +179,14 @@
                     <f:optionalBlock title="Include Sources" field="isIncludeSources" 
                     inline="true"  checked="${instance.dependencyScanConfig.isIncludeSources}"/>
                     
-                    <f:optionalBlock title="Enable exploitable path" field="isExploitablePath" 
+                    <f:optionalBlock title="Enable Exploitable Path" field="isExploitablePath" 
                     inline="true"  checked="${instance.dependencyScanConfig.isExploitablePath}">
+                    <f:entry title="Project Full Path" field="SASTProjectFullPath">
+                        <f:textbox value="${instance.dependencyScanConfig.SASTProjectFullPath}"/>
+                    </f:entry>  
+                      <f:entry title="Project ID" field="SASTprojectID">
+                        <f:textbox checkMethod="POST" value="${instance.dependencyScanConfig.SASTprojectID}"/>
+                    </f:entry>  
       			  <f:optionalBlock title="Use default CxSAST server credentials (${descriptor.credentialsDescription})"   inline="true"  field="useSastDetails" 
                     negative="true" checked="${instance==null||instance.useSastDetails==null?true:instance.useSastDetails}}">
                     <f:entry title="CxSAST Server Url" field="SASTServerUrl">
