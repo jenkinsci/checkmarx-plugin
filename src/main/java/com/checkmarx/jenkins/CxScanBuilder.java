@@ -1470,7 +1470,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     		scaSASTCred = CxCredentials.getCredentialsById(dsConfig.sastCredentialsId, run);
     		scaSASTServerUrl = dsConfig.scaSastServerUrl;
-
+    		
         	if(!globalSettingsInUse){
         		if(!dsConfig.useJobLevelSastDetails){
         			scaSASTCred = CxCredentials.getCredentialsById(descriptor.getDependencyScanConfig().sastCredentialsId, run);
@@ -1479,12 +1479,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         		derivedProjectName = dsConfig.scaSASTProjectFullPath; 
         		derivedProjectId = dsConfig.scaSASTProjectID;
         	}
-        	result.setSastServerUrl(scaSASTServerUrl);   	
+        	if(scaSASTCred!=null){
+        	result.setSastServerUrl(scaSASTServerUrl);
     		result.setSastUsername(scaSASTCred.getUsername());
     		result.setSastPassword(scaSASTCred.getPassword().getPlainText());
+        	}
     		result.setSastProjectName(derivedProjectName); 
     		result.setSastProjectId(derivedProjectId); 
-    		        		
+        	       		
 		}        
         return result;
     }
