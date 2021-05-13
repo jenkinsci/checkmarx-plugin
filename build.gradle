@@ -48,6 +48,23 @@ dependencies {
             'com.checkmarx:cx-config-provider:1.0.14',
             'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.5',
             'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.10.5'
+            constraints {
+		        implementation('io.vertx:vertx-web:3.9.7') {
+		            because 'previous versions have a bug impacting this application'
+		        }
+		        implementation('commons-beanutils:commons-beanutils:1.9.4') {
+		            because 'previous versions have a bug impacting this application'
+		        }
+		        implementation('io.netty:netty-codec-http:4.1.60.Final') {
+		            because 'previous versions have a bug impacting this application'
+		        }
+		        implementation('org.apache.httpcomponents:httpclient:4.5.13') {
+		            because 'previous versions have a bug impacting this application'
+		        }
+		        implementation('commons-io:commons-io:2.7') {
+		            because 'previous versions have a bug impacting this application'
+		        }
+		    }
 
     optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.4@jar',
             'org.jenkins-ci.plugins:credentials:2.1.19@jar'
