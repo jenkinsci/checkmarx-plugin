@@ -2230,7 +2230,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *         browser.
          */
         @POST
-        public FormValidation doCheckScaSASTprojectID(@QueryParameter String value,@QueryParameter String scaSASTProjectFullPath) {
+        public FormValidation doCheckScaSASTProjectID(@QueryParameter String value,@QueryParameter String scaSASTProjectFullPath) {
           if (StringUtil.isNullOrEmpty(value) && StringUtil.isNullOrEmpty(scaSASTProjectFullPath)) {
             return FormValidation.error("Must provide value for either 'Project Full Path' or 'Project Id'.");
           }
