@@ -47,9 +47,10 @@
         <f:entry title="Maven Path" field="mvnPath">
             <f:textbox/>
         </f:entry>
-
+		
         <f:validateButton title="Validate Maven Path" progress="Validating..." method="validateMvnPath"
                           with="mvnPath"/>
+         
 
         <f:entry title="Default Exclude folders" field="excludeFolders">
             <f:textbox/>
@@ -159,8 +160,31 @@
                     <f:validateButton title="Test Connection" progress="Testing..." method="testScaConnection"
                                       with="scaServerUrl,scaAccessControlUrl,scaCredentialsId,scaTenant"/>
                 </f:nested>
+                <f:entry title="Package Manager's Config File(s) Path" field="scaConfigFile">
+                        <f:textarea value="${descriptor.dependencyScanConfig.scaConfigFile}" />
+                    </f:entry>
+                    
+                    <f:entry title="Private Registry Environment Variable" field="scaEnvVariables">
+                        <f:textarea value="${descriptor.dependencyScanConfig.scaEnvVariables}" />
+                    </f:entry>
+                <f:optionalBlock title="Enable Exploitable Path" field="isExploitablePath" 
+                    inline="true"  checked="${descriptor.dependencyScanConfig.isExploitablePath}">
+                    <f:entry title="SAST Server Url" field="scaSastServerUrl">
+                <f:textbox value="${descriptor.dependencyScanConfig.scaSastServerUrl}" />
+            </f:entry>
+         <f:entry title="CxSAST credentials" field="sastCredentialsId">
+                 <c:select value="${descriptor.dependencyScanConfig.sastCredentialsId}" />
+                 </f:entry>
+                  <f:invisibleEntry>
+            <f:readOnlyTextbox field="username"/>
+            <f:readOnlyTextbox field="password"/>
+        </f:invisibleEntry>
+        <f:validateButton title="Test Connection" progress="Testing..." method="testScaSASTConnection"
+           		 with="scaSastServerUrl,password,username,timestamp,sastCredentialsId,isProxy" />
+    </f:optionalBlock>
             </f:radioBlock>
         </f:optionalBlock>
+		<f:optionalBlock title="Hide Debug Logs" inline="true" field="hideDebugLogs"/>        
     </f:section>
 
 </j:jelly>

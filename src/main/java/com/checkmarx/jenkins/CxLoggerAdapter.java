@@ -16,6 +16,8 @@ public class CxLoggerAdapter implements Logger {
     private static final String TRACE_PREFIX = "[Cx-Trace]: ";
 
     private final PrintStream log;
+    private boolean debugEnabled;
+    private boolean traceEnabled;
 
     public CxLoggerAdapter(PrintStream log) {
         this.log = log;
@@ -28,7 +30,7 @@ public class CxLoggerAdapter implements Logger {
 
 
     public boolean isDebugEnabled() {
-        return true;
+        return debugEnabled;
     }
 
     @Override
@@ -45,9 +47,18 @@ public class CxLoggerAdapter implements Logger {
     public boolean isErrorEnabled() {
         return true;
     }
+    
+    public final void setDebugEnabled(boolean debugEnabled) {
+		this.debugEnabled = debugEnabled;
+	}
 
-    public void debug(String s) {
-        log.println(DEBUG_PREFIX + s);
+	public final void setTraceEnabled(boolean traceEnabled) {
+		this.traceEnabled = traceEnabled;
+	}
+
+	public void debug(String s) {
+		if(isDebugEnabled())
+			log.println(DEBUG_PREFIX + s);
     }
 
     public void debug(String s, Throwable throwable) {
@@ -218,11 +229,12 @@ public class CxLoggerAdapter implements Logger {
     }
 
     public boolean isTraceEnabled() {
-        return false;
+        return traceEnabled;
     }
 
     public void trace(String s) {
-        log.println(TRACE_PREFIX + s);
+    	if (this.isTraceEnabled())
+    		log.println(TRACE_PREFIX + s);
     }
 
     public void trace(String s, Object o) {
