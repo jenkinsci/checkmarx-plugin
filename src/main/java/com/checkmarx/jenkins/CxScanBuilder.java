@@ -849,9 +849,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         if (instance != null && instance.proxy != null &&
                 (useOwnServerCredentials ? this.isProxy : getDescriptor().getIsProxy()) &&
                 !(isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))) {
-            action = new CxScanCallable(config, listener, instance.proxy, log);
+            action = new CxScanCallable(config, listener, instance.proxy);
         } else {
-            action = new CxScanCallable(config, listener, log);
+            action = new CxScanCallable(config, listener);
         }
 
         //create scans and retrieve results (in jenkins agent)
@@ -1251,7 +1251,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
         
         //Jenkins UI does not send teamName but team Id
-        teamPath = getTeamNameFromId(cxCredentials,descriptor, groupId);
+        //teamPath = getTeamNameFromId(cxCredentials,descriptor, groupId);
 
         //project
         ret.setProjectName(env.expand(projectName.trim()));
@@ -1458,8 +1458,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
            result.setEnvVariables(CxSCAFileSystemUtils.convertStringToKeyValueMap(env.expand(dsConfig.scaEnvVariables)));
         }
         String filePath = dsConfig.scaConfigFile;
-        String[] strArrayFile=filePath.split(",");
-        result.setConfigFilePaths(Arrays.asList(strArrayFile));
+		if (!StringUtils.isEmpty(filePath)) {
+			String[] strArrayFile = filePath.split(",");
+			result.setConfigFilePaths(Arrays.asList(strArrayFile));
+		}
         
 
         String derivedProjectName = projectName;
