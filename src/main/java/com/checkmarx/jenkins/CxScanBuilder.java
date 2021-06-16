@@ -1250,8 +1250,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
         
-        //Jenkins UI does not send teamName but team Id
-        teamPath = getTeamNameFromId(cxCredentials,descriptor, groupId);
+        // if teamPath not provided, get it as Jenkins UI does not send teamName but team Id
+        if (StringUtils.isEmpty(teamPath) && !StringUtils.isEmpty(groupId)) {
+            teamPath = getTeamNameFromId(cxCredentials,descriptor, groupId);
+        } else {
+            log.warn("Unable to get set Team Path, groupId or teamPath is required !");
+        }
 
         //project
         ret.setProjectName(env.expand(projectName.trim()));
