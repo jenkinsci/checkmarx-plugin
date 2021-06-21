@@ -1250,12 +1250,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
         
-        //Jenkins UI does not send teamName but team Id
-        //teamPath = getTeamNameFromId(cxCredentials,descriptor, groupId);
-
         //project
         ret.setProjectName(env.expand(projectName.trim()));
         ret.setTeamPath(teamPath);
+        //Jenkins UI does not send teamName but team Id
         ret.setTeamId(groupId);
 
         //scan control
