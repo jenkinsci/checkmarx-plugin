@@ -1510,8 +1510,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("plugin version: {}", CxConfig.version());
         log.info("server url: " + config.getUrl());
         log.info("username: " + config.getUsername());
-        log.info("is using Jenkins server proxy: " + (useOwnServerCredentials ? getIsProxy() : config.getProxyConfig() != null));
-        if (useOwnServerCredentials ? getIsProxy() : config.getProxyConfig() != null) {
+        boolean proxyEnabled = ((useOwnServerCredentials ? getIsProxy() : config.getProxyConfig()) != null);
+        log.info("is using Jenkins server proxy: " + proxyEnabled );
+        if (proxyEnabled) {
             if (Jenkins.getInstance().proxy != null)
                 log.info("No Proxy Host: " + printNoProxyHost());
         }
