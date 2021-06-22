@@ -849,9 +849,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         if (instance != null && instance.proxy != null &&
                 (useOwnServerCredentials ? this.isProxy : getDescriptor().getIsProxy()) &&
                 !(isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))) {
-            action = new CxScanCallable(config, listener, instance.proxy, log);
+            action = new CxScanCallable(config, listener, instance.proxy);
         } else {
-            action = new CxScanCallable(config, listener, log);
+            action = new CxScanCallable(config, listener);
         }
 
         //create scans and retrieve results (in jenkins agent)
@@ -1250,12 +1250,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
         
-        //Jenkins UI does not send teamName but team Id
-        teamPath = getTeamNameFromId(cxCredentials,descriptor, groupId);
-
         //project
         ret.setProjectName(env.expand(projectName.trim()));
         ret.setTeamPath(teamPath);
+        //Jenkins UI does not send teamName but team Id
         ret.setTeamId(groupId);
 
         //scan control
@@ -1458,8 +1456,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
            result.setEnvVariables(CxSCAFileSystemUtils.convertStringToKeyValueMap(env.expand(dsConfig.scaEnvVariables)));
         }
         String filePath = dsConfig.scaConfigFile;
-        String[] strArrayFile=filePath.split(",");
-        result.setConfigFilePaths(Arrays.asList(strArrayFile));
+		if (!StringUtils.isEmpty(filePath)) {
+			String[] strArrayFile = filePath.split(",");
+			result.setConfigFilePaths(Arrays.asList(strArrayFile));
+		}
         
 
         String derivedProjectName = projectName;
@@ -1508,8 +1508,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("plugin version: {}", CxConfig.version());
         log.info("server url: " + config.getUrl());
         log.info("username: " + config.getUsername());
-        log.info("is using Jenkins server proxy: " + (useOwnServerCredentials ? getIsProxy() : config.getProxyConfig() != null));
-        if (useOwnServerCredentials ? getIsProxy() : config.getProxyConfig() != null) {
+        boolean proxyEnabled = ((useOwnServerCredentials ? getIsProxy() : config.getProxyConfig()) != null);
+        log.info("is using Jenkins server proxy: " + proxyEnabled );
+        if (proxyEnabled) {
             if (Jenkins.getInstance().proxy != null)
                 log.info("No Proxy Host: " + printNoProxyHost());
         }

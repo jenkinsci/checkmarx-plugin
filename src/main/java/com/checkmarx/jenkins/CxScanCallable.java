@@ -30,24 +30,22 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
     private final CxScanConfig config;
     private final TaskListener listener;
     private ProxyConfiguration jenkinsProxy = null;
-    CxLoggerAdapter log = null;
-    
-    public CxScanCallable(CxScanConfig config, TaskListener listener, CxLoggerAdapter log) {
+        
+    public CxScanCallable(CxScanConfig config, TaskListener listener) {
         this.config = config;
-        this.listener = listener;
-        this.log = log;
+        this.listener = listener;    
     }
 
-    public CxScanCallable(CxScanConfig config, TaskListener listener, ProxyConfiguration jenkinsProxy, CxLoggerAdapter log) {
+    public CxScanCallable(CxScanConfig config, TaskListener listener, ProxyConfiguration jenkinsProxy) {
         this.config = config;
         this.listener = listener;
-        this.jenkinsProxy = jenkinsProxy;
-        this.log = log;
+        this.jenkinsProxy = jenkinsProxy;        
     }
 
     @Override
     public RemoteScanInfo invoke(File file, VirtualChannel channel) throws IOException, InterruptedException {
         
+    	CxLoggerAdapter log = new CxLoggerAdapter(listener.getLogger());    	
         config.setSourceDir(file.getAbsolutePath());
         config.setReportsDir(file);
         if (jenkinsProxy != null) {
