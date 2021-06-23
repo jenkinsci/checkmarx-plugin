@@ -35,3 +35,8 @@ com.cx.restclient.ast.dto.sca.report.DependencyPathSegment
 com.cx.restclient.ast.dto.sca.report.PackageSeverity
 com.cx.restclient.ast.dto.sca.report.PackageUsage
 com.cx.restclient.common.summary.DependencyScanResult
+com.cx.restclient.ast.dto.sca.ScaScanConfigValue
+com.cx.restclient.ast.dto.sca.ScaScanConfigValue$ScaScanConfigValueBuilder
+com.cx.restclient.ast.dto.sca.report.PolicyAction
+com.cx.restclient.ast.dto.sca.report.PolicyRule
+com.cx.restclient.ast.dto.sca.report.PolicyEvaluation
