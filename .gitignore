@@ -19,3 +19,4 @@ bin/
 #Jenkins specific out
 *.hpi
 classes/
+src/main/webapp/WEB-INF/web.xml

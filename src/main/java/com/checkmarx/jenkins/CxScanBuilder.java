@@ -849,9 +849,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         if (instance != null && instance.proxy != null &&
                 (useOwnServerCredentials ? this.isProxy : getDescriptor().getIsProxy()) &&
                 !(isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))) {
-            action = new CxScanCallable(config, listener, instance.proxy);
+            action = new CxScanCallable(config, listener, instance.proxy, isHideDebugLogs());
         } else {
-            action = new CxScanCallable(config, listener);
+            action = new CxScanCallable(config, listener, isHideDebugLogs());
         }
 
         //create scans and retrieve results (in jenkins agent)
