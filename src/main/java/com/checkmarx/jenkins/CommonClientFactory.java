@@ -1,9 +1,9 @@
 package com.checkmarx.jenkins;
 
 import com.cx.restclient.CxClientDelegator;
-import com.cx.restclient.sast.utils.LegacyClient;
 import com.cx.restclient.configuration.CxScanConfig;
 import com.cx.restclient.exception.CxClientException;
+import com.cx.restclient.sast.utils.LegacyClient;
 import org.slf4j.Logger;
 
 import java.net.MalformedURLException;
@@ -23,6 +23,8 @@ class CommonClientFactory {
 
         if (isProxy) {
             scanConfig.setProxyConfig(ProxyHelper.getProxyConfig());
+        } else {
+            scanConfig.setProxy(false);
         }
 
         return getInstance(scanConfig, log);

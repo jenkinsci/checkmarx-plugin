@@ -42,7 +42,9 @@ allprojects {
 
 dependencies {
     compileOnly 'com.intellij:annotations:12.0',
-            'org.slf4j:slf4j-api:1.6.1'
+            'org.slf4j:slf4j-api:1.7.31',
+            'org.slf4j:slf4j-log4j12:1.7.31',
+            'log4j:log4j:1.2.17'
 
     compile 'com.checkmarx:cx-client-common:2021.2.161',
             'com.checkmarx:cx-config-provider:1.0.14',

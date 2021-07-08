@@ -51,7 +51,6 @@ public class CxCredentials {
         if (cxScanBuilder.isUseOwnServerCredentials()) {
             ret.setServerUrl(cxScanBuilder.getServerUrl());
             return getCxCredentials(run, ret, cxScanBuilder.getCredentialsId(), cxScanBuilder.getUsername(), cxScanBuilder.getPasswordPlainText());
-
         } else {
             ret.setServerUrl(descriptor.getServerUrl());
             return getCxCredentials(run, ret, descriptor.getCredentialsId(), descriptor.getUsername(), descriptor.getPasswordPlainText());
