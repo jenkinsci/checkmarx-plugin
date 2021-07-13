@@ -11,17 +11,17 @@ import java.net.MalformedURLException;
 class CommonClientFactory {
     private static final String SCAN_ORIGIN = "Jenkins";
 
-    static LegacyClient getInstance(CxCredentials credentials,
+    static LegacyClient getInstance(CxConnectionDetails connDetails,
                                     boolean enableCertificateValidation,
-                                    Logger log, boolean isProxy)
+                                    Logger log)
             throws MalformedURLException, CxClientException {
-        CxScanConfig scanConfig = new CxScanConfig(credentials.getServerUrl(),
-                credentials.getUsername(),
-                Aes.decrypt(credentials.getPassword(), credentials.getUsername()),
+        CxScanConfig scanConfig = new CxScanConfig(connDetails.getServerUrl(),
+                connDetails.getUsername(),
+                Aes.decrypt(connDetails.getPassword(), connDetails.getUsername()),
                 SCAN_ORIGIN,
                 !enableCertificateValidation);
 
-        if (isProxy) {
+        if (connDetails.isProxy()) {
             scanConfig.setProxyConfig(ProxyHelper.getProxyConfig());
         } else {
             scanConfig.setProxy(false);

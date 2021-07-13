@@ -1244,16 +1244,19 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setOsaGenerateJsonReport(false);
 
         //cx server
-        CxCredentials cxCredentials = CxCredentials.resolveCred(this, descriptor, run);
-        ret.setUrl(cxCredentials.getServerUrl().trim());
-        ret.setUsername(cxCredentials.getUsername());
-        ret.setPassword(Aes.decrypt(cxCredentials.getPassword(), cxCredentials.getUsername()));
-        if (this.getIsProxy()) {
+        CxConnectionDetails cxConnectionDetails = CxConnectionDetails.resolveCred(this, descriptor, run);
+        ret.setUrl(cxConnectionDetails.getServerUrl().trim());
+        ret.setUsername(cxConnectionDetails.getUsername());
+        ret.setPassword(Aes.decrypt(cxConnectionDetails.getPassword(), cxConnectionDetails.getUsername()));
+        if (cxConnectionDetails.isProxy()) {
             Jenkins instance = Jenkins.getInstance();
-            if (instance != null && instance.proxy != null && (useOwnServerCredentials ? this.isProxy : getDescriptor().getIsProxy())
-                    && !(isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))) {
+            if (instance != null && instance.proxy != null && !(isCxURLinNoProxyHost(useOwnServerCredentials ?
+                    this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))) {
+                ret.setProxy(true);
                 ret.setProxyConfig(new ProxyConfig(instance.proxy.name, instance.proxy.port,
                         instance.proxy.getUserName(), instance.proxy.getPassword(), false));
+            } else {
+                ret.setProxy(false);
             }
         } else {
             ret.setProxy(false);
@@ -1342,7 +1345,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return ret;
     }
 
-    private String getTeamNameFromId(CxCredentials credentials, DescriptorImpl descriptor, String teamId) {
+    private String getTeamNameFromId(CxConnectionDetails credentials, DescriptorImpl descriptor, String teamId) {
         LegacyClient commonClient = null;
         String teamName = null;
         try {
@@ -1365,20 +1368,21 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
      *  Note: This method is called concurrently by multiple threads, refrain from using mutable
      *  shared state to avoid synchronization issues.
      */
-    private LegacyClient prepareLoggedInClient(CxCredentials credentials, DescriptorImpl descriptor)
+    private LegacyClient prepareLoggedInClient(CxConnectionDetails credentials, DescriptorImpl descriptor)
             throws IOException, CxClientException {
         LegacyClient ret;
         Jenkins instance = Jenkins.getInstance();
 
-        if (isProxy) {
+        if (credentials.isProxy()) {
             if (instance != null && instance.proxy != null && isCxURLinNoProxyHost(serverUrl, instance.proxy.getNoProxyHostPatterns())) {
-                ret = CommonClientFactory.getInstance(credentials, descriptor.isEnableCertificateValidation(), serverLog, false);
-            } else {
-                ret = CommonClientFactory.getInstance(credentials, descriptor.isEnableCertificateValidation(), serverLog, true);
+                credentials.setProxy(false);
             }
+            ret = CommonClientFactory.getInstance(credentials, descriptor.isEnableCertificateValidation(), serverLog);
         } else {
-            ret = CommonClientFactory.getInstance(credentials, descriptor.isEnableCertificateValidation(), serverLog, false);
+            credentials.setProxy(false);
+            ret = CommonClientFactory.getInstance(credentials, descriptor.isEnableCertificateValidation(), serverLog);
         }
+
         ret.login();
         return ret;
     }
@@ -1457,7 +1461,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         result.setWebAppUrl(dsConfig.scaWebAppUrl);
         result.setTenant(dsConfig.scaTenant);
         result.setIncludeSources(dsConfig.isIncludeSources);
-        UsernamePasswordCredentials credentials = CxCredentials.getCredentialsById(dsConfig.scaCredentialsId, run);
+        UsernamePasswordCredentials credentials = CxConnectionDetails.getCredentialsById(dsConfig.scaCredentialsId, run);
         if (credentials != null) {
             result.setUsername(credentials.getUsername());
             result.setPassword(credentials.getPassword().getPlainText());
@@ -1480,12 +1484,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         String scaSASTServerUrl = null;
         if (dsConfig.isExploitablePath) {
 
-            scaSASTCred = CxCredentials.getCredentialsById(dsConfig.sastCredentialsId, run);
+            scaSASTCred = CxConnectionDetails.getCredentialsById(dsConfig.sastCredentialsId, run);
             scaSASTServerUrl = dsConfig.scaSastServerUrl;
 
             if (!globalSettingsInUse) {
                 if (!dsConfig.useJobLevelSastDetails) {
-                    scaSASTCred = CxCredentials.getCredentialsById(descriptor.getDependencyScanConfig().sastCredentialsId, run);
+                    scaSASTCred = CxConnectionDetails.getCredentialsById(descriptor.getDependencyScanConfig().sastCredentialsId, run);
                     scaSASTServerUrl = descriptor.getDependencyScanConfig().scaSastServerUrl;
                 }
                 derivedProjectName = dsConfig.scaSASTProjectFullPath;
@@ -2197,21 +2201,21 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                @QueryParameter final String credentialsId, @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 
-            CxCredentials cred;
+            CxConnectionDetails cred;
             LegacyClient commonClient = null;
             try {
                 try {
-                    cred = CxCredentials.resolveCred(true, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
-                    CxCredentials.validateCxCredentials(cred);
+                    cred = CxConnectionDetails.resolveCred(true, serverUrl, username, getPasswordPlainText(password), credentialsId, isProxy, this, item);
+                    CxConnectionDetails.validateCxCredentials(cred);
                     Jenkins instance = Jenkins.getInstance();
-                    if (isProxy) {
+                    if (cred.isProxy()) {
                         if (instance != null && instance.proxy != null && isCxURLinNoProxyHost(serverUrl, instance.proxy.getNoProxyHostPatterns())) {
-                            commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(), serverLog, false);
-                        } else {
-                            commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(), serverLog, true);
+                            cred.setProxy(false);
                         }
+                        commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(), serverLog);
                     } else {
-                        commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(), serverLog, false);
+                        cred.setProxy(false);
+                        commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(), serverLog);
                     }
                 } catch (Exception e) {
                     return buildError(e, "Failed to init cx client");
@@ -2259,23 +2263,23 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                       @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to
             // invalidate Internet Explorer cache
-            CxCredentials cred;
+            CxConnectionDetails cred;
             LegacyClient commonClient = null;
             try {
                 try {
-                    cred = CxCredentials.resolveCred(true, scaSastServerUrl, username, getPasswordPlainText(password),
-                            sastCredentialsId, this, item);
-                    CxCredentials.validateCxCredentials(cred);
+                    cred = CxConnectionDetails.resolveCred(true, scaSastServerUrl, username, getPasswordPlainText(password),
+                            sastCredentialsId, isProxy, this, item);
+                    CxConnectionDetails.validateCxCredentials(cred);
                     Jenkins instance = Jenkins.getInstance();
 
-                    if (isProxy) {
+                    if (cred.isProxy()) {
                         if (instance != null && instance.proxy != null && isCxURLinNoProxyHost(serverUrl, instance.proxy.getNoProxyHostPatterns())) {
-                            commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(), serverLog, false);
-                        } else {
-                            commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(), serverLog, true);
+                            cred.setProxy(false);
                         }
+                        commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(), serverLog);
                     } else {
-                        commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(), serverLog, false);
+                        cred.setProxy(false);
+                        commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(), serverLog);
                     }
                 } catch (Exception e) {
                     return buildError(e, "Failed to init cx client");
@@ -2337,7 +2341,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 scaConfig.setApiUrl(scaServerUrl);
                 scaConfig.setTenant(scaTenant);
 
-                UsernamePasswordCredentials credentials = CxCredentials.getCredentialsById(scaCredentialsId, item);
+                UsernamePasswordCredentials credentials = CxConnectionDetails.getCredentialsById(scaCredentialsId, item);
                 if (credentials == null) {
                     throw new CxCredException("Sca connection failed. Please recheck the account name and CxSCA credentials you provided and try again.");
                 }
@@ -2380,20 +2384,21 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
          *  shared state to avoid synchronization issues.
          */
-        private LegacyClient prepareLoggedInClient(CxCredentials credentials, boolean isProxy, String serverUrl)
+        private LegacyClient prepareLoggedInClient(CxConnectionDetails connDetails)
                 throws IOException, CxClientException {
             LegacyClient ret;
             Jenkins instance = Jenkins.getInstance();
 
-            if (isProxy) {
+            if (connDetails.isProxy()) {
                 if (instance != null && instance.proxy != null && isCxURLinNoProxyHost(serverUrl, instance.proxy.getNoProxyHostPatterns())) {
-                    ret = CommonClientFactory.getInstance(credentials, this.isEnableCertificateValidation(), serverLog, false);
-                } else {
-                    ret = CommonClientFactory.getInstance(credentials, this.isEnableCertificateValidation(), serverLog, true);
+                    connDetails.setProxy(false);
                 }
+                ret = CommonClientFactory.getInstance(connDetails, this.isEnableCertificateValidation(), serverLog);
             } else {
-                ret = CommonClientFactory.getInstance(credentials, this.isEnableCertificateValidation(), serverLog, false);
+                connDetails.setProxy(false);
+                ret = CommonClientFactory.getInstance(connDetails, this.isEnableCertificateValidation(), serverLog);
             }
+
             ret.login();
             return ret;
         }
@@ -2404,13 +2409,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          */
         public ComboBoxModel doFillProjectNameItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
                                                     @QueryParameter final String username, @QueryParameter final String password,
-                                                    @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
+                                                    @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
+                                                    @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ComboBoxModel projectNames = new ComboBoxModel();
             LegacyClient commonClient = null;
             try {
-                CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, getPasswordPlainText(password), credentialsId, this, item);
-                commonClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy, useOwnServerCredentials ? this.serverUrl : serverUrl);
+                CxConnectionDetails connDetails = CxConnectionDetails.resolveCred(!useOwnServerCredentials, serverUrl, username,
+                        getPasswordPlainText(password), credentialsId, isProxy, this, item);
+                commonClient = prepareLoggedInClient(connDetails);
                 List<Project> projects = commonClient.getAllProjects();
 
                 for (Project p : projects) {
@@ -2444,12 +2451,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          */
         public ListBoxModel doFillPresetItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
                                               @QueryParameter final String username, @QueryParameter final String password,
-                                              @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
+                                              @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
+                                              @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
             try {
-                CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
-                LegacyClient commonClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy, useOwnServerCredentials ? this.serverUrl : serverUrl);
+                CxConnectionDetails connDetails = CxConnectionDetails.resolveCred(!useOwnServerCredentials, serverUrl, username,
+                        StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, isProxy, this, item);
+                LegacyClient commonClient = prepareLoggedInClient(connDetails);
 
                 //todo import preset
                 List<Preset> presets = commonClient.getPresetList();
@@ -2487,14 +2496,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         public ListBoxModel doFillSourceEncodingItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
                                                       @QueryParameter final String username, @QueryParameter final String password,
-                                                      @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
+                                                      @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
+                                                      @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
             LegacyClient commonClient = null;
             try {
-                CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
+                CxConnectionDetails connDetails = CxConnectionDetails.resolveCred(!useOwnServerCredentials, serverUrl, username,
+                        StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, isProxy, this, item);
 
-                commonClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy, useOwnServerCredentials ? this.serverUrl : serverUrl);
+                commonClient = prepareLoggedInClient(connDetails);
                 List<CxNameObj> configurationList = commonClient.getConfigurationSetList();
 
                 for (CxNameObj cs : configurationList) {
@@ -2523,13 +2534,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         public ListBoxModel doFillGroupIdItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
                                                @QueryParameter final String username, @QueryParameter final String password,
-                                               @QueryParameter final String timestamp, @QueryParameter final String credentialsId, @AncestorInPath Item item) {
+                                               @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
+                                               @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
             LegacyClient commonClient = null;
             try {
-                CxCredentials credentials = CxCredentials.resolveCred(!useOwnServerCredentials, serverUrl, username, StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, this, item);
-                commonClient = prepareLoggedInClient(credentials, useOwnServerCredentials ? this.isProxy : isProxy, useOwnServerCredentials ? this.serverUrl : serverUrl);
+                CxConnectionDetails connDetails = CxConnectionDetails.resolveCred(!useOwnServerCredentials, serverUrl, username,
+                        StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, isProxy, this, item);
+                commonClient = prepareLoggedInClient(connDetails);
                 List<Team> teamList = commonClient.getTeamList();
                 for (Team team : teamList) {
                     listBoxModel.add(new ListBoxModel.Option(team.getFullName(), team.getId()));
