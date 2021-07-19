@@ -1,7 +1,7 @@
 package com.checkmarx.jenkins.test;
 
 import com.checkmarx.jenkins.Aes;
-import com.checkmarx.jenkins.CxCredentials;
+import com.checkmarx.jenkins.CxConnectionDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,25 +18,25 @@ public class PasswordEncryptTest {
     private final String MESSAGE = "CxSAST Password";
 
     @Mock
-    CxCredentials credentials;
+    CxConnectionDetails connDetails;
 
     @BeforeEach
     void init() {
         final String USERNAME = "my@user";
-        Mockito.when(credentials.getUsername()).thenReturn(USERNAME);
-        String encryptedPassword = Aes.encrypt(EXPECTED_PASSWORD, credentials.getUsername());
-        Mockito.when(credentials.getPassword()).thenReturn(encryptedPassword);
+        Mockito.when(connDetails.getUsername()).thenReturn(USERNAME);
+        String encryptedPassword = Aes.encrypt(EXPECTED_PASSWORD, connDetails.getUsername());
+        Mockito.when(connDetails.getPassword()).thenReturn(encryptedPassword);
     }
 
     @Test
     void encryptDecryptPassword_ValidProcess() {
-        String actualResult = Aes.decrypt(credentials.getPassword(), credentials.getUsername());
+        String actualResult = Aes.decrypt(connDetails.getPassword(), connDetails.getUsername());
         assertEquals(EXPECTED_PASSWORD, actualResult, MESSAGE);
     }
 
     @Test
     void encryptDecryptPassword_InvalidProcess() {
-        String actualResult = Aes.decrypt(credentials.getPassword(), credentials.getUsername());
+        String actualResult = Aes.decrypt(connDetails.getPassword(), connDetails.getUsername());
         assertNotEquals("Pass245!", actualResult, MESSAGE);
     }
 }
