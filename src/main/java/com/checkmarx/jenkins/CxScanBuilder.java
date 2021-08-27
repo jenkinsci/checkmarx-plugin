@@ -781,10 +781,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private void setFsaConfiguration(EnvVars env) {
         // As job environment variable
         for (Map.Entry<String, String> entry : env.entrySet()) {
-            if (entry.getKey().contains("CX_MAVEN_PATH") ||
-                    entry.getKey().contains("CX_GRADLE_PATH") ||
-                    entry.getKey().contains("CX_NPM_PATH") ||
-                    entry.getKey().contains("CX_COMPOSER_PATH") ||
+            if (entry.getKey().contains("CX_") ||
                     entry.getKey().contains("FSA_CONFIGURATION")) {
                 if (StringUtils.isNotEmpty(entry.getValue())) {
                     System.setProperty(entry.getKey(), entry.getValue());
