@@ -40,3 +40,5 @@ com.cx.restclient.ast.dto.sca.ScaScanConfigValue$ScaScanConfigValueBuilder
 com.cx.restclient.ast.dto.sca.report.PolicyAction
 com.cx.restclient.ast.dto.sca.report.PolicyRule
 com.cx.restclient.ast.dto.sca.report.PolicyEvaluation
+com.cx.restclient.sast.dto.ResponseSastScanStatus
+com.cx.restclient.sast.dto.CxScanStateObj
