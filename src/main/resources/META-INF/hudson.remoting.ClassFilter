@@ -42,7 +42,6 @@ com.cx.restclient.ast.dto.sca.report.PolicyRule
 com.cx.restclient.ast.dto.sca.report.PolicyEvaluation
 com.cx.restclient.sast.dto.ResponseSastScanStatus
 com.cx.restclient.sast.dto.CxScanStateObj
-com.cx.restclient.sast.dto.CxScanStateObj
 com.cx.restclient.sast.dto.CxDateAndTimeObj
 com.cx.restclient.sast.dto.CxLanguageObj
 com.cx.restclient.sast.dto.CxLinkObj
