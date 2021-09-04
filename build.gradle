@@ -53,7 +53,7 @@ dependencies {
         exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
     }
 
-    compile 'com.checkmarx:cx-client-common:2021.3.166',
+    compile 'com.checkmarx:cx-client-common:2021.3.171',
             'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.5',
             'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.10.5',
             'org.apache.logging.log4j:log4j-slf4j-impl:2.13.3',
