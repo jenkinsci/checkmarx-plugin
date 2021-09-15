@@ -236,14 +236,21 @@
                 <f:entry title="Dependency scan low severity vulnerabilities threshold">
                     <f:readOnlyTextbox value="${descriptor.osaLowThresholdEnforcement}" />
                 </f:entry>
+				<f:optionalBlock title="Enable synchronous mode" inline="true" field="waitForResultsEnabled"
+                    checked="${instance==null?true:instance.waitForResultsEnabled}">
+
+                    <!-- -= Enable Synchronous Mode =- -->
+
+                    <f:description>Synchronous mode allows viewing scan results in Jenkins and setting thresholds
+                    </f:description>
 
                 <f:optionalBlock title="Generate CxSAST PDF report" inline="true" field="generatePdfReport" />
 
                 <!-- -= enableProjectPolicyEnforcement =- -->
                 <f:optionalBlock title="Enable Project's policy enforcement" inline="true" field="enableProjectPolicyEnforcement" />
-                 <!-- -= Generate Full XML report =- -->
-                  <f:optionalBlock title="Generate CxSAST full XML report" inline="true" field="generateXmlReport"
-                   checked="${instance==null?true:instance.generateXmlReport}" />
+                 
+                  
+                   </f:optionalBlock>
             </j:when>
 
             <!-- ** use specific configuration setting ** -->

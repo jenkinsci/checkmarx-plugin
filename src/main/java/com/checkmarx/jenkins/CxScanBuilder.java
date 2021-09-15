@@ -1266,7 +1266,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setTeamId(groupId);
 
         //scan control
-        boolean isaAsync = !isWaitForResultsEnabled() && !(descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings());
+        boolean isaAsync = !isWaitForResultsEnabled();
         ret.setSynchronous(!isaAsync);
         ret.setDenyProject(descriptor.isProhibitProjectCreation());
 
