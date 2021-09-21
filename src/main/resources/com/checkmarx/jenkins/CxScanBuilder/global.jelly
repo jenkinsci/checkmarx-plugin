@@ -110,6 +110,10 @@
                 <f:number clazz="positive-number" min="0" step="1" default="1"/>
             </f:entry>
         </f:optionalBlock>
+        
+        <f:optionalBlock title="Continue when timed out" inline="true" field="continueBuildWhenTimedOut">
+            
+        </f:optionalBlock>
 
         <f:optionalBlock title="Globally define dependency scan settings" field="dependencyScanConfig"
                          checked="${descriptor.dependencyScanConfig != null}">
