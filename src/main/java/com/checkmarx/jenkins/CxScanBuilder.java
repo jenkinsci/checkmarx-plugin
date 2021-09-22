@@ -128,6 +128,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private String excludeFolders;
     @Nullable
     private String filterPattern;
+    private String customFields;
+    private boolean forceScan;
     private boolean incremental;
     private boolean fullScansScheduled;
     private int fullScanCycle;
@@ -243,7 +245,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             boolean avoidDuplicateProjectScans,
             boolean addGlobalCommenToBuildCommet,
             Boolean generateXmlReport,
-            boolean hideDebugLogs
+            boolean hideDebugLogs,
+            boolean forceScan,
+            String customFields
     ) {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
@@ -292,6 +296,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.addGlobalCommenToBuildCommet = addGlobalCommenToBuildCommet;
         this.generateXmlReport = (generateXmlReport == null) ? true : generateXmlReport;
         this.hideDebugLogs = hideDebugLogs;
+        this.forceScan = forceScan;
+        this.customFields = customFields;
+        
     }
 
     // Configuration fields getters
@@ -759,7 +766,26 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return isThisBuildIncremental;
     }
 
+    
+    public String getCustomFields() {
+		return customFields;
+	}
+
     @DataBoundSetter
+	public void setCustomFields(String customFields) {
+		this.customFields = customFields;
+	}
+
+	public boolean isForceScan() {
+		return forceScan;
+	}
+
+	@DataBoundSetter
+	public void setForceScan(boolean forceScan) {
+		this.forceScan = forceScan;
+	}
+
+	@DataBoundSetter
     public void setGroupId(@Nullable String groupId) {
         this.groupId = groupId;
     }
@@ -1240,6 +1266,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setMvnPath(descriptor.getMvnPath());
         ret.setOsaGenerateJsonReport(false);
 
+        ret.setCustomFields(getCustomFields());
+        ret.setForceScan(isForceScan());
+        
         //cx server
         CxConnectionDetails cxConnectionDetails = CxConnectionDetails.resolveCred(this, descriptor, run);
         ret.setUrl(cxConnectionDetails.getServerUrl().trim());
