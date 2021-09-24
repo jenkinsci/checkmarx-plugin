@@ -128,6 +128,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private String excludeFolders;
     @Nullable
     private String filterPattern;
+    private String customFields;
+    private boolean forceScan;
     private boolean incremental;
     private boolean fullScansScheduled;
     private int fullScanCycle;
@@ -243,7 +245,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             boolean avoidDuplicateProjectScans,
             boolean addGlobalCommenToBuildCommet,
             Boolean generateXmlReport,
-            boolean hideDebugLogs
+            boolean hideDebugLogs,
+            boolean forceScan,
+            String customFields
     ) {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
@@ -292,6 +296,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.addGlobalCommenToBuildCommet = addGlobalCommenToBuildCommet;
         this.generateXmlReport = (generateXmlReport == null) ? true : generateXmlReport;
         this.hideDebugLogs = hideDebugLogs;
+        this.forceScan = forceScan;
+        this.customFields = customFields;
+        
     }
 
     // Configuration fields getters
@@ -759,7 +766,26 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return isThisBuildIncremental;
     }
 
+    
+    public String getCustomFields() {
+		return customFields;
+	}
+
     @DataBoundSetter
+	public void setCustomFields(String customFields) {
+		this.customFields = customFields;
+	}
+
+	public boolean isForceScan() {
+		return forceScan;
+	}
+
+	@DataBoundSetter
+	public void setForceScan(boolean forceScan) {
+		this.forceScan = forceScan;
+	}
+
+	@DataBoundSetter
     public void setGroupId(@Nullable String groupId) {
         this.groupId = groupId;
     }
@@ -1240,6 +1266,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setMvnPath(descriptor.getMvnPath());
         ret.setOsaGenerateJsonReport(false);
 
+        ret.setCustomFields(apiFormat(getCustomFields()));
+        ret.setForceScan(isForceScan());
+        
         //cx server
         CxConnectionDetails cxConnectionDetails = CxConnectionDetails.resolveCred(this, descriptor, run);
         ret.setUrl(cxConnectionDetails.getServerUrl().trim());
@@ -1342,7 +1371,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return ret;
     }
 
-    private String getTeamNameFromId(CxConnectionDetails credentials, DescriptorImpl descriptor, String teamId) {
+    private String apiFormat(String customFields) {
+    	if(!StringUtil.isNullOrEmpty(customFields)) {
+			customFields = customFields.replaceAll(":", "\":\"");
+			customFields = customFields.replaceAll(",", "\",\"");
+			customFields = "{\"".concat(customFields).concat("\"}");
+    	}
+    	return customFields;
+	}
+
+	private String getTeamNameFromId(CxConnectionDetails credentials, DescriptorImpl descriptor, String teamId) {
         LegacyClient commonClient = null;
         String teamName = null;
         try {
@@ -2253,7 +2291,62 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
             return FormValidation.ok();
         }
+        
+        
+        /**
+         * This method verify correct format for Custom Fields
+         * 
+         * @param value
+         * @param scaSASTProjectFullPath
+         * @return
+         */
+        @POST
+        public FormValidation doCheckCustomFields(@QueryParameter String value) {
+        	
+        	Pattern pattern = Pattern.compile("(^([a-zA-Z0-9]*):([a-zA-Z0-9]*)+(,([a-zA-Z0-9]*):([a-zA-Z0-9]*)+)*$)");
+        	Matcher match = pattern.matcher(value);
+        	if(!StringUtil.isNullOrEmpty(value) && !match.find()) {
+        		return FormValidation.error("Custome Fields must to have next format: key1:val1,key2:val2");
+        	}
+        	
+            return FormValidation.ok();
+        }
 
+        /**
+         * This method verify correct format for Custom Fields
+         * 
+         * @param value
+         * @param scaSASTProjectFullPath
+         * @return
+         */
+        @POST
+        public FormValidation doCheckForceScan(@QueryParameter boolean value, @QueryParameter boolean incremental) {
+        	
+        	if(incremental && value) {
+        		return FormValidation.error("Custome Fields must to have next format: key1:val1,key2:val2");
+        	}
+        	
+            return FormValidation.ok();
+        }
+        
+        /**
+         * This method verify correct format for Custom Fields
+         * 
+         * @param value
+         * @param scaSASTProjectFullPath
+         * @return
+         */
+        @POST
+        public FormValidation doCheckIncremental(@QueryParameter boolean value,	@QueryParameter boolean forceScan) {
+        	
+        	if(forceScan && value) {
+        		forceScan = false;
+            	
+        		return FormValidation.error("Custome Fields must to have next format: key1:val1,key2:val2");
+        	}
+        	
+            return FormValidation.ok();
+        }
         public FormValidation doTestScaSASTConnection(@QueryParameter final String scaSastServerUrl, @QueryParameter final String password,
                                                       @QueryParameter final String username, @QueryParameter final String timestamp,
                                                       @QueryParameter final String sastCredentialsId, @QueryParameter final boolean isProxy,
