@@ -101,7 +101,7 @@
         <f:entry title="Source character encoding (configuration)" field="sourceEncoding" description="Default Configuration uses UTF-8">
             <f:select />
         </f:entry>
-            <f:optionalBlock title="Allow global comment" inline="true" field="addGlobalCommenToBuildCommet" checked="true"  />
+            <f:optionalBlock title="Allow global comment" inline="true" field="addGlobalCommenToBuildCommet"/>
         <f:entry title="Comment" field="comment">
             <f:textarea />
         </f:entry>

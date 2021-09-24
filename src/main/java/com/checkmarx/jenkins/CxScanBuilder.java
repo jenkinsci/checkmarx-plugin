@@ -732,7 +732,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
-    public void setaddGlobalCommenToBuildCommet(boolean addGlobalCommenToBuildCommet) {
+    public void setAddGlobalCommenToBuildCommet(boolean addGlobalCommenToBuildCommet) {
         this.addGlobalCommenToBuildCommet = addGlobalCommenToBuildCommet;
     }
 
@@ -1915,6 +1915,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private JobGlobalStatusOnError jobGlobalStatusOnError;
         private JobGlobalStatusOnError jobGlobalStatusOnThresholdViolation = JobGlobalStatusOnError.FAILURE;
         private boolean scanTimeOutEnabled;
+        private boolean globallyDefineScanSettings;
         private boolean continueBuildWhenTimedOut;
         private Integer scanTimeoutDuration; // In minutes.
         private boolean lockVulnerabilitySettings = true;
@@ -2125,7 +2126,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             this.continueBuildWhenTimedOut = continueBuildWhenTimedOut;
         }
         
+        public boolean getGloballyDefineScanSettings() {
+            return globallyDefineScanSettings;
+        }
 
+        public void setGloballyDefineScanSettings(boolean globallyDefineScanSettings) {
+            this.globallyDefineScanSettings = globallyDefineScanSettings;
+        }
+        
         @Nullable
         public Integer getScanTimeoutDuration() {
             return scanTimeoutDuration;
@@ -2771,8 +2779,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             // option.
             if (!pluginData.has(DEPENDENCY_SCAN_CONFIG_PROP)) {
                 pluginData.put(DEPENDENCY_SCAN_CONFIG_PROP, null);
+                
             }
-
+            // Have put the below line to fix AB # 493 - "Globally define dependency scan settings" selection is not retained. 
+            // Line pluginData.put(DEPENDENCY_SCAN_CONFIG_PROP, null); should have solved the problem but putting null is actually not working. JSONObject.NULL
+            // API also no more available
+            setGloballyDefineScanSettings(pluginData.has(DEPENDENCY_SCAN_CONFIG_PROP));
             req.bindJSON(this, pluginData);
             save();
             return super.configure(req, formData);
