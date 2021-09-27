@@ -1250,9 +1250,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return originUrl;
     }
 
-    private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) {
+    private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) throws IOException {
         CxScanConfig ret = new CxScanConfig();
 
+        if(isIncremental() && isForceScan()) {
+        	throw new IOException("Force scan and incremental scan can not be configured in pair for SAST. Configure either Incremental or Force scan option");
+        }
         String originUrl = getCxOriginUrl(env, log);
         ret.setCxOriginUrl(originUrl);
         String jenkinURL = getJenkinURLForTheJob(env);
@@ -1584,6 +1587,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             log.info("SAST timeout: " + config.getSastScanTimeoutInMinutes());
             log.info("SAST scan comment: " + config.getScanComment());
             log.info("is incremental scan: " + config.getIncremental());
+            log.info("is force scan: " + config.getForceScan());
             log.info("is generate full XML report: " + config.getGenerateXmlReport());
             log.info("is generate PDF report: " + config.getGeneratePDFReport());
             log.info("source code encoding id: " + config.getEngineConfigurationId());
@@ -2323,7 +2327,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         public FormValidation doCheckForceScan(@QueryParameter boolean value, @QueryParameter boolean incremental) {
         	
         	if(incremental && value) {
-        		return FormValidation.error("Custome Fields must to have next format: key1:val1,key2:val2");
+        		return FormValidation.error("Force scan and incremental scan can not be configured in pair for SAST");
         	}
         	
             return FormValidation.ok();
@@ -2342,7 +2346,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         	if(forceScan && value) {
         		forceScan = false;
             	
-        		return FormValidation.error("Custome Fields must to have next format: key1:val1,key2:val2");
+        		return FormValidation.error("Force scan and incremental scan can not be configured in pair for SAST");
         	}
         	
             return FormValidation.ok();
