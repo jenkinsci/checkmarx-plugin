@@ -15,48 +15,52 @@ import org.jenkinsci.remoting.RoleChecker;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.StreamHandler;
 
 public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private static final Semaphore semaphore = new Semaphore(1);
+
     private final CxScanConfig config;
     private final TaskListener listener;
     private ProxyConfiguration jenkinsProxy = null;
     boolean hideDebugLogs;
-        
+
     public CxScanCallable(CxScanConfig config, TaskListener listener, boolean hideDebugLogs) {
         this.config = config;
-        this.listener = listener;    
+        this.listener = listener;
         this.hideDebugLogs = hideDebugLogs;
     }
 
     public CxScanCallable(CxScanConfig config, TaskListener listener, ProxyConfiguration jenkinsProxy, boolean hideDebugLogs) {
         this.config = config;
         this.listener = listener;
-        this.jenkinsProxy = jenkinsProxy;        
+        this.jenkinsProxy = jenkinsProxy;
         this.hideDebugLogs = hideDebugLogs;
     }
 
     @Override
     public RemoteScanInfo invoke(File file, VirtualChannel channel) throws IOException, InterruptedException {
-        
-    	CxLoggerAdapter log = new CxLoggerAdapter(listener.getLogger());    
-        if(hideDebugLogs) {
-        	log.setDebugEnabled(false);
-        	log.setTraceEnabled(false);
-        }else {
-        	log.setDebugEnabled(true);
-        	log.setTraceEnabled(true);        	
+
+        CxLoggerAdapter log = new CxLoggerAdapter(listener.getLogger());
+        if (hideDebugLogs) {
+            log.setDebugEnabled(false);
+            log.setTraceEnabled(false);
+        } else {
+            log.setDebugEnabled(true);
+            log.setTraceEnabled(true);
         }
-    	
+
         config.setSourceDir(file.getAbsolutePath());
         config.setReportsDir(file);
         if (jenkinsProxy != null) {
@@ -114,23 +118,30 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
         }
 
         Logger rootLog = null;
-        StreamHandler handler = null;
-        if (config.isOsaEnabled() || config.isAstScaEnabled()) {
-            //---------------------------
-            //we do this in order to redirect the logs from the filesystem agent component to the build console
-            rootLog = Logger.getLogger("");
-            handler = new StreamHandler(listener.getLogger(), new ComponentScanFormatter());
-            handler.setLevel(Level.ALL);
-            rootLog.addHandler(handler);
-            //---------------------------
-        }
+        OsaConsoleHandler handler = null;
+        ScanResults createScanResults;
+        try {
+            semaphore.acquire();
+            if (config.isOsaEnabled() || config.isAstScaEnabled()) {
+                //---------------------------
+                //we do this in order to redirect the logs from the filesystem agent component to the build console
+                rootLog = Logger.getLogger("");
+                handler = new OsaConsoleHandler();
+                handler.setLevel(Level.ALL);
+                handler.setFormatter(new ComponentScanFormatter());
+                rootLog.addHandler(handler);
+                //---------------------------
+            }
 
-        ScanResults createScanResults = delegator.initiateScan();
-        results.add(createScanResults);
+            createScanResults = delegator.initiateScan();
+            results.add(createScanResults);
 
-        if (rootLog != null) {
-            handler.flush();
-            rootLog.removeHandler(handler);
+            if (rootLog != null) {
+                handler.flush();
+                rootLog.removeHandler(handler);
+            }
+        } finally {
+            semaphore.release();
         }
 
         ScanResults scanResults = config.getSynchronous() ? delegator.waitForScanResults() : delegator.getLatestScanResults();
@@ -148,6 +159,12 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
         ScanResults finalScanResults = getFinalScanResults(results);
         result.setScanResults(finalScanResults);
         return result;
+    }
+
+    class OsaConsoleHandler extends ConsoleHandler {
+        protected void setOutputStream(OutputStream out) throws SecurityException {
+            super.setOutputStream(listener.getLogger());
+        }
     }
 
     private void cancelScan(CxClientDelegator delegator) {
