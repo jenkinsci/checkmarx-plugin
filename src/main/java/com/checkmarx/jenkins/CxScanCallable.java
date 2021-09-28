@@ -34,24 +34,28 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
     private final CxScanConfig config;
     private final TaskListener listener;
     private ProxyConfiguration jenkinsProxy = null;
-    boolean hideDebugLogs;
+    private boolean hideDebugLogs;
+    private Map<String, String> fsaVars;
 
-    public CxScanCallable(CxScanConfig config, TaskListener listener, boolean hideDebugLogs) {
+
+    public CxScanCallable(CxScanConfig config, TaskListener listener, boolean hideDebugLogs, Map<String, String> fsaVars) {
         this.config = config;
         this.listener = listener;
         this.hideDebugLogs = hideDebugLogs;
+        this.fsaVars = fsaVars;
     }
 
-    public CxScanCallable(CxScanConfig config, TaskListener listener, ProxyConfiguration jenkinsProxy, boolean hideDebugLogs) {
+    public CxScanCallable(CxScanConfig config, TaskListener listener, ProxyConfiguration jenkinsProxy,
+                          boolean hideDebugLogs, Map<String, String> fsaVars) {
         this.config = config;
         this.listener = listener;
         this.jenkinsProxy = jenkinsProxy;
         this.hideDebugLogs = hideDebugLogs;
+        this.fsaVars = fsaVars;
     }
 
     @Override
     public RemoteScanInfo invoke(File file, VirtualChannel channel) throws IOException, InterruptedException {
-
         CxLoggerAdapter log = new CxLoggerAdapter(listener.getLogger());
         if (hideDebugLogs) {
             log.setDebugEnabled(false);
@@ -123,6 +127,7 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
         try {
             semaphore.acquire();
             if (config.isOsaEnabled() || config.isAstScaEnabled()) {
+                setFsaConfiguration();
                 //---------------------------
                 //we do this in order to redirect the logs from the filesystem agent component to the build console
                 rootLog = Logger.getLogger("");
@@ -159,6 +164,12 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
         ScanResults finalScanResults = getFinalScanResults(results);
         result.setScanResults(finalScanResults);
         return result;
+    }
+
+    private void setFsaConfiguration() {
+        for (Map.Entry<String, String> entry : fsaVars.entrySet()) {
+            System.setProperty(entry.getKey(), entry.getValue());
+        }
     }
 
     class OsaConsoleHandler extends ConsoleHandler {

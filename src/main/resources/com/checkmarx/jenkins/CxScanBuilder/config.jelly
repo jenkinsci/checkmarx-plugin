@@ -128,7 +128,7 @@
                           name="dependencyScannerType" title="Use CxOSA dependency scanner" value="OSA">
                 <f:nested>
                     <f:entry title="FSA variables" field="fsaVariables">
-                        <f:textarea />
+                        <f:textarea value="${instance.dependencyScanConfig.fsaVariables}" />
                     </f:entry>
                     <f:entry title="Archive extract patterns" field="osaArchiveIncludePatterns">
                         <f:textbox default="${descriptor.DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS}"

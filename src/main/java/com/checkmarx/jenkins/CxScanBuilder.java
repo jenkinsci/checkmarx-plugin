@@ -778,13 +778,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.hideDebugLogs = hideDebugLogs;
     }
 
-    private void setFsaConfiguration(EnvVars env) {
+    private Map<String, String> getAllFsaVars(EnvVars env) {
+        Map<String, String> sumFsaVars = new HashMap<>();
         // As job environment variable
         for (Map.Entry<String, String> entry : env.entrySet()) {
             if (entry.getKey().contains("CX_") ||
                     entry.getKey().contains("FSA_CONFIGURATION")) {
                 if (StringUtils.isNotEmpty(entry.getValue())) {
-                    System.setProperty(entry.getKey(), entry.getValue());
+                    sumFsaVars.put(entry.getKey(), entry.getValue());
                 }
             }
         }
@@ -795,12 +796,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 String[] vars = fsaVars.replaceAll("[\\n\\r]", "").trim().split(",");
                 for (String var : vars) {
                     String[] entry = var.split("=");
-                    System.setProperty(entry[0], entry[1]);
+                    sumFsaVars.put(entry[0], entry[1]);
                 }
             } catch (Exception e) {
                 log.warn("Fail to add comment FSA vars");
             }
         }
+        return sumFsaVars;
     }
 
     @Override
@@ -826,7 +828,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //resolve configuration
         final DescriptorImpl descriptor = getDescriptor();
         EnvVars env = run.getEnvironment(listener);
-        setFsaConfiguration(env);
+        Map<String, String> fsaVars = getAllFsaVars(env);
         CxScanConfig config = resolveConfiguration(run, descriptor, env, log);
 
         if (configAsCode) {
@@ -853,9 +855,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         if (instance != null && instance.proxy != null &&
                 (useOwnServerCredentials ? this.isProxy : getDescriptor().getIsProxy()) &&
                 !(isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))) {
-            action = new CxScanCallable(config, listener, instance.proxy, isHideDebugLogs());
+            action = new CxScanCallable(config, listener, instance.proxy, isHideDebugLogs(), fsaVars);
         } else {
-            action = new CxScanCallable(config, listener, isHideDebugLogs());
+            action = new CxScanCallable(config, listener, isHideDebugLogs(), fsaVars);
         }
 
         //create scans and retrieve results (in jenkins agent)
