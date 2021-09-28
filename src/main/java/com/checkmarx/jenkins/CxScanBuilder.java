@@ -732,7 +732,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
-    public void setaddGlobalCommenToBuildCommet(boolean addGlobalCommenToBuildCommet) {
+    public void setAddGlobalCommenToBuildCommet(boolean addGlobalCommenToBuildCommet) {
         this.addGlobalCommenToBuildCommet = addGlobalCommenToBuildCommet;
     }
 
@@ -1266,7 +1266,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setTeamId(groupId);
 
         //scan control
-        boolean isaAsync = !isWaitForResultsEnabled() && !(descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings());
+        boolean isaAsync = !isWaitForResultsEnabled();
         ret.setSynchronous(!isaAsync);
         ret.setDenyProject(descriptor.isProhibitProjectCreation());
 
@@ -1338,7 +1338,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             enableProjectPolicyEnforcement = false;
         }
         ret.setEnablePolicyViolations(enableProjectPolicyEnforcement);
-
+        // Set the Continue build flag to Configuration object if Option from UI is choosen as useContinueBuildOnError
+        if(useContinueBuildOnError(getDescriptor())) {
+        	ret.setContinueBuild(Boolean.TRUE);
+        }
         return ret;
     }
 
@@ -1534,6 +1537,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("SAST scan enabled: " + config.isSastEnabled());
         log.info("avoid duplicated projects scans: " + config.isAvoidDuplicateProjectScans());
         log.info("enable Project Policy Enforcement: " + config.getEnablePolicyViolations());
+        log.info("continue build when timed out: " + config.getContinueBuild());
 
         ScannerType scannerType = getDependencyScannerType(config);
         String dependencyScannerType = scannerType != null ? scannerType.getDisplayName() : "NONE";
@@ -1773,7 +1777,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 || (JobStatusOnError.GLOBAL.equals(getJobStatusOnError()) && JobGlobalStatusOnError.UNSTABLE.equals(descriptor
                 .getJobGlobalStatusOnError()));
     }
-
+    /**
+     * Checks if job should fail with <code>UNSTABLE</code> status instead of <code>FAILED</code>
+     *
+     * @param descriptor Descriptor of the current build step
+     * @return if job should fail with <code>UNSTABLE</code> status instead of <code>FAILED</code>
+     */
+    private boolean useContinueBuildOnError(final DescriptorImpl descriptor) {
+        return descriptor.getContinueBuildWhenTimedOut();
+    }
     private boolean isThisBuildIncremental(int buildNumber) {
 
         boolean askedForIncremental = isIncremental();
@@ -1903,6 +1915,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private JobGlobalStatusOnError jobGlobalStatusOnError;
         private JobGlobalStatusOnError jobGlobalStatusOnThresholdViolation = JobGlobalStatusOnError.FAILURE;
         private boolean scanTimeOutEnabled;
+        private boolean globallyDefineScanSettings;
+        private boolean continueBuildWhenTimedOut;
         private Integer scanTimeoutDuration; // In minutes.
         private boolean lockVulnerabilitySettings = true;
 
@@ -2103,7 +2117,23 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         public void setScanTimeOutEnabled(boolean scanTimeOutEnabled) {
             this.scanTimeOutEnabled = scanTimeOutEnabled;
         }
+        
+        public boolean getContinueBuildWhenTimedOut() {
+            return continueBuildWhenTimedOut;
+        }
 
+        public void setContinueBuildWhenTimedOut(boolean continueBuildWhenTimedOut) {
+            this.continueBuildWhenTimedOut = continueBuildWhenTimedOut;
+        }
+        
+        public boolean getGloballyDefineScanSettings() {
+            return globallyDefineScanSettings;
+        }
+
+        public void setGloballyDefineScanSettings(boolean globallyDefineScanSettings) {
+            this.globallyDefineScanSettings = globallyDefineScanSettings;
+        }
+        
         @Nullable
         public Integer getScanTimeoutDuration() {
             return scanTimeoutDuration;
@@ -2749,8 +2779,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             // option.
             if (!pluginData.has(DEPENDENCY_SCAN_CONFIG_PROP)) {
                 pluginData.put(DEPENDENCY_SCAN_CONFIG_PROP, null);
+                
             }
-
+            // Have put the below line to fix AB # 493 - "Globally define dependency scan settings" selection is not retained. 
+            // Line pluginData.put(DEPENDENCY_SCAN_CONFIG_PROP, null); should have solved the problem but putting null is actually not working. JSONObject.NULL
+            // API also no more available
+            setGloballyDefineScanSettings(pluginData.has(DEPENDENCY_SCAN_CONFIG_PROP));
             req.bindJSON(this, pluginData);
             save();
             return super.configure(req, formData);
