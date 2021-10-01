@@ -98,6 +98,10 @@
             </f:optionalBlock>
         </f:optionalBlock>
 
+		<f:entry title="Post Scan Action" field="postScanActionId">
+        	<f:select />
+    	</f:entry>
+
         <f:entry title="Source character encoding (configuration)" field="sourceEncoding" description="Default Configuration uses UTF-8">
             <f:select />
         </f:entry>
