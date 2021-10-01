@@ -2455,6 +2455,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 				StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, isProxy, this, item);
 				commonClient = prepareLoggedInClient(connDetails);
 				List<PostAction> teamList = commonClient.getPostScanActionList();
+				listBoxModel.add(new ListBoxModel.Option("", ""));
 				for (PostAction postAction : teamList) {
 					listBoxModel.add(new ListBoxModel.Option(
 							postAction.getName(), Integer.toString(postAction.getId())));
