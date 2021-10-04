@@ -2714,11 +2714,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 CxConnectionDetails connDetails = CxConnectionDetails.resolveCred(!useOwnServerCredentials, serverUrl, username,
                         StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, isProxy, this, item);
                 commonClient = prepareLoggedInClient(connDetails);
-                List<Team> teamList = commonClient.getTeamList();
-                for (Team team : teamList) {
-                    listBoxModel.add(new ListBoxModel.Option(team.getFullName(), team.getId()));
-                }
-
+                
+                commonClient.getTeamList().stream().sorted(
+                		(firstElmnt, secondElmnt) -> 
+                		firstElmnt.getFullName().compareToIgnoreCase(secondElmnt.fullName))
+                		.forEach(team -> 
+                		listBoxModel.add(new ListBoxModel.Option(team.getFullName(), team.getId())));
+                
                 return listBoxModel;
 
             } catch (Exception e) {
