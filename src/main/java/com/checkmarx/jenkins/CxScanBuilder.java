@@ -1594,6 +1594,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("avoid duplicated projects scans: " + config.isAvoidDuplicateProjectScans());
         log.info("enable Project Policy Enforcement: " + config.getEnablePolicyViolations());
         log.info("continue build when timed out: " + config.getContinueBuild());
+        log.info("post scan action: " + config.getPostScanActionId());
+        log.info("is force scan: " + config.getForceScan());
+        log.info("scan level custom fields: " + config.getCustomFields());
 
         ScannerType scannerType = getDependencyScannerType(config);
         String dependencyScannerType = scannerType != null ? scannerType.getDisplayName() : "NONE";
@@ -2554,7 +2557,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 				StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, isProxy, this, item);
 				commonClient = prepareLoggedInClient(connDetails);
 				List<PostAction> teamList = commonClient.getPostScanActionList();
-				listBoxModel.add(new ListBoxModel.Option("", ""));
 				for (PostAction postAction : teamList) {
 					listBoxModel.add(new ListBoxModel.Option(
 							postAction.getName(), Integer.toString(postAction.getId())));
