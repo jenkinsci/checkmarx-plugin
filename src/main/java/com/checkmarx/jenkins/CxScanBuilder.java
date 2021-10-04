@@ -22,6 +22,7 @@ import com.cx.restclient.dto.scansummary.ScanSummary;
 import com.cx.restclient.exception.CxClientException;
 import com.cx.restclient.osa.dto.OSAResults;
 import com.cx.restclient.sast.dto.CxNameObj;
+import com.cx.restclient.sast.dto.PostAction;
 import com.cx.restclient.sast.dto.Preset;
 import com.cx.restclient.sast.dto.Project;
 import com.cx.restclient.sast.dto.SASTResults;
@@ -132,6 +133,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private boolean fullScansScheduled;
     private int fullScanCycle;
     private boolean isThisBuildIncremental;
+    private Integer postScanActionId;
     @Nullable
     private String sourceEncoding;
     @Nullable
@@ -223,6 +225,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             boolean incremental,
             boolean fullScansScheduled,
             int fullScanCycle,
+            Integer postScanActionId,
             @Nullable String sourceEncoding,
             @Nullable String comment,
             boolean skipSCMTriggers,
@@ -269,6 +272,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.incremental = incremental;
         this.fullScansScheduled = fullScansScheduled;
         this.fullScanCycle = fullScanCycle;
+        this.postScanActionId = postScanActionId;
         this.sourceEncoding = sourceEncoding;
         this.comment = comment;
         this.skipSCMTriggers = skipSCMTriggers;
@@ -421,7 +425,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public int getFullScanCycle() {
         return fullScanCycle;
     }
+    
+    public Integer getPostScanActionId() {
+		return postScanActionId;
+	}
 
+	@DataBoundSetter
+	public void setPostScanActionId(Integer postScanActionId) {
+		this.postScanActionId = postScanActionId;
+	}
     @Nullable
     public String getSourceEncoding() {
         return sourceEncoding;
@@ -1235,7 +1247,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setCxOrigin(jenkinURL);
         log.info("  ORIGIN FROM JENKIN :: " + jenkinURL);
         log.info("  ORIGIN URL FROM JENKIN :: " + originUrl);
-
+        
+        ret.setPostScanActionId(getPostScanActionId());
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
         ret.setMvnPath(descriptor.getMvnPath());
         ret.setOsaGenerateJsonReport(false);
@@ -2428,6 +2441,38 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             ret.login();
             return ret;
+        }
+
+        public ListBoxModel doFillPostScanActionIdItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
+                @QueryParameter final String username, @QueryParameter final String password,
+                @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
+                @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
+			// timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
+			ListBoxModel listBoxModel = new ListBoxModel();
+			LegacyClient commonClient = null;
+			try {
+				CxConnectionDetails connDetails = CxConnectionDetails.resolveCred(!useOwnServerCredentials, serverUrl, username,
+				StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, isProxy, this, item);
+				commonClient = prepareLoggedInClient(connDetails);
+				List<PostAction> teamList = commonClient.getPostScanActionList();
+				listBoxModel.add(new ListBoxModel.Option("", ""));
+				for (PostAction postAction : teamList) {
+					listBoxModel.add(new ListBoxModel.Option(
+							postAction.getName(), Integer.toString(postAction.getId())));
+				}
+			
+				return listBoxModel;
+			
+			} catch (Exception e) {
+				serverLog.error("Failed to populate post action list: " + e.toString());
+				String message = "Provide Checkmarx server credentials to see teams list";
+				listBoxModel.add(new ListBoxModel.Option(message, message));
+				return listBoxModel;
+			} finally {
+				if (commonClient != null) {
+					commonClient.close();
+				}
+			}
         }
 
         /*
