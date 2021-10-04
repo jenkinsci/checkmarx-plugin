@@ -97,6 +97,7 @@
             </f:optionalBlock>
         </f:optionalBlock>
 
+
 		<f:entry title="Force Scan" field="forceScan">
             <f:checkbox checkMethod="POST" checked="${instance.forceScan}"/>
         </f:entry>
@@ -105,10 +106,16 @@
         	<f:textbox checkMethod="POST" value="${instance.customFields}" />
         </f:entry>
         
+
+		<f:entry title="Post Scan Action" field="postScanActionId">
+	       	<f:select />
+	    </f:entry>
+
+
         <f:entry title="Source character encoding (configuration)" field="sourceEncoding" description="Default Configuration uses UTF-8">
             <f:select />
         </f:entry>
-            <f:optionalBlock title="Allow global comment" inline="true" field="addGlobalCommenToBuildCommet" checked="true"  />
+            <f:optionalBlock title="Allow global comment" inline="true" field="addGlobalCommenToBuildCommet"/>
         <f:entry title="Comment" field="comment">
             <f:textarea />
         </f:entry>
@@ -135,7 +142,7 @@
                           name="dependencyScannerType" title="Use CxOSA dependency scanner" value="OSA">
                 <f:nested>
                     <f:entry title="FSA variables" field="fsaVariables">
-                        <f:textarea />
+                        <f:textarea value="${instance.dependencyScanConfig.fsaVariables}" />
                     </f:entry>
                     <f:entry title="Archive extract patterns" field="osaArchiveIncludePatterns">
                         <f:textbox default="${descriptor.DEFAULT_OSA_ARCHIVE_INCLUDE_PATTERNS}"
@@ -243,14 +250,21 @@
                 <f:entry title="Dependency scan low severity vulnerabilities threshold">
                     <f:readOnlyTextbox value="${descriptor.osaLowThresholdEnforcement}" />
                 </f:entry>
+				<f:optionalBlock title="Enable synchronous mode" inline="true" field="waitForResultsEnabled"
+                    checked="${instance==null?true:instance.waitForResultsEnabled}">
+
+                    <!-- -= Enable Synchronous Mode =- -->
+
+                    <f:description>Synchronous mode allows viewing scan results in Jenkins and setting thresholds
+                    </f:description>
 
                 <f:optionalBlock title="Generate CxSAST PDF report" inline="true" field="generatePdfReport" />
 
                 <!-- -= enableProjectPolicyEnforcement =- -->
                 <f:optionalBlock title="Enable Project's policy enforcement" inline="true" field="enableProjectPolicyEnforcement" />
-                 <!-- -= Generate Full XML report =- -->
-                  <f:optionalBlock title="Generate CxSAST full XML report" inline="true" field="generateXmlReport"
-                   checked="${instance==null?true:instance.generateXmlReport}" />
+                 
+                  
+                   </f:optionalBlock>
             </j:when>
 
             <!-- ** use specific configuration setting ** -->
