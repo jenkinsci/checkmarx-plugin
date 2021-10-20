@@ -53,7 +53,7 @@ dependencies {
         exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
     }
 
-    compile 'com.checkmarx:cx-client-common:2021.4.3',
+    compile 'com.checkmarx:cx-client-common:2021.4.5',
             'com.fasterxml.jackson.core:jackson-core:2.11.3',
             'com.fasterxml.jackson.core:jackson-annotations:2.11.3',
             'com.fasterxml.jackson.core:jackson-databind:2.11.3',
@@ -81,9 +81,23 @@ dependencies {
                 }
             }
 
-    optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.4@jar',
-            'org.jenkins-ci.plugins:credentials:2.1.19@jar'
-
+	optionalJenkinsPlugins([group: 'org.jenkins-ci.plugins', name: 'credentials', version: '2.1.19', ext: 'jar'])
+    optionalJenkinsPlugins([group: 'org.jenkins-ci.main', name: 'maven-plugin', version: '1.509.4', ext: 'jar']) {
+        exclude group: 'org.codehaus.plexus', module: 'plexus-utils'
+        exclude group: 'org.apache.jackrabbit', module: 'jackrabbit-webdav'
+        exclude group: 'commons-collections', module: 'commons-collections'
+        exclude group: 'org.apache.ant', module: 'ant'
+        exclude group: 'junit', module: 'junit'
+        exclude group: 'com.jcraft', module: 'jsch'
+        
+    }
+	optionalJenkinsPlugins([group: 'org.codehaus.plexus', name: 'plexus-utils', version: '3.4.1', ext: 'jar'])
+	optionalJenkinsPlugins([group: 'org.apache.jackrabbit', name: 'jackrabbit-webdav', version: '2.21.7', ext: 'jar'])
+	optionalJenkinsPlugins([group: 'commons-collections', name: 'commons-collections', version: '3.2.2', ext: 'jar'])
+	optionalJenkinsPlugins([group: 'org.apache.ant', name: 'ant', version: '1.10.11', ext: 'jar'])
+	optionalJenkinsPlugins([group: 'junit', name: 'junit', version: '4.13.2', ext: 'jar'])
+	optionalJenkinsPlugins([group: 'com.jcraft', name: 'jsch', version: '0.1.55', ext: 'jar'])
+	
     testCompile 'junit:junit:4.13.1',
             'org.eclipse.sisu:org.eclipse.sisu.plexus:0.0.0.M5',
             'org.jmockit:jmockit:1.16'
