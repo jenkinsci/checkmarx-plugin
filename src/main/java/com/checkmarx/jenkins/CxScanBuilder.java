@@ -2365,7 +2365,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         /**
-         * This method verify correct format for Custom Fields
+         * This method verify if force scan is checked
          * 
          * @param value
          * @param scaSASTProjectFullPath
@@ -2382,7 +2382,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
         
         /**
-         * This method verify correct format for Custom Fields
+         * This method verifies if force scan and incremental scan both configured 
          * 
          * @param value
          * @param scaSASTProjectFullPath
