@@ -22,6 +22,7 @@ import com.cx.restclient.dto.scansummary.ScanSummary;
 import com.cx.restclient.exception.CxClientException;
 import com.cx.restclient.osa.dto.OSAResults;
 import com.cx.restclient.sast.dto.CxNameObj;
+import com.cx.restclient.sast.dto.PostAction;
 import com.cx.restclient.sast.dto.Preset;
 import com.cx.restclient.sast.dto.Project;
 import com.cx.restclient.sast.dto.SASTResults;
@@ -128,10 +129,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private String excludeFolders;
     @Nullable
     private String filterPattern;
+    private String customFields;
+    private boolean forceScan;
     private boolean incremental;
     private boolean fullScansScheduled;
     private int fullScanCycle;
     private boolean isThisBuildIncremental;
+    private Integer postScanActionId;
     @Nullable
     private String sourceEncoding;
     @Nullable
@@ -223,6 +227,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             boolean incremental,
             boolean fullScansScheduled,
             int fullScanCycle,
+            Integer postScanActionId,
             @Nullable String sourceEncoding,
             @Nullable String comment,
             boolean skipSCMTriggers,
@@ -243,7 +248,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             boolean avoidDuplicateProjectScans,
             boolean addGlobalCommenToBuildCommet,
             Boolean generateXmlReport,
-            boolean hideDebugLogs
+            boolean hideDebugLogs,
+            boolean forceScan,
+            String customFields
     ) {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
@@ -269,6 +276,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.incremental = incremental;
         this.fullScansScheduled = fullScansScheduled;
         this.fullScanCycle = fullScanCycle;
+        this.postScanActionId = postScanActionId;
         this.sourceEncoding = sourceEncoding;
         this.comment = comment;
         this.skipSCMTriggers = skipSCMTriggers;
@@ -292,6 +300,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.addGlobalCommenToBuildCommet = addGlobalCommenToBuildCommet;
         this.generateXmlReport = (generateXmlReport == null) ? true : generateXmlReport;
         this.hideDebugLogs = hideDebugLogs;
+        this.forceScan = forceScan;
+        this.customFields = customFields;
+        
     }
 
     // Configuration fields getters
@@ -421,7 +432,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public int getFullScanCycle() {
         return fullScanCycle;
     }
+    
+    public Integer getPostScanActionId() {
+		return postScanActionId;
+	}
 
+	@DataBoundSetter
+	public void setPostScanActionId(Integer postScanActionId) {
+		this.postScanActionId = postScanActionId;
+	}
     @Nullable
     public String getSourceEncoding() {
         return sourceEncoding;
@@ -732,7 +751,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
-    public void setaddGlobalCommenToBuildCommet(boolean addGlobalCommenToBuildCommet) {
+    public void setAddGlobalCommenToBuildCommet(boolean addGlobalCommenToBuildCommet) {
         this.addGlobalCommenToBuildCommet = addGlobalCommenToBuildCommet;
     }
 
@@ -759,7 +778,26 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return isThisBuildIncremental;
     }
 
+    
+    public String getCustomFields() {
+		return customFields;
+	}
+
     @DataBoundSetter
+	public void setCustomFields(String customFields) {
+		this.customFields = customFields;
+	}
+
+	public boolean isForceScan() {
+		return forceScan;
+	}
+
+	@DataBoundSetter
+	public void setForceScan(boolean forceScan) {
+		this.forceScan = forceScan;
+	}
+
+	@DataBoundSetter
     public void setGroupId(@Nullable String groupId) {
         this.groupId = groupId;
     }
@@ -1226,9 +1264,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return originUrl;
     }
 
-    private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) {
+    private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) throws IOException {
         CxScanConfig ret = new CxScanConfig();
 
+        if(isIncremental() && isForceScan()) {
+        	throw new IOException("Force scan and incremental scan can not be configured in pair for SAST. Configure either Incremental or Force scan option");
+        }
         String originUrl = getCxOriginUrl(env, log);
         ret.setCxOriginUrl(originUrl);
         String jenkinURL = getJenkinURLForTheJob(env);
@@ -1237,11 +1278,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setCxOrigin(jenkinURL);
         log.info("  ORIGIN FROM JENKIN :: " + jenkinURL);
         log.info("  ORIGIN URL FROM JENKIN :: " + originUrl);
-
+        
+        ret.setPostScanActionId(getPostScanActionId());
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
         ret.setMvnPath(descriptor.getMvnPath());
         ret.setOsaGenerateJsonReport(false);
 
+        ret.setCustomFields(apiFormat(getCustomFields()));
+        ret.setForceScan(isForceScan());
+        
         //cx server
         CxConnectionDetails cxConnectionDetails = CxConnectionDetails.resolveCred(this, descriptor, run);
         ret.setUrl(cxConnectionDetails.getServerUrl().trim());
@@ -1268,7 +1313,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setTeamId(groupId);
 
         //scan control
-        boolean isaAsync = !isWaitForResultsEnabled() && !(descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings());
+        boolean isaAsync = !isWaitForResultsEnabled();
         ret.setSynchronous(!isaAsync);
         ret.setDenyProject(descriptor.isProhibitProjectCreation());
 
@@ -1340,11 +1385,23 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             enableProjectPolicyEnforcement = false;
         }
         ret.setEnablePolicyViolations(enableProjectPolicyEnforcement);
-
+        // Set the Continue build flag to Configuration object if Option from UI is choosen as useContinueBuildOnError
+        if(useContinueBuildOnError(getDescriptor())) {
+        	ret.setContinueBuild(Boolean.TRUE);
+        }
         return ret;
     }
 
-    private String getTeamNameFromId(CxConnectionDetails credentials, DescriptorImpl descriptor, String teamId) {
+    private String apiFormat(String customFields) {
+    	if(!StringUtil.isNullOrEmpty(customFields)) {
+			customFields = customFields.replaceAll(":", "\":\"");
+			customFields = customFields.replaceAll(",", "\",\"");
+			customFields = "{\"".concat(customFields).concat("\"}");
+    	}
+    	return customFields;
+	}
+
+	private String getTeamNameFromId(CxConnectionDetails credentials, DescriptorImpl descriptor, String teamId) {
         LegacyClient commonClient = null;
         String teamName = null;
         try {
@@ -1536,6 +1593,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("SAST scan enabled: " + config.isSastEnabled());
         log.info("avoid duplicated projects scans: " + config.isAvoidDuplicateProjectScans());
         log.info("enable Project Policy Enforcement: " + config.getEnablePolicyViolations());
+        log.info("continue build when timed out: " + config.getContinueBuild());
+        log.info("post scan action: " + config.getPostScanActionId());
+        log.info("is force scan: " + config.getForceScan());
+        log.info("scan level custom fields: " + config.getCustomFields());
 
         ScannerType scannerType = getDependencyScannerType(config);
         String dependencyScannerType = scannerType != null ? scannerType.getDisplayName() : "NONE";
@@ -1548,6 +1609,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             log.info("SAST timeout: " + config.getSastScanTimeoutInMinutes());
             log.info("SAST scan comment: " + config.getScanComment());
             log.info("is incremental scan: " + config.getIncremental());
+            log.info("is force scan: " + config.getForceScan());
             log.info("is generate full XML report: " + config.getGenerateXmlReport());
             log.info("is generate PDF report: " + config.getGeneratePDFReport());
             log.info("source code encoding id: " + config.getEngineConfigurationId());
@@ -1775,7 +1837,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 || (JobStatusOnError.GLOBAL.equals(getJobStatusOnError()) && JobGlobalStatusOnError.UNSTABLE.equals(descriptor
                 .getJobGlobalStatusOnError()));
     }
-
+    /**
+     * Checks if job should fail with <code>UNSTABLE</code> status instead of <code>FAILED</code>
+     *
+     * @param descriptor Descriptor of the current build step
+     * @return if job should fail with <code>UNSTABLE</code> status instead of <code>FAILED</code>
+     */
+    private boolean useContinueBuildOnError(final DescriptorImpl descriptor) {
+        return descriptor.getContinueBuildWhenTimedOut();
+    }
     private boolean isThisBuildIncremental(int buildNumber) {
 
         boolean askedForIncremental = isIncremental();
@@ -1905,6 +1975,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private JobGlobalStatusOnError jobGlobalStatusOnError;
         private JobGlobalStatusOnError jobGlobalStatusOnThresholdViolation = JobGlobalStatusOnError.FAILURE;
         private boolean scanTimeOutEnabled;
+        private boolean globallyDefineScanSettings;
+        private boolean continueBuildWhenTimedOut;
         private Integer scanTimeoutDuration; // In minutes.
         private boolean lockVulnerabilitySettings = true;
 
@@ -2105,7 +2177,23 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         public void setScanTimeOutEnabled(boolean scanTimeOutEnabled) {
             this.scanTimeOutEnabled = scanTimeOutEnabled;
         }
+        
+        public boolean getContinueBuildWhenTimedOut() {
+            return continueBuildWhenTimedOut;
+        }
 
+        public void setContinueBuildWhenTimedOut(boolean continueBuildWhenTimedOut) {
+            this.continueBuildWhenTimedOut = continueBuildWhenTimedOut;
+        }
+        
+        public boolean getGloballyDefineScanSettings() {
+            return globallyDefineScanSettings;
+        }
+
+        public void setGloballyDefineScanSettings(boolean globallyDefineScanSettings) {
+            this.globallyDefineScanSettings = globallyDefineScanSettings;
+        }
+        
         @Nullable
         public Integer getScanTimeoutDuration() {
             return scanTimeoutDuration;
@@ -2255,7 +2343,62 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
             return FormValidation.ok();
         }
+        
+        
+        /**
+         * This method verify correct format for Custom Fields
+         * 
+         * @param value
+         * @param scaSASTProjectFullPath
+         * @return
+         */
+        @POST
+        public FormValidation doCheckCustomFields(@QueryParameter String value) {
+        	
+        	Pattern pattern = Pattern.compile("(^([a-zA-Z0-9]*):([a-zA-Z0-9]*)+(,([a-zA-Z0-9]*):([a-zA-Z0-9]*)+)*$)");
+        	Matcher match = pattern.matcher(value);
+        	if(!StringUtil.isNullOrEmpty(value) && !match.find()) {
+        		return FormValidation.error("Custome Fields must to have next format: key1:val1,key2:val2");
+        	}
+        	
+            return FormValidation.ok();
+        }
 
+        /**
+         * This method verify if force scan is checked
+         * 
+         * @param value
+         * @param scaSASTProjectFullPath
+         * @return
+         */
+        @POST
+        public FormValidation doCheckForceScan(@QueryParameter boolean value, @QueryParameter boolean incremental) {
+        	
+        	if(incremental && value) {
+        		return FormValidation.error("Force scan and incremental scan can not be configured in pair for SAST");
+        	}
+        	
+            return FormValidation.ok();
+        }
+        
+        /**
+         * This method verifies if force scan and incremental scan both configured 
+         * 
+         * @param value
+         * @param scaSASTProjectFullPath
+         * @return
+         */
+        @POST
+        public FormValidation doCheckIncremental(@QueryParameter boolean value,	@QueryParameter boolean forceScan) {
+        	
+        	if(forceScan && value) {
+        		forceScan = false;
+            	
+        		return FormValidation.error("Force scan and incremental scan can not be configured in pair for SAST");
+        	}
+        	
+            return FormValidation.ok();
+        }
         public FormValidation doTestScaSASTConnection(@QueryParameter final String scaSastServerUrl, @QueryParameter final String password,
                                                       @QueryParameter final String username, @QueryParameter final String timestamp,
                                                       @QueryParameter final String sastCredentialsId, @QueryParameter final boolean isProxy,
@@ -2402,6 +2545,37 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return ret;
         }
 
+        public ListBoxModel doFillPostScanActionIdItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
+                @QueryParameter final String username, @QueryParameter final String password,
+                @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
+                @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
+			// timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
+			ListBoxModel listBoxModel = new ListBoxModel();
+			LegacyClient commonClient = null;
+			try {
+				CxConnectionDetails connDetails = CxConnectionDetails.resolveCred(!useOwnServerCredentials, serverUrl, username,
+				StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, isProxy, this, item);
+				commonClient = prepareLoggedInClient(connDetails);
+				List<PostAction> teamList = commonClient.getPostScanActionList();
+				for (PostAction postAction : teamList) {
+					listBoxModel.add(new ListBoxModel.Option(
+							postAction.getName(), Integer.toString(postAction.getId())));
+				}
+			
+				return listBoxModel;
+			
+			} catch (Exception e) {
+				serverLog.error("Failed to populate post action list: " + e.toString());
+				String message = "Provide Checkmarx server credentials to see teams list";
+				listBoxModel.add(new ListBoxModel.Option(message, message));
+				return listBoxModel;
+			} finally {
+				if (commonClient != null) {
+					commonClient.close();
+				}
+			}
+        }
+
         /*
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
          *  shared state to avoid synchronization issues.
@@ -2542,11 +2716,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 CxConnectionDetails connDetails = CxConnectionDetails.resolveCred(!useOwnServerCredentials, serverUrl, username,
                         StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, isProxy, this, item);
                 commonClient = prepareLoggedInClient(connDetails);
-                List<Team> teamList = commonClient.getTeamList();
-                for (Team team : teamList) {
-                    listBoxModel.add(new ListBoxModel.Option(team.getFullName(), team.getId()));
-                }
-
+                
+                commonClient.getTeamList().stream().sorted(
+                		(firstElmnt, secondElmnt) -> 
+                		firstElmnt.getFullName().compareToIgnoreCase(secondElmnt.fullName))
+                		.forEach(team -> 
+                		listBoxModel.add(new ListBoxModel.Option(team.getFullName(), team.getId())));
+                
                 return listBoxModel;
 
             } catch (Exception e) {
@@ -2751,8 +2927,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             // option.
             if (!pluginData.has(DEPENDENCY_SCAN_CONFIG_PROP)) {
                 pluginData.put(DEPENDENCY_SCAN_CONFIG_PROP, null);
+                
             }
-
+            // Have put the below line to fix AB # 493 - "Globally define dependency scan settings" selection is not retained. 
+            // Line pluginData.put(DEPENDENCY_SCAN_CONFIG_PROP, null); should have solved the problem but putting null is actually not working. JSONObject.NULL
+            // API also no more available
+            setGloballyDefineScanSettings(pluginData.has(DEPENDENCY_SCAN_CONFIG_PROP));
             req.bindJSON(this, pluginData);
             save();
             return super.configure(req, formData);
