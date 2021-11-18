@@ -1516,6 +1516,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         result.setAccessControlUrl(dsConfig.scaAccessControlUrl);
         result.setWebAppUrl(dsConfig.scaWebAppUrl);
         result.setTenant(dsConfig.scaTenant);
+        result.setTeamPath(dsConfig.scaTeamPath);
         result.setIncludeSources(dsConfig.isIncludeSources);
         UsernamePasswordCredentials credentials = CxConnectionDetails.getCredentialsById(dsConfig.scaCredentialsId, run);
         if (credentials != null) {
@@ -2471,6 +2472,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                   @QueryParameter String scaAccessControlUrl,
                                                   @QueryParameter String scaCredentialsId,
                                                   @QueryParameter String scaTenant,
+                                                  @QueryParameter String scaTeamPath,
                                                   @AncestorInPath Item item) {
             try {
                 CxScanConfig config = new CxScanConfig();
@@ -2482,6 +2484,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 scaConfig.setAccessControlUrl(scaAccessControlUrl);
                 scaConfig.setApiUrl(scaServerUrl);
                 scaConfig.setTenant(scaTenant);
+                scaConfig.setTeamPath(scaTeamPath);
 
                 UsernamePasswordCredentials credentials = CxConnectionDetails.getCredentialsById(scaCredentialsId, item);
                 if (credentials == null) {

@@ -69,6 +69,9 @@ public class DependencyScanConfig {
     public String scaTenant;
     
     @DataBoundSetter
+    public String scaTeamPath;
+    
+    @DataBoundSetter
     public boolean isIncludeSources;
     
     @DataBoundSetter
