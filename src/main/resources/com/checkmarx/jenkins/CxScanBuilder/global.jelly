@@ -160,9 +160,10 @@
                       </f:description>
                     <f:entry title="Account" field="scaTenant">
                         <f:textbox value="${descriptor.dependencyScanConfig.scaTenant}"/>
+                    </f:entry>
                     <f:entry title="Teampath" field="scaTeamPath">
                         <f:textbox value="${descriptor.dependencyScanConfig.scaTeamPath}"/>
-                    </f:entry>
+                     </f:entry>   
                     <f:validateButton title="Test Connection" progress="Testing..." method="testScaConnection"
                                       with="scaServerUrl,scaAccessControlUrl,scaCredentialsId,scaTenant, scaTeamPath"/>
                 </f:nested>
