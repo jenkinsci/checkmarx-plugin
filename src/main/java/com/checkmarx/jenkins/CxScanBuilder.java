@@ -1496,6 +1496,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             config.setOsaRunInstall(effectiveConfig.osaInstallBeforeScan);
         } else if (config.isAstScaEnabled()) {
             config.setAstScaConfig(getScaConfig(run, env, dependencyScanConfig, descriptor));
+            config.setSCAScanTimeoutInMinutes(dependencyScanConfig.scaTimeout);
         }
     }
 
@@ -2473,6 +2474,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                   @QueryParameter String scaCredentialsId,
                                                   @QueryParameter String scaTenant,
                                                   @QueryParameter String scaTeamPath,
+                                                  @QueryParameter Integer scaTimeout,
                                                   @AncestorInPath Item item) {
             try {
                 CxScanConfig config = new CxScanConfig();
@@ -2496,6 +2498,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 scaConfig.setRemoteRepositoryInfo(null);
                 config.setAstScaConfig(scaConfig);
                 config.addScannerType(ScannerType.AST_SCA);
+                config.setSCAScanTimeoutInMinutes(scaTimeout);
 
                 try {
                     Jenkins instance = Jenkins.getInstance();

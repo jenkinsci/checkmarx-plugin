@@ -184,8 +184,13 @@
                     <f:entry title="Teampath" field="scaTeamPath">
                         <f:textbox value="${instance.dependencyScanConfig.scaTeamPath}"/>
                     </f:entry>
+                    
+                    <f:entry title="SCA Scan timeout (minutes)" field="scaTimeout">
+                        <f:textbox value="${instance.dependencyScanConfig.scaTimeout}"/>
+                    </f:entry>
+                    
                     <f:validateButton title="Test Connection" progress="Testing..." method="testScaConnection"
-                                      with="scaServerUrl,scaAccessControlUrl,scaCredentialsId,scaTenant,scaTeamPath"/>
+                                      with="scaServerUrl,scaAccessControlUrl,scaCredentialsId,scaTenant,scaTeamPath,scaTimeout"/>
                    
                     <f:entry title="Package Manager's Config File(s) Path" field="scaConfigFile">
                         <f:textarea value="${instance.dependencyScanConfig.scaConfigFile}" />
