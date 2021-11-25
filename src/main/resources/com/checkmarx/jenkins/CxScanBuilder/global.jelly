@@ -161,14 +161,12 @@
                     <f:entry title="Account" field="scaTenant">
                         <f:textbox value="${descriptor.dependencyScanConfig.scaTenant}"/>
                     </f:entry>
-                    <f:entry title="Teampath" field="scaTeamPath">
-                        <f:textbox value="${descriptor.dependencyScanConfig.scaTeamPath}"/>
-                     </f:entry>   
+                     
                      <f:entry title="SCA Scan timeout (minutes)" field="scaTimeout">
                         <f:textbox value="${descriptor.dependencyScanConfig.scaTimeout}"/>
                      </f:entry>
                     <f:validateButton title="Test Connection" progress="Testing..." method="testScaConnection"
-                                      with="scaServerUrl,scaAccessControlUrl,scaCredentialsId,scaTenant,scaTeamPath,scaTimeout"/>
+                                      with="scaServerUrl,scaAccessControlUrl,scaCredentialsId,scaTenant,scaTimeout"/>
                 </f:nested>
                 <f:entry title="Package Manager's Config File(s) Path" field="scaConfigFile">
                         <f:textarea value="${descriptor.dependencyScanConfig.scaConfigFile}" />

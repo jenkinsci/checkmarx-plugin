@@ -1305,7 +1305,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         } else {
             ret.setProxy(false);
         }
-
+        teamPath = getTeamNameFromId(cxConnectionDetails, descriptor, groupId);
         //project
         ret.setProjectName(env.expand(projectName.trim()));
         ret.setTeamPath(teamPath);
@@ -2473,7 +2473,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                   @QueryParameter String scaAccessControlUrl,
                                                   @QueryParameter String scaCredentialsId,
                                                   @QueryParameter String scaTenant,
-                                                  @QueryParameter String scaTeamPath,
                                                   @QueryParameter Integer scaTimeout,
                                                   @AncestorInPath Item item) {
             try {
@@ -2486,7 +2485,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 scaConfig.setAccessControlUrl(scaAccessControlUrl);
                 scaConfig.setApiUrl(scaServerUrl);
                 scaConfig.setTenant(scaTenant);
-                scaConfig.setTeamPath(scaTeamPath);
+                
 
                 UsernamePasswordCredentials credentials = CxConnectionDetails.getCredentialsById(scaCredentialsId, item);
                 if (credentials == null) {
