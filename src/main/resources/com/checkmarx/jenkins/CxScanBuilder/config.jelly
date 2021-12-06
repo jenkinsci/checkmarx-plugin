@@ -1,3 +1,6 @@
+
+
+
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:c="/lib/credentials" xmlns:l="/lib/layout"
 	xmlns:t="/lib/hudson" xmlns:f="/lib/form" descriptor="${it.descriptor}">
@@ -178,8 +181,16 @@
                     <f:entry title="Account" field="scaTenant">
                         <f:textbox value="${instance.dependencyScanConfig.scaTenant}"/>
                     </f:entry>  
+                    <f:entry title="Teampath" field="scaTeamPath">
+                        <f:textbox value="${instance.dependencyScanConfig.scaTeamPath}"/>
+                    </f:entry>
+                    
+                    <f:entry title="SCA Scan timeout (minutes)" field="scaTimeout">
+                        <f:textbox value="${instance.dependencyScanConfig.scaTimeout}"/>
+                    </f:entry>
+                    
                     <f:validateButton title="Test Connection" progress="Testing..." method="testScaConnection"
-                                      with="scaServerUrl,scaAccessControlUrl,scaCredentialsId,scaTenant"/>
+                                      with="scaServerUrl,scaAccessControlUrl,scaCredentialsId,scaTenant,scaTimeout"/>
                    
                     <f:entry title="Package Manager's Config File(s) Path" field="scaConfigFile">
                         <f:textarea value="${instance.dependencyScanConfig.scaConfigFile}" />
