@@ -68,4 +68,4 @@ For release notes see:
 
 For more information see:
 
--   [CxSAST Jenkins Plugin](https://checkmarx.atlassian.net/wiki/spaces/KC/pages/11337790/CxSAST+Jenkins+Plugin)
+-   [CxSAST Jenkins Plugin](https://checkmarx.atlassian.net/wiki/spaces/SD/pages/1339130110/Jenkins+Plugin)
