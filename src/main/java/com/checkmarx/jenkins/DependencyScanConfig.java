@@ -69,13 +69,16 @@ public class DependencyScanConfig {
     public String scaTenant;
     
     @DataBoundSetter
-    public String scaTeamPath;
-    
-    @DataBoundSetter
-    public Integer scaTimeout;
-    
-    @DataBoundSetter
     public boolean isIncludeSources;
+
+    @DataBoundSetter
+    public boolean enableScaResolver;
+
+    @DataBoundSetter
+    public String pathToScaResolver;
+
+    @DataBoundSetter
+    public String scaResolverAddParameters;
     
     @DataBoundSetter
     public String fsaVariables;
