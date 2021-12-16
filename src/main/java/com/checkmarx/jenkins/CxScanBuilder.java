@@ -1247,9 +1247,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             passedURL = "Jenkins " + hostName + " " + jobName;
             // 50 is the maximum number of characters allowed by SAST server
             if (passedURL.length() > 50)
-                passedURL = passedURL.substring(0, 50);
+            {
+                passedURL = passedURL.substring(0, 45);
+                passedURL = passedURL + "...";}
             else
-                passedURL = passedURL;
+            {
+                passedURL = passedURL;}
         } catch (UnsupportedEncodingException e) {
             log.error("Failed to get Jenkins URL of the JOB: " + e.getMessage());
         }
@@ -1261,6 +1264,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         String jenURL = env.get("JENKINS_URL");
         String jobName = env.get("JOB_NAME");
         String originUrl = jenURL + "job/" + jobName;
+        if (originUrl.length() > 120){ originUrl = originUrl.substring(0, 115) + "...";}
+        else{ originUrl = originUrl;}
         return originUrl;
     }
 
@@ -2351,7 +2356,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * This method verify correct format for Custom Fields
          * 
          * @param value
-         * @param scaSASTProjectFullPath
          * @return
          */
         @POST
@@ -2370,7 +2374,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * This method verify if force scan is checked
          * 
          * @param value
-         * @param scaSASTProjectFullPath
          * @return
          */
         @POST
@@ -2387,7 +2390,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * This method verifies if force scan and incremental scan both configured 
          * 
          * @param value
-         * @param scaSASTProjectFullPath
          * @return
          */
         @POST
