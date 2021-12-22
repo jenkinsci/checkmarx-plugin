@@ -1318,7 +1318,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         } else {
             ret.setProxy(false);
         }
-        teamPath = getTeamNameFromId(cxConnectionDetails, descriptor, groupId);
+        if (teamPath == null) {
+            teamPath = getTeamNameFromId(cxConnectionDetails, descriptor, groupId);
+        }
         //project
         ret.setProjectName(env.expand(projectName.trim()));
         ret.setTeamPath(teamPath);
