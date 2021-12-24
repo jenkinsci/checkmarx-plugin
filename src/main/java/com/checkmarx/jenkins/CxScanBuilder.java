@@ -1495,11 +1495,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             config.setOsaArchiveIncludePatterns(effectiveConfig.osaArchiveIncludePatterns.trim());
             config.setOsaRunInstall(effectiveConfig.osaInstallBeforeScan);
         } else if (config.isAstScaEnabled()) {
-            config.setAstScaConfig(getScaConfig(run, env, dependencyScanConfig, descriptor));
+            config.setAstScaConfig(getScaConfig(run, env, dependencyScanConfig, descriptor, config));
         }
     }
 
-    private AstScaConfig getScaConfig(Run<?, ?> run, EnvVars env, DependencyScanConfig dsConfigJobLevel, DescriptorImpl descriptor) {
+    private AstScaConfig getScaConfig(Run<?, ?> run, EnvVars env, DependencyScanConfig dsConfigJobLevel, DescriptorImpl descriptor, CxScanConfig config) {
 
 
         DependencyScanConfig dsConfig;
