@@ -1310,7 +1310,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         } else {
             ret.setProxy(false);
         }
-        teamPath = getTeamNameFromId(cxConnectionDetails, descriptor, groupId);
+        
+        /*
+         * Pipeline script can provide grouoId or teamPath
+         * teamPath will take precedence if it is not empty.
+         * Freestyle job always send groupId, hence initializing teamPath using groupId
+         */
+        if (!StringUtil.isNullOrEmpty(groupId) && StringUtil.isNullOrEmpty(teamPath)) {
+        	teamPath = getTeamNameFromId(cxConnectionDetails, descriptor, groupId);
+        }
+        
         //project
         ret.setProjectName(env.expand(projectName.trim()));
         ret.setTeamPath(teamPath);
