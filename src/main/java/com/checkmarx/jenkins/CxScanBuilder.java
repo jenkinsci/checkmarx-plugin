@@ -1305,7 +1305,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setUrl(cxConnectionDetails.getServerUrl().trim());
         ret.setUsername(cxConnectionDetails.getUsername());
         ret.setPassword(Aes.decrypt(cxConnectionDetails.getPassword(), cxConnectionDetails.getUsername()));
-        if (cxConnectionDetails.isProxy()) {
+        if (cxConnectionDetails.isProxy() != null && cxConnectionDetails.isProxy()) {
             Jenkins instance = Jenkins.getInstance();
             if (instance != null && instance.proxy != null && !(isCxURLinNoProxyHost(useOwnServerCredentials ?
                     this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))) {
