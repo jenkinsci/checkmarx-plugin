@@ -827,8 +827,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
         // As custom field - for pipeline jobs
         String fsaVars = dependencyScanConfig != null ? dependencyScanConfig.fsaVariables : "";
-        fsaVars = fsaVars.replace("${WORKSPACE}", env.get("WORKSPACE"));
         if (StringUtils.isNotEmpty(fsaVars)) {
+            fsaVars = fsaVars.contains("${WORKSPACE}") ? fsaVars.replace("${WORKSPACE}", env.get("WORKSPACE")) : fsaVars;
             try {
                 String[] vars = fsaVars.replaceAll("[\\n\\r]", "").trim().split(",");
                 for (String var : vars) {
@@ -1254,13 +1254,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
             passedURL = "Jenkins " + hostName + " " + jobName;
             // 50 is the maximum number of characters allowed by SAST server
-            if (passedURL.length() > 50)
-            {
+            if (passedURL.length() > 50) {
                 passedURL = passedURL.substring(0, 45);
-                passedURL = passedURL + "...";}
-            else
-            {
-                passedURL = passedURL;}
+                passedURL = passedURL + "...";
+            } else {
+                passedURL = passedURL;
+            }
         } catch (UnsupportedEncodingException e) {
             log.error("Failed to get Jenkins URL of the JOB: " + e.getMessage());
         }
@@ -1272,8 +1271,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         String jenURL = env.get("JENKINS_URL");
         String jobName = env.get("JOB_NAME");
         String originUrl = jenURL + "job/" + jobName;
-        if (originUrl.length() > 120){ originUrl = originUrl.substring(0, 115) + "...";}
-        else{ originUrl = originUrl;}
+        if (originUrl.length() > 120) {
+            originUrl = originUrl.substring(0, 115) + "...";
+        } else {
+            originUrl = originUrl;
+        }
         return originUrl;
     }
 
@@ -2498,7 +2500,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 scaConfig.setAccessControlUrl(scaAccessControlUrl);
                 scaConfig.setApiUrl(scaServerUrl);
                 scaConfig.setTenant(scaTenant);
-                
+
 
                 UsernamePasswordCredentials credentials = CxConnectionDetails.getCredentialsById(scaCredentialsId, item);
                 if (credentials == null) {
