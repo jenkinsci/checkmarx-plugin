@@ -53,16 +53,16 @@ dependencies {
         exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
     }
 
-    compile 'com.checkmarx:cx-client-common:2021.4.6',
+    compile 'com.checkmarx:cx-client-common:2021.4.9',
             'com.fasterxml.jackson.core:jackson-core:2.11.3',
             'com.fasterxml.jackson.core:jackson-annotations:2.11.3',
             'com.fasterxml.jackson.core:jackson-databind:2.11.3',
             'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.11.3',
             'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.5',
             'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.10.5',
-            'org.apache.logging.log4j:log4j-slf4j-impl:2.13.3',
-            'org.apache.logging.log4j:log4j-api:2.13.3',
-            'org.apache.logging.log4j:log4j-core:2.13.3'
+            'org.apache.logging.log4j:log4j-slf4j-impl:2.16.0',
+            'org.apache.logging.log4j:log4j-api:2.16.0',
+            'org.apache.logging.log4j:log4j-core:2.16.0'
             constraints {
                 implementation('io.vertx:vertx-web:3.9.7') {
                     because 'previous versions have a bug impacting this application'

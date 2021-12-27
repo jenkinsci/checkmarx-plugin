@@ -21,11 +21,8 @@ import com.cx.restclient.dto.*;
 import com.cx.restclient.dto.scansummary.ScanSummary;
 import com.cx.restclient.exception.CxClientException;
 import com.cx.restclient.osa.dto.OSAResults;
-import com.cx.restclient.sast.dto.CxNameObj;
-import com.cx.restclient.sast.dto.PostAction;
-import com.cx.restclient.sast.dto.Preset;
 import com.cx.restclient.sast.dto.Project;
-import com.cx.restclient.sast.dto.SASTResults;
+import com.cx.restclient.sast.dto.*;
 import com.cx.restclient.sast.utils.LegacyClient;
 import com.cx.restclient.sca.utils.CxSCAFileSystemUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -302,7 +299,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.hideDebugLogs = hideDebugLogs;
         this.forceScan = forceScan;
         this.customFields = customFields;
-        
+
     }
 
     // Configuration fields getters
@@ -432,15 +429,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public int getFullScanCycle() {
         return fullScanCycle;
     }
-    
-    public Integer getPostScanActionId() {
-		return postScanActionId;
-	}
 
-	@DataBoundSetter
-	public void setPostScanActionId(Integer postScanActionId) {
-		this.postScanActionId = postScanActionId;
-	}
+    public Integer getPostScanActionId() {
+        return postScanActionId;
+    }
+
+    @DataBoundSetter
+    public void setPostScanActionId(Integer postScanActionId) {
+        this.postScanActionId = postScanActionId;
+    }
+
     @Nullable
     public String getSourceEncoding() {
         return sourceEncoding;
@@ -778,26 +776,26 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return isThisBuildIncremental;
     }
 
-    
+
     public String getCustomFields() {
-		return customFields;
-	}
+        return customFields;
+    }
 
     @DataBoundSetter
-	public void setCustomFields(String customFields) {
-		this.customFields = customFields;
-	}
+    public void setCustomFields(String customFields) {
+        this.customFields = customFields;
+    }
 
-	public boolean isForceScan() {
-		return forceScan;
-	}
+    public boolean isForceScan() {
+        return forceScan;
+    }
 
-	@DataBoundSetter
-	public void setForceScan(boolean forceScan) {
-		this.forceScan = forceScan;
-	}
+    @DataBoundSetter
+    public void setForceScan(boolean forceScan) {
+        this.forceScan = forceScan;
+    }
 
-	@DataBoundSetter
+    @DataBoundSetter
     public void setGroupId(@Nullable String groupId) {
         this.groupId = groupId;
     }
@@ -821,7 +819,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         // As job environment variable
         for (Map.Entry<String, String> entry : env.entrySet()) {
             if (entry.getKey().contains("CX_") ||
-                    entry.getKey().contains("FSA_CONFIGURATION")) {
+                    entry.getKey().contains("FSA_")) {
                 if (StringUtils.isNotEmpty(entry.getValue())) {
                     sumFsaVars.put(entry.getKey(), entry.getValue());
                 }
@@ -830,11 +828,21 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         // As custom field - for pipeline jobs
         String fsaVars = dependencyScanConfig != null ? dependencyScanConfig.fsaVariables : "";
         if (StringUtils.isNotEmpty(fsaVars)) {
+            fsaVars = fsaVars.contains("${WORKSPACE}") ? fsaVars.replace("${WORKSPACE}", env.get("WORKSPACE")) : fsaVars;
             try {
                 String[] vars = fsaVars.replaceAll("[\\n\\r]", "").trim().split(",");
                 for (String var : vars) {
-                    String[] entry = var.split("=");
-                    sumFsaVars.put(entry[0], entry[1]);
+                    if (var.startsWith("FSA_CONFIGURATION")) {
+                        String fsaConfig = var.substring(18);
+                        sumFsaVars.put("FSA_CONFIGURATION", fsaConfig);
+                    } else {
+                        String[] entry = var.split("=");
+                        if (entry.length == 1) {
+                            sumFsaVars.put(entry[0], "");
+                        } else {
+                            sumFsaVars.put(entry[0], entry[1]);
+                        }
+                    }
                 }
             } catch (Exception e) {
                 log.warn("Fail to add comment FSA vars");
@@ -1246,10 +1254,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
             passedURL = "Jenkins " + hostName + " " + jobName;
             // 50 is the maximum number of characters allowed by SAST server
-            if (passedURL.length() > 50)
-                passedURL = passedURL.substring(0, 50);
-            else
+            if (passedURL.length() > 50) {
+                passedURL = passedURL.substring(0, 45);
+                passedURL = passedURL + "...";
+            } else {
                 passedURL = passedURL;
+            }
         } catch (UnsupportedEncodingException e) {
             log.error("Failed to get Jenkins URL of the JOB: " + e.getMessage());
         }
@@ -1261,14 +1271,19 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         String jenURL = env.get("JENKINS_URL");
         String jobName = env.get("JOB_NAME");
         String originUrl = jenURL + "job/" + jobName;
+        if (originUrl.length() > 120) {
+            originUrl = originUrl.substring(0, 115) + "...";
+        } else {
+            originUrl = originUrl;
+        }
         return originUrl;
     }
 
     private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) throws IOException {
         CxScanConfig ret = new CxScanConfig();
 
-        if(isIncremental() && isForceScan()) {
-        	throw new IOException("Force scan and incremental scan can not be configured in pair for SAST. Configure either Incremental or Force scan option");
+        if (isIncremental() && isForceScan()) {
+            throw new IOException("Force scan and incremental scan can not be configured in pair for SAST. Configure either Incremental or Force scan option");
         }
         String originUrl = getCxOriginUrl(env, log);
         ret.setCxOriginUrl(originUrl);
@@ -1278,7 +1293,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setCxOrigin(jenkinURL);
         log.info("  ORIGIN FROM JENKIN :: " + jenkinURL);
         log.info("  ORIGIN URL FROM JENKIN :: " + originUrl);
-        
+
         ret.setPostScanActionId(getPostScanActionId());
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
         ret.setMvnPath(descriptor.getMvnPath());
@@ -1286,7 +1301,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         ret.setCustomFields(apiFormat(getCustomFields()));
         ret.setForceScan(isForceScan());
-        
+
         //cx server
         CxConnectionDetails cxConnectionDetails = CxConnectionDetails.resolveCred(this, descriptor, run);
         ret.setUrl(cxConnectionDetails.getServerUrl().trim());
@@ -1386,22 +1401,22 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
         ret.setEnablePolicyViolations(enableProjectPolicyEnforcement);
         // Set the Continue build flag to Configuration object if Option from UI is choosen as useContinueBuildOnError
-        if(useContinueBuildOnError(getDescriptor())) {
-        	ret.setContinueBuild(Boolean.TRUE);
+        if (useContinueBuildOnError(getDescriptor())) {
+            ret.setContinueBuild(Boolean.TRUE);
         }
         return ret;
     }
 
     private String apiFormat(String customFields) {
-    	if(!StringUtil.isNullOrEmpty(customFields)) {
-			customFields = customFields.replaceAll(":", "\":\"");
-			customFields = customFields.replaceAll(",", "\",\"");
-			customFields = "{\"".concat(customFields).concat("\"}");
-    	}
-    	return customFields;
-	}
+        if (!StringUtil.isNullOrEmpty(customFields)) {
+            customFields = customFields.replaceAll(":", "\":\"");
+            customFields = customFields.replaceAll(",", "\",\"");
+            customFields = "{\"".concat(customFields).concat("\"}");
+        }
+        return customFields;
+    }
 
-	private String getTeamNameFromId(CxConnectionDetails credentials, DescriptorImpl descriptor, String teamId) {
+    private String getTeamNameFromId(CxConnectionDetails credentials, DescriptorImpl descriptor, String teamId) {
         LegacyClient commonClient = null;
         String teamName = null;
         try {
@@ -1843,6 +1858,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 || (JobStatusOnError.GLOBAL.equals(getJobStatusOnError()) && JobGlobalStatusOnError.UNSTABLE.equals(descriptor
                 .getJobGlobalStatusOnError()));
     }
+
     /**
      * Checks if job should fail with <code>UNSTABLE</code> status instead of <code>FAILED</code>
      *
@@ -1852,6 +1868,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private boolean useContinueBuildOnError(final DescriptorImpl descriptor) {
         return descriptor.getContinueBuildWhenTimedOut();
     }
+
     private boolean isThisBuildIncremental(int buildNumber) {
 
         boolean askedForIncremental = isIncremental();
@@ -2183,7 +2200,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         public void setScanTimeOutEnabled(boolean scanTimeOutEnabled) {
             this.scanTimeOutEnabled = scanTimeOutEnabled;
         }
-        
+
         public boolean getContinueBuildWhenTimedOut() {
             return continueBuildWhenTimedOut;
         }
@@ -2191,7 +2208,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         public void setContinueBuildWhenTimedOut(boolean continueBuildWhenTimedOut) {
             this.continueBuildWhenTimedOut = continueBuildWhenTimedOut;
         }
-        
+
         public boolean getGloballyDefineScanSettings() {
             return globallyDefineScanSettings;
         }
@@ -2199,7 +2216,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         public void setGloballyDefineScanSettings(boolean globallyDefineScanSettings) {
             this.globallyDefineScanSettings = globallyDefineScanSettings;
         }
-        
+
         @Nullable
         public Integer getScanTimeoutDuration() {
             return scanTimeoutDuration;
@@ -2349,62 +2366,60 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
             return FormValidation.ok();
         }
-        
-        
+
+
         /**
          * This method verify correct format for Custom Fields
-         * 
+         *
          * @param value
-         * @param scaSASTProjectFullPath
          * @return
          */
         @POST
         public FormValidation doCheckCustomFields(@QueryParameter String value) {
-        	
-        	Pattern pattern = Pattern.compile("(^([a-zA-Z0-9]*):([a-zA-Z0-9]*)+(,([a-zA-Z0-9]*):([a-zA-Z0-9]*)+)*$)");
-        	Matcher match = pattern.matcher(value);
-        	if(!StringUtil.isNullOrEmpty(value) && !match.find()) {
-        		return FormValidation.error("Custome Fields must to have next format: key1:val1,key2:val2");
-        	}
-        	
+
+            Pattern pattern = Pattern.compile("(^([a-zA-Z0-9]*):([a-zA-Z0-9]*)+(,([a-zA-Z0-9]*):([a-zA-Z0-9]*)+)*$)");
+            Matcher match = pattern.matcher(value);
+            if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
+                return FormValidation.error("Custome Fields must to have next format: key1:val1,key2:val2");
+            }
+
             return FormValidation.ok();
         }
 
         /**
          * This method verify if force scan is checked
-         * 
+         *
          * @param value
-         * @param scaSASTProjectFullPath
          * @return
          */
         @POST
         public FormValidation doCheckForceScan(@QueryParameter boolean value, @QueryParameter boolean incremental) {
-        	
-        	if(incremental && value) {
-        		return FormValidation.error("Force scan and incremental scan can not be configured in pair for SAST");
-        	}
-        	
+
+            if (incremental && value) {
+                return FormValidation.error("Force scan and incremental scan can not be configured in pair for SAST");
+            }
+
             return FormValidation.ok();
         }
-        
+
         /**
-         * This method verifies if force scan and incremental scan both configured 
-         * 
+         * This method verifies if force scan and incremental scan both configured
+         *
          * @param value
-         * @param scaSASTProjectFullPath
          * @return
          */
         @POST
-        public FormValidation doCheckIncremental(@QueryParameter boolean value,	@QueryParameter boolean forceScan) {
-        	
-        	if(forceScan && value) {
-        		forceScan = false;
-            	
-        		return FormValidation.error("Force scan and incremental scan can not be configured in pair for SAST");
-        	}
-        	
+        public FormValidation doCheckIncremental(@QueryParameter boolean value, @QueryParameter boolean forceScan) {
+
+            if (forceScan && value) {
+                forceScan = false;
+
+                return FormValidation.error("Force scan and incremental scan can not be configured in pair for SAST");
+            }
+
             return FormValidation.ok();
         }
+
         public FormValidation doTestScaSASTConnection(@QueryParameter final String scaSastServerUrl, @QueryParameter final String password,
                                                       @QueryParameter final String username, @QueryParameter final String timestamp,
                                                       @QueryParameter final String sastCredentialsId, @QueryParameter final boolean isProxy,
@@ -2552,34 +2567,34 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         public ListBoxModel doFillPostScanActionIdItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
-                @QueryParameter final String username, @QueryParameter final String password,
-                @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
-                @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
-			// timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
-			ListBoxModel listBoxModel = new ListBoxModel();
-			LegacyClient commonClient = null;
-			try {
-				CxConnectionDetails connDetails = CxConnectionDetails.resolveCred(!useOwnServerCredentials, serverUrl, username,
-				StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, isProxy, this, item);
-				commonClient = prepareLoggedInClient(connDetails);
-				List<PostAction> teamList = commonClient.getPostScanActionList();
-				for (PostAction postAction : teamList) {
-					listBoxModel.add(new ListBoxModel.Option(
-							postAction.getName(), Integer.toString(postAction.getId())));
-				}
-			
-				return listBoxModel;
-			
-			} catch (Exception e) {
-				serverLog.error("Failed to populate post action list: " + e.toString());
-				String message = "Provide Checkmarx server credentials to see teams list";
-				listBoxModel.add(new ListBoxModel.Option(message, message));
-				return listBoxModel;
-			} finally {
-				if (commonClient != null) {
-					commonClient.close();
-				}
-			}
+                                                        @QueryParameter final String username, @QueryParameter final String password,
+                                                        @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
+                                                        @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
+            // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
+            ListBoxModel listBoxModel = new ListBoxModel();
+            LegacyClient commonClient = null;
+            try {
+                CxConnectionDetails connDetails = CxConnectionDetails.resolveCred(!useOwnServerCredentials, serverUrl, username,
+                        StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, isProxy, this, item);
+                commonClient = prepareLoggedInClient(connDetails);
+                List<PostAction> teamList = commonClient.getPostScanActionList();
+                for (PostAction postAction : teamList) {
+                    listBoxModel.add(new ListBoxModel.Option(
+                            postAction.getName(), Integer.toString(postAction.getId())));
+                }
+
+                return listBoxModel;
+
+            } catch (Exception e) {
+                serverLog.error("Failed to populate post action list: " + e.toString());
+                String message = "Provide Checkmarx server credentials to see teams list";
+                listBoxModel.add(new ListBoxModel.Option(message, message));
+                return listBoxModel;
+            } finally {
+                if (commonClient != null) {
+                    commonClient.close();
+                }
+            }
         }
 
         /*
@@ -2722,13 +2737,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 CxConnectionDetails connDetails = CxConnectionDetails.resolveCred(!useOwnServerCredentials, serverUrl, username,
                         StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, isProxy, this, item);
                 commonClient = prepareLoggedInClient(connDetails);
-                
+
                 commonClient.getTeamList().stream().sorted(
-                		(firstElmnt, secondElmnt) -> 
-                		firstElmnt.getFullName().compareToIgnoreCase(secondElmnt.fullName))
-                		.forEach(team -> 
-                		listBoxModel.add(new ListBoxModel.Option(team.getFullName(), team.getId())));
-                
+                                (firstElmnt, secondElmnt) ->
+                                        firstElmnt.getFullName().compareToIgnoreCase(secondElmnt.fullName))
+                        .forEach(team ->
+                                listBoxModel.add(new ListBoxModel.Option(team.getFullName(), team.getId())));
+
                 return listBoxModel;
 
             } catch (Exception e) {
@@ -2933,7 +2948,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             // option.
             if (!pluginData.has(DEPENDENCY_SCAN_CONFIG_PROP)) {
                 pluginData.put(DEPENDENCY_SCAN_CONFIG_PROP, null);
-                
+
             }
             // Have put the below line to fix AB # 493 - "Globally define dependency scan settings" selection is not retained. 
             // Line pluginData.put(DEPENDENCY_SCAN_CONFIG_PROP, null); should have solved the problem but putting null is actually not working. JSONObject.NULL
