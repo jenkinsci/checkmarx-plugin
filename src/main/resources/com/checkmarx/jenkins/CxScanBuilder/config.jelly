@@ -190,42 +190,59 @@
                     </f:entry>
                     
                     <f:validateButton title="Test Connection" progress="Testing..." method="testScaConnection"
-                                      with="scaServerUrl,scaAccessControlUrl,scaCredentialsId,scaTenant,scaTimeout"/>
-                   
-                    <f:entry title="Package Manager's Config File(s) Path" field="scaConfigFile">
-                        <f:textarea value="${instance.dependencyScanConfig.scaConfigFile}" />
-                    </f:entry>
-                    
-                    <f:entry title="Private Registry Environment Variable" field="scaEnvVariables">
-                        <f:textarea value="${instance.dependencyScanConfig.scaEnvVariables}" />
-                    </f:entry>
-                   
-                    
-                    <f:optionalBlock title="Include Sources" field="isIncludeSources" 
-                    inline="true"  checked="${instance.dependencyScanConfig.isIncludeSources}"/>
-                    
-                    <f:optionalBlock title="Enable Exploitable Path" field="isExploitablePath" 
-                    inline="true"  checked="${instance.dependencyScanConfig.isExploitablePath}">
-                    
-                    <f:optionalBlock title="Use global settings (${descriptor.credentialsDescription})" field="useJobLevelSastDetails" 
-                    inline="true"  negative="true" checked="${!instance.dependencyScanConfig.useJobLevelSastDetails}">
-                    
-                    <f:entry title="CxSAST Server Url" field="scaSastServerUrl">
-                			<f:textbox default="${descriptor.dependencyScanConfig.serverUrl}"  value="${instance.dependencyScanConfig.scaSastServerUrl}" />
-            			</f:entry>
-            			<f:entry title="CxSAST credentials" field="sastCredentialsId">
-                 			<c:select value="${instance.dependencyScanConfig.sastCredentialsId}" />
-                 		</f:entry>
-                		<f:validateButton title="Test Connection" progress="Testing..." method="testScaSASTConnection" 
-                			with="scaSastServerUrl,password,username,timestamp,sastCredentialsId,isProxy" />
-   			     	</f:optionalBlock>
-                       <f:entry title="Project Full Path" field="scaSASTProjectFullPath">
-                        <f:textbox value="${instance.dependencyScanConfig.scaSASTProjectFullPath}"/>
-                        </f:entry>  
-                        <f:entry title="Project ID" field="scaSASTProjectID">
-                            <f:textbox checkMethod="POST" value="${instance.dependencyScanConfig.scaSASTProjectID}"/>
-                        </f:entry>   
-   			     	</f:optionalBlock>
+                                      with="scaServerUrl,scaAccessControlUrl,scaCredentialsId,scaTenant"/>
+
+                    <f:radioBlock checked="${instance.dependencyScanConfig.enableScaResolver == null || instance.dependencyScanConfig.enableScaResolver == 'SCA_RESOLVER'}" inline="true"
+                                    name="enableScaResolver" title="Perform SCA scan using dependency resolution by SCA Resolver tool."
+                                    value="SCA_RESOLVER">
+                        <!-- Sca Resolver Fields-->
+                        <f:entry title="Path to SCA Resolver" field="pathToScaResolver">
+                            <f:textbox value="${instance.dependencyScanConfig.pathToScaResolver}" />
+                        </f:entry>
+
+                        <f:entry title="SCA Resolver Additional Parameters" field="scaResolverAddParameters">
+                             <f:textarea value="${instance.dependencyScanConfig.scaResolverAddParameters}" />
+                        </f:entry>
+                    </f:radioBlock>
+                    <f:radioBlock checked="${instance.dependencyScanConfig.enableScaResolver == null || instance.dependencyScanConfig.enableScaResolver == 'MANIFEST'}" inline="true"
+                                    name="enableScaResolver" title="Perform SCA scan by uploading manifests file(s)/source to SCA Service."
+                                    value="MANIFEST">
+                            <!-- Non-Sca Resolver Fields-->
+                            <f:entry title="Package Manager's Config File(s) Path" field="scaConfigFile">
+                                <f:textarea value="${instance.dependencyScanConfig.scaConfigFile}" />
+                            </f:entry>
+
+                            <f:entry title="Private Registry Environment Variable" field="scaEnvVariables">
+                                <f:textarea value="${instance.dependencyScanConfig.scaEnvVariables}" />
+                            </f:entry>
+
+                            <f:optionalBlock title="Include Sources" field="isIncludeSources"
+                                            inline="true"  checked="${instance.dependencyScanConfig.isIncludeSources}"/>
+
+                            <f:optionalBlock title="Enable Exploitable Path" field="isExploitablePath"
+                                            inline="true"  checked="${instance.dependencyScanConfig.isExploitablePath}">
+
+                                <f:optionalBlock title="Use global settings (${descriptor.credentialsDescription})" field="useJobLevelSastDetails"
+                                                inline="true"  negative="true" checked="${!instance.dependencyScanConfig.useJobLevelSastDetails}">
+
+                                    <f:entry title="CxSAST Server Url" field="scaSastServerUrl">
+                                        <f:textbox default="${descriptor.dependencyScanConfig.serverUrl}"  value="${instance.dependencyScanConfig.scaSastServerUrl}" />
+                                    </f:entry>
+                                    <f:entry title="CxSAST credentials" field="sastCredentialsId">
+                                        <c:select value="${instance.dependencyScanConfig.sastCredentialsId}" />
+                                    </f:entry>
+                                    <f:validateButton title="Test Connection" progress="Testing..." method="testScaSASTConnection"
+                                                    with="scaSastServerUrl,password,username,timestamp,sastCredentialsId,isProxy" />
+                                </f:optionalBlock>
+
+                                <f:entry title="Project Full Path" field="scaSASTProjectFullPath">
+                                    <f:textbox value="${instance.dependencyScanConfig.scaSASTProjectFullPath}"/>
+                                </f:entry>
+                                <f:entry title="Project ID" field="scaSASTProjectID">
+                                    <f:textbox checkMethod="POST" value="${instance.dependencyScanConfig.scaSASTProjectID}"/>
+                                </f:entry>
+                            </f:optionalBlock>
+                        </f:radioBlock>
                 </f:nested>
             </f:radioBlock>
         </f:optionalBlock>

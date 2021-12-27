@@ -76,6 +76,15 @@ public class DependencyScanConfig {
     
     @DataBoundSetter
     public boolean isIncludeSources;
+
+    @DataBoundSetter
+    public SCAScanType enableScaResolver;
+
+    @DataBoundSetter
+    public String pathToScaResolver;
+
+    @DataBoundSetter
+    public String scaResolverAddParameters;
     
     @DataBoundSetter
     public String fsaVariables;
