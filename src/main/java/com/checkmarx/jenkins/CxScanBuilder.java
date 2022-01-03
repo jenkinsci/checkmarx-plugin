@@ -40,10 +40,12 @@ import io.netty.util.internal.StringUtil;
 import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.*;
@@ -1320,7 +1322,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         } else {
             ret.setProxy(false);
         }
-        teamPath = getTeamNameFromId(cxConnectionDetails, descriptor, groupId);
+        
+        /*
+         * Pipeline script can provide grouoId or teamPath
+         * teamPath will take precedence if it is not empty.
+         * Freestyle job always send groupId, hence initializing teamPath using groupId
+         */
+        if (!StringUtil.isNullOrEmpty(groupId) && StringUtil.isNullOrEmpty(teamPath)) {
+        	teamPath = getTeamNameFromId(cxConnectionDetails, descriptor, groupId);
+        }
         //project
         ret.setProjectName(env.expand(projectName.trim()));
         ret.setTeamPath(teamPath);
@@ -1534,6 +1544,20 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         result.setTenant(dsConfig.scaTenant);
         result.setTeamPath(dsConfig.scaTeamPath);
         result.setIncludeSources(dsConfig.isIncludeSources);
+
+        //add SCA Resolver code here
+		if (dsConfig.enableScaResolver != null
+				&& SCAScanType.SCA_RESOLVER.toString().equalsIgnoreCase(dsConfig.enableScaResolver.toString())) {
+			scaResolverPathExist(dsConfig.pathToScaResolver);
+			validateScaResolverParams(dsConfig.scaResolverAddParameters);
+			result.setEnableScaResolver(true);
+    	}
+		else
+			result.setEnableScaResolver(false);
+        
+        result.setPathToScaResolver(dsConfig.pathToScaResolver);
+        result.setScaResolverAddParameters(dsConfig.scaResolverAddParameters);
+
         UsernamePasswordCredentials credentials = CxConnectionDetails.getCredentialsById(dsConfig.scaCredentialsId, run);
         if (credentials != null) {
             result.setUsername(credentials.getUsername());
@@ -1907,6 +1931,50 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
         return allowedCauses.isEmpty();
+    }
+    
+    private boolean scaResolverPathExist(String pathToResolver) {
+    	 pathToResolver = pathToResolver + File.separator + "ScaResolver";
+ 		if(!SystemUtils.IS_OS_UNIX)
+ 			pathToResolver = pathToResolver + ".exe";
+ 		
+         File file = new File(pathToResolver);
+         if(!file.exists())
+         {
+             throw new CxClientException("SCA Resolver path does not exist. Path="+file.getAbsolutePath());
+         }
+         return true;
+    }
+    
+    private void validateScaResolverParams(String additionalParams) {
+    	
+        String[] arguments = additionalParams.split(" ");
+        Map<String, String> params = new HashMap<>();
+        
+        for (int i = 0; i <  arguments.length ; i++) {
+            if(arguments[i].startsWith("-") && (i+1 != arguments.length && !arguments[i+1].startsWith("-")))
+            	params.put(arguments[i], arguments[i+1]);
+            else
+            	params.put(arguments[i], "");            		
+        }
+        
+        String dirPath = params.get("-s");
+        if(StringUtils.isEmpty(dirPath)) 
+        	throw new CxClientException("Source code path (-s <source code path>) is not provided.");
+        fileExists(dirPath);
+        
+        String projectName = params.get("-n");
+        if(StringUtils.isEmpty(projectName)) 
+        	throw new CxClientException("Project name parameter (-n <project name>) must be provided to ScaResolver.");
+		
+    }
+    
+    private void fileExists(String file) {
+    	
+		File resultPath = new File(file);
+		if (!resultPath.exists()) {			
+				throw new CxClientException("Path does not exist. Path= " + resultPath.getAbsolutePath());
+		}
     }
 
     /**
