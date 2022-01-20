@@ -2647,6 +2647,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 List<PostAction> teamList = commonClient.getPostScanActionList();
                 for (PostAction postAction : teamList) {
                     if (postAction.getType().contains("POST_SCAN_COMMAND")){
+                        if (listBoxModel.isEmpty() && !listBoxModel.contains("")){
+                            listBoxModel.add(new ListBoxModel.Option("", Integer.toString(0)));
+                        }
                         listBoxModel.add(new ListBoxModel.Option(postAction.getName(), Integer.toString(postAction.getId())));
                     }else {
                         continue;
