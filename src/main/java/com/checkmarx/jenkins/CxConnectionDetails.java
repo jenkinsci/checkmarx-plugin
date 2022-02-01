@@ -22,6 +22,7 @@ public class CxConnectionDetails {
     private String username;
     private String encryptedPassword;
     private Boolean isProxy;
+    private Boolean isScaProxy;
 
     public String getServerUrl() {
         return serverUrl;
@@ -53,6 +54,13 @@ public class CxConnectionDetails {
 
     public void setProxy(Boolean proxy) {
         isProxy = proxy;
+    }
+    public Boolean isScaProxy() {
+        return isScaProxy;
+    }
+
+    public void setScaProxy(Boolean scaProxy) {
+        isScaProxy = scaProxy;
     }
 
     @NotNull

@@ -901,8 +901,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         Jenkins instance = Jenkins.getInstance();
         final CxScanCallable action;
         if (instance != null && instance.proxy != null &&
-                (useOwnServerCredentials ? this.isProxy : getDescriptor().getIsProxy()) &&
-                !(isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))) {
+             ((!isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))
+                    || (!isCxURLinNoProxyHost(getDescriptor().getDependencyScanConfig().scaAccessControlUrl, instance.proxy.getNoProxyHostPatterns()))))
+        {
             action = new CxScanCallable(config, listener, instance.proxy, isHideDebugLogs(), fsaVars);
         } else {
             action = new CxScanCallable(config, listener, isHideDebugLogs(), fsaVars);
@@ -1311,16 +1312,30 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setPassword(Aes.decrypt(cxConnectionDetails.getPassword(), cxConnectionDetails.getUsername()));
         if (cxConnectionDetails.isProxy()) {
             Jenkins instance = Jenkins.getInstance();
-            if (instance != null && instance.proxy != null && !(isCxURLinNoProxyHost(useOwnServerCredentials ?
-                    this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))) {
-                ret.setProxy(true);
-                ret.setProxyConfig(new ProxyConfig(instance.proxy.name, instance.proxy.port,
-                        instance.proxy.getUserName(), instance.proxy.getPassword(), false));
+            if (instance != null && instance.proxy != null) {
+                boolean sastProxy = false;
+
+                if (!isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns())) {
+                    ret.setProxy(true);
+                    ret.setProxyConfig(new ProxyConfig(instance.proxy.name, instance.proxy.port,
+                            instance.proxy.getUserName(), instance.proxy.getPassword(), false));
+                    sastProxy = true;
+                }
+                if (!isCxURLinNoProxyHost(getDescriptor().getDependencyScanConfig().scaAccessControlUrl, instance.proxy.getNoProxyHostPatterns())) {
+                    if (!sastProxy){
+                        ret.setProxy(false);
+                    }
+                    ret.setScaProxy(true);
+                    ret.setScaProxyConfig(new ProxyConfig(instance.proxy.name, instance.proxy.port,
+                            instance.proxy.getUserName(), instance.proxy.getPassword(), false));
+                }
             } else {
                 ret.setProxy(false);
+                ret.setScaProxy(false);
             }
         } else {
             ret.setProxy(false);
+            ret.setScaProxy(false);
         }
         
         /*
@@ -1455,12 +1470,23 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         Jenkins instance = Jenkins.getInstance();
 
         if (credentials.isProxy()) {
-            if (instance != null && instance.proxy != null && isCxURLinNoProxyHost(serverUrl, instance.proxy.getNoProxyHostPatterns())) {
-                credentials.setProxy(false);
+            if (instance != null && instance.proxy != null) {
+                boolean isSastProxy = false;
+                if (!isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns())) {
+                    credentials.setProxy(true);
+                    isSastProxy = true;
+                }
+                if (!isCxURLinNoProxyHost(getDescriptor().getDependencyScanConfig().scaAccessControlUrl, instance.proxy.getNoProxyHostPatterns())) {
+                    credentials.setScaProxy(true);
+                    if (!isSastProxy || !getSastEnabled()){
+                        credentials.setProxy(false);
+                    }
+                }
             }
             ret = CommonClientFactory.getInstance(credentials, descriptor.isEnableCertificateValidation(), serverLog);
         } else {
             credentials.setProxy(false);
+            credentials.setScaProxy(false);
             ret = CommonClientFactory.getInstance(credentials, descriptor.isEnableCertificateValidation(), serverLog);
         }
 
@@ -2501,11 +2527,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
                     if (cred.isProxy()) {
                         if (instance != null && instance.proxy != null && isCxURLinNoProxyHost(serverUrl, instance.proxy.getNoProxyHostPatterns())) {
-                            cred.setProxy(false);
+                            cred.setScaProxy(false);
                         }
                         commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(), serverLog);
                     } else {
-                        cred.setProxy(false);
+                        cred.setScaProxy(false);
                         commonClient = CommonClientFactory.getInstance(cred, this.isEnableCertificateValidation(), serverLog);
                     }
                 } catch (Exception e) {
@@ -2584,9 +2610,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
                 try {
                     Jenkins instance = Jenkins.getInstance();
-                    if (instance != null && instance.proxy != null && isProxy && !(isCxURLinNoProxyHost(serverUrl, instance.proxy.getNoProxyHostPatterns()))) {
+                    if (instance != null && instance.proxy != null && isProxy && !(isCxURLinNoProxyHost(scaConfig.getAccessControlUrl(), instance.proxy.getNoProxyHostPatterns()))) {
                         ProxyConfig proxyConfig = ProxyHelper.getProxyConfig();
-                        config.setProxyConfig(proxyConfig);
+                        config.setScaProxyConfig(proxyConfig);
                     }
                 } catch (Exception e) {
                     return buildError(e, "Failed to init cx client");
