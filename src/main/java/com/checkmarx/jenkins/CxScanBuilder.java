@@ -1647,7 +1647,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("plugin version: {}", CxConfig.version());
         log.info("server url: " + config.getUrl());
         log.info("username: " + config.getUsername());
-        boolean proxyEnabled = ((useOwnServerCredentials ? getIsProxy() : config.getProxyConfig()) != null);
+        //Print correct value only for local project proxy setup
+        //useOwnServerCredentials == true once it's un-checked on job config and false once its checked
+        boolean proxyEnabled = ((!useOwnServerCredentials ? getIsProxy() : config.getProxyConfig()) != null);
         log.info("is using Jenkins server proxy: " + proxyEnabled);
         if (proxyEnabled) {
             if (Jenkins.getInstance().proxy != null)
@@ -1668,7 +1670,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ScannerType scannerType = getDependencyScannerType(config);
         String dependencyScannerType = scannerType != null ? scannerType.getDisplayName() : "NONE";
 
-        log.info("Dependency scanner type: {}", dependencyScannerType);
         if (config.isSastEnabled()) {
             log.info("preset id: " + config.getPresetId());
             log.info("SAST folder exclusions: " + config.getSastFolderExclusions());
