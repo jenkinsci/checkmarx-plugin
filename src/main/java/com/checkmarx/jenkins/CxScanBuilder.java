@@ -2298,6 +2298,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             this.hideDebugLogs = hideDebugLogs;
         }
 
+        @POST
         public FormValidation doCheckScanTimeoutDuration(@QueryParameter final Integer value) {
         	Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             return timeoutValid(value);
@@ -2371,6 +2372,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
          *  shared state to avoid synchronization issues.
          */
+        @POST
         public FormValidation doTestConnection(@QueryParameter final String serverUrl, @QueryParameter final String password,
                                                @QueryParameter final String username, @QueryParameter final String timestamp,
                                                @QueryParameter final String credentialsId, @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
@@ -2458,8 +2460,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *
          * @param value
          * @return
-         */
-        @POST
+         */        
         public FormValidation doCheckForceScan(@QueryParameter boolean value, @QueryParameter boolean incremental) {
         	Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             if (incremental && value) {
@@ -2474,8 +2475,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *
          * @param value
          * @return
-         */
-        @POST
+         */        
         public FormValidation doCheckIncremental(@QueryParameter boolean value, @QueryParameter boolean forceScan) {
         	Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             if (forceScan && value) {
@@ -2487,6 +2487,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return FormValidation.ok();
         }
 
+        @POST
         public FormValidation doTestScaSASTConnection(@QueryParameter final String scaSastServerUrl, @QueryParameter final String password,
                                                       @QueryParameter final String username, @QueryParameter final String timestamp,
                                                       @QueryParameter final String sastCredentialsId, @QueryParameter final boolean isProxy,
@@ -2537,7 +2538,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
 
-
+        @POST
         public FormValidation doValidateMvnPath(@QueryParameter final String mvnPath) throws InterruptedException {
         	Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             boolean mvnPathExists = false;
@@ -2557,6 +2558,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return mvnPathExists ? FormValidation.ok("Maven is found") : FormValidation.error(errorMsg);
         }
 
+        @POST
         public FormValidation doTestScaConnection(@QueryParameter String scaServerUrl,
                                                   @QueryParameter String scaAccessControlUrl,
                                                   @QueryParameter String scaCredentialsId,
@@ -2639,6 +2641,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return ret;
         }
 
+        @POST
         public ListBoxModel doFillPostScanActionIdItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
                                                         @QueryParameter final String username, @QueryParameter final String password,
                                                         @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
@@ -2675,6 +2678,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
          *  shared state to avoid synchronization issues.
          */
+        @POST
         public ComboBoxModel doFillProjectNameItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
                                                     @QueryParameter final String username, @QueryParameter final String password,
                                                     @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
@@ -2718,6 +2722,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
          *  shared state to avoid synchronization issues.
          */
+        @POST
         public ListBoxModel doFillPresetItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
                                               @QueryParameter final String username, @QueryParameter final String password,
                                               @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
@@ -2756,6 +2761,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *  Note: This method is called concurrently by multiple threads, refrain from using mutable
          *  shared state to avoid synchronization issues.
          */
+        @POST
         public FormValidation doCheckFullScanCycle(@QueryParameter final int value) {
         	Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             if (value >= FULL_SCAN_CYCLE_MIN && value <= FULL_SCAN_CYCLE_MAX) {
@@ -2765,6 +2771,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
 
+        @POST
         public ListBoxModel doFillSourceEncodingItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
                                                       @QueryParameter final String username, @QueryParameter final String password,
                                                       @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
@@ -2804,6 +2811,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *  shared state to avoid synchronization issues.
          */
 
+        @POST
         public ListBoxModel doFillGroupIdItems(@QueryParameter final boolean useOwnServerCredentials, @QueryParameter final String serverUrl,
                                                @QueryParameter final String username, @QueryParameter final String password,
                                                @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
@@ -2836,7 +2844,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 }
             }
         }
-
+        @POST
         public ListBoxModel doFillFailBuildOnNewSeverityItems() {
         	Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             ListBoxModel listBoxModel = new ListBoxModel();
@@ -2846,7 +2854,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return listBoxModel;
 
         }
-
+        
+        @POST
         public ListBoxModel doFillVulnerabilityThresholdResultItems() {
         	Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             ListBoxModel listBoxModel = new ListBoxModel();
@@ -2865,7 +2874,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
          * avoid synchronization issues.
          */
-
+        @POST
         public FormValidation doCheckHighThreshold(@QueryParameter final Integer value) {
         	Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             return checkNonNegativeValue(value);
@@ -2875,7 +2884,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
          * avoid synchronization issues.
          */
-
+        @POST
         public FormValidation doCheckMediumThreshold(@QueryParameter final Integer value) {
         	Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             return checkNonNegativeValue(value);
@@ -2885,7 +2894,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
          * avoid synchronization issues.
          */
-
+        @POST
         public FormValidation doCheckLowThreshold(@QueryParameter final Integer value) {
         	Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             return checkNonNegativeValue(value);
@@ -2895,7 +2904,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
          * avoid synchronization issues.
          */
-
+        @POST
         public FormValidation doCheckHighThresholdEnforcement(@QueryParameter final Integer value) {
         	Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             return checkNonNegativeValue(value);
@@ -2905,7 +2914,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
          * avoid synchronization issues.
          */
-
+        @POST
         public FormValidation doCheckMediumThresholdEnforcement(@QueryParameter final Integer value) {
         	Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             return checkNonNegativeValue(value);
@@ -2915,7 +2924,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
          * avoid synchronization issues.
          */
-
+        @POST
         public FormValidation doCheckLowThresholdEnforcement(@QueryParameter final Integer value) {
         	Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             return checkNonNegativeValue(value);
@@ -2926,7 +2935,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *  shared state to avoid synchronization issues.
          */
 
-
+        @POST
         public FormValidation doCheckOsaHighThreshold(@QueryParameter final Integer value) {
         	Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             return checkNonNegativeValue(value);
@@ -2936,7 +2945,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
          * avoid synchronization issues.
          */
-
+        @POST
         public FormValidation doCheckOsaMediumThreshold(@QueryParameter final Integer value) {
         	Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             return checkNonNegativeValue(value);
@@ -2946,13 +2955,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
          * avoid synchronization issues.
          */
-
+        @POST
         public FormValidation doCheckOsaLowThreshold(@QueryParameter final Integer value) {
         	Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             return checkNonNegativeValue(value);
         }
 
-
+        @POST
         public FormValidation doCheckOsaHighThresholdEnforcement(@QueryParameter final Integer value) {
         	Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             return checkNonNegativeValue(value);
@@ -2962,7 +2971,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
          * avoid synchronization issues.
          */
-
+        @POST
         public FormValidation doCheckOsaMediumThresholdEnforcement(@QueryParameter final Integer value) {
         	Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             return checkNonNegativeValue(value);
@@ -2972,7 +2981,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
          * avoid synchronization issues.
          */
-
+        @POST
         public FormValidation doCheckOsaLowThresholdEnforcement(@QueryParameter final Integer value) {
         	Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             return checkNonNegativeValue(value);
@@ -3076,16 +3085,19 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             this.lockVulnerabilitySettings = lockVulnerabilitySettings;
         }
 
+        @POST
         public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String credentialsId) {
         	Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
         	return getCredentialList(item, credentialsId);
         }
 
+        @POST
         public ListBoxModel doFillScaCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String scaCredentialsId) {
         	Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
         	return getCredentialList(item, scaCredentialsId);
         }
 
+        @POST
         public ListBoxModel doFillSastCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String sastCredentialsId) {
         	Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
         	return getCredentialList(item, sastCredentialsId);

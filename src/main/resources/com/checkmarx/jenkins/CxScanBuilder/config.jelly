@@ -95,7 +95,7 @@
                     title="Number of incremental scans between full scans (${descriptor.FULL_SCAN_CYCLE_MIN}-${descriptor.FULL_SCAN_CYCLE_MAX})"
                     field="fullScanCycle">
                     <f:number clazz="positive-number" min="${descriptor.FULL_SCAN_CYCLE_MIN}" max="${descriptor.FULL_SCAN_CYCLE_MAX}"
-                        step="1" default="10" />
+                        step="1" default="10" checkMethod="POST"  />
                 </f:entry>
             </f:optionalBlock>
         </f:optionalBlock>
@@ -356,13 +356,13 @@
                                             <f:select />
                                         </f:entry>
                                         <f:entry title="SAST High severity vulnerabilities threshold" field="highThreshold">
-                                            <f:number clazz="positive-number" min="0" step="1" default="" />
+                                            <f:number clazz="positive-number" min="0" step="1" default="" checkMethod="post" />
                                         </f:entry>
                                         <f:entry title="SAST Medium severity vulnerabilities threshold" field="mediumThreshold">
-                                            <f:number clazz="positive-number" min="0" step="1" default="" />
+                                            <f:number clazz="positive-number" min="0" step="1" default="" checkMethod="post" />
                                         </f:entry>
                                         <f:entry title="SAST Low severity vulnerabilities threshold" field="lowThreshold">
-                                            <f:number clazz="positive-number" min="0" step="1" default="" />
+                                            <f:number clazz="positive-number" min="0" step="1" default="" checkMethod="post" />
                                         </f:entry>
 
                                         <f:optionalBlock title="Fail the build for new SAST vulnerabilities" inline="true" field="failBuildOnNewResults">
@@ -372,13 +372,13 @@
                                         </f:optionalBlock>
 
                                         <f:entry title="Dependency scan high severity vulnerabilities threshold" field="osaHighThreshold">
-                                            <f:number clazz="positive-number" min="0" step="1" default="" />
+                                            <f:number clazz="positive-number" min="0" step="1" default="" checkMethod="POST"  />
                                         </f:entry>
                                         <f:entry title="Dependency scan medium severity vulnerabilities threshold" field="osaMediumThreshold">
-                                            <f:number clazz="positive-number" min="0" step="1" default="" />
+                                            <f:number clazz="positive-number" min="0" step="1" default="" checkMethod="POST" />
                                         </f:entry>
                                         <f:entry title="Dependency scan low severity vulnerabilities threshold" field="osaLowThreshold">
-                                            <f:number clazz="positive-number" min="0" step="1" default="" />
+                                            <f:number clazz="positive-number" min="0" step="1" default="" checkMethod="POST" />
                                         </f:entry>
                                     </f:nested>
                                 </f:radioBlock>

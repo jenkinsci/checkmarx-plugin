@@ -85,29 +85,29 @@
             </f:entry>
 
             <f:entry title="SAST High severity vulnerabilities threshold" field="highThresholdEnforcement">
-                <f:number clazz="positive-number" min="0" step="1" default=""/>
+                <f:number clazz="positive-number" min="0" step="1" default="" checkMethod="POST"/>
             </f:entry>
 
             <f:entry title="SAST Medium severity vulnerabilities threshold" field="mediumThresholdEnforcement">
-                <f:number clazz="positive-number" min="0" step="1" default=""/>
+                <f:number clazz="positive-number" min="0" step="1" default="" checkMethod="POST"/>
             </f:entry>
             <f:entry title="SAST Low severity vulnerabilities threshold" field="lowThresholdEnforcement">
-                <f:number clazz="positive-number" min="0" step="1" default=""/>
+                <f:number clazz="positive-number" min="0" step="1" default="" checkMethod="POST"/>
             </f:entry>
             <f:entry title="Dependency scan high severity vulnerabilities threshold" field="osaHighThresholdEnforcement">
-                <f:number clazz="positive-number" min="0" step="1" default=""/>
+                <f:number clazz="positive-number" min="0" step="1" default="" checkMethod="POST"/>
             </f:entry>
             <f:entry title="Dependency scan medium severity vulnerabilities threshold" field="osaMediumThresholdEnforcement">
-                <f:number clazz="positive-number" min="0" step="1" default=""/>
+                <f:number clazz="positive-number" min="0" step="1" default="" checkMethod="POST"/>
             </f:entry>
             <f:entry title="Dependency scan low severity vulnerabilities threshold" field="osaLowThresholdEnforcement">
-                <f:number clazz="positive-number" min="0" step="1" default=""/>
+                <f:number clazz="positive-number" min="0" step="1" default="" checkMethod="POST"/>
             </f:entry>
         </f:optionalBlock>
 
         <f:optionalBlock title="Set job scan timeout threshold" inline="true" field="scanTimeOutEnabled">
             <f:entry title="Scan timeout (minutes)" field="scanTimeoutDuration">
-                <f:number clazz="positive-number" min="0" step="1" default="1"/>
+                <f:number clazz="positive-number" min="0" step="1" default="1" checkMethod="POST" />
             </f:entry>
         </f:optionalBlock>
         
