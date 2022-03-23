@@ -1296,7 +1296,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("  ORIGIN FROM JENKIN :: " + jenkinURL);
         log.info("  ORIGIN URL FROM JENKIN :: " + originUrl);
 
-        ret.setPostScanActionId(getPostScanActionId());
+        if(getPostScanActionId() == 0)
+        	ret.setPostScanActionId(null);
+        else
+        	ret.setPostScanActionId(getPostScanActionId());
+        	
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
         ret.setMvnPath(descriptor.getMvnPath());
         ret.setOsaGenerateJsonReport(false);
