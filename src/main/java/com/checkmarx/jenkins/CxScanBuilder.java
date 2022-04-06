@@ -1552,7 +1552,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //add SCA Resolver code here
         if (dsConfig.enableScaResolver != null
                 && SCAScanType.SCA_RESOLVER.toString().equalsIgnoreCase(dsConfig.enableScaResolver.toString())) {
-            scaResolverPathExist(dsConfig.pathToScaResolver);
+            //scaResolverPathExist(dsConfig.pathToScaResolver);
             validateScaResolverParams(dsConfig.scaResolverAddParameters);
             result.setEnableScaResolver(true);
         }
@@ -1937,7 +1937,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return allowedCauses.isEmpty();
     }
 
-    private boolean scaResolverPathExist(String pathToResolver) {
+    /*private boolean scaResolverPathExist(String pathToResolver) {
         pathToResolver = pathToResolver + File.separator + "ScaResolver";
         if(!SystemUtils.IS_OS_UNIX)
             pathToResolver = pathToResolver + ".exe";
@@ -1948,7 +1948,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             throw new CxClientException("SCA Resolver path does not exist. Path="+file.getAbsolutePath());
         }
         return true;
-    }
+    }*/
 
     private void validateScaResolverParams(String additionalParams) {
 
