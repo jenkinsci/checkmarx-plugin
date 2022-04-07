@@ -134,7 +134,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private boolean fullScansScheduled;
     private int fullScanCycle;
     private boolean isThisBuildIncremental;
-    private Integer postScanActionId;
+    private int postScanActionId;
     @Nullable
     private String sourceEncoding;
     @Nullable
@@ -226,7 +226,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             boolean incremental,
             boolean fullScansScheduled,
             int fullScanCycle,
-            Integer postScanActionId,
+            int postScanActionId,
             @Nullable String sourceEncoding,
             @Nullable String comment,
             boolean skipSCMTriggers,
@@ -432,7 +432,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return fullScanCycle;
     }
 
-    public Integer getPostScanActionId() {
+    public int getPostScanActionId() {
         return postScanActionId;
     }
 
