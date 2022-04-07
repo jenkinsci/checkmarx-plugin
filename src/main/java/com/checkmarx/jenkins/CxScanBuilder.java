@@ -1578,7 +1578,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //add SCA Resolver code here
         if (dsConfig.enableScaResolver != null
                 && SCAScanType.SCA_RESOLVER.toString().equalsIgnoreCase(dsConfig.enableScaResolver.toString())) {
-            scaResolverPathExist(dsConfig.pathToScaResolver);
+//            scaResolverPathExist(dsConfig.pathToScaResolver);
             validateScaResolverParams(dsConfig.scaResolverAddParameters);
             result.setEnableScaResolver(true);
         }
@@ -1992,7 +1992,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         String dirPath = params.get("-s");
         if(StringUtils.isEmpty(dirPath))
             throw new CxClientException("Source code path (-s <source code path>) is not provided.");
-        fileExists(dirPath);
+//        fileExists(dirPath);
 
         String projectName = params.get("-n");
         if(StringUtils.isEmpty(projectName))
