@@ -2591,12 +2591,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         @POST
-        public FormValidation doTestScaConnection(@QueryParameter String scaServerUrl,
-                                                  @QueryParameter String scaAccessControlUrl,
-                                                  @QueryParameter String scaCredentialsId,
-                                                  @QueryParameter String scaTenant,
-                                                  @QueryParameter Integer scaTimeout,
-                                                  @AncestorInPath Item item) {
+        public FormValidation doTestScaConnection(@QueryParameter String scaServerUrl, @QueryParameter String scaAccessControlUrl,
+                                                  @QueryParameter String scaCredentialsId, @QueryParameter String scaTenant,
+                                                  @QueryParameter Integer scaTimeout, @QueryParameter final boolean isProxy,
+                                                  @QueryParameter final String timestamp, @AncestorInPath Item item) {
             Jenkins.getInstance().checkPermission(Item.CONFIGURE);
             try {
                 CxScanConfig config = new CxScanConfig();
@@ -2624,7 +2622,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
                 try {
                     Jenkins instance = Jenkins.getInstance();
-                    if (instance != null && instance.proxy != null && isProxy && !(isCxURLinNoProxyHost(scaConfig.getAccessControlUrl(), instance.proxy.getNoProxyHostPatterns()))) {
+                    if (instance != null && instance.proxy != null){
+                        if (isProxy && !(isCxURLinNoProxyHost(scaConfig.getAccessControlUrl(), instance.proxy.getNoProxyHostPatterns())))
+                        {
+                            config.setScaProxy(true);
+                        }else{
+                            config.setScaProxy(false);
+                        }
                         ProxyConfig proxyConfig = ProxyHelper.getProxyConfig();
                         config.setScaProxyConfig(proxyConfig);
                     }
