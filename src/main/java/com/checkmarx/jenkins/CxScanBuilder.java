@@ -1296,20 +1296,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("  ORIGIN FROM JENKIN :: " + jenkinURL);
         log.info("  ORIGIN URL FROM JENKIN :: " + originUrl);
 
-<<<<<<< HEAD
         if(getPostScanActionId() == 0)
         	ret.setPostScanActionId(null);
         else
         	ret.setPostScanActionId(getPostScanActionId());
         	
-=======
-        if (getPostScanActionId() == 0)
-            ret.setPostScanActionId(null);
-        else
-            ret.setPostScanActionId(getPostScanActionId());
-
-
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
         ret.setMvnPath(descriptor.getMvnPath());
         ret.setOsaGenerateJsonReport(false);
@@ -2392,11 +2383,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             if(item==null){
                 Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             }else {
-<<<<<<< HEAD
                 Jenkins.getInstance().checkPermission(Item.CONFIGURE);
-=======
-                item.checkPermission(Item.CONFIGURE);
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
             }
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
 
@@ -2449,17 +2436,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * browser.
          */
         @POST
-<<<<<<< HEAD
         public FormValidation doCheckScaSASTProjectID(@QueryParameter String value, @QueryParameter String scaSASTProjectFullPath) {
             Jenkins.getInstance().checkPermission(Item.CONFIGURE);
-=======
-        public FormValidation doCheckScaSASTProjectID(@QueryParameter String value, @QueryParameter String scaSASTProjectFullPath,@AncestorInPath Item item) {
-            if(item==null){
-                Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else {
-                item.checkPermission(Item.CONFIGURE);
-            }
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
             if (StringUtil.isNullOrEmpty(value) && StringUtil.isNullOrEmpty(scaSASTProjectFullPath)) {
                 return FormValidation.error("Must provide value for either 'Project Full Path' or 'Project Id'.");
             }
@@ -2474,17 +2452,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * @return
          */
         @POST
-<<<<<<< HEAD
         public FormValidation doCheckCustomFields(@QueryParameter String value) {
             Jenkins.getInstance().checkPermission(Item.CONFIGURE);
-=======
-        public FormValidation doCheckCustomFields(@QueryParameter String value,@AncestorInPath Item item) {
-            if(item==null){
-                Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else {
-                item.checkPermission(Item.CONFIGURE);
-            }
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
             Pattern pattern = Pattern.compile("(^([a-zA-Z0-9]*):([a-zA-Z0-9]*)+(,([a-zA-Z0-9]*):([a-zA-Z0-9]*)+)*$)");
             Matcher match = pattern.matcher(value);
             if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
@@ -2500,17 +2469,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * @param value
          * @return
          */
-<<<<<<< HEAD
         public FormValidation doCheckForceScan(@QueryParameter boolean value, @QueryParameter boolean incremental) {
             Jenkins.getInstance().checkPermission(Item.CONFIGURE);
-=======
-        public FormValidation doCheckForceScan(@QueryParameter boolean value, @QueryParameter boolean incremental,@AncestorInPath Item item) {
-            if(item==null){
-                Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else {
-                item.checkPermission(Item.CONFIGURE);
-            }
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
             if (incremental && value) {
                 return FormValidation.error("Force scan and incremental scan can not be configured in pair for SAST");
             }
@@ -2524,17 +2484,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * @param value
          * @return
          */
-<<<<<<< HEAD
         public FormValidation doCheckIncremental(@QueryParameter boolean value, @QueryParameter boolean forceScan) {
             Jenkins.getInstance().checkPermission(Item.CONFIGURE);
-=======
-        public FormValidation doCheckIncremental(@QueryParameter boolean value, @QueryParameter boolean forceScan,@AncestorInPath Item item) {
-            if(item==null){
-                Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else {
-                item.checkPermission(Item.CONFIGURE);
-            }
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
             if (forceScan && value) {
                 forceScan = false;
 
@@ -2552,11 +2503,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             if(item==null){
                 Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             }else {
-<<<<<<< HEAD
                 Jenkins.getInstance().checkPermission(Item.CONFIGURE);
-=======
-                item.checkPermission(Item.CONFIGURE);
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
             }
             // timestamp is not used in code, it is one of the arguments to
             // invalidate Internet Explorer cache
@@ -2633,11 +2580,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             if(item==null){
                 Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             }else {
-<<<<<<< HEAD
                 Jenkins.getInstance().checkPermission(Item.CONFIGURE);
-=======
-                item.checkPermission(Item.CONFIGURE);
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
             }
             try {
                 CxScanConfig config = new CxScanConfig();
@@ -2719,15 +2662,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                         @QueryParameter final String username, @QueryParameter final String password,
                                                         @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
                                                         @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
-<<<<<<< HEAD
             Jenkins.getInstance().checkPermission(Item.CONFIGURE);
-=======
-            if(item==null){
-                Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else {
-                item.checkPermission(Item.CONFIGURE);
-            }
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
             LegacyClient commonClient = null;
@@ -2770,15 +2705,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                     @QueryParameter final String username, @QueryParameter final String password,
                                                     @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
                                                     @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
-<<<<<<< HEAD
             Jenkins.getInstance().checkPermission(Item.CONFIGURE);
-=======
-            if(item==null){
-                Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else {
-                item.checkPermission(Item.CONFIGURE);
-            }
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ComboBoxModel projectNames = new ComboBoxModel();
             LegacyClient commonClient = null;
@@ -2822,15 +2749,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                               @QueryParameter final String username, @QueryParameter final String password,
                                               @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
                                               @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
-<<<<<<< HEAD
             Jenkins.getInstance().checkPermission(Item.CONFIGURE);
-=======
-            if(item==null){
-                Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else {
-                item.checkPermission(Item.CONFIGURE);
-            }
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
             try {
@@ -2865,17 +2784,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *  shared state to avoid synchronization issues.
          */
         @POST
-<<<<<<< HEAD
         public FormValidation doCheckFullScanCycle(@QueryParameter final int value) {
             Jenkins.getInstance().checkPermission(Item.CONFIGURE);
-=======
-        public FormValidation doCheckFullScanCycle(@QueryParameter final int value,@AncestorInPath Item item) {
-            if(item==null){
-                Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else {
-                item.checkPermission(Item.CONFIGURE);
-            }
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
             if (value >= FULL_SCAN_CYCLE_MIN && value <= FULL_SCAN_CYCLE_MAX) {
                 return FormValidation.ok();
             } else {
@@ -2888,15 +2798,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                       @QueryParameter final String username, @QueryParameter final String password,
                                                       @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
                                                       @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
-<<<<<<< HEAD
             Jenkins.getInstance().checkPermission(Item.CONFIGURE);
-=======
-            if(item==null){
-                Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else {
-                item.checkPermission(Item.CONFIGURE);
-            }
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
             LegacyClient commonClient = null;
@@ -2936,15 +2838,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                @QueryParameter final String username, @QueryParameter final String password,
                                                @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
                                                @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
-<<<<<<< HEAD
             Jenkins.getInstance().checkPermission(Item.CONFIGURE);
-=======
-            if(item==null){
-                Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else {
-                item.checkPermission(Item.CONFIGURE);
-            }
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
             LegacyClient commonClient = null;
@@ -2973,17 +2867,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
         @POST
-<<<<<<< HEAD
         public ListBoxModel doFillFailBuildOnNewSeverityItems() {
             Jenkins.getInstance().checkPermission(Item.CONFIGURE);
-=======
-        public ListBoxModel doFillFailBuildOnNewSeverityItems(@AncestorInPath Item item) {
-            if(item==null){
-                Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else {
-                item.checkPermission(Item.CONFIGURE);
-            }
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
             ListBoxModel listBoxModel = new ListBoxModel();
             listBoxModel.add(new ListBoxModel.Option("High", "HIGH"));
             listBoxModel.add(new ListBoxModel.Option("Medium", "MEDIUM"));
@@ -2993,17 +2878,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         @POST
-<<<<<<< HEAD
         public ListBoxModel doFillVulnerabilityThresholdResultItems() {
             Jenkins.getInstance().checkPermission(Item.CONFIGURE);
-=======
-        public ListBoxModel doFillVulnerabilityThresholdResultItems(@AncestorInPath Item item) {
-            if(item==null){
-                Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else {
-                item.checkPermission(Item.CONFIGURE);
-            }
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
             ListBoxModel listBoxModel = new ListBoxModel();
 
             for (JobStatusOnError status : JobStatusOnError.values()) {
@@ -3021,17 +2897,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * avoid synchronization issues.
          */
         @POST
-<<<<<<< HEAD
         public FormValidation doCheckHighThreshold(@QueryParameter final Integer value) {
             Jenkins.getInstance().checkPermission(Item.CONFIGURE);
-=======
-        public FormValidation doCheckHighThreshold(@QueryParameter final Integer value,@AncestorInPath Item item) {
-            if(item==null){
-                Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else {
-                item.checkPermission(Item.CONFIGURE);
-            }
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
             return checkNonNegativeValue(value);
         }
 
@@ -3040,17 +2907,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * avoid synchronization issues.
          */
         @POST
-<<<<<<< HEAD
         public FormValidation doCheckMediumThreshold(@QueryParameter final Integer value) {
             Jenkins.getInstance().checkPermission(Item.CONFIGURE);
-=======
-        public FormValidation doCheckMediumThreshold(@QueryParameter final Integer value,@AncestorInPath Item item) {
-            if(item==null){
-                Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else {
-                item.checkPermission(Item.CONFIGURE);
-            }
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
             return checkNonNegativeValue(value);
         }
 
@@ -3059,17 +2917,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * avoid synchronization issues.
          */
         @POST
-<<<<<<< HEAD
         public FormValidation doCheckLowThreshold(@QueryParameter final Integer value) {
             Jenkins.getInstance().checkPermission(Item.CONFIGURE);
-=======
-        public FormValidation doCheckLowThreshold(@QueryParameter final Integer value,@AncestorInPath Item item) {
-            if(item==null){
-                Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else {
-                item.checkPermission(Item.CONFIGURE);
-            }
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
             return checkNonNegativeValue(value);
         }
 
@@ -3109,17 +2958,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          */
 
         @POST
-<<<<<<< HEAD
         public FormValidation doCheckOsaHighThreshold(@QueryParameter final Integer value) {
             Jenkins.getInstance().checkPermission(Item.CONFIGURE);
-=======
-        public FormValidation doCheckOsaHighThreshold(@QueryParameter final Integer value,@AncestorInPath Item item) {
-            if(item==null){
-                Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else {
-                item.checkPermission(Item.CONFIGURE);
-            }
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
             return checkNonNegativeValue(value);
         }
 
@@ -3128,17 +2968,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * avoid synchronization issues.
          */
         @POST
-<<<<<<< HEAD
         public FormValidation doCheckOsaMediumThreshold(@QueryParameter final Integer value) {
             Jenkins.getInstance().checkPermission(Item.CONFIGURE);
-=======
-        public FormValidation doCheckOsaMediumThreshold(@QueryParameter final Integer value,@AncestorInPath Item item) {
-            if(item==null){
-                Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else {
-                item.checkPermission(Item.CONFIGURE);
-            }
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
             return checkNonNegativeValue(value);
         }
 
@@ -3147,17 +2978,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * avoid synchronization issues.
          */
         @POST
-<<<<<<< HEAD
         public FormValidation doCheckOsaLowThreshold(@QueryParameter final Integer value) {
             Jenkins.getInstance().checkPermission(Item.CONFIGURE);
-=======
-        public FormValidation doCheckOsaLowThreshold(@QueryParameter final Integer value,@AncestorInPath Item item) {
-            if(item==null){
-                Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else {
-                item.checkPermission(Item.CONFIGURE);
-            }
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
             return checkNonNegativeValue(value);
         }
 
@@ -3290,11 +3112,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             if(item==null){
                 Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             }else {
-<<<<<<< HEAD
                 Jenkins.getInstance().checkPermission(Item.CONFIGURE);
-=======
-                item.checkPermission(Item.CONFIGURE);
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
             }
             return getCredentialList(item, credentialsId);
         }
@@ -3304,11 +3122,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             if(item==null){
                 Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             }else {
-<<<<<<< HEAD
                 Jenkins.getInstance().checkPermission(Item.CONFIGURE);
-=======
-                item.checkPermission(Item.CONFIGURE);
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
             }
             return getCredentialList(item, scaCredentialsId);
         }
@@ -3318,15 +3132,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             if(item==null){
                 Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             }else {
-<<<<<<< HEAD
                 Jenkins.getInstance().checkPermission(Item.CONFIGURE);
             }
             Jenkins.getInstance().checkPermission(Item.CONFIGURE);
-=======
-                item.checkPermission(Item.CONFIGURE);
-            }
-
->>>>>>> 0dd5a0ad7c81efa1afe86e20bd5dec125defcba6
             return getCredentialList(item, sastCredentialsId);
         }
 
