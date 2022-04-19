@@ -46,7 +46,11 @@
                 </div>
             </j:if> 
             </j:if>
-            
+            <j:if test="${!result.scanRanAsynchronous}">
+               <div>
+                    ${result.getHtmlReport()}
+                </div>
+            </j:if>
         </j:forEach>
     </j:if>
 
