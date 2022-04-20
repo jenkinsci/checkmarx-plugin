@@ -29,9 +29,7 @@
                     vertical-align: top;
                     }
                 </style>
-               
-            </j:if>
-            <j:if test="${result.isRemoveAsyncHtml()}">
+               <j:if test="${result.isRemoveAsyncHtml()}">
              	<div id="async-note">
                     <div class="async-note"><div class="async-note-title">Note:</div>
                         <div class="async-note-body" id="async-note-body">Job is configured to run Checkmarx scan asynchronously. Displayed results are of the previous successful scan.</div></div>
@@ -47,7 +45,12 @@
                         <div class="async-note-body" id="async-note-body">Job is configured to run Checkmarx scan asynchronously.Report generation is disabled.</div></div>
                 </div>
             </j:if> 
-            
+            </j:if>
+            <j:if test="${!result.scanRanAsynchronous}">
+               <div>
+                    ${result.getHtmlReport()}
+                </div>
+            </j:if>
         </j:forEach>
     </j:if>
 
