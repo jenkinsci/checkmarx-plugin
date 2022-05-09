@@ -21,7 +21,7 @@ apply plugin: 'nebula.provided-base'
 repositories {
     jcenter()
     mavenLocal()        // Use this to load a custom build of Common Client from a local Maven repo.
-    maven { url 'http://repo.jenkins-ci.org/releases/' }
+    maven { url 'https://repo.jenkins-ci.org/artifactory/releases/' }
     maven { url 'http://cx-artifactory:8081/artifactory/libs-release/' }
     maven { url 'http://cx-artifactory:8081/artifactory/libs-snapshot' }
     maven { url 'http://cx-artifactory:8081/artifactory/plugins-release-local/' }
@@ -82,7 +82,7 @@ dependencies {
             }
 
     optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.4@jar',
-            'org.jenkins-ci.plugins:credentials:2.1.19@jar'
+            'org.jenkins-ci.plugins:credentials:1061.vb_1fceb_58fa_18@jar'
 
     testCompile 'junit:junit:4.13.1',
             'org.eclipse.sisu:org.eclipse.sisu.plexus:0.0.0.M5',

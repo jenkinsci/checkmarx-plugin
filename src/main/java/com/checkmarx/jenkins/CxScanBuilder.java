@@ -40,7 +40,6 @@ import io.netty.util.internal.StringUtil;
 import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -816,6 +815,29 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.hideDebugLogs = hideDebugLogs;
     }
 
+
+    /**
+     * Using environment injection plugin you can add the JVM proxy settings.
+     * For example using EnvInject plugin the following can be applied under 'Properties Content':
+     *
+     *  http.proxyHost={HOST}
+     *  http.proxyPass={PORT}
+     *  http.proxyUser={USER}
+     *  http.proxyPassword={PASS}
+     *  http.nonProxyHosts={HOSTS}
+     */
+    private void setJvmVars(EnvVars env) {
+        for (Map.Entry<String, String> entry : env.entrySet()) {
+            if (entry.getKey().contains("http.proxy") ||
+                    entry.getKey().contains("https.proxy") ||
+                    entry.getKey().contains("http.nonProxyHosts")) {
+                if (StringUtils.isNotEmpty(entry.getValue())) {
+                    System.setProperty(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+    }
+
     private Map<String, String> getAllFsaVars(EnvVars env) {
         Map<String, String> sumFsaVars = new HashMap<>();
         // As job environment variable
@@ -876,6 +898,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //resolve configuration
         final DescriptorImpl descriptor = getDescriptor();
         EnvVars env = run.getEnvironment(listener);
+        setJvmVars(env);
         Map<String, String> fsaVars = getAllFsaVars(env);
         CxScanConfig config = resolveConfiguration(run, descriptor, env, log);
 
@@ -901,9 +924,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         Jenkins instance = Jenkins.getInstance();
         final CxScanCallable action;
         if (instance != null && instance.proxy != null &&
-             ((!isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))
-                    || (!isCxURLinNoProxyHost(getDescriptor().getDependencyScanConfig().scaAccessControlUrl, instance.proxy.getNoProxyHostPatterns()))))
-        {
+                ((!isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))
+                        || (config.isScaProxy()))) {
             action = new CxScanCallable(config, listener, instance.proxy, isHideDebugLogs(), fsaVars);
         } else {
             action = new CxScanCallable(config, listener, isHideDebugLogs(), fsaVars);
@@ -1297,11 +1319,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("  ORIGIN FROM JENKIN :: " + jenkinURL);
         log.info("  ORIGIN URL FROM JENKIN :: " + originUrl);
 
-        if(getPostScanActionId() == 0)
-        	ret.setPostScanActionId(null);
+        if (getPostScanActionId() == 0)
+            ret.setPostScanActionId(null);
         else
-        	ret.setPostScanActionId(getPostScanActionId());
-        	
+            ret.setPostScanActionId(getPostScanActionId());
+
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
         ret.setMvnPath(descriptor.getMvnPath());
         ret.setOsaGenerateJsonReport(false);
@@ -1316,22 +1338,34 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setPassword(Aes.decrypt(cxConnectionDetails.getPassword(), cxConnectionDetails.getUsername()));
         if (cxConnectionDetails.isProxy()) {
             Jenkins instance = Jenkins.getInstance();
-            if (instance != null && instance.proxy != null) {
+            if (instance.proxy != null) {
                 boolean sastProxy = false;
 
-                if (!isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns())) {
+                if (!isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : descriptor.getServerUrl(), instance.proxy.getNoProxyHostPatterns())) {
                     ret.setProxy(true);
                     ret.setProxyConfig(new ProxyConfig(instance.proxy.name, instance.proxy.port,
                             instance.proxy.getUserName(), instance.proxy.getPassword(), false));
                     sastProxy = true;
                 }
-                if (!isCxURLinNoProxyHost(getDescriptor().getDependencyScanConfig().scaAccessControlUrl, instance.proxy.getNoProxyHostPatterns())) {
-                    if (!sastProxy){
-                        ret.setProxy(false);
+
+                DependencyScanConfig depScanConf;
+                if (dependencyScanConfig != null) {
+                    depScanConf = dependencyScanConfig; // Local
+                } else {
+                    depScanConf = descriptor.getDependencyScanConfig(); // Global
+                }
+
+                if (depScanConf != null) {
+                    if (!isCxURLinNoProxyHost(depScanConf.scaAccessControlUrl, instance.proxy.getNoProxyHostPatterns())) {
+                        if (!sastProxy) {
+                            ret.setProxy(false);
+                        }
+                        ret.setScaProxy(true);
+                        ret.setScaProxyConfig(new ProxyConfig(instance.proxy.name, instance.proxy.port,
+                                instance.proxy.getUserName(), instance.proxy.getPassword(), false));
+                    } else {
+                        ret.setScaProxy(false);
                     }
-                    ret.setScaProxy(true);
-                    ret.setScaProxyConfig(new ProxyConfig(instance.proxy.name, instance.proxy.port,
-                            instance.proxy.getUserName(), instance.proxy.getPassword(), false));
                 }
             } else {
                 ret.setProxy(false);
@@ -1348,7 +1382,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * Freestyle job always send groupId, hence initializing teamPath using groupId
          */
         if (!StringUtil.isNullOrEmpty(groupId) && StringUtil.isNullOrEmpty(teamPath)) {
-            teamPath = getTeamNameFromId(cxConnectionDetails, descriptor, groupId);
+            teamPath = getTeamNameFromId(cxConnectionDetails, descriptor, groupId, ret);
         }
         //project
         ret.setProjectName(env.expand(projectName.trim()));
@@ -1445,12 +1479,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return customFields;
     }
 
-    private String getTeamNameFromId(CxConnectionDetails credentials, DescriptorImpl descriptor, String teamId) {
+    private String getTeamNameFromId(CxConnectionDetails credentials, DescriptorImpl descriptor,
+                                     String teamId, CxScanConfig scanConfig) {
         LegacyClient commonClient = null;
         String teamName = null;
         try {
 
-            commonClient = prepareLoggedInClient(credentials, descriptor);
+            commonClient = prepareLoggedInClient(credentials, descriptor, scanConfig);
             teamName = commonClient.getTeamNameById(teamId);
 
         } catch (Exception e) {
@@ -1468,7 +1503,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
      *  Note: This method is called concurrently by multiple threads, refrain from using mutable
      *  shared state to avoid synchronization issues.
      */
-    private LegacyClient prepareLoggedInClient(CxConnectionDetails credentials, DescriptorImpl descriptor)
+    private LegacyClient prepareLoggedInClient(CxConnectionDetails credentials, DescriptorImpl descriptor, CxScanConfig scanConfig)
             throws IOException, CxClientException {
         LegacyClient ret;
         Jenkins instance = Jenkins.getInstance();
@@ -1480,9 +1515,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     credentials.setProxy(true);
                     isSastProxy = true;
                 }
-                if (!isCxURLinNoProxyHost(getDescriptor().getDependencyScanConfig().scaAccessControlUrl, instance.proxy.getNoProxyHostPatterns())) {
+                if (scanConfig.isScaProxy()) {
                     credentials.setScaProxy(true);
-                    if (!isSastProxy || !getSastEnabled()){
+                    if (!isSastProxy || !getSastEnabled()) {
                         credentials.setProxy(false);
                     }
                 }
@@ -1581,8 +1616,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 //            scaResolverPathExist(dsConfig.pathToScaResolver);
             validateScaResolverParams(dsConfig.scaResolverAddParameters);
             result.setEnableScaResolver(true);
-        }
-        else
+        } else
             result.setEnableScaResolver(false);
 
         result.setPathToScaResolver(dsConfig.pathToScaResolver);
@@ -1966,13 +2000,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     private boolean scaResolverPathExist(String pathToResolver) {
         pathToResolver = pathToResolver + File.separator + "ScaResolver";
-        if(!SystemUtils.IS_OS_UNIX)
+        if (!SystemUtils.IS_OS_UNIX)
             pathToResolver = pathToResolver + ".exe";
 
         File file = new File(pathToResolver);
-        if(!file.exists())
-        {
-            throw new CxClientException("SCA Resolver path does not exist. Path="+file.getAbsolutePath());
+        if (!file.exists()) {
+            throw new CxClientException("SCA Resolver path does not exist. Path=" + file.getAbsolutePath());
         }
         return true;
     }
@@ -1982,20 +2015,20 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         String[] arguments = additionalParams.split(" ");
         Map<String, String> params = new HashMap<>();
 
-        for (int i = 0; i <  arguments.length ; i++) {
-            if(arguments[i].startsWith("-") && (i+1 != arguments.length && !arguments[i+1].startsWith("-")))
-                params.put(arguments[i], arguments[i+1]);
+        for (int i = 0; i < arguments.length; i++) {
+            if (arguments[i].startsWith("-") && (i + 1 != arguments.length && !arguments[i + 1].startsWith("-")))
+                params.put(arguments[i], arguments[i + 1]);
             else
                 params.put(arguments[i], "");
         }
 
         String dirPath = params.get("-s");
-        if(StringUtils.isEmpty(dirPath))
+        if (StringUtils.isEmpty(dirPath))
             throw new CxClientException("Source code path (-s <source code path>) is not provided.");
 //        fileExists(dirPath);
 
         String projectName = params.get("-n");
-        if(StringUtils.isEmpty(projectName))
+        if (StringUtils.isEmpty(projectName))
             throw new CxClientException("Project name parameter (-n <project name>) must be provided to ScaResolver.");
 
     }
@@ -2622,11 +2655,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
                 try {
                     Jenkins instance = Jenkins.getInstance();
-                    if (instance != null && instance.proxy != null){
-                        if (isProxy && !(isCxURLinNoProxyHost(scaConfig.getAccessControlUrl(), instance.proxy.getNoProxyHostPatterns())))
-                        {
+                    if (instance != null && instance.proxy != null) {
+                        if (isProxy && !(isCxURLinNoProxyHost(scaConfig.getAccessControlUrl(), instance.proxy.getNoProxyHostPatterns()))) {
                             config.setScaProxy(true);
-                        }else{
+                        } else {
                             config.setScaProxy(false);
                         }
                         ProxyConfig proxyConfig = ProxyHelper.getProxyConfig();
@@ -2691,13 +2723,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                         StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, isProxy, this, item);
                 commonClient = prepareLoggedInClient(connDetails);
                 List<PostAction> teamList = commonClient.getPostScanActionList();
-                if (listBoxModel.isEmpty() && !listBoxModel.contains("")){
+                if (listBoxModel.isEmpty() && !listBoxModel.contains("")) {
                     listBoxModel.add(new ListBoxModel.Option("", Integer.toString(0)));
                 }
                 for (PostAction postAction : teamList) {
-                    if (postAction.getType().contains("POST_SCAN_COMMAND")){
+                    if (postAction.getType().contains("POST_SCAN_COMMAND")) {
                         listBoxModel.add(new ListBoxModel.Option(postAction.getName(), Integer.toString(postAction.getId())));
-                    }else {
+                    } else {
                         continue;
                     }
 
@@ -2868,8 +2900,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 commonClient = prepareLoggedInClient(connDetails);
 
                 commonClient.getTeamList().stream().sorted(
-                        (firstElmnt, secondElmnt) ->
-                                firstElmnt.getFullName().compareToIgnoreCase(secondElmnt.fullName))
+                                (firstElmnt, secondElmnt) ->
+                                        firstElmnt.getFullName().compareToIgnoreCase(secondElmnt.fullName))
                         .forEach(team ->
                                 listBoxModel.add(new ListBoxModel.Option(team.getFullName(), team.getId())));
 
@@ -2886,6 +2918,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 }
             }
         }
+
         @POST
         public ListBoxModel doFillFailBuildOnNewSeverityItems() {
             Jenkins.getInstance().checkPermission(Item.CONFIGURE);
