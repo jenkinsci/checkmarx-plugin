@@ -190,7 +190,7 @@
                     </f:entry>
                     
                     <f:validateButton title="Test Connection" progress="Testing..." method="testScaConnection"
-                                      with="scaServerUrl,scaAccessControlUrl,scaCredentialsId,scaTenant"/>
+                                      with="scaServerUrl,scaAccessControlUrl,scaCredentialsId,scaTenant,timestamp,isProxy"/>
 
                     <f:radioBlock checked="${instance.dependencyScanConfig.enableScaResolver == null || instance.dependencyScanConfig.enableScaResolver == 'SCA_RESOLVER'}" inline="true"
                                     name="enableScaResolver" title="Perform SCA scan using dependency resolution by SCA Resolver tool."
