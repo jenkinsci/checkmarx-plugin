@@ -1718,6 +1718,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 log.info("  OSA archive includes: " + config.getOsaArchiveIncludePatterns());
                 log.info("  OSA run Execute dependency managers install packages command before Scan: " + config.getOsaRunInstall());
             }
+            if (config.isAstScaEnabled() && config.getAstScaConfig() != null){
+                log.info("Use CxSCA dependency scanner is enabled");
+                log.info("CxSCA API URL: " + config.getAstScaConfig().getApiUrl());
+                log.info("Access control server URL: " + config.getAstScaConfig().getAccessControlUrl());
+                log.info("CxSCA web app URL: " + config.getAstScaConfig().getWebAppUrl());
+                log.info("Account: " + config.getAstScaConfig().getTenant());
+                log.info("Team: " + config.getAstScaConfig().getTeamPath());
+            }
         }
 
         log.info("------------------------------------------------------------------------------------------");
