@@ -2506,10 +2506,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 return FormValidation.ok();
         	}
             item.checkPermission(Item.CONFIGURE);
-            Pattern pattern = Pattern.compile("(^([a-zA-Z0-9]*):([a-zA-Z0-9]*)+(,([a-zA-Z0-9]*):([a-zA-Z0-9]*)+)*$)");
+            Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
             Matcher match = pattern.matcher(value);
             if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
-                return FormValidation.error("Custome Fields must to have next format: key1:val1,key2:val2");
+                return FormValidation.error("Custom Fields must to have next format: key1:val1,key2:val2. \nCustom field allow to use next special characters: # . _ \"");
             }
 
             return FormValidation.ok();
