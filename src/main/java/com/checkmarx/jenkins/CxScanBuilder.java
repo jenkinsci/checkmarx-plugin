@@ -2832,7 +2832,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
                 //todo import preset
                 List<Preset> presets = commonClient.getPresetList();
-
+                listBoxModel.add(new ListBoxModel.Option("Project Default", Integer.toString(0)));
                 for (Preset p : presets) {
                     listBoxModel.add(new ListBoxModel.Option(p.getName(), Integer.toString(p.getId())));
                 }
