@@ -1605,6 +1605,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         result.setWebAppUrl(dsConfig.scaWebAppUrl);
         result.setTenant(dsConfig.scaTenant);
         result.setTeamPath(dsConfig.scaTeamPath);
+        result.setTeamId(dsConfig.scaTeamId);
         result.setIncludeSources(dsConfig.isIncludeSources);
 
         //add SCA Resolver code here
@@ -2853,7 +2854,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
                 //todo import preset
                 List<Preset> presets = commonClient.getPresetList();
-
+                listBoxModel.add(new ListBoxModel.Option(LegacyClient.PRESETNAME_PROJET_SETTING_DEFAULT, LegacyClient.PRESETID_PROJET_SETTING_DEFAULT));
                 for (Preset p : presets) {
                     listBoxModel.add(new ListBoxModel.Option(p.getName(), Integer.toString(p.getId())));
                 }
