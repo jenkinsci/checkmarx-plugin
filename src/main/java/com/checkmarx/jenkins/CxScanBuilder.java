@@ -1275,7 +1275,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             } else {
                 hostName = jenURL;
             }
-            passedURL = "Jenkins " + CxConfig.version()+ " " + hostName + " " + jobName;
+            passedURL = "Jenkins/" + CxConfig.version()+ " " + hostName + " " + jobName;
             // 50 is the maximum number of characters allowed by SAST server
             if (passedURL.length() > 50) {
                 passedURL = passedURL.substring(0, 45);
