@@ -72,6 +72,9 @@ public class DependencyScanConfig {
     public String scaTeamPath;
     
     @DataBoundSetter
+    public String scaTeamId;
+    
+    @DataBoundSetter
     public Integer scaTimeout;
     
     @DataBoundSetter
