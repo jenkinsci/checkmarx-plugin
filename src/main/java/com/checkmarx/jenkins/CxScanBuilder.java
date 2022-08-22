@@ -2531,7 +2531,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
             Matcher match = pattern.matcher(value);
             if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
-            	return FormValidation.error("Custom Fields must to have next format: key1:val1,key2:val2. \nCustom field allow to use next special characters: # . _ ");
+            	return FormValidation.error("Custom Fields must have given format: key1:val1,key2:val2. \nCustom field allows to use these special characters: # . _ ");
             }
 
             return FormValidation.ok();
