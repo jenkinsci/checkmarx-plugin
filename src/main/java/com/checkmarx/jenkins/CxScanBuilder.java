@@ -1301,7 +1301,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
         return originUrl;
     }
-
+    private Boolean verifyCustomCharacters(String inputString) {
+    	 Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
+         Matcher match = pattern.matcher(inputString);
+         if (!StringUtil.isNullOrEmpty(inputString) && !match.find()) {
+        	 return false;
+         }
+    	return true;
+    }
     private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) throws IOException {
         CxScanConfig ret = new CxScanConfig();
 
@@ -1325,7 +1332,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
         ret.setMvnPath(descriptor.getMvnPath());
         ret.setOsaGenerateJsonReport(false);
-
+        
+        if(!verifyCustomCharacters(getCustomFields())) {
+        	throw new CxClientException("Custom Fields must have given format: key1:val1,key2:val2. \\nCustom field allows to use these special characters: # . _ ");
+        }
         ret.setCustomFields(apiFormat(getCustomFields()));
         ret.setForceScan(isForceScan());
 
