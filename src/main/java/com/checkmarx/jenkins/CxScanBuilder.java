@@ -1461,10 +1461,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             enableProjectPolicyEnforcement = false;
         }
         ret.setEnablePolicyViolations(enableProjectPolicyEnforcement);
+        
         // Set the Continue build flag to Configuration object if Option from UI is choosen as useContinueBuildOnError
         if (useContinueBuildOnError(getDescriptor())) {
             ret.setContinueBuild(Boolean.TRUE);
         }
+        
+        //Ignore errors that can be suppressed for ex. duplicate scan,source folder is empty, no files to zip. 
+        ret.setIgnoreBenignErrors(true);
+        
         return ret;
     }
 
