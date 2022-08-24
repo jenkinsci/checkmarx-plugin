@@ -92,6 +92,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private static final String PDF_URL_TEMPLATE = "/%scheckmarx/pdfReport";
     private static final String PDF_URL = "checkmarx/pdfReport";
     private static final String REQUEST_ORIGIN = "Jenkins";
+    
+    private static final String SUPPRESS_BENIGN_ERRORS = "suppressBenignErrors";
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Persistent plugin configuration parameters
@@ -1477,8 +1479,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             ret.setContinueBuild(Boolean.TRUE);
         }
         
-        //Ignore errors that can be suppressed for ex. duplicate scan,source folder is empty, no files to zip. 
-        ret.setIgnoreBenignErrors(true);
+        //Ignore errors that can be suppressed for ex. duplicate scan,source folder is empty, no files to zip.
+        String suppressBenignErrors = System.getProperty(SUPPRESS_BENIGN_ERRORS);
+        if(suppressBenignErrors == null || Boolean.parseBoolean(suppressBenignErrors))
+        	ret.setIgnoreBenignErrors(true);
         
         return ret;
     }
