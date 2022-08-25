@@ -4,7 +4,7 @@ import com.typesafe.config.Optional;
 
 public class ConfigAsCode {
     @Optional
-    private String project;
+    private ProjectConfig project;
     @Optional
     private String team;
     @Optional
@@ -31,11 +31,11 @@ public class ConfigAsCode {
         this.sast = sast;
     }
 
-    public String getProject() {
+    public ProjectConfig getProject() {
         return project;
     }
 
-    public void setProject(String project) {
+    public void setProject(ProjectConfig project) {
         this.project = project;
     }
 
