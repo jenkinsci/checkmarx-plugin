@@ -81,6 +81,8 @@ dependencies {
                 }
             }
 
+    jenkinsPlugins 'org.jenkins-ci.plugins:apache-httpcomponents-client-4-api:4.5.13-138.v4e7d9a_7b_a_e61'
+
     optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.4@jar',
             'org.jenkins-ci.plugins:credentials:2.1.19@jar'
 
