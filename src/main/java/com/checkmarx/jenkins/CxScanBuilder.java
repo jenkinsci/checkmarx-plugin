@@ -92,6 +92,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private static final String PDF_URL_TEMPLATE = "/%scheckmarx/pdfReport";
     private static final String PDF_URL = "checkmarx/pdfReport";
     private static final String REQUEST_ORIGIN = "Jenkins";
+    
+    private static final String SUPPRESS_BENIGN_ERRORS = "suppressBenignErrors";
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Persistent plugin configuration parameters
@@ -814,7 +816,27 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public void setHideDebugLogs(Boolean hideDebugLogs) {
         this.hideDebugLogs = hideDebugLogs;
     }
-
+    /**
+     * Using environment injection plugin you can add the JVM proxy settings.
+     * For example using EnvInject plugin the following can be applied under 'Properties Content':
+     *
+     *  http.proxyHost={HOST}
+     *  http.proxyPass={PORT}
+     *  http.proxyUser={USER}
+     *  http.proxyPassword={PASS}
+     *  http.nonProxyHosts={HOSTS}
+     */
+    private void setJvmVars(EnvVars env) {
+        for (Map.Entry<String, String> entry : env.entrySet()) {
+            if (entry.getKey().contains("http.proxy") ||
+                    entry.getKey().contains("https.proxy") ||
+                    entry.getKey().contains("http.nonProxyHosts")) {
+                if (StringUtils.isNotEmpty(entry.getValue())) {
+                    System.setProperty(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+    }
     private Map<String, String> getAllFsaVars(EnvVars env) {
         Map<String, String> sumFsaVars = new HashMap<>();
         // As job environment variable
@@ -875,6 +897,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //resolve configuration
         final DescriptorImpl descriptor = getDescriptor();
         EnvVars env = run.getEnvironment(listener);
+        setJvmVars(env);
         Map<String, String> fsaVars = getAllFsaVars(env);
         CxScanConfig config = resolveConfiguration(run, descriptor, env, log);
 
@@ -900,8 +923,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         Jenkins instance = Jenkins.getInstance();
         final CxScanCallable action;
         if (instance != null && instance.proxy != null &&
-             ((!isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : descriptor.getServerUrl(), instance.proxy.getNoProxyHostPatterns()))
-                    || (descriptor.getDependencyScanConfig()!= null && !isCxURLinNoProxyHost(descriptor.getDependencyScanConfig().scaAccessControlUrl, instance.proxy.getNoProxyHostPatterns()))))
+        		 ((!isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))
+                         || (config.isScaProxy()))) 
         {
             action = new CxScanCallable(config, listener, instance.proxy, isHideDebugLogs(), fsaVars);
         } else {
@@ -1254,7 +1277,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             } else {
                 hostName = jenURL;
             }
-            passedURL = "Jenkins " + hostName + " " + jobName;
+            passedURL = "Jenkins/" + CxConfig.version()+ " " + hostName + " " + jobName;
             // 50 is the maximum number of characters allowed by SAST server
             if (passedURL.length() > 50) {
                 passedURL = passedURL.substring(0, 45);
@@ -1280,7 +1303,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
         return originUrl;
     }
-
+    private Boolean verifyCustomCharacters(String inputString) {
+    	 Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
+         Matcher match = pattern.matcher(inputString);
+         if (!StringUtil.isNullOrEmpty(inputString) && !match.find()) {
+        	 return false;
+         }
+    	return true;
+    }
     private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) throws IOException {
         CxScanConfig ret = new CxScanConfig();
 
@@ -1304,7 +1334,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
         ret.setMvnPath(descriptor.getMvnPath());
         ret.setOsaGenerateJsonReport(false);
-
+        
+        if(!verifyCustomCharacters(getCustomFields())) {
+        	throw new CxClientException("Custom Fields must have given format: key1:val1,key2:val2. \\nCustom field allows to use these special characters: # . _ ");
+        }
         ret.setCustomFields(apiFormat(getCustomFields()));
         ret.setForceScan(isForceScan());
 
@@ -1359,7 +1392,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * Freestyle job always send groupId, hence initializing teamPath using groupId
          */
         if (!StringUtil.isNullOrEmpty(groupId) && StringUtil.isNullOrEmpty(teamPath)) {
-            teamPath = getTeamNameFromId(cxConnectionDetails, descriptor, groupId);
+            teamPath = getTeamNameFromId(cxConnectionDetails, descriptor, groupId, ret);
         }
         //project
         ret.setProjectName(env.expand(projectName.trim()));
@@ -1440,10 +1473,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             enableProjectPolicyEnforcement = false;
         }
         ret.setEnablePolicyViolations(enableProjectPolicyEnforcement);
+        
         // Set the Continue build flag to Configuration object if Option from UI is choosen as useContinueBuildOnError
         if (useContinueBuildOnError(getDescriptor())) {
             ret.setContinueBuild(Boolean.TRUE);
         }
+        
+        //Ignore errors that can be suppressed for ex. duplicate scan,source folder is empty, no files to zip.
+        String suppressBenignErrors = System.getProperty(SUPPRESS_BENIGN_ERRORS);
+        if(suppressBenignErrors == null || Boolean.parseBoolean(suppressBenignErrors))
+        	ret.setIgnoreBenignErrors(true);
+        
         return ret;
     }
 
@@ -1456,12 +1496,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return customFields;
     }
 
-    private String getTeamNameFromId(CxConnectionDetails credentials, DescriptorImpl descriptor, String teamId) {
+    private String getTeamNameFromId(CxConnectionDetails credentials, DescriptorImpl descriptor, String teamId, CxScanConfig scanConfig) {
         LegacyClient commonClient = null;
         String teamName = null;
         try {
 
-            commonClient = prepareLoggedInClient(credentials, descriptor);
+            commonClient = prepareLoggedInClient(credentials, descriptor, scanConfig);
             teamName = commonClient.getTeamNameById(teamId);
 
         } catch (Exception e) {
@@ -1479,7 +1519,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
      *  Note: This method is called concurrently by multiple threads, refrain from using mutable
      *  shared state to avoid synchronization issues.
      */
-    private LegacyClient prepareLoggedInClient(CxConnectionDetails credentials, DescriptorImpl descriptor)
+    private LegacyClient prepareLoggedInClient(CxConnectionDetails credentials, DescriptorImpl descriptor, CxScanConfig scanConfig)
             throws IOException, CxClientException {
         LegacyClient ret;
         Jenkins instance = Jenkins.getInstance();
@@ -1491,7 +1531,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     credentials.setProxy(true);
                     isSastProxy = true;
                 }
-                if (descriptor.getDependencyScanConfig() != null && !isCxURLinNoProxyHost(descriptor.getDependencyScanConfig().scaAccessControlUrl, instance.proxy.getNoProxyHostPatterns())) {
+                if (scanConfig.isScaProxy()) {
                     credentials.setScaProxy(true);
                     if (!isSastProxy || !getSastEnabled()) {
                         credentials.setProxy(false);
@@ -1584,6 +1624,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         result.setWebAppUrl(dsConfig.scaWebAppUrl);
         result.setTenant(dsConfig.scaTenant);
         result.setTeamPath(dsConfig.scaTeamPath);
+        result.setTeamId(dsConfig.scaTeamId);
         result.setIncludeSources(dsConfig.isIncludeSources);
 
         //add SCA Resolver code here
@@ -2506,10 +2547,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 return FormValidation.ok();
         	}
             item.checkPermission(Item.CONFIGURE);
-            Pattern pattern = Pattern.compile("(^([a-zA-Z0-9]*):([a-zA-Z0-9]*)+(,([a-zA-Z0-9]*):([a-zA-Z0-9]*)+)*$)");
+            Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
             Matcher match = pattern.matcher(value);
             if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
-                return FormValidation.error("Custome Fields must to have next format: key1:val1,key2:val2");
+            	return FormValidation.error("Custom Fields must have given format: key1:val1,key2:val2. \nCustom field allows to use these special characters: # . _ ");
             }
 
             return FormValidation.ok();
@@ -2832,7 +2873,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
                 //todo import preset
                 List<Preset> presets = commonClient.getPresetList();
-
+                listBoxModel.add(new ListBoxModel.Option(LegacyClient.PRESETNAME_PROJET_SETTING_DEFAULT, LegacyClient.PRESETID_PROJET_SETTING_DEFAULT));
                 for (Preset p : presets) {
                     listBoxModel.add(new ListBoxModel.Option(p.getName(), Integer.toString(p.getId())));
                 }
