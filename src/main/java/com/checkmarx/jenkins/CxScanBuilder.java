@@ -1335,10 +1335,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setMvnPath(descriptor.getMvnPath());
         ret.setOsaGenerateJsonReport(false);
         
-        if(!verifyCustomCharacters(getCustomFields())) {
-        	throw new CxClientException("Custom Fields must have given format: key1:val1,key2:val2. \\nCustom field allows to use these special characters: # . _ ");
+        if(StringUtils.isNotEmpty(getCustomFields())) {
+	        if(!verifyCustomCharacters(getCustomFields())) {
+	        	throw new CxClientException("Custom Fields must have given format: key1:val1,key2:val2. \\nCustom field allows to use these special characters: # . _ ");
+	        }
+	        ret.setCustomFields(apiFormat(getCustomFields()));
         }
-        ret.setCustomFields(apiFormat(getCustomFields()));
         ret.setForceScan(isForceScan());
 
         //cx server
