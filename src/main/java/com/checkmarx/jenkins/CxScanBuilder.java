@@ -59,6 +59,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -200,7 +201,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private Boolean generateXmlReport = true;
 
     public static final int MINIMUM_TIMEOUT_IN_MINUTES = 1;
-    public static final String REPORTS_FOLDER = "Checkmarx/Reports";
+    public static final String REPORTS_FOLDER = "Checkmarx" + File.separator + "Reports";
 
     @DataBoundConstructor
     public CxScanBuilder(
@@ -990,9 +991,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             OSAResults osaResults = scanResults.getOsaResults();
             AstScaResults scaResults = scanResults.getScaResults();
             if (osaResults != null && osaResults.isOsaResultsReady()) {
-                createOsaReports(osaResults, checkmarxBuildDir);
+                createOsaReports(osaResults, workspace);
             } else if (scaResults != null && scaResults.isScaResultReady()) {
-                createScaReports(scaResults, checkmarxBuildDir);
+                createScaReports(scaResults, workspace);
             }
             return;
         }
@@ -1223,10 +1224,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
 
-    private void createScaReports(AstScaResults scaResults, File checkmarxBuildDir) {
-        writeJsonObjectToFile(scaResults.getSummary(), new File(checkmarxBuildDir, SCA_SUMMERY_JSON), "OSA summary json report");
-        writeJsonObjectToFile(scaResults.getPackages(), new File(checkmarxBuildDir, SCA_LIBRARIES_JSON), "OSA libraries json report");
-        writeJsonObjectToFile(scaResults.getFindings(), new File(checkmarxBuildDir, SCA_VULNERABILITIES_JSON), "OSA vulnerabilities json report");
+    private void createScaReports(AstScaResults scaResults, FilePath checkmarxBuildDir) {
+        writeJsonObjectToFile(scaResults.getSummary(), new File(checkmarxBuildDir.getRemote(), SCA_SUMMERY_JSON), "SCA summary json report");
+        writeJsonObjectToFile(scaResults.getPackages(), new File(checkmarxBuildDir.getRemote(), SCA_LIBRARIES_JSON), "SCA libraries json report");
+        writeJsonObjectToFile(scaResults.getFindings(), new File(checkmarxBuildDir.getRemote(), SCA_VULNERABILITIES_JSON), "SCA vulnerabilities json report");
     }
 
     /**
@@ -1812,10 +1813,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
     }
 
-    private void createOsaReports(OSAResults osaResults, File checkmarxBuildDir) {
-        writeJsonObjectToFile(osaResults.getResults(), new File(checkmarxBuildDir, OSA_SUMMERY_JSON), "OSA summery json report");
-        writeJsonObjectToFile(osaResults.getOsaLibraries(), new File(checkmarxBuildDir, OSA_LIBRARIES_JSON), "OSA libraries json report");
-        writeJsonObjectToFile(osaResults.getOsaVulnerabilities(), new File(checkmarxBuildDir, OSA_VULNERABILITIES_JSON), "OSA vulnerabilities json report");
+    private void createOsaReports(OSAResults osaResults, FilePath checkmarxBuildDir) {
+        writeJsonObjectToFile(osaResults.getResults(), new File(checkmarxBuildDir.getRemote(), OSA_SUMMERY_JSON), "OSA summery json report");
+        writeJsonObjectToFile(osaResults.getOsaLibraries(), new File(checkmarxBuildDir.getRemote(), OSA_LIBRARIES_JSON), "OSA libraries json report");
+        writeJsonObjectToFile(osaResults.getOsaVulnerabilities(), new File(checkmarxBuildDir.getRemote(), OSA_VULNERABILITIES_JSON), "OSA vulnerabilities json report");
     }
 
     private String generateHTMLReport(@Nonnull FilePath workspace, File checkmarxBuildDir, CxScanConfig config, ScanResults results) {
@@ -1847,11 +1848,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             ObjectMapper objectMapper = new ObjectMapper();
             String json = null;
             json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObj);
-            FileUtils.writeStringToFile(to, json);
+            String fileName = to.getName();
+            to = new File(to.getParent() + File.separator + REPORTS_FOLDER + File.separator + fileName);
+            if (!to.exists()) {
+                FileUtils.createParentDirectories(to);
+                to.createNewFile();
+            }
+            FileUtils.writeStringToFile(to, json, StandardCharsets.UTF_8);
             log.info("Copying file [" + to.getName() + "] to workspace [" + to.getAbsolutePath() + "]");
         } catch (Exception e) {
             log.error("Failed to write " + description + " to [" + to.getAbsolutePath() + "]");
-
         }
     }
 
@@ -1928,12 +1934,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     private void writeFileToWorkspaceReports(FilePath workspace, File file) {
-
-        String remoteDirPath = workspace.getRemote() + "/" + REPORTS_FOLDER;
+        String remoteDirPath = workspace.getRemote() + File.separator + REPORTS_FOLDER;
         FileInputStream fis = null;
 
         try {
-            String remoteFilePath = remoteDirPath + "/" + file.getName();
+            String remoteFilePath = remoteDirPath + File.separator + file.getName();
             log.info("Copying file {} to workspace {}", file.getName(), remoteFilePath);
             FilePath remoteFile = new FilePath(workspace.getChannel(), remoteFilePath);
             fis = new FileInputStream(file);
@@ -1945,7 +1950,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         } finally {
             IOUtils.closeQuietly(fis);
         }
-
     }
 
     private boolean shouldUseGlobalThreshold() {
