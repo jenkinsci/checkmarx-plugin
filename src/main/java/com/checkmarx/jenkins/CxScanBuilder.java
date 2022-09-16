@@ -916,7 +916,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //validate at least one scan type is enabled
         if (!config.isSastEnabled() && !config.isAstScaEnabled() && !config.isOsaEnabled()) {
             log.error("Both SAST and dependency scan are disabled. Exiting.");
-            run.setResult(Result.FAILURE);
+            run.setResult(Result.FAILURE);            
             return;
         }
 
@@ -1411,6 +1411,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setSastEnabled(this.sastEnabled == null || sastEnabled); //for backward compatibility, assuming if sastEnabled is not set, then sast is enabled
 
         if (ret.isSastEnabled()) {
+        	        	        	
             int presetId = parseInt(preset, log, "Invalid presetId: [%s]. Using default preset.", 0);
             ret.setPresetId(presetId);
 
@@ -1855,7 +1856,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
     }
 
-    private void failTheBuild(Run<?, ?> run, CxScanConfig config, ScanResults ret) {
+    private void failTheBuild(Run<?, ?> run, CxScanConfig config, ScanResults ret) throws AbortException {
         //assert if expected exception is thrown  OR when vulnerabilities under threshold OR when policy violated
         ScanSummary scanSummary = new ScanSummary(config, ret.getSastResults(), ret.getOsaResults(), ret.getScaResults());
         if (scanSummary.hasErrors() || ret.getGeneralException() != null ||
@@ -1863,15 +1864,27 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 (ret.getOsaResults() != null && ret.getOsaResults().getException() != null) ||
                 (ret.getScaResults() != null && ret.getScaResults().getException() != null)) {
             printBuildFailure(scanSummary.toString(), ret, log);
-            if (resolvedVulnerabilityThresholdResult != null) {
-                run.setResult(resolvedVulnerabilityThresholdResult);
+            
+            String statusToReturn = "";
+            String msgPrefix = "";
+            if (!scanSummary.getThresholdErrors().isEmpty() || (config.getSastNewResultsThresholdEnabled() && scanSummary.isSastThresholdForNewResultsExceeded() ) ) {
+            	resolvedVulnerabilityThresholdResult = resolvedVulnerabilityThresholdResult == null? 
+            			Result.fromString(JobStatusOnError.FAILURE.toString()): resolvedVulnerabilityThresholdResult;
+            	run.setResult(resolvedVulnerabilityThresholdResult);
+            	statusToReturn = resolvedVulnerabilityThresholdResult.toString();
+            	msgPrefix = "Threshold exceeded.";
+            }else {
+            	msgPrefix = "Scan error occurred.";
+            	statusToReturn = getReturnStatusOnError(getDescriptor());
+            	run.setResult(Result.fromString(statusToReturn));
             }
+            
+            if(JobStatusOnError.FAILURE.toString().equalsIgnoreCase(statusToReturn)) {
+            	String msg = msgPrefix + "Job is configured to return FAILURE and stop the build/pipeline.";
+            	log.warn(msg);
+            	throw new AbortException(msg);
+       	    }                     
 
-            if (useUnstableOnError(getDescriptor())) {
-                run.setResult(Result.UNSTABLE);
-            } else {
-                run.setResult(Result.FAILURE);
-            }
         }
     }
 
@@ -1970,6 +1983,18 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return JobStatusOnError.UNSTABLE.equals(getJobStatusOnError())
                 || (JobStatusOnError.GLOBAL.equals(getJobStatusOnError()) && JobGlobalStatusOnError.UNSTABLE.equals(descriptor
                 .getJobGlobalStatusOnError()));
+    }
+    
+    private String getReturnStatusOnError(final DescriptorImpl descriptor) {
+        
+    	String status = JobStatusOnError.FAILURE.toString();
+    	
+    	if (JobStatusOnError.GLOBAL.equals(getJobStatusOnError()))
+    			status = descriptor.getJobGlobalStatusOnError().toString();
+    	else
+    		status = getJobStatusOnError().toString();
+    	
+    	return status;
     }
 
     /**
