@@ -4,6 +4,7 @@ import com.checkmarx.configprovider.ConfigProvider;
 import com.checkmarx.configprovider.dto.ResourceType;
 import com.checkmarx.configprovider.dto.interfaces.ConfigReader;
 import com.checkmarx.jenkins.configascode.ConfigAsCode;
+import com.checkmarx.jenkins.configascode.ProjectConfig;
 import com.checkmarx.jenkins.configascode.SastConfig;
 import com.checkmarx.jenkins.configascode.ScaConfig;
 import com.checkmarx.jenkins.exception.CxCredException;
@@ -99,6 +100,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     // Persistent plugin configuration parameters
     //////////////////////////////////////////////////////////////////////////////////////
     private boolean useOwnServerCredentials;
+    
+    private boolean overrideProjectSetting;
 
     private boolean configAsCode;
     @Nullable
@@ -318,8 +321,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public void setConfigAsCode(boolean configAsCode) {
         this.configAsCode = configAsCode;
     }
+    
+    public boolean isOverrideProjectSetting() {
+		return overrideProjectSetting;
+	}
 
-    @Nullable
+    @DataBoundSetter
+	public void setOverrideProjectSetting(boolean overrideProjectSetting) {
+		this.overrideProjectSetting = overrideProjectSetting;
+	}
+
+	@Nullable
     public String getServerUrl() {
         return serverUrl;
     }
@@ -1030,8 +1042,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         if (configProvider.hasConfiguration(CX_ORIGIN, "project"))
             configAsCodeFromFile.setProject(
-                    configProvider.getStringConfiguration(CX_ORIGIN, "project")
-            );
+                    configProvider.getConfiguration(CX_ORIGIN, "project",ProjectConfig.class));
 
         if (configProvider.hasConfiguration(CX_ORIGIN, "team"))
             configAsCodeFromFile.setTeam(
@@ -1052,9 +1063,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         //map global
         Optional.ofNullable(configAsCodeFromFile).ifPresent(cac -> {
-            if (StringUtils.isNotEmpty(cac.getProject())) {
-                scanConfig.setProjectName(cac.getProject());
-                overridesResults.put("Project Name:", String.valueOf(cac.getProject()));
+            if (StringUtils.isNotEmpty(cac.getProject().getFullPath())) {
+                scanConfig.setProjectName(cac.getProject().getFullPath());
+                overridesResults.put("Project Name:", String.valueOf(cac.getProject().getFullPath()));
             }
 
             if (StringUtils.isNotEmpty(cac.getTeam())) {
@@ -1190,8 +1201,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 .filter(StringUtils::isNotBlank)
                 .ifPresent(pValue -> {
                     scanConfig.setPresetName(pValue);
+                    scanConfig.setPresetId(null);
                     overridesResults.put("Preset", pValue);
                 });
+       
 
         sast.map(SastConfig::getExcludeFolders)
                 .filter(StringUtils::isNotBlank)
@@ -1313,6 +1326,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
     private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) throws IOException {
         CxScanConfig ret = new CxScanConfig();
+        
+        ret.setIsOverrideProjectSetting(overrideProjectSetting);
 
         if (isIncremental() && isForceScan()) {
             throw new IOException("Force scan and incremental scan can not be configured in pair for SAST. Configure either Incremental or Force scan option");
@@ -1725,6 +1740,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("post scan action: " + config.getPostScanActionId());
         log.info("is force scan: " + config.getForceScan());
         log.info("scan level custom fields: " + config.getCustomFields());
+        log.info("overrideProjectSetting value: " + overrideProjectSetting);
 
         ScannerType scannerType = getDependencyScannerType(config);
         String dependencyScannerType = scannerType != null ? scannerType.getDisplayName() : "NONE";
