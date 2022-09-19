@@ -14,7 +14,7 @@
         !**/*.htmls, !**/*.ihtml, !**/*.mht, !**/*.mhtm, !**/*.mhtml, !**/*.ssi, !**/*.stm,
         !**/*.bin,!**/*.lock,!**/*.svg,!**/*.obj,
         !**/*.stml, !**/*.ttml, !**/*.txn, !**/*.xhtm, !**/*.xhtml, !**/*.class, !**/*.iml, !Checkmarx/Reports/*.*,
-        !OSADependencies.json, !**/node_modules/**/*</entry>
+        !OSADependencies.json, !**/node_modules/**/*, !**/*.cxsca-results.json</entry>
     <entry key="DefaultOSAArchiveIncludePatterns">*.zip, *.war, *.ear, *.tgz</entry>
     <entry key="DefaultSCAServerURL">https://api-sca.checkmarx.net</entry>
     <entry key="DefaultSCAAccessControlUrl">https://platform.checkmarx.net</entry>
