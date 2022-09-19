@@ -52,10 +52,7 @@ import org.kohsuke.stapler.verb.POST;
 
 import javax.annotation.Nonnull;
 import javax.naming.ConfigurationException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
@@ -93,7 +90,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private static final String PDF_URL_TEMPLATE = "/%scheckmarx/pdfReport";
     private static final String PDF_URL = "checkmarx/pdfReport";
     private static final String REQUEST_ORIGIN = "Jenkins";
-    
+
     private static final String SUPPRESS_BENIGN_ERRORS = "suppressBenignErrors";
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -817,15 +814,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public void setHideDebugLogs(Boolean hideDebugLogs) {
         this.hideDebugLogs = hideDebugLogs;
     }
+
     /**
      * Using environment injection plugin you can add the JVM proxy settings.
      * For example using EnvInject plugin the following can be applied under 'Properties Content':
-     *
-     *  http.proxyHost={HOST}
-     *  http.proxyPass={PORT}
-     *  http.proxyUser={USER}
-     *  http.proxyPassword={PASS}
-     *  http.nonProxyHosts={HOSTS}
+     * <p>
+     * http.proxyHost={HOST}
+     * http.proxyPass={PORT}
+     * http.proxyUser={USER}
+     * http.proxyPassword={PASS}
+     * http.nonProxyHosts={HOSTS}
      */
     private void setJvmVars(EnvVars env) {
         for (Map.Entry<String, String> entry : env.entrySet()) {
@@ -838,6 +836,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
     }
+
     private Map<String, String> getAllFsaVars(EnvVars env) {
         Map<String, String> sumFsaVars = new HashMap<>();
         // As job environment variable
@@ -924,9 +923,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         Jenkins instance = Jenkins.getInstance();
         final CxScanCallable action;
         if (instance != null && instance.proxy != null &&
-        		 ((!isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))
-                         || (config.isScaProxy()))) 
-        {
+                ((!isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))
+                        || (config.isScaProxy()))) {
             action = new CxScanCallable(config, listener, instance.proxy, isHideDebugLogs(), fsaVars);
         } else {
             action = new CxScanCallable(config, listener, isHideDebugLogs(), fsaVars);
@@ -1072,7 +1070,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             overridesResults.keySet().forEach(key -> log.info(String.format("%s = %s", key, overridesResults.get(key))));
         }
     }
-
 
     private void mapScaConfiguration(Optional<ScaConfig> sca, CxScanConfig scanConfig, Map<String, String> overridesResults) {
 
@@ -1223,11 +1220,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 });
     }
 
-
     private void createScaReports(AstScaResults scaResults, FilePath checkmarxBuildDir) {
-        writeJsonObjectToFile(scaResults.getSummary(), new File(checkmarxBuildDir.getRemote(), SCA_SUMMERY_JSON), "SCA summary json report");
-        writeJsonObjectToFile(scaResults.getPackages(), new File(checkmarxBuildDir.getRemote(), SCA_LIBRARIES_JSON), "SCA libraries json report");
-        writeJsonObjectToFile(scaResults.getFindings(), new File(checkmarxBuildDir.getRemote(), SCA_VULNERABILITIES_JSON), "SCA vulnerabilities json report");
+        writeJsonObjectToFile(scaResults.getSummary(), checkmarxBuildDir, SCA_SUMMERY_JSON);
+        writeJsonObjectToFile(scaResults.getPackages(), checkmarxBuildDir, SCA_LIBRARIES_JSON);
+        writeJsonObjectToFile(scaResults.getFindings(), checkmarxBuildDir, SCA_VULNERABILITIES_JSON);
     }
 
     /**
@@ -1278,7 +1274,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             } else {
                 hostName = jenURL;
             }
-            passedURL = "Jenkins/" + CxConfig.version()+ " " + hostName + " " + jobName;
+            passedURL = "Jenkins/" + CxConfig.version() + " " + hostName + " " + jobName;
             // 50 is the maximum number of characters allowed by SAST server
             if (passedURL.length() > 50) {
                 passedURL = passedURL.substring(0, 45);
@@ -1304,14 +1300,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
         return originUrl;
     }
+
     private Boolean verifyCustomCharacters(String inputString) {
-    	 Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
-         Matcher match = pattern.matcher(inputString);
-         if (!StringUtil.isNullOrEmpty(inputString) && !match.find()) {
-        	 return false;
-         }
-    	return true;
+        Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
+        Matcher match = pattern.matcher(inputString);
+        if (!StringUtil.isNullOrEmpty(inputString) && !match.find()) {
+            return false;
+        }
+        return true;
     }
+
     private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) throws IOException {
         CxScanConfig ret = new CxScanConfig();
 
@@ -1327,20 +1325,20 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("  ORIGIN FROM JENKIN :: " + jenkinURL);
         log.info("  ORIGIN URL FROM JENKIN :: " + originUrl);
 
-        if(getPostScanActionId() == 0)
-        	ret.setPostScanActionId(null);
+        if (getPostScanActionId() == 0)
+            ret.setPostScanActionId(null);
         else
-        	ret.setPostScanActionId(getPostScanActionId());
-        	
+            ret.setPostScanActionId(getPostScanActionId());
+
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
         ret.setMvnPath(descriptor.getMvnPath());
         ret.setOsaGenerateJsonReport(false);
-        
-        if(StringUtils.isNotEmpty(getCustomFields())) {
-	        if(!verifyCustomCharacters(getCustomFields())) {
-	        	throw new CxClientException("Custom Fields must have given format: key1:val1,key2:val2. \\nCustom field allows to use these special characters: # . _ ");
-	        }
-	        ret.setCustomFields(apiFormat(getCustomFields()));
+
+        if (StringUtils.isNotEmpty(getCustomFields())) {
+            if (!verifyCustomCharacters(getCustomFields())) {
+                throw new CxClientException("Custom Fields must have given format: key1:val1,key2:val2. \\nCustom field allows to use these special characters: # . _ ");
+            }
+            ret.setCustomFields(apiFormat(getCustomFields()));
         }
         ret.setForceScan(isForceScan());
 
@@ -1476,17 +1474,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             enableProjectPolicyEnforcement = false;
         }
         ret.setEnablePolicyViolations(enableProjectPolicyEnforcement);
-        
+
         // Set the Continue build flag to Configuration object if Option from UI is choosen as useContinueBuildOnError
         if (useContinueBuildOnError(getDescriptor())) {
             ret.setContinueBuild(Boolean.TRUE);
         }
-        
+
         //Ignore errors that can be suppressed for ex. duplicate scan,source folder is empty, no files to zip.
         String suppressBenignErrors = System.getProperty(SUPPRESS_BENIGN_ERRORS);
-        if(suppressBenignErrors == null || Boolean.parseBoolean(suppressBenignErrors))
-        	ret.setIgnoreBenignErrors(true);
-        
+        if (suppressBenignErrors == null || Boolean.parseBoolean(suppressBenignErrors))
+            ret.setIgnoreBenignErrors(true);
+
         return ret;
     }
 
@@ -1636,8 +1634,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 //            scaResolverPathExist(dsConfig.pathToScaResolver);
             validateScaResolverParams(dsConfig.scaResolverAddParameters);
             result.setEnableScaResolver(true);
-        }
-        else
+        } else
             result.setEnableScaResolver(false);
 
         result.setPathToScaResolver(dsConfig.pathToScaResolver);
@@ -1762,7 +1759,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 log.info("  OSA archive includes: " + config.getOsaArchiveIncludePatterns());
                 log.info("  OSA run Execute dependency managers install packages command before Scan: " + config.getOsaRunInstall());
             }
-            if (config.isAstScaEnabled() && config.getAstScaConfig() != null){
+            if (config.isAstScaEnabled() && config.getAstScaConfig() != null) {
                 log.info("Use CxSCA dependency scanner is enabled");
                 log.info("CxSCA API URL: " + config.getAstScaConfig().getApiUrl());
                 log.info("Access control server URL: " + config.getAstScaConfig().getAccessControlUrl());
@@ -1814,9 +1811,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     private void createOsaReports(OSAResults osaResults, FilePath checkmarxBuildDir) {
-        writeJsonObjectToFile(osaResults.getResults(), new File(checkmarxBuildDir.getRemote(), OSA_SUMMERY_JSON), "OSA summery json report");
-        writeJsonObjectToFile(osaResults.getOsaLibraries(), new File(checkmarxBuildDir.getRemote(), OSA_LIBRARIES_JSON), "OSA libraries json report");
-        writeJsonObjectToFile(osaResults.getOsaVulnerabilities(), new File(checkmarxBuildDir.getRemote(), OSA_VULNERABILITIES_JSON), "OSA vulnerabilities json report");
+        writeJsonObjectToFile(osaResults.getResults(), checkmarxBuildDir, OSA_SUMMERY_JSON);
+        writeJsonObjectToFile(osaResults.getOsaLibraries(), checkmarxBuildDir, OSA_LIBRARIES_JSON);
+        writeJsonObjectToFile(osaResults.getOsaVulnerabilities(), checkmarxBuildDir, OSA_VULNERABILITIES_JSON);
     }
 
     private String generateHTMLReport(@Nonnull FilePath workspace, File checkmarxBuildDir, CxScanConfig config, ScanResults results) {
@@ -1843,21 +1840,23 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return reportName;
     }
 
-    private void writeJsonObjectToFile(Object jsonObj, File to, String description) {
+    private void writeJsonObjectToFile(Object jsonObj, FilePath to, String fileName) {
+        String remoteDirPath = to.getRemote() + File.separator + REPORTS_FOLDER;
+        InputStream is = null;
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             String json = null;
             json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObj);
-            String fileName = to.getName();
-            to = new File(to.getParent() + File.separator + REPORTS_FOLDER + File.separator + fileName);
-            if (!to.exists()) {
-                FileUtils.createParentDirectories(to);
-                to.createNewFile();
-            }
-            FileUtils.writeStringToFile(to, json, StandardCharsets.UTF_8);
-            log.info("Copying file [" + to.getName() + "] to workspace [" + to.getAbsolutePath() + "]");
+            is = IOUtils.toInputStream(json, StandardCharsets.UTF_8);
+
+            String remoteFilePath = remoteDirPath + File.separator + fileName;
+            log.info("Copying file {} to workspace {}", fileName, remoteFilePath);
+            FilePath remoteFile = new FilePath(to.getChannel(), remoteFilePath);
+            remoteFile.copyFrom(is);
         } catch (Exception e) {
-            log.error("Failed to write " + description + " to [" + to.getAbsolutePath() + "]");
+            log.error("Failed to write '" + fileName + "' to [" + to.getRemote() + "]", e);
+        } finally {
+            IOUtils.closeQuietly(is);
         }
     }
 
@@ -1906,13 +1905,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.error("");
     }
 
-
     private void logError(Exception ex) {
         if (ex != null) {
             log.error(ex.getMessage());
         }
     }
-
 
     private void addEnvVarAction(Run<?, ?> run, SASTResults sastResults) {
         EnvVarAction envVarAction = new EnvVarAction();
@@ -1936,17 +1933,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private void writeFileToWorkspaceReports(FilePath workspace, File file) {
         String remoteDirPath = workspace.getRemote() + File.separator + REPORTS_FOLDER;
         FileInputStream fis = null;
-
         try {
             String remoteFilePath = remoteDirPath + File.separator + file.getName();
             log.info("Copying file {} to workspace {}", file.getName(), remoteFilePath);
             FilePath remoteFile = new FilePath(workspace.getChannel(), remoteFilePath);
             fis = new FileInputStream(file);
             remoteFile.copyFrom(fis);
-
         } catch (Exception e) {
             log.warn("Failed to write file [" + file.getName() + "] to workspace: " + e.getMessage());
-
         } finally {
             IOUtils.closeQuietly(fis);
         }
@@ -2032,13 +2026,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     private boolean scaResolverPathExist(String pathToResolver) {
         pathToResolver = pathToResolver + File.separator + "ScaResolver";
-        if(!SystemUtils.IS_OS_UNIX)
+        if (!SystemUtils.IS_OS_UNIX)
             pathToResolver = pathToResolver + ".exe";
 
         File file = new File(pathToResolver);
-        if(!file.exists())
-        {
-            throw new CxClientException("SCA Resolver path does not exist. Path="+file.getAbsolutePath());
+        if (!file.exists()) {
+            throw new CxClientException("SCA Resolver path does not exist. Path=" + file.getAbsolutePath());
         }
         return true;
     }
@@ -2048,20 +2041,20 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         String[] arguments = additionalParams.split(" ");
         Map<String, String> params = new HashMap<>();
 
-        for (int i = 0; i <  arguments.length ; i++) {
-            if(arguments[i].startsWith("-") && (i+1 != arguments.length && !arguments[i+1].startsWith("-")))
-                params.put(arguments[i], arguments[i+1]);
+        for (int i = 0; i < arguments.length; i++) {
+            if (arguments[i].startsWith("-") && (i + 1 != arguments.length && !arguments[i + 1].startsWith("-")))
+                params.put(arguments[i], arguments[i + 1]);
             else
                 params.put(arguments[i], "");
         }
 
         String dirPath = params.get("-s");
-        if(StringUtils.isEmpty(dirPath))
+        if (StringUtils.isEmpty(dirPath))
             throw new CxClientException("Source code path (-s <source code path>) is not provided.");
 //        fileExists(dirPath);
 
         String projectName = params.get("-n");
-        if(StringUtils.isEmpty(projectName))
+        if (StringUtils.isEmpty(projectName))
             throw new CxClientException("Project name parameter (-n <project name>) must be provided to ScaResolver.");
 
     }
@@ -2473,9 +2466,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         public FormValidation doTestConnection(@QueryParameter final String serverUrl, @QueryParameter final String password,
                                                @QueryParameter final String username, @QueryParameter final String timestamp,
                                                @QueryParameter final String credentialsId, @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
-            if(item==null){
+            if (item == null) {
                 Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else if(item!=null){
+            } else if (item != null) {
                 item.checkPermission(Item.CONFIGURE);
             }
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
@@ -2529,11 +2522,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * browser.
          */
         @POST
-        public FormValidation doCheckScaSASTProjectID(@QueryParameter String value, @QueryParameter String scaSASTProjectFullPath,@AncestorInPath Item item) {
-        	if (item == null) {
+        public FormValidation doCheckScaSASTProjectID(@QueryParameter String value, @QueryParameter String scaSASTProjectFullPath, @AncestorInPath Item item) {
+            if (item == null) {
                 return FormValidation.ok();
-        	}    
-        	item.checkPermission(Item.CONFIGURE);
+            }
+            item.checkPermission(Item.CONFIGURE);
             if (StringUtil.isNullOrEmpty(value) && StringUtil.isNullOrEmpty(scaSASTProjectFullPath)) {
                 return FormValidation.error("Must provide value for either 'Project Full Path' or 'Project Id'.");
             }
@@ -2548,15 +2541,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * @return
          */
         @POST
-        public FormValidation doCheckCustomFields(@QueryParameter String value,@AncestorInPath Item item) {
-        	if (item == null) {
+        public FormValidation doCheckCustomFields(@QueryParameter String value, @AncestorInPath Item item) {
+            if (item == null) {
                 return FormValidation.ok();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
             Matcher match = pattern.matcher(value);
             if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
-            	return FormValidation.error("Custom Fields must have given format: key1:val1,key2:val2. \nCustom field allows to use these special characters: # . _ ");
+                return FormValidation.error("Custom Fields must have given format: key1:val1,key2:val2. \nCustom field allows to use these special characters: # . _ ");
             }
 
             return FormValidation.ok();
@@ -2568,10 +2561,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * @param value
          * @return
          */
-        public FormValidation doCheckForceScan(@QueryParameter boolean value, @QueryParameter boolean incremental,@AncestorInPath Item item) {
-        	if (item == null) {
+        public FormValidation doCheckForceScan(@QueryParameter boolean value, @QueryParameter boolean incremental, @AncestorInPath Item item) {
+            if (item == null) {
                 return FormValidation.ok();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             if (incremental && value) {
                 return FormValidation.error("Force scan and incremental scan can not be configured in pair for SAST");
@@ -2586,10 +2579,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * @param value
          * @return
          */
-        public FormValidation doCheckIncremental(@QueryParameter boolean value, @QueryParameter boolean forceScan,@AncestorInPath Item item) {
-        	if (item == null) {
+        public FormValidation doCheckIncremental(@QueryParameter boolean value, @QueryParameter boolean forceScan, @AncestorInPath Item item) {
+            if (item == null) {
                 return FormValidation.ok();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             if (forceScan && value) {
                 forceScan = false;
@@ -2605,9 +2598,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                       @QueryParameter final String username, @QueryParameter final String timestamp,
                                                       @QueryParameter final String sastCredentialsId, @QueryParameter final boolean isProxy,
                                                       @AncestorInPath Item item) {
-            if(item==null){
+            if (item == null) {
                 Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else if(item!=null){
+            } else if (item != null) {
                 item.checkPermission(Item.CONFIGURE);
             }
             // timestamp is not used in code, it is one of the arguments to
@@ -2682,9 +2675,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                   @QueryParameter String scaTenant,
                                                   @QueryParameter Integer scaTimeout,
                                                   @AncestorInPath Item item) {
-            if(item==null){
+            if (item == null) {
                 Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else if(item!=null){
+            } else if (item != null) {
                 item.checkPermission(Item.CONFIGURE);
             }
 
@@ -2773,9 +2766,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                         @QueryParameter final String username, @QueryParameter final String password,
                                                         @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
                                                         @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
-        	if (item == null) {
+            if (item == null) {
                 return new ListBoxModel();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
@@ -2785,13 +2778,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                         StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, isProxy, this, item);
                 commonClient = prepareLoggedInClient(connDetails);
                 List<PostAction> teamList = commonClient.getPostScanActionList();
-                if (listBoxModel.isEmpty() && !listBoxModel.contains("")){
+                if (listBoxModel.isEmpty() && !listBoxModel.contains("")) {
                     listBoxModel.add(new ListBoxModel.Option("", Integer.toString(0)));
                 }
                 for (PostAction postAction : teamList) {
-                    if (postAction.getType().contains("POST_SCAN_COMMAND")){
+                    if (postAction.getType().contains("POST_SCAN_COMMAND")) {
                         listBoxModel.add(new ListBoxModel.Option(postAction.getName(), Integer.toString(postAction.getId())));
-                    }else {
+                    } else {
                         continue;
                     }
 
@@ -2819,9 +2812,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                     @QueryParameter final String username, @QueryParameter final String password,
                                                     @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
                                                     @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
-        	if (item == null) {
+            if (item == null) {
                 return new ComboBoxModel();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ComboBoxModel projectNames = new ComboBoxModel();
@@ -2866,9 +2859,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                               @QueryParameter final String username, @QueryParameter final String password,
                                               @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
                                               @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
-        	if (item == null) {
+            if (item == null) {
                 return new ListBoxModel();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
@@ -2904,10 +2897,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *  shared state to avoid synchronization issues.
          */
         @POST
-        public FormValidation doCheckFullScanCycle(@QueryParameter final int value , @AncestorInPath Item item) {
-        	if (item == null) {
+        public FormValidation doCheckFullScanCycle(@QueryParameter final int value, @AncestorInPath Item item) {
+            if (item == null) {
                 return FormValidation.ok();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             if (value >= FULL_SCAN_CYCLE_MIN && value <= FULL_SCAN_CYCLE_MAX) {
                 return FormValidation.ok();
@@ -2921,9 +2914,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                       @QueryParameter final String username, @QueryParameter final String password,
                                                       @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
                                                       @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
-        	if (item == null) {
+            if (item == null) {
                 return new ListBoxModel();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
@@ -2964,9 +2957,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                @QueryParameter final String username, @QueryParameter final String password,
                                                @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
                                                @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
-        	if (item == null) {
+            if (item == null) {
                 return new ListBoxModel();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
@@ -2977,8 +2970,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 commonClient = prepareLoggedInClient(connDetails);
 
                 commonClient.getTeamList().stream().sorted(
-                        (firstElmnt, secondElmnt) ->
-                                firstElmnt.getFullName().compareToIgnoreCase(secondElmnt.fullName))
+                                (firstElmnt, secondElmnt) ->
+                                        firstElmnt.getFullName().compareToIgnoreCase(secondElmnt.fullName))
                         .forEach(team ->
                                 listBoxModel.add(new ListBoxModel.Option(team.getFullName(), team.getId())));
 
@@ -2995,11 +2988,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 }
             }
         }
+
         @POST
         public ListBoxModel doFillFailBuildOnNewSeverityItems(@AncestorInPath Item item) {
-        	if (item == null) {
+            if (item == null) {
                 return new ListBoxModel();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             ListBoxModel listBoxModel = new ListBoxModel();
             listBoxModel.add(new ListBoxModel.Option("High", "HIGH"));
@@ -3011,9 +3005,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         @POST
         public ListBoxModel doFillVulnerabilityThresholdResultItems(@AncestorInPath Item item) {
-        	if (item == null) {
+            if (item == null) {
                 return new ListBoxModel();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             ListBoxModel listBoxModel = new ListBoxModel();
 
@@ -3032,10 +3026,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * avoid synchronization issues.
          */
         @POST
-        public FormValidation doCheckHighThreshold(@QueryParameter final Integer value,@AncestorInPath Item item) {
-        	if (item == null) {
+        public FormValidation doCheckHighThreshold(@QueryParameter final Integer value, @AncestorInPath Item item) {
+            if (item == null) {
                 return FormValidation.ok();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             return checkNonNegativeValue(value);
         }
@@ -3045,10 +3039,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * avoid synchronization issues.
          */
         @POST
-        public FormValidation doCheckMediumThreshold(@QueryParameter final Integer value,@AncestorInPath Item item) {
-        	if (item == null) {
+        public FormValidation doCheckMediumThreshold(@QueryParameter final Integer value, @AncestorInPath Item item) {
+            if (item == null) {
                 return FormValidation.ok();
-        	} 
+            }
             item.checkPermission(Item.CONFIGURE);
             return checkNonNegativeValue(value);
         }
@@ -3058,10 +3052,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * avoid synchronization issues.
          */
         @POST
-        public FormValidation doCheckLowThreshold(@QueryParameter final Integer value,@AncestorInPath Item item) {
-        	if (item == null) {
+        public FormValidation doCheckLowThreshold(@QueryParameter final Integer value, @AncestorInPath Item item) {
+            if (item == null) {
                 return FormValidation.ok();
-        	} 
+            }
             item.checkPermission(Item.CONFIGURE);
             return checkNonNegativeValue(value);
         }
@@ -3102,10 +3096,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          */
 
         @POST
-        public FormValidation doCheckOsaHighThreshold(@QueryParameter final Integer value,@AncestorInPath Item item) {
-        	if (item == null) {
+        public FormValidation doCheckOsaHighThreshold(@QueryParameter final Integer value, @AncestorInPath Item item) {
+            if (item == null) {
                 return FormValidation.ok();
-        	} 
+            }
             item.checkPermission(Item.CONFIGURE);
             return checkNonNegativeValue(value);
         }
@@ -3115,10 +3109,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * avoid synchronization issues.
          */
         @POST
-        public FormValidation doCheckOsaMediumThreshold(@QueryParameter final Integer value,@AncestorInPath Item item) {
-        	if (item == null) {
+        public FormValidation doCheckOsaMediumThreshold(@QueryParameter final Integer value, @AncestorInPath Item item) {
+            if (item == null) {
                 return FormValidation.ok();
-        	} 
+            }
             item.checkPermission(Item.CONFIGURE);
             return checkNonNegativeValue(value);
         }
@@ -3128,16 +3122,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * avoid synchronization issues.
          */
         @POST
-        public FormValidation doCheckOsaLowThreshold(@QueryParameter final Integer value,@AncestorInPath Item item) {
-        	if (item == null) {
+        public FormValidation doCheckOsaLowThreshold(@QueryParameter final Integer value, @AncestorInPath Item item) {
+            if (item == null) {
                 return FormValidation.ok();
-        	} 
+            }
             item.checkPermission(Item.CONFIGURE);
             return checkNonNegativeValue(value);
         }
 
         @POST
-            public FormValidation doCheckOsaHighThresholdEnforcement(@QueryParameter final Integer value) {
+        public FormValidation doCheckOsaHighThresholdEnforcement(@QueryParameter final Integer value) {
             Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             return checkNonNegativeValue(value);
         }
@@ -3262,9 +3256,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         @POST
         public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String credentialsId) {
-            if(item==null){
+            if (item == null) {
                 Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else if(item!=null){
+            } else if (item != null) {
                 item.checkPermission(Item.CONFIGURE);
             }
             return getCredentialList(item, credentialsId);
@@ -3272,9 +3266,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         @POST
         public ListBoxModel doFillScaCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String scaCredentialsId) {
-            if(item==null){
+            if (item == null) {
                 Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else if(item!=null){
+            } else if (item != null) {
                 item.checkPermission(Item.CONFIGURE);
             }
             return getCredentialList(item, scaCredentialsId);
@@ -3282,9 +3276,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         @POST
         public ListBoxModel doFillSastCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String sastCredentialsId) {
-            if(item==null){
+            if (item == null) {
                 Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else if(item!=null){
+            } else if (item != null) {
                 item.checkPermission(Item.CONFIGURE);
             }
             return getCredentialList(item, sastCredentialsId);
