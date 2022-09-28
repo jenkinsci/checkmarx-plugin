@@ -34,9 +34,7 @@
                     <div class="async-note"><div class="async-note-title">Note:</div>
                         <div class="async-note-body" id="async-note-body">Job is configured to run Checkmarx scan asynchronously.</div></div>
                 </div>
-                <div>
-                    ${result.getHtmlReport()}
-                </div>
+                
             </j:if> 
             
             <j:if test="${!result.isRemoveAsyncHtml()}">
