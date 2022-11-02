@@ -1411,6 +1411,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setSastEnabled(this.sastEnabled == null || sastEnabled); //for backward compatibility, assuming if sastEnabled is not set, then sast is enabled
 
         if (ret.isSastEnabled()) {
+        	if(descriptor.isMigrateEnabled()) {
+        		ret.setSubmitToAST(true);
+        	}
             int presetId = parseInt(preset, log, "Invalid presetId: [%s]. Using default preset.", 0);
             ret.setPresetId(presetId);
 
@@ -2155,6 +2158,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private JobGlobalStatusOnError jobGlobalStatusOnError;
         private JobGlobalStatusOnError jobGlobalStatusOnThresholdViolation = JobGlobalStatusOnError.FAILURE;
         private boolean scanTimeOutEnabled;
+        private boolean migrateEnabled;
         private boolean globallyDefineScanSettings;
         private boolean continueBuildWhenTimedOut;
         private Integer scanTimeoutDuration; // In minutes.
@@ -2177,6 +2181,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         public void setServerUrl(@Nullable String serverUrl) {
             this.serverUrl = serverUrl;
+        }
+        
+        @Nullable
+        public boolean isMigrateEnabled() {
+            return migrateEnabled;
+        }
+
+        public void setMigrateEnabled(@Nullable boolean migrateEnabled) {
+            this.migrateEnabled = migrateEnabled;
         }
 
         @Nullable
