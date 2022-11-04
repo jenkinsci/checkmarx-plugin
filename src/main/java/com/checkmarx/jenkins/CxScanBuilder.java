@@ -1335,6 +1335,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setMvnPath(descriptor.getMvnPath());
         ret.setOsaGenerateJsonReport(false);
         
+        // AST 
+        
+        
+        ret.setAccessControlBaseUrl(descriptor.accessControlBaseUrl);
+        ret.setApiBaseUrl(descriptor.apiBaseUrl);
+        ret.setClientId(descriptor.getClientId());
+        ret.setClientSecret(descriptor.clientSecret);
+        ret.setTenant(descriptor.tenant);
+        
         if(StringUtils.isNotEmpty(getCustomFields())) {
 	        if(!verifyCustomCharacters(getCustomFields())) {
 	        	throw new CxClientException("Custom Fields must have given format: key1:val1,key2:val2. \\nCustom field allows to use these special characters: # . _ ");
@@ -2131,8 +2140,56 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private String excludeFolders;
         @Nullable
         private String filterPattern;
+        
+        private String accessControlBaseUrl;
+        private String apiBaseUrl;
+        private String clientId;
+        private String clientSecret;
+        private String tenant;
+        
+        
 
-        public String getSastcomment() {
+        public String getTenant() {
+			return tenant;
+		}
+
+		public void setTenant(String tenant) {
+			this.tenant = tenant;
+		}
+
+		public String isAccessControlBaseUrl() {
+			return accessControlBaseUrl;
+		}
+
+		public void setAccessControlBaseUrl(String accessControlBaseUrl) {
+			this.accessControlBaseUrl = accessControlBaseUrl;
+		}
+
+		public String getApiBaseUrl() {
+			return apiBaseUrl;
+		}
+
+		public void setApiBaseUrl(String apiBaseUrl) {
+			this.apiBaseUrl = apiBaseUrl;
+		}
+
+		public String getClientId() {
+			return clientId;
+		}
+
+		public void setClientId(String clientId) {
+			this.clientId = clientId;
+		}
+
+		public String getClientSecret() {
+			return clientSecret;
+		}
+
+		public void setClientSecret(String clientSecret) {
+			this.clientSecret = clientSecret;
+		}
+
+		public String getSastcomment() {
             return sastcomment;
         }
 

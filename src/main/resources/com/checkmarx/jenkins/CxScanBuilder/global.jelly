@@ -194,5 +194,27 @@
         </f:optionalBlock>
 		<f:optionalBlock title="Hide Debug Logs" inline="true" field="hideDebugLogs"/>        
     </f:section>
+    
+    <f:optionalBlock title="MigarteToAST" field="migrateToAst" checked="${descriptor.globallyDefineScanSettings}">
+           
+                 <f:entry title="Access control server URL" field="accessControlBaseUrl">
+                        <f:textarea value="${descriptor.accessControlUrl}"/>
+                    </f: entry>
+                    
+                     <f:entry title="Api Base Url" field="apiBaseUrl">
+                        <f:textarea value="${descriptor.apiBaseUrl}"/>
+                    </f: entry>
+                    
+                     <f:entry title="Client Id" field="clientId">
+                        <f:textarea value="${descriptor.clientId}"/>
+                    </f: entry>
+                    
+                     <f:entry title="Client Secret" field="clientSecret">
+                        <f:textarea value="${descriptor.clientSecret}"/>
+                    </f: entry>
+                    
+                    <f:entry title="Tenant" field="tenant">
+                        <f:textarea value="${descriptor.tenant}"/>
+                    </f: entry>
 
 </j:jelly>
