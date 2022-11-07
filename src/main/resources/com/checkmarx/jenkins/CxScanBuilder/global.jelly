@@ -69,11 +69,39 @@
                  field="jobGlobalStatusOnError">
             <f:enum field="jobGlobalStatusOnError">${it.displayName}</f:enum>
         </f:entry>
+        
+        
          <f:entry title="Sast Comment" field="sastcomment">
                     <f:textarea  default=""/>
                 </f:entry>
 
-
+        
+         <f:optionalBlock title="Migrate To AST" inline="true"
+                         field="migrateToAst">
+                         
+                 <f:entry title="Access control server URL" field="accessControlBaseUrl">
+                    <f:textbox value="${descriptor.accessControlUrl}"/>
+                 </f:entry>                         
+              
+                 <f:entry title="Api Base URL" field="apiBaseUrl"> 
+                    <f:textbox value="${descriptor.apiBaseUrl}"/>
+                 </f:entry>
+                             
+                <f:entry title="Client Id" field="clientId"> 
+                  <f:textbox value="${descriptor.clientId}"/>
+                </f:entry>
+                             
+                <f:entry title="Client Secret" field="clientSecret"> 
+                  <f:textbox value="${descriptor.clientSecret}"/>
+                </f:entry>
+           
+            <f:entry title="Tenant" field="tenant"> 
+               <f:textbox value="${descriptor.tenant}"/>
+            </f:entry>
+                             
+        </f:optionalBlock>
+            
+        
         <f:optionalBlock title="Globally Define vulnerability thresholds for all jobs" inline="true"
                          field="forcingVulnerabilityThresholdEnabled">
 
@@ -104,6 +132,7 @@
                 <f:number clazz="positive-number" min="0" step="1" default="" checkMethod="POST"/>
             </f:entry>
         </f:optionalBlock>
+        
 
         <f:optionalBlock title="Set job scan timeout threshold" inline="true" field="scanTimeOutEnabled">
             <f:entry title="Scan timeout (minutes)" field="scanTimeoutDuration">
@@ -114,6 +143,7 @@
         <f:optionalBlock title="Continue when timed out" inline="true" field="continueBuildWhenTimedOut">
             
         </f:optionalBlock>
+  
 
         <f:optionalBlock title="Globally define dependency scan settings" field="dependencyScanConfig"
                          checked="${descriptor.globallyDefineScanSettings}">
@@ -192,29 +222,9 @@
     </f:optionalBlock>
             </f:radioBlock>
         </f:optionalBlock>
-		<f:optionalBlock title="Hide Debug Logs" inline="true" field="hideDebugLogs"/>        
+		<f:optionalBlock title="Hide Debug Logs" inline="true" field="hideDebugLogs"/>      
+		  
     </f:section>
     
-    <f:optionalBlock title="MigarteToAST" field="migrateToAst" checked="${descriptor.globallyDefineScanSettings}">
-           
-                 <f:entry title="Access control server URL" field="accessControlBaseUrl">
-                        <f:textarea value="${descriptor.accessControlUrl}"/>
-                    </f: entry>
-                    
-                     <f:entry title="Api Base Url" field="apiBaseUrl">
-                        <f:textarea value="${descriptor.apiBaseUrl}"/>
-                    </f: entry>
-                    
-                     <f:entry title="Client Id" field="clientId">
-                        <f:textarea value="${descriptor.clientId}"/>
-                    </f: entry>
-                    
-                     <f:entry title="Client Secret" field="clientSecret">
-                        <f:textarea value="${descriptor.clientSecret}"/>
-                    </f: entry>
-                    
-                    <f:entry title="Tenant" field="tenant">
-                        <f:textarea value="${descriptor.tenant}"/>
-                    </f: entry>
-
+    
 </j:jelly>
