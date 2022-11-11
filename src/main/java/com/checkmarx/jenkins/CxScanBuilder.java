@@ -2157,7 +2157,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 			this.tenant = tenant;
 		}
 
-		public String isAccessControlBaseUrl() {
+		public String getAccessControlBaseUrl() {
 			return accessControlBaseUrl;
 		}
 

@@ -77,10 +77,10 @@
 
         
          <f:optionalBlock title="Migrate To AST" inline="true"
-                         field="migrateToAst">
+                         field="migrateEnabled">
                          
                  <f:entry title="Access control server URL" field="accessControlBaseUrl">
-                    <f:textbox value="${descriptor.accessControlUrl}"/>
+                    <f:textbox value="${descriptor.accessControlBaseUrl}"/>
                  </f:entry>                         
               
                  <f:entry title="Api Base URL" field="apiBaseUrl"> 
