@@ -1895,8 +1895,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             	run.setResult(Result.fromString(statusToReturn));
             }
             
-            if(JobStatusOnError.FAILURE.toString().equalsIgnoreCase(statusToReturn)) {
-            	String msg = msgPrefix + "Job is configured to return FAILURE and stop the build/pipeline.";
+            if(JobStatusOnError.ABORTED.toString().equalsIgnoreCase(statusToReturn)) {
+            	String msg = msgPrefix + "Job is configured to return ABORTED and stop the build/pipeline.";
             	log.warn(msg);
             	throw new AbortException(msg);
        	    }                     
