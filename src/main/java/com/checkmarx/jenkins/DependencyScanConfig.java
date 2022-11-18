@@ -98,4 +98,6 @@ public class DependencyScanConfig {
     @DataBoundConstructor
     public DependencyScanConfig() {
     }
+    
+    
 }

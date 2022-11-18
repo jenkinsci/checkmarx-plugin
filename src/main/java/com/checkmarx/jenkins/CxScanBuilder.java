@@ -991,7 +991,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             AstScaResults scaResults = scanResults.getScaResults();
             if (osaResults != null && osaResults.isOsaResultsReady()) {
                 createOsaReports(osaResults, checkmarxBuildDir);
-            } else if (scaResults != null && scaResults.isScaResultReady()) {
+//            } else if (scaResults != null && scaResults.isScaResultReady()) {
                 createScaReports(scaResults, checkmarxBuildDir);
             }
             return;
@@ -1224,9 +1224,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
 
     private void createScaReports(AstScaResults scaResults, File checkmarxBuildDir) {
-        writeJsonObjectToFile(scaResults.getSummary(), new File(checkmarxBuildDir, SCA_SUMMERY_JSON), "OSA summary json report");
-        writeJsonObjectToFile(scaResults.getPackages(), new File(checkmarxBuildDir, SCA_LIBRARIES_JSON), "OSA libraries json report");
-        writeJsonObjectToFile(scaResults.getFindings(), new File(checkmarxBuildDir, SCA_VULNERABILITIES_JSON), "OSA vulnerabilities json report");
+//        writeJsonObjectToFile(scaResults.getSummary(), new File(checkmarxBuildDir, SCA_SUMMERY_JSON), "OSA summary json report");
+//        writeJsonObjectToFile(scaResults.getPackages(), new File(checkmarxBuildDir, SCA_LIBRARIES_JSON), "OSA libraries json report");
+//        writeJsonObjectToFile(scaResults.getFindings(), new File(checkmarxBuildDir, SCA_VULNERABILITIES_JSON), "OSA vulnerabilities json report");
     }
 
     /**
@@ -1311,6 +1311,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          }
     	return true;
     }
+  
     private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) throws IOException {
         CxScanConfig ret = new CxScanConfig();
 
@@ -1337,12 +1338,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         
         // AST 
         
-        
-        ret.setAccessControlBaseUrl(descriptor.accessControlBaseUrl);
-        ret.setApiBaseUrl(descriptor.apiBaseUrl);
-        ret.setClientId(descriptor.getClientId());
-        ret.setClientSecret(descriptor.clientSecret);
-        ret.setTenant(descriptor.tenant);
+//        ret.setAccessControlBaseUrl(descriptor.dependencyScanConfig.accessControlBaseUrl);
+//        ret.setApiBaseUrl(descriptor.dependencyScanConfig.apiBaseUrl);
+//        ret.setClientId(descriptor.dependencyScanConfig.clientId);
+//        ret.setClientSecret(descriptor.dependencyScanConfig.clientSecret);
+//        ret.setTenant(descriptor.dependencyScanConfig.tenant);
         
         if(StringUtils.isNotEmpty(getCustomFields())) {
 	        if(!verifyCustomCharacters(getCustomFields())) {
@@ -1633,42 +1633,42 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         AstScaConfig result = new AstScaConfig();
-        result.setApiUrl(dsConfig.scaServerUrl);
-        result.setAccessControlUrl(dsConfig.scaAccessControlUrl);
-        result.setWebAppUrl(dsConfig.scaWebAppUrl);
-        result.setTenant(dsConfig.scaTenant);
-        result.setTeamPath(dsConfig.scaTeamPath);
-        result.setTeamId(dsConfig.scaTeamId);
-        result.setIncludeSources(dsConfig.isIncludeSources);
+//        result.setApiUrl(dsConfig.scaServerUrl);
+//        result.setAccessControlUrl(dsConfig.scaAccessControlUrl);
+//        result.setWebAppUrl(dsConfig.scaWebAppUrl);
+//        result.setTenant(dsConfig.scaTenant);
+//        result.setTeamPath(dsConfig.scaTeamPath);
+//        result.setTeamId(dsConfig.scaTeamId);
+//        result.setIncludeSources(dsConfig.isIncludeSources);
 
         //add SCA Resolver code here
         if (dsConfig.enableScaResolver != null
                 && SCAScanType.SCA_RESOLVER.toString().equalsIgnoreCase(dsConfig.enableScaResolver.toString())) {
 //            scaResolverPathExist(dsConfig.pathToScaResolver);
             validateScaResolverParams(dsConfig.scaResolverAddParameters);
-            result.setEnableScaResolver(true);
+//            result.setEnableScaResolver(true);
         }
         else
-            result.setEnableScaResolver(false);
+ //           result.setEnableScaResolver(false);
 
-        result.setPathToScaResolver(dsConfig.pathToScaResolver);
-        result.setScaResolverAddParameters(dsConfig.scaResolverAddParameters);
+//        result.setPathToScaResolver(dsConfig.pathToScaResolver);
+//        result.setScaResolverAddParameters(dsConfig.scaResolverAddParameters);
 
-        UsernamePasswordCredentials credentials = CxConnectionDetails.getCredentialsById(dsConfig.scaCredentialsId, run);
-        if (credentials != null) {
-            result.setUsername(credentials.getUsername());
-            result.setPassword(credentials.getPassword().getPlainText());
-        } else {
-            log.warn("CxSCA credentials are not specified.");
-        }
-        if (StringUtils.isNotEmpty(dsConfig.scaEnvVariables)) {
-            result.setEnvVariables(CxSCAFileSystemUtils.convertStringToKeyValueMap(env.expand(dsConfig.scaEnvVariables)));
-        }
-        String filePath = dsConfig.scaConfigFile;
-        if (!StringUtils.isEmpty(filePath)) {
-            String[] strArrayFile = filePath.split(",");
-            result.setConfigFilePaths(Arrays.asList(strArrayFile));
-        }
+//        UsernamePasswordCredentials credentials = CxConnectionDetails.getCredentialsById(dsConfig.scaCredentialsId, run);
+//        if (credentials != null) {
+//            result.setUsername(credentials.getUsername());
+//            result.setPassword(credentials.getPassword().getPlainText());
+//        } else {
+//            log.warn("CxSCA credentials are not specified.");
+//        }
+//        if (StringUtils.isNotEmpty(dsConfig.scaEnvVariables)) {
+//            result.setEnvVariables(CxSCAFileSystemUtils.convertStringToKeyValueMap(env.expand(dsConfig.scaEnvVariables)));
+//        }
+//        String filePath = dsConfig.scaConfigFile;
+//        if (!StringUtils.isEmpty(filePath)) {
+//            String[] strArrayFile = filePath.split(",");
+//            result.setConfigFilePaths(Arrays.asList(strArrayFile));
+//        }
 
 
         String derivedProjectName = projectName;
@@ -2141,53 +2141,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         @Nullable
         private String filterPattern;
         
-        private String accessControlBaseUrl;
-        private String apiBaseUrl;
-        private String clientId;
-        private String clientSecret;
-        private String tenant;
-        
-        
-
-        public String getTenant() {
-			return tenant;
-		}
-
-		public void setTenant(String tenant) {
-			this.tenant = tenant;
-		}
-
-		public String isAccessControlBaseUrl() {
-			return accessControlBaseUrl;
-		}
-
-		public void setAccessControlBaseUrl(String accessControlBaseUrl) {
-			this.accessControlBaseUrl = accessControlBaseUrl;
-		}
-
-		public String getApiBaseUrl() {
-			return apiBaseUrl;
-		}
-
-		public void setApiBaseUrl(String apiBaseUrl) {
-			this.apiBaseUrl = apiBaseUrl;
-		}
-
-		public String getClientId() {
-			return clientId;
-		}
-
-		public void setClientId(String clientId) {
-			this.clientId = clientId;
-		}
-
-		public String getClientSecret() {
-			return clientSecret;
-		}
-
-		public void setClientSecret(String clientSecret) {
-			this.clientSecret = clientSecret;
-		}
 
 		public String getSastcomment() {
             return sastcomment;
@@ -2220,8 +2173,53 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private boolean continueBuildWhenTimedOut;
         private Integer scanTimeoutDuration; // In minutes.
         private boolean lockVulnerabilitySettings = true;
+        private String accessControlBaseUrl;
+        private String apiBaseUrl;
+        private String tenant;
+        private String clientSecret;
+        private String clientId;
 
-        private final transient Pattern msGuid = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
+        public String getAccessControlBaseUrl() {
+			return accessControlBaseUrl;
+		}
+
+		public void setAccessControlBaseUrl(String accessControlBaseUrl) {
+			this.accessControlBaseUrl = accessControlBaseUrl;
+		}
+
+		public String getApiBaseUrl() {
+			return apiBaseUrl;
+		}
+
+		public void setApiBaseUrl(String apiBaseUrl) {
+			this.apiBaseUrl = apiBaseUrl;
+		}
+
+		public String getTenant() {
+			return tenant;
+		}
+
+		public void setTenant(String tenant) {
+			this.tenant = tenant;
+		}
+
+		public String getClientSecret() {
+			return clientSecret;
+		}
+
+		public void setClientSecret(String clientSecret) {
+			this.clientSecret = clientSecret;
+		}
+
+		public String getClientId() {
+			return clientId;
+		}
+
+		public void setClientId(String clientId) {
+			this.clientId = clientId;
+		}
+
+		private final transient Pattern msGuid = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
 
         private final String DEPENDENCY_SCAN_CONFIG_PROP = "dependencyScanConfig";
         private DependencyScanConfig dependencyScanConfig;
@@ -2770,10 +2768,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 if (credentials == null) {
                     throw new CxCredException("Sca connection failed. Please recheck the account name and CxSCA credentials you provided and try again.");
                 }
-                scaConfig.setUsername(credentials.getUsername());
-                scaConfig.setPassword(credentials.getPassword().getPlainText());
-                scaConfig.setSourceLocationType(SourceLocationType.LOCAL_DIRECTORY);
-                scaConfig.setRemoteRepositoryInfo(null);
+//                scaConfig.setUsername(credentials.getUsername());
+//                scaConfig.setPassword(credentials.getPassword().getPlainText());
+//                scaConfig.setSourceLocationType(SourceLocationType.LOCAL_DIRECTORY);
+//                scaConfig.setRemoteRepositoryInfo(null);
                 config.setAstScaConfig(scaConfig);
                 config.addScannerType(ScannerType.AST_SCA);
                 config.setSCAScanTimeoutInMinutes(scaTimeout);
@@ -3074,6 +3072,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return listBoxModel;
 
         }
+        
+        
 
         @POST
         public ListBoxModel doFillVulnerabilityThresholdResultItems(@AncestorInPath Item item) {
@@ -3293,7 +3293,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 pluginData.put(DEPENDENCY_SCAN_CONFIG_PROP, null);
 
             }
-            // Have put the below line to fix AB # 493 - "Globally define dependency scan settings" selection is not retained.
+            // Have put the below line to fix AB # 493 - "k" selection is not retained.
             // Line pluginData.put(DEPENDENCY_SCAN_CONFIG_PROP, null); should have solved the problem but putting null is actually not working. JSONObject.NULL
             // API also no more available
             setGloballyDefineScanSettings(pluginData.has(DEPENDENCY_SCAN_CONFIG_PROP));

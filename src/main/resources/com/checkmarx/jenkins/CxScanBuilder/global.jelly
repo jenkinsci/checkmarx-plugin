@@ -43,6 +43,31 @@
 
 		<f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
 			with="isProxy,serverUrl,username,password,timestamp,credentialsId" />
+			
+			 <f:optionalBlock title="Migrate To AST" inline="true"
+                         field="isMigrateEnabled">
+                         
+                 <f:entry title="Access control server URL" field="accessControlBaseUrl">
+                    <f:textbox value="${descriptor.dependencyScanConfig.accessControlBaseUrl}"/>
+                 </f:entry>                         
+              
+                 <f:entry title="Api Base URL" field="apiBaseUrl"> 
+                    <f:textbox value="${descriptor.dependencyScanConfig.apiBaseUrl}"/>
+                 </f:entry>
+                             
+                <f:entry title="Client Id" field="clientId"> 
+                  <f:textbox value="${descriptor.dependencyScanConfig.clientId}"/>
+                </f:entry>
+                             
+                <f:entry title="Client Secret" field="password"> 
+                  <f:textbox value="${descriptor.dependencyScanConfig.clientSecret}"/>
+                </f:entry>
+           
+            <f:entry title="Tenant" field="tenant"> 
+               <f:textbox value="${descriptor.dependencyScanConfig.tenant}"/>
+            </f:entry>
+                             
+        </f:optionalBlock>
 
         <f:entry title="Maven Path" field="mvnPath">
             <f:textbox/>
@@ -74,32 +99,6 @@
          <f:entry title="Sast Comment" field="sastcomment">
                     <f:textarea  default=""/>
                 </f:entry>
-
-        
-         <f:optionalBlock title="Migrate To AST" inline="true"
-                         field="migrateToAst">
-                         
-                 <f:entry title="Access control server URL" field="accessControlBaseUrl">
-                    <f:textbox value="${descriptor.accessControlUrl}"/>
-                 </f:entry>                         
-              
-                 <f:entry title="Api Base URL" field="apiBaseUrl"> 
-                    <f:textbox value="${descriptor.apiBaseUrl}"/>
-                 </f:entry>
-                             
-                <f:entry title="Client Id" field="clientId"> 
-                  <f:textbox value="${descriptor.clientId}"/>
-                </f:entry>
-                             
-                <f:entry title="Client Secret" field="clientSecret"> 
-                  <f:textbox value="${descriptor.clientSecret}"/>
-                </f:entry>
-           
-            <f:entry title="Tenant" field="tenant"> 
-               <f:textbox value="${descriptor.tenant}"/>
-            </f:entry>
-                             
-        </f:optionalBlock>
             
         
         <f:optionalBlock title="Globally Define vulnerability thresholds for all jobs" inline="true"
@@ -222,6 +221,8 @@
     </f:optionalBlock>
             </f:radioBlock>
         </f:optionalBlock>
+        
+        
 		<f:optionalBlock title="Hide Debug Logs" inline="true" field="hideDebugLogs"/>      
 		  
     </f:section>
