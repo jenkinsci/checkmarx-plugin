@@ -43,6 +43,31 @@
 
 		<f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
 			with="isProxy,serverUrl,username,password,timestamp,credentialsId" />
+			
+		 <f:optionalBlock title="Migrate To AST" inline="true"
+                         field="isMigrateEnabled">
+                         
+                 <f:entry title="Access control server URL" field="accessControlBaseUrl">
+                    <f:textbox value="${descriptor.dependencyScanConfig.accessControlBaseUrl}"/>
+                 </f:entry>                         
+              
+                 <f:entry title="Api Base URL" field="apiBaseUrl"> 
+                    <f:textbox value="${descriptor.dependencyScanConfig.apiBaseUrl}"/>
+                 </f:entry>
+                             
+                <f:entry title="Client Id" field="clientId"> 
+                  <f:textbox value="${descriptor.dependencyScanConfig.clientId}"/>
+                </f:entry>
+                             
+                <f:entry title="Client Secret" field="clientSecret"> 
+                  <f:password value="${descriptor.dependencyScanConfig.clientSecret}"/>
+                </f:entry>
+           
+            <f:entry title="Tenant" field="tenant"> 
+               <f:textbox value="${descriptor.dependencyScanConfig.tenant}"/>
+            </f:entry> 
+                             
+        </f:optionalBlock>
 
         <f:entry title="Maven Path" field="mvnPath">
             <f:textbox/>
