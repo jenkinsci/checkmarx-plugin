@@ -1343,6 +1343,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setClientId(descriptor.getClientId());
         ret.setClientSecret(descriptor.clientSecret);
         ret.setTenant(descriptor.tenant);
+        ret.setBranchName(env.get("GIT_BRANCH"));
         
         if(StringUtils.isNotEmpty(getCustomFields())) {
 	        if(!verifyCustomCharacters(getCustomFields())) {
