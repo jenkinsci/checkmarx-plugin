@@ -1070,7 +1070,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             if (StringUtils.isNotEmpty(cac.getTeam())) {
                 scanConfig.setTeamPath(cac.getTeam());
-                overridesResults.put("Project Name:", String.valueOf(cac.getTeam()));
+                overridesResults.put("Team Name:", String.valueOf(cac.getTeam()));
             }
         });
 
@@ -1078,7 +1078,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         mapScaConfiguration(Optional.ofNullable(configAsCodeFromFile.getSca()), scanConfig, overridesResults);
 
         if (!overridesResults.isEmpty()) {
-            log.info("the following fields was overrides using config as code file : ");
+            log.info("The following fields are overridden using config as code file : ");
             overridesResults.keySet().forEach(key -> log.info(String.format("%s = %s", key, overridesResults.get(key))));
         }
     }
@@ -1167,6 +1167,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     scanConfig.setIncremental(pValue);
                     overridesResults.put("Is Incremental", String.valueOf(pValue));
                 });
+        
+        sast.map(SastConfig::isOverrideProjectSetting)
+        .ifPresent(pValue -> {
+            scanConfig.setIsOverrideProjectSetting(pValue);
+            overridesResults.put("Is OverrideProjectSetting", String.valueOf(pValue));
+        });
 
         sast.map(SastConfig::isPrivateScan)
                 .ifPresent(pValue -> {
