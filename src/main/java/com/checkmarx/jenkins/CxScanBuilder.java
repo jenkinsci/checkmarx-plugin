@@ -917,7 +917,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             try {
                 overrideConfigAsCode(config, workspace);
             } catch (ConfigurationException e) {
-                log.warn("couldn't load config file", e.getMessage());
+                log.warn("couldn't load config file: " + e.getMessage(), e);
             }
         }
 
