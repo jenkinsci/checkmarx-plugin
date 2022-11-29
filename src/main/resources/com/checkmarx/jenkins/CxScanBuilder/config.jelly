@@ -125,7 +125,7 @@
 
 
         <f:optionalBlock title="Avoid duplicate project scans in queue" inline="true" field="avoidDuplicateProjectScans" />
-        <f:optionalBlock title="Enable Override Project Setting" inline="true" field="overrideProjectSetting" checked="${instance==null?true:instance.overrideProjectSetting}" />                     
+        <f:optionalBlock title="Enable Override Project Setting" inline="true" field="overrideProjectSetting" checked="${instance==null?false:instance.overrideProjectSetting}" />                     
     </f:optionalBlock>
     <f:optionalBlock title="Skip scan if triggered by SCM Changes" inline="true" field="skipSCMTriggers" />
 
