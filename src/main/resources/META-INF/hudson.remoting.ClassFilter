@@ -14,6 +14,7 @@ com.cx.restclient.dto.ScannerType
 com.cx.restclient.osa.dto.OSAScanState
 com.cx.restclient.osa.dto.OSASummaryResults
 com.cx.restclient.sast.dto.SASTResults
+com.cx.restclient.ast.dto.sast.AstSastResults
 com.cx.restclient.dto.Results
 com.cx.restclient.osa.dto.CVEReportTableRow
 com.cx.restclient.osa.dto.Library

@@ -48,23 +48,23 @@
                          field="isMigrateEnabled">
                          
                  <f:entry title="Access control server URL" field="accessControlBaseUrl">
-                    <f:textbox value="${descriptor.dependencyScanConfig.accessControlBaseUrl}"/>
+                    <f:textbox value="${descriptor.accessControlBaseUrl}"/>
                  </f:entry>                         
               
                  <f:entry title="Api Base URL" field="apiBaseUrl"> 
-                    <f:textbox value="${descriptor.dependencyScanConfig.apiBaseUrl}"/>
+                    <f:textbox value="${descriptor.apiBaseUrl}"/>
                  </f:entry>
                              
                 <f:entry title="Client Id" field="clientId"> 
-                  <f:textbox value="${descriptor.dependencyScanConfig.clientId}"/>
+                  <f:textbox value="${descriptor.clientId}"/>
                 </f:entry>
                              
                 <f:entry title="Client Secret" field="clientSecret"> 
-                  <f:password value="${descriptor.dependencyScanConfig.clientSecret}"/>
+                  <f:password value="${descriptor.clientSecret}"/>
                 </f:entry>
            
             <f:entry title="Tenant" field="tenant"> 
-               <f:textbox value="${descriptor.dependencyScanConfig.tenant}"/>
+               <f:textbox value="${descriptor.tenant}"/>
             </f:entry> 
                              
         </f:optionalBlock>

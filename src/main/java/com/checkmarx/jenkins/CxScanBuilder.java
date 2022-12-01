@@ -944,7 +944,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         File checkmarxBuildDir = new File(run.getRootDir(), "checkmarx");
         checkmarxBuildDir.mkdir();
 
-        if (config.getGeneratePDFReport()) {
+        if (config.getGeneratePDFReport() && !config.isSubmitToAST()) {
             String path = "";
             // run.getUrl() returns a URL path similar to job/MyJobName/124/
             //getRootUrl() will return the value of "Manage Jenkins->configuration->Jenkins URL"
@@ -1834,7 +1834,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private String generateHTMLReport(@Nonnull FilePath workspace, File checkmarxBuildDir, CxScanConfig config, ScanResults results) {
         String reportName = null;
         try {
-            String reportHTML = SummaryUtils.generateSummary(results.getSastResults(), results.getOsaResults(), results.getScaResults(), config);
+        	String reportHTML = "";
+        	if(config.isSubmitToAST()) {
+        		reportHTML = SummaryUtils.generateSummary(results.getSastResults(), results.getOsaResults(), results.getScaResults(), results.getAstSastResults(), config);
+        	} else{
+        		reportHTML = SummaryUtils.generateSummary(results.getSastResults(), results.getOsaResults(), results.getScaResults(), config);
+        	}
+             
             reportName = CxScanResult.resolveHTMLReportName(config.isSastEnabled(), getDependencyScannerType(config));
             File reportFile = new File(checkmarxBuildDir, reportName);
             FileUtils.writeStringToFile(reportFile, reportHTML, Charset.defaultCharset());
