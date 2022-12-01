@@ -45,7 +45,7 @@
 			with="isProxy,serverUrl,username,password,timestamp,credentialsId" />
 			
 		 <f:optionalBlock title="Migrate To AST" inline="true"
-                         field="isMigrateEnabled">
+                         field="migrateEnabled">
                          
                  <f:entry title="Access control server URL" field="accessControlBaseUrl">
                     <f:textbox value="${descriptor.accessControlBaseUrl}"/>
