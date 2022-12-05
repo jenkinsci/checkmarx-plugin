@@ -4,6 +4,7 @@ import com.checkmarx.configprovider.ConfigProvider;
 import com.checkmarx.configprovider.dto.ResourceType;
 import com.checkmarx.configprovider.dto.interfaces.ConfigReader;
 import com.checkmarx.jenkins.configascode.ConfigAsCode;
+import com.checkmarx.jenkins.configascode.ProjectConfig;
 import com.checkmarx.jenkins.configascode.SastConfig;
 import com.checkmarx.jenkins.configascode.ScaConfig;
 import com.checkmarx.jenkins.exception.CxCredException;
@@ -99,6 +100,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     // Persistent plugin configuration parameters
     //////////////////////////////////////////////////////////////////////////////////////
     private boolean useOwnServerCredentials;
+    
+    private boolean overrideProjectSetting;
 
     private boolean configAsCode;
     @Nullable
@@ -318,8 +321,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public void setConfigAsCode(boolean configAsCode) {
         this.configAsCode = configAsCode;
     }
+    
+    public boolean isOverrideProjectSetting() {
+		return overrideProjectSetting;
+	}
 
-    @Nullable
+    @DataBoundSetter
+	public void setOverrideProjectSetting(boolean overrideProjectSetting) {
+		this.overrideProjectSetting = overrideProjectSetting;
+	}
+
+	@Nullable
     public String getServerUrl() {
         return serverUrl;
     }
@@ -905,7 +917,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             try {
                 overrideConfigAsCode(config, workspace);
             } catch (ConfigurationException e) {
-                log.warn("couldn't load config file", e.getMessage());
+                log.warn("couldn't load config file: " + e.getMessage(), e);
             }
         }
 
@@ -916,7 +928,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //validate at least one scan type is enabled
         if (!config.isSastEnabled() && !config.isAstScaEnabled() && !config.isOsaEnabled()) {
             log.error("Both SAST and dependency scan are disabled. Exiting.");
-            run.setResult(Result.FAILURE);
+            run.setResult(Result.FAILURE);            
             return;
         }
 
@@ -1030,8 +1042,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         if (configProvider.hasConfiguration(CX_ORIGIN, "project"))
             configAsCodeFromFile.setProject(
-                    configProvider.getStringConfiguration(CX_ORIGIN, "project")
-            );
+                    configProvider.getConfiguration(CX_ORIGIN, "project",ProjectConfig.class));
 
         if (configProvider.hasConfiguration(CX_ORIGIN, "team"))
             configAsCodeFromFile.setTeam(
@@ -1052,14 +1063,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         //map global
         Optional.ofNullable(configAsCodeFromFile).ifPresent(cac -> {
-            if (StringUtils.isNotEmpty(cac.getProject())) {
-                scanConfig.setProjectName(cac.getProject());
-                overridesResults.put("Project Name:", String.valueOf(cac.getProject()));
+            if (StringUtils.isNotEmpty(cac.getProject().getFullPath())) {
+                scanConfig.setProjectName(cac.getProject().getFullPath());
+                overridesResults.put("Project Name:", String.valueOf(cac.getProject().getFullPath()));
             }
 
             if (StringUtils.isNotEmpty(cac.getTeam())) {
                 scanConfig.setTeamPath(cac.getTeam());
-                overridesResults.put("Project Name:", String.valueOf(cac.getTeam()));
+                overridesResults.put("Team Name:", String.valueOf(cac.getTeam()));
             }
         });
 
@@ -1067,7 +1078,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         mapScaConfiguration(Optional.ofNullable(configAsCodeFromFile.getSca()), scanConfig, overridesResults);
 
         if (!overridesResults.isEmpty()) {
-            log.info("the following fields was overrides using config as code file : ");
+            log.info("The following fields are overridden using config as code file : ");
             overridesResults.keySet().forEach(key -> log.info(String.format("%s = %s", key, overridesResults.get(key))));
         }
     }
@@ -1156,6 +1167,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     scanConfig.setIncremental(pValue);
                     overridesResults.put("Is Incremental", String.valueOf(pValue));
                 });
+        
+        sast.map(SastConfig::isOverrideProjectSetting)
+        .ifPresent(pValue -> {
+            scanConfig.setIsOverrideProjectSetting(pValue);
+            overridesResults.put("Is OverrideProjectSetting", String.valueOf(pValue));
+        });
 
         sast.map(SastConfig::isPrivateScan)
                 .ifPresent(pValue -> {
@@ -1190,8 +1207,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 .filter(StringUtils::isNotBlank)
                 .ifPresent(pValue -> {
                     scanConfig.setPresetName(pValue);
+                    scanConfig.setPresetId(null);
                     overridesResults.put("Preset", pValue);
                 });
+       
 
         sast.map(SastConfig::getExcludeFolders)
                 .filter(StringUtils::isNotBlank)
@@ -1313,6 +1332,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
     private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) throws IOException {
         CxScanConfig ret = new CxScanConfig();
+        
+        ret.setIsOverrideProjectSetting(overrideProjectSetting);
 
         if (isIncremental() && isForceScan()) {
             throw new IOException("Force scan and incremental scan can not be configured in pair for SAST. Configure either Incremental or Force scan option");
@@ -1411,6 +1432,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setSastEnabled(this.sastEnabled == null || sastEnabled); //for backward compatibility, assuming if sastEnabled is not set, then sast is enabled
 
         if (ret.isSastEnabled()) {
+        	        	        	
             int presetId = parseInt(preset, log, "Invalid presetId: [%s]. Using default preset.", 0);
             ret.setPresetId(presetId);
 
@@ -1724,6 +1746,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("post scan action: " + config.getPostScanActionId());
         log.info("is force scan: " + config.getForceScan());
         log.info("scan level custom fields: " + config.getCustomFields());
+        log.info("overrideProjectSetting value: " + overrideProjectSetting);
 
         ScannerType scannerType = getDependencyScannerType(config);
         String dependencyScannerType = scannerType != null ? scannerType.getDisplayName() : "NONE";
@@ -1855,7 +1878,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
     }
 
-    private void failTheBuild(Run<?, ?> run, CxScanConfig config, ScanResults ret) {
+    private void failTheBuild(Run<?, ?> run, CxScanConfig config, ScanResults ret) throws AbortException {
         //assert if expected exception is thrown  OR when vulnerabilities under threshold OR when policy violated
         ScanSummary scanSummary = new ScanSummary(config, ret.getSastResults(), ret.getOsaResults(), ret.getScaResults());
         if (scanSummary.hasErrors() || ret.getGeneralException() != null ||
@@ -1863,15 +1886,27 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 (ret.getOsaResults() != null && ret.getOsaResults().getException() != null) ||
                 (ret.getScaResults() != null && ret.getScaResults().getException() != null)) {
             printBuildFailure(scanSummary.toString(), ret, log);
-            if (resolvedVulnerabilityThresholdResult != null) {
-                run.setResult(resolvedVulnerabilityThresholdResult);
+            
+            String statusToReturn = "";
+            String msgPrefix = "";
+            if (!scanSummary.getThresholdErrors().isEmpty() || (config.getSastNewResultsThresholdEnabled() && scanSummary.isSastThresholdForNewResultsExceeded() ) ) {
+            	resolvedVulnerabilityThresholdResult = resolvedVulnerabilityThresholdResult == null? 
+            			Result.fromString(JobStatusOnError.FAILURE.toString()): resolvedVulnerabilityThresholdResult;
+            	run.setResult(resolvedVulnerabilityThresholdResult);
+            	statusToReturn = resolvedVulnerabilityThresholdResult.toString();
+            	msgPrefix = "Threshold exceeded.";
+            }else {
+            	msgPrefix = "Scan error occurred.";
+            	statusToReturn = getReturnStatusOnError(getDescriptor());
+            	run.setResult(Result.fromString(statusToReturn));
             }
+            
+            if(JobStatusOnError.ABORTED.toString().equalsIgnoreCase(statusToReturn)) {
+            	String msg = msgPrefix + "Job is configured to return ABORTED and stop the build/pipeline.";
+            	log.warn(msg);
+            	throw new AbortException(msg);
+       	    }                     
 
-            if (useUnstableOnError(getDescriptor())) {
-                run.setResult(Result.UNSTABLE);
-            } else {
-                run.setResult(Result.FAILURE);
-            }
         }
     }
 
@@ -1970,6 +2005,18 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return JobStatusOnError.UNSTABLE.equals(getJobStatusOnError())
                 || (JobStatusOnError.GLOBAL.equals(getJobStatusOnError()) && JobGlobalStatusOnError.UNSTABLE.equals(descriptor
                 .getJobGlobalStatusOnError()));
+    }
+    
+    private String getReturnStatusOnError(final DescriptorImpl descriptor) {
+        
+    	String status = JobStatusOnError.FAILURE.toString();
+    	
+    	if (JobStatusOnError.GLOBAL.equals(getJobStatusOnError()))
+    			status = descriptor.getJobGlobalStatusOnError().toString();
+    	else
+    		status = getJobStatusOnError().toString();
+    	
+    	return status;
     }
 
     /**
