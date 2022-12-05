@@ -53,16 +53,24 @@ dependencies {
         exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
     }
 
-    compile 'com.checkmarx:cx-client-common:2022.4.4-private',
-            'com.fasterxml.jackson.core:jackson-core:2.11.3',
+    compile ('com.checkmarx:cx-client-common:2022.4.3') {
+       exclude group: 'org.apache.commons', module: 'commons-compress'
+       exclude group: 'org.yaml' , module: 'snakeyaml'
+       exclude group: 'com.google.code.gson', module: 'gson'
+    }
+    
+    compile 'com.fasterxml.jackson.core:jackson-core:2.11.3',
             'com.fasterxml.jackson.core:jackson-annotations:2.11.3',
-            'com.fasterxml.jackson.core:jackson-databind:2.11.3',
+            'com.fasterxml.jackson.core:jackson-databind:2.14.1',
             'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.11.3',
             'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.5',
             'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.10.5',
             'org.apache.logging.log4j:log4j-slf4j-impl:2.17.1',
             'org.apache.logging.log4j:log4j-api:2.17.1',
-            'org.apache.logging.log4j:log4j-core:2.17.1'
+            'org.apache.logging.log4j:log4j-core:2.17.1',
+            'org.apache.commons:commons-compress:1.22',
+            'com.google.code.gson:gson:2.8.9',           
+            'org.yaml:snakeyaml:1.33'
             constraints {
                 implementation('io.vertx:vertx-web:3.9.7') {
                     because 'previous versions have a bug impacting this application'
