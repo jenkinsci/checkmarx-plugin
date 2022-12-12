@@ -849,21 +849,21 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
     }
-    private Map<String, String> getAllFsaVars(EnvVars env) {
+    private Map<String, String> getAllFsaVars(EnvVars env, String workspacePath) {
         Map<String, String> sumFsaVars = new HashMap<>();
         // As job environment variable
         for (Map.Entry<String, String> entry : env.entrySet()) {
             if (entry.getKey().contains("CX_") ||
                     entry.getKey().contains("FSA_")) {
                 if (StringUtils.isNotEmpty(entry.getValue())) {
-                    sumFsaVars.put(entry.getKey(), entry.getValue());
+                    sumFsaVars.put(entry.getKey().trim(), entry.getValue().trim());
                 }
             }
         }
         // As custom field - for pipeline jobs
         String fsaVars = dependencyScanConfig != null ? dependencyScanConfig.fsaVariables : "";
         if (StringUtils.isNotEmpty(fsaVars)) {
-            fsaVars = fsaVars.contains("${WORKSPACE}") ? fsaVars.replace("${WORKSPACE}", env.get("WORKSPACE")) : fsaVars;
+            fsaVars = fsaVars.contains("${WORKSPACE}") ? fsaVars.replace("${WORKSPACE}", workspacePath) : fsaVars;
             try {
                 String[] vars = fsaVars.replaceAll("[\\n\\r]", "").trim().split(",");
                 for (String var : vars) {
@@ -910,7 +910,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         final DescriptorImpl descriptor = getDescriptor();
         EnvVars env = run.getEnvironment(listener);
         setJvmVars(env);
-        Map<String, String> fsaVars = getAllFsaVars(env);
+        Map<String, String> fsaVars = getAllFsaVars(env, workspace.getRemote());
         CxScanConfig config = resolveConfiguration(run, descriptor, env, log);
 
         if (configAsCode) {
