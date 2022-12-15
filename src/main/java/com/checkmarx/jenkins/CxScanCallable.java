@@ -118,7 +118,7 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
                     return result;
                 }
             }
-            throw new IOException(message);
+            throw new IOException(ex);
         }
 
         Logger rootLog = null;
