@@ -1344,6 +1344,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setClientId(descriptor.getClientId());
         ret.setClientSecret(descriptor.clientSecret);
         ret.setTenant(descriptor.tenant);
+        ret.setFilePath(descriptor.filePath);
         ret.setBranchName(env.get("GIT_BRANCH"));
         
         if(StringUtils.isNotEmpty(getCustomFields())) {
@@ -2172,6 +2173,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private String clientId;
         private String clientSecret;
         private String tenant;
+        private String filePath;
         
         
 
@@ -2213,6 +2215,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
 		public void setClientSecret(String clientSecret) {
 			this.clientSecret = clientSecret;
+		}
+	
+		public String getFilePath() {
+			return filePath;
+		}
+
+		public void setFilePath(String filePath) {
+			this.filePath = filePath;
 		}
 
 		public String getSastcomment() {
