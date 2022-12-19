@@ -56,6 +56,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
@@ -1835,7 +1836,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         String reportName = null;
         try {
         	String reportHTML = "";
-        	if(config.isSubmitToAST()) {
+        	
+        	if(isCxOneScanEnabled(config)) {
         		reportHTML = SummaryUtils.generateSummary(results.getSastResults(), results.getOsaResults(), results.getScaResults(), results.getAstSastResults(), config);
         	} else{
         		reportHTML = SummaryUtils.generateSummary(results.getSastResults(), results.getOsaResults(), results.getScaResults(), config);
@@ -1861,6 +1863,18 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return reportName;
     }
 
+    private boolean isCxOneScanEnabled(CxScanConfig config) {
+    	CxClientDelegator commonClient;
+		try {
+			commonClient = CommonClientFactory.getClientDelegatorInstance(config, serverLog);
+			return ((config.isSubmitToAST()) && (commonClient.getCxOneSastClient() != null));
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (CxClientException e) {
+			e.printStackTrace();
+		}
+    	return false;
+    }
     private void writeJsonObjectToFile(Object jsonObj, File to, String description) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -1876,7 +1890,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     private void failTheBuild(Run<?, ?> run, CxScanConfig config, ScanResults ret) {
         //assert if expected exception is thrown  OR when vulnerabilities under threshold OR when policy violated
-        ScanSummary scanSummary = new ScanSummary(config, ret.getSastResults(), ret.getOsaResults(), ret.getScaResults());
+    	ScanSummary scanSummary;
+    	if(isCxOneScanEnabled(config)) {
+         scanSummary = new ScanSummary(config, ret.getSastResults(), ret.getOsaResults(), ret.getScaResults(), ret.getAstSastResults());
+    	} else {
+    		scanSummary = new ScanSummary(config, ret.getSastResults(), ret.getOsaResults(), ret.getScaResults());
+    	}
         if (scanSummary.hasErrors() || ret.getGeneralException() != null ||
                 (ret.getSastResults() != null && ret.getSastResults().getException() != null) ||
                 (ret.getOsaResults() != null && ret.getOsaResults().getException() != null) ||
