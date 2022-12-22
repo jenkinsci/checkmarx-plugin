@@ -1,5 +1,45 @@
 package com.checkmarx.jenkins;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
+import javax.naming.ConfigurationException;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.verb.POST;
+
 import com.checkmarx.configprovider.ConfigProvider;
 import com.checkmarx.configprovider.dto.ResourceType;
 import com.checkmarx.configprovider.dto.interfaces.ConfigReader;
@@ -13,22 +53,40 @@ import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.cx.restclient.CxClientDelegator;
+import com.cx.restclient.ast.dto.sast.AstSastResults;
 import com.cx.restclient.ast.dto.sca.AstScaConfig;
 import com.cx.restclient.ast.dto.sca.AstScaResults;
 import com.cx.restclient.common.summary.SummaryUtils;
 import com.cx.restclient.configuration.CxScanConfig;
-import com.cx.restclient.dto.*;
+import com.cx.restclient.dto.ProxyConfig;
+import com.cx.restclient.dto.Results;
+import com.cx.restclient.dto.ScanResults;
+import com.cx.restclient.dto.ScannerType;
+import com.cx.restclient.dto.SourceLocationType;
 import com.cx.restclient.dto.scansummary.ScanSummary;
 import com.cx.restclient.exception.CxClientException;
 import com.cx.restclient.osa.dto.OSAResults;
+import com.cx.restclient.sast.dto.CxNameObj;
+import com.cx.restclient.sast.dto.PostAction;
+import com.cx.restclient.sast.dto.Preset;
 import com.cx.restclient.sast.dto.Project;
-import com.cx.restclient.sast.dto.*;
+import com.cx.restclient.sast.dto.SASTResults;
 import com.cx.restclient.sast.utils.LegacyClient;
 import com.cx.restclient.sca.utils.CxSCAFileSystemUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import freemarker.template.TemplateException;
-import hudson.*;
-import hudson.model.*;
+import hudson.EnvVars;
+import hudson.Extension;
+import hudson.FilePath;
+import hudson.Launcher;
+import hudson.ProxyConfiguration;
+import hudson.model.AbstractProject;
+import hudson.model.Cause;
+import hudson.model.Item;
+import hudson.model.Result;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.triggers.SCMTrigger;
@@ -40,35 +98,6 @@ import io.netty.util.internal.StringUtil;
 import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.kohsuke.stapler.*;
-import org.kohsuke.stapler.verb.POST;
-
-import javax.annotation.Nonnull;
-import javax.naming.ConfigurationException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.charset.Charset;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Optional;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * The main entry point for Checkmarx plugin. This class implements the Builder
@@ -945,7 +974,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         File checkmarxBuildDir = new File(run.getRootDir(), "checkmarx");
         checkmarxBuildDir.mkdir();
 
-        if (config.getGeneratePDFReport() && !config.isSubmitToAST()) {
+        if (config.getGeneratePDFReport()) {
             String path = "";
             // run.getUrl() returns a URL path similar to job/MyJobName/124/
             //getRootUrl() will return the value of "Manage Jenkins->configuration->Jenkins URL"
@@ -954,17 +983,32 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 URL parsedUrl = new URL(baseUrl);
                 path = parsedUrl.getPath();
             }
-            if (!(path.equals("/"))) {
-                //to handle this Jenkins root url,EX: http://localhost:8081/jenkins
-                Path pdfUrlPath = Paths.get(path, run.getUrl(), PDF_URL);
-                scanResults.getSastResults().setSastPDFLink(pdfUrlPath.toString());
-            } else {
-                //to handle this Jenkins root url,EX: http://localhost:8081/
-                String pdfUrl = String.format(PDF_URL_TEMPLATE, run.getUrl());
-                scanResults.getSastResults().setSastPDFLink(pdfUrl);
-            }
-        }
-
+			if (!isCxOneScanEnabled(config)) {
+				if (!(path.equals("/"))) {
+					// to handle this Jenkins root url,EX:
+					// http://localhost:8081/jenkins
+					Path pdfUrlPath = Paths.get(path, run.getUrl(), PDF_URL);
+					scanResults.getSastResults().setSastPDFLink(pdfUrlPath.toString());
+				} else {
+					// to handle this Jenkins root url,EX:
+					// http://localhost:8081/
+					String pdfUrl = String.format(PDF_URL_TEMPLATE, run.getUrl());
+					scanResults.getSastResults().setSastPDFLink(pdfUrl);
+				}
+			} else {
+				if (!(path.equals("/"))) {
+					// to handle this Jenkins root url,EX:
+					// http://localhost:8081/jenkins
+					Path pdfUrlPath = Paths.get(path, run.getUrl(), PDF_URL);
+					scanResults.getAstSastResults().setCxOneSastPDFLink(pdfUrlPath.toString());
+				} else {
+					// to handle this Jenkins root url,EX:
+					// http://localhost:8081/
+					String pdfUrl = String.format(PDF_URL_TEMPLATE, run.getUrl());
+					scanResults.getAstSastResults().setCxOneSastPDFLink(pdfUrl);
+				}
+			}
+        } 
         //in case of async mode, do not create reports (only the report of the latest scan)
         //and don't assert threshold vulnerabilities
 
@@ -987,6 +1031,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 cxScanResult.setSastResults(sastResults);
             }
 
+            // create CxOne Sast reports
+            AstSastResults cxOneSastResults = scanResults.getAstSastResults();
+            if (cxOneSastResults != null && cxOneSastResults.isCxoneSastResultsReady()) {
+                if (config.getGenerateXmlReport() == null || config.getGenerateXmlReport()) {
+                    createCxOneSastReports(cxOneSastResults, checkmarxBuildDir, workspace);
+                }
+                cxScanResult.setAstSastResults(cxOneSastResults);
+            }
             //create osa reports
             OSAResults osaResults = scanResults.getOsaResults();
             AstScaResults scaResults = scanResults.getScaResults();
@@ -1827,6 +1879,18 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
     }
 
+    
+    private void createCxOneSastReports(AstSastResults astSastResults, File checkmarxBuildDir, @Nonnull FilePath workspace) {
+
+        if (astSastResults.getPDFReport() != null) {
+            File pdfReportFile = new File(checkmarxBuildDir, CxScanResult.PDF_REPORT_NAME);
+            try {
+                FileUtils.writeByteArrayToFile(pdfReportFile, astSastResults.getPDFReport());
+            } catch (IOException e) {
+                log.warn("Failed to write SAST PDF report to workspace: " + e.getMessage());
+            }
+        }
+    }
     private void createOsaReports(OSAResults osaResults, File checkmarxBuildDir) {
         writeJsonObjectToFile(osaResults.getResults(), new File(checkmarxBuildDir, OSA_SUMMERY_JSON), "OSA summery json report");
         writeJsonObjectToFile(osaResults.getOsaLibraries(), new File(checkmarxBuildDir, OSA_LIBRARIES_JSON), "OSA libraries json report");
@@ -1858,6 +1922,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 message = "OSA results are empty.";
             } else if (results.getScaResults() != null && !results.getScaResults().isScaResultReady()) {
                 message = "SCA results are empty.";
+            } else if (results.getAstSastResults() != null && !results.getAstSastResults().isCxoneSastResultsReady()) {
+                message = "CxOne SAST results are empty.";
             }
             log.error("Failed to generate HTML report. {}", message);
         }
@@ -1900,7 +1966,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         if (scanSummary.hasErrors() || ret.getGeneralException() != null ||
                 (ret.getSastResults() != null && ret.getSastResults().getException() != null) ||
                 (ret.getOsaResults() != null && ret.getOsaResults().getException() != null) ||
-                (ret.getScaResults() != null && ret.getScaResults().getException() != null)) {
+                (ret.getScaResults() != null && ret.getScaResults().getException() != null) ||
+                (ret.getAstSastResults() != null && ret.getAstSastResults().getException() != null)) {
             printBuildFailure(scanSummary.toString(), ret, log);
             if (resolvedVulnerabilityThresholdResult != null) {
                 run.setResult(resolvedVulnerabilityThresholdResult);

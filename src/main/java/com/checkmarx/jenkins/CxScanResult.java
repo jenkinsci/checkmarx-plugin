@@ -1,24 +1,5 @@
 package com.checkmarx.jenkins;
 
-import com.checkmarx.jenkins.legacy8_7.OsaScanResult;
-import com.checkmarx.jenkins.legacy8_7.QueryResult;
-import com.checkmarx.jenkins.legacy8_7.SastScanResult;
-import com.checkmarx.jenkins.legacy8_7.ThresholdConfig;
-import com.cx.restclient.configuration.CxScanConfig;
-import com.cx.restclient.dto.ScannerType;
-import com.cx.restclient.sast.dto.SASTResults;
-import hudson.PluginWrapper;
-import hudson.model.Action;
-import hudson.model.Run;
-import hudson.util.IOUtils;
-import jenkins.model.Jenkins;
-import org.apache.commons.io.FileUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
-
-import javax.servlet.ServletOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -28,6 +9,29 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.servlet.ServletOutputStream;
+
+import org.apache.commons.io.FileUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
+
+import com.checkmarx.jenkins.legacy8_7.OsaScanResult;
+import com.checkmarx.jenkins.legacy8_7.QueryResult;
+import com.checkmarx.jenkins.legacy8_7.SastScanResult;
+import com.checkmarx.jenkins.legacy8_7.ThresholdConfig;
+import com.cx.restclient.ast.dto.sast.AstSastResults;
+import com.cx.restclient.configuration.CxScanConfig;
+import com.cx.restclient.dto.ScannerType;
+import com.cx.restclient.sast.dto.SASTResults;
+
+import hudson.PluginWrapper;
+import hudson.model.Action;
+import hudson.model.Run;
+import hudson.util.IOUtils;
+import jenkins.model.Jenkins;
 
 /**
  * @author denis
@@ -84,6 +88,11 @@ public class CxScanResult implements Action {
         this.lowCount = results.getLow();
     }
 
+    public void setAstSastResults(AstSastResults results) {
+        this.highCount = results.getHigh();
+        this.mediumCount = results.getMedium();
+        this.lowCount = results.getLow();
+    }
     public Boolean getSastEnabled() {
         return sastEnabled;
     }
