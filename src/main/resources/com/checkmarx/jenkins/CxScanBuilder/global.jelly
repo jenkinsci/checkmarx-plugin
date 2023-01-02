@@ -65,8 +65,10 @@
            
             <f:entry title="Tenant" field="tenant"> 
                <f:textbox value="${descriptor.tenant}"/>
-            </f:entry> 
-                             
+            </f:entry>
+            <f:entry title="Mapping File Path" field="filePath">
+              <f:textbox value="${descriptor.filePath}"/>
+            </f:entry>
         </f:optionalBlock>
 
         <f:entry title="Maven Path" field="mvnPath">
