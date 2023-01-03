@@ -918,7 +918,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             log.setTraceEnabled(true);
         }
 
-        if ((sastEnabled == null || sastEnabled) && isSkipScan(run)) {
+        if (isSkipScan(run)) {
             log.info("Checkmarx scan skipped since the build was triggered by SCM. " +
                     "Visit plugin configuration page to disable this skip.");
             return;
