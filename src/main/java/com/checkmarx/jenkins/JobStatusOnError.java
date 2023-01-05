@@ -1,7 +1,7 @@
 package com.checkmarx.jenkins;
 
 public enum JobStatusOnError {
-	GLOBAL("Use Global Settings"), FAILURE("Failure"), UNSTABLE("Unstable");
+	GLOBAL("Use Global Settings"), FAILURE("Failure"), UNSTABLE("Unstable"), ABORTED("ABORTED");
 
 	private final String displayName;
 

@@ -21,7 +21,8 @@ public class SastConfig {
     private int medium;
     @Optional
     private int high;
-
+    @Optional
+    private boolean overrideProjectSetting;
 
     public SastConfig() {
     }
@@ -97,4 +98,12 @@ public class SastConfig {
     public void setPrivateScan(boolean privateScan) {
         this.privateScan = privateScan;
     }
+    
+	public boolean isOverrideProjectSetting() {
+		return overrideProjectSetting;
+	}
+
+	public void setOverrideProjectSetting(boolean isOverrideProjectSetting) {
+		this.overrideProjectSetting = isOverrideProjectSetting;
+	}
 }
