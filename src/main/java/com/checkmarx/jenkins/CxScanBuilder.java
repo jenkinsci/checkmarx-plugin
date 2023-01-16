@@ -971,7 +971,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         // We'll need this for the HTML report.
         config.setCxARMUrl(scanInfo.getCxARMUrl());
 
-        CxScanResult cxScanResult = new CxScanResult(run, config);
+        CxScanResult cxScanResult = new CxScanResult(run, config, isCxOneScanEnabled(config));
 
         //write reports to build dir
         File checkmarxBuildDir = new File(run.getRootDir(), "checkmarx");
@@ -1917,11 +1917,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         	
         	if(isCxOneScanEnabled(config)) {
         		reportHTML = SummaryUtils.generateSummary(results.getSastResults(), results.getOsaResults(), results.getScaResults(), results.getAstSastResults(), config);
+        		reportName = CxScanResult.resolveHTMLReportName(false, getDependencyScannerType(config));
         	} else{
         		reportHTML = SummaryUtils.generateSummary(results.getSastResults(), results.getOsaResults(), results.getScaResults(), config);
+        		reportName = CxScanResult.resolveHTMLReportName(config.isSastEnabled(), getDependencyScannerType(config));
         	}
              
-            reportName = CxScanResult.resolveHTMLReportName(config.isSastEnabled(), getDependencyScannerType(config));
             File reportFile = new File(checkmarxBuildDir, reportName);
             FileUtils.writeStringToFile(reportFile, reportHTML, Charset.defaultCharset());
             writeFileToWorkspaceReports(workspace, reportFile);

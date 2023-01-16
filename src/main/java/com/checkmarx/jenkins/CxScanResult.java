@@ -47,6 +47,7 @@ public class CxScanResult implements Action {
     private long scanId;
 
     private Boolean sastEnabled;
+    private Boolean astSastEnabled;
     private boolean osaEnabled;
 
     //Resultsalc
@@ -74,9 +75,10 @@ public class CxScanResult implements Action {
         this.htmlReportName = htmlReportName;
     }
 
-    public CxScanResult(Run<?, ?> owner, CxScanConfig config) {
+    public CxScanResult(Run<?, ?> owner, CxScanConfig config, boolean astSastEnabled) {
         this.scanRanAsynchronous = !config.getSynchronous();
         this.sastEnabled = config.isSastEnabled();
+        this.astSastEnabled = astSastEnabled;
         this.osaEnabled = config.isOsaEnabled();
         this.owner = owner;
         this.resultDeepLink = "";
@@ -247,6 +249,8 @@ public class CxScanResult implements Action {
         String result = "Report";
         if (sastEnabled) {
             result += "_CxSAST";
+        } else {
+        	result += "_CxOneSAST";
         }
         if (dependencyScanner == ScannerType.OSA || dependencyScanner == ScannerType.AST_SCA) {
             result += "_" + dependencyScanner.getDisplayName();
