@@ -971,7 +971,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         // We'll need this for the HTML report.
         config.setCxARMUrl(scanInfo.getCxARMUrl());
 
-        CxScanResult cxScanResult = new CxScanResult(run, config, isCxOneScanEnabled(config));
+        CxScanResult cxScanResult = new CxScanResult(run, config);
 
         //write reports to build dir
         File checkmarxBuildDir = new File(run.getRootDir(), "checkmarx");
@@ -986,7 +986,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 URL parsedUrl = new URL(baseUrl);
                 path = parsedUrl.getPath();
             }
-			if (!isCxOneScanEnabled(config)) {
+			if (!scanInfo.isCxOneSASTEnabled()) {
 				if (!(path.equals("/"))) {
 					// to handle this Jenkins root url,EX:
 					// http://localhost:8081/jenkins
@@ -1015,11 +1015,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //in case of async mode, do not create reports (only the report of the latest scan)
         //and don't assert threshold vulnerabilities
 
-        failTheBuild(run, config, scanResults);
+        failTheBuild(run, config, scanResults, scanInfo);
         if (config.getSynchronous()) {
 
             //generate html report
-            String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
+            String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults, scanInfo);
             cxScanResult.setHtmlReportName(reportName);
             run.addAction(cxScanResult);
 
@@ -1055,7 +1055,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         //Asynchronous scan - add note message and previous build reports
         if (!descriptor.isAsyncHtmlRemoval() || config.getSynchronous()) {
-            String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
+            String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults, scanInfo);
             cxScanResult.setHtmlReportName(reportName);
         }
         run.addAction(cxScanResult);
@@ -1910,12 +1910,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         writeJsonObjectToFile(osaResults.getOsaVulnerabilities(), new File(checkmarxBuildDir, OSA_VULNERABILITIES_JSON), "OSA vulnerabilities json report");
     }
 
-    private String generateHTMLReport(@Nonnull FilePath workspace, File checkmarxBuildDir, CxScanConfig config, ScanResults results) {
+    private String generateHTMLReport(@Nonnull FilePath workspace, File checkmarxBuildDir, CxScanConfig config, ScanResults results, RemoteScanInfo scanInfo) {
         String reportName = null;
         try {
         	String reportHTML = "";
         	
-        	if(isCxOneScanEnabled(config)) {
+        	if(scanInfo.isCxOneSASTEnabled()) {
         		reportHTML = SummaryUtils.generateSummary(results.getSastResults(), results.getOsaResults(), results.getScaResults(), results.getAstSastResults(), config);
         		reportName = CxScanResult.resolveHTMLReportName(false, getDependencyScannerType(config));
         	} else{
@@ -1944,18 +1944,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return reportName;
     }
 
-    private boolean isCxOneScanEnabled(CxScanConfig config) {
-    	CxClientDelegator commonClient;
-		try {
-			commonClient = CommonClientFactory.getClientDelegatorInstance(config, serverLog);
-			return ((config.isSubmitToAST()) && (commonClient.getCxOneSastClient() != null));
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (CxClientException e) {
-			e.printStackTrace();
-		}
-    	return false;
-    }
+   
     private void writeJsonObjectToFile(Object jsonObj, File to, String description) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -1969,10 +1958,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
     }
 
-    private void failTheBuild(Run<?, ?> run, CxScanConfig config, ScanResults ret) throws AbortException {
+    private void failTheBuild(Run<?, ?> run, CxScanConfig config, ScanResults ret, RemoteScanInfo scanInfo) throws AbortException {
         //assert if expected exception is thrown  OR when vulnerabilities under threshold OR when policy violated
     	ScanSummary scanSummary;
-    	if(isCxOneScanEnabled(config)) {
+    	if(scanInfo.isCxOneSASTEnabled()) {
          scanSummary = new ScanSummary(config, ret.getSastResults(), ret.getOsaResults(), ret.getScaResults(), ret.getAstSastResults());
     	} else {
     		scanSummary = new ScanSummary(config, ret.getSastResults(), ret.getOsaResults(), ret.getScaResults());

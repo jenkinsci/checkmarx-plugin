@@ -11,8 +11,17 @@ import java.io.Serializable;
 public class RemoteScanInfo implements Serializable {
     private ScanResults scanResults;
     private String cxARMUrl;
+    private boolean cxOneSASTEnabled;
 
-    public void setScanResults(ScanResults scanResults) {
+	public boolean isCxOneSASTEnabled() {
+		return cxOneSASTEnabled;
+	}
+
+	public void setCxOneSASTEnabled(boolean cxOneSASTEnabled) {
+		this.cxOneSASTEnabled = cxOneSASTEnabled;
+	}
+
+	public void setScanResults(ScanResults scanResults) {
         this.scanResults = scanResults;
     }
 
