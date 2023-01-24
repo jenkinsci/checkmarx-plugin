@@ -36,6 +36,7 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
     private ProxyConfiguration jenkinsProxy = null;
     private boolean hideDebugLogs;
     private Map<String, String> fsaVars;
+    private CxClientDelegator delegator;
 
 
     public CxScanCallable(CxScanConfig config, TaskListener listener, boolean hideDebugLogs, Map<String, String> fsaVars) {
@@ -83,6 +84,7 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
 
         try {
             delegator = CommonClientFactory.getClientDelegatorInstance(config, log);
+            this.delegator = delegator;
             ScanResults initResults = delegator.init();
             results.add(initResults);
 
@@ -163,9 +165,22 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
 
         ScanResults finalScanResults = getFinalScanResults(results);
         result.setScanResults(finalScanResults);
+        if(isCxOneScanEnabled(config)) {
+        	result.setCxOneSASTEnabled(true);
+        }
         return result;
     }
 
+    private boolean isCxOneScanEnabled(CxScanConfig config) {
+		try {
+			boolean isCxOneEnabled = ((config.isSubmitToAST()) && delegator.getSastClient() == null);
+			return isCxOneEnabled;
+		} catch (CxClientException e) {
+			e.printStackTrace();
+		}
+    	return false;
+    }
+    
     private void setFsaConfiguration() {
         for (Map.Entry<String, String> entry : fsaVars.entrySet()) {
             System.setProperty(entry.getKey(), entry.getValue());

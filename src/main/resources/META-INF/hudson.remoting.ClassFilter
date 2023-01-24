@@ -19,6 +19,7 @@ com.cx.restclient.ast.dto.sast.AstSASTParam
 com.cx.restclient.ast.dto.sast.AstSastQueryCounter
 com.cx.restclient.ast.dto.sast.AstSastResults
 com.checkmarx.one.dto.migration.MigratedGroup
+com.checkmarx.one.dto.migration.MigratedPreset
 com.checkmarx.one.dto.scan.sast.SastResultDetails
 com.checkmarx.one.dto.scan.sast.SastResultNodeResponse
 com.checkmarx.one.dto.scan.sast.SastResults
