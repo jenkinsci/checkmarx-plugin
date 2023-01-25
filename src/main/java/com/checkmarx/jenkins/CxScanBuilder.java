@@ -1003,12 +1003,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 					// to handle this Jenkins root url,EX:
 					// http://localhost:8081/jenkins
 					Path pdfUrlPath = Paths.get(path, run.getUrl(), PDF_URL);
-					scanResults.getAstSastResults().setCxOneSastPDFLink(pdfUrlPath.toString());
+					scanResults.getAstSastResults().setCxonesastPDFLink(pdfUrlPath.toString());
 				} else {
 					// to handle this Jenkins root url,EX:
 					// http://localhost:8081/
 					String pdfUrl = String.format(PDF_URL_TEMPLATE, run.getUrl());
-					scanResults.getAstSastResults().setCxOneSastPDFLink(pdfUrl);
+					scanResults.getAstSastResults().setCxonesastPDFLink(pdfUrl);
 				}
 			}
         } 
