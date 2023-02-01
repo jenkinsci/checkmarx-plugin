@@ -14,6 +14,7 @@ com.cx.restclient.dto.ScannerType
 com.cx.restclient.osa.dto.OSAScanState
 com.cx.restclient.osa.dto.OSASummaryResults
 com.cx.restclient.sast.dto.SASTResults
+com.cx.restclient.dto.DummyResults
 
 com.cx.restclient.ast.dto.sast.AstSASTParam
 com.cx.restclient.ast.dto.sast.AstSastQueryCounter
