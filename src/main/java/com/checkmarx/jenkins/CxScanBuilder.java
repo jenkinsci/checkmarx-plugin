@@ -50,6 +50,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.kohsuke.stapler.*;
 import org.kohsuke.stapler.verb.POST;
+import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 
 import javax.annotation.Nonnull;
 import javax.naming.ConfigurationException;
@@ -181,6 +182,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private DependencyScanConfig dependencyScanConfig;
 
     private boolean hideDebugLogs;
+    
+    @StepContextParameter
+    private transient EnvVars env;
 
     //////////////////////////////////////////////////////////////////////////////////////
     // Private variables
@@ -205,6 +209,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public static final int MINIMUM_TIMEOUT_IN_MINUTES = 1;
     public static final String REPORTS_FOLDER = "Checkmarx/Reports";
 
+    
+    
     @DataBoundConstructor
     public CxScanBuilder(
             boolean useOwnServerCredentials,
@@ -908,7 +914,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         //resolve configuration
         final DescriptorImpl descriptor = getDescriptor();
-        EnvVars env = run.getEnvironment(listener);
+        //EnvVars env = run.getEnvironment(listener);
+        
+        consolidateEnvVars(listener, env, run, null, launcher, false);
+        
         setJvmVars(env);
         Map<String, String> fsaVars = getAllFsaVars(env);
         CxScanConfig config = resolveConfiguration(run, descriptor, env, log);
@@ -2129,6 +2138,70 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return this;
     }
 
+    
+    
+    Map<String, String> consolidateEnvVars(TaskListener listener,  EnvVars env, Run<?, ?> run, AbstractBuild<?, ?> build,  Launcher launcher, boolean chatty) {
+        // EnvVars extends TreeMap
+        TreeMap<String, String> overrides = new TreeMap<String, String>();
+       // TreeMap<String, String> overrides = env;
+        // merge from all potential sources
+        if (run != null) {
+            try {
+                EnvVars runEnv = run.getEnvironment(listener);
+                if (chatty)
+                    listener.getLogger().println("run env vars:  " + runEnv);
+                overrides.putAll(runEnv);
+            } catch (IOException | InterruptedException e) {
+                if (chatty)
+                    e.printStackTrace(listener.getLogger());
+            }
+        }
+
+        if (build != null) {
+            try {
+                EnvVars buildEnv = build.getEnvironment(listener);
+                if (chatty)
+                    listener.getLogger()
+                            .println("build env vars:  " + buildEnv);
+                overrides.putAll(buildEnv);
+            } catch (IOException | InterruptedException e) {
+                if (chatty)
+                    e.printStackTrace(listener.getLogger());
+            }
+        }
+
+        try {
+            EnvVars computerEnv = null;
+            Computer computer = Computer.currentComputer();
+            if (computer != null) {
+                computerEnv = computer.getEnvironment();
+            } else {
+                computer = launcher.getComputer();
+                if (computer != null) {
+                    computerEnv = computer.getEnvironment();
+                }
+            }
+            if (chatty)
+                listener.getLogger().println(
+                        "computer env vars:  " + computerEnv);
+            if (computerEnv != null)
+                overrides.putAll(computerEnv);
+        } catch (IOException | InterruptedException e2) {
+            if (chatty)
+                e2.printStackTrace(listener.getLogger());
+        }
+
+		/*
+		 * if (env != null) { if (chatty)
+		 * listener.getLogger().println("DSL injected env vars: " + env);
+		 * overrides.putAll(env); }
+		 */
+
+        return overrides;
+    }
+    
+    
+    
     //////////////////////////////////////////////////////////////////////////////////////////////
     //
     //  Descriptor class

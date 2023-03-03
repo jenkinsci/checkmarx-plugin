@@ -55,7 +55,7 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
     }
 
     @Override
-    public RemoteScanInfo invoke(File file, VirtualChannel channel) throws IOException, InterruptedException {
+    public RemoteScanInfo invoke(File file, VirtualChannel channel) throws IOException, InterruptedException {    	
         CxLoggerAdapter log = new CxLoggerAdapter(listener.getLogger());
         if (hideDebugLogs) {
             log.setDebugEnabled(false);
@@ -65,6 +65,12 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
             log.setTraceEnabled(true);
         }
 
+        Map<String, String> env = System.getenv();
+        for (String envName : env.keySet()) {
+            System.out.format("%s=%s%n", envName, env.get(envName));
+            log.info(envName +"=" + env.get(envName));
+        }
+        
         config.setSourceDir(file.getAbsolutePath());
         config.setReportsDir(file);
         if (jenkinsProxy != null) {
