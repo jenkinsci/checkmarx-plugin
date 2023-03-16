@@ -2170,7 +2170,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private boolean hideResults;
         private boolean asyncHtmlRemoval;
 
-        private boolean enableCertificateValidation;
+        private boolean enableCertificateValidation = true;
         @Nullable
         private String excludeFolders;
         @Nullable
@@ -2513,7 +2513,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *  shared state to avoid synchronization issues.
          */
         @POST
-        public FormValidation doTestConnection(@QueryParameter final String serverUrl, @QueryParameter final String password,
+        public FormValidation doTestConnection(@QueryParameter final boolean enableCertificateValidation,@QueryParameter final String serverUrl, @QueryParameter final String password,
                                                @QueryParameter final String username, @QueryParameter final String timestamp,
                                                @QueryParameter final String credentialsId, @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
             if(item==null){
