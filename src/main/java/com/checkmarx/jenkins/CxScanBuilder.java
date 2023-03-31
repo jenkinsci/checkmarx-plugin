@@ -1615,10 +1615,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             config.setOsaHighThreshold(descriptor.getOsaHighThresholdEnforcement());
             config.setOsaMediumThreshold(descriptor.getOsaMediumThresholdEnforcement());
             config.setOsaLowThreshold(descriptor.getOsaLowThresholdEnforcement());
+            resolvedVulnerabilityThresholdResult = Result.fromString(descriptor.getJobGlobalStatusOnThresholdViolation().name());
         } else if (useJobThreshold) {
             config.setOsaHighThreshold(getOsaHighThreshold());
             config.setOsaMediumThreshold(getOsaMediumThreshold());
             config.setOsaLowThreshold(getOsaLowThreshold());
+            resolvedVulnerabilityThresholdResult = vulnerabilityThresholdResult;
         }
 
         if (config.isOsaEnabled()) {
