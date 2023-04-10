@@ -155,6 +155,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private boolean failBuildOnNewResults;
     private String failBuildOnNewSeverity;
     private boolean generatePdfReport;
+    private boolean generateScaReport;
     private boolean enableProjectPolicyEnforcement;
     @Nullable
     private Integer osaHighThreshold;
@@ -194,6 +195,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     CxLoggerAdapter log;
 
     private JobStatusOnError jobStatusOnError;
+    private ScaReportFormat scaReportFormat;
     private String exclusionsSetting;
     private String thresholdSettings;
     private Result vulnerabilityThresholdResult;
@@ -223,6 +225,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             Boolean sastEnabled,
             @Nullable String preset,
             JobStatusOnError jobStatusOnError,
+            ScaReportFormat scaReportFormat,
             boolean presetSpecified,
             String exclusionsSetting,
             @Nullable String excludeFolders,
@@ -245,6 +248,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             @Nullable Integer osaMediumThreshold,
             @Nullable Integer osaLowThreshold,
             boolean generatePdfReport,
+            boolean generateScaReport,
             boolean enableProjectPolicyEnforcement,
             String thresholdSettings,
             String vulnerabilityThresholdResult,
@@ -271,6 +275,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.sastEnabled = sastEnabled;
         this.preset = (preset != null && !preset.startsWith("Provide Checkmarx")) ? preset : null;
         this.jobStatusOnError = jobStatusOnError;
+        this.scaReportFormat = scaReportFormat;
         this.presetSpecified = presetSpecified;
         this.exclusionsSetting = exclusionsSetting;
         this.globalExclusions = "global".equals(exclusionsSetting);
@@ -294,6 +299,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.osaMediumThreshold = osaMediumThreshold;
         this.osaLowThreshold = osaLowThreshold;
         this.generatePdfReport = generatePdfReport;
+        this.generateScaReport = generateScaReport;
         this.enableProjectPolicyEnforcement = enableProjectPolicyEnforcement;
         this.thresholdSettings = thresholdSettings;
         if (vulnerabilityThresholdResult != null) {
@@ -590,6 +596,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public boolean isGeneratePdfReport() {
         return generatePdfReport;
     }
+    
+    public boolean isGenerateScaReport() {
+		return generateScaReport;
+	}
 
     public boolean isEnableProjectPolicyEnforcement() {
         return enableProjectPolicyEnforcement;
@@ -747,6 +757,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public void setGeneratePdfReport(boolean generatePdfReport) {
         this.generatePdfReport = generatePdfReport;
     }
+    
+    @DataBoundSetter
+    public void setGenerateScaReport(boolean generateScaReport) {
+		this.generateScaReport = generateScaReport;
+	}
 
     @DataBoundSetter
     public void setEnableProjectPolicyEnforcement(boolean enableProjectPolicyEnforcement) {
@@ -911,8 +926,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         EnvVars env = run.getEnvironment(listener);
         setJvmVars(env);
         Map<String, String> fsaVars = getAllFsaVars(env);
-        CxScanConfig config = resolveConfiguration(run, descriptor, env, log);
-
+        CxScanConfig config;
+		try {
+			config = resolveConfiguration(run, descriptor, env, log);
+		
         if (configAsCode) {
             try {
                 overrideConfigAsCode(config, workspace);
@@ -975,6 +992,30 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 scanResults.getSastResults().setSastPDFLink(pdfUrl);
             }
         }
+        
+        if (config.isGenerateScaReport()) {
+        	if(config.getScaReportFormat() != null) {
+            String path = "";
+            // run.getUrl() returns a URL path similar to job/MyJobName/124/
+            //getRootUrl() will return the value of "Manage Jenkins->configuration->Jenkins URL"
+            String baseUrl = Jenkins.getInstance().getRootUrl();
+            if (StringUtils.isNotEmpty(baseUrl)) {
+                URL parsedUrl = new URL(baseUrl);
+                path = parsedUrl.getPath();
+            }
+            if (!(path.equals("/"))) {
+                //to handle this Jenkins root url,EX: http://localhost:8081/jenkins
+                Path pdfUrlPath = Paths.get(path, run.getUrl(), PDF_URL);
+                scanResults.getScaResults().setScaPDFLink(pdfUrlPath.toString());
+            } else {
+                //to handle this Jenkins root url,EX: http://localhost:8081/
+                String pdfUrl = String.format(PDF_URL_TEMPLATE, run.getUrl());
+                scanResults.getScaResults().setScaPDFLink(pdfUrl);
+            }
+        	}
+        }
+        
+        
 
         //in case of async mode, do not create reports (only the report of the latest scan)
         //and don't assert threshold vulnerabilities
@@ -1004,7 +1045,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             if (osaResults != null && osaResults.isOsaResultsReady()) {
                 createOsaReports(osaResults, checkmarxBuildDir);
             } else if (scaResults != null && scaResults.isScaResultReady()) {
-                createScaReports(scaResults, checkmarxBuildDir);
+                createScaReports(scaResults, checkmarxBuildDir, workspace);
             }
             return;
         }
@@ -1015,7 +1056,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             cxScanResult.setHtmlReportName(reportName);
         }
         run.addAction(cxScanResult);
+		} catch (ConfigurationException e1) {
+			e1.printStackTrace();
+		}	
     }
+		
 
     private void overrideConfigAsCode(CxScanConfig config, FilePath workspace) throws ConfigurationException {
         String configFilePath =
@@ -1242,10 +1287,19 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
 
-    private void createScaReports(AstScaResults scaResults, File checkmarxBuildDir) {
+    private void createScaReports(AstScaResults scaResults, File checkmarxBuildDir, @Nonnull FilePath workspace) {
         writeJsonObjectToFile(scaResults.getSummary(), new File(checkmarxBuildDir, SCA_SUMMERY_JSON), "OSA summary json report");
         writeJsonObjectToFile(scaResults.getPackages(), new File(checkmarxBuildDir, SCA_LIBRARIES_JSON), "OSA libraries json report");
         writeJsonObjectToFile(scaResults.getFindings(), new File(checkmarxBuildDir, SCA_VULNERABILITIES_JSON), "OSA vulnerabilities json report");
+        
+        if (scaResults.getPDFReport() != null) {
+            File pdfReportFile = new File(checkmarxBuildDir, CxScanResult.PDF_REPORT_NAME);
+            try {
+                FileUtils.writeByteArrayToFile(pdfReportFile, scaResults.getPDFReport());
+            } catch (IOException e) {
+                log.warn("Failed to write SCA PDF report to workspace: " + e.getMessage());
+            }
+        }
     }
 
     /**
@@ -1330,7 +1384,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          }
     	return true;
     }
-    private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) throws IOException {
+    private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) throws IOException, ConfigurationException {
         CxScanConfig ret = new CxScanConfig();
         
         ret.setIsOverrideProjectSetting(overrideProjectSetting);
@@ -1497,6 +1551,20 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             enableProjectPolicyEnforcement = false;
         }
         ret.setEnablePolicyViolations(enableProjectPolicyEnforcement);
+        
+        if (!ret.isAstScaEnabled() && !ret.getSynchronous()) {
+        	generateScaReport = false;
+        }
+		if (ret.isAstScaEnabled()) {
+			ret.setGenerateScaReport(generateScaReport);
+			ret.setScaReportFormat(scaReportFormat.name());
+			if (ret.getScaReportFormat() != null && !ret.getScaReportFormat().isEmpty()) {
+				ret.setGenerateScaReport(true);
+			} else {
+				ret.setGenerateScaReport(false);
+				throw new ConfigurationException("Invalid SCA report format:" + scaReportFormat + ".");
+			}
+		}
         
         // Set the Continue build flag to Configuration object if Option from UI is choosen as useContinueBuildOnError
         if (useContinueBuildOnError(getDescriptor())) {
@@ -1791,6 +1859,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 log.info("CxSCA web app URL: " + config.getAstScaConfig().getWebAppUrl());
                 log.info("Account: " + config.getAstScaConfig().getTenant());
                 log.info("Team: " + config.getAstScaConfig().getTeamPath());
+                log.info("is generate SCA report: "+ config.isGenerateScaReport());
             }
         }
 
@@ -2139,8 +2208,19 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public DescriptorImpl getDescriptor() {
         return (DescriptorImpl) super.getDescriptor();
     }
+	
+	public ScaReportFormat getScaReportFormat() {
+		return scaReportFormat;
+	}
 
-    @Extension
+	@DataBoundSetter
+	public void setScaReportFormat(ScaReportFormat scaReportFormat) {
+		this.scaReportFormat = scaReportFormat;
+	}
+
+	
+
+	@Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
         public static final String DEFAULT_FILTER_PATTERNS = CxConfig.defaultFilterPattern();
@@ -2642,6 +2722,20 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             return FormValidation.ok();
         }
+        @POST
+        public FormValidation doCheckGenerateScaReport(@QueryParameter boolean value, @QueryParameter boolean dependencyScanConfig, @QueryParameter boolean generateScaReport,@AncestorInPath Item item) {
+        	if (item == null) {
+                return FormValidation.ok();
+        	}
+            item.checkPermission(Item.CONFIGURE);
+            if (!dependencyScanConfig && value) {
+            	generateScaReport=false;
+            	dependencyScanConfig = false;
+            	return FormValidation.error("Enable dependency scanner as SCA");
+            }
+
+            return FormValidation.ok();
+        }
 
         @POST
         public FormValidation doTestScaSASTConnection(@QueryParameter final String scaSastServerUrl, @QueryParameter final String password,
@@ -3068,6 +3162,19 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             return listBoxModel;
         }
+        
+        @POST
+		public ListBoxModel doFillScaReportFormat(@AncestorInPath Item item) {
+			if (item == null) {
+				return new ListBoxModel();
+			}
+			item.checkPermission(Item.CONFIGURE);
+			ListBoxModel listBoxModel = new ListBoxModel();
+			for (ScaReportFormat status : ScaReportFormat.values()) {
+				listBoxModel.add(new ListBoxModel.Option(status.getDisplayNames(), status.name()));
+			}
+			return listBoxModel;
+		}
 
 
         /*

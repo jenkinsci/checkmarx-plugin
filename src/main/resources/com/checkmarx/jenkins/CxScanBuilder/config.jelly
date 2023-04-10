@@ -1,6 +1,3 @@
-
-
-
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:c="/lib/credentials" xmlns:l="/lib/layout"
 	xmlns:t="/lib/hudson" xmlns:f="/lib/form" descriptor="${it.descriptor}">
@@ -242,7 +239,7 @@
                                 <f:entry title="Project ID" field="scaSASTProjectID">
                                     <f:textbox checkMethod="POST" value="${instance.dependencyScanConfig.scaSASTProjectID}"/>
                                 </f:entry>
-                            </f:optionalBlock>
+                            </f:optionalBlock> 
                         </f:radioBlock>
                 </f:nested>
             </f:radioBlock>
@@ -310,7 +307,16 @@
 
                     <!-- -= Generate PDF report =- -->
                     <f:optionalBlock title="Generate CxSAST PDF report" inline="true" field="generatePdfReport" />
-
+                    
+					 <!-- -= generateScaReport =- -->
+                	<f:optionalBlock title="Generate SCA report" inline="true" field="generateScaReport" checkMethod="POST"
+                	checked="${instance.dependencyScanConfig.dependencyScannerType == 'SCA'}">
+                
+                		<f:entry name="scaReportFormat" title="Report Format:" field="scaReportFormat">
+            			<f:enum field="scaReportFormat">${it.displayNames}</f:enum>
+            			</f:entry>
+           			</f:optionalBlock>
+                    
                     <!-- -= enableProjectPolicyEnforcement =- -->
                     <f:optionalBlock title="Enable Project's policy enforcement" inline="true" field="enableProjectPolicyEnforcement" />
 
