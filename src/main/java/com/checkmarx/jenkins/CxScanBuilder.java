@@ -114,8 +114,18 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     //used for SCA Exploitable path feature
     private String sastCredentialsId;
     private Boolean isProxy = true;
+
+    public Boolean getOverrideGlobalRetentionRate() {
+        return overrideGlobalRetentionRate;
+    }
+
+    private Boolean overrideGlobalRetentionRate = false;
     @Nullable
     private String projectName;
+
+    @Nullable
+    private Integer projectRetentionRate;
+
     @Nullable
     private String groupId;
     @Nullable
@@ -217,6 +227,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             boolean configAsCode,
             String projectName,
             long projectId,
+            Integer projectRetentionRate,
             String buildStep,
             @Nullable String groupId,
             @Nullable String teamPath, //used by pipeline
@@ -266,6 +277,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.isProxy = (isProxy == null) ? true : isProxy;
         this.projectName = (projectName == null) ? buildStep : projectName;
         this.projectId = projectId;
+        this.projectRetentionRate=projectRetentionRate;
         this.groupId = (groupId != null && !groupId.startsWith("Provide Checkmarx")) ? groupId : null;
         this.teamPath = teamPath;
         this.sastEnabled = sastEnabled;
@@ -371,6 +383,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     public String getProjectName() {
         return projectName;
+    }
+
+    @Nullable
+    public Integer getProjectRetentionRate() {
+        return projectRetentionRate;
     }
 
     // Workaround for compatibility with Conditional BuildStep Plugin
@@ -777,6 +794,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public void setIsProxy(Boolean proxy) {
         this.isProxy = proxy;
     }
+    @DataBoundSetter
+    public void setoverrideGlobalRetentionRate(Boolean overrideGlobalRetentionRate) {
+        this.overrideGlobalRetentionRate = overrideGlobalRetentionRate;
+    }
 
     @DataBoundSetter
     public void setProjectId(long projectId) {
@@ -815,6 +836,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.groupId = groupId;
     }
 
+    @DataBoundSetter
+    public void setProjectRetentionRate(@Nullable Integer projectRetentionRate){
+        this.projectRetentionRate=projectRetentionRate;
+    }
     public DependencyScanConfig getDependencyScanConfig() {
         return dependencyScanConfig;
     }
@@ -1346,6 +1371,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setCxOrigin(jenkinURL);
         log.info("  ORIGIN FROM JENKIN :: " + jenkinURL);
         log.info("  ORIGIN URL FROM JENKIN :: " + originUrl);
+        ret.setEnableDataRetention(getDescriptor().isEnableDataRetention());
+        if (getDescriptor().isEnableDataRetention()) {
+            if (getOverrideGlobalRetentionRate()) {
+                ret.setProjectRetentionRate(getProjectRetentionRate());
+            } else {
+                ret.setProjectRetentionRate(getDescriptor().getprojectRetentionRate());
+            }
+        }
 
         if(getPostScanActionId() == 0)
         	ret.setPostScanActionId(null);
@@ -1737,6 +1770,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
         log.info("project name: " + config.getProjectName());
         log.info("team id: " + config.getTeamId());
+        log.info("Project Retention Rate: " + config.getProjectRetentionRate());
         log.info("is synchronous mode: " + config.getSynchronous());
         log.info("deny new project creation: " + config.getDenyProject());
         log.info("SAST scan enabled: " + config.isSastEnabled());
@@ -2136,7 +2170,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     //////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public DescriptorImpl getDescriptor() {
+     public DescriptorImpl getDescriptor() {
         return (DescriptorImpl) super.getDescriptor();
     }
 
@@ -2161,10 +2195,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private String username;
         @Nullable
         private String password;
-
+        private Integer projectRetentionRate;
         private String credentialsId;
         private String mvnPath;
         private boolean isProxy = true;
+        private boolean enableDataRetention=false;
 
         private boolean prohibitProjectCreation;
         private boolean hideResults;
@@ -2232,6 +2267,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return username;
         }
 
+        public Integer getprojectRetentionRate() {
+            return projectRetentionRate;
+        }
+
+        public void setProjectRetentionRate(Integer projectRetentionRate) {
+            this.projectRetentionRate = projectRetentionRate;
+        }
         public void setUsername(@Nullable String username) {
             this.username = username;
         }
@@ -2258,6 +2300,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             this.password = Secret.fromString(password).getEncryptedValue();
         }
 
+        public boolean isEnableDataRetention() {
+            return enableDataRetention;
+        }
+
+        public void setEnableDataRetention(boolean enableDataRetention) {
+            this.enableDataRetention = enableDataRetention;
+        }
         @Nullable
         public String getPasswordPlainText(String password) {
             return Secret.fromString(password).getPlainText();

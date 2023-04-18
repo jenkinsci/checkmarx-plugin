@@ -56,6 +56,7 @@
             <f:textbox/>
         </f:entry>
 
+
         <f:entry title="Default Include/Exclude wildcard patterns" field="filterPattern">
             <f:textarea default="${descriptor.DEFAULT_FILTER_PATTERNS}"/>
         </f:entry>
@@ -191,6 +192,12 @@
            		 with="scaSastServerUrl,password,username,timestamp,sastCredentialsId,isProxy" />
     </f:optionalBlock>
             </f:radioBlock>
+        </f:optionalBlock>
+        <f:optionalBlock title="Enable Data Retention" inline="true"
+                         field="enableDataRetention">
+            <f:entry title="Scan Retention rate (number of scan)" field="projectRetentionRate">
+                <f:number clazz="positive-number" min="1" max="10000" step="1" default="10" checkMethod="POST" />
+            </f:entry>
         </f:optionalBlock>
 		<f:optionalBlock title="Hide Debug Logs" inline="true" field="hideDebugLogs"/>        
     </f:section>
