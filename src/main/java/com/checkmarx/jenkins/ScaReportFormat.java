@@ -3,13 +3,13 @@ package com.checkmarx.jenkins;
 public enum ScaReportFormat {
 	PDF("PDF"), XML("XML"), CSV("CSV"), JSON("JSON"), cyclonedxjson("cyclonedxjson"), cyclonedxxml("cyclonedxxml");
 
-	private final String displayNames;
+	private final String displayName;
 
-	ScaReportFormat(String displayNames) {
-		this.displayNames = displayNames;
+	ScaReportFormat(String displayName) {
+		this.displayName = displayName;
 	}
 
-	public String getDisplayNames() {
-		return displayNames;
+	public String getDisplayName() {
+		return displayName;
 	}
 }

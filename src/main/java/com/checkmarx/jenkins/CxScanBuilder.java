@@ -3171,7 +3171,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 			item.checkPermission(Item.CONFIGURE);
 			ListBoxModel listBoxModel = new ListBoxModel();
 			for (ScaReportFormat status : ScaReportFormat.values()) {
-				listBoxModel.add(new ListBoxModel.Option(status.getDisplayNames(), status.name()));
+				listBoxModel.add(new ListBoxModel.Option(status.getDisplayName(), status.name()));
 			}
 			return listBoxModel;
 		}

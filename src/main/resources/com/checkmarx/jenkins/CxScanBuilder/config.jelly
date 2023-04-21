@@ -313,7 +313,7 @@
                 	checked="${instance.dependencyScanConfig.dependencyScannerType == 'SCA'}">
                 
                 		<f:entry name="scaReportFormat" title="Report Format:" field="scaReportFormat">
-            			<f:enum field="scaReportFormat">${it.displayNames}</f:enum>
+            			<f:enum field="scaReportFormat">${it.displayName}</f:enum>
             			</f:entry>
            			</f:optionalBlock>
                     
