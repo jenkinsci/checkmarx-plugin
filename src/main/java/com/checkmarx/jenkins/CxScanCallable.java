@@ -7,6 +7,7 @@ import com.cx.restclient.dto.Results;
 import com.cx.restclient.dto.ScanResults;
 import com.cx.restclient.dto.ScannerType;
 import com.cx.restclient.exception.CxClientException;
+import groovy.transform.Synchronized;
 import hudson.FilePath;
 import hudson.ProxyConfiguration;
 import hudson.model.TaskListener;
@@ -20,16 +21,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Semaphore;
 import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    private static final Semaphore semaphore = new Semaphore(1);
 
     private final CxScanConfig config;
     private final TaskListener listener;
@@ -55,115 +51,97 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
     }
 
     @Override
+    @Synchronized
     public RemoteScanInfo invoke(File file, VirtualChannel channel) throws IOException, InterruptedException {
-        CxLoggerAdapter log = new CxLoggerAdapter(listener.getLogger());
-        if (hideDebugLogs) {
-            log.setDebugEnabled(false);
-            log.setTraceEnabled(false);
-        } else {
-            log.setDebugEnabled(true);
-            log.setTraceEnabled(true);
-        }
-
-        config.setSourceDir(file.getAbsolutePath());
-        config.setReportsDir(file);
-        if (jenkinsProxy != null) {
-            config.setProxyConfig(new ProxyConfig(jenkinsProxy.name, jenkinsProxy.port,
-                    jenkinsProxy.getUserName(), jenkinsProxy.getPassword(), false));
-            log.debug("Proxy configuration:");
-            log.debug("Proxy host: " + jenkinsProxy.name);
-            log.debug("Proxy port: " + jenkinsProxy.port);
-            log.debug("Proxy user: " + jenkinsProxy.getUserName());
-            log.debug("Proxy password: *************");
-        }
-
-        RemoteScanInfo result = new RemoteScanInfo();
-        CxClientDelegator delegator = null;
-        List<ScanResults> results = new ArrayList<>();
-
-        try {
-            delegator = CommonClientFactory.getClientDelegatorInstance(config, log);
-            ScanResults initResults = delegator.init();
-            results.add(initResults);
-
-            // Make sure CxARMUrl is passed in the result.
-            // Cannot pass CxARMUrl in the config object, because this callable can be executed on a Jenkins agent.
-            // On a Jenkins agent we'll get a cloned config instead of the original object reference.
-            result.setCxARMUrl(config.getCxARMUrl());
-        } catch (Exception ex) {
-            ScanResults scanResults = new ScanResults();
-            scanResults.setGeneralException(ex);
-            result.setScanResults(scanResults);
-
-            String message = ex.getMessage();
-            // Can actually be null e.g. for NullPointerException.
-            if (message != null) {
-                if (message.contains("Server is unavailable")) {
-                    if (delegator != null) {
-                        try {
-                            delegator.getSastClient().login();
-                        } catch (CxClientException e) {
-                            throw new IOException(e);
-                        }
-                    }
-
-                    String errorMsg = "Connection Failed.\n" +
-                            "Validate the provided login credentials and server URL are correct.\n" +
-                            "In addition, make sure the installed plugin version is compatible with the CxSAST version according to CxSAST release notes.\n" +
-                            "Error: " + message;
-
-                    throw new IOException(errorMsg);
-                }
-                if (message.contains("Creation of the new project")) {
-                    return result;
-                }
+        synchronized (this) {
+            CxLoggerAdapter log = new CxLoggerAdapter(listener.getLogger());
+            if (hideDebugLogs) {
+                log.setDebugEnabled(false);
+                log.setTraceEnabled(false);
+            } else {
+                log.setDebugEnabled(true);
+                log.setTraceEnabled(true);
             }
-            throw new IOException(message);
-        }
 
-        Logger rootLog = null;
-        OsaConsoleHandler handler = null;
-        ScanResults createScanResults;
-        try {
-            semaphore.acquire();
+            config.setSourceDir(file.getAbsolutePath());
+            config.setReportsDir(file);
+            if (jenkinsProxy != null) {
+                config.setProxyConfig(new ProxyConfig(jenkinsProxy.name, jenkinsProxy.port,
+                        jenkinsProxy.getUserName(), jenkinsProxy.getPassword(), false));
+                log.debug("Proxy configuration:");
+                log.debug("Proxy host: " + jenkinsProxy.name);
+                log.debug("Proxy port: " + jenkinsProxy.port);
+                log.debug("Proxy user: " + jenkinsProxy.getUserName());
+                log.debug("Proxy password: *************");
+            }
+
+            RemoteScanInfo result = new RemoteScanInfo();
+            CxClientDelegator delegator = null;
+            List<ScanResults> results = new ArrayList<>();
+
+            try {
+                delegator = CommonClientFactory.getClientDelegatorInstance(config, log);
+                ScanResults initResults = delegator.init();
+                results.add(initResults);
+
+                // Make sure CxARMUrl is passed in the result.
+                // Cannot pass CxARMUrl in the config object, because this callable can be executed on a Jenkins agent.
+                // On a Jenkins agent we'll get a cloned config instead of the original object reference.
+                result.setCxARMUrl(config.getCxARMUrl());
+            } catch (Exception ex) {
+                ScanResults scanResults = new ScanResults();
+                scanResults.setGeneralException(ex);
+                result.setScanResults(scanResults);
+
+                String message = ex.getMessage();
+                // Can actually be null e.g. for NullPointerException.
+                if (message != null) {
+                    if (message.contains("Server is unavailable")) {
+                        if (delegator != null) {
+                            try {
+                                delegator.getSastClient().login();
+                            } catch (CxClientException e) {
+                                throw new IOException(e);
+                            }
+                        }
+
+                        String errorMsg = "Connection Failed.\n" +
+                                "Validate the provided login credentials and server URL are correct.\n" +
+                                "In addition, make sure the installed plugin version is compatible with the CxSAST version according to CxSAST release notes.\n" +
+                                "Error: " + message;
+
+                        throw new IOException(errorMsg);
+                    }
+                    if (message.contains("Creation of the new project")) {
+                        return result;
+                    }
+                }
+                throw new IOException(message);
+            }
+
+            ScanResults createScanResults;
             if (config.isOsaEnabled() || config.isAstScaEnabled()) {
                 setFsaConfiguration();
-                //---------------------------
-                //we do this in order to redirect the logs from the filesystem agent component to the build console
-                rootLog = Logger.getLogger("");
-                handler = new OsaConsoleHandler();
-                handler.setLevel(Level.ALL);
-                handler.setFormatter(new ComponentScanFormatter());
-                rootLog.addHandler(handler);
-                //---------------------------
             }
-
             createScanResults = delegator.initiateScan();
             results.add(createScanResults);
 
-            if (rootLog != null) {
-                handler.flush();
-                rootLog.removeHandler(handler);
+            ScanResults scanResults = config.getSynchronous() ? delegator.waitForScanResults() : delegator.getLatestScanResults();
+            results.add(scanResults);
+
+            if (config.getSynchronous() && config.isSastEnabled() &&
+                    ((createScanResults.getSastResults() != null && createScanResults.getSastResults().getException() != null && createScanResults.getSastResults().getScanId() > 0) || (scanResults.getSastResults() != null && scanResults.getSastResults().getException() != null))) {
+                cancelScan(delegator);
             }
-        } finally {
-            semaphore.release();
+
+            if (config.getEnablePolicyViolations()) {
+                delegator.printIsProjectViolated(scanResults);
+            }
+
+            ScanResults finalScanResults = getFinalScanResults(results);
+            result.setScanResults(finalScanResults);
+            return result;
         }
-
-        ScanResults scanResults = config.getSynchronous() ? delegator.waitForScanResults() : delegator.getLatestScanResults();
-        results.add(scanResults);
-
-        if (config.getSynchronous() && config.isSastEnabled() &&
-                ((createScanResults.getSastResults() != null && createScanResults.getSastResults().getException() != null && createScanResults.getSastResults().getScanId() > 0) || (scanResults.getSastResults() != null && scanResults.getSastResults().getException() != null))) {
-            cancelScan(delegator);
-        }
-
-        if (config.getEnablePolicyViolations()) {
-            delegator.printIsProjectViolated(scanResults);
-        }
-
-        ScanResults finalScanResults = getFinalScanResults(results);
-        result.setScanResults(finalScanResults);
-        return result;
     }
 
     private void setFsaConfiguration() {

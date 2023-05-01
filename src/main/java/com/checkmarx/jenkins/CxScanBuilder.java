@@ -53,11 +53,13 @@ import org.kohsuke.stapler.verb.POST;
 
 import javax.annotation.Nonnull;
 import javax.naming.ConfigurationException;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -201,7 +203,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private Boolean generateXmlReport = true;
 
     public static final int MINIMUM_TIMEOUT_IN_MINUTES = 1;
-    public static final String REPORTS_FOLDER = "Checkmarx" + File.separator + "Reports";
+    public static final String REPORTS_FOLDER = File.separator + "Checkmarx" + File.separator + "Reports";
 
     @DataBoundConstructor
     public CxScanBuilder(
@@ -1000,10 +1002,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             //create osa reports
             OSAResults osaResults = scanResults.getOsaResults();
             AstScaResults scaResults = scanResults.getScaResults();
+            File dependencyScanDir = new File(workspace.getRemote() + REPORTS_FOLDER);
+            dependencyScanDir.mkdir();
             if (osaResults != null && osaResults.isOsaResultsReady()) {
-                createOsaReports(osaResults, workspace);
+                createOsaReports(osaResults, dependencyScanDir);
             } else if (scaResults != null && scaResults.isScaResultReady()) {
-                createScaReports(scaResults, workspace);
+                createScaReports(scaResults, dependencyScanDir);
             }
             return;
         }
@@ -1019,6 +1023,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private void overrideConfigAsCode(CxScanConfig config, FilePath workspace) throws ConfigurationException {
         String configFilePath =
                 workspace.getRemote() + File.separator + ".checkmarx" + File.separator + CONFIG_AS_CODE_FILE_NAME;
+        try {
+            if (!workspace.child(configFilePath).exists()) {
+                log.warn("Config file doe's not exist under: " + configFilePath);
+                return;
+            }
+        } catch (Exception e) {
+            log.error("Fail to verify config file existence", e);
+        }
         com.checkmarx.configprovider.readers.FileReader reader =
                 new com.checkmarx.configprovider.readers.FileReader(ResourceType.YAML, configFilePath);
 
@@ -1239,10 +1251,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 });
     }
 
-    private void createScaReports(AstScaResults scaResults, FilePath checkmarxBuildDir) {
-        writeJsonObjectToFile(scaResults.getSummary(), checkmarxBuildDir, SCA_SUMMERY_JSON);
-        writeJsonObjectToFile(scaResults.getPackages(), checkmarxBuildDir, SCA_LIBRARIES_JSON);
-        writeJsonObjectToFile(scaResults.getFindings(), checkmarxBuildDir, SCA_VULNERABILITIES_JSON);
+    private void createScaReports(AstScaResults scaResults, File checkmarxBuildDir) {
+        writeJsonObjectToFile(scaResults.getSummary(), new File(checkmarxBuildDir, SCA_SUMMERY_JSON), "OSA summary json report");
+        writeJsonObjectToFile(scaResults.getPackages(), new File(checkmarxBuildDir, SCA_LIBRARIES_JSON), "OSA libraries json report");
+        writeJsonObjectToFile(scaResults.getFindings(), new File(checkmarxBuildDir, SCA_VULNERABILITIES_JSON), "OSA vulnerabilities json report");
     }
 
     /**
@@ -1832,10 +1844,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
     }
 
-    private void createOsaReports(OSAResults osaResults, FilePath checkmarxBuildDir) {
-        writeJsonObjectToFile(osaResults.getResults(), checkmarxBuildDir, OSA_SUMMERY_JSON);
-        writeJsonObjectToFile(osaResults.getOsaLibraries(), checkmarxBuildDir, OSA_LIBRARIES_JSON);
-        writeJsonObjectToFile(osaResults.getOsaVulnerabilities(), checkmarxBuildDir, OSA_VULNERABILITIES_JSON);
+    private void createOsaReports(OSAResults osaResults, File checkmarxBuildDir) {
+        writeJsonObjectToFile(osaResults.getResults(), new File(checkmarxBuildDir, OSA_SUMMERY_JSON), "OSA summery json report");
+        writeJsonObjectToFile(osaResults.getOsaLibraries(), new File(checkmarxBuildDir, OSA_LIBRARIES_JSON), "OSA libraries json report");
+        writeJsonObjectToFile(osaResults.getOsaVulnerabilities(), new File(checkmarxBuildDir, OSA_VULNERABILITIES_JSON), "OSA vulnerabilities json report");
     }
 
     private String generateHTMLReport(@Nonnull FilePath workspace, File checkmarxBuildDir, CxScanConfig config, ScanResults results) {
@@ -1862,23 +1874,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return reportName;
     }
 
-    private void writeJsonObjectToFile(Object jsonObj, FilePath to, String fileName) {
-        String remoteDirPath = to.getRemote() + File.separator + REPORTS_FOLDER;
-        InputStream is = null;
+    private void writeJsonObjectToFile(Object jsonObj, File to, String description) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             String json = null;
             json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObj);
-            is = IOUtils.toInputStream(json, StandardCharsets.UTF_8);
-
-            String remoteFilePath = remoteDirPath + File.separator + fileName;
-            log.info("Copying file {} to workspace {}", fileName, remoteFilePath);
-            FilePath remoteFile = new FilePath(to.getChannel(), remoteFilePath);
-            remoteFile.copyFrom(is);
+            FileUtils.writeStringToFile(to, json);
+            log.info("Copying file [" + to.getName() + "] to workspace [" + to.getAbsolutePath() + "]");
         } catch (Exception e) {
-            log.error("Failed to write '" + fileName + "' to [" + to.getRemote() + "]", e);
-        } finally {
-            IOUtils.closeQuietly(is);
+            log.error("Failed to write " + description + " to [" + to.getAbsolutePath() + "]");
+
         }
     }
 
@@ -1966,10 +1971,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return ret;
     }
 
-    private void writeFileToWorkspaceReports(FilePath workspace, File file) {
-        String remoteDirPath = workspace.getRemote() + File.separator + REPORTS_FOLDER;
+    private synchronized void writeFileToWorkspaceReports(FilePath workspace, File file) {
         FileInputStream fis = null;
         try {
+            String remoteDirPath = workspace.getRemote() + REPORTS_FOLDER;
             String remoteFilePath = remoteDirPath + File.separator + file.getName();
             log.info("Copying file {} to workspace {}", file.getName(), remoteFilePath);
             FilePath remoteFile = new FilePath(workspace.getChannel(), remoteFilePath);
