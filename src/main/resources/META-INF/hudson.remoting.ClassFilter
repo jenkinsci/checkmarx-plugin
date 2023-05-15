@@ -47,3 +47,4 @@ com.cx.restclient.sast.dto.CxScanStateObj
 com.cx.restclient.sast.dto.CxDateAndTimeObj
 com.cx.restclient.sast.dto.CxLanguageObj
 com.cx.restclient.sast.dto.CxLinkObj
+org.apache.http.HttpHost
