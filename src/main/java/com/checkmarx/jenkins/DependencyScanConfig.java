@@ -78,6 +78,9 @@ public class DependencyScanConfig {
     public Integer scaTimeout;
     
     @DataBoundSetter
+    public boolean generateScaReport;
+    
+    @DataBoundSetter
     public boolean isIncludeSources;
 
     @DataBoundSetter
