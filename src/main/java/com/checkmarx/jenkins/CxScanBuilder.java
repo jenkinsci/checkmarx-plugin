@@ -2163,9 +2163,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 else
                     throw new CxClientException("sast result path must be specified");
             }
-            log.info("If exploitable path: "+additionalParams);
         }
-        log.info("Additional params: "+additionalParams);
+        log.debug("Sca Resolver Additional params: "+additionalParams);
        return  additionalParams;
     }
 
