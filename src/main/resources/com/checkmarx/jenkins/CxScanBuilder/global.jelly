@@ -42,7 +42,7 @@
         <f:optionalBlock title="Use Jenkins proxy" inline="true" field="isProxy" />
 
 		<f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
-			with="isProxy,serverUrl,username,password,timestamp,credentialsId" />
+			with="enableCertificateValidation,isProxy,serverUrl,username,password,timestamp,credentialsId" />
 
         <f:entry title="Maven Path" field="mvnPath">
             <f:textbox/>
