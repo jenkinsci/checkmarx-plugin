@@ -1332,7 +1332,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          }
     	return true;
     }
-    private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) throws IOException {
+    private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log, FilePath workspace) throws IOException {
         CxScanConfig ret = new CxScanConfig();
         
         ret.setIsOverrideProjectSetting(overrideProjectSetting);
@@ -2159,7 +2159,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
             if (!additionalParams.contains("--sast-result-path ")) {
                 if(null != workspace)
-                    additionalParams += "--sast-result-path "+ workspace + File.separator + scaResolverSastResultPath ;
+                    additionalParams += " --sast-result-path "+ workspace + File.separator + scaResolverSastResultPath;
                 else
                     throw new CxClientException("sast result path must be specified");
             }

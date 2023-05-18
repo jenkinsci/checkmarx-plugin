@@ -170,9 +170,9 @@
                 </f:nested>
                 
                 <!-- Sca Resolver Global Fields-->
-                <f:optionalBlock checked="${descriptor.dependencyScanConfig.enableScaResolver == null || descriptor.dependencyScanConfig.enableScaResolver == 'SCA_RESOLVER'}" inline="true"
-                                    name="enableScaResolver" title="Perform SCA scan using dependency resolution by SCA Resolver tool."
-                                    value="SCA_RESOLVER">
+                <f:optionalBlock checked="${descriptor.dependencyScanConfig.enableScaResolver == null || descriptor.dependencyScanConfig.enableScaResolver == 'SCA_RESOLVER'}"
+                 title="Perform SCA scan using dependency resolution by SCA Resolver tool."
+                                  field="enableScaResolver"  value="SCA_RESOLVER" inline="true">
                  <f:entry title="Path to SCA Resolver" field="pathToScaResolver">
                  		<f:textbox value="${descriptor.dependencyScanConfig.pathToScaResolver}" />
                  </f:entry>
