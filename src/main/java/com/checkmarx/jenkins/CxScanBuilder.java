@@ -57,9 +57,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -213,7 +215,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private Boolean generateXmlReport = true;
 
     public static final int MINIMUM_TIMEOUT_IN_MINUTES = 1;
-    public static final String REPORTS_FOLDER = "Checkmarx/Reports";
+    public static final String REPORTS_FOLDER = "Checkmarx" + File.separator + "Reports";
 
     @DataBoundConstructor
     public CxScanBuilder(
@@ -856,12 +858,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     /**
      * Using environment injection plugin you can add the JVM proxy settings.
      * For example using EnvInject plugin the following can be applied under 'Properties Content':
-     *
-     *  http.proxyHost={HOST}
-     *  http.proxyPass={PORT}
-     *  http.proxyUser={USER}
-     *  http.proxyPassword={PASS}
-     *  http.nonProxyHosts={HOSTS}
+     * <p>
+     * http.proxyHost={HOST}
+     * http.proxyPass={PORT}
+     * http.proxyUser={USER}
+     * http.proxyPassword={PASS}
+     * http.nonProxyHosts={HOSTS}
      */
     private void setJvmVars(EnvVars env) {
         for (Map.Entry<String, String> entry : env.entrySet()) {
@@ -874,21 +876,22 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
     }
-    private Map<String, String> getAllFsaVars(EnvVars env) {
+
+    private Map<String, String> getAllFsaVars(EnvVars env, String workspacePath) {
         Map<String, String> sumFsaVars = new HashMap<>();
         // As job environment variable
         for (Map.Entry<String, String> entry : env.entrySet()) {
             if (entry.getKey().contains("CX_") ||
                     entry.getKey().contains("FSA_")) {
                 if (StringUtils.isNotEmpty(entry.getValue())) {
-                    sumFsaVars.put(entry.getKey(), entry.getValue());
+                    sumFsaVars.put(entry.getKey().trim(), entry.getValue().trim());
                 }
             }
         }
         // As custom field - for pipeline jobs
         String fsaVars = dependencyScanConfig != null ? dependencyScanConfig.fsaVariables : "";
         if (StringUtils.isNotEmpty(fsaVars)) {
-            fsaVars = fsaVars.contains("${WORKSPACE}") ? fsaVars.replace("${WORKSPACE}", env.get("WORKSPACE")) : fsaVars;
+            fsaVars = fsaVars.contains("${WORKSPACE}") ? fsaVars.replace("${WORKSPACE}", workspacePath) : fsaVars;
             try {
                 String[] vars = fsaVars.replaceAll("[\\n\\r]", "").trim().split(",");
                 for (String var : vars) {
@@ -935,7 +938,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         final DescriptorImpl descriptor = getDescriptor();
         EnvVars env = run.getEnvironment(listener);
         setJvmVars(env);
-        Map<String, String> fsaVars = getAllFsaVars(env);
+        Map<String, String> fsaVars = getAllFsaVars(env, workspace.getRemote());
         CxScanConfig config = resolveConfiguration(run, descriptor, env, log);
 
         if (configAsCode) {
@@ -960,9 +963,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         Jenkins instance = Jenkins.getInstance();
         final CxScanCallable action;
         if (instance != null && instance.proxy != null &&
-        		 ((!isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))
-                         || (config.isScaProxy()))) 
-        {
+                ((!isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))
+                        || (config.isScaProxy()))) {
             action = new CxScanCallable(config, listener, instance.proxy, isHideDebugLogs(), fsaVars);
         } else {
             action = new CxScanCallable(config, listener, isHideDebugLogs(), fsaVars);
@@ -1027,9 +1029,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             OSAResults osaResults = scanResults.getOsaResults();
             AstScaResults scaResults = scanResults.getScaResults();
             if (osaResults != null && osaResults.isOsaResultsReady()) {
-                createOsaReports(osaResults, checkmarxBuildDir);
+                createOsaReports(osaResults, workspace);
             } else if (scaResults != null && scaResults.isScaResultReady()) {
-                createScaReports(scaResults, checkmarxBuildDir);
+                createScaReports(scaResults, workspace);
             }
             return;
         }
@@ -1266,11 +1268,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 });
     }
 
-
-    private void createScaReports(AstScaResults scaResults, File checkmarxBuildDir) {
-        writeJsonObjectToFile(scaResults.getSummary(), new File(checkmarxBuildDir, SCA_SUMMERY_JSON), "OSA summary json report");
-        writeJsonObjectToFile(scaResults.getPackages(), new File(checkmarxBuildDir, SCA_LIBRARIES_JSON), "OSA libraries json report");
-        writeJsonObjectToFile(scaResults.getFindings(), new File(checkmarxBuildDir, SCA_VULNERABILITIES_JSON), "OSA vulnerabilities json report");
+    private void createScaReports(AstScaResults scaResults, FilePath checkmarxBuildDir) {
+        writeJsonObjectToFile(scaResults.getSummary(), checkmarxBuildDir, SCA_SUMMERY_JSON);
+        writeJsonObjectToFile(scaResults.getPackages(), checkmarxBuildDir, SCA_LIBRARIES_JSON);
+        writeJsonObjectToFile(scaResults.getFindings(), checkmarxBuildDir, SCA_VULNERABILITIES_JSON);
     }
 
     /**
@@ -1347,14 +1348,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
         return originUrl;
     }
+
     private Boolean verifyCustomCharacters(String inputString) {
-    	 Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
-         Matcher match = pattern.matcher(inputString);
-         if (!StringUtil.isNullOrEmpty(inputString) && !match.find()) {
-        	 return false;
-         }
-    	return true;
+        Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
+        Matcher match = pattern.matcher(inputString);
+        if (!StringUtil.isNullOrEmpty(inputString) && !match.find()) {
+            return false;
+        }
+        return true;
     }
+
     private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) throws IOException {
         CxScanConfig ret = new CxScanConfig();
         
@@ -1871,10 +1874,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
     }
 
-    private void createOsaReports(OSAResults osaResults, File checkmarxBuildDir) {
-        writeJsonObjectToFile(osaResults.getResults(), new File(checkmarxBuildDir, OSA_SUMMERY_JSON), "OSA summery json report");
-        writeJsonObjectToFile(osaResults.getOsaLibraries(), new File(checkmarxBuildDir, OSA_LIBRARIES_JSON), "OSA libraries json report");
-        writeJsonObjectToFile(osaResults.getOsaVulnerabilities(), new File(checkmarxBuildDir, OSA_VULNERABILITIES_JSON), "OSA vulnerabilities json report");
+    private void createOsaReports(OSAResults osaResults, FilePath checkmarxBuildDir) {
+        writeJsonObjectToFile(osaResults.getResults(), checkmarxBuildDir, OSA_SUMMERY_JSON);
+        writeJsonObjectToFile(osaResults.getOsaLibraries(), checkmarxBuildDir, OSA_LIBRARIES_JSON);
+        writeJsonObjectToFile(osaResults.getOsaVulnerabilities(), checkmarxBuildDir, OSA_VULNERABILITIES_JSON);
     }
 
     private String generateHTMLReport(@Nonnull FilePath workspace, File checkmarxBuildDir, CxScanConfig config, ScanResults results) {
@@ -1901,16 +1904,23 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return reportName;
     }
 
-    private void writeJsonObjectToFile(Object jsonObj, File to, String description) {
+    private void writeJsonObjectToFile(Object jsonObj, FilePath to, String fileName) {
+        String remoteDirPath = to.getRemote() + File.separator + REPORTS_FOLDER;
+        InputStream is = null;
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             String json = null;
             json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObj);
-            FileUtils.writeStringToFile(to, json);
-            log.info("Copying file [" + to.getName() + "] to workspace [" + to.getAbsolutePath() + "]");
-        } catch (Exception e) {
-            log.error("Failed to write " + description + " to [" + to.getAbsolutePath() + "]");
+            is = IOUtils.toInputStream(json, StandardCharsets.UTF_8);
 
+            String remoteFilePath = remoteDirPath + File.separator + fileName;
+            log.info("Copying file {} to workspace {}", fileName, remoteFilePath);
+            FilePath remoteFile = new FilePath(to.getChannel(), remoteFilePath);
+            remoteFile.copyFrom(is);
+        } catch (Exception e) {
+            log.error("Failed to write '" + fileName + "' to [" + to.getRemote() + "]", e);
+        } finally {
+            IOUtils.closeQuietly(is);
         }
     }
 
@@ -1999,12 +2009,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     private void writeFileToWorkspaceReports(FilePath workspace, File file) {
-
-        String remoteDirPath = workspace.getRemote() + "/" + REPORTS_FOLDER;
+        String remoteDirPath = workspace.getRemote() + File.separator + REPORTS_FOLDER;
         FileInputStream fis = null;
 
         try {
-            String remoteFilePath = remoteDirPath + "/" + file.getName();
+            String remoteFilePath = remoteDirPath + File.separator + file.getName();
             log.info("Copying file {} to workspace {}", file.getName(), remoteFilePath);
             FilePath remoteFile = new FilePath(workspace.getChannel(), remoteFilePath);
             fis = new FileInputStream(file);
