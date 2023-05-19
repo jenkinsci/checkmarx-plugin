@@ -214,6 +214,8 @@
                         <f:entry title="SCA Resolver Additional Parameters" field="scaResolverAddParameters">
                              <f:textarea value="${instance.dependencyScanConfig.scaResolverAddParameters}" />
                         </f:entry>
+                        <f:optionalBlock title="Enable Exploitable Path" field="isExploitablePathByScaResolver" inline="true"  checked="${instance.dependencyScanConfig.isExploitablePathByScaResolver}">
+                        </f:optionalBlock>
                     </f:radioBlock>
                     <f:radioBlock checked="${instance.dependencyScanConfig.enableScaResolver == null || instance.dependencyScanConfig.enableScaResolver == 'MANIFEST'}" inline="true"
                                     name="enableScaResolver" title="Perform SCA scan by uploading manifests file(s)/source to SCA Service."
