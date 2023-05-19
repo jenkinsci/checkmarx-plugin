@@ -168,6 +168,24 @@
                     <f:validateButton title="Test Connection" progress="Testing..." method="testScaConnection"
                                       with="scaServerUrl,scaAccessControlUrl,scaCredentialsId,scaTenant,scaTimeout,timestamp,isProxy"/>
                 </f:nested>
+                 <f:radioBlock checked="${descriptor.dependencyScanConfig.enableScaResolver == null || descriptor.dependencyScanConfig.enableScaResolver == 'SCA_RESOLVER'}" inline="true"
+                                    name="enableScaResolver" title="Perform SCA scan using dependency resolution by SCA Resolver tool."
+                                    value="SCA_RESOLVER">
+                  <!-- Sca Resolver Fields-->
+                        <f:entry title="Path to SCA Resolver" field="pathToScaResolver">
+                            <f:textbox value="${descriptor.dependencyScanConfig.pathToScaResolver}" />
+                        </f:entry>
+
+                        <f:entry title="SCA Resolver Additional Parameters" field="scaResolverAddParameters">
+                             <f:textarea value="${descriptor.dependencyScanConfig.scaResolverAddParameters}" />
+                        </f:entry>
+                        <f:optionalBlock title="Enable Exploitable Path" field="isExploitablePathByScaResolver" inline="true"  checked="${descriptor.dependencyScanConfig.isExploitablePathByScaResolver}">
+                        </f:optionalBlock>
+                    </f:radioBlock>
+                    <f:radioBlock checked="${descriptor.dependencyScanConfig.enableScaResolver == null || descriptor.dependencyScanConfig.enableScaResolver == 'MANIFEST'}" inline="true"
+                                    name="enableScaResolver" title="Perform SCA scan by uploading manifests file(s)/source to SCA Service."
+                                    value="MANIFEST">
+                            <!-- Non-Sca Resolver Fields-->
                 <f:entry title="Package Manager's Config File(s) Path" field="scaConfigFile">
                         <f:textarea value="${descriptor.dependencyScanConfig.scaConfigFile}" />
                     </f:entry>
@@ -191,6 +209,7 @@
            		 with="scaSastServerUrl,password,username,timestamp,sastCredentialsId,isProxy" />
     </f:optionalBlock>
             </f:radioBlock>
+           </f:radioBlock>
         </f:optionalBlock>
 		<f:optionalBlock title="Hide Debug Logs" inline="true" field="hideDebugLogs"/>        
     </f:section>
