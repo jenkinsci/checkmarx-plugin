@@ -57,9 +57,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -116,8 +118,18 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     //used for SCA Exploitable path feature
     private String sastCredentialsId;
     private Boolean isProxy = true;
+
+    public Boolean getOverrideGlobalRetentionRate() {
+        return overrideGlobalRetentionRate;
+    }
+
+    private Boolean overrideGlobalRetentionRate = false;
     @Nullable
     private String projectName;
+
+    @Nullable
+    private Integer projectRetentionRate;
+
     @Nullable
     private String groupId;
     @Nullable
@@ -205,7 +217,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private Boolean generateXmlReport = true;
 
     public static final int MINIMUM_TIMEOUT_IN_MINUTES = 1;
-    public static final String REPORTS_FOLDER = "Checkmarx/Reports";
+    public static final String REPORTS_FOLDER = "Checkmarx" + File.separator + "Reports";
 
     @DataBoundConstructor
     public CxScanBuilder(
@@ -219,6 +231,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             boolean configAsCode,
             String projectName,
             long projectId,
+            Integer projectRetentionRate,
             String buildStep,
             @Nullable String groupId,
             @Nullable String teamPath, //used by pipeline
@@ -268,6 +281,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.isProxy = (isProxy == null) ? true : isProxy;
         this.projectName = (projectName == null) ? buildStep : projectName;
         this.projectId = projectId;
+        this.projectRetentionRate=projectRetentionRate;
         this.groupId = (groupId != null && !groupId.startsWith("Provide Checkmarx")) ? groupId : null;
         this.teamPath = teamPath;
         this.sastEnabled = sastEnabled;
@@ -373,6 +387,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     public String getProjectName() {
         return projectName;
+    }
+
+    @Nullable
+    public Integer getProjectRetentionRate() {
+        return projectRetentionRate;
     }
 
     // Workaround for compatibility with Conditional BuildStep Plugin
@@ -779,6 +798,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public void setIsProxy(Boolean proxy) {
         this.isProxy = proxy;
     }
+    @DataBoundSetter
+    public void setoverrideGlobalRetentionRate(Boolean overrideGlobalRetentionRate) {
+        this.overrideGlobalRetentionRate = overrideGlobalRetentionRate;
+    }
 
     @DataBoundSetter
     public void setProjectId(long projectId) {
@@ -817,6 +840,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.groupId = groupId;
     }
 
+    @DataBoundSetter
+    public void setProjectRetentionRate(@Nullable Integer projectRetentionRate){
+        this.projectRetentionRate=projectRetentionRate;
+    }
     public DependencyScanConfig getDependencyScanConfig() {
         return dependencyScanConfig;
     }
@@ -833,12 +860,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     /**
      * Using environment injection plugin you can add the JVM proxy settings.
      * For example using EnvInject plugin the following can be applied under 'Properties Content':
-     *
-     *  http.proxyHost={HOST}
-     *  http.proxyPass={PORT}
-     *  http.proxyUser={USER}
-     *  http.proxyPassword={PASS}
-     *  http.nonProxyHosts={HOSTS}
+     * <p>
+     * http.proxyHost={HOST}
+     * http.proxyPass={PORT}
+     * http.proxyUser={USER}
+     * http.proxyPassword={PASS}
+     * http.nonProxyHosts={HOSTS}
      */
     private void setJvmVars(EnvVars env) {
         for (Map.Entry<String, String> entry : env.entrySet()) {
@@ -851,21 +878,22 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
     }
-    private Map<String, String> getAllFsaVars(EnvVars env) {
+
+    private Map<String, String> getAllFsaVars(EnvVars env, String workspacePath) {
         Map<String, String> sumFsaVars = new HashMap<>();
         // As job environment variable
         for (Map.Entry<String, String> entry : env.entrySet()) {
             if (entry.getKey().contains("CX_") ||
                     entry.getKey().contains("FSA_")) {
                 if (StringUtils.isNotEmpty(entry.getValue())) {
-                    sumFsaVars.put(entry.getKey(), entry.getValue());
+                    sumFsaVars.put(entry.getKey().trim(), entry.getValue().trim());
                 }
             }
         }
         // As custom field - for pipeline jobs
         String fsaVars = dependencyScanConfig != null ? dependencyScanConfig.fsaVariables : "";
         if (StringUtils.isNotEmpty(fsaVars)) {
-            fsaVars = fsaVars.contains("${WORKSPACE}") ? fsaVars.replace("${WORKSPACE}", env.get("WORKSPACE")) : fsaVars;
+            fsaVars = fsaVars.contains("${WORKSPACE}") ? fsaVars.replace("${WORKSPACE}", workspacePath) : fsaVars;
             try {
                 String[] vars = fsaVars.replaceAll("[\\n\\r]", "").trim().split(",");
                 for (String var : vars) {
@@ -912,7 +940,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         final DescriptorImpl descriptor = getDescriptor();
         EnvVars env = run.getEnvironment(listener);
         setJvmVars(env);
-        Map<String, String> fsaVars = getAllFsaVars(env);
+        Map<String, String> fsaVars = getAllFsaVars(env, workspace.getRemote());
         CxScanConfig config = resolveConfiguration(run, descriptor, env, log, workspace);
 
         if (configAsCode) {
@@ -937,9 +965,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         Jenkins instance = Jenkins.getInstance();
         final CxScanCallable action;
         if (instance != null && instance.proxy != null &&
-        		 ((!isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))
-                         || (config.isScaProxy()))) 
-        {
+                ((!isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))
+                        || (config.isScaProxy()))) {
             action = new CxScanCallable(config, listener, instance.proxy, isHideDebugLogs(), fsaVars);
         } else {
             action = new CxScanCallable(config, listener, isHideDebugLogs(), fsaVars);
@@ -1004,9 +1031,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             OSAResults osaResults = scanResults.getOsaResults();
             AstScaResults scaResults = scanResults.getScaResults();
             if (osaResults != null && osaResults.isOsaResultsReady()) {
-                createOsaReports(osaResults, checkmarxBuildDir);
+                createOsaReports(osaResults, workspace);
             } else if (scaResults != null && scaResults.isScaResultReady()) {
-                createScaReports(scaResults, checkmarxBuildDir);
+                createScaReports(scaResults, workspace);
             }
             return;
         }
@@ -1243,11 +1270,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 });
     }
 
-
-    private void createScaReports(AstScaResults scaResults, File checkmarxBuildDir) {
-        writeJsonObjectToFile(scaResults.getSummary(), new File(checkmarxBuildDir, SCA_SUMMERY_JSON), "OSA summary json report");
-        writeJsonObjectToFile(scaResults.getPackages(), new File(checkmarxBuildDir, SCA_LIBRARIES_JSON), "OSA libraries json report");
-        writeJsonObjectToFile(scaResults.getFindings(), new File(checkmarxBuildDir, SCA_VULNERABILITIES_JSON), "OSA vulnerabilities json report");
+    private void createScaReports(AstScaResults scaResults, FilePath checkmarxBuildDir) {
+        writeJsonObjectToFile(scaResults.getSummary(), checkmarxBuildDir, SCA_SUMMERY_JSON);
+        writeJsonObjectToFile(scaResults.getPackages(), checkmarxBuildDir, SCA_LIBRARIES_JSON);
+        writeJsonObjectToFile(scaResults.getFindings(), checkmarxBuildDir, SCA_VULNERABILITIES_JSON);
     }
 
     /**
@@ -1324,13 +1350,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
         return originUrl;
     }
+
     private Boolean verifyCustomCharacters(String inputString) {
-    	 Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
-         Matcher match = pattern.matcher(inputString);
-         if (!StringUtil.isNullOrEmpty(inputString) && !match.find()) {
-        	 return false;
-         }
-    	return true;
+        Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
+        Matcher match = pattern.matcher(inputString);
+        if (!StringUtil.isNullOrEmpty(inputString) && !match.find()) {
+            return false;
+        }
+        return true;
     }
     private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log, FilePath workspace) throws IOException {
         CxScanConfig ret = new CxScanConfig();
@@ -1348,6 +1375,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setCxOrigin(jenkinURL);
         log.info("  ORIGIN FROM JENKIN :: " + jenkinURL);
         log.info("  ORIGIN URL FROM JENKIN :: " + originUrl);
+        ret.setEnableDataRetention(getDescriptor().isEnableDataRetention());
+        if (getDescriptor().isEnableDataRetention()) {
+            if (getOverrideGlobalRetentionRate()) {
+                ret.setProjectRetentionRate(getProjectRetentionRate());
+            } else {
+                ret.setProjectRetentionRate(getDescriptor().getprojectRetentionRate());
+            }
+        }
 
         if(getPostScanActionId() == 0)
         	ret.setPostScanActionId(null);
@@ -1617,10 +1652,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             config.setOsaHighThreshold(descriptor.getOsaHighThresholdEnforcement());
             config.setOsaMediumThreshold(descriptor.getOsaMediumThresholdEnforcement());
             config.setOsaLowThreshold(descriptor.getOsaLowThresholdEnforcement());
+            resolvedVulnerabilityThresholdResult = Result.fromString(descriptor.getJobGlobalStatusOnThresholdViolation().name());
         } else if (useJobThreshold) {
             config.setOsaHighThreshold(getOsaHighThreshold());
             config.setOsaMediumThreshold(getOsaMediumThreshold());
             config.setOsaLowThreshold(getOsaLowThreshold());
+            resolvedVulnerabilityThresholdResult = vulnerabilityThresholdResult;
         }
 
         if (config.isOsaEnabled()) {
@@ -1740,6 +1777,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
         log.info("project name: " + config.getProjectName());
         log.info("team id: " + config.getTeamId());
+        log.info("Project Retention Rate: " + config.getProjectRetentionRate());
         log.info("is synchronous mode: " + config.getSynchronous());
         log.info("deny new project creation: " + config.getDenyProject());
         log.info("SAST scan enabled: " + config.isSastEnabled());
@@ -1838,10 +1876,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
     }
 
-    private void createOsaReports(OSAResults osaResults, File checkmarxBuildDir) {
-        writeJsonObjectToFile(osaResults.getResults(), new File(checkmarxBuildDir, OSA_SUMMERY_JSON), "OSA summery json report");
-        writeJsonObjectToFile(osaResults.getOsaLibraries(), new File(checkmarxBuildDir, OSA_LIBRARIES_JSON), "OSA libraries json report");
-        writeJsonObjectToFile(osaResults.getOsaVulnerabilities(), new File(checkmarxBuildDir, OSA_VULNERABILITIES_JSON), "OSA vulnerabilities json report");
+    private void createOsaReports(OSAResults osaResults, FilePath checkmarxBuildDir) {
+        writeJsonObjectToFile(osaResults.getResults(), checkmarxBuildDir, OSA_SUMMERY_JSON);
+        writeJsonObjectToFile(osaResults.getOsaLibraries(), checkmarxBuildDir, OSA_LIBRARIES_JSON);
+        writeJsonObjectToFile(osaResults.getOsaVulnerabilities(), checkmarxBuildDir, OSA_VULNERABILITIES_JSON);
     }
 
     private String generateHTMLReport(@Nonnull FilePath workspace, File checkmarxBuildDir, CxScanConfig config, ScanResults results) {
@@ -1868,16 +1906,23 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return reportName;
     }
 
-    private void writeJsonObjectToFile(Object jsonObj, File to, String description) {
+    private void writeJsonObjectToFile(Object jsonObj, FilePath to, String fileName) {
+        String remoteDirPath = to.getRemote() + File.separator + REPORTS_FOLDER;
+        InputStream is = null;
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             String json = null;
             json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObj);
-            FileUtils.writeStringToFile(to, json);
-            log.info("Copying file [" + to.getName() + "] to workspace [" + to.getAbsolutePath() + "]");
-        } catch (Exception e) {
-            log.error("Failed to write " + description + " to [" + to.getAbsolutePath() + "]");
+            is = IOUtils.toInputStream(json, StandardCharsets.UTF_8);
 
+            String remoteFilePath = remoteDirPath + File.separator + fileName;
+            log.info("Copying file {} to workspace {}", fileName, remoteFilePath);
+            FilePath remoteFile = new FilePath(to.getChannel(), remoteFilePath);
+            remoteFile.copyFrom(is);
+        } catch (Exception e) {
+            log.error("Failed to write '" + fileName + "' to [" + to.getRemote() + "]", e);
+        } finally {
+            IOUtils.closeQuietly(is);
         }
     }
 
@@ -1966,12 +2011,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     private void writeFileToWorkspaceReports(FilePath workspace, File file) {
-
-        String remoteDirPath = workspace.getRemote() + "/" + REPORTS_FOLDER;
+        String remoteDirPath = workspace.getRemote() + File.separator + REPORTS_FOLDER;
         FileInputStream fis = null;
 
         try {
-            String remoteFilePath = remoteDirPath + "/" + file.getName();
+            String remoteFilePath = remoteDirPath + File.separator + file.getName();
             log.info("Copying file {} to workspace {}", file.getName(), remoteFilePath);
             FilePath remoteFile = new FilePath(workspace.getChannel(), remoteFilePath);
             fis = new FileInputStream(file);
@@ -2195,7 +2239,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     //////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public DescriptorImpl getDescriptor() {
+     public DescriptorImpl getDescriptor() {
         return (DescriptorImpl) super.getDescriptor();
     }
 
@@ -2220,16 +2264,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private String username;
         @Nullable
         private String password;
-
+        private Integer projectRetentionRate;
         private String credentialsId;
         private String mvnPath;
         private boolean isProxy = true;
+        private boolean enableDataRetention=false;
 
         private boolean prohibitProjectCreation;
         private boolean hideResults;
         private boolean asyncHtmlRemoval;
 
-        private boolean enableCertificateValidation;
+        private boolean enableCertificateValidation = true;
         @Nullable
         private String excludeFolders;
         @Nullable
@@ -2291,6 +2336,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return username;
         }
 
+        public Integer getprojectRetentionRate() {
+            return projectRetentionRate;
+        }
+
+        public void setProjectRetentionRate(Integer projectRetentionRate) {
+            this.projectRetentionRate = projectRetentionRate;
+        }
         public void setUsername(@Nullable String username) {
             this.username = username;
         }
@@ -2317,6 +2369,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             this.password = Secret.fromString(password).getEncryptedValue();
         }
 
+        public boolean isEnableDataRetention() {
+            return enableDataRetention;
+        }
+
+        public void setEnableDataRetention(boolean enableDataRetention) {
+            this.enableDataRetention = enableDataRetention;
+        }
         @Nullable
         public String getPasswordPlainText(String password) {
             return Secret.fromString(password).getPlainText();
@@ -2572,7 +2631,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *  shared state to avoid synchronization issues.
          */
         @POST
-        public FormValidation doTestConnection(@QueryParameter final String serverUrl, @QueryParameter final String password,
+        public FormValidation doTestConnection(@QueryParameter final boolean enableCertificateValidation,@QueryParameter final String serverUrl, @QueryParameter final String password,
                                                @QueryParameter final String username, @QueryParameter final String timestamp,
                                                @QueryParameter final String credentialsId, @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
             if(item==null){
