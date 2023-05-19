@@ -90,9 +90,6 @@ public class DependencyScanConfig {
     public String scaResolverAddParameters;
     
     @DataBoundSetter
-    public boolean isExploitablePathByScaResolver;
-    
-    @DataBoundSetter
     public String fsaVariables;
     
     @DataBoundSetter

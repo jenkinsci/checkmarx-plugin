@@ -96,8 +96,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     
     private static final String SUPPRESS_BENIGN_ERRORS = "suppressBenignErrors";
 
-    private static final String scaResolverResultPath = ".cxscaresolver" + File.separator + "sca";
-    private static final String scaResolverSastResultPath = ".cxscaresolver" + File.separator + "sast";
     //////////////////////////////////////////////////////////////////////////////////////
     // Persistent plugin configuration parameters
     //////////////////////////////////////////////////////////////////////////////////////
@@ -913,7 +911,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         EnvVars env = run.getEnvironment(listener);
         setJvmVars(env);
         Map<String, String> fsaVars = getAllFsaVars(env);
-        CxScanConfig config = resolveConfiguration(run, descriptor, env, log, workspace);
+        CxScanConfig config = resolveConfiguration(run, descriptor, env, log);
 
         if (configAsCode) {
             try {
@@ -1332,7 +1330,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          }
     	return true;
     }
-    private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log, FilePath workspace) throws IOException {
+    private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log) throws IOException {
         CxScanConfig ret = new CxScanConfig();
         
         ret.setIsOverrideProjectSetting(overrideProjectSetting);
@@ -1493,7 +1491,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             setDependencyScanConfig(config);
         }
 
-        configureDependencyScan(run, descriptor, env, ret, workspace);
+        configureDependencyScan(run, descriptor, env, ret);
 
         if (!ret.getSynchronous()) {
             enableProjectPolicyEnforcement = false;
@@ -1576,7 +1574,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
 
-    private void configureDependencyScan(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxScanConfig config, FilePath workspace) {
+    private void configureDependencyScan(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxScanConfig config) {
         boolean dependencyScanEnabled = dependencyScanConfig != null;
         if (!dependencyScanEnabled) {
             return;
@@ -1627,12 +1625,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             config.setOsaArchiveIncludePatterns(effectiveConfig.osaArchiveIncludePatterns.trim());
             config.setOsaRunInstall(effectiveConfig.osaInstallBeforeScan);
         } else if (config.isAstScaEnabled()) {
-            config.setAstScaConfig(getScaConfig(run, env, dependencyScanConfig, descriptor, workspace, config));
+            config.setAstScaConfig(getScaConfig(run, env, dependencyScanConfig, descriptor));
             config.setSCAScanTimeoutInMinutes(dependencyScanConfig.scaTimeout);
         }
     }
 
-    private AstScaConfig getScaConfig(Run<?, ?> run, EnvVars env, DependencyScanConfig dsConfigJobLevel, DescriptorImpl descriptor, FilePath workspace, CxScanConfig config) {
+    private AstScaConfig getScaConfig(Run<?, ?> run, EnvVars env, DependencyScanConfig dsConfigJobLevel, DescriptorImpl descriptor) {
 
 
         DependencyScanConfig dsConfig;
@@ -1654,18 +1652,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         result.setIncludeSources(dsConfig.isIncludeSources);
 
         //add SCA Resolver code here
-        String additionalParams = dsConfig.scaResolverAddParameters;
-		if (dsConfig.enableScaResolver != null
-				&& SCAScanType.SCA_RESOLVER.toString().equalsIgnoreCase(dsConfig.enableScaResolver.toString())) {
+        if (dsConfig.enableScaResolver != null
+                && SCAScanType.SCA_RESOLVER.toString().equalsIgnoreCase(dsConfig.enableScaResolver.toString())) {
 //            scaResolverPathExist(dsConfig.pathToScaResolver);
-			validateScaResolverParams(additionalParams, config, workspace);
-			additionalParams = checkMissingMandatoryAdditionalParams(additionalParams, workspace, config, dsConfig.isExploitablePathByScaResolver);
-			result.setEnableScaResolver(true);
-		} else
-			result.setEnableScaResolver(false);
+            validateScaResolverParams(dsConfig.scaResolverAddParameters);
+            result.setEnableScaResolver(true);
+        }
+        else
+            result.setEnableScaResolver(false);
 
-		result.setPathToScaResolver(dsConfig.pathToScaResolver);
-        result.setScaResolverAddParameters(additionalParams);
+        result.setPathToScaResolver(dsConfig.pathToScaResolver);
+        result.setScaResolverAddParameters(dsConfig.scaResolverAddParameters);
 
         UsernamePasswordCredentials credentials = CxConnectionDetails.getCredentialsById(dsConfig.scaCredentialsId, run);
         if (credentials != null) {
@@ -2089,7 +2086,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return true;
     }
 
-    private void validateScaResolverParams(String additionalParams, CxScanConfig config, FilePath workspace) {
+    private void validateScaResolverParams(String additionalParams) {
 
         String[] arguments = additionalParams.split(" ");
         Map<String, String> params = new HashMap<>();
@@ -2102,70 +2099,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         String dirPath = params.get("-s");
-        if(StringUtils.isEmpty(dirPath)) {
-        	if(null == workspace)
-        		throw new CxClientException("Source code path (-s <source code path>) is not provided.");
-                //        fileExists(dirPath);
-        }
+        if(StringUtils.isEmpty(dirPath))
+            throw new CxClientException("Source code path (-s <source code path>) is not provided.");
+//        fileExists(dirPath);
+
         String projectName = params.get("-n");
-        if(StringUtils.isEmpty(projectName)) {
-            if (StringUtils.isEmpty(config.getProjectName()))
-                throw new CxClientException("Project name parameter (-n <project name>) must be provided to ScaResolver.");
-        }
-    }
+        if(StringUtils.isEmpty(projectName))
+            throw new CxClientException("Project name parameter (-n <project name>) must be provided to ScaResolver.");
 
-	private String checkMissingMandatoryAdditionalParams(String additionalParams, FilePath workspace, CxScanConfig config, boolean isExploitablePathByScaResolver) {
-        if (additionalParams == null) {
-            additionalParams = "";
-        }
-        if (!additionalParams.contains("-n ")) {
-            if(StringUtils.isNotEmpty(config.getProjectName()))
-                additionalParams += " -n " +config.getProjectName();
-            else
-                throw new CxClientException("projectname must be specified");
-        }
-        
-        if (!additionalParams.contains("-s ")) {
-            if(null != workspace)
-                additionalParams += " -s " + workspace;   
-            else
-                throw new CxClientException("source path must be specified");
-        }
-
-        if (!additionalParams.contains("-r ") && !additionalParams.contains("--resolver-result-path ")) {
-            if(null != workspace)
-                additionalParams += " -r " + workspace + File.separator + scaResolverResultPath;
-            else
-                throw new CxClientException("result path must be specified");
-        }
-        if(isExploitablePathByScaResolver) {
-            if (!additionalParams.contains("--cxserver ")) {
-                if(StringUtils.isNotEmpty(config.getUrl()))
-                    additionalParams += " --cxserver " +config.getUrl();
-                else
-                    throw new CxClientException("cxserver must be specified");
-            }
-            if (!additionalParams.contains("--cxuser ")) {
-                if(StringUtils.isNotEmpty(config.getUsername()))
-                    additionalParams += " --cxuser " +config.getUsername();
-                else
-                    throw new CxClientException("cxuser  must be specified");
-            }
-            if (!additionalParams.contains("--cxpassword ")) {
-                if(StringUtils.isNotEmpty(config.getPassword()))
-                    additionalParams += " --cxpassword " +config.getPassword();
-                else
-                    throw new CxClientException("cxpassword must be specified");
-            }
-            if (!additionalParams.contains("--sast-result-path ")) {
-                if(null != workspace)
-                    additionalParams += " --sast-result-path "+ workspace + File.separator + scaResolverSastResultPath;
-                else
-                    throw new CxClientException("sast result path must be specified");
-            }
-        }
-        log.debug("Sca Resolver Additional params: "+additionalParams);
-       return  additionalParams;
     }
 
     private void fileExists(String file) {
