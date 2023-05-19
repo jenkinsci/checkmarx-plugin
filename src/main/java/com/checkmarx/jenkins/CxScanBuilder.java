@@ -1045,7 +1045,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             if (osaResults != null && osaResults.isOsaResultsReady()) {
                 createOsaReports(osaResults, checkmarxBuildDir);
             } else if (scaResults != null && scaResults.isScaResultReady()) {
-                createScaReports(scaResults, checkmarxBuildDir, workspace);
+                createScaReports(scaResults, checkmarxBuildDir);
             }
             return;
         }
@@ -1287,7 +1287,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
 
-    private void createScaReports(AstScaResults scaResults, File checkmarxBuildDir, @Nonnull FilePath workspace) {
+    private void createScaReports(AstScaResults scaResults, File checkmarxBuildDir) {
         writeJsonObjectToFile(scaResults.getSummary(), new File(checkmarxBuildDir, SCA_SUMMERY_JSON), "OSA summary json report");
         writeJsonObjectToFile(scaResults.getPackages(), new File(checkmarxBuildDir, SCA_LIBRARIES_JSON), "OSA libraries json report");
         writeJsonObjectToFile(scaResults.getFindings(), new File(checkmarxBuildDir, SCA_VULNERABILITIES_JSON), "OSA vulnerabilities json report");
@@ -1552,7 +1552,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
         ret.setEnablePolicyViolations(enableProjectPolicyEnforcement);
         
-        if (!ret.isAstScaEnabled() && !ret.getSynchronous()) {
+        if (!ret.isAstScaEnabled() || !ret.getSynchronous()) {
         	generateScaReport = false;
         }
 		if (ret.isAstScaEnabled()) {
