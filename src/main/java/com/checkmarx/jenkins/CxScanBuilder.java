@@ -2207,6 +2207,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 else
                     throw new CxClientException("sast result path must be specified");
             }
+            if (!additionalParams.contains("--cxprojectname ") && !additionalParams.contains("--cxprojectid ")) {
+                if(StringUtils.isNotEmpty(config.getProjectName()))
+                    additionalParams += " --cxprojectname "+ config.getProjectName();
+                else
+                    throw new CxClientException("sast project name or sast project id must be specified");
+            }
         }
         log.debug("Sca Resolver Additional params: "+additionalParams);
        return  additionalParams;
