@@ -2216,65 +2216,94 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
     }
 
-	private String checkMissingMandatoryAdditionalParams(String additionalParams, FilePath workspace, CxScanConfig config, boolean isExploitablePathByScaResolver) {
-        if (additionalParams == null) {
-            additionalParams = "";
-        }
-        if (!additionalParams.contains("-n ")) {
-            if(StringUtils.isNotEmpty(config.getProjectName()))
-                additionalParams += " -n " +config.getProjectName();
-            else
-                throw new CxClientException("projectname must be specified");
-        }
-        
-        if (!additionalParams.contains("-s ")) {
-            if(null != workspace)
-                additionalParams += " -s " + workspace;   
-            else
-                throw new CxClientException("source path must be specified");
-        }
+	private String checkMissingMandatoryAdditionalParams(String additionalParams, FilePath workspace,
+			CxScanConfig config, boolean isExploitablePathByScaResolver) {
+		if (additionalParams == null) {
+			additionalParams = "";
+		}
+		if (!additionalParams.contains("-n ")) {
+			if (StringUtils.isNotEmpty(config.getProjectName()))
+				additionalParams += " -n " + config.getProjectName();
+			else
+				throw new CxClientException("projectname must be specified");
+		}
 
-        if (!additionalParams.contains("-r ") && !additionalParams.contains("--resolver-result-path ")) {
-            if(null != workspace)
-                additionalParams += " -r " + workspace + File.separator + scaResolverResultPath;
-            else
-                throw new CxClientException("result path must be specified");
-        }
-        if(isExploitablePathByScaResolver) {
-            if (!additionalParams.contains("--cxserver ")) {
-                if(StringUtils.isNotEmpty(config.getUrl()))
-                    additionalParams += " --cxserver " +config.getUrl();
-                else
-                    throw new CxClientException("cxserver must be specified");
-            }
-            if (!additionalParams.contains("--cxuser ")) {
-                if(StringUtils.isNotEmpty(config.getUsername()))
-                    additionalParams += " --cxuser " +config.getUsername();
-                else
-                    throw new CxClientException("cxuser  must be specified");
-            }
-            if (!additionalParams.contains("--cxpassword ")) {
-                if(StringUtils.isNotEmpty(config.getPassword()))
-                    additionalParams += " --cxpassword " +config.getPassword();
-                else
-                    throw new CxClientException("cxpassword must be specified");
-            }
-            if (!additionalParams.contains("--sast-result-path ")) {
-                if(null != workspace)
-                    additionalParams += " --sast-result-path "+ workspace + File.separator + scaResolverSastResultPath;
-                else
-                    throw new CxClientException("sast result path must be specified");
-            }
-            if (!additionalParams.contains("--cxprojectname ") && !additionalParams.contains("--cxprojectid ")) {
-                if(StringUtils.isNotEmpty(config.getProjectName()))
-                    additionalParams += " --cxprojectname "+ config.getProjectName();
-                else
-                    throw new CxClientException("sast project name or sast project id must be specified");
-            }
-        }
-        log.debug("Sca Resolver Additional params: "+additionalParams);
-       return  additionalParams;
-    }
+		if (!additionalParams.contains("-s ")) {
+			if (null != workspace)
+				additionalParams += " -s " + workspace;
+			else
+				throw new CxClientException("source path must be specified");
+		}
+
+		if (!additionalParams.contains("-r ") && !additionalParams.contains("--resolver-result-path ")) {
+			if (null != workspace)
+				additionalParams += " -r " + workspace + File.separator + scaResolverResultPath;
+			else
+				throw new CxClientException("result path must be specified");
+		}
+		if (isExploitablePathByScaResolver && !additionalParams.isEmpty()
+				&& exploitablePathParamsIncomplete(additionalParams.contains("--cxserver "),
+						additionalParams.contains("--cxuser"), additionalParams.contains("--cxpassword "),
+						additionalParams.contains("--cxprojectname "), additionalParams.contains("--cxprojectid "),
+						additionalParams.contains("--sast-result-path "))) {
+			log.warn(
+					"Partial sca resolver additional parameters will be override for exploitable path detection. Rest other parameters will be taken from Job level arguments.");
+		}
+
+		if (isExploitablePathByScaResolver && (additionalParams.contains("--cxserver ")
+				&& additionalParams.contains("--cxuser ") && additionalParams.contains("--cxpassword ")
+				&& additionalParams.contains("--sast-result-path ")
+				&& (additionalParams.contains("--cxprojectname ") || additionalParams.contains("--cxprojectid ")))) {
+			log.warn("Sca Resolver additional parameters will be used for exploitable path detection");
+
+		}
+
+		if (isExploitablePathByScaResolver) {
+			if (!additionalParams.contains("--cxserver ")) {
+				if (StringUtils.isNotEmpty(config.getUrl()))
+					additionalParams += " --cxserver " + config.getUrl();
+				else
+					throw new CxClientException("cxserver must be specified");
+			}
+			if (!additionalParams.contains("--cxuser ")) {
+				if (StringUtils.isNotEmpty(config.getUsername()))
+					additionalParams += " --cxuser " + config.getUsername();
+				else
+					throw new CxClientException("cxuser  must be specified");
+			}
+			if (!additionalParams.contains("--cxpassword ")) {
+				if (StringUtils.isNotEmpty(config.getPassword()))
+					additionalParams += " --cxpassword " + config.getPassword();
+				else
+					throw new CxClientException("cxpassword must be specified");
+			}
+			if (!additionalParams.contains("--sast-result-path ")) {
+				if (null != workspace)
+					additionalParams += " --sast-result-path " + workspace + File.separator + scaResolverSastResultPath;
+				else
+					throw new CxClientException("sast result path must be specified");
+			}
+			if (!additionalParams.contains("--cxprojectname ") && !additionalParams.contains("--cxprojectid ")) {
+				if (StringUtils.isNotEmpty(config.getProjectName()))
+					additionalParams += " --cxprojectname " + config.getProjectName();
+				else
+					throw new CxClientException("sast project name or sast project id must be specified");
+			}
+		}
+		log.debug("Sca Resolver Additional params: " + additionalParams);
+		return additionalParams;
+	}
+
+	private boolean exploitablePathParamsIncomplete(boolean isServerURL, boolean isUser, boolean isPassword,
+			boolean isProjectId, boolean isProjectName, boolean isSastResultPath) {
+		boolean partialParams = false;
+		partialParams = isServerURL && !partialParams ? false : true;
+		partialParams = isUser && !partialParams ? false : true;
+		partialParams = isPassword && !partialParams ? false : true;
+		partialParams = (isProjectId || isProjectName) && !partialParams ? false : true;
+		partialParams = isSastResultPath && !partialParams ? false : true;
+		return partialParams;
+	}
 
     private void fileExists(String file) {
 
@@ -2774,6 +2803,37 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return FormValidation.ok();
         }
 
+        @POST 
+        public FormValidation doCheckScaResolverAddParameters(@QueryParameter String value, @QueryParameter boolean isExploitablePathByScaResolver, @AncestorInPath Item item) {
+        	if(item == null) {
+        		return FormValidation.ok();
+        	}
+        	item.checkPermission(Item.CONFIGURE);
+        	if(!isExploitablePathByScaResolver && ((value.contains("--cxserver ") &&
+				 value.contains("--cxuser ") && value.contains("--cxpassword ") &&
+				value.contains("--cxprojectid ") || value.contains("--cxprojectname ") &&
+				value.contains("--sast-result-path ")))) {
+        		return FormValidation.error("Enable Exploitable Path to use Exploitable Path Detection");
+        	}
+            return FormValidation.ok();	
+        }
+
+        @POST 
+        public FormValidation doCheckIsExploitablePathByScaResolver(@QueryParameter boolean value, @QueryParameter String scaResolverAddParameters, @AncestorInPath Item item) {
+        	if(item == null) {
+        		return FormValidation.ok();
+        	}
+            item.checkPermission(Item.CONFIGURE);
+            if((scaResolverAddParameters.contains("--cxserver ") &&
+                    scaResolverAddParameters.contains("--cxuser ") && scaResolverAddParameters.contains("--cxpassword ") &&
+                    scaResolverAddParameters.contains("--cxprojectid ") || scaResolverAddParameters.contains("--cxprojectname ") &&
+                    scaResolverAddParameters.contains("--sast-result-path ")) && !value) {
+                return FormValidation.error("Enable Exploitable Path to use Exploitable Path Detection");
+            }
+            return FormValidation.ok();
+
+
+        }
 
         /**
          * This method verify correct format for Custom Fields
