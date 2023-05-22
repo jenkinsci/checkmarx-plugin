@@ -955,7 +955,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         final DescriptorImpl descriptor = getDescriptor();
         EnvVars env = run.getEnvironment(listener);
         setJvmVars(env);
-        Map<String, String> fsaVars = getAllFsaVars(env);
+        Map<String, String> fsaVars = getAllFsaVars(env, workspace.getRemote());
         CxScanConfig config;
 		try {
 			config = resolveConfiguration(run, descriptor, env, log,  workspace);
@@ -1317,14 +1317,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         writeJsonObjectToFile(scaResults.getSummary(), checkmarxBuildDir, SCA_SUMMERY_JSON);
         writeJsonObjectToFile(scaResults.getPackages(), checkmarxBuildDir, SCA_LIBRARIES_JSON);
         writeJsonObjectToFile(scaResults.getFindings(), checkmarxBuildDir, SCA_VULNERABILITIES_JSON);
-        if (scaResults.getPDFReport() != null) {
-            File pdfReportFile = new File(checkmarxBuildDir, CxScanResult.PDF_REPORT_NAME);
-            try {
-                FileUtils.writeByteArrayToFile(pdfReportFile, scaResults.getPDFReport());
-            } catch (IOException e) {
-                log.warn("Failed to write SCA PDF report to workspace: " + e.getMessage());
-            }
-        }
     }
 
     /**
