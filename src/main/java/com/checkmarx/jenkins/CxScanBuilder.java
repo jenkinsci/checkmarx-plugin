@@ -970,7 +970,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
 
         //print configuration
-        printConfiguration(config, log);
+        printConfiguration(config, descriptor, log);
 
         //validate at least one scan type is enabled
         if (!config.isSastEnabled() && !config.isAstScaEnabled() && !config.isOsaEnabled()) {
@@ -1317,18 +1317,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 		writeJsonObjectToFile(scaResults.getSummary(), checkmarxBuildDir, SCA_SUMMERY_JSON);
 		writeJsonObjectToFile(scaResults.getPackages(), checkmarxBuildDir, SCA_LIBRARIES_JSON);
 		writeJsonObjectToFile(scaResults.getFindings(), checkmarxBuildDir, SCA_VULNERABILITIES_JSON);
-
-		if (scaResults.getPDFReport() != null) {
-			String pdfReportPath = checkmarxBuildDir.getRemote() + File.separator + CxScanResult.SCA_PDF_REPORT_NAME;
-			log.debug("PDF Report path: " + pdfReportPath);
-			File pdfReportFile = new File(pdfReportPath);
-			try {
-				FileUtils.writeByteArrayToFile(pdfReportFile, scaResults.getPDFReport());
-				log.info("PDF Report generated at location: " + pdfReportPath);
-			} catch (IOException e) {
-				log.warn("Failed to write SCA PDF report to workspace: " + e.getMessage());
-			}
-		}
 	}
 
     /**
@@ -1760,9 +1748,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         result.setIncludeSources(dsConfig.isIncludeSources);
 
         //add SCA Resolver code here
-		String additionalParams = (globalSettingsInUse == true) ? dsConfig.globalScaResolverAddParameters
+		String additionalParams = (globalSettingsInUse) ? dsConfig.globalScaResolverAddParameters
 				: dsConfig.scaResolverAddParameters;
-		boolean isExploitablePath = (globalSettingsInUse == true) ? dsConfig.isGlobalExploitablePathByScaResolver
+		boolean isExploitablePath = (globalSettingsInUse) ? dsConfig.isGlobalExploitablePathByScaResolver
 				: dsConfig.isExploitablePathByScaResolver;
 
 		if (dsConfig.enableScaResolver != null
@@ -1836,7 +1824,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return result;
     }
 
-    private void printConfiguration(CxScanConfig config, CxLoggerAdapter log) {
+    private void printConfiguration(CxScanConfig config, DescriptorImpl descriptor, CxLoggerAdapter log) {
         log.info("---------------------------------------Configurations:------------------------------------");
         log.info("plugin version: {}", CxConfig.version());
         log.info("server url: " + config.getUrl());
@@ -1900,18 +1888,20 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 log.info("  OSA run Execute dependency managers install packages command before Scan: " + config.getOsaRunInstall());
             }
             if (config.isAstScaEnabled() && config.getAstScaConfig() != null){
-                log.info("Use CxSCA dependency scanner is enabled");
-                log.info("CxSCA API URL: " + config.getAstScaConfig().getApiUrl());
-                log.info("Access control server URL: " + config.getAstScaConfig().getAccessControlUrl());
-                log.info("CxSCA web app URL: " + config.getAstScaConfig().getWebAppUrl());
-                log.info("Account: " + config.getAstScaConfig().getTenant());
-                log.info("Team: " + config.getAstScaConfig().getTeamPath());
-                log.info("is generate SCA report: "+ config.isGenerateScaReport());
-                log.info("Enable Sca Resolver: " +config.getAstScaConfig().isEnableScaResolver());
-                if(config.getAstScaConfig().isEnableScaResolver())
-                    log.info("Enable Exploitable Path by Sca Resolver: "+((dependencyScanConfig.overrideGlobalConfig) ? dependencyScanConfig.isExploitablePathByScaResolver : dependencyScanConfig.isGlobalExploitablePathByScaResolver);
-            }
-        }
+				log.info("Use CxSCA dependency scanner is enabled");
+				log.info("CxSCA API URL: " + config.getAstScaConfig().getApiUrl());
+				log.info("Access control server URL: " + config.getAstScaConfig().getAccessControlUrl());
+				log.info("CxSCA web app URL: " + config.getAstScaConfig().getWebAppUrl());
+				log.info("Account: " + config.getAstScaConfig().getTenant());
+				log.info("Team: " + config.getAstScaConfig().getTeamPath());
+				log.info("is generate SCA report: " + config.isGenerateScaReport());
+				log.info("Enable Sca Resolver: " + config.getAstScaConfig().isEnableScaResolver());
+				if (config.getAstScaConfig().isEnableScaResolver())
+					log.info("Enable Exploitable Path by Sca Resolver: " + ((dependencyScanConfig.overrideGlobalConfig)
+							? dependencyScanConfig.isExploitablePathByScaResolver
+							: descriptor.getDependencyScanConfig().isGlobalExploitablePathByScaResolver));
+			}
+		}
 
         log.info("------------------------------------------------------------------------------------------");
     }
