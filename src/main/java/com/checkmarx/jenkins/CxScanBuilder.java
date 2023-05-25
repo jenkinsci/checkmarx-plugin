@@ -1374,6 +1374,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setEnableDataRetention(getDescriptor().isEnableDataRetention());
         if (getDescriptor().isEnableDataRetention()) {
             if (getOverrideGlobalRetentionRate()) {
+                if(getProjectRetentionRate()==0){
+                    ret.setEnableDataRetention(false);
+                }
                 ret.setProjectRetentionRate(getProjectRetentionRate());
             } else {
                 ret.setProjectRetentionRate(getDescriptor().getprojectRetentionRate());
