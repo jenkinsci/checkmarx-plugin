@@ -323,6 +323,15 @@
                     <!-- -= Generate PDF report =- -->
                     <f:optionalBlock title="Generate CxSAST PDF report" inline="true" field="generatePdfReport" />
 
+					<!-- -= generateScaReport =- -->
+                	<f:optionalBlock title="Generate SCA report" inline="true" field="generateScaReport" checkMethod="POST"
+                	checked="${instance.dependencyScanConfig.dependencyScannerType == 'SCA'}">
+
+                		<f:entry name="scaReportFormat" title="Report Format:" field="scaReportFormat">
+            			<f:enum field="scaReportFormat">${it.displayName}</f:enum>
+            			</f:entry>
+           			</f:optionalBlock>
+
                     <!-- -= enableProjectPolicyEnforcement =- -->
                     <f:optionalBlock title="Enable Project's policy enforcement" inline="true" field="enableProjectPolicyEnforcement" />
 
