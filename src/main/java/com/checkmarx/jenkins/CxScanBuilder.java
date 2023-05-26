@@ -94,6 +94,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     private static final String PDF_URL_TEMPLATE = "/%scheckmarx/pdfReport";
     private static final String PDF_URL = "checkmarx/pdfReport";
+    private static final String SCA_PDF_URL_TEMPLATE = "/%scheckmarx/scaPdfReport";
+    private static final String SCA_PDF_URL = "checkmarx/scaPdfReport";
     private static final String REQUEST_ORIGIN = "Jenkins";
     
     private static final String SUPPRESS_BENIGN_ERRORS = "suppressBenignErrors";
@@ -1023,7 +1025,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
         
         if (config.isGenerateScaReport()) {
-        	if(config.getScaReportFormat() != null) {
+        	if(config.getScaReportFormat() != null && "pdf".equalsIgnoreCase(config.getScaReportFormat())) {
             String path = "";
             // run.getUrl() returns a URL path similar to job/MyJobName/124/
             //getRootUrl() will return the value of "Manage Jenkins->configuration->Jenkins URL"
@@ -1034,11 +1036,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
             if (!(path.equals("/"))) {
                 //to handle this Jenkins root url,EX: http://localhost:8081/jenkins
-                Path pdfUrlPath = Paths.get(path, run.getUrl(), PDF_URL);
+                Path pdfUrlPath = Paths.get(path, run.getUrl(), SCA_PDF_URL);
                 scanResults.getScaResults().setScaPDFLink(pdfUrlPath.toString());
             } else {
                 //to handle this Jenkins root url,EX: http://localhost:8081/
-                String pdfUrl = String.format(PDF_URL_TEMPLATE, run.getUrl());
+                String pdfUrl = String.format(SCA_PDF_URL_TEMPLATE, run.getUrl());
                 scanResults.getScaResults().setScaPDFLink(pdfUrl);
             }
         	}
@@ -1047,7 +1049,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //in case of async mode, do not create reports (only the report of the latest scan)
         //and don't assert threshold vulnerabilities
 
-        failTheBuild(run, config, scanResults);
+         failTheBuild(run, config, scanResults);
         if (config.getSynchronous()) {
 
             //generate html report
@@ -1073,7 +1075,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             if (osaResults != null && osaResults.isOsaResultsReady()) {
                 createOsaReports(osaResults, workspace);
             } else if (scaResults != null && scaResults.isScaResultReady()) {
-                createScaReports(scaResults, workspace);
+                createScaReports(scaResults, config, checkmarxBuildDir, workspace);
             }
             return;
         }
@@ -1313,11 +1315,26 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 });
     }
 
-    private void createScaReports(AstScaResults scaResults, FilePath checkmarxBuildDir) {
-        writeJsonObjectToFile(scaResults.getSummary(), checkmarxBuildDir, SCA_SUMMERY_JSON);
-        writeJsonObjectToFile(scaResults.getPackages(), checkmarxBuildDir, SCA_LIBRARIES_JSON);
-        writeJsonObjectToFile(scaResults.getFindings(), checkmarxBuildDir, SCA_VULNERABILITIES_JSON);
-    }
+	private void createScaReports(AstScaResults scaResults, CxScanConfig config, File checkmarxBuildDir,
+			FilePath workspace) {
+
+		writeJsonObjectToFile(scaResults.getSummary(), workspace, SCA_SUMMERY_JSON);
+		writeJsonObjectToFile(scaResults.getPackages(), workspace, SCA_LIBRARIES_JSON);
+		writeJsonObjectToFile(scaResults.getFindings(), workspace, SCA_VULNERABILITIES_JSON);
+		if (config.isGenerateScaReport()) {
+			if (scaResults.getPDFReport() != null) {
+				File pdfReportFile = new File(checkmarxBuildDir, CxScanResult.SCA_PDF_REPORT_NAME);
+				log.info("PDF Report generated at location: " + pdfReportFile.getAbsolutePath());
+				try {
+					FileUtils.writeByteArrayToFile(pdfReportFile, scaResults.getPDFReport());
+					scaResults.setScaPDFLink(checkmarxBuildDir + File.separator + CxScanResult.SCA_PDF_REPORT_NAME);
+					log.info("PDF Report generated at location: " + pdfReportFile.getAbsolutePath());
+				} catch (IOException e) {
+					log.warn("Failed to write SCA PDF report to workspace: " + e.getMessage());
+				}
+			}
+		}
+	}
 
     /**
      * Method validate if CxServerURL is part of 'No proxy host'
@@ -1583,12 +1600,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 		if (ret.isAstScaEnabled()) {
 			ret.setGenerateScaReport(generateScaReport);
-			ret.setScaReportFormat(scaReportFormat.name());
-			if (ret.getScaReportFormat() != null && !ret.getScaReportFormat().isEmpty()) {
-				ret.setGenerateScaReport(true);
-			} else {
-				ret.setGenerateScaReport(false);
-				throw new ConfigurationException("Invalid SCA report format:" + scaReportFormat + ".");
+			if (getScaReportFormat() != null && scaReportFormat.name() != null) {
+				ret.setScaReportFormat(scaReportFormat.name());
 			}
 		}
         
