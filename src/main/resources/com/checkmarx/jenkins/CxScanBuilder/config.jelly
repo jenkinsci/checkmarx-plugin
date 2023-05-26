@@ -325,7 +325,7 @@
 
 					<!-- -= generateScaReport =- -->
                 	<f:optionalBlock title="Generate SCA report" inline="true" field="generateScaReport" checkMethod="POST"
-                	checked="${instance.dependencyScanConfig.dependencyScannerType == 'SCA'}">
+                	checked="${instance.generateScaReport &amp;&amp; instance.dependencyScanConfig.dependencyScannerType == 'SCA'}">
 
                 		<f:entry name="scaReportFormat" title="Report Format:" field="scaReportFormat">
             			<f:enum field="scaReportFormat">${it.displayName}</f:enum>
