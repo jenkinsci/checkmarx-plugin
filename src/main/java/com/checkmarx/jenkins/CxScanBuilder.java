@@ -1773,7 +1773,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
         log.info("project name: " + config.getProjectName());
         log.info("team id: " + config.getTeamId());
-        log.info("Project Retention Rate: " + config.getProjectRetentionRate());
+        log.info("scan retention rate: " + config.getProjectRetentionRate());
         log.info("is synchronous mode: " + config.getSynchronous());
         log.info("deny new project creation: " + config.getDenyProject());
         log.info("SAST scan enabled: " + config.isSastEnabled());
