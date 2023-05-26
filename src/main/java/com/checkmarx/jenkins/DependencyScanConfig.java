@@ -93,7 +93,13 @@ public class DependencyScanConfig {
     public String scaResolverAddParameters;
     
     @DataBoundSetter
+    public String globalScaResolverAddParameters;
+    
+    @DataBoundSetter
     public boolean isExploitablePathByScaResolver;
+    
+    @DataBoundSetter
+    public boolean isGlobalExploitablePathByScaResolver;
     
     @DataBoundSetter
     public String fsaVariables;

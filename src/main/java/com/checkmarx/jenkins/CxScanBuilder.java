@@ -972,7 +972,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
 
         //print configuration
-        printConfiguration(config, log);
+        printConfiguration(config, descriptor, log);
 
         //validate at least one scan type is enabled
         if (!config.isSastEnabled() && !config.isAstScaEnabled() && !config.isOsaEnabled()) {
@@ -1315,6 +1315,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 });
     }
 
+
 	private void createScaReports(AstScaResults scaResults, CxScanConfig config, File checkmarxBuildDir,
 			FilePath workspace) {
 
@@ -1438,6 +1439,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setEnableDataRetention(getDescriptor().isEnableDataRetention());
         if (getDescriptor().isEnableDataRetention()) {
             if (getOverrideGlobalRetentionRate()) {
+                if(getProjectRetentionRate()==0){
+                    ret.setEnableDataRetention(false);
+                }
                 ret.setProjectRetentionRate(getProjectRetentionRate());
             } else {
                 ret.setProjectRetentionRate(getDescriptor().getprojectRetentionRate());
@@ -1745,7 +1749,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         DependencyScanConfig dsConfig;
         boolean globalSettingsInUse = false;
         if (dsConfigJobLevel.overrideGlobalConfig) {
-            dsConfig = dsConfigJobLevel;
+            dsConfig = dsConfigJobLevel; 
         } else {
             globalSettingsInUse = true;
             dsConfig = descriptor.getDependencyScanConfig();
@@ -1761,12 +1765,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         result.setIncludeSources(dsConfig.isIncludeSources);
 
         //add SCA Resolver code here
-        String additionalParams = dsConfig.scaResolverAddParameters;
+		String additionalParams = (globalSettingsInUse) ? dsConfig.globalScaResolverAddParameters
+				: dsConfig.scaResolverAddParameters;
+		boolean isExploitablePath = (globalSettingsInUse) ? dsConfig.isGlobalExploitablePathByScaResolver
+				: dsConfig.isExploitablePathByScaResolver;
+
 		if (dsConfig.enableScaResolver != null
 				&& SCAScanType.SCA_RESOLVER.toString().equalsIgnoreCase(dsConfig.enableScaResolver.toString())) {
 //            scaResolverPathExist(dsConfig.pathToScaResolver);
 			validateScaResolverParams(additionalParams, config, workspace);
-			additionalParams = checkMissingMandatoryAdditionalParams(additionalParams, workspace, config, dsConfig.isExploitablePathByScaResolver);
+			additionalParams = checkMissingMandatoryAdditionalParams(additionalParams, workspace, config,
+					isExploitablePath);
 			result.setEnableScaResolver(true);
 		} else
 			result.setEnableScaResolver(false);
@@ -1832,7 +1841,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return result;
     }
 
-    private void printConfiguration(CxScanConfig config, CxLoggerAdapter log) {
+    private void printConfiguration(CxScanConfig config, DescriptorImpl descriptor, CxLoggerAdapter log) {
         log.info("---------------------------------------Configurations:------------------------------------");
         log.info("plugin version: {}", CxConfig.version());
         log.info("server url: " + config.getUrl());
@@ -1847,7 +1856,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
         log.info("project name: " + config.getProjectName());
         log.info("team id: " + config.getTeamId());
-        log.info("Project Retention Rate: " + config.getProjectRetentionRate());
+        log.info("scan retention rate: " + config.getProjectRetentionRate());
         log.info("is synchronous mode: " + config.getSynchronous());
         log.info("deny new project creation: " + config.getDenyProject());
         log.info("SAST scan enabled: " + config.isSastEnabled());
@@ -1896,15 +1905,20 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 log.info("  OSA run Execute dependency managers install packages command before Scan: " + config.getOsaRunInstall());
             }
             if (config.isAstScaEnabled() && config.getAstScaConfig() != null){
-                log.info("Use CxSCA dependency scanner is enabled");
-                log.info("CxSCA API URL: " + config.getAstScaConfig().getApiUrl());
-                log.info("Access control server URL: " + config.getAstScaConfig().getAccessControlUrl());
-                log.info("CxSCA web app URL: " + config.getAstScaConfig().getWebAppUrl());
-                log.info("Account: " + config.getAstScaConfig().getTenant());
-                log.info("Team: " + config.getAstScaConfig().getTeamPath());
-                log.info("is generate SCA report: "+ config.isGenerateScaReport());
-            }
-        }
+				log.info("Use CxSCA dependency scanner is enabled");
+				log.info("CxSCA API URL: " + config.getAstScaConfig().getApiUrl());
+				log.info("Access control server URL: " + config.getAstScaConfig().getAccessControlUrl());
+				log.info("CxSCA web app URL: " + config.getAstScaConfig().getWebAppUrl());
+				log.info("Account: " + config.getAstScaConfig().getTenant());
+				log.info("Team: " + config.getAstScaConfig().getTeamPath());
+				log.info("is generate SCA report: " + config.isGenerateScaReport());
+				log.info("Enable Sca Resolver: " + config.getAstScaConfig().isEnableScaResolver());
+				if (config.getAstScaConfig().isEnableScaResolver())
+					log.info("Enable Exploitable Path by Sca Resolver: " + ((dependencyScanConfig.overrideGlobalConfig)
+							? dependencyScanConfig.isExploitablePathByScaResolver
+							: descriptor.getDependencyScanConfig().isGlobalExploitablePathByScaResolver));
+			}
+		}
 
         log.info("------------------------------------------------------------------------------------------");
     }
@@ -2229,59 +2243,85 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
     }
 
-	private String checkMissingMandatoryAdditionalParams(String additionalParams, FilePath workspace, CxScanConfig config, boolean isExploitablePathByScaResolver) {
-        if (additionalParams == null) {
-            additionalParams = "";
-        }
-        if (!additionalParams.contains("-n ")) {
-            if(StringUtils.isNotEmpty(config.getProjectName()))
-                additionalParams += " -n " +config.getProjectName();
-            else
-                throw new CxClientException("projectname must be specified");
-        }
-        
-        if (!additionalParams.contains("-s ")) {
-            if(null != workspace)
-                additionalParams += " -s " + workspace;   
-            else
-                throw new CxClientException("source path must be specified");
-        }
+	private String checkMissingMandatoryAdditionalParams(String additionalParams, FilePath workspace,
+			CxScanConfig config, boolean isExploitablePathByScaResolver) {
+		if (additionalParams == null) {
+			additionalParams = "";
+		}
+		String addParams = additionalParams;
+		if (!additionalParams.contains("-n ")) {
+			if (StringUtils.isNotEmpty(config.getProjectName()))
+				additionalParams += " -n " + config.getProjectName();
+			else
+				throw new CxClientException("projectname must be specified");
+		}
 
-        if (!additionalParams.contains("-r ") && !additionalParams.contains("--resolver-result-path ")) {
-            if(null != workspace)
-                additionalParams += " -r " + workspace + File.separator + scaResolverResultPath;
-            else
-                throw new CxClientException("result path must be specified");
-        }
-        if(isExploitablePathByScaResolver) {
-            if (!additionalParams.contains("--cxserver ")) {
-                if(StringUtils.isNotEmpty(config.getUrl()))
-                    additionalParams += " --cxserver " +config.getUrl();
-                else
-                    throw new CxClientException("cxserver must be specified");
-            }
-            if (!additionalParams.contains("--cxuser ")) {
-                if(StringUtils.isNotEmpty(config.getUsername()))
-                    additionalParams += " --cxuser " +config.getUsername();
-                else
-                    throw new CxClientException("cxuser  must be specified");
-            }
-            if (!additionalParams.contains("--cxpassword ")) {
-                if(StringUtils.isNotEmpty(config.getPassword()))
-                    additionalParams += " --cxpassword " +config.getPassword();
-                else
-                    throw new CxClientException("cxpassword must be specified");
-            }
-            if (!additionalParams.contains("--sast-result-path ")) {
-                if(null != workspace)
-                    additionalParams += " --sast-result-path "+ workspace + File.separator + scaResolverSastResultPath;
-                else
-                    throw new CxClientException("sast result path must be specified");
-            }
-        }
-        log.debug("Sca Resolver Additional params: "+additionalParams);
-       return  additionalParams;
-    }
+		if (!additionalParams.contains("-s ")) {
+			if (null != workspace)
+				additionalParams += " -s " + workspace;
+			else
+				throw new CxClientException("source path must be specified");
+		}
+
+		if (!additionalParams.contains("-r ") && !additionalParams.contains("--resolver-result-path ")) {
+			if (null != workspace)
+				additionalParams += " -r " + workspace + File.separator + scaResolverResultPath;
+			else
+				throw new CxClientException("result path must be specified");
+		}
+		if (isExploitablePathByScaResolver) {
+			if (!additionalParams.contains("--cxserver ")) {
+				if (StringUtils.isNotEmpty(config.getUrl()))
+					additionalParams += " --cxserver " + config.getUrl();
+				else
+					throw new CxClientException("cxserver must be specified");
+			}
+			if (!additionalParams.contains("--cxuser ")) {
+				if (StringUtils.isNotEmpty(config.getUsername()))
+					additionalParams += " --cxuser " + config.getUsername();
+				else
+					throw new CxClientException("cxuser  must be specified");
+			}
+			if (!additionalParams.contains("--cxpassword ")) {
+				if (StringUtils.isNotEmpty(config.getPassword()))
+					additionalParams += " --cxpassword " + config.getPassword();
+				else
+					throw new CxClientException("cxpassword must be specified");
+			}
+			if (!additionalParams.contains("--sast-result-path ")) {
+				if (null != workspace)
+					additionalParams += " --sast-result-path " + workspace + File.separator + scaResolverSastResultPath;
+				else
+					throw new CxClientException("sast result path must be specified");
+			}
+			if (!additionalParams.contains("--cxprojectname ") && !additionalParams.contains("--cxprojectid ")) {
+				if (StringUtils.isNotEmpty(config.getProjectName()))
+					additionalParams += " --cxprojectname " + config.getProjectName();
+				else
+					throw new CxClientException("sast project name or sast project id must be specified");
+			}
+		}
+		if (!isExploitablePathByScaResolver && (addParams.contains("--cxserver ") && addParams.contains("--cxuser ")
+				&& addParams.contains("--cxpassword ")
+				&& (addParams.contains("--cxprojectid ") || addParams.contains("--cxprojectname "))
+				&& addParams.contains("--sast-result-path ")))
+			log.warn(
+					"All SAST Parameters (--cxserver, --cxuser, --cxpassword, --sast-result-path, and --cxprojectid or --cxprojectname) are provided. But Enable Exploitable Path is disabled.");
+
+		else if (isExploitablePathByScaResolver && (addParams.contains("--cxserver ") || addParams.contains("--cxuser ")
+				|| addParams.contains("--cxpassword ")
+				|| (addParams.contains("--cxprojectid ") || addParams.contains("--cxprojectname "))
+				|| addParams.contains("--sast-result-path ")))
+			log.warn(
+					"Provided SAST Parameters (--cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname) will be taken from ScaResolver Additional Parameters. Rest missing parameters will be taken from the Job level parameters.");
+
+		if (addParams.contains("-n ") || addParams.contains("-s ") || addParams.contains("-r ")
+				|| addParams.contains("--resolver-result-path"))
+			log.warn(
+					"Provided parameters (-n , -s, -r or --resolver-result-path) will be taken from ScaResolver Additional Parameters. Rest missing parameters will be taken from the Job level parameters.");
+
+		return additionalParams;
+	}
 
     private void fileExists(String file) {
 
@@ -2770,17 +2810,170 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * browser.
          */
         @POST
-        public FormValidation doCheckScaSASTProjectID(@QueryParameter String value, @QueryParameter String scaSASTProjectFullPath,@AncestorInPath Item item) {
+        public FormValidation doCheckScaSASTProjectID(@QueryParameter String value, @QueryParameter String scaSASTProjectFullPath, @AncestorInPath Item item) {
         	if (item == null) {
                 return FormValidation.ok();
-        	}    
+        	}
         	item.checkPermission(Item.CONFIGURE);
             if (StringUtil.isNullOrEmpty(value) && StringUtil.isNullOrEmpty(scaSASTProjectFullPath)) {
                 return FormValidation.error("Must provide value for either 'Project Full Path' or 'Project Id'.");
             }
             return FormValidation.ok();
         }
+        
+        
+		private boolean checkAllSastAddParamsWithoutExpPath(boolean isExploitablePathByScaResolver,
+				String scaResolverAddParameters) {
+			return (!isExploitablePathByScaResolver && (scaResolverAddParameters.contains("--cxserver ")
+					&& scaResolverAddParameters.contains("--cxuser ")
+					&& scaResolverAddParameters.contains("--cxpassword ")
+					&& (scaResolverAddParameters.contains("--cxprojectid ")
+							|| scaResolverAddParameters.contains("--cxprojectname "))
+					&& scaResolverAddParameters.contains("--sast-result-path ")));
+		}
 
+		private boolean checkAnySastAddParamsWithExpPath(boolean isExploitablePathByScaResolver,
+				String scaResolverAddParameters) {
+			return (isExploitablePathByScaResolver && (scaResolverAddParameters.contains("--cxserver ")
+					|| scaResolverAddParameters.contains("--cxuser ")
+					|| scaResolverAddParameters.contains("--cxpassword ")
+					|| (scaResolverAddParameters.contains("--cxprojectid ")
+							|| scaResolverAddParameters.contains("--cxprojectname "))
+					|| scaResolverAddParameters.contains("--sast-result-path ")));
+		}
+
+		private boolean checkAnyMandatoryAddParams(String scaResolverAddParameters) {
+			return (scaResolverAddParameters.contains("-n ") || scaResolverAddParameters.contains("-s ")
+					|| scaResolverAddParameters.contains("-r ")
+					|| scaResolverAddParameters.contains("--resolver-result-path"));
+		}
+
+		/**
+		 * This method validates the SCA Resolver Additional Parameters on UI.
+		 * 
+		 * @param value:                         Indicates scaResolverAddParameters.
+		 * @param isExploitablePathByScaResolver
+		 * @return FormValidation: Indicates the outcome of the validation and send to
+		 *         UI.
+		 */
+		@POST
+		public FormValidation doCheckScaResolverAddParameters(@QueryParameter String value,
+				@QueryParameter boolean isExploitablePathByScaResolver) {
+			String warnMessage = "";
+			String errorMessage = "";
+			String otherWarnMessage = "";
+			if (checkAllSastAddParamsWithoutExpPath(isExploitablePathByScaResolver, value)) {
+				errorMessage = "All SAST Parameters in 'SCA Resolver Additional Parameters' (--cxserver, --cxuser, --cxpassword, --sast-result-path, and --cxprojectid or --cxprojectname) are provided. But Enable Exploitable Path is disabled.";
+			} else if (checkAnySastAddParamsWithExpPath(isExploitablePathByScaResolver, value)) {
+				warnMessage = "Given SAST Parameters in 'SCA Resolver Additional Parameters' (like --cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname) will be considered. Rest missing parameters will be considered from the Job/Global level parameters.";
+			}
+			if (checkAnyMandatoryAddParams(value)) {
+				otherWarnMessage = "Given parameters in 'SCA Resolver Additional Parameters' (like -n , -s, -r or --resolver-result-path) will be considered. Rest missing parameters will be considered from the Job level parameters.";
+			}
+			if (!StringUtil.isNullOrEmpty(errorMessage)) {
+				if (!StringUtil.isNullOrEmpty(otherWarnMessage))
+					errorMessage += "\n" + otherWarnMessage;
+				return FormValidation.error(errorMessage);
+			} else if (!StringUtil.isNullOrEmpty(warnMessage)) {
+				if (!StringUtil.isNullOrEmpty(otherWarnMessage))
+					warnMessage += "\n" + otherWarnMessage;
+				return FormValidation.warning(warnMessage);
+			} else if (!StringUtil.isNullOrEmpty(otherWarnMessage))
+				return FormValidation.warning(otherWarnMessage);
+			return FormValidation.ok();
+		}
+
+		/**
+		 * This method validates the SCA Resolver Additional Parameters on UI.
+		 * 
+		 * @param value:                   Indicates isExploitablePathByScaResolver.
+		 * @param scaResolverAddParameters
+		 * @return FormValidation: Indicates the outcome of the validation and send to
+		 *         UI.
+		 */
+		@POST
+		public FormValidation doCheckIsExploitablePathByScaResolver(@QueryParameter boolean value,
+				@QueryParameter String scaResolverAddParameters) {
+			String warnMessage = "";
+			String errorMessage = "";
+			if (checkAllSastAddParamsWithoutExpPath(value, scaResolverAddParameters)) {
+				errorMessage = "All SAST Parameters in 'SCA Resolver Additional Parameters' (--cxserver, --cxuser, --cxpassword, --sast-result-path, and --cxprojectid or --cxprojectname) are provided. But 'Enable Exploitable Path' is disabled.";
+			} else if (checkAnySastAddParamsWithExpPath(!value, scaResolverAddParameters)) {
+				errorMessage = "Given SAST Parameters in 'SCA Resolver Additional Parameters' (like --cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname) will not be considered. As 'Enable Exploitable Path' is disabled.";
+			}
+			if (checkAnyMandatoryAddParams(scaResolverAddParameters)) {
+				warnMessage = "Given parameters in 'SCA Resolver Additional Parameters' (like -n , -s, -r or --resolver-result-path) will be considered. Rest missing parameters will be taken from the Job level parameters.";
+			}
+			if (!StringUtil.isNullOrEmpty(errorMessage))
+				return FormValidation.error(errorMessage);
+			else if (!StringUtil.isNullOrEmpty(warnMessage))
+				return FormValidation.warning(warnMessage);
+			return FormValidation.ok();
+		}
+
+		/**
+		 * This method validates the Global SCA Resolver Additional Parameters on UI.
+		 * 
+		 * @param value:                               Indicates
+		 *                                             globalScaResolverAddParameters.
+		 * @param isGlobalExploitablePathByScaResolver
+		 * @return FormValidation: Indicates the outcome of the validation and send to
+		 *         UI.
+		 */
+		@POST
+		public FormValidation doCheckGlobalScaResolverAddParameters(@QueryParameter String value,
+				@QueryParameter boolean isGlobalExploitablePathByScaResolver) {
+			String warnMessage = "";
+			String errorMessage = "";
+			String otherWarnMessage = "";
+			String globalWarnMessage = "Given parameters will be considered only if 'Override global dependency scan settings' parameter is disabled at Job Level.";
+			if (checkAllSastAddParamsWithoutExpPath(isGlobalExploitablePathByScaResolver, value)) {
+				errorMessage = "All SAST Parameters in 'SCA Resolver Additional Parameters' (--cxserver, --cxuser, --cxpassword, --sast-result-path, and --cxprojectid or --cxprojectname) are provided. But Enable Exploitable Path is disabled.";
+			} else if (checkAnySastAddParamsWithExpPath(isGlobalExploitablePathByScaResolver, value)) {
+				warnMessage = "Given SAST Parameters in 'SCA Resolver Additional Parameters' (like --cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname) will be considered. Rest missing parameters will be considered from the Job/Global level parameters.";
+			}
+			if (checkAnyMandatoryAddParams(value)) {
+				otherWarnMessage = "Given parameters in 'SCA Resolver Additional Parameters' (like -n , -s, -r or --resolver-result-path) will be considered. Rest missing parameters will be considered from the Job level parameters.";
+			}
+			if (!StringUtil.isNullOrEmpty(errorMessage)) {
+				if (!StringUtil.isNullOrEmpty(otherWarnMessage))
+					errorMessage += "\n" + otherWarnMessage;
+				return FormValidation.error(errorMessage);
+			}
+			if (!StringUtil.isNullOrEmpty(warnMessage) || !StringUtil.isNullOrEmpty(otherWarnMessage))
+				return FormValidation.warning(globalWarnMessage + "\n" + warnMessage + "\n" + otherWarnMessage);
+			return FormValidation.ok();
+		}
+
+		/**
+		 * This method validates the Global SCA Resolver Additional Parameters on UI.
+		 * 
+		 * @param value:                         Indicates
+		 *                                       isGlobalExploitablePathByScaResolver.
+		 * @param globalScaResolverAddParameters
+		 * @return FormValidation: Indicates the outcome of the validation and send to
+		 *         UI.
+		 */
+		@POST
+		public FormValidation doCheckIsGlobalExploitablePathByScaResolver(@QueryParameter boolean value,
+				@QueryParameter String globalScaResolverAddParameters) {
+			String warnMessage = "";
+			String errorMessage = "";
+			String globalWarnMessage = "Given parameters will be considered only if 'Override global dependency scan settings' parameter is disabled at Job Level.";
+			if (checkAllSastAddParamsWithoutExpPath(value, globalScaResolverAddParameters)) {
+				errorMessage = "All SAST Parameters in 'SCA Resolver Additional Parameters' (--cxserver, --cxuser, --cxpassword, --sast-result-path, and --cxprojectid or --cxprojectname) are provided. But 'Enable Exploitable Path' is disabled.";
+			} else if (checkAnySastAddParamsWithExpPath(!value, globalScaResolverAddParameters)) {
+				errorMessage = "Given SAST Parameters in 'SCA Resolver Additional Parameters' (like --cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname) will not be considered. As 'Enable Exploitable Path' is disabled.";
+			}
+			if (checkAnyMandatoryAddParams(globalScaResolverAddParameters)) {
+				warnMessage = "Given parameters in 'SCA Resolver Additional Parameters' (like -n , -s, -r or --resolver-result-path) will be considered. Rest missing parameters will be taken from the Job level parameters.";
+			}
+			if (!StringUtil.isNullOrEmpty(errorMessage))
+				return FormValidation.error(errorMessage);
+			else if (!StringUtil.isNullOrEmpty(warnMessage))
+				return FormValidation.warning(globalWarnMessage + "\n" + warnMessage);
+			return FormValidation.ok();
+		}
 
         /**
          * This method verify correct format for Custom Fields

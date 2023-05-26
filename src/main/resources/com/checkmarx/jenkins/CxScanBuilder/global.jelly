@@ -177,10 +177,10 @@
                             <f:textbox value="${descriptor.dependencyScanConfig.pathToScaResolver}" />
                         </f:entry>
 
-                        <f:entry title="SCA Resolver Additional Parameters" field="scaResolverAddParameters">
-                             <f:textarea value="${descriptor.dependencyScanConfig.scaResolverAddParameters}" />
+                        <f:entry title="SCA Resolver Additional Parameters" field="globalScaResolverAddParameters">
+                             <f:textarea value="${descriptor.dependencyScanConfig.globalScaResolverAddParameters}" />
                         </f:entry>
-                        <f:optionalBlock title="Enable Exploitable Path" field="isExploitablePathByScaResolver" inline="true"  checked="${descriptor.dependencyScanConfig.isExploitablePathByScaResolver}">
+                        <f:optionalBlock title="Enable Exploitable Path" field="isGlobalExploitablePathByScaResolver" inline="true"  checked="${descriptor.dependencyScanConfig.isGlobalExploitablePathByScaResolver}">
                         </f:optionalBlock>
                     </f:radioBlock>
                     <f:radioBlock checked="${descriptor.dependencyScanConfig.enableScaResolver == null || descriptor.dependencyScanConfig.enableScaResolver == 'MANIFEST'}" inline="true"
