@@ -3625,6 +3625,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return checkNonNegativeValue(value);
         }
 
+        @POST
+        public FormValidation doCheckProjectRetentionRate(@QueryParameter final Integer value,@AncestorInPath Item item) {
+            if (item == null) {
+                return FormValidation.ok();
+            }
+            item.checkPermission(Item.CONFIGURE);
+            if(value==0){
+                return FormValidation.warning("scan retention with 0 value will not set retention rate");
+            }
+            return checkNonNegativeValue(value);
+        }
 
         private FormValidation checkNonNegativeValue(final Integer value) {
             if (value == null || value >= 0) {

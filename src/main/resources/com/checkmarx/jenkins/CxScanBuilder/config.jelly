@@ -67,7 +67,7 @@
         <f:optionalBlock title="Override global scan retention settings" name="overrideGlobalRetentionRate"
                          checked="${instance.overrideGlobalRetentionRate}" inline="true">
                     <f:entry title="Scan Retention rate (number of scan)" field="projectRetentionRate">
-                        <f:number clazz="positive-number" min="0" max="10000" step="1" default="10" checkMethod="POST" />
+                        <f:number clazz="number" min="0" max="10000" step="1" default="10" checkMethod="POST" />
                     </f:entry>
         </f:optionalBlock>
         </j:when>
