@@ -324,7 +324,7 @@
                     <f:optionalBlock title="Generate CxSAST PDF report" inline="true" field="generatePdfReport" />
 
 					<!-- -= generateScaReport =- -->
-                	<f:optionalBlock title="Generate SCA report" inline="true" field="generateScaReport" checkMethod="POST"
+                	<f:optionalBlock title="Generate CxSCA report" inline="true" field="generateScaReport" checkMethod="POST"
                 	checked="${instance.generateScaReport &amp;&amp; instance.dependencyScanConfig.dependencyScannerType == 'SCA'}">
 
                 		<f:entry name="scaReportFormat" title="Report Format:" field="scaReportFormat">
