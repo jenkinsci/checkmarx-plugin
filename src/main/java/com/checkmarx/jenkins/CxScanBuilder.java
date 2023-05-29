@@ -3632,7 +3632,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
             item.checkPermission(Item.CONFIGURE);
             if(value==0){
-                return FormValidation.warning("scan retention with 0 value will not set retention rate");
+                return FormValidation.warning("Scan retention with 0 value will not set retention rate");
             }
             return checkNonNegativeValue(value);
         }
