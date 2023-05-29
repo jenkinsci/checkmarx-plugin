@@ -1323,7 +1323,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 		writeJsonObjectToFile(scaResults.getPackages(), workspace, SCA_LIBRARIES_JSON);
 		writeJsonObjectToFile(scaResults.getFindings(), workspace, SCA_VULNERABILITIES_JSON);
 		if (config.isGenerateScaReport()) {
-			if (scaResults.getPDFReport() != null) {
+			if (scaResults.getPDFReport() != null && "pdf".equalsIgnoreCase(config.getScaReportFormat())) {
 				File pdfReportFile = new File(checkmarxBuildDir, CxScanResult.SCA_PDF_REPORT_NAME);
 				log.info("PDF Report generated at location: " + pdfReportFile.getAbsolutePath());
 				try {
