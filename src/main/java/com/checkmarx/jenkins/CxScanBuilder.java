@@ -1444,7 +1444,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 }
                 ret.setProjectRetentionRate(getProjectRetentionRate());
             } else {
-                ret.setProjectRetentionRate(getDescriptor().getprojectRetentionRate());
+                ret.setProjectRetentionRate(getDescriptor().getprojectRetentionRateEnforce());
             }
         }
 
@@ -2396,7 +2396,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private String username;
         @Nullable
         private String password;
-        private Integer projectRetentionRate;
+        private Integer projectRetentionRateEnforce;
         private String credentialsId;
         private String mvnPath;
         private boolean isProxy = true;
@@ -2468,12 +2468,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return username;
         }
 
-        public Integer getprojectRetentionRate() {
-            return projectRetentionRate;
+        public Integer getprojectRetentionRateEnforce() {
+            return projectRetentionRateEnforce;
         }
 
-        public void setProjectRetentionRate(Integer projectRetentionRate) {
-            this.projectRetentionRate = projectRetentionRate;
+        public void setProjectRetentionRateEnforce(Integer projectRetentionRateEnforce) {
+            this.projectRetentionRateEnforce = projectRetentionRateEnforce;
         }
         public void setUsername(@Nullable String username) {
             this.username = username;
