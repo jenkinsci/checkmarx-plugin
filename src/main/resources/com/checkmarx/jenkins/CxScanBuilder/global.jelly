@@ -214,7 +214,7 @@
         </f:optionalBlock>
         <f:optionalBlock title="Enable Data Retention" inline="true"
                          field="enableDataRetention">
-            <f:entry title="Scan Retention rate (number of scan)" field="projectRetentionRate">
+            <f:entry title="Scan Retention rate (number of scan)" field="projectRetentionRateEnforce">
                 <f:number clazz="positive-number" min="1" max="10000" step="1" default="10" checkMethod="POST" />
             </f:entry>
         </f:optionalBlock>

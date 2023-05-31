@@ -1323,7 +1323,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 		writeJsonObjectToFile(scaResults.getPackages(), workspace, SCA_LIBRARIES_JSON);
 		writeJsonObjectToFile(scaResults.getFindings(), workspace, SCA_VULNERABILITIES_JSON);
 		if (config.isGenerateScaReport()) {
-			if (scaResults.getPDFReport() != null) {
+			if (scaResults.getPDFReport() != null && "pdf".equalsIgnoreCase(config.getScaReportFormat())) {
 				File pdfReportFile = new File(checkmarxBuildDir, CxScanResult.SCA_PDF_REPORT_NAME);
 				log.info("PDF Report generated at location: " + pdfReportFile.getAbsolutePath());
 				try {
@@ -1444,7 +1444,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 }
                 ret.setProjectRetentionRate(getProjectRetentionRate());
             } else {
-                ret.setProjectRetentionRate(getDescriptor().getprojectRetentionRate());
+                ret.setProjectRetentionRate(getDescriptor().getprojectRetentionRateEnforce());
             }
         }
 
@@ -2383,7 +2383,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private String username;
         @Nullable
         private String password;
-        private Integer projectRetentionRate;
+        private Integer projectRetentionRateEnforce;
         private String credentialsId;
         private String mvnPath;
         private boolean isProxy = true;
@@ -2455,12 +2455,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return username;
         }
 
-        public Integer getprojectRetentionRate() {
-            return projectRetentionRate;
+        public Integer getprojectRetentionRateEnforce() {
+            return projectRetentionRateEnforce;
         }
 
-        public void setProjectRetentionRate(Integer projectRetentionRate) {
-            this.projectRetentionRate = projectRetentionRate;
+        public void setProjectRetentionRateEnforce(Integer projectRetentionRateEnforce) {
+            this.projectRetentionRateEnforce = projectRetentionRateEnforce;
         }
         public void setUsername(@Nullable String username) {
             this.username = username;
@@ -3626,6 +3626,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return checkNonNegativeValue(value);
         }
 
+        @POST
+        public FormValidation doCheckProjectRetentionRate(@QueryParameter final Integer value,@AncestorInPath Item item) {
+            if (item == null) {
+                return FormValidation.ok();
+            }
+            item.checkPermission(Item.CONFIGURE);
+            if(value==0){
+                return FormValidation.warning("Scan retention with 0 value will not set retention rate");
+            }
+            return checkNonNegativeValue(value);
+        }
 
         private FormValidation checkNonNegativeValue(final Integer value) {
             if (value == null || value >= 0) {
