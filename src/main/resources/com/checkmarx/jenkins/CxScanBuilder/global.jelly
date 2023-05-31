@@ -177,11 +177,11 @@
                             <f:textbox value="${descriptor.dependencyScanConfig.pathToScaResolver}" />
                         </f:entry>
 
-                        <f:entry title="SCA Resolver Additional Parameters" field="globalScaResolverAddParameters">
-                             <f:textarea value="${descriptor.dependencyScanConfig.globalScaResolverAddParameters}" />
-                        </f:entry>
                         <f:optionalBlock title="Enable Exploitable Path" field="isGlobalExploitablePathByScaResolver" inline="true"  checked="${descriptor.dependencyScanConfig.isGlobalExploitablePathByScaResolver}">
                         </f:optionalBlock>
+                     <f:entry title="SCA Resolver Additional Parameters" field="globalScaResolverAddParameters">
+                         <f:textarea value="${descriptor.dependencyScanConfig.globalScaResolverAddParameters}" />
+                     </f:entry>
                     </f:radioBlock>
                     <f:radioBlock checked="${descriptor.dependencyScanConfig.enableScaResolver == null || descriptor.dependencyScanConfig.enableScaResolver == 'MANIFEST'}" inline="true"
                                     name="enableScaResolver" title="Perform SCA scan by uploading manifests file(s)/source to SCA Service."
