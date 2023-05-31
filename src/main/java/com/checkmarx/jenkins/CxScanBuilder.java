@@ -2313,11 +2313,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 				|| (addParams.contains("--cxprojectid ") || addParams.contains("--cxprojectname "))
 				|| addParams.contains("--sast-result-path ")))
 			log.warn(
-					"Any of the parameters(--cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname) specified in SCA Resolver additional paramters will be used for Exploitable Path Detection instead the corresponding parameters configured in the pipeline.");
+					"Any of the parameters(--cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname) specified in SCA Resolver additional paramters will be used for Exploitable Path Detection instead of the corresponding parameters configured in the pipeline.");
             if (addParams.contains("-n ") || addParams.contains("-s ") || addParams.contains("-r ")
 				|| addParams.contains("--resolver-result-path"))
 			log.warn(
-					"Any of the parameters(-n, -s, -r/--resolver-result-path) specified in SCA Resolver additional paramters will be used for dependency resolution instead the corresponding parameters configured in the pipeline.");
+					"Any of the parameters(-n, -s, -r/--resolver-result-path) specified in SCA Resolver additional paramters will be used for dependency resolution instead of the corresponding parameters configured in the pipeline.");
 
 		return additionalParams;
 	}
@@ -2866,10 +2866,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 			if (checkAllSastAddParamsWithoutExpPath(isExploitablePathByScaResolver, value)) {
 				errorMessage = "Enable Exploitable Path option is not selected, but exploitable path detection will be performed since all the required parameters for exploitable path detection are provided in SCA Resolver Additional Parameter.";
 			} else if (checkAnySastAddParamsWithExpPath(isExploitablePathByScaResolver, value)) {
-				warnMessage = "Any of the parameters(--cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname) specified in SCA Resolver additional paramters will be used for Exploitable Path Detection instead the corresponding parameters configured in the pipeline.";
+				warnMessage = "Any of the parameters(--cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname) specified in SCA Resolver additional paramters will be used for Exploitable Path Detection instead of the corresponding parameters configured in the pipeline.";
 			}
 			if (checkAnyMandatoryAddParams(value)) {
-				otherWarnMessage = "Any of the parameters(-n, -s, -r/--resolver-result-path) specified in SCA Resolver additional paramters will be used for dependency resolution instead the corresponding parameters configured in the pipeline.";
+				otherWarnMessage = "Any of the parameters(-n, -s, -r/--resolver-result-path) specified in SCA Resolver additional paramters will be used for dependency resolution instead of the corresponding parameters configured in the pipeline.";
 			}
             if (!StringUtil.isNullOrEmpty(errorMessage)) {
                 if (!StringUtil.isNullOrEmpty(otherWarnMessage))
@@ -2903,7 +2903,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 errorMessage = "Given SAST Parameters in 'SCA Resolver Additional Parameters' (like --cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname) will not be considered. As 'Enable Exploitable Path' is disabled.";
             }
             if (checkAnyMandatoryAddParams(scaResolverAddParameters)) {
-                warnMessage = "Any of the parameters(-n, -s, -r/--resolver-result-path) specified in SCA Resolver additional paramters will be used for dependency resolution instead the corresponding parameters configured in the pipeline.";
+                warnMessage = "Any of the parameters(-n, -s, -r/--resolver-result-path) specified in SCA Resolver additional paramters will be used for dependency resolution instead of the corresponding parameters configured in the pipeline.";
             }
             if (!StringUtil.isNullOrEmpty(errorMessage))
                 return FormValidation.error(errorMessage);
@@ -2931,10 +2931,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 			if (checkAllSastAddParamsWithoutExpPath(isGlobalExploitablePathByScaResolver, value)) {
 				errorMessage = "Enable Exploitable Path option is not selected, but exploitable path detection will be performed since all the required parameters for exploitable path detection are provided in SCA Resolver Additional Parameter.";
 			} else if (checkAnySastAddParamsWithExpPath(isGlobalExploitablePathByScaResolver, value)) {
-				warnMessage = "Any of the parameters(--cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname) specified in SCA Resolver additional paramters will be used for Exploitable Path Detection instead the corresponding parameters configured in the pipeline.";
+				warnMessage = "Any of the parameters(--cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname) specified in SCA Resolver additional paramters will be used for Exploitable Path Detection instead of the corresponding parameters configured in the pipeline.";
 			}
 			if (checkAnyMandatoryAddParams(value)) {
-				otherWarnMessage = "Any of the parameters(-n, -s, -r/--resolver-result-path) specified in SCA Resolver additional paramters will be used for dependency resolution instead the corresponding parameters configured in the pipeline.";
+				otherWarnMessage = "Any of the parameters(-n, -s, -r/--resolver-result-path) specified in SCA Resolver additional paramters will be used for dependency resolution instead of the corresponding parameters configured in the pipeline.";
 			}
             if (!StringUtil.isNullOrEmpty(errorMessage)) {
                 if (!StringUtil.isNullOrEmpty(otherWarnMessage))
@@ -2967,7 +2967,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 				errorMessage = "Given SAST Parameters in 'SCA Resolver Additional Parameters' (like --cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname) will not be considered. As 'Enable Exploitable Path' is disabled.";
 			}
 			if (checkAnyMandatoryAddParams(globalScaResolverAddParameters)) {
-                warnMessage = "Any of the parameters(-n, -s, -r/--resolver-result-path) specified in SCA Resolver additional paramters will be used for dependency resolution instead the corresponding parameters configured in the pipeline.";
+                warnMessage = "Any of the parameters(-n, -s, -r/--resolver-result-path) specified in SCA Resolver additional paramters will be used for dependency resolution instead of the corresponding parameters configured in the pipeline.";
 			}
             if (!StringUtil.isNullOrEmpty(errorMessage))
                 return FormValidation.error(errorMessage);
