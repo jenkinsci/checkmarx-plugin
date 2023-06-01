@@ -42,7 +42,7 @@
         <f:optionalBlock title="Use Jenkins proxy" inline="true" field="isProxy" />
 
 		<f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
-			with="isProxy,serverUrl,username,password,timestamp,credentialsId" />
+			with="enableCertificateValidation,isProxy,serverUrl,username,password,timestamp,credentialsId" />
 
         <f:entry title="Maven Path" field="mvnPath">
             <f:textbox/>
@@ -55,6 +55,7 @@
         <f:entry title="Default Exclude folders" field="excludeFolders">
             <f:textbox/>
         </f:entry>
+
 
         <f:entry title="Default Include/Exclude wildcard patterns" field="filterPattern">
             <f:textarea default="${descriptor.DEFAULT_FILTER_PATTERNS}"/>
@@ -168,6 +169,24 @@
                     <f:validateButton title="Test Connection" progress="Testing..." method="testScaConnection"
                                       with="scaServerUrl,scaAccessControlUrl,scaCredentialsId,scaTenant,scaTimeout,timestamp,isProxy"/>
                 </f:nested>
+                 <f:radioBlock checked="${descriptor.dependencyScanConfig.enableScaResolver == null || descriptor.dependencyScanConfig.enableScaResolver == 'SCA_RESOLVER'}" inline="true"
+                                    name="enableScaResolver" title="Perform SCA scan using dependency resolution by SCA Resolver tool."
+                                    value="SCA_RESOLVER">
+                  <!-- Sca Resolver Fields-->
+                        <f:entry title="Path to SCA Resolver" field="pathToScaResolver">
+                            <f:textbox value="${descriptor.dependencyScanConfig.pathToScaResolver}" />
+                        </f:entry>
+
+                        <f:optionalBlock title="Enable Exploitable Path" field="isGlobalExploitablePathByScaResolver" inline="true"  checked="${descriptor.dependencyScanConfig.isGlobalExploitablePathByScaResolver}">
+                        </f:optionalBlock>
+                     <f:entry title="SCA Resolver Additional Parameters" field="globalScaResolverAddParameters">
+                         <f:textarea value="${descriptor.dependencyScanConfig.globalScaResolverAddParameters}" />
+                     </f:entry>
+                    </f:radioBlock>
+                    <f:radioBlock checked="${descriptor.dependencyScanConfig.enableScaResolver == null || descriptor.dependencyScanConfig.enableScaResolver == 'MANIFEST'}" inline="true"
+                                    name="enableScaResolver" title="Perform SCA scan by uploading manifests file(s)/source to SCA Service."
+                                    value="MANIFEST">
+                            <!-- Non-Sca Resolver Fields-->
                 <f:entry title="Package Manager's Config File(s) Path" field="scaConfigFile">
                         <f:textarea value="${descriptor.dependencyScanConfig.scaConfigFile}" />
                     </f:entry>
@@ -191,6 +210,13 @@
            		 with="scaSastServerUrl,password,username,timestamp,sastCredentialsId,isProxy" />
     </f:optionalBlock>
             </f:radioBlock>
+           </f:radioBlock>
+        </f:optionalBlock>
+        <f:optionalBlock title="Enable Data Retention" inline="true"
+                         field="enableDataRetention">
+            <f:entry title="Scan Retention rate (number of scan)" field="projectRetentionRateEnforce">
+                <f:number clazz="positive-number" min="1" max="10000" step="1" default="10" checkMethod="POST" />
+            </f:entry>
         </f:optionalBlock>
 		<f:optionalBlock title="Hide Debug Logs" inline="true" field="hideDebugLogs"/>        
     </f:section>
