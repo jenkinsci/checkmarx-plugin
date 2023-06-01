@@ -210,7 +210,6 @@
            		 with="scaSastServerUrl,password,username,timestamp,sastCredentialsId,isProxy" />
     </f:optionalBlock>
             </f:radioBlock>
-           </f:radioBlock>
         </f:optionalBlock>
         <f:optionalBlock title="Enable Data Retention" inline="true"
                          field="enableDataRetention">
