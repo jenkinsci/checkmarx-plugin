@@ -58,6 +58,8 @@ public class CxScanResult implements Action {
 
     private File pdfReport;
     public static final String PDF_REPORT_NAME = "ScanReport.pdf";
+    
+    public static final String SCA_PDF_REPORT_NAME = "ScaPdfReport.pdf";
     private boolean osaSuccessful; //osa fails flag for jelly
 
     private String htmlReportName;
@@ -232,6 +234,18 @@ public class CxScanResult implements Action {
         outputStream.flush();
         outputStream.close();
     }
+
+	public void doScaPdfReport(StaplerRequest req, StaplerResponse rsp) throws IOException {
+		rsp.setContentType("application/pdf");
+		ServletOutputStream outputStream = rsp.getOutputStream();
+		File buildDirectory = owner.getRootDir();
+		File b = new File(buildDirectory, "/checkmarx/" + SCA_PDF_REPORT_NAME);
+		
+		IOUtils.copy(b, outputStream);
+		
+		outputStream.flush();
+		outputStream.close();
+	}
 
     static String resolveHTMLReportName(boolean sastEnabled, ScannerType dependencyScanner) {
         final String POSTFIX = ".html";

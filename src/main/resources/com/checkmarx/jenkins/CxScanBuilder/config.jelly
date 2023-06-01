@@ -62,7 +62,19 @@
         <f:entry title="Preset" field="preset">
             <f:select />
         </f:entry>
-
+        <j:choose>
+        <j:when test="${descriptor.enableDataRetention}">
+        <f:optionalBlock title="Override global scan retention settings" name="overrideGlobalRetentionRate"
+                         checked="${instance.overrideGlobalRetentionRate}" inline="true">
+                    <f:entry title="Scan Retention rate (number of scan)" field="projectRetentionRate">
+                        <f:number clazz="number" min="0" max="10000" step="1" default="${descriptor.projectRetentionRateEnforce}" checkMethod="POST" />
+                    </f:entry>
+        </f:optionalBlock>
+        </j:when>
+        <j:otherwise>
+            <f:description>Global settings option for Data Retention is disabled</f:description>
+        </j:otherwise>
+        </j:choose>
          <!-- GLOBAL INCLUDE\EXCLUDE -->
         <f:radioBlock checked="${instance == null || instance.exclusionsSetting == null || instance.exclusionsSetting.equals('global')}" inline="true"
             name="exclusionsSetting" title="Use Global Include/Exclude Settings" value="global">
@@ -128,8 +140,6 @@
         <f:optionalBlock title="Enable Override Project Setting" inline="true" field="overrideProjectSetting" checked="${instance==null?false:instance.overrideProjectSetting}" />                     
     </f:optionalBlock>
     <f:optionalBlock title="Skip scan if triggered by SCM Changes" inline="true" field="skipSCMTriggers" />
-
-
     <f:section title="Dependency Scan" />
     <f:optionalBlock title="Enable dependency scan" field="dependencyScanConfig"
                      checked="${instance.dependencyScanConfig != null}">
@@ -200,9 +210,10 @@
                         <f:entry title="Path to SCA Resolver" field="pathToScaResolver">
                             <f:textbox value="${instance.dependencyScanConfig.pathToScaResolver}" />
                         </f:entry>
-
+                        <f:optionalBlock title="Enable Exploitable Path" field="isExploitablePathByScaResolver" inline="true"  checked="${instance.dependencyScanConfig.isExploitablePathByScaResolver}">
+                        </f:optionalBlock>
                         <f:entry title="SCA Resolver Additional Parameters" field="scaResolverAddParameters">
-                             <f:textarea value="${instance.dependencyScanConfig.scaResolverAddParameters}" />
+                            <f:textarea value="${instance.dependencyScanConfig.scaResolverAddParameters}" />
                         </f:entry>
                     </f:radioBlock>
                     <f:radioBlock checked="${instance.dependencyScanConfig.enableScaResolver == null || instance.dependencyScanConfig.enableScaResolver == 'MANIFEST'}" inline="true"
@@ -310,6 +321,15 @@
 
                     <!-- -= Generate PDF report =- -->
                     <f:optionalBlock title="Generate CxSAST PDF report" inline="true" field="generatePdfReport" />
+
+					<!-- -= generateScaReport =- -->
+                	<f:optionalBlock title="Generate CxSCA report" inline="true" field="generateScaReport" checkMethod="POST"
+                	checked="${instance.generateScaReport &amp;&amp; instance.dependencyScanConfig.dependencyScannerType == 'SCA'}">
+
+                		<f:entry name="scaReportFormat" title="Report Format:" field="scaReportFormat">
+            			<f:enum field="scaReportFormat">${it.displayName}</f:enum>
+            			</f:entry>
+           			</f:optionalBlock>
 
                     <!-- -= enableProjectPolicyEnforcement =- -->
                     <f:optionalBlock title="Enable Project's policy enforcement" inline="true" field="enableProjectPolicyEnforcement" />

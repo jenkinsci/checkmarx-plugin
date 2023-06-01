@@ -78,6 +78,9 @@ public class DependencyScanConfig {
     public Integer scaTimeout;
     
     @DataBoundSetter
+    public boolean generateScaReport;
+    
+    @DataBoundSetter
     public boolean isIncludeSources;
 
     @DataBoundSetter
@@ -88,6 +91,15 @@ public class DependencyScanConfig {
 
     @DataBoundSetter
     public String scaResolverAddParameters;
+    
+    @DataBoundSetter
+    public String globalScaResolverAddParameters;
+    
+    @DataBoundSetter
+    public boolean isExploitablePathByScaResolver;
+    
+    @DataBoundSetter
+    public boolean isGlobalExploitablePathByScaResolver;
     
     @DataBoundSetter
     public String fsaVariables;
