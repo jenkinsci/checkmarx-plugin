@@ -1864,7 +1864,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("enable Project Policy Enforcement: " + config.getEnablePolicyViolations());
         log.info("continue build when timed out: " + config.getContinueBuild());
         log.info("post scan action: " + config.getPostScanActionId());
-        log.info("is force scan: " + config.getForceScan());
+        //log.info("is force scan: " + config.getForceScan());
         log.info("scan level custom fields: " + config.getCustomFields());
         log.info("overrideProjectSetting value: " + overrideProjectSetting);
 
@@ -3006,7 +3006,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
             Matcher match = pattern.matcher(value);
             if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
-            	return FormValidation.error("Custom Fields must have given format: key1:val1,key2:val2. \nCustom field allows to use these special characters: # . _ ");
+            	return FormValidation.error("Custom Fields must have given format: key1:val1,key2:val2. Custom field allows to use these special characters: # . _ ");
             }
 
             return FormValidation.ok();
