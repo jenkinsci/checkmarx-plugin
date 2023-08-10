@@ -97,7 +97,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private static final String SCA_PDF_URL_TEMPLATE = "/%scheckmarx/scaPdfReport";
     private static final String SCA_PDF_URL = "checkmarx/scaPdfReport";
     private static final String REQUEST_ORIGIN = "Jenkins";
-    
+
     private static final String SUPPRESS_BENIGN_ERRORS = "suppressBenignErrors";
 
     private static final String scaResolverResultPath = ".cxscaresolver" + File.separator + "sca";
@@ -106,7 +106,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     // Persistent plugin configuration parameters
     //////////////////////////////////////////////////////////////////////////////////////
     private boolean useOwnServerCredentials;
-    
+
     private boolean overrideProjectSetting;
 
     private boolean configAsCode;
@@ -221,7 +221,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private Boolean generateXmlReport = true;
 
     public static final int MINIMUM_TIMEOUT_IN_MINUTES = 1;
-    public static final String REPORTS_FOLDER = "Checkmarx" + File.separator + "Reports";
+    public static final String REPORTS_FOLDER = File.separator + "Checkmarx" + File.separator + "Reports";
 
     @DataBoundConstructor
     public CxScanBuilder(
@@ -287,7 +287,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.isProxy = (isProxy == null) ? true : isProxy;
         this.projectName = (projectName == null) ? buildStep : projectName;
         this.projectId = projectId;
-        this.projectRetentionRate=projectRetentionRate;
+        this.projectRetentionRate = projectRetentionRate;
         this.groupId = (groupId != null && !groupId.startsWith("Provide Checkmarx")) ? groupId : null;
         this.teamPath = teamPath;
         this.sastEnabled = sastEnabled;
@@ -345,17 +345,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public void setConfigAsCode(boolean configAsCode) {
         this.configAsCode = configAsCode;
     }
-    
+
     public boolean isOverrideProjectSetting() {
-		return overrideProjectSetting;
-	}
+        return overrideProjectSetting;
+    }
 
     @DataBoundSetter
-	public void setOverrideProjectSetting(boolean overrideProjectSetting) {
-		this.overrideProjectSetting = overrideProjectSetting;
-	}
+    public void setOverrideProjectSetting(boolean overrideProjectSetting) {
+        this.overrideProjectSetting = overrideProjectSetting;
+    }
 
-	@Nullable
+    @Nullable
     public String getServerUrl() {
         return serverUrl;
     }
@@ -619,10 +619,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public boolean isGeneratePdfReport() {
         return generatePdfReport;
     }
-    
+
     public boolean isGenerateScaReport() {
-		return generateScaReport;
-	}
+        return generateScaReport;
+    }
 
     public boolean isEnableProjectPolicyEnforcement() {
         return enableProjectPolicyEnforcement;
@@ -780,11 +780,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public void setGeneratePdfReport(boolean generatePdfReport) {
         this.generatePdfReport = generatePdfReport;
     }
-    
+
     @DataBoundSetter
     public void setGenerateScaReport(boolean generateScaReport) {
-		this.generateScaReport = generateScaReport;
-	}
+        this.generateScaReport = generateScaReport;
+    }
 
     @DataBoundSetter
     public void setEnableProjectPolicyEnforcement(boolean enableProjectPolicyEnforcement) {
@@ -815,6 +815,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public void setIsProxy(Boolean proxy) {
         this.isProxy = proxy;
     }
+
     @DataBoundSetter
     public void setoverrideGlobalRetentionRate(Boolean overrideGlobalRetentionRate) {
         this.overrideGlobalRetentionRate = overrideGlobalRetentionRate;
@@ -858,9 +859,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
-    public void setProjectRetentionRate(@Nullable Integer projectRetentionRate){
-        this.projectRetentionRate=projectRetentionRate;
+    public void setProjectRetentionRate(@Nullable Integer projectRetentionRate) {
+        this.projectRetentionRate = projectRetentionRate;
     }
+
     public DependencyScanConfig getDependencyScanConfig() {
         return dependencyScanConfig;
     }
@@ -874,6 +876,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public void setHideDebugLogs(Boolean hideDebugLogs) {
         this.hideDebugLogs = hideDebugLogs;
     }
+
     /**
      * Using environment injection plugin you can add the JVM proxy settings.
      * For example using EnvInject plugin the following can be applied under 'Properties Content':
@@ -959,141 +962,150 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         setJvmVars(env);
         Map<String, String> fsaVars = getAllFsaVars(env, workspace.getRemote());
         CxScanConfig config;
-		try {
-			config = resolveConfiguration(run, descriptor, env, log,  workspace);
-        
-        if (configAsCode) {
-            try {
-                overrideConfigAsCode(config, workspace);
-            } catch (ConfigurationException e) {
-                log.warn("couldn't load config file: " + e.getMessage(), e);
-            }
-        }
+        try {
+            config = resolveConfiguration(run, descriptor, env, log, workspace);
 
-
-        //print configuration
-        printConfiguration(config, descriptor, log);
-
-        //validate at least one scan type is enabled
-        if (!config.isSastEnabled() && !config.isAstScaEnabled() && !config.isOsaEnabled()) {
-            log.error("Both SAST and dependency scan are disabled. Exiting.");
-            run.setResult(Result.FAILURE);            
-            return;
-        }
-
-        Jenkins instance = Jenkins.getInstance();
-        final CxScanCallable action;
-        if (instance != null && instance.proxy != null &&
-                ((!isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))
-                        || (config.isScaProxy()))) {
-            action = new CxScanCallable(config, listener, instance.proxy, isHideDebugLogs(), fsaVars);
-        } else {
-            action = new CxScanCallable(config, listener, isHideDebugLogs(), fsaVars);
-        }
-
-        //create scans and retrieve results (in jenkins agent)
-        RemoteScanInfo scanInfo = workspace.act(action);
-        ScanResults scanResults = scanInfo.getScanResults();
-
-        // We'll need this for the HTML report.
-        config.setCxARMUrl(scanInfo.getCxARMUrl());
-
-        CxScanResult cxScanResult = new CxScanResult(run, config);
-
-        //write reports to build dir
-        File checkmarxBuildDir = new File(run.getRootDir(), "checkmarx");
-        checkmarxBuildDir.mkdir();
-
-        if (config.getGeneratePDFReport()) {
-            String path = "";
-            // run.getUrl() returns a URL path similar to job/MyJobName/124/
-            //getRootUrl() will return the value of "Manage Jenkins->configuration->Jenkins URL"
-            String baseUrl = Jenkins.getInstance().getRootUrl();
-            if (StringUtils.isNotEmpty(baseUrl)) {
-                URL parsedUrl = new URL(baseUrl);
-                path = parsedUrl.getPath();
-            }
-            if (!(path.equals("/"))) {
-                //to handle this Jenkins root url,EX: http://localhost:8081/jenkins
-                Path pdfUrlPath = Paths.get(path, run.getUrl(), PDF_URL);
-                scanResults.getSastResults().setSastPDFLink(pdfUrlPath.toString());
-            } else {
-                //to handle this Jenkins root url,EX: http://localhost:8081/
-                String pdfUrl = String.format(PDF_URL_TEMPLATE, run.getUrl());
-                scanResults.getSastResults().setSastPDFLink(pdfUrl);
-            }
-        }
-        
-        if (config.isGenerateScaReport()) {
-        	if(config.getScaReportFormat() != null && "pdf".equalsIgnoreCase(config.getScaReportFormat())) {
-            String path = "";
-            // run.getUrl() returns a URL path similar to job/MyJobName/124/
-            //getRootUrl() will return the value of "Manage Jenkins->configuration->Jenkins URL"
-            String baseUrl = Jenkins.getInstance().getRootUrl();
-            if (StringUtils.isNotEmpty(baseUrl)) {
-                URL parsedUrl = new URL(baseUrl);
-                path = parsedUrl.getPath();
-            }
-            if (!(path.equals("/"))) {
-                //to handle this Jenkins root url,EX: http://localhost:8081/jenkins
-                Path pdfUrlPath = Paths.get(path, run.getUrl(), SCA_PDF_URL);
-                scanResults.getScaResults().setScaPDFLink(pdfUrlPath.toString());
-            } else {
-                //to handle this Jenkins root url,EX: http://localhost:8081/
-                String pdfUrl = String.format(SCA_PDF_URL_TEMPLATE, run.getUrl());
-                scanResults.getScaResults().setScaPDFLink(pdfUrl);
-            }
-        	}
-        }
-
-        //in case of async mode, do not create reports (only the report of the latest scan)
-        //and don't assert threshold vulnerabilities
-
-         failTheBuild(run, config, scanResults);
-        if (config.getSynchronous()) {
-
-            //generate html report
-            String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
-            cxScanResult.setHtmlReportName(reportName);
-            run.addAction(cxScanResult);
-            
-
-
-            //create sast reports
-            SASTResults sastResults = scanResults.getSastResults();
-            if (sastResults != null && sastResults.isSastResultsReady()) {
-                if (config.getGenerateXmlReport() == null || config.getGenerateXmlReport()) {
-                    createSastReports(sastResults, checkmarxBuildDir, workspace);
+            if (configAsCode) {
+                try {
+                    overrideConfigAsCode(config, workspace);
+                } catch (ConfigurationException e) {
+                    log.warn("couldn't load config file: " + e.getMessage(), e);
                 }
-                addEnvVarAction(run, sastResults);
-                cxScanResult.setSastResults(sastResults);
             }
 
-            //create osa reports
-            OSAResults osaResults = scanResults.getOsaResults();
-            AstScaResults scaResults = scanResults.getScaResults();
-            if (osaResults != null && osaResults.isOsaResultsReady()) {
-                createOsaReports(osaResults, workspace);
-            } else if (scaResults != null && scaResults.isScaResultReady()) {
-                createScaReports(scaResults, config, checkmarxBuildDir, workspace);
-            }
-            return;
-        }
 
-        //Asynchronous scan - add note message and previous build reports
-        if (!descriptor.isAsyncHtmlRemoval() || config.getSynchronous()) {
-            String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
-            cxScanResult.setHtmlReportName(reportName);
+            //print configuration
+            printConfiguration(config, descriptor, log);
+
+            //validate at least one scan type is enabled
+            if (!config.isSastEnabled() && !config.isAstScaEnabled() && !config.isOsaEnabled()) {
+                log.error("Both SAST and dependency scan are disabled. Exiting.");
+                run.setResult(Result.FAILURE);
+                return;
+            }
+
+            Jenkins instance = Jenkins.getInstance();
+            final CxScanCallable action;
+            if (instance != null && instance.proxy != null &&
+                    ((!isCxURLinNoProxyHost(useOwnServerCredentials ? this.serverUrl : getDescriptor().getServerUrl(), instance.proxy.getNoProxyHostPatterns()))
+                            || (config.isScaProxy()))) {
+                action = new CxScanCallable(config, listener, instance.proxy, isHideDebugLogs(), fsaVars);
+            } else {
+                action = new CxScanCallable(config, listener, isHideDebugLogs(), fsaVars);
+            }
+
+            //create scans and retrieve results (in jenkins agent)
+            RemoteScanInfo scanInfo = workspace.act(action);
+            ScanResults scanResults = scanInfo.getScanResults();
+
+            // We'll need this for the HTML report.
+            config.setCxARMUrl(scanInfo.getCxARMUrl());
+
+            CxScanResult cxScanResult = new CxScanResult(run, config);
+
+            //write reports to build dir
+            File checkmarxBuildDir = new File(run.getRootDir(), "checkmarx");
+            checkmarxBuildDir.mkdir();
+
+            if (config.getGeneratePDFReport()) {
+                String path = "";
+                // run.getUrl() returns a URL path similar to job/MyJobName/124/
+                //getRootUrl() will return the value of "Manage Jenkins->configuration->Jenkins URL"
+                String baseUrl = Jenkins.getInstance().getRootUrl();
+                if (StringUtils.isNotEmpty(baseUrl)) {
+                    URL parsedUrl = new URL(baseUrl);
+                    path = parsedUrl.getPath();
+                }
+                if (!(path.equals("/"))) {
+                    //to handle this Jenkins root url,EX: http://localhost:8081/jenkins
+                    Path pdfUrlPath = Paths.get(path, run.getUrl(), PDF_URL);
+                    scanResults.getSastResults().setSastPDFLink(pdfUrlPath.toString());
+                } else {
+                    //to handle this Jenkins root url,EX: http://localhost:8081/
+                    String pdfUrl = String.format(PDF_URL_TEMPLATE, run.getUrl());
+                    scanResults.getSastResults().setSastPDFLink(pdfUrl);
+                }
+            }
+
+            if (config.isGenerateScaReport()) {
+                if (config.getScaReportFormat() != null && "pdf".equalsIgnoreCase(config.getScaReportFormat())) {
+                    String path = "";
+                    // run.getUrl() returns a URL path similar to job/MyJobName/124/
+                    //getRootUrl() will return the value of "Manage Jenkins->configuration->Jenkins URL"
+                    String baseUrl = Jenkins.getInstance().getRootUrl();
+                    if (StringUtils.isNotEmpty(baseUrl)) {
+                        URL parsedUrl = new URL(baseUrl);
+                        path = parsedUrl.getPath();
+                    }
+                    if (!(path.equals("/"))) {
+                        //to handle this Jenkins root url,EX: http://localhost:8081/jenkins
+                        Path pdfUrlPath = Paths.get(path, run.getUrl(), SCA_PDF_URL);
+                        scanResults.getScaResults().setScaPDFLink(pdfUrlPath.toString());
+                    } else {
+                        //to handle this Jenkins root url,EX: http://localhost:8081/
+                        String pdfUrl = String.format(SCA_PDF_URL_TEMPLATE, run.getUrl());
+                        scanResults.getScaResults().setScaPDFLink(pdfUrl);
+                    }
+                }
+            }
+
+            //in case of async mode, do not create reports (only the report of the latest scan)
+            //and don't assert threshold vulnerabilities
+
+            failTheBuild(run, config, scanResults);
+            if (config.getSynchronous()) {
+
+                //generate html report
+                String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
+                cxScanResult.setHtmlReportName(reportName);
+                run.addAction(cxScanResult);
+
+
+                //create sast reports
+                SASTResults sastResults = scanResults.getSastResults();
+                if (sastResults != null && sastResults.isSastResultsReady()) {
+                    if (config.getGenerateXmlReport() == null || config.getGenerateXmlReport()) {
+                        createSastReports(sastResults, checkmarxBuildDir, workspace);
+                    }
+                    addEnvVarAction(run, sastResults);
+                    cxScanResult.setSastResults(sastResults);
+                }
+
+                //create osa reports
+                OSAResults osaResults = scanResults.getOsaResults();
+                AstScaResults scaResults = scanResults.getScaResults();
+                File dependencyScanDir = new File(workspace.getRemote() + REPORTS_FOLDER);
+                dependencyScanDir.mkdir();
+                if (osaResults != null && osaResults.isOsaResultsReady()) {
+                    createOsaReports(osaResults, dependencyScanDir);
+                } else if (scaResults != null && scaResults.isScaResultReady()) {
+                    createScaReports(scaResults, config, checkmarxBuildDir, workspace);
+                }
+                return;
+            }
+
+            //Asynchronous scan - add note message and previous build reports
+            if (!descriptor.isAsyncHtmlRemoval() || config.getSynchronous()) {
+                String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
+                cxScanResult.setHtmlReportName(reportName);
+            }
+            run.addAction(cxScanResult);
+        } catch (ConfigurationException e1) {
+            e1.printStackTrace();
         }
-        run.addAction(cxScanResult);
-			} catch (ConfigurationException e1) {
-				e1.printStackTrace();
-			}
     }
 
     private void overrideConfigAsCode(CxScanConfig config, FilePath workspace) throws ConfigurationException {
         String configFilePath =
                 workspace.getRemote() + File.separator + ".checkmarx" + File.separator + CONFIG_AS_CODE_FILE_NAME;
+        try {
+            if (!workspace.child(configFilePath).exists()) {
+                log.warn("Config file doe's not exist under: " + configFilePath);
+                return;
+            }
+        } catch (Exception e) {
+            log.error("Fail to verify config file existence", e);
+        }
         com.checkmarx.configprovider.readers.FileReader reader =
                 new com.checkmarx.configprovider.readers.FileReader(ResourceType.YAML, configFilePath);
 
@@ -1116,7 +1128,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         if (configProvider.hasConfiguration(CX_ORIGIN, "project"))
             configAsCodeFromFile.setProject(
-                    configProvider.getConfiguration(CX_ORIGIN, "project",ProjectConfig.class));
+                    configProvider.getConfiguration(CX_ORIGIN, "project", ProjectConfig.class));
 
         if (configProvider.hasConfiguration(CX_ORIGIN, "team"))
             configAsCodeFromFile.setTeam(
@@ -1241,12 +1253,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     scanConfig.setIncremental(pValue);
                     overridesResults.put("Is Incremental", String.valueOf(pValue));
                 });
-        
+
         sast.map(SastConfig::isOverrideProjectSetting)
-        .ifPresent(pValue -> {
-            scanConfig.setIsOverrideProjectSetting(pValue);
-            overridesResults.put("Is OverrideProjectSetting", String.valueOf(pValue));
-        });
+                .ifPresent(pValue -> {
+                    scanConfig.setIsOverrideProjectSetting(pValue);
+                    overridesResults.put("Is OverrideProjectSetting", String.valueOf(pValue));
+                });
 
         sast.map(SastConfig::isPrivateScan)
                 .ifPresent(pValue -> {
@@ -1284,7 +1296,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     scanConfig.setPresetId(null);
                     overridesResults.put("Preset", pValue);
                 });
-       
+
 
         sast.map(SastConfig::getExcludeFolders)
                 .filter(StringUtils::isNotBlank)
@@ -1316,26 +1328,26 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
 
-	private void createScaReports(AstScaResults scaResults, CxScanConfig config, File checkmarxBuildDir,
-			FilePath workspace) {
+    private void createScaReports(AstScaResults scaResults, CxScanConfig config, File checkmarxBuildDir,
+                                  FilePath workspace) {
 
-		writeJsonObjectToFile(scaResults.getSummary(), workspace, SCA_SUMMERY_JSON);
-		writeJsonObjectToFile(scaResults.getPackages(), workspace, SCA_LIBRARIES_JSON);
-		writeJsonObjectToFile(scaResults.getFindings(), workspace, SCA_VULNERABILITIES_JSON);
-		if (config.isGenerateScaReport()) {
-			if (scaResults.getPDFReport() != null && "pdf".equalsIgnoreCase(config.getScaReportFormat())) {
-				File pdfReportFile = new File(checkmarxBuildDir, CxScanResult.SCA_PDF_REPORT_NAME);
-				log.info("PDF Report generated at location: " + pdfReportFile.getAbsolutePath());
-				try {
-					FileUtils.writeByteArrayToFile(pdfReportFile, scaResults.getPDFReport());
-					scaResults.setScaPDFLink(checkmarxBuildDir + File.separator + CxScanResult.SCA_PDF_REPORT_NAME);
-					log.info("PDF Report generated at location: " + pdfReportFile.getAbsolutePath());
-				} catch (IOException e) {
-					log.warn("Failed to write SCA PDF report to workspace: " + e.getMessage());
-				}
-			}
-		}
-	}
+        writeJsonObjectToFile(scaResults.getSummary(), new File(checkmarxBuildDir, SCA_SUMMERY_JSON), SCA_SUMMERY_JSON);
+        writeJsonObjectToFile(scaResults.getPackages(), new File(checkmarxBuildDir, SCA_LIBRARIES_JSON), SCA_LIBRARIES_JSON);
+        writeJsonObjectToFile(scaResults.getFindings(), new File(checkmarxBuildDir, SCA_VULNERABILITIES_JSON), SCA_VULNERABILITIES_JSON);
+        if (config.isGenerateScaReport()) {
+            if (scaResults.getPDFReport() != null && "pdf".equalsIgnoreCase(config.getScaReportFormat())) {
+                File pdfReportFile = new File(checkmarxBuildDir, CxScanResult.SCA_PDF_REPORT_NAME);
+                log.info("PDF Report generated at location: " + pdfReportFile.getAbsolutePath());
+                try {
+                    FileUtils.writeByteArrayToFile(pdfReportFile, scaResults.getPDFReport());
+                    scaResults.setScaPDFLink(checkmarxBuildDir + File.separator + CxScanResult.SCA_PDF_REPORT_NAME);
+                    log.info("PDF Report generated at location: " + pdfReportFile.getAbsolutePath());
+                } catch (IOException e) {
+                    log.warn("Failed to write SCA PDF report to workspace: " + e.getMessage());
+                }
+            }
+        }
+    }
 
     /**
      * Method validate if CxServerURL is part of 'No proxy host'
@@ -1385,7 +1397,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             } else {
                 hostName = jenURL;
             }
-            passedURL = "Jenkins/" + CxConfig.version()+ " " + hostName + " " + jobName;
+            passedURL = "Jenkins/" + CxConfig.version() + " " + hostName + " " + jobName;
             // 50 is the maximum number of characters allowed by SAST server
             if (passedURL.length() > 50) {
                 passedURL = passedURL.substring(0, 45);
@@ -1420,9 +1432,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
         return true;
     }
+
     private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log, FilePath workspace) throws IOException, ConfigurationException {
         CxScanConfig ret = new CxScanConfig();
-        
+
         ret.setIsOverrideProjectSetting(overrideProjectSetting);
 
         if (isIncremental() && isForceScan()) {
@@ -1439,7 +1452,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setEnableDataRetention(getDescriptor().isEnableDataRetention());
         if (getDescriptor().isEnableDataRetention()) {
             if (getOverrideGlobalRetentionRate()) {
-                if(getProjectRetentionRate()==0){
+                if (getProjectRetentionRate() == 0) {
                     ret.setEnableDataRetention(false);
                 }
                 ret.setProjectRetentionRate(getProjectRetentionRate());
@@ -1448,20 +1461,20 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
 
-        if(getPostScanActionId() == 0)
-        	ret.setPostScanActionId(null);
+        if (getPostScanActionId() == 0)
+            ret.setPostScanActionId(null);
         else
-        	ret.setPostScanActionId(getPostScanActionId());
-        	
+            ret.setPostScanActionId(getPostScanActionId());
+
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
         ret.setMvnPath(descriptor.getMvnPath());
         ret.setOsaGenerateJsonReport(false);
-        
-        if(StringUtils.isNotEmpty(getCustomFields())) {
-	        if(!verifyCustomCharacters(getCustomFields())) {
-	        	throw new CxClientException("Custom Fields must have given format: key1:val1,key2:val2. \\nCustom field allows to use these special characters: # . _ ");
-	        }
-	        ret.setCustomFields(apiFormat(getCustomFields()));
+
+        if (StringUtils.isNotEmpty(getCustomFields())) {
+            if (!verifyCustomCharacters(getCustomFields())) {
+                throw new CxClientException("Custom Fields must have given format: key1:val1,key2:val2. \\nCustom field allows to use these special characters: # . _ ");
+            }
+            ret.setCustomFields(apiFormat(getCustomFields()));
         }
         ret.setForceScan(isForceScan());
 
@@ -1533,7 +1546,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setSastEnabled(this.sastEnabled == null || sastEnabled); //for backward compatibility, assuming if sastEnabled is not set, then sast is enabled
 
         if (ret.isSastEnabled()) {
-        	        	        	
+
             int presetId = parseInt(preset, log, "Invalid presetId: [%s]. Using default preset.", 0);
             ret.setPresetId(presetId);
 
@@ -1598,27 +1611,27 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             enableProjectPolicyEnforcement = false;
         }
         ret.setEnablePolicyViolations(enableProjectPolicyEnforcement);
-        
+
         if (!ret.isAstScaEnabled() || !ret.getSynchronous()) {
-        	generateScaReport = false;
+            generateScaReport = false;
         }
-		if (ret.isAstScaEnabled()) {
-			ret.setGenerateScaReport(generateScaReport);
-			if (getScaReportFormat() != null && scaReportFormat.name() != null) {
-				ret.setScaReportFormat(scaReportFormat.name());
-			}
-		}
-        
+        if (ret.isAstScaEnabled()) {
+            ret.setGenerateScaReport(generateScaReport);
+            if (getScaReportFormat() != null && scaReportFormat.name() != null) {
+                ret.setScaReportFormat(scaReportFormat.name());
+            }
+        }
+
         // Set the Continue build flag to Configuration object if Option from UI is choosen as useContinueBuildOnError
         if (useContinueBuildOnError(getDescriptor())) {
             ret.setContinueBuild(Boolean.TRUE);
         }
-        
+
         //Ignore errors that can be suppressed for ex. duplicate scan,source folder is empty, no files to zip.
         String suppressBenignErrors = System.getProperty(SUPPRESS_BENIGN_ERRORS);
-        if(suppressBenignErrors == null || Boolean.parseBoolean(suppressBenignErrors))
-        	ret.setIgnoreBenignErrors(true);
-        
+        if (suppressBenignErrors == null || Boolean.parseBoolean(suppressBenignErrors))
+            ret.setIgnoreBenignErrors(true);
+
         return ret;
     }
 
@@ -1749,7 +1762,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         DependencyScanConfig dsConfig;
         boolean globalSettingsInUse = false;
         if (dsConfigJobLevel.overrideGlobalConfig) {
-            dsConfig = dsConfigJobLevel; 
+            dsConfig = dsConfigJobLevel;
         } else {
             globalSettingsInUse = true;
             dsConfig = descriptor.getDependencyScanConfig();
@@ -1765,22 +1778,22 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         result.setIncludeSources(dsConfig.isIncludeSources);
 
         //add SCA Resolver code here
-		String additionalParams = (globalSettingsInUse) ? dsConfig.globalScaResolverAddParameters
-				: dsConfig.scaResolverAddParameters;
-		boolean isExploitablePath = (globalSettingsInUse) ? dsConfig.isGlobalExploitablePathByScaResolver
-				: dsConfig.isExploitablePathByScaResolver;
+        String additionalParams = (globalSettingsInUse) ? dsConfig.globalScaResolverAddParameters
+                : dsConfig.scaResolverAddParameters;
+        boolean isExploitablePath = (globalSettingsInUse) ? dsConfig.isGlobalExploitablePathByScaResolver
+                : dsConfig.isExploitablePathByScaResolver;
 
-		if (dsConfig.enableScaResolver != null
-				&& SCAScanType.SCA_RESOLVER.toString().equalsIgnoreCase(dsConfig.enableScaResolver.toString())) {
+        if (dsConfig.enableScaResolver != null
+                && SCAScanType.SCA_RESOLVER.toString().equalsIgnoreCase(dsConfig.enableScaResolver.toString())) {
 //            scaResolverPathExist(dsConfig.pathToScaResolver);
-			validateScaResolverParams(additionalParams, config, workspace);
-			additionalParams = checkMissingMandatoryAdditionalParams(additionalParams, workspace, config,
-					isExploitablePath);
-			result.setEnableScaResolver(true);
-		} else
-			result.setEnableScaResolver(false);
+            validateScaResolverParams(additionalParams, config, workspace);
+            additionalParams = checkMissingMandatoryAdditionalParams(additionalParams, workspace, config,
+                    isExploitablePath);
+            result.setEnableScaResolver(true);
+        } else
+            result.setEnableScaResolver(false);
 
-		result.setPathToScaResolver(dsConfig.pathToScaResolver);
+        result.setPathToScaResolver(dsConfig.pathToScaResolver);
         result.setScaResolverAddParameters(additionalParams);
 
         UsernamePasswordCredentials credentials = CxConnectionDetails.getCredentialsById(dsConfig.scaCredentialsId, run);
@@ -1904,21 +1917,21 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 log.info("  OSA archive includes: " + config.getOsaArchiveIncludePatterns());
                 log.info("  OSA run Execute dependency managers install packages command before Scan: " + config.getOsaRunInstall());
             }
-            if (config.isAstScaEnabled() && config.getAstScaConfig() != null){
-				log.info("Use CxSCA dependency scanner is enabled");
-				log.info("CxSCA API URL: " + config.getAstScaConfig().getApiUrl());
-				log.info("Access control server URL: " + config.getAstScaConfig().getAccessControlUrl());
-				log.info("CxSCA web app URL: " + config.getAstScaConfig().getWebAppUrl());
-				log.info("Account: " + config.getAstScaConfig().getTenant());
-				log.info("Team: " + config.getAstScaConfig().getTeamPath());
-				log.info("is generate SCA report: " + config.isGenerateScaReport());
-				log.info("Enable Sca Resolver: " + config.getAstScaConfig().isEnableScaResolver());
-				if (config.getAstScaConfig().isEnableScaResolver())
-					log.info("Enable Exploitable Path by Sca Resolver: " + ((dependencyScanConfig.overrideGlobalConfig)
-							? dependencyScanConfig.isExploitablePathByScaResolver
-							: descriptor.getDependencyScanConfig().isGlobalExploitablePathByScaResolver));
-			}
-		}
+            if (config.isAstScaEnabled() && config.getAstScaConfig() != null) {
+                log.info("Use CxSCA dependency scanner is enabled");
+                log.info("CxSCA API URL: " + config.getAstScaConfig().getApiUrl());
+                log.info("Access control server URL: " + config.getAstScaConfig().getAccessControlUrl());
+                log.info("CxSCA web app URL: " + config.getAstScaConfig().getWebAppUrl());
+                log.info("Account: " + config.getAstScaConfig().getTenant());
+                log.info("Team: " + config.getAstScaConfig().getTeamPath());
+                log.info("is generate SCA report: " + config.isGenerateScaReport());
+                log.info("Enable Sca Resolver: " + config.getAstScaConfig().isEnableScaResolver());
+                if (config.getAstScaConfig().isEnableScaResolver())
+                    log.info("Enable Exploitable Path by Sca Resolver: " + ((dependencyScanConfig.overrideGlobalConfig)
+                            ? dependencyScanConfig.isExploitablePathByScaResolver
+                            : descriptor.getDependencyScanConfig().isGlobalExploitablePathByScaResolver));
+            }
+        }
 
         log.info("------------------------------------------------------------------------------------------");
     }
@@ -1961,7 +1974,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
     }
 
-    private void createOsaReports(OSAResults osaResults, FilePath checkmarxBuildDir) {
+    private void createOsaReports(OSAResults osaResults, File checkmarxBuildDir) {
         writeJsonObjectToFile(osaResults.getResults(), checkmarxBuildDir, OSA_SUMMERY_JSON);
         writeJsonObjectToFile(osaResults.getOsaLibraries(), checkmarxBuildDir, OSA_LIBRARIES_JSON);
         writeJsonObjectToFile(osaResults.getOsaVulnerabilities(), checkmarxBuildDir, OSA_VULNERABILITIES_JSON);
@@ -1991,23 +2004,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return reportName;
     }
 
-    private void writeJsonObjectToFile(Object jsonObj, FilePath to, String fileName) {
-        String remoteDirPath = to.getRemote() + File.separator + REPORTS_FOLDER;
-        InputStream is = null;
+    private void writeJsonObjectToFile(Object jsonObj, File to, String description) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             String json = null;
             json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObj);
-            is = IOUtils.toInputStream(json, StandardCharsets.UTF_8);
-
-            String remoteFilePath = remoteDirPath + File.separator + fileName;
-            log.info("Copying file {} to workspace {}", fileName, remoteFilePath);
-            FilePath remoteFile = new FilePath(to.getChannel(), remoteFilePath);
-            remoteFile.copyFrom(is);
+            FileUtils.writeStringToFile(to, json);
+            log.info("Copying file [" + to.getName() + "] to workspace [" + to.getAbsolutePath() + "]");
         } catch (Exception e) {
-            log.error("Failed to write '" + fileName + "' to [" + to.getRemote() + "]", e);
-        } finally {
-            IOUtils.closeQuietly(is);
+            log.error("Failed to write " + description + " to [" + to.getAbsolutePath() + "]");
+
         }
     }
 
@@ -2019,26 +2025,26 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 (ret.getOsaResults() != null && ret.getOsaResults().getException() != null) ||
                 (ret.getScaResults() != null && ret.getScaResults().getException() != null)) {
             printBuildFailure(scanSummary.toString(), ret, log);
-            
+
             String statusToReturn = "";
             String msgPrefix = "";
-            if (!scanSummary.getThresholdErrors().isEmpty() || (config.getSastNewResultsThresholdEnabled() && scanSummary.isSastThresholdForNewResultsExceeded() ) ) {
-            	resolvedVulnerabilityThresholdResult = resolvedVulnerabilityThresholdResult == null? 
-            			Result.fromString(JobStatusOnError.FAILURE.toString()): resolvedVulnerabilityThresholdResult;
-            	run.setResult(resolvedVulnerabilityThresholdResult);
-            	statusToReturn = resolvedVulnerabilityThresholdResult.toString();
-            	msgPrefix = "Threshold exceeded.";
-            }else {
-            	msgPrefix = "Scan error occurred.";
-            	statusToReturn = getReturnStatusOnError(getDescriptor());
-            	run.setResult(Result.fromString(statusToReturn));
+            if (!scanSummary.getThresholdErrors().isEmpty() || (config.getSastNewResultsThresholdEnabled() && scanSummary.isSastThresholdForNewResultsExceeded())) {
+                resolvedVulnerabilityThresholdResult = resolvedVulnerabilityThresholdResult == null ?
+                        Result.fromString(JobStatusOnError.FAILURE.toString()) : resolvedVulnerabilityThresholdResult;
+                run.setResult(resolvedVulnerabilityThresholdResult);
+                statusToReturn = resolvedVulnerabilityThresholdResult.toString();
+                msgPrefix = "Threshold exceeded.";
+            } else {
+                msgPrefix = "Scan error occurred.";
+                statusToReturn = getReturnStatusOnError(getDescriptor());
+                run.setResult(Result.fromString(statusToReturn));
             }
-            
-            if(JobStatusOnError.ABORTED.toString().equalsIgnoreCase(statusToReturn)) {
-            	String msg = msgPrefix + "Job is configured to return ABORTED and stop the build/pipeline.";
-            	log.warn(msg);
-            	throw new AbortException(msg);
-       	    }                     
+
+            if (JobStatusOnError.ABORTED.toString().equalsIgnoreCase(statusToReturn)) {
+                String msg = msgPrefix + "Job is configured to return ABORTED and stop the build/pipeline.";
+                log.warn(msg);
+                throw new AbortException(msg);
+            }
 
         }
     }
@@ -2096,23 +2102,19 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     private void writeFileToWorkspaceReports(FilePath workspace, File file) {
-        String remoteDirPath = workspace.getRemote() + File.separator + REPORTS_FOLDER;
         FileInputStream fis = null;
-
         try {
+            String remoteDirPath = workspace.getRemote() + REPORTS_FOLDER;
             String remoteFilePath = remoteDirPath + File.separator + file.getName();
             log.info("Copying file {} to workspace {}", file.getName(), remoteFilePath);
             FilePath remoteFile = new FilePath(workspace.getChannel(), remoteFilePath);
             fis = new FileInputStream(file);
             remoteFile.copyFrom(fis);
-
         } catch (Exception e) {
             log.warn("Failed to write file [" + file.getName() + "] to workspace: " + e.getMessage());
-
         } finally {
             IOUtils.closeQuietly(fis);
         }
-
     }
 
     private boolean shouldUseGlobalThreshold() {
@@ -2138,17 +2140,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 || (JobStatusOnError.GLOBAL.equals(getJobStatusOnError()) && JobGlobalStatusOnError.UNSTABLE.equals(descriptor
                 .getJobGlobalStatusOnError()));
     }
-    
+
     private String getReturnStatusOnError(final DescriptorImpl descriptor) {
-        
-    	String status = JobStatusOnError.FAILURE.toString();
-    	
-    	if (JobStatusOnError.GLOBAL.equals(getJobStatusOnError()))
-    			status = descriptor.getJobGlobalStatusOnError().toString();
-    	else
-    		status = getJobStatusOnError().toString();
-    	
-    	return status;
+
+        String status = JobStatusOnError.FAILURE.toString();
+
+        if (JobStatusOnError.GLOBAL.equals(getJobStatusOnError()))
+            status = descriptor.getJobGlobalStatusOnError().toString();
+        else
+            status = getJobStatusOnError().toString();
+
+        return status;
     }
 
     /**
@@ -2207,13 +2209,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     private boolean scaResolverPathExist(String pathToResolver) {
         pathToResolver = pathToResolver + File.separator + "ScaResolver";
-        if(!SystemUtils.IS_OS_UNIX)
+        if (!SystemUtils.IS_OS_UNIX)
             pathToResolver = pathToResolver + ".exe";
 
         File file = new File(pathToResolver);
-        if(!file.exists())
-        {
-            throw new CxClientException("SCA Resolver path does not exist. Path="+file.getAbsolutePath());
+        if (!file.exists()) {
+            throw new CxClientException("SCA Resolver path does not exist. Path=" + file.getAbsolutePath());
         }
         return true;
     }
@@ -2223,115 +2224,115 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         String[] arguments = additionalParams.split(" ");
         Map<String, String> params = new HashMap<>();
 
-        for (int i = 0; i <  arguments.length ; i++) {
-            if(arguments[i].startsWith("-") && (i+1 != arguments.length && !arguments[i+1].startsWith("-")))
-                params.put(arguments[i], arguments[i+1]);
+        for (int i = 0; i < arguments.length; i++) {
+            if (arguments[i].startsWith("-") && (i + 1 != arguments.length && !arguments[i + 1].startsWith("-")))
+                params.put(arguments[i], arguments[i + 1]);
             else
                 params.put(arguments[i], "");
         }
 
         String dirPath = params.get("-s");
-        if(StringUtils.isEmpty(dirPath)) {
-        	if(null == workspace)
-        		throw new CxClientException("Source code path (-s <source code path>) is not provided.");
-                //        fileExists(dirPath);
+        if (StringUtils.isEmpty(dirPath)) {
+            if (null == workspace)
+                throw new CxClientException("Source code path (-s <source code path>) is not provided.");
+            //        fileExists(dirPath);
         }
         String projectName = params.get("-n");
-        if(StringUtils.isEmpty(projectName)) {
+        if (StringUtils.isEmpty(projectName)) {
             if (StringUtils.isEmpty(config.getProjectName()))
                 throw new CxClientException("Project name parameter (-n <project name>) must be provided to ScaResolver.");
         }
     }
 
-	private String checkMissingMandatoryAdditionalParams(String additionalParams, FilePath workspace,
-			CxScanConfig config, boolean isExploitablePathByScaResolver) {
-		if (additionalParams == null) {
-			additionalParams = "";
-		}
-		String addParams = additionalParams;
-		if (!additionalParams.contains("-n ")) {
-			if (StringUtils.isNotEmpty(config.getProjectName()))
-				additionalParams += " -n " + config.getProjectName();
-			else
-				throw new CxClientException("projectname must be specified");
-		}
+    private String checkMissingMandatoryAdditionalParams(String additionalParams, FilePath workspace,
+                                                         CxScanConfig config, boolean isExploitablePathByScaResolver) {
+        if (additionalParams == null) {
+            additionalParams = "";
+        }
+        String addParams = additionalParams;
+        if (!additionalParams.contains("-n ")) {
+            if (StringUtils.isNotEmpty(config.getProjectName()))
+                additionalParams += " -n " + config.getProjectName();
+            else
+                throw new CxClientException("projectname must be specified");
+        }
 
-		if (!additionalParams.contains("-s ")) {
-			if (null != workspace)
-				additionalParams += " -s " + workspace;
-			else
-				throw new CxClientException("source path must be specified");
-		}
+        if (!additionalParams.contains("-s ")) {
+            if (null != workspace)
+                additionalParams += " -s " + workspace;
+            else
+                throw new CxClientException("source path must be specified");
+        }
 
-		if (!additionalParams.contains("-r ") && !additionalParams.contains("--resolver-result-path ")) {
-			if (null != workspace)
-				additionalParams += " -r " + workspace + File.separator + scaResolverResultPath;
-			else
-				throw new CxClientException("result path must be specified");
-		}
-		if (isExploitablePathByScaResolver) {
-			if (!additionalParams.contains("--cxserver ")) {
-				if (StringUtils.isNotEmpty(config.getUrl()))
-					additionalParams += " --cxserver " + config.getUrl();
-				else
-					throw new CxClientException("cxserver must be specified");
-			}
-			if (!additionalParams.contains("--cxuser ")) {
-				if (StringUtils.isNotEmpty(config.getUsername()))
-					additionalParams += " --cxuser " + config.getUsername();
-				else
-					throw new CxClientException("cxuser  must be specified");
-			}
-			if (!additionalParams.contains("--cxpassword ")) {
-				if (StringUtils.isNotEmpty(config.getPassword()))
-					additionalParams += " --cxpassword " + config.getPassword();
-				else
-					throw new CxClientException("cxpassword must be specified");
-			}
-			if (!additionalParams.contains("--sast-result-path ")) {
-				if (null != workspace)
-					additionalParams += " --sast-result-path " + workspace + File.separator + scaResolverSastResultPath;
-				else
-					throw new CxClientException("sast result path must be specified");
-			}
-			if (!additionalParams.contains("--cxprojectname ") && !additionalParams.contains("--cxprojectid ")) {
-				if (StringUtils.isNotEmpty(config.getProjectName()))
-					additionalParams += " --cxprojectname " + config.getProjectName();
-				else
-					throw new CxClientException("sast project name or sast project id must be specified");
-			}
-		}
-		if (!isExploitablePathByScaResolver && (addParams.contains("--cxserver ") && addParams.contains("--cxuser ")
-				&& addParams.contains("--cxpassword ")
-				&& (addParams.contains("--cxprojectid ") || addParams.contains("--cxprojectname "))
-				&& addParams.contains("--sast-result-path ")))
-			log.warn(
-					"Enable Exploitable Path option is not selected, but exploitable path detection will be performed since all the required parameters for exploitable path detection are provided in SCA Resolver Additional Parameters.");
-
-		else if (isExploitablePathByScaResolver && (addParams.contains("--cxserver ") || addParams.contains("--cxuser ")
-				|| addParams.contains("--cxpassword ")
-				|| (addParams.contains("--cxprojectid ") || addParams.contains("--cxprojectname "))
-				|| addParams.contains("--sast-result-path ")))
-			log.warn(
-					"Any of the parameters (--cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname, --sast-result-path) specified in SCA Resolver additional parameters will be used for Exploitable Path Detection instead of the corresponding parameters configured in the pipeline.");
-		else if (!isExploitablePathByScaResolver && (addParams.contains("--cxserver ")
-				|| addParams.contains("--cxuser ") || addParams.contains("--cxpassword ")
-				|| (addParams.contains("--cxprojectid ") || addParams.contains("--cxprojectname "))
-				|| addParams.contains("--sast-result-path ")))
-			log.error(
-					"Enable Exploitable Path is disabled and only a few SAST parameters (like --cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname, --sast-result-path) are specified in SCA Resolver Additional Parameters. Thus, Exploitable Path Detection will not happen.");
-            if (addParams.contains("-n ") || addParams.contains("-s ") || addParams.contains("-r ")
-				|| addParams.contains("--resolver-result-path"))
-			log.warn(
-					"Any of the parameters (-n, -s, -r/--resolver-result-path) specified in SCA Resolver additional parameters will be used for dependency resolution instead of the corresponding parameters configured in the pipeline.");
-            
-            if(!isExploitablePathByScaResolver) {
-                if(additionalParams.contains("--cxserver ")) {
-                    additionalParams.replace("--cxserver ", "");
-                }
+        if (!additionalParams.contains("-r ") && !additionalParams.contains("--resolver-result-path ")) {
+            if (null != workspace)
+                additionalParams += " -r " + workspace + File.separator + scaResolverResultPath;
+            else
+                throw new CxClientException("result path must be specified");
+        }
+        if (isExploitablePathByScaResolver) {
+            if (!additionalParams.contains("--cxserver ")) {
+                if (StringUtils.isNotEmpty(config.getUrl()))
+                    additionalParams += " --cxserver " + config.getUrl();
+                else
+                    throw new CxClientException("cxserver must be specified");
             }
-		return additionalParams;
-	}
+            if (!additionalParams.contains("--cxuser ")) {
+                if (StringUtils.isNotEmpty(config.getUsername()))
+                    additionalParams += " --cxuser " + config.getUsername();
+                else
+                    throw new CxClientException("cxuser  must be specified");
+            }
+            if (!additionalParams.contains("--cxpassword ")) {
+                if (StringUtils.isNotEmpty(config.getPassword()))
+                    additionalParams += " --cxpassword " + config.getPassword();
+                else
+                    throw new CxClientException("cxpassword must be specified");
+            }
+            if (!additionalParams.contains("--sast-result-path ")) {
+                if (null != workspace)
+                    additionalParams += " --sast-result-path " + workspace + File.separator + scaResolverSastResultPath;
+                else
+                    throw new CxClientException("sast result path must be specified");
+            }
+            if (!additionalParams.contains("--cxprojectname ") && !additionalParams.contains("--cxprojectid ")) {
+                if (StringUtils.isNotEmpty(config.getProjectName()))
+                    additionalParams += " --cxprojectname " + config.getProjectName();
+                else
+                    throw new CxClientException("sast project name or sast project id must be specified");
+            }
+        }
+        if (!isExploitablePathByScaResolver && (addParams.contains("--cxserver ") && addParams.contains("--cxuser ")
+                && addParams.contains("--cxpassword ")
+                && (addParams.contains("--cxprojectid ") || addParams.contains("--cxprojectname "))
+                && addParams.contains("--sast-result-path ")))
+            log.warn(
+                    "Enable Exploitable Path option is not selected, but exploitable path detection will be performed since all the required parameters for exploitable path detection are provided in SCA Resolver Additional Parameters.");
+
+        else if (isExploitablePathByScaResolver && (addParams.contains("--cxserver ") || addParams.contains("--cxuser ")
+                || addParams.contains("--cxpassword ")
+                || (addParams.contains("--cxprojectid ") || addParams.contains("--cxprojectname "))
+                || addParams.contains("--sast-result-path ")))
+            log.warn(
+                    "Any of the parameters (--cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname, --sast-result-path) specified in SCA Resolver additional parameters will be used for Exploitable Path Detection instead of the corresponding parameters configured in the pipeline.");
+        else if (!isExploitablePathByScaResolver && (addParams.contains("--cxserver ")
+                || addParams.contains("--cxuser ") || addParams.contains("--cxpassword ")
+                || (addParams.contains("--cxprojectid ") || addParams.contains("--cxprojectname "))
+                || addParams.contains("--sast-result-path ")))
+            log.error(
+                    "Enable Exploitable Path is disabled and only a few SAST parameters (like --cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname, --sast-result-path) are specified in SCA Resolver Additional Parameters. Thus, Exploitable Path Detection will not happen.");
+        if (addParams.contains("-n ") || addParams.contains("-s ") || addParams.contains("-r ")
+                || addParams.contains("--resolver-result-path"))
+            log.warn(
+                    "Any of the parameters (-n, -s, -r/--resolver-result-path) specified in SCA Resolver additional parameters will be used for dependency resolution instead of the corresponding parameters configured in the pipeline.");
+
+        if (!isExploitablePathByScaResolver) {
+            if (additionalParams.contains("--cxserver ")) {
+                additionalParams.replace("--cxserver ", "");
+            }
+        }
+        return additionalParams;
+    }
 
     private void fileExists(String file) {
 
@@ -2360,19 +2361,19 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     //////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-     public DescriptorImpl getDescriptor() {
+    public DescriptorImpl getDescriptor() {
         return (DescriptorImpl) super.getDescriptor();
     }
 
     public ScaReportFormat getScaReportFormat() {
-		return scaReportFormat;
-	}
+        return scaReportFormat;
+    }
 
-	@DataBoundSetter
-	public void setScaReportFormat(ScaReportFormat scaReportFormat) {
-		this.scaReportFormat = scaReportFormat;
-	}
-    
+    @DataBoundSetter
+    public void setScaReportFormat(ScaReportFormat scaReportFormat) {
+        this.scaReportFormat = scaReportFormat;
+    }
+
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
@@ -2398,7 +2399,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private String credentialsId;
         private String mvnPath;
         private boolean isProxy = true;
-        private boolean enableDataRetention=false;
+        private boolean enableDataRetention = false;
 
         private boolean prohibitProjectCreation;
         private boolean hideResults;
@@ -2473,6 +2474,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         public void setProjectRetentionRateEnforce(Integer projectRetentionRateEnforce) {
             this.projectRetentionRateEnforce = projectRetentionRateEnforce;
         }
+
         public void setUsername(@Nullable String username) {
             this.username = username;
         }
@@ -2506,6 +2508,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         public void setEnableDataRetention(boolean enableDataRetention) {
             this.enableDataRetention = enableDataRetention;
         }
+
         @Nullable
         public String getPasswordPlainText(String password) {
             return Secret.fromString(password).getPlainText();
@@ -2761,12 +2764,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *  shared state to avoid synchronization issues.
          */
         @POST
-        public FormValidation doTestConnection(@QueryParameter final boolean enableCertificateValidation,@QueryParameter final String serverUrl, @QueryParameter final String password,
+        public FormValidation doTestConnection(@QueryParameter final boolean enableCertificateValidation, @QueryParameter final String serverUrl, @QueryParameter final String password,
                                                @QueryParameter final String username, @QueryParameter final String timestamp,
                                                @QueryParameter final String credentialsId, @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
-            if(item==null){
+            if (item == null) {
                 Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else if(item!=null){
+            } else if (item != null) {
                 item.checkPermission(Item.CONFIGURE);
             }
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
@@ -2821,69 +2824,69 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          */
         @POST
         public FormValidation doCheckScaSASTProjectID(@QueryParameter String value, @QueryParameter String scaSASTProjectFullPath, @AncestorInPath Item item) {
-        	if (item == null) {
+            if (item == null) {
                 return FormValidation.ok();
-        	}
-        	item.checkPermission(Item.CONFIGURE);
+            }
+            item.checkPermission(Item.CONFIGURE);
             if (StringUtil.isNullOrEmpty(value) && StringUtil.isNullOrEmpty(scaSASTProjectFullPath)) {
                 return FormValidation.error("Must provide value for either 'Project Full Path' or 'Project Id'.");
             }
             return FormValidation.ok();
         }
-        
-        
-		private boolean checkAllSastAddParamsWithoutExpPath(boolean isExploitablePathByScaResolver,
-				String scaResolverAddParameters) {
-			return (!isExploitablePathByScaResolver && (scaResolverAddParameters.contains("--cxserver ")
-					&& scaResolverAddParameters.contains("--cxuser ")
-					&& scaResolverAddParameters.contains("--cxpassword ")
-					&& (scaResolverAddParameters.contains("--cxprojectid ")
-							|| scaResolverAddParameters.contains("--cxprojectname "))
-					&& scaResolverAddParameters.contains("--sast-result-path ")));
-		}
-
-		private boolean checkAnySastAddParamsWithExpPath(boolean isExploitablePathByScaResolver,
-				String scaResolverAddParameters) {
-			return (isExploitablePathByScaResolver && (scaResolverAddParameters.contains("--cxserver ")
-					|| scaResolverAddParameters.contains("--cxuser ")
-					|| scaResolverAddParameters.contains("--cxpassword ")
-					|| (scaResolverAddParameters.contains("--cxprojectid ")
-							|| scaResolverAddParameters.contains("--cxprojectname "))
-					|| scaResolverAddParameters.contains("--sast-result-path ")));
-		}
 
 
-		private boolean checkAnyMandatoryAddParams(String scaResolverAddParameters) {
-			return (scaResolverAddParameters.contains("-n ") || scaResolverAddParameters.contains("-s ")
-					|| scaResolverAddParameters.contains("-r ")
-					|| scaResolverAddParameters.contains("--resolver-result-path"));
-		}
+        private boolean checkAllSastAddParamsWithoutExpPath(boolean isExploitablePathByScaResolver,
+                                                            String scaResolverAddParameters) {
+            return (!isExploitablePathByScaResolver && (scaResolverAddParameters.contains("--cxserver ")
+                    && scaResolverAddParameters.contains("--cxuser ")
+                    && scaResolverAddParameters.contains("--cxpassword ")
+                    && (scaResolverAddParameters.contains("--cxprojectid ")
+                    || scaResolverAddParameters.contains("--cxprojectname "))
+                    && scaResolverAddParameters.contains("--sast-result-path ")));
+        }
+
+        private boolean checkAnySastAddParamsWithExpPath(boolean isExploitablePathByScaResolver,
+                                                         String scaResolverAddParameters) {
+            return (isExploitablePathByScaResolver && (scaResolverAddParameters.contains("--cxserver ")
+                    || scaResolverAddParameters.contains("--cxuser ")
+                    || scaResolverAddParameters.contains("--cxpassword ")
+                    || (scaResolverAddParameters.contains("--cxprojectid ")
+                    || scaResolverAddParameters.contains("--cxprojectname "))
+                    || scaResolverAddParameters.contains("--sast-result-path ")));
+        }
 
 
-		/**
-		 * This method validates the SCA Resolver Additional Parameters on UI.
-		 * 
-		 * @param value:                         Indicates scaResolverAddParameters.
-		 * @param isExploitablePathByScaResolver
-		 * @return FormValidation: Indicates the outcome of the validation and send to
-		 *         UI.
-		 */
-		@POST
-		public FormValidation doCheckScaResolverAddParameters(@QueryParameter String value,
-				@QueryParameter boolean isExploitablePathByScaResolver) {
-			String warnMessage = "";
-			String errorMessage = "";
-			String otherWarnMessage = "";
-			if (checkAllSastAddParamsWithoutExpPath(isExploitablePathByScaResolver, value)) {
-				errorMessage = "Enable Exploitable Path option is not selected, but exploitable path detection will be performed since all the required parameters for exploitable path detection are provided in SCA Resolver Additional Parameters.";
-			} else if (checkAnySastAddParamsWithExpPath(isExploitablePathByScaResolver, value)) {
-				warnMessage = "Any of the parameters (--cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname, --sast-result-path) specified in SCA Resolver additional parameters will be used for Exploitable Path Detection instead of the corresponding parameters configured in the pipeline.";
-			} else if (checkAnySastAddParamsWithExpPath(!isExploitablePathByScaResolver, value)) {
+        private boolean checkAnyMandatoryAddParams(String scaResolverAddParameters) {
+            return (scaResolverAddParameters.contains("-n ") || scaResolverAddParameters.contains("-s ")
+                    || scaResolverAddParameters.contains("-r ")
+                    || scaResolverAddParameters.contains("--resolver-result-path"));
+        }
+
+
+        /**
+         * This method validates the SCA Resolver Additional Parameters on UI.
+         *
+         * @param value:                         Indicates scaResolverAddParameters.
+         * @param isExploitablePathByScaResolver
+         * @return FormValidation: Indicates the outcome of the validation and send to
+         * UI.
+         */
+        @POST
+        public FormValidation doCheckScaResolverAddParameters(@QueryParameter String value,
+                                                              @QueryParameter boolean isExploitablePathByScaResolver) {
+            String warnMessage = "";
+            String errorMessage = "";
+            String otherWarnMessage = "";
+            if (checkAllSastAddParamsWithoutExpPath(isExploitablePathByScaResolver, value)) {
+                errorMessage = "Enable Exploitable Path option is not selected, but exploitable path detection will be performed since all the required parameters for exploitable path detection are provided in SCA Resolver Additional Parameters.";
+            } else if (checkAnySastAddParamsWithExpPath(isExploitablePathByScaResolver, value)) {
+                warnMessage = "Any of the parameters (--cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname, --sast-result-path) specified in SCA Resolver additional parameters will be used for Exploitable Path Detection instead of the corresponding parameters configured in the pipeline.";
+            } else if (checkAnySastAddParamsWithExpPath(!isExploitablePathByScaResolver, value)) {
                 errorMessage = "Enable Exploitable Path is disabled and only a few SAST parameters (like --cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname, --sast-result-path) are specified in SCA Resolver Additional Parameters. Thus, Exploitable Path Detection will not happen.";
             }
-			if (checkAnyMandatoryAddParams(value)) {
-				otherWarnMessage = "Any of the parameters (-n, -s, -r/--resolver-result-path) specified in SCA Resolver additional parameters will be used for dependency resolution instead of the corresponding parameters configured in the pipeline.";
-			}
+            if (checkAnyMandatoryAddParams(value)) {
+                otherWarnMessage = "Any of the parameters (-n, -s, -r/--resolver-result-path) specified in SCA Resolver additional parameters will be used for dependency resolution instead of the corresponding parameters configured in the pipeline.";
+            }
             if (!StringUtil.isNullOrEmpty(errorMessage)) {
                 if (!StringUtil.isNullOrEmpty(otherWarnMessage))
                     errorMessage += "\n" + otherWarnMessage;
@@ -2897,17 +2900,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return FormValidation.ok();
         }
 
-		/**
-		 * This method validates the SCA Resolver Additional Parameters on UI.
-		 * 
-		 * @param value:                   Indicates isExploitablePathByScaResolver.
-		 * @param scaResolverAddParameters
-		 * @return FormValidation: Indicates the outcome of the validation and send to
-		 *         UI.
-		 */
-		@POST
-		public FormValidation doCheckIsExploitablePathByScaResolver(@QueryParameter boolean value,
-				@QueryParameter String scaResolverAddParameters) {
+        /**
+         * This method validates the SCA Resolver Additional Parameters on UI.
+         *
+         * @param value:                   Indicates isExploitablePathByScaResolver.
+         * @param scaResolverAddParameters
+         * @return FormValidation: Indicates the outcome of the validation and send to
+         * UI.
+         */
+        @POST
+        public FormValidation doCheckIsExploitablePathByScaResolver(@QueryParameter boolean value,
+                                                                    @QueryParameter String scaResolverAddParameters) {
             String warnMessage = "";
             String errorMessage = "";
             if (checkAllSastAddParamsWithoutExpPath(value, scaResolverAddParameters)) {
@@ -2925,32 +2928,32 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return FormValidation.ok();
         }
 
-		/**
-		 * This method validates the Global SCA Resolver Additional Parameters on UI.
-		 * 
-		 * @param value:                               Indicates
-		 *                                             globalScaResolverAddParameters.
-		 * @param isGlobalExploitablePathByScaResolver
-		 * @return FormValidation: Indicates the outcome of the validation and send to
-		 *         UI.
-		 */
-		@POST
-		public FormValidation doCheckGlobalScaResolverAddParameters(@QueryParameter String value,
-				@QueryParameter boolean isGlobalExploitablePathByScaResolver) {
-			String warnMessage = "";
-			String errorMessage = "";
-			String otherWarnMessage = "";
-			String globalWarnMessage = "Given parameters will be considered only if 'Override global dependency scan settings' parameter is disabled at Job Level.";
-			if (checkAllSastAddParamsWithoutExpPath(isGlobalExploitablePathByScaResolver, value)) {
-				errorMessage = "Enable Exploitable Path option is not selected, but exploitable path detection will be performed since all the required parameters for exploitable path detection are provided in SCA Resolver Additional Parameters.";
-			} else if (checkAnySastAddParamsWithExpPath(isGlobalExploitablePathByScaResolver, value)) {
-				warnMessage = "Any of the parameters (--cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname, --sast-result-path) specified in SCA Resolver additional parameters will be used for Exploitable Path Detection instead of the corresponding parameters configured in the pipeline.";
-			} else if (checkAnySastAddParamsWithExpPath(!isGlobalExploitablePathByScaResolver, value)) {
+        /**
+         * This method validates the Global SCA Resolver Additional Parameters on UI.
+         *
+         * @param value:                               Indicates
+         *                                             globalScaResolverAddParameters.
+         * @param isGlobalExploitablePathByScaResolver
+         * @return FormValidation: Indicates the outcome of the validation and send to
+         * UI.
+         */
+        @POST
+        public FormValidation doCheckGlobalScaResolverAddParameters(@QueryParameter String value,
+                                                                    @QueryParameter boolean isGlobalExploitablePathByScaResolver) {
+            String warnMessage = "";
+            String errorMessage = "";
+            String otherWarnMessage = "";
+            String globalWarnMessage = "Given parameters will be considered only if 'Override global dependency scan settings' parameter is disabled at Job Level.";
+            if (checkAllSastAddParamsWithoutExpPath(isGlobalExploitablePathByScaResolver, value)) {
+                errorMessage = "Enable Exploitable Path option is not selected, but exploitable path detection will be performed since all the required parameters for exploitable path detection are provided in SCA Resolver Additional Parameters.";
+            } else if (checkAnySastAddParamsWithExpPath(isGlobalExploitablePathByScaResolver, value)) {
+                warnMessage = "Any of the parameters (--cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname, --sast-result-path) specified in SCA Resolver additional parameters will be used for Exploitable Path Detection instead of the corresponding parameters configured in the pipeline.";
+            } else if (checkAnySastAddParamsWithExpPath(!isGlobalExploitablePathByScaResolver, value)) {
                 errorMessage = "Enable Exploitable Path is disabled and only a few SAST parameters (like --cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname, --sast-result-path) are specified in SCA Resolver Additional Parameters. Thus, Exploitable Path Detection will not happen.";
             }
-			if (checkAnyMandatoryAddParams(value)) {
-				otherWarnMessage = "Any of the parameters (-n, -s, -r/--resolver-result-path) specified in SCA Resolver additional parameters will be used for dependency resolution instead of the corresponding parameters configured in the pipeline.";
-			}
+            if (checkAnyMandatoryAddParams(value)) {
+                otherWarnMessage = "Any of the parameters (-n, -s, -r/--resolver-result-path) specified in SCA Resolver additional parameters will be used for dependency resolution instead of the corresponding parameters configured in the pipeline.";
+            }
             if (!StringUtil.isNullOrEmpty(errorMessage)) {
                 if (!StringUtil.isNullOrEmpty(otherWarnMessage))
                     errorMessage += "\n" + otherWarnMessage;
@@ -2961,29 +2964,29 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return FormValidation.ok();
         }
 
-		/**
-		 * This method validates the Global SCA Resolver Additional Parameters on UI.
-		 * 
-		 * @param value:                         Indicates
-		 *                                       isGlobalExploitablePathByScaResolver.
-		 * @param globalScaResolverAddParameters
-		 * @return FormValidation: Indicates the outcome of the validation and send to
-		 *         UI.
-		 */
-		@POST
-		public FormValidation doCheckIsGlobalExploitablePathByScaResolver(@QueryParameter boolean value,
-				@QueryParameter String globalScaResolverAddParameters) {
-			String warnMessage = "";
-			String errorMessage = "";
-			String globalWarnMessage = "Given parameters will be considered only if 'Override global dependency scan settings' parameter is disabled at Job Level.";
-			if (checkAllSastAddParamsWithoutExpPath(value, globalScaResolverAddParameters)) {
-				errorMessage = "Enable Exploitable Path option is not selected, but exploitable path detection will be performed since all the required parameters for exploitable path detection are provided in SCA Resolver Additional Parameters.";
-			} else if (checkAnySastAddParamsWithExpPath(!value, globalScaResolverAddParameters)) {
-				errorMessage = "Enable Exploitable Path is disabled and only a few SAST parameters (like --cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname, --sast-result-path) are specified in SCA Resolver Additional Parameters. Thus, Exploitable Path Detection will not happen.";
-			}
-			if (checkAnyMandatoryAddParams(globalScaResolverAddParameters)) {
+        /**
+         * This method validates the Global SCA Resolver Additional Parameters on UI.
+         *
+         * @param value:                         Indicates
+         *                                       isGlobalExploitablePathByScaResolver.
+         * @param globalScaResolverAddParameters
+         * @return FormValidation: Indicates the outcome of the validation and send to
+         * UI.
+         */
+        @POST
+        public FormValidation doCheckIsGlobalExploitablePathByScaResolver(@QueryParameter boolean value,
+                                                                          @QueryParameter String globalScaResolverAddParameters) {
+            String warnMessage = "";
+            String errorMessage = "";
+            String globalWarnMessage = "Given parameters will be considered only if 'Override global dependency scan settings' parameter is disabled at Job Level.";
+            if (checkAllSastAddParamsWithoutExpPath(value, globalScaResolverAddParameters)) {
+                errorMessage = "Enable Exploitable Path option is not selected, but exploitable path detection will be performed since all the required parameters for exploitable path detection are provided in SCA Resolver Additional Parameters.";
+            } else if (checkAnySastAddParamsWithExpPath(!value, globalScaResolverAddParameters)) {
+                errorMessage = "Enable Exploitable Path is disabled and only a few SAST parameters (like --cxserver, --cxuser, --cxpassword, --sast-result-path, --cxprojectid or --cxprojectname, --sast-result-path) are specified in SCA Resolver Additional Parameters. Thus, Exploitable Path Detection will not happen.";
+            }
+            if (checkAnyMandatoryAddParams(globalScaResolverAddParameters)) {
                 warnMessage = "Any of the parameters (-n, -s, -r/--resolver-result-path) specified in SCA Resolver additional parameters will be used for dependency resolution instead of the corresponding parameters configured in the pipeline.";
-			}
+            }
             if (!StringUtil.isNullOrEmpty(errorMessage))
                 return FormValidation.error(errorMessage);
             else if (!StringUtil.isNullOrEmpty(warnMessage))
@@ -2998,15 +3001,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * @return
          */
         @POST
-        public FormValidation doCheckCustomFields(@QueryParameter String value,@AncestorInPath Item item) {
-        	if (item == null) {
+        public FormValidation doCheckCustomFields(@QueryParameter String value, @AncestorInPath Item item) {
+            if (item == null) {
                 return FormValidation.ok();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
             Matcher match = pattern.matcher(value);
             if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
-            	return FormValidation.error("Custom Fields must have given format: key1:val1,key2:val2. \nCustom field allows to use these special characters: # . _ ");
+                return FormValidation.error("Custom Fields must have given format: key1:val1,key2:val2. \nCustom field allows to use these special characters: # . _ ");
             }
 
             return FormValidation.ok();
@@ -3018,10 +3021,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * @param value
          * @return
          */
-        public FormValidation doCheckForceScan(@QueryParameter boolean value, @QueryParameter boolean incremental,@AncestorInPath Item item) {
-        	if (item == null) {
+        public FormValidation doCheckForceScan(@QueryParameter boolean value, @QueryParameter boolean incremental, @AncestorInPath Item item) {
+            if (item == null) {
                 return FormValidation.ok();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             if (incremental && value) {
                 return FormValidation.error("Force scan and incremental scan can not be configured in pair for SAST");
@@ -3036,10 +3039,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * @param value
          * @return
          */
-        public FormValidation doCheckIncremental(@QueryParameter boolean value, @QueryParameter boolean forceScan,@AncestorInPath Item item) {
-        	if (item == null) {
+        public FormValidation doCheckIncremental(@QueryParameter boolean value, @QueryParameter boolean forceScan, @AncestorInPath Item item) {
+            if (item == null) {
                 return FormValidation.ok();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             if (forceScan && value) {
                 forceScan = false;
@@ -3049,31 +3052,31 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             return FormValidation.ok();
         }
-        
+
         @POST
-        public FormValidation doCheckGenerateScaReport(@QueryParameter boolean value, @QueryParameter boolean dependencyScanConfig, @QueryParameter boolean generateScaReport,@AncestorInPath Item item) {
-        	if (item == null) {
+        public FormValidation doCheckGenerateScaReport(@QueryParameter boolean value, @QueryParameter boolean dependencyScanConfig, @QueryParameter boolean generateScaReport, @AncestorInPath Item item) {
+            if (item == null) {
                 return FormValidation.ok();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             if (!dependencyScanConfig && value) {
-            	generateScaReport=false;
-            	dependencyScanConfig = false;
-            	return FormValidation.error("Enable dependency scanner as SCA");
+                generateScaReport = false;
+                dependencyScanConfig = false;
+                return FormValidation.error("Enable dependency scanner as SCA");
             }
 
             return FormValidation.ok();
         }
-        
+
 
         @POST
         public FormValidation doTestScaSASTConnection(@QueryParameter final String scaSastServerUrl, @QueryParameter final String password,
                                                       @QueryParameter final String username, @QueryParameter final String timestamp,
                                                       @QueryParameter final String sastCredentialsId, @QueryParameter final boolean isProxy,
                                                       @AncestorInPath Item item) {
-            if(item==null){
+            if (item == null) {
                 Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else if(item!=null){
+            } else if (item != null) {
                 item.checkPermission(Item.CONFIGURE);
             }
             // timestamp is not used in code, it is one of the arguments to
@@ -3148,9 +3151,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                   @QueryParameter String scaTenant,
                                                   @QueryParameter Integer scaTimeout,
                                                   @AncestorInPath Item item) {
-            if(item==null){
+            if (item == null) {
                 Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else if(item!=null){
+            } else if (item != null) {
                 item.checkPermission(Item.CONFIGURE);
             }
 
@@ -3239,9 +3242,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                         @QueryParameter final String username, @QueryParameter final String password,
                                                         @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
                                                         @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
-        	if (item == null) {
+            if (item == null) {
                 return new ListBoxModel();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
@@ -3251,13 +3254,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                         StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, isProxy, this, item);
                 commonClient = prepareLoggedInClient(connDetails);
                 List<PostAction> teamList = commonClient.getPostScanActionList();
-                if (listBoxModel.isEmpty() && !listBoxModel.contains("")){
+                if (listBoxModel.isEmpty() && !listBoxModel.contains("")) {
                     listBoxModel.add(new ListBoxModel.Option("", Integer.toString(0)));
                 }
                 for (PostAction postAction : teamList) {
-                    if (postAction.getType().contains("POST_SCAN_COMMAND")){
+                    if (postAction.getType().contains("POST_SCAN_COMMAND")) {
                         listBoxModel.add(new ListBoxModel.Option(postAction.getName(), Integer.toString(postAction.getId())));
-                    }else {
+                    } else {
                         continue;
                     }
 
@@ -3285,9 +3288,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                     @QueryParameter final String username, @QueryParameter final String password,
                                                     @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
                                                     @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
-        	if (item == null) {
+            if (item == null) {
                 return new ComboBoxModel();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ComboBoxModel projectNames = new ComboBoxModel();
@@ -3332,9 +3335,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                               @QueryParameter final String username, @QueryParameter final String password,
                                               @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
                                               @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
-        	if (item == null) {
+            if (item == null) {
                 return new ListBoxModel();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
@@ -3370,10 +3373,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          *  shared state to avoid synchronization issues.
          */
         @POST
-        public FormValidation doCheckFullScanCycle(@QueryParameter final int value , @AncestorInPath Item item) {
-        	if (item == null) {
+        public FormValidation doCheckFullScanCycle(@QueryParameter final int value, @AncestorInPath Item item) {
+            if (item == null) {
                 return FormValidation.ok();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             if (value >= FULL_SCAN_CYCLE_MIN && value <= FULL_SCAN_CYCLE_MAX) {
                 return FormValidation.ok();
@@ -3387,9 +3390,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                       @QueryParameter final String username, @QueryParameter final String password,
                                                       @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
                                                       @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
-        	if (item == null) {
+            if (item == null) {
                 return new ListBoxModel();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
@@ -3430,9 +3433,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                                                @QueryParameter final String username, @QueryParameter final String password,
                                                @QueryParameter final String timestamp, @QueryParameter final String credentialsId,
                                                @QueryParameter final boolean isProxy, @AncestorInPath Item item) {
-        	if (item == null) {
+            if (item == null) {
                 return new ListBoxModel();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
@@ -3443,8 +3446,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 commonClient = prepareLoggedInClient(connDetails);
 
                 commonClient.getTeamList().stream().sorted(
-                        (firstElmnt, secondElmnt) ->
-                                firstElmnt.getFullName().compareToIgnoreCase(secondElmnt.fullName))
+                                (firstElmnt, secondElmnt) ->
+                                        firstElmnt.getFullName().compareToIgnoreCase(secondElmnt.fullName))
                         .forEach(team ->
                                 listBoxModel.add(new ListBoxModel.Option(team.getFullName(), team.getId())));
 
@@ -3461,11 +3464,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 }
             }
         }
+
         @POST
         public ListBoxModel doFillFailBuildOnNewSeverityItems(@AncestorInPath Item item) {
-        	if (item == null) {
+            if (item == null) {
                 return new ListBoxModel();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             ListBoxModel listBoxModel = new ListBoxModel();
             listBoxModel.add(new ListBoxModel.Option("High", "HIGH"));
@@ -3477,9 +3481,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         @POST
         public ListBoxModel doFillVulnerabilityThresholdResultItems(@AncestorInPath Item item) {
-        	if (item == null) {
+            if (item == null) {
                 return new ListBoxModel();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             ListBoxModel listBoxModel = new ListBoxModel();
 
@@ -3491,19 +3495,19 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             return listBoxModel;
         }
-        
+
         @POST
-		public ListBoxModel doFillScaReportFormat(@AncestorInPath Item item) {
-			if (item == null) {
-				return new ListBoxModel();
-			}
-			item.checkPermission(Item.CONFIGURE);
-			ListBoxModel listBoxModel = new ListBoxModel();
-			for (ScaReportFormat status : ScaReportFormat.values()) {
-				listBoxModel.add(new ListBoxModel.Option(status.getDisplayName(), status.name()));
-			}
-			return listBoxModel;
-		}
+        public ListBoxModel doFillScaReportFormat(@AncestorInPath Item item) {
+            if (item == null) {
+                return new ListBoxModel();
+            }
+            item.checkPermission(Item.CONFIGURE);
+            ListBoxModel listBoxModel = new ListBoxModel();
+            for (ScaReportFormat status : ScaReportFormat.values()) {
+                listBoxModel.add(new ListBoxModel.Option(status.getDisplayName(), status.name()));
+            }
+            return listBoxModel;
+        }
 
 
         /*
@@ -3511,10 +3515,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * avoid synchronization issues.
          */
         @POST
-        public FormValidation doCheckHighThreshold(@QueryParameter final Integer value,@AncestorInPath Item item) {
-        	if (item == null) {
+        public FormValidation doCheckHighThreshold(@QueryParameter final Integer value, @AncestorInPath Item item) {
+            if (item == null) {
                 return FormValidation.ok();
-        	}
+            }
             item.checkPermission(Item.CONFIGURE);
             return checkNonNegativeValue(value);
         }
@@ -3524,10 +3528,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * avoid synchronization issues.
          */
         @POST
-        public FormValidation doCheckMediumThreshold(@QueryParameter final Integer value,@AncestorInPath Item item) {
-        	if (item == null) {
+        public FormValidation doCheckMediumThreshold(@QueryParameter final Integer value, @AncestorInPath Item item) {
+            if (item == null) {
                 return FormValidation.ok();
-        	} 
+            }
             item.checkPermission(Item.CONFIGURE);
             return checkNonNegativeValue(value);
         }
@@ -3537,10 +3541,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * avoid synchronization issues.
          */
         @POST
-        public FormValidation doCheckLowThreshold(@QueryParameter final Integer value,@AncestorInPath Item item) {
-        	if (item == null) {
+        public FormValidation doCheckLowThreshold(@QueryParameter final Integer value, @AncestorInPath Item item) {
+            if (item == null) {
                 return FormValidation.ok();
-        	} 
+            }
             item.checkPermission(Item.CONFIGURE);
             return checkNonNegativeValue(value);
         }
@@ -3581,10 +3585,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          */
 
         @POST
-        public FormValidation doCheckOsaHighThreshold(@QueryParameter final Integer value,@AncestorInPath Item item) {
-        	if (item == null) {
+        public FormValidation doCheckOsaHighThreshold(@QueryParameter final Integer value, @AncestorInPath Item item) {
+            if (item == null) {
                 return FormValidation.ok();
-        	} 
+            }
             item.checkPermission(Item.CONFIGURE);
             return checkNonNegativeValue(value);
         }
@@ -3594,10 +3598,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * avoid synchronization issues.
          */
         @POST
-        public FormValidation doCheckOsaMediumThreshold(@QueryParameter final Integer value,@AncestorInPath Item item) {
-        	if (item == null) {
+        public FormValidation doCheckOsaMediumThreshold(@QueryParameter final Integer value, @AncestorInPath Item item) {
+            if (item == null) {
                 return FormValidation.ok();
-        	} 
+            }
             item.checkPermission(Item.CONFIGURE);
             return checkNonNegativeValue(value);
         }
@@ -3607,16 +3611,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * avoid synchronization issues.
          */
         @POST
-        public FormValidation doCheckOsaLowThreshold(@QueryParameter final Integer value,@AncestorInPath Item item) {
-        	if (item == null) {
+        public FormValidation doCheckOsaLowThreshold(@QueryParameter final Integer value, @AncestorInPath Item item) {
+            if (item == null) {
                 return FormValidation.ok();
-        	} 
+            }
             item.checkPermission(Item.CONFIGURE);
             return checkNonNegativeValue(value);
         }
 
         @POST
-            public FormValidation doCheckOsaHighThresholdEnforcement(@QueryParameter final Integer value) {
+        public FormValidation doCheckOsaHighThresholdEnforcement(@QueryParameter final Integer value) {
             Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
             return checkNonNegativeValue(value);
         }
@@ -3642,12 +3646,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         @POST
-        public FormValidation doCheckProjectRetentionRate(@QueryParameter final Integer value,@AncestorInPath Item item) {
+        public FormValidation doCheckProjectRetentionRate(@QueryParameter final Integer value, @AncestorInPath Item item) {
             if (item == null) {
                 return FormValidation.ok();
             }
             item.checkPermission(Item.CONFIGURE);
-            if(value==0){
+            if (value == 0) {
                 return FormValidation.warning("Scan retention with 0 value will not set retention rate");
             }
             return checkNonNegativeValue(value);
@@ -3752,9 +3756,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         @POST
         public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String credentialsId) {
-            if(item==null){
+            if (item == null) {
                 Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else if(item!=null){
+            } else if (item != null) {
                 item.checkPermission(Item.CONFIGURE);
             }
             return getCredentialList(item, credentialsId);
@@ -3762,9 +3766,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         @POST
         public ListBoxModel doFillScaCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String scaCredentialsId) {
-            if(item==null){
+            if (item == null) {
                 Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else if(item!=null){
+            } else if (item != null) {
                 item.checkPermission(Item.CONFIGURE);
             }
             return getCredentialList(item, scaCredentialsId);
@@ -3772,9 +3776,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         @POST
         public ListBoxModel doFillSastCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String sastCredentialsId) {
-            if(item==null){
+            if (item == null) {
                 Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
-            }else if(item!=null){
+            } else if (item != null) {
                 item.checkPermission(Item.CONFIGURE);
             }
             return getCredentialList(item, sastCredentialsId);
