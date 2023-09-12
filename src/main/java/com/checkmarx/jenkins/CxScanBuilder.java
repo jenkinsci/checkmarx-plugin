@@ -58,8 +58,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.*;
-import java.net.URL;
-import java.net.URLDecoder;
+import java.net.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -1408,7 +1407,21 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         } catch (UnsupportedEncodingException e) {
             log.error("Failed to get Jenkins URL of the JOB: " + e.getMessage());
         }
-        return passedURL;
+
+        String resolvedUrl;
+        try {
+            URI tmpUri = new URI(passedURL);
+            String host = StringUtils.isNotEmpty(tmpUri.getAuthority()) ? tmpUri.getAuthority() : tmpUri.getHost();
+            host = IDN.toASCII(host, IDN.ALLOW_UNASSIGNED);
+            URI uri = new URI(tmpUri.getScheme(), tmpUri.getUserInfo(), host, tmpUri.getPort(), tmpUri.getPath(),
+                    tmpUri.getQuery(), tmpUri.getFragment());
+            resolvedUrl = uri.toString();
+        } catch (Exception e) {
+            resolvedUrl = passedURL;
+            log.warn("Fail to convert URI: " + passedURL);
+        }
+
+        return resolvedUrl;
     }
 
 
@@ -1984,7 +1997,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         String reportName = null;
         try {
             String reportHTML = SummaryUtils.generateSummary(results.getSastResults(), results.getOsaResults(), results.getScaResults(), config);
-            reportName = CxScanResult.resolveHTMLReportName(config.isSastEnabled(), getDependencyScannerType(config));
+            reportName = CxScanResult.resolveHTMLReportName(config.isSastEnabled(), getDependencyScannerType(config)) +
+                    "-" + System.currentTimeMillis();
             File reportFile = new File(checkmarxBuildDir, reportName);
             FileUtils.writeStringToFile(reportFile, reportHTML, Charset.defaultCharset());
             writeFileToWorkspaceReports(workspace, reportFile);
