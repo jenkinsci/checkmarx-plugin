@@ -301,10 +301,11 @@
                 <f:optionalBlock title="Generate CxSAST PDF report" inline="true" field="generatePdfReport" />
 
                 <!-- -= enableProjectPolicyEnforcement =- -->
-                <f:optionalBlock title="Enable Project's policy enforcement" inline="true" field="enableProjectPolicyEnforcement" />
-                 
-                  
-                   </f:optionalBlock>
+                <f:optionalBlock title="Enable Project's policy enforcement for SAST" inline="true" field="enableProjectPolicyEnforcementSAST" />
+                    <f:optionalBlock title="Enable Project's policy enforcement for SCA" inline="true" field="enableProjectPolicyEnforcementSCA" />
+
+
+                </f:optionalBlock>
             </j:when>
 
             <!-- ** use specific configuration setting ** -->
@@ -332,7 +333,8 @@
            			</f:optionalBlock>
 
                     <!-- -= enableProjectPolicyEnforcement =- -->
-                    <f:optionalBlock title="Enable Project's policy enforcement" inline="true" field="enableProjectPolicyEnforcement" />
+                    <f:optionalBlock title="Enable Project's policy enforcement for SAST" inline="true" field="enableProjectPolicyEnforcementSAST" />
+                    <f:optionalBlock title="Enable Project's policy enforcement for SCA" inline="true" field="enableProjectPolicyEnforcementSCA" />
 
                    <!-- ** Enable CxSAST vulnerability threshold ** -->
                     <f:optionalBlock title="Enable vulnerability threshold" inline="true"

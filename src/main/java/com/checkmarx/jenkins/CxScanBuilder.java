@@ -173,6 +173,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private boolean generatePdfReport;
     private boolean generateScaReport;
     private boolean enableProjectPolicyEnforcement;
+
+    private boolean enableProjectPolicyEnforcementSCA;
     @Nullable
     private Integer osaHighThreshold;
     @Nullable
@@ -267,6 +269,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             boolean generatePdfReport,
             boolean generateScaReport,
             boolean enableProjectPolicyEnforcement,
+            boolean enableProjectPolicyEnforcementSCA,
             String thresholdSettings,
             String vulnerabilityThresholdResult,
             boolean avoidDuplicateProjectScans,
@@ -319,6 +322,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.generatePdfReport = generatePdfReport;
         this.generateScaReport = generateScaReport;
         this.enableProjectPolicyEnforcement = enableProjectPolicyEnforcement;
+        this.enableProjectPolicyEnforcementSCA=enableProjectPolicyEnforcementSCA;
         this.thresholdSettings = thresholdSettings;
         if (vulnerabilityThresholdResult != null) {
             this.vulnerabilityThresholdResult = Result.fromString(vulnerabilityThresholdResult);
@@ -627,8 +631,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public boolean isEnableProjectPolicyEnforcement() {
         return enableProjectPolicyEnforcement;
     }
+    public boolean isEnableProjectPolicyEnforcementSCA() {
+        return enableProjectPolicyEnforcement;
+    }
 
-    public boolean isAvoidDuplicateProjectScans() {
+        public boolean isAvoidDuplicateProjectScans() {
         return avoidDuplicateProjectScans;
     }
 
@@ -789,6 +796,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setEnableProjectPolicyEnforcement(boolean enableProjectPolicyEnforcement) {
         this.enableProjectPolicyEnforcement = enableProjectPolicyEnforcement;
+    }
+
+    @DataBoundSetter
+    public void setEnableProjectPolicyEnforcementSCA(boolean enableProjectPolicyEnforcementSCA) {
+        this.enableProjectPolicyEnforcementSCA = enableProjectPolicyEnforcementSCA;
     }
 
     @DataBoundSetter
@@ -1596,9 +1608,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         if (!ret.getSynchronous()) {
             enableProjectPolicyEnforcement = false;
+            enableProjectPolicyEnforcementSCA=false;
         }
         ret.setEnablePolicyViolations(enableProjectPolicyEnforcement);
-        
+        ret.setEnablePolicyViolationsSCA(enableProjectPolicyEnforcementSCA);
         if (!ret.isAstScaEnabled() || !ret.getSynchronous()) {
         	generateScaReport = false;
         }
@@ -1861,7 +1874,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("deny new project creation: " + config.getDenyProject());
         log.info("SAST scan enabled: " + config.isSastEnabled());
         log.info("avoid duplicated projects scans: " + config.isAvoidDuplicateProjectScans());
-        log.info("enable Project Policy Enforcement: " + config.getEnablePolicyViolations());
+        log.info("enable Project Policy Enforcement SAST: " + config.getEnablePolicyViolations());
+        log.info("enable Project Policy Enforcement SCA: " + config.getEnablePolicyViolationsSCA());
         log.info("continue build when timed out: " + config.getContinueBuild());
         log.info("post scan action: " + config.getPostScanActionId());
         log.info("is force scan: " + config.getForceScan());
