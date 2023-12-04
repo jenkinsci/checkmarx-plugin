@@ -231,30 +231,7 @@
                             <f:optionalBlock title="Include Sources" field="isIncludeSources"
                                             inline="true"  checked="${instance.dependencyScanConfig.isIncludeSources}"/>
 
-                            <f:optionalBlock title="Enable Exploitable Path" field="isExploitablePath"
-                                            inline="true"  checked="${instance.dependencyScanConfig.isExploitablePath}">
-
-                                <f:optionalBlock title="Use global settings (${descriptor.credentialsDescription})" field="useJobLevelSastDetails"
-                                                inline="true"  negative="true" checked="${!instance.dependencyScanConfig.useJobLevelSastDetails}">
-
-                                    <f:entry title="CxSAST Server Url" field="scaSastServerUrl">
-                                        <f:textbox default="${descriptor.dependencyScanConfig.serverUrl}"  value="${instance.dependencyScanConfig.scaSastServerUrl}" />
-                                    </f:entry>
-                                    <f:entry title="CxSAST credentials" field="sastCredentialsId">
-                                        <c:select value="${instance.dependencyScanConfig.sastCredentialsId}" />
-                                    </f:entry>
-                                    <f:validateButton title="Test Connection" progress="Testing..." method="testScaSASTConnection"
-                                                    with="scaSastServerUrl,password,username,timestamp,sastCredentialsId,isProxy" />
-                                </f:optionalBlock>
-
-                                <f:entry title="Project Full Path" field="scaSASTProjectFullPath">
-                                    <f:textbox value="${instance.dependencyScanConfig.scaSASTProjectFullPath}"/>
-                                </f:entry>
-                                <f:entry title="Project ID" field="scaSASTProjectID">
-                                    <f:textbox checkMethod="POST" value="${instance.dependencyScanConfig.scaSASTProjectID}"/>
-                                </f:entry>
-                            </f:optionalBlock>
-                        </f:radioBlock>
+                             </f:radioBlock>
                 </f:nested>
             </f:radioBlock>
         </f:optionalBlock>
@@ -301,10 +278,11 @@
                 <f:optionalBlock title="Generate CxSAST PDF report" inline="true" field="generatePdfReport" />
 
                 <!-- -= enableProjectPolicyEnforcement =- -->
-                <f:optionalBlock title="Enable Project's policy enforcement" inline="true" field="enableProjectPolicyEnforcement" />
-                 
-                  
-                   </f:optionalBlock>
+                <f:optionalBlock title="Enable Project's policy enforcement for SAST" inline="true" field="enableProjectPolicyEnforcementSAST" />
+                    <f:optionalBlock title="Enable Project's policy enforcement for SCA" inline="true" field="enableProjectPolicyEnforcementSCA" />
+
+
+                </f:optionalBlock>
             </j:when>
 
             <!-- ** use specific configuration setting ** -->
@@ -332,7 +310,8 @@
            			</f:optionalBlock>
 
                     <!-- -= enableProjectPolicyEnforcement =- -->
-                    <f:optionalBlock title="Enable Project's policy enforcement" inline="true" field="enableProjectPolicyEnforcement" />
+                    <f:optionalBlock title="Enable Project's policy enforcement for SAST" inline="true" field="enableProjectPolicyEnforcementSAST" />
+                    <f:optionalBlock title="Enable Project's policy enforcement for SCA" inline="true" field="enableProjectPolicyEnforcementSCA" />
 
                    <!-- ** Enable CxSAST vulnerability threshold ** -->
                     <f:optionalBlock title="Enable vulnerability threshold" inline="true"
