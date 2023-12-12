@@ -195,6 +195,12 @@
                     <f:entry title="Teampath" field="scaTeamPath">
                         <f:textbox value="${instance.dependencyScanConfig.scaTeamPath}"/>
                     </f:entry>
+                    <f:entry title="Project Custom Tags" field="scaProjectCustomTags">
+                        <f:textbox value="${instance.dependencyScanConfig.scaProjectCustomTags}"/>
+                    </f:entry>
+                    <f:entry title="Scan Custom Tags" field="scaScanCustomTags">
+                        <f:textbox value="${instance.dependencyScanConfig.scaScanCustomTags}"/>
+                    </f:entry>
                     
                     <f:entry title="SCA Scan timeout (minutes)" field="scaTimeout">
                         <f:textbox value="${instance.dependencyScanConfig.scaTimeout}"/>
@@ -278,7 +284,7 @@
                 <f:optionalBlock title="Generate CxSAST PDF report" inline="true" field="generatePdfReport" />
 
                 <!-- -= enableProjectPolicyEnforcement =- -->
-                <f:optionalBlock title="Enable Project's policy enforcement for SAST" inline="true" field="enableProjectPolicyEnforcementSAST" />
+                <f:optionalBlock title="Enable Project's policy enforcement for SAST" inline="true" field="enableProjectPolicyEnforcement" />
                     <f:optionalBlock title="Enable Project's policy enforcement for SCA" inline="true" field="enableProjectPolicyEnforcementSCA" />
 
 

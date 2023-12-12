@@ -70,7 +70,13 @@ public class DependencyScanConfig {
     
     @DataBoundSetter
     public String scaTeamPath;
-    
+
+    @DataBoundSetter
+    public String scaScanCustomTags;
+
+    @DataBoundSetter
+    public String scaProjectCustomTags;
+
     @DataBoundSetter
     public String scaTeamId;
     
