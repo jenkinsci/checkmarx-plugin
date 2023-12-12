@@ -116,12 +116,6 @@
 		<f:entry title="Force Scan" field="forceScan">
             <f:checkbox checkMethod="POST" checked="${instance.forceScan}"/>
         </f:entry>
-        
-        
-        <f:entry title="Project level - custom fields" field="projectLevelCustomFields">
-        	<f:textbox checkMethod="POST" value="${instance.projectLevelCustomFields}" />
-        </f:entry>
-        
 
 
         <f:entry title="Project level - custom fields" field="projectLevelCustomFields">

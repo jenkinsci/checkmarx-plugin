@@ -845,15 +845,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public void setCustomFields(String customFields) {
         this.customFields = customFields;
     }
-    
-    public String getProjectLevelCustomFields() {
-        return projectLevelCustomFields;
-    }
-
-    @DataBoundSetter
-    public void setProjectLevelCustomFields(String projectLevelCustomFields) {
-        this.projectLevelCustomFields = projectLevelCustomFields;
-    }
 
     public String getProjectLevelCustomFields() {
         return projectLevelCustomFields;
@@ -3029,27 +3020,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          */
         @POST
         public FormValidation doCheckCustomFields(@QueryParameter String value,@AncestorInPath Item item) {
-        	if (item == null) {
-                return FormValidation.ok();
-        	}
-            item.checkPermission(Item.CONFIGURE);
-            Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
-            Matcher match = pattern.matcher(value);
-            if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
-            	return FormValidation.error("Custom Fields must have given format: key1:val1,key2:val2. \nCustom field allows to use these special characters: # . _ ");
-            }
-
-            return FormValidation.ok();
-        }
-        
-        /**
-         * This method verify correct format for Project Level Custom Fields
-         *
-         * @param value
-         * @return
-         */
-        @POST
-        public FormValidation doCheckProjectLevelCustomFields(@QueryParameter String value,@AncestorInPath Item item) {
         	if (item == null) {
                 return FormValidation.ok();
         	}
