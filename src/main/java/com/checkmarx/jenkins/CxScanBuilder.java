@@ -589,7 +589,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public void setExcludeOpenSourceFolders(@Nullable String excludeOpenSourceFolders) {
         this.excludeOpenSourceFolders = excludeOpenSourceFolders;
     }
-
     @Nullable
     public String getIncludeOpenSourceFolders() {
         return includeOpenSourceFolders;
@@ -1773,6 +1772,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         result.setAccessControlUrl(dsConfig.scaAccessControlUrl);
         result.setWebAppUrl(dsConfig.scaWebAppUrl);
         result.setTenant(dsConfig.scaTenant);
+        result.setScaScanCustomTags(dsConfig.scaScanCustomTags);
+        result.setScaProjectCustomTags(dsConfig.scaProjectCustomTags);
         result.setTeamPath(dsConfig.scaTeamPath);
         result.setTeamId(dsConfig.scaTeamId);
         result.setIncludeSources(dsConfig.isIncludeSources);
@@ -1927,6 +1928,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 				log.info("Team: " + config.getAstScaConfig().getTeamPath());
 				log.info("is generate SCA report: " + config.isGenerateScaReport());
 				log.info("Enable Sca Resolver: " + config.getAstScaConfig().isEnableScaResolver());
+               log.info("Project custom Tags for SCA: " + config.getAstScaConfig().getScaProjectCustomTags());
+                log.info("Scan custom Tags for SCA: " + config.getAstScaConfig().getScaScanCustomTags());
 				if (config.getAstScaConfig().isEnableScaResolver())
 					log.info("Enable Exploitable Path by Sca Resolver: " + ((dependencyScanConfig.overrideGlobalConfig)
 							? dependencyScanConfig.isExploitablePathByScaResolver
@@ -2409,6 +2412,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         @Nullable
         private String password;
         private Integer projectRetentionRateEnforce;
+
         private String credentialsId;
         private String mvnPath;
         private boolean isProxy = true;
@@ -2873,6 +2877,46 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 					|| scaResolverAddParameters.contains("--resolver-result-path"));
 		}
 
+        /**
+         * This method validates the SCA Project Custom Tags Parameters on UI.
+         *
+         * @param value:                         Indicates scaProjectCustomTags.
+         * @return FormValidation: Indicates the outcome of the validation and send to
+         *         UI.
+         */
+        @POST
+        public FormValidation doCheckScaProjectCustomTags(@QueryParameter String value,@AncestorInPath Item item) {
+            if (item == null) {
+                return FormValidation.ok();
+            }
+            item.checkPermission(Item.CONFIGURE);
+            Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
+            Matcher match = pattern.matcher(value);
+            if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
+                return FormValidation.error("Custom Fields must have given format: key1:val1,key2:val2. \nCustom field allows to use these special characters: # . _ ");
+            }
+            return FormValidation.ok();
+        }
+        /**
+        * This method validates the SCA Scan Custom Tags  Parameters on UI.
+        *
+        * @param value:                         Indicates scaProjectCustomTags.
+        * @return FormValidation: Indicates the outcome of the validation and send to
+        *         UI.
+        */
+        @POST
+        public FormValidation doCheckScaScanCustomTags(@QueryParameter String value,@AncestorInPath Item item) {
+            if (item == null) {
+                return FormValidation.ok();
+            }
+            item.checkPermission(Item.CONFIGURE);
+            Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
+            Matcher match = pattern.matcher(value);
+            if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
+                return FormValidation.error("Custom Fields must have given format: key1:val1,key2:val2. \nCustom field allows to use these special characters: # . _ ");
+            }
+            return FormValidation.ok();
+        }
 
 		/**
 		 * This method validates the SCA Resolver Additional Parameters on UI.
@@ -2883,7 +2927,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 		 *         UI.
 		 */
 		@POST
-		public FormValidation doCheckScaResolverAddParameters(@QueryParameter String value,
+		public FormValidation doCheckResolverAddParameters(@QueryParameter String value,
 				@QueryParameter boolean isExploitablePathByScaResolver) {
 			String warnMessage = "";
 			String errorMessage = "";
