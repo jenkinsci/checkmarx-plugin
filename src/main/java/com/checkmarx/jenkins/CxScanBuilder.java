@@ -149,6 +149,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     private String filterPattern;
     private String customFields;
+    private String projectLevelCustomFields;
     private boolean forceScan;
     private boolean incremental;
     private boolean fullScansScheduled;
@@ -277,7 +278,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             Boolean generateXmlReport,
             boolean hideDebugLogs,
             boolean forceScan,
-            String customFields
+            String customFields,
+            String projectLevelCustomFields
     ) {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
@@ -333,6 +335,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.hideDebugLogs = hideDebugLogs;
         this.forceScan = forceScan;
         this.customFields = customFields;
+        this.projectLevelCustomFields = projectLevelCustomFields;
 
     }
 
@@ -853,6 +856,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setCustomFields(String customFields) {
         this.customFields = customFields;
+    }
+
+    public String getProjectLevelCustomFields() {
+        return projectLevelCustomFields;
+    }
+
+    @DataBoundSetter
+    public void setProjectLevelCustomFields(String projectLevelCustomFields) {
+        this.projectLevelCustomFields = projectLevelCustomFields;
     }
 
     public boolean isForceScan() {
@@ -1425,8 +1437,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     private Boolean verifyCustomCharacters(String inputString) {
-        Pattern pattern = Pattern.compile("^([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+(,([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+)*$");
-         Matcher match = pattern.matcher(inputString);
+        Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
+        Matcher match = pattern.matcher(inputString);
         if (!StringUtil.isNullOrEmpty(inputString) && !match.find()) {
             return false;
         }
@@ -1469,6 +1481,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setMvnPath(descriptor.getMvnPath());
         ret.setOsaGenerateJsonReport(false);
         
+        if(StringUtils.isNotEmpty(getProjectLevelCustomFields())) {
+	        if(!verifyCustomCharacters(getProjectLevelCustomFields())) {
+	        	throw new CxClientException("Custom Fields must have given format: field1:value1,field2:value2. \\nCustom field allows to use these special characters: # . _ ");
+	        }
+	        ret.setProjectLevelCustomFields(getProjectLevelCustomFields());
+        }
+
         if(StringUtils.isNotEmpty(getCustomFields())) {
 	        if(!verifyCustomCharacters(getCustomFields())) {
                 throw new CxClientException("Custom Fields must have given format: key1:val1,key2:val2. \\nCustom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
@@ -1880,6 +1899,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("post scan action: " + config.getPostScanActionId());
         log.info("is force scan: " + config.getForceScan());
         log.info("scan level custom fields: " + config.getCustomFields());
+        log.info("project level custom fields: " + config.getProjectLevelCustomFields());
         log.info("overrideProjectSetting value: " + overrideProjectSetting);
 
         ScannerType scannerType = getDependencyScannerType(config);
@@ -3020,8 +3040,29 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             Pattern pattern = Pattern.compile("^([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+(,([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+)*$");
             Matcher match = pattern.matcher(value);
             if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
-                return FormValidation.error("Custom Fields must have given format: key1:val1,key2:val2. \\nCustom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
-            	     }
+            	return FormValidation.error("Custom Fields must have given format: key1:val1,key2:val2. \nCustom field allows to use these special characters: # . _ ");
+            }
+
+            return FormValidation.ok();
+        }
+
+        /**
+         * This method verify correct format for Project Level Custom Fields
+         *
+         * @param value
+         * @return
+         */
+        @POST
+        public FormValidation doCheckProjectLevelCustomFields(@QueryParameter String value,@AncestorInPath Item item) {
+        	if (item == null) {
+                return FormValidation.ok();
+        	}
+            item.checkPermission(Item.CONFIGURE);
+            Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
+            Matcher match = pattern.matcher(value);
+            if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
+            	return FormValidation.error("Custom Fields must have given format: key1:val1,key2:val2. \nCustom field allows to use these special characters: # . _ ");
+            }
 
             return FormValidation.ok();
         }
