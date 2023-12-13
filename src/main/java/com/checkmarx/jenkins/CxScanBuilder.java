@@ -1349,7 +1349,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 		if (config.isGenerateScaReport()) {
 			if (scaResults.getPDFReport() != null && "pdf".equalsIgnoreCase(config.getScaReportFormat())) {
 				File pdfReportFile = new File(checkmarxBuildDir, CxScanResult.SCA_PDF_REPORT_NAME);
-				log.info("PDF Report generated at location: " + pdfReportFile.getAbsolutePath());
 				try {
 					FileUtils.writeByteArrayToFile(pdfReportFile, scaResults.getPDFReport());
 					scaResults.setScaPDFLink(checkmarxBuildDir + File.separator + CxScanResult.SCA_PDF_REPORT_NAME);
