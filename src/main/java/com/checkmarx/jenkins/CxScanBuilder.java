@@ -1437,7 +1437,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     private Boolean verifyCustomCharacters(String inputString) {
-        Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
+        Pattern pattern = Pattern.compile("^([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+(,([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+)*$");
         Matcher match = pattern.matcher(inputString);
         if (!StringUtil.isNullOrEmpty(inputString) && !match.find()) {
             return false;
@@ -1483,7 +1483,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         
         if(StringUtils.isNotEmpty(getProjectLevelCustomFields())) {
 	        if(!verifyCustomCharacters(getProjectLevelCustomFields())) {
-	        	throw new CxClientException("Custom Fields must have given format: field1:value1,field2:value2. \\nCustom field allows to use these special characters: # . _ ");
+	        	throw new CxClientException("Custom Fields must have given format: key1:val1,key2:val2. \\nCustom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
 	        }
 	        ret.setProjectLevelCustomFields(getProjectLevelCustomFields());
         }
@@ -3041,7 +3041,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             Pattern pattern = Pattern.compile("^([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+(,([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+)*$");
             Matcher match = pattern.matcher(value);
             if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
-            	return FormValidation.error("Custom Fields must have given format: key1:val1,key2:val2. \nCustom field allows to use these special characters: # . _ ");
+            	return FormValidation.error("Custom Fields must have given format: key1:val1,key2:val2. \\nCustom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
             }
 
             return FormValidation.ok();
@@ -3059,10 +3059,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 return FormValidation.ok();
         	}
             item.checkPermission(Item.CONFIGURE);
-            Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
+            Pattern pattern = Pattern.compile("^([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+(,([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+)*$");
             Matcher match = pattern.matcher(value);
             if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
-            	return FormValidation.error("Custom Fields must have given format: key1:val1,key2:val2. \nCustom field allows to use these special characters: # . _ ");
+            	return FormValidation.error("Custom Fields must have given format: key1:val1,key2:val2. \\nCustom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
             }
 
             return FormValidation.ok();
