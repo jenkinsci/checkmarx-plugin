@@ -161,6 +161,9 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
             delegator.printIsProjectViolated(scanResults);
         }
 
+        if (config.getEnablePolicyViolationsSCA()) {
+            delegator.printIsProjectViolated(scanResults);
+        }
         ScanResults finalScanResults = getFinalScanResults(results);
         result.setScanResults(finalScanResults);
         return result;
