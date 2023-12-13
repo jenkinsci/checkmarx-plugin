@@ -2038,6 +2038,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             log.info("Copying file {} to workspace {}", fileName, remoteFilePath);
             FilePath remoteFile = new FilePath(to.getChannel(), remoteFilePath);
             remoteFile.copyFrom(is);
+            log.info("File {} successfully written to workspace", fileName);
         } catch (Exception e) {
             log.error("Failed to write '" + fileName + "' to [" + to.getRemote() + "]", e);
         } finally {
