@@ -60,6 +60,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.*;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -219,6 +220,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private String thresholdSettings;
     private Result vulnerabilityThresholdResult;
     private Result resolvedVulnerabilityThresholdResult;
+    private boolean exceptionOnThresholdError;
+    private boolean resolvedExceptionOnThresholdError;
     private boolean avoidDuplicateProjectScans;
     private boolean addGlobalCommenToBuildCommet;
     private Boolean generateXmlReport = true;
@@ -258,7 +261,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             @Nullable String comment,
             boolean skipSCMTriggers,
             boolean waitForResultsEnabled,
-            boolean vulnerabilityThresholdEnabled,
+            boolean vulnerabilityThresholdEnabled,            
             @Nullable Integer highThreshold,
             @Nullable Integer mediumThreshold,
             @Nullable Integer lowThreshold,
@@ -272,7 +275,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             boolean enableProjectPolicyEnforcement,
             boolean enableProjectPolicyEnforcementSCA,
             String thresholdSettings,
-            String vulnerabilityThresholdResult,
+            String vulnerabilityThresholdResult,            
+            boolean exceptionOnThresholdError,
             boolean avoidDuplicateProjectScans,
             boolean addGlobalCommenToBuildCommet,
             Boolean generateXmlReport,
@@ -312,7 +316,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.comment = comment;
         this.skipSCMTriggers = skipSCMTriggers;
         this.waitForResultsEnabled = waitForResultsEnabled;
-        this.vulnerabilityThresholdEnabled = vulnerabilityThresholdEnabled;
+        this.vulnerabilityThresholdEnabled = vulnerabilityThresholdEnabled;        
         this.highThreshold = highThreshold;
         this.mediumThreshold = mediumThreshold;
         this.lowThreshold = lowThreshold;
@@ -329,6 +333,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         if (vulnerabilityThresholdResult != null) {
             this.vulnerabilityThresholdResult = Result.fromString(vulnerabilityThresholdResult);
         }
+        this.exceptionOnThresholdError = exceptionOnThresholdError;
         this.avoidDuplicateProjectScans = avoidDuplicateProjectScans;
         this.addGlobalCommenToBuildCommet = addGlobalCommenToBuildCommet;
         this.generateXmlReport = (generateXmlReport == null) ? true : generateXmlReport;
@@ -637,8 +642,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public boolean isEnableProjectPolicyEnforcementSCA() {
         return enableProjectPolicyEnforcement;
     }
-
-        public boolean isAvoidDuplicateProjectScans() {
+    public boolean isAvoidDuplicateProjectScans() {
         return avoidDuplicateProjectScans;
     }
 
@@ -680,6 +684,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
         return null;
     }
+    
+    @DataBoundSetter
+    public void setExceptionOnThresholdError(boolean exceptionOnThresholdError) {
+		this.exceptionOnThresholdError = exceptionOnThresholdError;
+	}
+    
+    public boolean isExceptionOnThresholdError() {
+		return exceptionOnThresholdError;
+	}
 
     @DataBoundSetter
     public void setUseOwnServerCredentials(boolean useOwnServerCredentials) {
@@ -810,7 +823,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public void setJobStatusOnError(JobStatusOnError jobStatusOnError) {
         this.jobStatusOnError = jobStatusOnError;
     }
-
+    
     @DataBoundSetter
     public void setAvoidDuplicateProjectScans(boolean avoidDuplicateProjectScans) {
         this.avoidDuplicateProjectScans = avoidDuplicateProjectScans;
@@ -1427,6 +1440,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         String jenURL = env.get("JENKINS_URL");
         String jobName = env.get("JOB_NAME");
         String originUrl = jenURL + "job/" + jobName;
+        try{
+        	log.info("Encoding the Origin URL:"+originUrl);
+        	originUrl = URLEncoder.encode(originUrl, "UTF-8"); //encoding special characters
+        }catch(UnsupportedEncodingException uee){
+        	log.error("Error occurred while encoding Origin URL:"+uee.getMessage());
+        }
         if (originUrl.length() > 120) {
             originUrl = originUrl.substring(0, 115) + "...";
         } else {
@@ -1601,6 +1620,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 ret.setSastMediumThreshold(descriptor.getMediumThresholdEnforcement());
                 ret.setSastLowThreshold(descriptor.getLowThresholdEnforcement());
                 resolvedVulnerabilityThresholdResult = Result.fromString(descriptor.getJobGlobalStatusOnThresholdViolation().name());
+                resolvedExceptionOnThresholdError = descriptor.isExceptionOnThresholdErrorGlobal();
             } else if (useJobThreshold) {
                 ret.setSastHighThreshold(getHighThreshold());
                 ret.setSastMediumThreshold(getMediumThreshold());
@@ -1608,6 +1628,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 ret.setSastNewResultsThresholdEnabled(failBuildOnNewResults);
                 ret.setSastNewResultsThresholdSeverity(failBuildOnNewSeverity);
                 resolvedVulnerabilityThresholdResult = vulnerabilityThresholdResult;
+                resolvedExceptionOnThresholdError = exceptionOnThresholdError;
             }
         }
 
@@ -1758,11 +1779,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             config.setOsaMediumThreshold(descriptor.getOsaMediumThresholdEnforcement());
             config.setOsaLowThreshold(descriptor.getOsaLowThresholdEnforcement());
             resolvedVulnerabilityThresholdResult = Result.fromString(descriptor.getJobGlobalStatusOnThresholdViolation().name());
+            resolvedExceptionOnThresholdError = descriptor.isExceptionOnThresholdErrorGlobal();
         } else if (useJobThreshold) {
             config.setOsaHighThreshold(getOsaHighThreshold());
             config.setOsaMediumThreshold(getOsaMediumThreshold());
             config.setOsaLowThreshold(getOsaLowThreshold());
             resolvedVulnerabilityThresholdResult = vulnerabilityThresholdResult;
+            resolvedExceptionOnThresholdError = exceptionOnThresholdError;
         }
 
         if (config.isOsaEnabled()) {
@@ -2076,6 +2099,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             	run.setResult(resolvedVulnerabilityThresholdResult);
             	statusToReturn = resolvedVulnerabilityThresholdResult.toString();
             	msgPrefix = "Threshold exceeded.";
+            	log.info("exceptionOnThresholdError:"+resolvedExceptionOnThresholdError);
+            	if (resolvedExceptionOnThresholdError) {	
+        			String msg = msgPrefix + "Job is configured to return "+statusToReturn+" and stop the build/pipeline.";
+                    log.warn(msg);
+                    throw new AbortException(msg);
+                }
             }else {
             	msgPrefix = "Scan error occurred.";
             	statusToReturn = getReturnStatusOnError(getDescriptor());
@@ -2483,6 +2512,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private Integer osaLowThresholdEnforcement;
         private JobGlobalStatusOnError jobGlobalStatusOnError;
         private JobGlobalStatusOnError jobGlobalStatusOnThresholdViolation = JobGlobalStatusOnError.FAILURE;
+        private boolean exceptionOnThresholdErrorGlobal = false;
         private boolean scanTimeOutEnabled;
         private boolean globallyDefineScanSettings;
         private boolean continueBuildWhenTimedOut;
@@ -3849,6 +3879,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         public void setJobGlobalStatusOnThresholdViolation(JobGlobalStatusOnError jobGlobalStatusOnThresholdViolation) {
             this.jobGlobalStatusOnThresholdViolation = jobGlobalStatusOnThresholdViolation;
+        }
+        
+        public void setExceptionOnThresholdErrorGlobal(boolean exceptionOnThresholdErrorGlobal) {
+        	this.exceptionOnThresholdErrorGlobal = exceptionOnThresholdErrorGlobal;
+        }
+        public boolean isExceptionOnThresholdErrorGlobal() {
+        	return exceptionOnThresholdErrorGlobal;
         }
 
         public boolean isLockVulnerabilitySettings() {

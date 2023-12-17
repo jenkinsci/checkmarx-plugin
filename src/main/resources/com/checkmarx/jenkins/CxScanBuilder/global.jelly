@@ -84,6 +84,7 @@
             <f:entry title="Build status when results exceed threshold:" field="jobGlobalStatusOnThresholdViolation">
                 <f:enum>${it.displayName}</f:enum>
             </f:entry>
+            <f:optionalBlock title="Throw exception when results exceed threshold" inline="true" field="exceptionOnThresholdErrorGlobal" />
 
             <f:entry title="SAST High severity vulnerabilities threshold" field="highThresholdEnforcement">
                 <f:number clazz="positive-number" min="0" step="1" default="" checkMethod="POST"/>
