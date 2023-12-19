@@ -1381,7 +1381,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
      * @return
      */
     private Boolean isCxURLinNoProxyHost(String serverUrl, List<Pattern> noProxyHostPatterns) {
-
         if ((noProxyHostPatterns != null) && (!noProxyHostPatterns.isEmpty()) && (serverUrl != null) && (!serverUrl.isEmpty())) {
 
             Pattern pattern;
@@ -1501,14 +1500,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         
         if(StringUtils.isNotEmpty(getProjectLevelCustomFields())) {
 	        if(!verifyCustomCharacters(getProjectLevelCustomFields())) {
-	        	throw new CxClientException("Custom Fields must have given format: key1:val1,key2:val2. Custom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
+	        	throw new CxClientException("Project level custom fields for SAST Scan must have given format: key1:val1,key2:val2. Custom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
 	        }
 	        ret.setProjectLevelCustomFields(getProjectLevelCustomFields());
         }
 
         if(StringUtils.isNotEmpty(getCustomFields())) {
 	        if(!verifyCustomCharacters(getCustomFields())) {
-                throw new CxClientException("Custom Fields must have given format: key1:val1,key2:val2. Custom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
+	        	throw new CxClientException("Scan level custom fields for SAST Scan must have given format: key1:val1,key2:val2. Custom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
 	         }
 	        ret.setCustomFields(apiFormat(getCustomFields()));
         }
@@ -1537,9 +1536,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 } else {
                     depScanConf = descriptor.getDependencyScanConfig(); // Global
                 }
-
                 if (depScanConf != null) {
-                    if (!isCxURLinNoProxyHost(depScanConf.scaAccessControlUrl, instance.proxy.getNoProxyHostPatterns())) {
+                    if (!isCxURLinNoProxyHost(depScanConf.scaServerUrl, instance.proxy.getNoProxyHostPatterns())) {
                         if (!sastProxy) {
                             ret.setProxy(false);
                         }
@@ -1558,7 +1556,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             ret.setProxy(false);
             ret.setScaProxy(false);
         }
-
         /*
          * Pipeline script can provide grouoId or teamPath
          * teamPath will take precedence if it is not empty.
@@ -1816,13 +1813,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         result.setTenant(dsConfig.scaTenant);
         if(StringUtils.isNotEmpty(dsConfig.scaScanCustomTags)) {
             if(!verifyCustomCharacters(dsConfig.scaScanCustomTags)) {
-                throw new CxClientException("Custom Fields must have given format: key1:val1,key2:val2. \\nCustom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
+            	throw new CxClientException("Scan level custom fields for SCA Scan must have given format: key1:val1,key2:val2. Custom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
             }
             result.setScaScanCustomTags(dsConfig.scaScanCustomTags);
         }
         if(StringUtils.isNotEmpty(dsConfig.scaProjectCustomTags)) {
             if(!verifyCustomCharacters(dsConfig.scaProjectCustomTags)) {
-                throw new CxClientException("Custom Fields must have given format: key1:val1,key2:val2. \\nCustom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
+            	throw new CxClientException("Project level custom fields for SCA Scan must have given format: key1:val1,key2:val2. Custom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
             }
             result.setScaProjectCustomTags(dsConfig.scaProjectCustomTags);
         }
@@ -2950,10 +2947,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 return FormValidation.ok();
             }
             item.checkPermission(Item.CONFIGURE);
-            Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
+            Pattern pattern = Pattern.compile("^([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+(,([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+)*$");
             Matcher match = pattern.matcher(value);
             if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
-                return FormValidation.error("Custom Fields must have given format: key1:val1,key2:val2. \nCustom field allows to use these special characters: # . _ ");
+            	return FormValidation.error("Project level custom fields in SCA Scan must have given format: key1:val1,key2:val2. Custom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
             }
             return FormValidation.ok();
         }
@@ -2970,10 +2967,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 return FormValidation.ok();
             }
             item.checkPermission(Item.CONFIGURE);
-            Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
+            Pattern pattern = Pattern.compile("^([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+(,([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+)*$");
             Matcher match = pattern.matcher(value);
             if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
-                return FormValidation.error("Custom Fields must have given format: key1:val1,key2:val2. \nCustom field allows to use these special characters: # . _ ");
+            	return FormValidation.error("Scan level custom fields in SCA Scan must have given format: key1:val1,key2:val2. Custom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
             }
             return FormValidation.ok();
         }
@@ -3124,7 +3121,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             Pattern pattern = Pattern.compile("^([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+(,([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+)*$");
             Matcher match = pattern.matcher(value);
             if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
-            	return FormValidation.error("Custom Fields must have given format: key1:val1,key2:val2. Custom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
+            	return FormValidation.error("Scan level custom fields in SAST Scan must have given format: key1:val1,key2:val2. Custom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
             }
 
             return FormValidation.ok();
@@ -3145,7 +3142,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             Pattern pattern = Pattern.compile("^([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+(,([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+)*$");
             Matcher match = pattern.matcher(value);
             if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
-            	return FormValidation.error("Custom Fields must have given format: key1:val1,key2:val2. Custom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
+            	return FormValidation.error("Project level custom fields in SAST Scan must have given format: key1:val1,key2:val2. Custom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
             }
 
             return FormValidation.ok();
