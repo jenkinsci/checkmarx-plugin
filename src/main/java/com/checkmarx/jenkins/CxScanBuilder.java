@@ -1977,6 +1977,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 				log.info("Account: " + config.getAstScaConfig().getTenant());
 				log.info("Team: " + config.getAstScaConfig().getTeamPath());
 				log.info("is generate SCA report: " + config.isGenerateScaReport());
+				log.info("SCA timeout: " + config.getSCAScanTimeoutInMinutes());
 				log.info("Enable Sca Resolver: " + config.getAstScaConfig().isEnableScaResolver());
                log.info("Project custom Tags for SCA: " + config.getAstScaConfig().getScaProjectCustomTags());
                 log.info("Scan custom Tags for SCA: " + config.getAstScaConfig().getScaScanCustomTags());
