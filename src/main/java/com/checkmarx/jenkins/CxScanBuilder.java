@@ -640,7 +640,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         return enableProjectPolicyEnforcement;
     }
     public boolean isEnableProjectPolicyEnforcementSCA() {
-        return enableProjectPolicyEnforcement;
+        return enableProjectPolicyEnforcementSCA;
     }
     public boolean isAvoidDuplicateProjectScans() {
         return avoidDuplicateProjectScans;
@@ -2098,7 +2098,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             	statusToReturn = resolvedVulnerabilityThresholdResult.toString();
             	msgPrefix = "Threshold exceeded.";
             	log.info("exceptionOnThresholdError:"+resolvedExceptionOnThresholdError);
-            	if (resolvedExceptionOnThresholdError) {	
+            	if (resolvedExceptionOnThresholdError && (!scanSummary.getThresholdErrors().isEmpty())) {	
         			String msg = msgPrefix + "Job is configured to return "+statusToReturn+" and stop the build/pipeline.";
                     log.warn(msg);
                     throw new AbortException(msg);
@@ -2218,7 +2218,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         
     	String status = JobStatusOnError.FAILURE.toString();
     	
-    	if (JobStatusOnError.GLOBAL.equals(getJobStatusOnError()))
+    	if (JobStatusOnError.GLOBAL.equals(getJobStatusOnError()) && descriptor!=null && descriptor.getJobGlobalStatusOnError()!=null)
     			status = descriptor.getJobGlobalStatusOnError().toString();
     	else
     		status = getJobStatusOnError().toString();

@@ -157,13 +157,10 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
             cancelScan(delegator);
         }
 
-        if (config.getEnablePolicyViolations()) {
+        if (config.getEnablePolicyViolations() || config.getEnablePolicyViolationsSCA()) {
             delegator.printIsProjectViolated(scanResults);
         }
 
-        if (config.getEnablePolicyViolationsSCA()) {
-            delegator.printIsProjectViolated(scanResults);
-        }
         ScanResults finalScanResults = getFinalScanResults(results);
         result.setScanResults(finalScanResults);
         return result;
