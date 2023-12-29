@@ -36,6 +36,8 @@ com.cx.restclient.ast.dto.sca.report.DependencyPathSegment
 com.cx.restclient.ast.dto.sca.report.PackageSeverity
 com.cx.restclient.ast.dto.sca.report.PackageUsage
 com.cx.restclient.common.summary.DependencyScanResult
+com.cx.restclient.ast.dto.common.tags
+com.cx.restclient.ast.dto.sca.UpdateProjectRequest
 com.cx.restclient.ast.dto.sca.ScaScanConfigValue
 com.cx.restclient.ast.dto.sca.ScaScanConfigValue$ScaScanConfigValueBuilder
 com.cx.restclient.ast.dto.sca.report.PolicyAction
@@ -47,3 +49,7 @@ com.cx.restclient.sast.dto.CxScanStateObj
 com.cx.restclient.sast.dto.CxDateAndTimeObj
 com.cx.restclient.sast.dto.CxLanguageObj
 com.cx.restclient.sast.dto.CxLinkObj
+com.cx.restclient.sast.dto.ProjectLevelCustomFields 
+com.cx.restclient.sast.dto.ProjectPutRequest
+com.cx.restclient.sca.dto.Tags
+org.apache.http.HttpHost

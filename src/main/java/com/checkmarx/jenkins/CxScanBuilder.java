@@ -60,6 +60,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.*;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -149,6 +150,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     private String filterPattern;
     private String customFields;
+    private String projectLevelCustomFields;
     private boolean forceScan;
     private boolean incremental;
     private boolean fullScansScheduled;
@@ -173,6 +175,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private boolean generatePdfReport;
     private boolean generateScaReport;
     private boolean enableProjectPolicyEnforcement;
+
+    private boolean enableProjectPolicyEnforcementSCA;
     @Nullable
     private Integer osaHighThreshold;
     @Nullable
@@ -216,6 +220,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private String thresholdSettings;
     private Result vulnerabilityThresholdResult;
     private Result resolvedVulnerabilityThresholdResult;
+    private boolean exceptionOnThresholdError;
+    private boolean resolvedExceptionOnThresholdError;
     private boolean avoidDuplicateProjectScans;
     private boolean addGlobalCommenToBuildCommet;
     private Boolean generateXmlReport = true;
@@ -255,7 +261,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             @Nullable String comment,
             boolean skipSCMTriggers,
             boolean waitForResultsEnabled,
-            boolean vulnerabilityThresholdEnabled,
+            boolean vulnerabilityThresholdEnabled,            
             @Nullable Integer highThreshold,
             @Nullable Integer mediumThreshold,
             @Nullable Integer lowThreshold,
@@ -267,14 +273,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             boolean generatePdfReport,
             boolean generateScaReport,
             boolean enableProjectPolicyEnforcement,
+            boolean enableProjectPolicyEnforcementSCA,
             String thresholdSettings,
-            String vulnerabilityThresholdResult,
+            String vulnerabilityThresholdResult,            
+            boolean exceptionOnThresholdError,
             boolean avoidDuplicateProjectScans,
             boolean addGlobalCommenToBuildCommet,
             Boolean generateXmlReport,
             boolean hideDebugLogs,
             boolean forceScan,
-            String customFields
+            String customFields,
+            String projectLevelCustomFields
     ) {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
@@ -307,7 +316,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.comment = comment;
         this.skipSCMTriggers = skipSCMTriggers;
         this.waitForResultsEnabled = waitForResultsEnabled;
-        this.vulnerabilityThresholdEnabled = vulnerabilityThresholdEnabled;
+        this.vulnerabilityThresholdEnabled = vulnerabilityThresholdEnabled;        
         this.highThreshold = highThreshold;
         this.mediumThreshold = mediumThreshold;
         this.lowThreshold = lowThreshold;
@@ -319,16 +328,19 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.generatePdfReport = generatePdfReport;
         this.generateScaReport = generateScaReport;
         this.enableProjectPolicyEnforcement = enableProjectPolicyEnforcement;
+        this.enableProjectPolicyEnforcementSCA=enableProjectPolicyEnforcementSCA;
         this.thresholdSettings = thresholdSettings;
         if (vulnerabilityThresholdResult != null) {
             this.vulnerabilityThresholdResult = Result.fromString(vulnerabilityThresholdResult);
         }
+        this.exceptionOnThresholdError = exceptionOnThresholdError;
         this.avoidDuplicateProjectScans = avoidDuplicateProjectScans;
         this.addGlobalCommenToBuildCommet = addGlobalCommenToBuildCommet;
         this.generateXmlReport = (generateXmlReport == null) ? true : generateXmlReport;
         this.hideDebugLogs = hideDebugLogs;
         this.forceScan = forceScan;
         this.customFields = customFields;
+        this.projectLevelCustomFields = projectLevelCustomFields;
 
     }
 
@@ -627,7 +639,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public boolean isEnableProjectPolicyEnforcement() {
         return enableProjectPolicyEnforcement;
     }
-
+    public boolean isEnableProjectPolicyEnforcementSCA() {
+        return enableProjectPolicyEnforcementSCA;
+    }
     public boolean isAvoidDuplicateProjectScans() {
         return avoidDuplicateProjectScans;
     }
@@ -670,6 +684,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         }
         return null;
     }
+    
+    @DataBoundSetter
+    public void setExceptionOnThresholdError(boolean exceptionOnThresholdError) {
+		this.exceptionOnThresholdError = exceptionOnThresholdError;
+	}
+    
+    public boolean isExceptionOnThresholdError() {
+		return exceptionOnThresholdError;
+	}
 
     @DataBoundSetter
     public void setUseOwnServerCredentials(boolean useOwnServerCredentials) {
@@ -792,10 +815,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     @DataBoundSetter
+    public void setEnableProjectPolicyEnforcementSCA(boolean enableProjectPolicyEnforcementSCA) {
+        this.enableProjectPolicyEnforcementSCA = enableProjectPolicyEnforcementSCA;
+    }
+
+    @DataBoundSetter
     public void setJobStatusOnError(JobStatusOnError jobStatusOnError) {
         this.jobStatusOnError = jobStatusOnError;
     }
-
+    
     @DataBoundSetter
     public void setAvoidDuplicateProjectScans(boolean avoidDuplicateProjectScans) {
         this.avoidDuplicateProjectScans = avoidDuplicateProjectScans;
@@ -841,6 +869,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setCustomFields(String customFields) {
         this.customFields = customFields;
+    }
+
+    public String getProjectLevelCustomFields() {
+        return projectLevelCustomFields;
+    }
+
+    @DataBoundSetter
+    public void setProjectLevelCustomFields(String projectLevelCustomFields) {
+        this.projectLevelCustomFields = projectLevelCustomFields;
     }
 
     public boolean isForceScan() {
@@ -1325,7 +1362,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 		if (config.isGenerateScaReport()) {
 			if (scaResults.getPDFReport() != null && "pdf".equalsIgnoreCase(config.getScaReportFormat())) {
 				File pdfReportFile = new File(checkmarxBuildDir, CxScanResult.SCA_PDF_REPORT_NAME);
-				log.info("PDF Report generated at location: " + pdfReportFile.getAbsolutePath());
 				try {
 					FileUtils.writeByteArrayToFile(pdfReportFile, scaResults.getPDFReport());
 					scaResults.setScaPDFLink(checkmarxBuildDir + File.separator + CxScanResult.SCA_PDF_REPORT_NAME);
@@ -1345,7 +1381,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
      * @return
      */
     private Boolean isCxURLinNoProxyHost(String serverUrl, List<Pattern> noProxyHostPatterns) {
-
         if ((noProxyHostPatterns != null) && (!noProxyHostPatterns.isEmpty()) && (serverUrl != null) && (!serverUrl.isEmpty())) {
 
             Pattern pattern;
@@ -1404,6 +1439,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         String jenURL = env.get("JENKINS_URL");
         String jobName = env.get("JOB_NAME");
         String originUrl = jenURL + "job/" + jobName;
+        try{
+        	log.info("Encoding the Origin URL:"+originUrl);
+        	originUrl = URLEncoder.encode(originUrl, "UTF-8"); //encoding special characters
+        }catch(UnsupportedEncodingException uee){
+        	log.error("Error occurred while encoding Origin URL:"+uee.getMessage());
+        }
         if (originUrl.length() > 120) {
             originUrl = originUrl.substring(0, 115) + "...";
         } else {
@@ -1413,7 +1454,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     private Boolean verifyCustomCharacters(String inputString) {
-        Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
+        Pattern pattern = Pattern.compile("^([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+(,([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+)*$");
         Matcher match = pattern.matcher(inputString);
         if (!StringUtil.isNullOrEmpty(inputString) && !match.find()) {
             return false;
@@ -1457,10 +1498,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         ret.setMvnPath(descriptor.getMvnPath());
         ret.setOsaGenerateJsonReport(false);
         
+        if(StringUtils.isNotEmpty(getProjectLevelCustomFields())) {
+	        if(!verifyCustomCharacters(getProjectLevelCustomFields())) {
+	        	throw new CxClientException("Project level custom fields for SAST Scan must have given format: key1:val1,key2:val2. Custom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
+	        }
+	        ret.setProjectLevelCustomFields(getProjectLevelCustomFields());
+        }
+
         if(StringUtils.isNotEmpty(getCustomFields())) {
 	        if(!verifyCustomCharacters(getCustomFields())) {
-	        	throw new CxClientException("Custom Fields must have given format: key1:val1,key2:val2. \\nCustom field allows to use these special characters: # . _ ");
-	        }
+	        	throw new CxClientException("Scan level custom fields for SAST Scan must have given format: key1:val1,key2:val2. Custom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
+	         }
 	        ret.setCustomFields(apiFormat(getCustomFields()));
         }
         ret.setForceScan(isForceScan());
@@ -1488,9 +1536,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 } else {
                     depScanConf = descriptor.getDependencyScanConfig(); // Global
                 }
-
                 if (depScanConf != null) {
-                    if (!isCxURLinNoProxyHost(depScanConf.scaAccessControlUrl, instance.proxy.getNoProxyHostPatterns())) {
+                    if (!isCxURLinNoProxyHost(depScanConf.scaServerUrl, instance.proxy.getNoProxyHostPatterns())) {
                         if (!sastProxy) {
                             ret.setProxy(false);
                         }
@@ -1509,7 +1556,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             ret.setProxy(false);
             ret.setScaProxy(false);
         }
-
         /*
          * Pipeline script can provide grouoId or teamPath
          * teamPath will take precedence if it is not empty.
@@ -1571,6 +1617,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 ret.setSastMediumThreshold(descriptor.getMediumThresholdEnforcement());
                 ret.setSastLowThreshold(descriptor.getLowThresholdEnforcement());
                 resolvedVulnerabilityThresholdResult = Result.fromString(descriptor.getJobGlobalStatusOnThresholdViolation().name());
+                resolvedExceptionOnThresholdError = descriptor.isExceptionOnThresholdErrorGlobal();
             } else if (useJobThreshold) {
                 ret.setSastHighThreshold(getHighThreshold());
                 ret.setSastMediumThreshold(getMediumThreshold());
@@ -1578,6 +1625,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 ret.setSastNewResultsThresholdEnabled(failBuildOnNewResults);
                 ret.setSastNewResultsThresholdSeverity(failBuildOnNewSeverity);
                 resolvedVulnerabilityThresholdResult = vulnerabilityThresholdResult;
+                resolvedExceptionOnThresholdError = exceptionOnThresholdError;
             }
         }
 
@@ -1596,9 +1644,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         if (!ret.getSynchronous()) {
             enableProjectPolicyEnforcement = false;
+            enableProjectPolicyEnforcementSCA=false;
         }
         ret.setEnablePolicyViolations(enableProjectPolicyEnforcement);
-        
+        ret.setEnablePolicyViolationsSCA(enableProjectPolicyEnforcementSCA);
         if (!ret.isAstScaEnabled() || !ret.getSynchronous()) {
         	generateScaReport = false;
         }
@@ -1727,11 +1776,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             config.setOsaMediumThreshold(descriptor.getOsaMediumThresholdEnforcement());
             config.setOsaLowThreshold(descriptor.getOsaLowThresholdEnforcement());
             resolvedVulnerabilityThresholdResult = Result.fromString(descriptor.getJobGlobalStatusOnThresholdViolation().name());
+            resolvedExceptionOnThresholdError = descriptor.isExceptionOnThresholdErrorGlobal();
         } else if (useJobThreshold) {
             config.setOsaHighThreshold(getOsaHighThreshold());
             config.setOsaMediumThreshold(getOsaMediumThreshold());
             config.setOsaLowThreshold(getOsaLowThreshold());
             resolvedVulnerabilityThresholdResult = vulnerabilityThresholdResult;
+            resolvedExceptionOnThresholdError = exceptionOnThresholdError;
         }
 
         if (config.isOsaEnabled()) {
@@ -1760,6 +1811,18 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         result.setAccessControlUrl(dsConfig.scaAccessControlUrl);
         result.setWebAppUrl(dsConfig.scaWebAppUrl);
         result.setTenant(dsConfig.scaTenant);
+        if(StringUtils.isNotEmpty(dsConfig.scaScanCustomTags)) {
+            if(!verifyCustomCharacters(dsConfig.scaScanCustomTags)) {
+            	throw new CxClientException("Scan level custom fields for SCA Scan must have given format: key1:val1,key2:val2. Custom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
+            }
+            result.setScaScanCustomTags(dsConfig.scaScanCustomTags);
+        }
+        if(StringUtils.isNotEmpty(dsConfig.scaProjectCustomTags)) {
+            if(!verifyCustomCharacters(dsConfig.scaProjectCustomTags)) {
+            	throw new CxClientException("Project level custom fields for SCA Scan must have given format: key1:val1,key2:val2. Custom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
+            }
+            result.setScaProjectCustomTags(dsConfig.scaProjectCustomTags);
+        }
         result.setTeamPath(dsConfig.scaTeamPath);
         result.setTeamId(dsConfig.scaTeamId);
         result.setIncludeSources(dsConfig.isIncludeSources);
@@ -1861,11 +1924,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("deny new project creation: " + config.getDenyProject());
         log.info("SAST scan enabled: " + config.isSastEnabled());
         log.info("avoid duplicated projects scans: " + config.isAvoidDuplicateProjectScans());
-        log.info("enable Project Policy Enforcement: " + config.getEnablePolicyViolations());
+        log.info("enable Project Policy Enforcement SAST: " + config.getEnablePolicyViolations());
+        log.info("enable Project Policy Enforcement SCA: " + config.getEnablePolicyViolationsSCA());
         log.info("continue build when timed out: " + config.getContinueBuild());
         log.info("post scan action: " + config.getPostScanActionId());
         log.info("is force scan: " + config.getForceScan());
         log.info("scan level custom fields: " + config.getCustomFields());
+        log.info("project level custom fields: " + config.getProjectLevelCustomFields());
         log.info("overrideProjectSetting value: " + overrideProjectSetting);
 
         ScannerType scannerType = getDependencyScannerType(config);
@@ -1912,7 +1977,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 				log.info("Account: " + config.getAstScaConfig().getTenant());
 				log.info("Team: " + config.getAstScaConfig().getTeamPath());
 				log.info("is generate SCA report: " + config.isGenerateScaReport());
+				log.info("SCA timeout: " + config.getSCAScanTimeoutInMinutes());
 				log.info("Enable Sca Resolver: " + config.getAstScaConfig().isEnableScaResolver());
+               log.info("Project custom Tags for SCA: " + config.getAstScaConfig().getScaProjectCustomTags());
+                log.info("Scan custom Tags for SCA: " + config.getAstScaConfig().getScaScanCustomTags());
 				if (config.getAstScaConfig().isEnableScaResolver())
 					log.info("Enable Exploitable Path by Sca Resolver: " + ((dependencyScanConfig.overrideGlobalConfig)
 							? dependencyScanConfig.isExploitablePathByScaResolver
@@ -2004,6 +2072,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             log.info("Copying file {} to workspace {}", fileName, remoteFilePath);
             FilePath remoteFile = new FilePath(to.getChannel(), remoteFilePath);
             remoteFile.copyFrom(is);
+            log.info("File {} successfully written to workspace", fileName);
         } catch (Exception e) {
             log.error("Failed to write '" + fileName + "' to [" + to.getRemote() + "]", e);
         } finally {
@@ -2028,6 +2097,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             	run.setResult(resolvedVulnerabilityThresholdResult);
             	statusToReturn = resolvedVulnerabilityThresholdResult.toString();
             	msgPrefix = "Threshold exceeded.";
+            	log.info("exceptionOnThresholdError:"+resolvedExceptionOnThresholdError);
+            	if (resolvedExceptionOnThresholdError && (!scanSummary.getThresholdErrors().isEmpty())) {	
+        			String msg = msgPrefix + "Job is configured to return "+statusToReturn+" and stop the build/pipeline.";
+                    log.warn(msg);
+                    throw new AbortException(msg);
+                }
             }else {
             	msgPrefix = "Scan error occurred.";
             	statusToReturn = getReturnStatusOnError(getDescriptor());
@@ -2143,7 +2218,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         
     	String status = JobStatusOnError.FAILURE.toString();
     	
-    	if (JobStatusOnError.GLOBAL.equals(getJobStatusOnError()))
+    	if (JobStatusOnError.GLOBAL.equals(getJobStatusOnError()) && descriptor!=null && descriptor.getJobGlobalStatusOnError()!=null)
     			status = descriptor.getJobGlobalStatusOnError().toString();
     	else
     		status = getJobStatusOnError().toString();
@@ -2330,6 +2405,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     additionalParams.replace("--cxserver ", "");
                 }
             }
+            if(additionalParams!=null)
+            {
+            	additionalParams = additionalParams.trim();
+            }
 		return additionalParams;
 	}
 
@@ -2435,6 +2514,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         private Integer osaLowThresholdEnforcement;
         private JobGlobalStatusOnError jobGlobalStatusOnError;
         private JobGlobalStatusOnError jobGlobalStatusOnThresholdViolation = JobGlobalStatusOnError.FAILURE;
+        private boolean exceptionOnThresholdErrorGlobal = false;
         private boolean scanTimeOutEnabled;
         private boolean globallyDefineScanSettings;
         private boolean continueBuildWhenTimedOut;
@@ -2859,6 +2939,46 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 					|| scaResolverAddParameters.contains("--resolver-result-path"));
 		}
 
+        /**
+         * This method validates the SCA Project Custom Tags Parameters on UI.
+         *
+         * @param value:                         Indicates scaProjectCustomTags.
+         * @return FormValidation: Indicates the outcome of the validation and send to
+         *         UI.
+         */
+        @POST
+        public FormValidation doCheckScaProjectCustomTags(@QueryParameter String value,@AncestorInPath Item item) {
+            if (item == null) {
+                return FormValidation.ok();
+            }
+            item.checkPermission(Item.CONFIGURE);
+            Pattern pattern = Pattern.compile("^([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+(,([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+)*$");
+            Matcher match = pattern.matcher(value);
+            if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
+            	return FormValidation.error("Project level custom fields in SCA Scan must have given format: key1:val1,key2:val2. Custom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
+            }
+            return FormValidation.ok();
+        }
+        /**
+        * This method validates the SCA Scan Custom Tags  Parameters on UI.
+        *
+        * @param value:                         Indicates scaProjectCustomTags.
+        * @return FormValidation: Indicates the outcome of the validation and send to
+        *         UI.
+        */
+        @POST
+        public FormValidation doCheckScaScanCustomTags(@QueryParameter String value,@AncestorInPath Item item) {
+            if (item == null) {
+                return FormValidation.ok();
+            }
+            item.checkPermission(Item.CONFIGURE);
+            Pattern pattern = Pattern.compile("^([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+(,([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+)*$");
+            Matcher match = pattern.matcher(value);
+            if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
+            	return FormValidation.error("Scan level custom fields in SCA Scan must have given format: key1:val1,key2:val2. Custom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
+            }
+            return FormValidation.ok();
+        }
 
 		/**
 		 * This method validates the SCA Resolver Additional Parameters on UI.
@@ -3003,10 +3123,31 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 return FormValidation.ok();
         	}
             item.checkPermission(Item.CONFIGURE);
-            Pattern pattern = Pattern.compile("(^([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+(,([a-zA-Z0-9#._]*):([a-zA-Z0-9#._]*)+)*$)");
+            Pattern pattern = Pattern.compile("^([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+(,([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+)*$");
             Matcher match = pattern.matcher(value);
             if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
-            	return FormValidation.error("Custom Fields must have given format: key1:val1,key2:val2. \nCustom field allows to use these special characters: # . _ ");
+            	return FormValidation.error("Scan level custom fields in SAST Scan must have given format: key1:val1,key2:val2. Custom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
+            }
+
+            return FormValidation.ok();
+        }
+
+        /**
+         * This method verify correct format for Project Level Custom Fields
+         *
+         * @param value
+         * @return
+         */
+        @POST
+        public FormValidation doCheckProjectLevelCustomFields(@QueryParameter String value,@AncestorInPath Item item) {
+        	if (item == null) {
+                return FormValidation.ok();
+        	}
+            item.checkPermission(Item.CONFIGURE);
+            Pattern pattern = Pattern.compile("^([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+(,([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+)*$");
+            Matcher match = pattern.matcher(value);
+            if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
+            	return FormValidation.error("Project level custom fields in SAST Scan must have given format: key1:val1,key2:val2. Custom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
             }
 
             return FormValidation.ok();
@@ -3740,6 +3881,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         public void setJobGlobalStatusOnThresholdViolation(JobGlobalStatusOnError jobGlobalStatusOnThresholdViolation) {
             this.jobGlobalStatusOnThresholdViolation = jobGlobalStatusOnThresholdViolation;
+        }
+        
+        public void setExceptionOnThresholdErrorGlobal(boolean exceptionOnThresholdErrorGlobal) {
+        	this.exceptionOnThresholdErrorGlobal = exceptionOnThresholdErrorGlobal;
+        }
+        public boolean isExceptionOnThresholdErrorGlobal() {
+        	return exceptionOnThresholdErrorGlobal;
         }
 
         public boolean isLockVulnerabilitySettings() {
