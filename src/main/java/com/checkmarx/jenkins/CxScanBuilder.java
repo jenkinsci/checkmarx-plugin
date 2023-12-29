@@ -2405,6 +2405,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     additionalParams.replace("--cxserver ", "");
                 }
             }
+            if(additionalParams!=null)
+            {
+            	additionalParams = additionalParams.trim();
+            }
 		return additionalParams;
 	}
 

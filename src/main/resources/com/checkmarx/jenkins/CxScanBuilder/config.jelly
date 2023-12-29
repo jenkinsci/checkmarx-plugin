@@ -261,7 +261,7 @@
                 <f:entry title="Build status when results exceed threshold:">
                     <f:readOnlyTextbox value="Setting Locked by Administrator (${descriptor.JobGlobalStatusOnThresholdViolation})" />
                 </f:entry>
-                <f:entry title="Throw exception when results exceed threshold:">
+                <f:entry title="Propagate error when results exceed threshold:">
                     <f:readOnlyTextbox value="Setting Locked by Administrator (${descriptor.exceptionOnThresholdErrorGlobal})" />
                 </f:entry>
                                 
@@ -343,7 +343,7 @@
                                         <f:entry title="Build status when results exceed threshold:">
                                             <f:readOnlyTextbox value="${descriptor.JobGlobalStatusOnThresholdViolation.displayName}" />
                                         </f:entry>
-                                        <f:entry title="Throw exception when results exceed threshold:">
+                                        <f:entry title="Propagate error when results exceed threshold:">
                                             <f:readOnlyTextbox value="${descriptor.exceptionOnThresholdErrorGlobal}" />
                                         </f:entry>
                                         <f:entry title="SAST High severity vulnerabilities threshold">
@@ -373,7 +373,7 @@
                                         <f:entry title="Build status when results exceed threshold:" field="vulnerabilityThresholdResult">
                                             <f:select />
                                         </f:entry>
-                                        <f:optionalBlock title="Throw exception when results exceed threshold" inline="true" field="exceptionOnThresholdError" />
+                                        <f:optionalBlock title="Propagate error when results exceed threshold" inline="true" field="exceptionOnThresholdError" />
                                         <f:entry title="SAST High severity vulnerabilities threshold" field="highThreshold">
                                             <f:number clazz="positive-number" min="0" step="1" default="" checkMethod="post" />
                                         </f:entry>
@@ -407,7 +407,7 @@
                                 <f:entry title="Build status when results exceed threshold:" field="vulnerabilityThresholdResult">
                                     <f:select />
                                 </f:entry>
-                                <f:optionalBlock title="Throw exception when results exceed threshold" inline="true" field="exceptionOnThresholdError" />
+                                <f:optionalBlock title="Propagate error when results exceed threshold" inline="true" field="exceptionOnThresholdError" />
                                 <f:entry title="SAST High severity vulnerabilities threshold" field="highThreshold">
                                     <f:number clazz="positive-number" min="0" step="1" default="" />
                                 </f:entry>
