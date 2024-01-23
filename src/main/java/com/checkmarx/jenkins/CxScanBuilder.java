@@ -972,7 +972,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 }
             }
 
-
             //print configuration
             printConfiguration(config, descriptor, log);
 
@@ -1050,15 +1049,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             //in case of async mode, do not create reports (only the report of the latest scan)
             //and don't assert threshold vulnerabilities
-
             failTheBuild(run, config, scanResults);
             if (config.getSynchronous()) {
-
                 //generate html report
                 String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
                 cxScanResult.setHtmlReportName(reportName);
                 run.addAction(cxScanResult);
-
 
                 //create sast reports
                 SASTResults sastResults = scanResults.getSastResults();
@@ -1988,9 +1984,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     private void createOsaReports(OSAResults osaResults, File checkmarxBuildDir) {
-        writeJsonObjectToFile(osaResults.getResults(), checkmarxBuildDir, OSA_SUMMERY_JSON);
-        writeJsonObjectToFile(osaResults.getOsaLibraries(), checkmarxBuildDir, OSA_LIBRARIES_JSON);
-        writeJsonObjectToFile(osaResults.getOsaVulnerabilities(), checkmarxBuildDir, OSA_VULNERABILITIES_JSON);
+        writeJsonObjectToFile(osaResults.getResults(), new File(checkmarxBuildDir, OSA_SUMMERY_JSON), OSA_SUMMERY_JSON);
+        writeJsonObjectToFile(osaResults.getOsaLibraries(), new File(checkmarxBuildDir, OSA_LIBRARIES_JSON), OSA_LIBRARIES_JSON);
+        writeJsonObjectToFile(osaResults.getOsaVulnerabilities(), new File(checkmarxBuildDir, OSA_VULNERABILITIES_JSON), OSA_VULNERABILITIES_JSON);
     }
 
     private String generateHTMLReport(@Nonnull FilePath workspace, File checkmarxBuildDir, CxScanConfig config, ScanResults results) {
@@ -2020,14 +2016,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     private void writeJsonObjectToFile(Object jsonObj, File to, String description) {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            String json = null;
-            json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObj);
-            FileUtils.writeStringToFile(to, json);
-            log.info("Copying file [" + to.getName() + "] to workspace [" + to.getAbsolutePath() + "]");
+            if (jsonObj != null) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                String json = null;
+                json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObj);
+                FileUtils.writeStringToFile(to, json);
+                log.info("Copying file [" + to.getName() + "] to workspace [" + to.getAbsolutePath() + "]");
+            }
         } catch (Exception e) {
-            log.error("Failed to write " + description + " to [" + to.getAbsolutePath() + "]");
-
+            log.error("Failed to write " + description + " to [" + to.getAbsolutePath() + "]", e);
         }
     }
 
