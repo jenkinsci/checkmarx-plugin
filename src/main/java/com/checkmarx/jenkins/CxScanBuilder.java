@@ -3206,6 +3206,23 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return FormValidation.ok();
         }
         
+		@POST
+		public FormValidation doCheckVulnerabilityThresholdEnabled(@QueryParameter boolean value,
+				@QueryParameter boolean sastEnabled, @QueryParameter boolean vulnerabilityThresholdEnabled,
+				@AncestorInPath Item item) {
+			if (item == null) {
+				return FormValidation.ok();
+			}
+			item.checkPermission(Item.CONFIGURE);
+			if (!sastEnabled && value) {
+				vulnerabilityThresholdEnabled = false;
+				sastEnabled = false;
+				return FormValidation.error("Enable CxSAST scan to  set SAST threshold");
+			}
+
+			return FormValidation.ok();
+		}
+        
 
         @POST
         public FormValidation doTestScaSASTConnection(@QueryParameter final String scaSastServerUrl, @QueryParameter final String password,
