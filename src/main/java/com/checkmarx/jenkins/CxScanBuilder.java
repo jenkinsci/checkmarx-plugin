@@ -302,7 +302,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.sastEnabled = sastEnabled;
         this.preset = (preset != null && !preset.startsWith("Provide Checkmarx")) ? preset : null;
         this.jobStatusOnError = jobStatusOnError;
-        this.scaReportFormat = scaReportFormat;
+        this.scaReportFormat = (generateScaReport) ?  scaReportFormat : null;
         this.presetSpecified = presetSpecified;
         this.exclusionsSetting = exclusionsSetting;
         this.globalExclusions = "global".equals(exclusionsSetting);
