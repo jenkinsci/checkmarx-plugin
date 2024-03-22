@@ -331,7 +331,7 @@
 
                    <!-- ** Enable CxSAST vulnerability threshold ** -->
                     <f:optionalBlock title="Enable vulnerability threshold" inline="true"
-                        field="vulnerabilityThresholdEnabled">
+                        field="vulnerabilityThresholdEnabled" checkMethod="POST">
 
                         <j:choose>
                             <j:when test="${descriptor.forcingVulnerabilityThresholdEnabled}">
