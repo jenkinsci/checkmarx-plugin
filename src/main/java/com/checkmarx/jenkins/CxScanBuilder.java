@@ -1117,8 +1117,27 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
-        //Asynchronous scan - add note message and previous build reports
-        if (!descriptor.isAsyncHtmlRemoval() || config.getSynchronous()) {
+		boolean generateAsyncReport = false;
+		SASTResults sastResults = scanResults.getSastResults();
+		OSAResults osaResults = scanResults.getOsaResults();
+		AstScaResults scaResults = scanResults.getScaResults();
+		if (config.isSastEnabled() && sastResults != null && sastResults.isSastResultsReady()) {
+			generateAsyncReport = true;
+		}
+
+		if (config.isOsaEnabled()) {
+			if (osaResults == null && !osaResults.isOsaResultsReady()) {
+				generateAsyncReport = false;
+			}
+		} else if (config.isAstScaEnabled()) {
+			if (scaResults == null || !scaResults.isScaResultReady()) {
+				generateAsyncReport = false;
+			}
+		} else {
+			generateAsyncReport = true;
+		}
+
+		if ((!descriptor.isAsyncHtmlRemoval() && generateAsyncReport) || config.getSynchronous()) {
             String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
             cxScanResult.setHtmlReportName(reportName);
         }
@@ -1928,7 +1947,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("enable Project Policy Enforcement SCA: " + config.getEnablePolicyViolationsSCA());
         log.info("continue build when timed out: " + config.getContinueBuild());
         log.info("post scan action: " + config.getPostScanActionId());
-        log.info("is force scan: " + config.getForceScan());
         log.info("scan level custom fields: " + config.getCustomFields());
         log.info("project level custom fields: " + config.getProjectLevelCustomFields());
         log.info("overrideProjectSetting value: " + overrideProjectSetting);

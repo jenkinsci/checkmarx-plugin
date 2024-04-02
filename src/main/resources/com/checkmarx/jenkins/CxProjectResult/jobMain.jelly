@@ -30,14 +30,34 @@
                     }
                 </style>
                <j:if test="${result.isRemoveAsyncHtml()}">
-             	<div id="async-note">
-                    <div class="async-note"><div class="async-note-title">Note:</div>
-                        <div class="async-note-body" id="async-note-body">Job is configured to run Checkmarx scan asynchronously. Displayed results are of the previous successful scan.</div></div>
-                </div>
-                <div>
-                    ${result.getHtmlReport()}
-                </div>
-            </j:if> 
+	<div>
+	<j:choose>
+		<j:when test="${result.isEmptyReportAsync()}">
+			<div id="async-note">
+				<div class="async-note">
+					<div class="async-note-title">Note:</div>
+					<div class="async-note-body" id="async-note-body">
+						Job is configured to run Checkmarx scan asynchronously. Previous report not found.
+					</div>
+				</div>
+			</div>
+		</j:when>
+		<j:otherwise>
+			<div id="async-note">
+                <div class="async-note">
+					<div class="async-note-title">Note:</div>
+                    <div class="async-note-body" id="async-note-body">
+						Job is configured to run Checkmarx scan asynchronously. Displayed results are of the previous successful scan.
+					</div>
+				</div>
+            </div>
+            <div>
+                ${result.getHtmlReport()}
+            </div>
+		</j:otherwise>
+    </j:choose>
+	</div>
+</j:if> 
             
             <j:if test="${!result.isRemoveAsyncHtml()}">
              	<div id="async-note">
