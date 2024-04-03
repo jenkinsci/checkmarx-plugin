@@ -3217,7 +3217,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 			if (!sastEnabled && value) {
 				vulnerabilityThresholdEnabled = false;
 				sastEnabled = false;
-				return FormValidation.error("Enable CxSAST scan to  set SAST threshold");
+				return FormValidation.error("Enable CxSAST scan to set SAST threshold");
 			}
 
 			return FormValidation.ok();
