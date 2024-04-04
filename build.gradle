@@ -53,13 +53,16 @@ dependencies {
     }
 
 
-    compile ('com.checkmarx:cx-client-common:2023.4.4') {
-       exclude group: 'org.apache.commons', module: 'commons-compress'
+    compile ('com.checkmarx:cx-client-common:2024.1.1') {
+       
        exclude group: 'org.yaml' , module: 'snakeyaml'
        exclude group: 'com.google.code.gson', module: 'gson'
        exclude group: 'org.json', module: 'json'
        exclude group: 'commons-beanutils', module: 'commons-beanutils' 
-       exclude group: 'com.google.guava', module: 'guava'       
+       exclude group: 'com.google.guava', module: 'guava'
+       exclude group: 'commons-collections', module: 'commons-collections'
+       exclude group: 'io.netty', module: 'netty-codec-http'
+       exclude group: 'org.apache.commons', module: 'commons-compress' 
     }
     
     compile 'com.fasterxml.jackson.core:jackson-core:2.11.3',
@@ -71,9 +74,9 @@ dependencies {
             'org.apache.logging.log4j:log4j-slf4j-impl:2.17.1',
             'org.apache.logging.log4j:log4j-api:2.17.1',
             'org.apache.logging.log4j:log4j-core:2.17.1',
-            'org.apache.commons:commons-compress:1.25.0',
+            'org.apache.commons:commons-compress:1.26.0',          
             'com.google.code.gson:gson:2.8.9',           
-            'org.yaml:snakeyaml:1.33',
+            'org.yaml:snakeyaml:2.2',
             'org.json:json:20231013',
             'org.eclipse.jgit:org.eclipse.jgit:6.8.0.202311291450-r',
             'com.google.guava:guava:32.1.1-jre' 
@@ -85,7 +88,7 @@ dependencies {
                 implementation('commons-beanutils:commons-beanutils:1.9.4') {
                     because 'previous versions have a bug impacting this application'
                 }
-                implementation('io.netty:netty-codec-http:4.1.60.Final') {
+                implementation('io.netty:netty-codec-http:4.1.101.Final') {
                     because 'previous versions have a bug impacting this application'
                 }
                 implementation('org.apache.httpcomponents:httpclient:4.5.13') {
