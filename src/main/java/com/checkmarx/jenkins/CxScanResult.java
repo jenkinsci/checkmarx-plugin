@@ -176,7 +176,6 @@ public class CxScanResult implements Action {
  // Check if neither the current report nor the older report is found	
 	public boolean isEmptyReportAsync() {
 		try {
-			boolean isRemoveAsyncHtmlValue = isRemoveAsyncHtml();
 			String htmlReport = getHtmlReport();
 			return htmlReport == null || htmlReport.isEmpty()
 					|| htmlReport.equals("<h1>Checkmarx HTML report not found<h1>");

@@ -1117,6 +1117,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
+		// For asynchronous scan, if reports are not ready or previous reports is not
+		// found, HTML Report is not generated
 		boolean generateAsyncReport = false;
 		SASTResults sastResults = scanResults.getSastResults();
 		OSAResults osaResults = scanResults.getOsaResults();
@@ -1125,22 +1127,47 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 			generateAsyncReport = true;
 		}
 
-		if (config.isOsaEnabled()) {
-			if (osaResults == null && !osaResults.isOsaResultsReady()) {
-				generateAsyncReport = false;
-			}
-		} else if (config.isAstScaEnabled()) {
-			if (scaResults == null || !scaResults.isScaResultReady()) {
-				generateAsyncReport = false;
-			}
-		} else {
-			generateAsyncReport = true;
+		if (config.isOsaEnabled() || config.isAstScaEnabled()) {
+			if (config.isOsaEnabled()) {
+				if (osaResults == null || !osaResults.isOsaResultsReady()) {
+					generateAsyncReport = false;
+				} else {
+					/*If both SAST and OSA scan are enabled, 
+					HTML report is generated only if,previous report is available for both the scan*/
+					
+					if(config.isSastEnabled()){ 
+						if(sastResults == null || !sastResults.isSastResultsReady()) {
+							generateAsyncReport = false;
+						}
+					}else {
+					generateAsyncReport = true;
+					}
+				}
+			} else {
+				if (scaResults == null || !scaResults.isScaResultReady()) {
+					generateAsyncReport = false;
+				} else {
+					/*If both SAST and SCA scan are enabled, 
+					HTML report is generated only if,previous report is available for both the scan*/
+					if(config.isSastEnabled()){
+						if(sastResults == null || !sastResults.isSastResultsReady()) {
+							generateAsyncReport = false;
+						}
+					}else {
+					generateAsyncReport = true;
+					}
+				}
+			} 
 		}
 
-		if ((!descriptor.isAsyncHtmlRemoval() && generateAsyncReport) || config.getSynchronous()) {
-            String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
-            cxScanResult.setHtmlReportName(reportName);
-        }
+		if (!descriptor.isAsyncHtmlRemoval() || config.getSynchronous()) {
+			log.info("Running in Asynchronous mode. Not waiting for scan to finish.");
+
+			if (generateAsyncReport) {
+				String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
+				cxScanResult.setHtmlReportName(reportName);
+			}
+		}
         run.addAction(cxScanResult);
 			} catch (ConfigurationException e1) {
 				e1.printStackTrace();
