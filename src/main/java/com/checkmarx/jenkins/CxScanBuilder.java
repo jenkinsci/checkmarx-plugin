@@ -1117,6 +1117,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
+		/* For asynchronous scan, if reports are not ready or report of previous successful scan is not
+		 found, HTML Report is not generated*/
 		boolean generateAsyncReport = false;
 		SASTResults sastResults = scanResults.getSastResults();
 		OSAResults osaResults = scanResults.getOsaResults();
@@ -1124,23 +1126,27 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 		if (config.isSastEnabled() && sastResults != null && sastResults.isSastResultsReady()) {
 			generateAsyncReport = true;
 		}
-
-		if (config.isOsaEnabled()) {
-			if (osaResults == null && !osaResults.isOsaResultsReady()) {
+		
+		/*If a combination scan is run(SAST + OSA/SCA), 
+		HTML report is generated only if, previous reports are available for both the scans*/
+		if (config.isOsaEnabled() || config.isAstScaEnabled()) {
+			if ((config.isOsaEnabled() && (osaResults == null || !osaResults.isOsaResultsReady()))
+					|| (config.isAstScaEnabled() && (scaResults == null || !scaResults.isScaResultReady()))
+					|| (config.isSastEnabled() && (sastResults == null || !sastResults.isSastResultsReady()))) {
 				generateAsyncReport = false;
+			} else {
+				generateAsyncReport = true;
 			}
-		} else if (config.isAstScaEnabled()) {
-			if (scaResults == null || !scaResults.isScaResultReady()) {
-				generateAsyncReport = false;
-			}
-		} else {
-			generateAsyncReport = true;
 		}
 
-		if ((!descriptor.isAsyncHtmlRemoval() && generateAsyncReport) || config.getSynchronous()) {
-            String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
-            cxScanResult.setHtmlReportName(reportName);
-        }
+		if (!descriptor.isAsyncHtmlRemoval() || config.getSynchronous()) {
+			log.info("Running in Asynchronous mode. Not waiting for scan to finish.");
+
+			if (generateAsyncReport) {
+				String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
+				cxScanResult.setHtmlReportName(reportName);
+			}
+		}
         run.addAction(cxScanResult);
 			} catch (ConfigurationException e1) {
 				e1.printStackTrace();
