@@ -1117,8 +1117,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
-		// For asynchronous scan, if reports are not ready or previous reports is not
-		// found, HTML Report is not generated
+		/* For asynchronous scan, if reports are not ready or report of previous successful scan is not
+		 found, HTML Report is not generated*/
 		boolean generateAsyncReport = false;
 		SASTResults sastResults = scanResults.getSastResults();
 		OSAResults osaResults = scanResults.getOsaResults();
@@ -1126,38 +1126,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 		if (config.isSastEnabled() && sastResults != null && sastResults.isSastResultsReady()) {
 			generateAsyncReport = true;
 		}
-
+		
+		/*If a combination scan is run(SAST + OSA/SCA), 
+		HTML report is generated only if, previous reports are available for both the scans*/
 		if (config.isOsaEnabled() || config.isAstScaEnabled()) {
-			if (config.isOsaEnabled()) {
-				if (osaResults == null || !osaResults.isOsaResultsReady()) {
-					generateAsyncReport = false;
-				} else {
-					/*If both SAST and OSA scan are enabled, 
-					HTML report is generated only if,previous report is available for both the scan*/
-					
-					if(config.isSastEnabled()){ 
-						if(sastResults == null || !sastResults.isSastResultsReady()) {
-							generateAsyncReport = false;
-						}
-					}else {
-					generateAsyncReport = true;
-					}
-				}
+			if ((config.isOsaEnabled() && (osaResults == null || !osaResults.isOsaResultsReady()))
+					|| (config.isAstScaEnabled() && (scaResults == null || !scaResults.isScaResultReady()))
+					|| (config.isSastEnabled() && (sastResults == null || !sastResults.isSastResultsReady()))) {
+				generateAsyncReport = false;
 			} else {
-				if (scaResults == null || !scaResults.isScaResultReady()) {
-					generateAsyncReport = false;
-				} else {
-					/*If both SAST and SCA scan are enabled, 
-					HTML report is generated only if,previous report is available for both the scan*/
-					if(config.isSastEnabled()){
-						if(sastResults == null || !sastResults.isSastResultsReady()) {
-							generateAsyncReport = false;
-						}
-					}else {
-					generateAsyncReport = true;
-					}
-				}
-			} 
+				generateAsyncReport = true;
+			}
 		}
 
 		if (!descriptor.isAsyncHtmlRemoval() || config.getSynchronous()) {
