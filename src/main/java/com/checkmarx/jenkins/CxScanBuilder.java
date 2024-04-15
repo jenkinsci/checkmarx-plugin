@@ -1014,7 +1014,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //validate at least one scan type is enabled
         if (!config.isSastEnabled() && !config.isAstScaEnabled() && !config.isOsaEnabled()) {
             log.error("Both SAST and dependency scan are disabled. Exiting.");
-            run.setResult(Result.FAILURE);            
+            run.setResult(Result.SUCCESS);            
             return;
         }
 
