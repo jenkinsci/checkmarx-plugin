@@ -2217,13 +2217,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private boolean shouldUseGlobalThreshold() {
         final DescriptorImpl descriptor = getDescriptor();
         //locked by global or (job threshold enabled and points to 'global' and global is enabled)
-        return (descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || (isVulnerabilityThresholdEnabled() && "global".equals(getThresholdSettings()) && descriptor.isForcingVulnerabilityThresholdEnabled());
+        return (descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || (isWaitForResultsEnabled() && isVulnerabilityThresholdEnabled() && descriptor.isForcingVulnerabilityThresholdEnabled() && "global".equals(getThresholdSettings()));
     }
 
     private boolean shouldUseJobThreshold() {
         final DescriptorImpl descriptor = getDescriptor();
         //not locked by global and job threshold enabled and points to 'job'
-        return !(descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) && isVulnerabilityThresholdEnabled();
+        return !(descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) && (isWaitForResultsEnabled() && isVulnerabilityThresholdEnabled());
     }
 
     /**

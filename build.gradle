@@ -53,7 +53,9 @@ dependencies {
     }
 
 
-    compile ('com.checkmarx:cx-client-common:2024.2.1') {
+
+    compile ('com.checkmarx:cx-client-common:2024.2.2') {
+
        
        exclude group: 'org.yaml' , module: 'snakeyaml'
        exclude group: 'com.google.code.gson', module: 'gson'
