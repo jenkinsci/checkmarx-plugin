@@ -302,7 +302,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.sastEnabled = sastEnabled;
         this.preset = (preset != null && !preset.startsWith("Provide Checkmarx")) ? preset : null;
         this.jobStatusOnError = jobStatusOnError;
-        this.scaReportFormat = scaReportFormat;
+        this.scaReportFormat = (generateScaReport) ?  scaReportFormat : null;
         this.presetSpecified = presetSpecified;
         this.exclusionsSetting = exclusionsSetting;
         this.globalExclusions = "global".equals(exclusionsSetting);
@@ -1014,7 +1014,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         //validate at least one scan type is enabled
         if (!config.isSastEnabled() && !config.isAstScaEnabled() && !config.isOsaEnabled()) {
             log.error("Both SAST and dependency scan are disabled. Exiting.");
-            run.setResult(Result.FAILURE);            
+            run.setResult(Result.SUCCESS);            
             return;
         }
 
@@ -1117,11 +1117,36 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
-        //Asynchronous scan - add note message and previous build reports
-        if (!descriptor.isAsyncHtmlRemoval() || config.getSynchronous()) {
-            String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
-            cxScanResult.setHtmlReportName(reportName);
-        }
+		/* For asynchronous scan, if reports are not ready or report of previous successful scan is not
+		 found, HTML Report is not generated*/
+		boolean generateAsyncReport = false;
+		SASTResults sastResults = scanResults.getSastResults();
+		OSAResults osaResults = scanResults.getOsaResults();
+		AstScaResults scaResults = scanResults.getScaResults();
+		if (config.isSastEnabled() && sastResults != null && sastResults.isSastResultsReady()) {
+			generateAsyncReport = true;
+		}
+		
+		/*If a combination scan is run(SAST + OSA/SCA), 
+		HTML report is generated only if, previous reports are available for both the scans*/
+		if (config.isOsaEnabled() || config.isAstScaEnabled()) {
+			if ((config.isOsaEnabled() && (osaResults == null || !osaResults.isOsaResultsReady()))
+					|| (config.isAstScaEnabled() && (scaResults == null || !scaResults.isScaResultReady()))
+					|| (config.isSastEnabled() && (sastResults == null || !sastResults.isSastResultsReady()))) {
+				generateAsyncReport = false;
+			} else {
+				generateAsyncReport = true;
+			}
+		}
+
+		if (!descriptor.isAsyncHtmlRemoval() || config.getSynchronous()) {
+			log.info("Running in Asynchronous mode. Not waiting for scan to finish.");
+
+			if (generateAsyncReport) {
+				String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
+				cxScanResult.setHtmlReportName(reportName);
+			}
+		}
         run.addAction(cxScanResult);
 			} catch (ConfigurationException e1) {
 				e1.printStackTrace();
@@ -1928,7 +1953,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("enable Project Policy Enforcement SCA: " + config.getEnablePolicyViolationsSCA());
         log.info("continue build when timed out: " + config.getContinueBuild());
         log.info("post scan action: " + config.getPostScanActionId());
-        log.info("is force scan: " + config.getForceScan());
         log.info("scan level custom fields: " + config.getCustomFields());
         log.info("project level custom fields: " + config.getProjectLevelCustomFields());
         log.info("overrideProjectSetting value: " + overrideProjectSetting);
@@ -2193,13 +2217,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private boolean shouldUseGlobalThreshold() {
         final DescriptorImpl descriptor = getDescriptor();
         //locked by global or (job threshold enabled and points to 'global' and global is enabled)
-        return (descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || (isVulnerabilityThresholdEnabled() && "global".equals(getThresholdSettings()) && descriptor.isForcingVulnerabilityThresholdEnabled());
+        return (descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) || (isWaitForResultsEnabled() && isVulnerabilityThresholdEnabled() && descriptor.isForcingVulnerabilityThresholdEnabled() && "global".equals(getThresholdSettings()));
     }
 
     private boolean shouldUseJobThreshold() {
         final DescriptorImpl descriptor = getDescriptor();
         //not locked by global and job threshold enabled and points to 'job'
-        return !(descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) && isVulnerabilityThresholdEnabled();
+        return !(descriptor.isForcingVulnerabilityThresholdEnabled() && descriptor.isLockVulnerabilitySettings()) && (isWaitForResultsEnabled() && isVulnerabilityThresholdEnabled());
     }
 
     /**
@@ -3205,6 +3229,23 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             return FormValidation.ok();
         }
+        
+		@POST
+		public FormValidation doCheckVulnerabilityThresholdEnabled(@QueryParameter boolean value,
+				@QueryParameter boolean sastEnabled, @QueryParameter boolean vulnerabilityThresholdEnabled,
+				@AncestorInPath Item item) {
+			if (item == null) {
+				return FormValidation.ok();
+			}
+			item.checkPermission(Item.CONFIGURE);
+			if (!sastEnabled && value) {
+				vulnerabilityThresholdEnabled = false;
+				sastEnabled = false;
+				return FormValidation.error("Enable CxSAST scan to set SAST threshold");
+			}
+
+			return FormValidation.ok();
+		}
         
 
         @POST
