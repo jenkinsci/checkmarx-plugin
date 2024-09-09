@@ -11,20 +11,24 @@ import java.util.LinkedList;
  */
 public class SastScanResult {
 
-    private Integer highCount;
+	private Integer criticalCount;
+	private Integer highCount;
     private Integer mediumCount;
     private Integer lowCount;
     private Integer infoCount;
 
+    private Integer newCriticalCount;
     private Integer newHighCount;
     private Integer newMediumCount;
     private Integer newLowCount;
 
+    private LinkedList<QueryResult> criticalQueryResultList;
     private LinkedList<QueryResult> highQueryResultList;
     private LinkedList<QueryResult> mediumQueryResultList;
     private LinkedList<QueryResult> lowQueryResultList;
     private LinkedList<QueryResult> infoQueryResultList;
 
+    private String criticalQueryResultsJson;
     private String highQueryResultsJson;
     private String mediumQueryResultsJson;
     private String lowQueryResultsJson;
@@ -48,11 +52,20 @@ public class SastScanResult {
     private String errorMessage;
 
     public SastScanResult() {
+    	this.criticalQueryResultList = new LinkedList<>();
         this.highQueryResultList = new LinkedList<>();
         this.mediumQueryResultList = new LinkedList<>();
         this.lowQueryResultList = new LinkedList<>();
         this.infoQueryResultList = new LinkedList<>();
         this.resultDeepLink = "";
+    }
+    
+    public Integer getCriticalCount() {
+        return criticalCount;
+    }
+
+    public void setCriticalCount(int criticalCount) {
+        this.criticalCount = criticalCount;
     }
 
     public Integer getHighCount() {
@@ -87,6 +100,10 @@ public class SastScanResult {
         this.infoCount = infoCount;
     }
 
+    public Integer getNewCriticalCount() { return newCriticalCount; }
+    
+    public void setNewCriticalCount(Integer newCriticalCount) { this.newCriticalCount = newCriticalCount; }
+    
     public Integer getNewHighCount() { return newHighCount; }
 
     public void setNewHighCount(Integer newHighCount) { this.newHighCount = newHighCount; }
@@ -99,10 +116,14 @@ public class SastScanResult {
 
     public void setNewLowCount(Integer newLowCount) { this.newLowCount = newLowCount; }
 
+    public LinkedList<QueryResult> getCriticalQueryResultList() {
+        return criticalQueryResultList;
+    }
+
     public LinkedList<QueryResult> getHighQueryResultList() {
         return highQueryResultList;
     }
-
+    
     public LinkedList<QueryResult> getMediumQueryResultList() {
         return mediumQueryResultList;
     }
@@ -115,6 +136,14 @@ public class SastScanResult {
         return infoQueryResultList;
     }
 
+    public String getCriticalQueryResultsJson() {
+        return criticalQueryResultsJson;
+    }
+
+    public void setCriticalQueryResultsJson(String criticalQueryResultsJson) {
+        this.criticalQueryResultsJson = criticalQueryResultsJson;
+    }
+    
     public String getHighQueryResultsJson() {
         return highQueryResultsJson;
     }

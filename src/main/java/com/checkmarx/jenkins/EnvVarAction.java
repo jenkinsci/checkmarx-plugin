@@ -26,15 +26,17 @@ public class EnvVarAction implements EnvironmentContributingAction {
     public void setCxSastResults(CxScanResult cxScanResult) {
         final String cxPrefix = "CXSAST_RESULTS_";
 
+        add(cxPrefix + "CRITICAL", Integer.toString(cxScanResult.getCriticalCount()));
         add(cxPrefix + "HIGH", Integer.toString(cxScanResult.getHighCount()));
         add(cxPrefix + "MEDIUM", Integer.toString(cxScanResult.getMediumCount()));
         add(cxPrefix + "LOW", Integer.toString(cxScanResult.getLowCount()));
         add(cxPrefix + "INFO", Integer.toString(cxScanResult.getInfoCount()));
     }
 
-    public void setCxSastResults(int high, int medium, int low, int info) {
+    public void setCxSastResults(int critical, int high, int medium, int low, int info) {
         final String cxPrefix = "CXSAST_RESULTS_";
 
+        add(cxPrefix + "CRITICAL", Integer.toString(critical));
         add(cxPrefix + "HIGH", Integer.toString(high));
         add(cxPrefix + "MEDIUM", Integer.toString(medium));
         add(cxPrefix + "LOW", Integer.toString(low));

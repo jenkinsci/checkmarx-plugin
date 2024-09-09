@@ -15,6 +15,8 @@ public class ScaConfig {
     private int medium;
     @Optional
     private int high;
+    @Optional
+    private int critical;
 
     public ScaConfig() {
     }
@@ -65,5 +67,13 @@ public class ScaConfig {
 
     public void setHigh(int high) {
         this.high = high;
+    }
+    
+    public int getCritical() {
+        return critical;
+    }
+
+    public void setCritical(int critical) {
+        this.critical = critical;
     }
 }
