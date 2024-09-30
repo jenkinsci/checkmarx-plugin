@@ -1531,6 +1531,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
     private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log, FilePath workspace) throws IOException, ConfigurationException {
         CxScanConfig ret = new CxScanConfig();
+        //setting plugin version to be added in api request headers
+        ret.setPluginVersion(CxConfig.version());
         
         ret.setIsOverrideProjectSetting(overrideProjectSetting);
 
