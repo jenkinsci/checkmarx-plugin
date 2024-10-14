@@ -18,7 +18,7 @@ apply plugin: 'project-report'
 apply plugin: 'org.jenkins-ci.jpi'
 apply plugin: 'nebula.provided-base'
 
-repositories {
+repositories {	
 	jcenter()
     mavenLocal()        // Use this to load a custom build of Common Client from a local Maven repo.
     maven { url 'http://repo.jenkins-ci.org/releases/' }
@@ -77,7 +77,8 @@ dependencies {
        exclude group: 'io.netty', module: 'netty-codec-http2'
        exclude group: 'io.netty', module: 'netty-resolver-dns'
        exclude group: 'io.netty', module: 'netty-codec-dns'
-       exclude group: 'org.iq80.snappy', module: 'snappy' 
+       exclude group: 'org.iq80.snappy', module: 'snappy'
+       exclude group: 'org.codehaus.plexus', module: 'plexus-utils' 
     }
     
     compile 'com.fasterxml.jackson.core:jackson-core:2.11.3',
@@ -110,6 +111,7 @@ dependencies {
             'io.netty:netty-codec-http2:4.1.112.Final',
             'io.netty:netty-resolver-dns:4.1.112.Final',
             'io.netty:netty-codec-dns:4.1.112.Final',
+            'org.codehaus.plexus:plexus-utils:3.5.1',
             'org.iq80.snappy:snappy:0.5'
 
             constraints {

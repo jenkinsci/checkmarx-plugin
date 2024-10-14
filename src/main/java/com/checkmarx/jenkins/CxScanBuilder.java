@@ -1034,7 +1034,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
 
-
         //print configuration
         printConfiguration(config, descriptor, log);
 
@@ -1053,11 +1052,20 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             action = new CxScanCallable(config, listener, instance.proxy, isHideDebugLogs(), fsaVars);
         } else {
             action = new CxScanCallable(config, listener, isHideDebugLogs(), fsaVars);
-        }
+        }      
+        
 
         //create scans and retrieve results (in jenkins agent)
         RemoteScanInfo scanInfo = workspace.act(action);
         ScanResults scanResults = scanInfo.getScanResults();
+        //setting cxVersion in config if it is null (Jenkins agent node scenario). We need this for HTML report.
+        if(config.getCxVersion() == null){
+        	CxVersion cxVersion = new CxVersion();
+        	cxVersion.setVersion(scanInfo.getVersion());
+        	cxVersion.setHotFix(scanInfo.getHotFix());
+        	cxVersion.setEnginePackVersion(scanInfo.getEnginePackVersion());
+        	config.setCxVersion(cxVersion);        	
+        }
 
         // We'll need this for the HTML report.
         config.setCxARMUrl(scanInfo.getCxARMUrl());
@@ -1112,11 +1120,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         //in case of async mode, do not create reports (only the report of the latest scan)
         //and don't assert threshold vulnerabilities
-
+        
          failTheBuild(run, config, scanResults);
         if (config.getSynchronous()) {
-
-            //generate html report
+        	//generate html report
             String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
             cxScanResult.setHtmlReportName(reportName);
             run.addAction(cxScanResult);
@@ -2154,9 +2161,33 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             IOUtils.closeQuietly(is);
         }
     }
+    
+    private void showWarningForFailTheBuildOnNewCriticalVulnerabilities(CxScanConfig config){
+    	String msg = "Critical severity is not supported for the version of the configured SAST server. Thus, fail the build functionality for new critical vulnerabilities will not work if critical severity is not supported by the configured SAST server.";
+    	if(config.getSastNewResultsThresholdEnabled() 
+        		&& "CRITICAL".equalsIgnoreCase(config.getSastNewResultsThresholdSeverity())) {
+    		if(config.getCxVersion()!=null && config.getCxVersion().getVersion()!=null) {
+    			String sastVersion = config.getCxVersion().getVersion();
+    			String[] versionComponents = sastVersion.split("\\.");
+    			float currentVersionFloat = Float.parseFloat("9.0");
+    			if (versionComponents.length >= 2) {    				
+    				String currentVersion = versionComponents[0] + "." + versionComponents[1];
+    				currentVersionFloat = Float.parseFloat(currentVersion);    				
+    			}
+    			if(currentVersionFloat < Float.parseFloat("9.7")) {
+    				log.warn(msg);
+    			}        		
+        	}
+    		else {
+    			log.warn(msg);
+    		}    		
+    	}    	
+    }
 
     private void failTheBuild(Run<?, ?> run, CxScanConfig config, ScanResults ret) throws AbortException {
-        //assert if expected exception is thrown  OR when vulnerabilities under threshold OR when policy violated
+        //check if critical severity is supported for fail the build
+    	showWarningForFailTheBuildOnNewCriticalVulnerabilities(config);    	
+    	//assert if expected exception is thrown  OR when vulnerabilities under threshold OR when policy violated
         ScanSummary scanSummary = new ScanSummary(config, ret.getSastResults(), ret.getOsaResults(), ret.getScaResults());
         if (scanSummary.hasErrors() || ret.getGeneralException() != null ||
                 (ret.getSastResults() != null && ret.getSastResults().getException() != null) ||
@@ -3723,6 +3754,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         	}
             item.checkPermission(Item.CONFIGURE);
             ListBoxModel listBoxModel = new ListBoxModel();
+            listBoxModel.add(new ListBoxModel.Option("Critical", "CRITICAL"));
             listBoxModel.add(new ListBoxModel.Option("High", "HIGH"));
             listBoxModel.add(new ListBoxModel.Option("Medium", "MEDIUM"));
             listBoxModel.add(new ListBoxModel.Option("Low", "LOW"));
