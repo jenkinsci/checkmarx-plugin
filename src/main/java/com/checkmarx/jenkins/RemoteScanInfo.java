@@ -11,6 +11,9 @@ import java.io.Serializable;
 public class RemoteScanInfo implements Serializable {
     private ScanResults scanResults;
     private String cxARMUrl;
+    private String version;
+    private String hotFix;
+    private String enginePackVersion;
 
     public void setScanResults(ScanResults scanResults) {
         this.scanResults = scanResults;
@@ -26,5 +29,29 @@ public class RemoteScanInfo implements Serializable {
 
     public String getCxARMUrl() {
         return cxARMUrl;
+    }
+    
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+    
+    public void setHotFix(String hotFix) {
+        this.hotFix = hotFix;
+    }
+
+    public String getHotFix() {
+        return hotFix;
+    }
+    
+    public void setEnginePackVersion(String enginePackVersion) {
+        this.enginePackVersion = enginePackVersion;
+    }
+
+    public String getEnginePackVersion() {
+        return enginePackVersion;
     }
 }

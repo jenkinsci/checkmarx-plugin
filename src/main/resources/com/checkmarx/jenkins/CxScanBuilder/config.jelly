@@ -264,7 +264,9 @@
                 <f:entry title="Propagate error when results exceed threshold:">
                     <f:readOnlyTextbox value="Setting Locked by Administrator (${descriptor.exceptionOnThresholdErrorGlobal})" />
                 </f:entry>
-                                
+                <f:entry title="SAST Critical severity vulnerabilities threshold">
+                    <f:readOnlyTextbox value="${descriptor.criticalThresholdEnforcement}" />
+                </f:entry>                
                 <f:entry title="SAST High severity vulnerabilities threshold">
                     <f:readOnlyTextbox value="${descriptor.highThresholdEnforcement}" />
                 </f:entry>
@@ -273,6 +275,9 @@
                 </f:entry>
                 <f:entry title="SAST Low severity vulnerabilities threshold">
                     <f:readOnlyTextbox value="${descriptor.lowThresholdEnforcement}" />
+                </f:entry>
+                <f:entry title="Dependency scan critical severity vulnerabilities threshold">
+                    <f:readOnlyTextbox value="${descriptor.osaCriticalThresholdEnforcement}" />
                 </f:entry>
                 <f:entry title="Dependency scan high severity vulnerabilities threshold">
                     <f:readOnlyTextbox value="${descriptor.osaHighThresholdEnforcement}" />
@@ -346,6 +351,9 @@
                                         <f:entry title="Propagate error when results exceed threshold:">
                                             <f:readOnlyTextbox value="${descriptor.exceptionOnThresholdErrorGlobal}" />
                                         </f:entry>
+                                        <f:entry title="SAST Critical severity vulnerabilities threshold">
+                                            <f:readOnlyTextbox value="${descriptor.criticalThresholdEnforcement}" />
+                                        </f:entry>
                                         <f:entry title="SAST High severity vulnerabilities threshold">
                                             <f:readOnlyTextbox value="${descriptor.highThresholdEnforcement}" />
                                         </f:entry>
@@ -354,6 +362,9 @@
                                         </f:entry>
                                         <f:entry title="SAST Low severity vulnerabilities threshold">
                                             <f:readOnlyTextbox value="${descriptor.lowThresholdEnforcement}" />
+                                        </f:entry>
+                                        <f:entry title="Dependency scan critical severity vulnerabilities threshold">
+                                            <f:readOnlyTextbox value="${descriptor.osaCriticalThresholdEnforcement}" />
                                         </f:entry>
                                         <f:entry title="Dependency scan high severity vulnerabilities threshold">
                                             <f:readOnlyTextbox value="${descriptor.osaHighThresholdEnforcement}" />
@@ -374,6 +385,9 @@
                                             <f:select />
                                         </f:entry>
                                         <f:optionalBlock title="Propagate error when results exceed threshold" inline="true" field="exceptionOnThresholdError" />
+                                        <f:entry title="SAST Critical severity vulnerabilities threshold" field="criticalThreshold">
+                                            <f:number clazz="positive-number" min="0" step="1" default="" checkMethod="post" />
+                                        </f:entry>
                                         <f:entry title="SAST High severity vulnerabilities threshold" field="highThreshold">
                                             <f:number clazz="positive-number" min="0" step="1" default="" checkMethod="post" />
                                         </f:entry>
@@ -390,6 +404,9 @@
                                             </f:entry>
                                         </f:optionalBlock>
 
+                                        <f:entry title="Dependency scan critical severity vulnerabilities threshold" field="osaCriticalThreshold">
+                                            <f:number clazz="positive-number" min="0" step="1" default="" checkMethod="POST"  />
+                                        </f:entry>
                                         <f:entry title="Dependency scan high severity vulnerabilities threshold" field="osaHighThreshold">
                                             <f:number clazz="positive-number" min="0" step="1" default="" checkMethod="POST"  />
                                         </f:entry>
@@ -408,6 +425,9 @@
                                     <f:select />
                                 </f:entry>
                                 <f:optionalBlock title="Propagate error when results exceed threshold" inline="true" field="exceptionOnThresholdError" />
+                                <f:entry title="SAST Critical severity vulnerabilities threshold" field="criticalThreshold">
+                                    <f:number clazz="positive-number" min="0" step="1" default="" />
+                                </f:entry>
                                 <f:entry title="SAST High severity vulnerabilities threshold" field="highThreshold">
                                     <f:number clazz="positive-number" min="0" step="1" default="" />
                                 </f:entry>
@@ -424,6 +444,9 @@
                                     </f:entry>
                                 </f:optionalBlock>
 
+                                <f:entry title="Dependency scan critical severity vulnerabilities threshold" field="osaCriticalThreshold">
+                                    <f:number clazz="positive-number" min="0" step="1" default="" />
+                                </f:entry>
                                 <f:entry title="Dependency scan high severity vulnerabilities threshold" field="osaHighThreshold">
                                     <f:number clazz="positive-number" min="0" step="1" default="" />
                                 </f:entry>

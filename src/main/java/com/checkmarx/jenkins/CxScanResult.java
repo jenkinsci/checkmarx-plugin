@@ -81,6 +81,7 @@ public class CxScanResult implements Action {
     }
 
     public void setSastResults(SASTResults results) {
+    	this.criticalCount = results.getCritical();
         this.highCount = results.getHigh();
         this.mediumCount = results.getMedium();
         this.lowCount = results.getLow();
@@ -95,6 +96,7 @@ public class CxScanResult implements Action {
         this.serverUrl = serverUrl;
         this.resultIsValid = false; //sast fails flag for jelly
         this.errorMessage = "No Scan Results"; // error message to appear if results were not parsed
+        this.criticalQueryResultList = new LinkedList<>();
         this.highQueryResultList = new LinkedList<>();
         this.mediumQueryResultList = new LinkedList<>();
         this.lowQueryResultList = new LinkedList<>();
@@ -378,14 +380,16 @@ public class CxScanResult implements Action {
 
 
     public boolean isThresholdExceeded() {
-        boolean ret = isThresholdExceededByLevel(sastScanResult.getHighCount(), sastThresholdConfig.getHighSeverity());
+        boolean ret = isThresholdExceededByLevel(sastScanResult.getCriticalCount(), sastThresholdConfig.getCriticalSeverity());
+        ret |= isThresholdExceededByLevel(sastScanResult.getHighCount(), sastThresholdConfig.getHighSeverity());
         ret |= isThresholdExceededByLevel(sastScanResult.getMediumCount(), sastThresholdConfig.getMediumSeverity());
         ret |= isThresholdExceededByLevel(sastScanResult.getLowCount(), sastThresholdConfig.getLowSeverity());
         return ret;
     }
 
     public boolean isOsaThresholdExceeded() {
-        boolean ret = isThresholdExceededByLevel(osaScanResult.getOsaHighCount(), osaThresholdConfig.getHighSeverity());
+        boolean ret = isThresholdExceededByLevel(osaScanResult.getOsaCriticalCount(), osaThresholdConfig.getCriticalSeverity());
+        ret |= isThresholdExceededByLevel(osaScanResult.getOsaHighCount(), osaThresholdConfig.getHighSeverity());
         ret |= isThresholdExceededByLevel(osaScanResult.getOsaMediumCount(), osaThresholdConfig.getMediumSeverity());
         ret |= isThresholdExceededByLevel(osaScanResult.getOsaLowCount(), osaThresholdConfig.getLowSeverity());
         return ret;
@@ -405,11 +409,13 @@ public class CxScanResult implements Action {
     //(when we stop supporting 8.4.1 and down)
     /*******************Legacy Variables for UI backward computability****************************************/
 
+    private int criticalCount;
     private int highCount;
     private int mediumCount;
     private int lowCount;
     private int infoCount;
 
+    private LinkedList<QueryResult> criticalQueryResultList;
     private LinkedList<QueryResult> highQueryResultList;
     private LinkedList<QueryResult> mediumQueryResultList;
     private LinkedList<QueryResult> lowQueryResultList;
@@ -434,11 +440,13 @@ public class CxScanResult implements Action {
 
 
     public void initializeSastLegacyVariables(SastScanResult sastScanResult) {
-        this.highCount = sastScanResult.getHighCount();
+    	this.criticalCount = sastScanResult.getCriticalCount();
+    	this.highCount = sastScanResult.getHighCount();
         this.mediumCount = sastScanResult.getMediumCount();
         this.lowCount = sastScanResult.getLowCount();
         this.infoCount = sastScanResult.getInfoCount();
 
+        this.criticalQueryResultList = sastScanResult.getCriticalQueryResultList();
         this.highQueryResultList = sastScanResult.getHighQueryResultList();
         this.mediumQueryResultList = sastScanResult.getMediumQueryResultList();
         this.lowQueryResultList = sastScanResult.getLowQueryResultList();
@@ -455,6 +463,10 @@ public class CxScanResult implements Action {
         this.errorMessage = sastScanResult.getErrorMessage();
     }
 
+    public int getCriticalCount() {
+        return criticalCount;
+    }
+    
     public int getHighCount() {
         return highCount;
     }
@@ -508,6 +520,10 @@ public class CxScanResult implements Action {
     public boolean isResultIsValid() {
         return resultIsValid;
     }
+    
+    public List<QueryResult> getCriticalQueryResultList() {
+        return criticalQueryResultList;
+    }
 
     public List<QueryResult> getHighQueryResultList() {
         return highQueryResultList;
@@ -526,6 +542,7 @@ public class CxScanResult implements Action {
     }
 
     //osa results
+    private int osaCriticalCount;
     private int osaHighCount;
     private int osaMediumCount;
     private int osaLowCount;
@@ -534,6 +551,7 @@ public class CxScanResult implements Action {
 
     public void initializeOsaLegacyVariables(OsaScanResult osaScanResult) {
         if (osaScanResult != null) {
+        	this.osaCriticalCount = osaScanResult.getOsaCriticalCount();
             this.osaHighCount = osaScanResult.getOsaHighCount();
             this.osaMediumCount = osaScanResult.getOsaMediumCount();
             this.osaLowCount = osaScanResult.getOsaLowCount();
@@ -542,6 +560,10 @@ public class CxScanResult implements Action {
         }
     }
 
+    public int getOsaCriticalCount() {
+        return osaCriticalCount;
+    }
+    
     public int getOsaHighCount() {
         return osaHighCount;
     }
@@ -562,13 +584,16 @@ public class CxScanResult implements Action {
         return osaNoVulnerabilityLibs;
     }
 
-
+    @Nullable
+    private Integer criticalThreshold;
     @Nullable
     private Integer highThreshold;
     @Nullable
     private Integer mediumThreshold;
     @Nullable
     private Integer lowThreshold;
+    @Nullable
+    private Integer osaCriticalThreshold;
     @Nullable
     private Integer osaHighThreshold;
     @Nullable
@@ -577,17 +602,28 @@ public class CxScanResult implements Action {
     private Integer osaLowThreshold;
 
     private void initializeSastLegacyThresholdVariables(ThresholdConfig thresholdConfig) {
-        this.setHighThreshold(thresholdConfig.getHighSeverity());
+    	this.setCriticalThreshold(thresholdConfig.getCriticalSeverity());
+    	this.setHighThreshold(thresholdConfig.getHighSeverity());
         this.setMediumThreshold(thresholdConfig.getMediumSeverity());
         this.setLowThreshold(thresholdConfig.getLowSeverity());
     }
 
     private void initializeOsaLegacyThresholdVariables(ThresholdConfig thresholdConfig) {
-        this.setOsaHighThreshold(thresholdConfig.getHighSeverity());
+    	this.setOsaCriticalThreshold(thresholdConfig.getCriticalSeverity());
+    	this.setOsaHighThreshold(thresholdConfig.getHighSeverity());
         this.setOsaMediumThreshold(thresholdConfig.getMediumSeverity());
         this.setOsaLowThreshold(thresholdConfig.getLowSeverity());
     }
 
+    @Nullable
+    public Integer getCriticalThreshold() {
+        return criticalThreshold;
+    }
+    
+    public void setCriticalThreshold(@Nullable Integer criticalThreshold) {
+        this.criticalThreshold = criticalThreshold;
+    }
+    
     @Nullable
     public Integer getHighThreshold() {
         return highThreshold;
@@ -615,6 +651,15 @@ public class CxScanResult implements Action {
         this.lowThreshold = lowThreshold;
     }
 
+    @Nullable
+    public Integer getOsaCriticalThreshold() {
+        return osaCriticalThreshold;
+    }
+
+    public void setOsaCriticalThreshold(@Nullable Integer osaCriticalThreshold) {
+        this.osaCriticalThreshold = osaCriticalThreshold;
+    }
+    
     @Nullable
     public Integer getOsaHighThreshold() {
         return osaHighThreshold;
