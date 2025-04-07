@@ -21,6 +21,8 @@ class CommonClientFactory {
                 SCAN_ORIGIN,
                 !enableCertificateValidation);
 
+        //setting plugin version to be added in api request headers
+        scanConfig.setPluginVersion(CxConfig.version());
         if (connDetails.isProxy()) {
             scanConfig.setProxyConfig(ProxyHelper.getProxyConfig());
         } else {

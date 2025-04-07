@@ -17,6 +17,7 @@ public class OsaScanResult {
     //osa results
     private GetOpenSourceSummaryResponse openSourceSummaryResponse;
     private String openSourceSummaryJson;
+    private Integer osaCriticalCount;
     private Integer osaHighCount;
     private Integer osaMediumCount;
     private Integer osaLowCount;
@@ -30,6 +31,7 @@ public class OsaScanResult {
 
     private String osaFullLibraryList;
     private String osaFullCVEsList;
+    private String criticalCvesList;
     private String highCvesList;
     private String mediumCvesList;
     private String lowCvesList;
@@ -60,10 +62,11 @@ public class OsaScanResult {
     public void setOsaResults(GetOpenSourceSummaryResponse osaResults) {
        if(osaResults != null) {
            this.openSourceSummaryResponse = osaResults;
+           this.osaCriticalCount = osaResults.getCriticalCount();
            this.osaHighCount = osaResults.getHighCount();
            this.osaMediumCount = osaResults.getMediumCount();
            this.osaLowCount = osaResults.getLowCount();
-           this.osaTotalVulnerabilitiesLibs = osaResults.getLowVulnerabilityLibraries() + osaResults.getMediumVulnerabilityLibraries() + osaResults.getHighVulnerabilityLibraries();
+           this.osaTotalVulnerabilitiesLibs = osaResults.getLowVulnerabilityLibraries() + osaResults.getMediumVulnerabilityLibraries() + osaResults.getHighVulnerabilityLibraries() + osaResults.getCriticalVulnerabilityLibraries();
            this.osaVulnerableAndOutdatedLibs = osaResults.getVulnerableAndOutdated();
            this.osaNoVulnerabilityLibs = osaResults.getNoKnownVulnerabilities();
            this.osaScanTotalLibraries = getOsaTotalVulnerabilitiesLibs() + getOsaNoVulnerabilityLibs();
@@ -85,6 +88,14 @@ public class OsaScanResult {
         return osaScanEndTime;
     }
 
+    public int getOsaCriticalCount() {
+        return osaCriticalCount;
+    }
+
+    public void setOsaCriticalCount(int osaCriticalCount) {
+        this.osaCriticalCount = osaCriticalCount;
+    }
+    
     public int getOsaHighCount() {
         return osaHighCount;
     }
@@ -169,6 +180,14 @@ public class OsaScanResult {
         this.osaFullCVEsList = osaFullCVEsList;
     }
 
+    public String getCriticalCvesList() {
+        return criticalCvesList;
+    }
+
+    public void setCriticalCvesList(String criticalCvesList) {
+        this.criticalCvesList = criticalCvesList;
+    }
+    
     public String getHighCvesList() {
         return highCvesList;
     }

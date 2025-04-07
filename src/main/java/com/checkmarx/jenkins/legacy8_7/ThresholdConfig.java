@@ -3,12 +3,20 @@ package com.checkmarx.jenkins.legacy8_7;
 import hudson.model.Result;
 
 public class ThresholdConfig {
+	private Integer criticalSeverity;
     private Integer highSeverity;
     private Integer mediumSeverity;
     private Integer lowSeverity;
     private Result buildStatus;
     
-	public Integer getHighSeverity() {
+    public Integer getCriticalSeverity() {
+		return criticalSeverity;
+	}
+	public void setCriticalSeverity(Integer criticalSeverity) {
+		this.criticalSeverity = criticalSeverity;
+	}
+    
+    public Integer getHighSeverity() {
 		return highSeverity;
 	}
 	public void setHighSeverity(Integer highSeverity) {

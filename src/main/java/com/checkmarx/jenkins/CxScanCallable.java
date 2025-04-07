@@ -82,10 +82,9 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
         List<ScanResults> results = new ArrayList<>();
 
         try {
-            delegator = CommonClientFactory.getClientDelegatorInstance(config, log);
+        	delegator = CommonClientFactory.getClientDelegatorInstance(config, log);
             ScanResults initResults = delegator.init();
             results.add(initResults);
-
             // Make sure CxARMUrl is passed in the result.
             // Cannot pass CxARMUrl in the config object, because this callable can be executed on a Jenkins agent.
             // On a Jenkins agent we'll get a cloned config instead of the original object reference.
@@ -120,7 +119,7 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
             }
             throw new IOException(message);
         }
-
+        
         Logger rootLog = null;
         OsaConsoleHandler handler = null;
         ScanResults createScanResults;
@@ -148,21 +147,24 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
         } finally {
             semaphore.release();
         }
-
+        
         ScanResults scanResults = config.getSynchronous() ? delegator.waitForScanResults() : delegator.getLatestScanResults();
         results.add(scanResults);
-
         if (config.getSynchronous() && config.isSastEnabled() &&
                 ((createScanResults.getSastResults() != null && createScanResults.getSastResults().getException() != null && createScanResults.getSastResults().getScanId() > 0) || (scanResults.getSastResults() != null && scanResults.getSastResults().getException() != null))) {
             cancelScan(delegator);
         }
-
         if (((config.isSastEnabled()||config.isOsaEnabled()) && config.getEnablePolicyViolations()) || (config.isAstScaEnabled() && config.getEnablePolicyViolationsSCA())) {
             delegator.printIsProjectViolated(scanResults);
         }
-
         ScanResults finalScanResults = getFinalScanResults(results);
         result.setScanResults(finalScanResults);
+        
+    	if(config.getCxVersion()!=null) {
+    		result.setVersion(config.getCxVersion().getVersion());
+    		result.setHotFix(config.getCxVersion().getHotFix());
+    		result.setEnginePackVersion(config.getCxVersion().getEnginePackVersion());
+    	}
         return result;
     }
 

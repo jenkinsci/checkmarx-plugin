@@ -22,6 +22,8 @@ public class SastConfig {
     @Optional
     private int high;
     @Optional
+    private int critical;
+    @Optional
     private boolean overrideProjectSetting;
 
     public SastConfig() {
@@ -89,6 +91,14 @@ public class SastConfig {
 
     public void setHigh(int high) {
         this.high = high;
+    }
+    
+    public int getCritical() {
+        return critical;
+    }
+
+    public void setCritical(int critical) {
+        this.critical = critical;
     }
 
     public boolean isPrivateScan() {

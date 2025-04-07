@@ -185,6 +185,7 @@ public class CxProjectResult implements Action {
             // In this case we generate an empty graph
             DataSetBuilder<CxResultSeverity, String> dsb = new DataSetBuilder<CxResultSeverity, String>();
 
+            dsb.add(0, CxResultSeverity.CRITICAL, "0");
             dsb.add(0, CxResultSeverity.HIGH, "0");
             dsb.add(0, CxResultSeverity.MEDIUM, "0");
             dsb.add(0, CxResultSeverity.LOW, "0");
@@ -194,7 +195,8 @@ public class CxProjectResult implements Action {
             DataSetBuilder<CxResultSeverity, ChartUtil.NumberOnlyBuildLabel> dsb = new DataSetBuilder<CxResultSeverity, ChartUtil.NumberOnlyBuildLabel>();
 
             for (CxScanResult a = lastBuildAction; a != null; a = a.getPreviousResult()) {
-                dsb.add(a.getHighCount(), CxResultSeverity.HIGH, new ChartUtil.NumberOnlyBuildLabel((Run<?, ?>) a.owner));
+            	dsb.add(a.getCriticalCount(), CxResultSeverity.CRITICAL, new ChartUtil.NumberOnlyBuildLabel((Run<?, ?>) a.owner));
+            	dsb.add(a.getHighCount(), CxResultSeverity.HIGH, new ChartUtil.NumberOnlyBuildLabel((Run<?, ?>) a.owner));
                 dsb.add(a.getMediumCount(), CxResultSeverity.MEDIUM, new ChartUtil.NumberOnlyBuildLabel((Run<?, ?>) a.owner));
                 dsb.add(a.getLowCount(), CxResultSeverity.LOW, new ChartUtil.NumberOnlyBuildLabel((Run<?, ?>) a.owner));
             }
@@ -250,9 +252,10 @@ public class CxProjectResult implements Action {
             }
         };
         plot.setRenderer(ar);
-        ar.setSeriesPaint(0, new Color(246, 0, 22)); // high.
-        ar.setSeriesPaint(1, new Color(249, 167, 16)); // medium.
-        ar.setSeriesPaint(2, new Color(254, 255, 3)); // low.
+        ar.setSeriesPaint(0, new Color(246, 0, 22).darker()); // critical.
+        ar.setSeriesPaint(1, new Color(246, 0, 22)); // high.
+        ar.setSeriesPaint(2, new Color(249, 167, 16)); // medium.
+        ar.setSeriesPaint(3, new Color(254, 255, 3)); // low.
 
         // crop extra space around the graph
         plot.setInsets(new RectangleInsets(0, 0, 0, 5.0));

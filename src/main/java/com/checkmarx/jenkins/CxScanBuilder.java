@@ -165,6 +165,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private boolean waitForResultsEnabled;
     private boolean vulnerabilityThresholdEnabled;
     @Nullable
+    private Integer criticalThreshold;
+    @Nullable
     private Integer highThreshold;
     @Nullable
     private Integer mediumThreshold;
@@ -177,6 +179,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private boolean enableProjectPolicyEnforcement;
 
     private boolean enableProjectPolicyEnforcementSCA;
+    @Nullable
+    private Integer osaCriticalThreshold;
     @Nullable
     private Integer osaHighThreshold;
     @Nullable
@@ -261,12 +265,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             @Nullable String comment,
             boolean skipSCMTriggers,
             boolean waitForResultsEnabled,
-            boolean vulnerabilityThresholdEnabled,            
+            boolean vulnerabilityThresholdEnabled,
+            @Nullable Integer criticalThreshold,
             @Nullable Integer highThreshold,
             @Nullable Integer mediumThreshold,
             @Nullable Integer lowThreshold,
             boolean failBuildOnNewResults,
             String failBuildOnNewSeverity,
+            @Nullable Integer osaCriticalThreshold,
             @Nullable Integer osaHighThreshold,
             @Nullable Integer osaMediumThreshold,
             @Nullable Integer osaLowThreshold,
@@ -316,12 +322,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.comment = comment;
         this.skipSCMTriggers = skipSCMTriggers;
         this.waitForResultsEnabled = waitForResultsEnabled;
-        this.vulnerabilityThresholdEnabled = vulnerabilityThresholdEnabled;        
+        this.vulnerabilityThresholdEnabled = vulnerabilityThresholdEnabled;
+        this.criticalThreshold = criticalThreshold;
         this.highThreshold = highThreshold;
         this.mediumThreshold = mediumThreshold;
         this.lowThreshold = lowThreshold;
         this.failBuildOnNewResults = failBuildOnNewResults;
         this.failBuildOnNewSeverity = failBuildOnNewSeverity;
+        this.osaCriticalThreshold = osaCriticalThreshold;
         this.osaHighThreshold = osaHighThreshold;
         this.osaMediumThreshold = osaMediumThreshold;
         this.osaLowThreshold = osaLowThreshold;
@@ -520,6 +528,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public boolean isVulnerabilityThresholdEnabled() {
         return vulnerabilityThresholdEnabled;
     }
+    
+    public Integer getCriticalThreshold() {
+        return criticalThreshold;
+    }
 
     public Integer getHighThreshold() {
         return highThreshold;
@@ -556,6 +568,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setOsaEnabled(boolean osaEnabled) {
         this.osaEnabled = osaEnabled;
+    }
+    
+    @Nullable
+    public Integer getOsaCriticalThreshold() {
+        return osaCriticalThreshold;
+    }
+    
+    @DataBoundSetter
+    public void setOsaCriticalThreshold(Integer osaCriticalThreshold) {
+        this.osaCriticalThreshold = osaCriticalThreshold;
     }
 
     @Nullable
@@ -783,6 +805,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     public void setVulnerabilityThresholdEnabled(boolean vulnerabilityThresholdEnabled) {
         this.vulnerabilityThresholdEnabled = vulnerabilityThresholdEnabled;
     }
+    
+    @DataBoundSetter
+    public void setCriticalThreshold(@Nullable Integer criticalThreshold) {
+        this.criticalThreshold = criticalThreshold;
+    }
 
     @DataBoundSetter
     public void setHighThreshold(@Nullable Integer highThreshold) {
@@ -1007,7 +1034,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
 
-
         //print configuration
         printConfiguration(config, descriptor, log);
 
@@ -1026,11 +1052,20 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             action = new CxScanCallable(config, listener, instance.proxy, isHideDebugLogs(), fsaVars);
         } else {
             action = new CxScanCallable(config, listener, isHideDebugLogs(), fsaVars);
-        }
+        }      
+        
 
         //create scans and retrieve results (in jenkins agent)
         RemoteScanInfo scanInfo = workspace.act(action);
         ScanResults scanResults = scanInfo.getScanResults();
+        //setting cxVersion in config if it is null (Jenkins agent node scenario). We need this for HTML report.
+        if(config.getCxVersion() == null){
+        	CxVersion cxVersion = new CxVersion();
+        	cxVersion.setVersion(scanInfo.getVersion());
+        	cxVersion.setHotFix(scanInfo.getHotFix());
+        	cxVersion.setEnginePackVersion(scanInfo.getEnginePackVersion());
+        	config.setCxVersion(cxVersion);        	
+        }
 
         // We'll need this for the HTML report.
         config.setCxARMUrl(scanInfo.getCxARMUrl());
@@ -1085,11 +1120,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         //in case of async mode, do not create reports (only the report of the latest scan)
         //and don't assert threshold vulnerabilities
-
+        
          failTheBuild(run, config, scanResults);
         if (config.getSynchronous()) {
-
-            //generate html report
+        	//generate html report
             String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
             cxScanResult.setHtmlReportName(reportName);
             run.addAction(cxScanResult);
@@ -1245,6 +1279,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     scanConfig.setOsaFolderExclusions(pValue);
                     overridesResults.put("Sca Folder Exclude", pValue);
                 });
+        
+        sca.map(ScaConfig::getCritical)
+        .filter(n -> n > 0)
+        .ifPresent(pValue -> {
+            scanConfig.setOsaThresholdsEnabled(true);
+            scanConfig.setOsaCriticalThreshold(pValue);
+            overridesResults.put("Sca Critical", String.valueOf(pValue));
+        });
 
         sca.map(ScaConfig::getHigh)
                 .filter(n -> n > 0)
@@ -1331,6 +1373,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                     scanConfig.setSastMediumThreshold(pValue);
                     overridesResults.put("Medium", String.valueOf(pValue));
                 });
+        
+        sast.map(SastConfig::getCritical)
+        .filter(n -> n > 0)
+        .ifPresent(pValue -> {
+            scanConfig.setSastThresholdsEnabled(true);
+            scanConfig.setSastCriticalThreshold(pValue);
+            overridesResults.put("Critical", String.valueOf(pValue));
+        });
 
         sast.map(SastConfig::getHigh)
                 .filter(n -> n > 0)
@@ -1488,6 +1538,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
     private CxScanConfig resolveConfiguration(Run<?, ?> run, DescriptorImpl descriptor, EnvVars env, CxLoggerAdapter log, FilePath workspace) throws IOException, ConfigurationException {
         CxScanConfig ret = new CxScanConfig();
+        //setting plugin version to be added in api request headers
+        ret.setPluginVersion(CxConfig.version());
         
         ret.setIsOverrideProjectSetting(overrideProjectSetting);
 
@@ -1638,12 +1690,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             }
 
             if (useGlobalThreshold) {
+            	ret.setSastCriticalThreshold(descriptor.getCriticalThresholdEnforcement());
                 ret.setSastHighThreshold(descriptor.getHighThresholdEnforcement());
                 ret.setSastMediumThreshold(descriptor.getMediumThresholdEnforcement());
                 ret.setSastLowThreshold(descriptor.getLowThresholdEnforcement());
                 resolvedVulnerabilityThresholdResult = Result.fromString(descriptor.getJobGlobalStatusOnThresholdViolation().name());
                 resolvedExceptionOnThresholdError = descriptor.isExceptionOnThresholdErrorGlobal();
             } else if (useJobThreshold) {
+            	ret.setSastCriticalThreshold(getCriticalThreshold());
                 ret.setSastHighThreshold(getHighThreshold());
                 ret.setSastMediumThreshold(getMediumThreshold());
                 ret.setSastLowThreshold(getLowThreshold());
@@ -1797,12 +1851,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         config.setOsaThresholdsEnabled(useGlobalThreshold || useJobThreshold);
 
         if (useGlobalThreshold) {
+        	config.setOsaCriticalThreshold(descriptor.getOsaCriticalThresholdEnforcement());
             config.setOsaHighThreshold(descriptor.getOsaHighThresholdEnforcement());
             config.setOsaMediumThreshold(descriptor.getOsaMediumThresholdEnforcement());
             config.setOsaLowThreshold(descriptor.getOsaLowThresholdEnforcement());
             resolvedVulnerabilityThresholdResult = Result.fromString(descriptor.getJobGlobalStatusOnThresholdViolation().name());
             resolvedExceptionOnThresholdError = descriptor.isExceptionOnThresholdErrorGlobal();
         } else if (useJobThreshold) {
+        	config.setOsaCriticalThreshold(getOsaCriticalThreshold());
             config.setOsaHighThreshold(getOsaHighThreshold());
             config.setOsaMediumThreshold(getOsaMediumThreshold());
             config.setOsaLowThreshold(getOsaLowThreshold());
@@ -1973,6 +2029,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             log.info("source code encoding id: " + config.getEngineConfigurationId());
             log.info("SAST thresholds enabled: " + config.getSastThresholdsEnabled());
             if (config.getSastThresholdsEnabled()) {
+            	log.info("SAST critical threshold: " + config.getSastCriticalThreshold());
                 log.info("SAST high threshold: " + config.getSastHighThreshold());
                 log.info("SAST medium threshold: " + config.getSastMediumThreshold());
                 log.info("SAST low threshold: " + config.getSastLowThreshold());
@@ -1985,6 +2042,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             log.info("  filter patterns: " + config.getOsaFilterPattern());
             log.info("  thresholds enabled: " + config.getOsaThresholdsEnabled());
             if (config.getOsaThresholdsEnabled()) {
+            	log.info("  critical threshold: " + config.getOsaCriticalThreshold());
                 log.info("  high threshold: " + config.getOsaHighThreshold());
                 log.info("  medium threshold: " + config.getOsaMediumThreshold());
                 log.info("  low threshold: " + config.getOsaLowThreshold());
@@ -2103,9 +2161,33 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             IOUtils.closeQuietly(is);
         }
     }
+    
+    private void showWarningForFailTheBuildOnNewCriticalVulnerabilities(CxScanConfig config){
+    	String msg = "Critical severity is not supported for the version of the configured SAST server. Thus, fail the build functionality for new critical vulnerabilities will not work if critical severity is not supported by the configured SAST server.";
+    	if(config.getSastNewResultsThresholdEnabled() 
+        		&& "CRITICAL".equalsIgnoreCase(config.getSastNewResultsThresholdSeverity())) {
+    		if(config.getCxVersion()!=null && config.getCxVersion().getVersion()!=null) {
+    			String sastVersion = config.getCxVersion().getVersion();
+    			String[] versionComponents = sastVersion.split("\\.");
+    			float currentVersionFloat = Float.parseFloat("9.0");
+    			if (versionComponents.length >= 2) {    				
+    				String currentVersion = versionComponents[0] + "." + versionComponents[1];
+    				currentVersionFloat = Float.parseFloat(currentVersion);    				
+    			}
+    			if(currentVersionFloat < Float.parseFloat("9.7")) {
+    				log.warn(msg);
+    			}        		
+        	}
+    		else {
+    			log.warn(msg);
+    		}    		
+    	}    	
+    }
 
     private void failTheBuild(Run<?, ?> run, CxScanConfig config, ScanResults ret) throws AbortException {
-        //assert if expected exception is thrown  OR when vulnerabilities under threshold OR when policy violated
+        //check if critical severity is supported for fail the build
+    	showWarningForFailTheBuildOnNewCriticalVulnerabilities(config);    	
+    	//assert if expected exception is thrown  OR when vulnerabilities under threshold OR when policy violated
         ScanSummary scanSummary = new ScanSummary(config, ret.getSastResults(), ret.getOsaResults(), ret.getScaResults());
         if (scanSummary.hasErrors() || ret.getGeneralException() != null ||
                 (ret.getSastResults() != null && ret.getSastResults().getException() != null) ||
@@ -2177,7 +2259,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     private void addEnvVarAction(Run<?, ?> run, SASTResults sastResults) {
         EnvVarAction envVarAction = new EnvVarAction();
-        envVarAction.setCxSastResults(sastResults.getHigh(),
+        envVarAction.setCxSastResults(sastResults.getCritical(),
+        		sastResults.getHigh(),
                 sastResults.getMedium(),
                 sastResults.getLow(),
                 sastResults.getInformation());
@@ -2525,11 +2608,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         private boolean forcingVulnerabilityThresholdEnabled;
         @Nullable
+        private Integer criticalThresholdEnforcement;
+        @Nullable
         private Integer highThresholdEnforcement;
         @Nullable
         private Integer mediumThresholdEnforcement;
         @Nullable
         private Integer lowThresholdEnforcement;
+        @Nullable
+        private Integer osaCriticalThresholdEnforcement;
         @Nullable
         private Integer osaHighThresholdEnforcement;
         @Nullable
@@ -2697,6 +2784,14 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         public void setForcingVulnerabilityThresholdEnabled(boolean forcingVulnerabilityThresholdEnabled) {
             this.forcingVulnerabilityThresholdEnabled = forcingVulnerabilityThresholdEnabled;
         }
+        
+        public Integer getCriticalThresholdEnforcement() {
+            return criticalThresholdEnforcement;
+        }
+
+        public void setCriticalThresholdEnforcement(Integer criticalThresholdEnforcement) {
+            this.criticalThresholdEnforcement = criticalThresholdEnforcement;
+        }
 
         public Integer getHighThresholdEnforcement() {
             return highThresholdEnforcement;
@@ -2720,6 +2815,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
         public void setLowThresholdEnforcement(Integer lowThresholdEnforcement) {
             this.lowThresholdEnforcement = lowThresholdEnforcement;
+        }
+        
+        @Nullable
+        public Integer getOsaCriticalThresholdEnforcement() {
+            return osaCriticalThresholdEnforcement;
+        }
+
+        public void setOsaCriticalThresholdEnforcement(@Nullable Integer osaCriticalThresholdEnforcement) {
+            this.osaCriticalThresholdEnforcement = osaCriticalThresholdEnforcement;
         }
 
         @Nullable
@@ -3650,6 +3754,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         	}
             item.checkPermission(Item.CONFIGURE);
             ListBoxModel listBoxModel = new ListBoxModel();
+            listBoxModel.add(new ListBoxModel.Option("Critical", "CRITICAL"));
             listBoxModel.add(new ListBoxModel.Option("High", "HIGH"));
             listBoxModel.add(new ListBoxModel.Option("Medium", "MEDIUM"));
             listBoxModel.add(new ListBoxModel.Option("Low", "LOW"));
@@ -3686,6 +3791,19 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 			}
 			return listBoxModel;
 		}
+        
+        /*
+         * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
+         * avoid synchronization issues.
+         */
+        @POST
+        public FormValidation doCheckCriticalThreshold(@QueryParameter final Integer value,@AncestorInPath Item item) {
+        	if (item == null) {
+                return FormValidation.ok();
+        	}
+            item.checkPermission(Item.CONFIGURE);
+            return checkNonNegativeValue(value);
+        }
 
 
         /*
@@ -3726,6 +3844,16 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             item.checkPermission(Item.CONFIGURE);
             return checkNonNegativeValue(value);
         }
+        
+        /*
+         * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
+         * avoid synchronization issues.
+         */
+        @POST
+        public FormValidation doCheckCriticalThresholdEnforcement(@QueryParameter final Integer value) {
+            Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
+            return checkNonNegativeValue(value);
+        }
 
         /*
          * Note: This method is called concurrently by multiple threads, refrain from using mutable shared state to
@@ -3754,6 +3882,20 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         @POST
         public FormValidation doCheckLowThresholdEnforcement(@QueryParameter final Integer value) {
             Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
+            return checkNonNegativeValue(value);
+        }
+        
+        /*
+         *  Note: This method is called concurrently by multiple threads, refrain from using mutable
+         *  shared state to avoid synchronization issues.
+         */
+
+        @POST
+        public FormValidation doCheckOsaCriticalThreshold(@QueryParameter final Integer value,@AncestorInPath Item item) {
+        	if (item == null) {
+                return FormValidation.ok();
+        	} 
+            item.checkPermission(Item.CONFIGURE);
             return checkNonNegativeValue(value);
         }
 
@@ -3795,6 +3937,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         	} 
             item.checkPermission(Item.CONFIGURE);
             return checkNonNegativeValue(value);
+        }
+        
+        @POST
+        public FormValidation doCheckOsaCriticalThresholdEnforcement(@QueryParameter final Integer value) {
+        Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
+        return checkNonNegativeValue(value);
         }
 
         @POST

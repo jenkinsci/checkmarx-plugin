@@ -17,6 +17,8 @@ public class GetOpenSourceSummaryResponse {
     private Integer vulnerableAndOutdated;
     @JsonProperty("totalLibraries")
     private Integer total;
+    @JsonProperty("criticalVulnerabilityLibraries")
+    private Integer criticalVulnerabilityLibraries;
     @JsonProperty("highVulnerabilityLibraries")
     private Integer highVulnerabilityLibraries;
     @JsonProperty("mediumVulnerabilityLibraries")
@@ -25,6 +27,8 @@ public class GetOpenSourceSummaryResponse {
     private Integer lowVulnerabilityLibraries;
     @JsonProperty("vulnerabilityScore")
     private String vulnerabilityScore;
+    @JsonProperty("totalCriticalVulnerabilities")
+    private Integer criticalVulnerabilities;
     @JsonProperty("totalHighVulnerabilities")
     private Integer highVulnerabilities;
     @JsonProperty("totalMediumVulnerabilities")
@@ -33,6 +37,10 @@ public class GetOpenSourceSummaryResponse {
     private Integer lowVulnerabilities;
 
 
+    public int getCriticalCount() {
+        return criticalVulnerabilities;
+    }
+    
     public int getHighCount() {
         return highVulnerabilities;
     }
@@ -75,6 +83,14 @@ public class GetOpenSourceSummaryResponse {
     public void setTotal(Integer total) {
         this.total = total;
     }
+    
+    public Integer getCriticalVulnerabilityLibraries() {
+        return criticalVulnerabilityLibraries;
+    }
+
+    public void setCriticalVulnerabilityLibraries(Integer criticalVulnerabilityLibraries) {
+        this.criticalVulnerabilityLibraries = criticalVulnerabilityLibraries;
+    }
 
     public Integer getHighVulnerabilityLibraries() {
         return highVulnerabilityLibraries;
@@ -97,6 +113,15 @@ public class GetOpenSourceSummaryResponse {
         return vulnerabilityScore;
     }
 
+    public Integer getCriticalVulnerabilities()
+    {
+        return criticalVulnerabilities;
+    }
+
+    public void setCriticalVulnerabilities(Integer criticalVulnerabilities) {
+        this.criticalVulnerabilities = criticalVulnerabilities;
+    }
+    
     public Integer getHighVulnerabilities()
     {
         return highVulnerabilities;

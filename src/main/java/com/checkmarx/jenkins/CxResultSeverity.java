@@ -4,7 +4,8 @@ package com.checkmarx.jenkins;
  * This class represents the severity of a result in a scan report
  */
 public enum  CxResultSeverity {
-    HIGH("High","3"),
+	CRITICAL("Critical","4"),
+	HIGH("High","3"),
     MEDIUM("Medium","2"),
     LOW("Low","1"),
     INFO("Info","0");
