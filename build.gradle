@@ -1,7 +1,7 @@
 buildscript {
     repositories {
     	jcenter()
-    	maven { url 'http://repo.jenkins-ci.org/releases/' }
+    	maven { url 'https://repo.jenkins-ci.org/public/' }
     }
     dependencies {
         classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.35.0',
@@ -21,7 +21,7 @@ apply plugin: 'nebula.provided-base'
 repositories {	
 	jcenter()
     mavenLocal()        // Use this to load a custom build of Common Client from a local Maven repo.
-    maven { url 'http://repo.jenkins-ci.org/releases/' }
+    maven { url 'https://repo.jenkins-ci.org/public/' }
     maven { url 'http://cx-artifactory:8081/artifactory/libs-release/' }
     maven { url 'http://cx-artifactory:8081/artifactory/libs-snapshot' }
     maven { url 'http://cx-artifactory:8081/artifactory/plugins-release-local/' }
@@ -90,27 +90,27 @@ dependencies {
             'org.apache.logging.log4j:log4j-slf4j-impl:2.17.1',
             'org.apache.logging.log4j:log4j-api:2.17.1',
             'org.apache.logging.log4j:log4j-core:2.17.1',
-            'org.apache.commons:commons-compress:1.27.0',          
+            'org.apache.commons:commons-compress:1.27.1',          
             'com.google.code.gson:gson:2.8.9',           
             'org.yaml:snakeyaml:2.2',
             'org.json:json:20231013',
             'org.eclipse.jgit:org.eclipse.jgit:6.8.0.202311291450-r',
             'com.google.guava:guava:32.1.1-jre',
-            'io.vertx:vertx-core:4.5.9',
+            'io.vertx:vertx-core:4.5.14',
             'org.mozilla:rhino:1.7.15',
             'javax.annotation:javax.annotation-api:1.3.2',
-            'io.netty:netty-common:4.1.112.Final',
-            'io.netty:netty-buffer:4.1.112.Final',
-            'io.netty:netty-transport:4.1.112.Final',
-            'io.netty:netty-resolver:4.1.112.Final',
-            'io.netty:netty-handler:4.1.112.Final',
-            'io.netty:netty-transport-native-unix-common:4.1.112.Final',
-            'io.netty:netty-codec:4.1.112.Final',
-            'io.netty:netty-handler-proxy:4.1.112.Final',
-            'io.netty:netty-codec-socks:4.1.112.Final',
-            'io.netty:netty-codec-http2:4.1.112.Final',
-            'io.netty:netty-resolver-dns:4.1.112.Final',
-            'io.netty:netty-codec-dns:4.1.112.Final',
+            'io.netty:netty-common:4.1.121.Final',
+            'io.netty:netty-buffer:4.1.121.Final',
+            'io.netty:netty-transport:4.1.121.Final',
+            'io.netty:netty-resolver:4.1.121.Final',
+            'io.netty:netty-handler:4.1.121.Final',
+            'io.netty:netty-transport-native-unix-common:4.1.121.Final',
+            'io.netty:netty-codec:4.1.121.Final',
+            'io.netty:netty-handler-proxy:4.1.121.Final',
+            'io.netty:netty-codec-socks:4.1.121.Final',
+            'io.netty:netty-codec-http2:4.1.121.Final',
+            'io.netty:netty-resolver-dns:4.1.121.Final',
+            'io.netty:netty-codec-dns:4.1.121.Final',
             'org.codehaus.plexus:plexus-utils:3.5.1',
             'org.iq80.snappy:snappy:0.5'
 
