@@ -53,7 +53,7 @@ dependencies {
     }
 
 
-    compile ('com.checkmarx:cx-client-common:2024.3.28') {
+    compile ('com.checkmarx:cx-client-common:00233634_master_selected_lib') {
        
        exclude group: 'org.yaml' , module: 'snakeyaml'
        exclude group: 'com.google.code.gson', module: 'gson'
@@ -61,22 +61,8 @@ dependencies {
        exclude group: 'commons-beanutils', module: 'commons-beanutils' 
        exclude group: 'com.google.guava', module: 'guava'
        exclude group: 'commons-collections', module: 'commons-collections'
-       exclude group: 'io.netty', module: 'netty-codec-http'
        exclude group: 'org.apache.commons', module: 'commons-compress'
-       exclude group: 'io.vertx', module: 'vertx-core'
        exclude group: 'org.mozilla', module: 'rhino'
-       exclude group: 'io.netty', module: 'netty-common'
-       exclude group: 'io.netty', module: 'netty-buffer'
-       exclude group: 'io.netty', module: 'netty-transport'
-       exclude group: 'io.netty', module: 'netty-resolver'
-       exclude group: 'io.netty', module: 'netty-handler'
-       exclude group: 'io.netty', module: 'netty-transport-native-unix-common'
-       exclude group: 'io.netty', module: 'netty-codec'
-       exclude group: 'io.netty', module: 'netty-handler-proxy'
-       exclude group: 'io.netty', module: 'netty-codec-socks'
-       exclude group: 'io.netty', module: 'netty-codec-http2'
-       exclude group: 'io.netty', module: 'netty-resolver-dns'
-       exclude group: 'io.netty', module: 'netty-codec-dns'
        exclude group: 'org.iq80.snappy', module: 'snappy'
        exclude group: 'org.codehaus.plexus', module: 'plexus-utils' 
     }
@@ -96,21 +82,8 @@ dependencies {
             'org.json:json:20231013',
             'org.eclipse.jgit:org.eclipse.jgit:6.8.0.202311291450-r',
             'com.google.guava:guava:32.1.1-jre',
-            'io.vertx:vertx-core:4.5.14',
             'org.mozilla:rhino:1.7.15',
             'javax.annotation:javax.annotation-api:1.3.2',
-            'io.netty:netty-common:4.1.121.Final',
-            'io.netty:netty-buffer:4.1.121.Final',
-            'io.netty:netty-transport:4.1.121.Final',
-            'io.netty:netty-resolver:4.1.121.Final',
-            'io.netty:netty-handler:4.1.121.Final',
-            'io.netty:netty-transport-native-unix-common:4.1.121.Final',
-            'io.netty:netty-codec:4.1.121.Final',
-            'io.netty:netty-handler-proxy:4.1.121.Final',
-            'io.netty:netty-codec-socks:4.1.121.Final',
-            'io.netty:netty-codec-http2:4.1.121.Final',
-            'io.netty:netty-resolver-dns:4.1.121.Final',
-            'io.netty:netty-codec-dns:4.1.121.Final',
             'org.codehaus.plexus:plexus-utils:3.5.1',
             'org.iq80.snappy:snappy:0.5'
 

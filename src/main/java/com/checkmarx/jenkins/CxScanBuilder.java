@@ -37,7 +37,6 @@ import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
-import io.netty.util.internal.StringUtil;
 import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
@@ -1531,7 +1530,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private Boolean verifyCustomCharacters(String inputString) {
         Pattern pattern = Pattern.compile("^([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+(,([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+)*$");
         Matcher match = pattern.matcher(inputString);
-        if (!StringUtil.isNullOrEmpty(inputString) && !match.find()) {
+        if (!StringUtils.isEmpty(inputString) && !match.find()) {
             return false;
         }
         return true;
@@ -1638,7 +1637,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
          * teamPath will take precedence if it is not empty.
          * Freestyle job always send groupId, hence initializing teamPath using groupId
          */
-        if (!StringUtil.isNullOrEmpty(groupId) && StringUtil.isNullOrEmpty(teamPath)) {
+        if (!StringUtils.isEmpty(groupId) && StringUtils.isNotEmpty(teamPath)) {
             teamPath = getTeamNameFromId(cxConnectionDetails, descriptor, groupId, ret);
         }
         //project
@@ -1751,7 +1750,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     private String apiFormat(String customFields) {
-        if (!StringUtil.isNullOrEmpty(customFields)) {
+        if (!StringUtils.isEmpty(customFields)) {
             customFields = customFields.replaceAll(":", "\":\"");
             customFields = customFields.replaceAll(",", "\",\"");
             customFields = "{\"".concat(customFields).concat("\"}");
@@ -3033,7 +3032,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 return FormValidation.ok();
         	}
         	item.checkPermission(Item.CONFIGURE);
-            if (StringUtil.isNullOrEmpty(value) && StringUtil.isNullOrEmpty(scaSASTProjectFullPath)) {
+            if (StringUtils.isNotEmpty(value) && StringUtils.isNotEmpty(scaSASTProjectFullPath)) {
                 return FormValidation.error("Must provide value for either 'Project Full Path' or 'Project Id'.");
             }
             return FormValidation.ok();
@@ -3082,7 +3081,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             item.checkPermission(Item.CONFIGURE);
             Pattern pattern = Pattern.compile("^([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+(,([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+)*$");
             Matcher match = pattern.matcher(value);
-            if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
+            if (!StringUtils.isEmpty(value) && !match.find()) {
             	return FormValidation.error("Project level custom fields in SCA Scan must have given format: key1:val1,key2:val2. Custom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
             }
             return FormValidation.ok();
@@ -3102,7 +3101,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             item.checkPermission(Item.CONFIGURE);
             Pattern pattern = Pattern.compile("^([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+(,([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+)*$");
             Matcher match = pattern.matcher(value);
-            if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
+            if (!StringUtils.isEmpty(value) && !match.find()) {
             	return FormValidation.error("Scan level custom fields in SCA Scan must have given format: key1:val1,key2:val2. Custom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
             }
             return FormValidation.ok();
@@ -3132,15 +3131,15 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 			if (checkAnyMandatoryAddParams(value)) {
 				otherWarnMessage = "Any of the parameters (-n, -s, -r/--resolver-result-path) specified in SCA Resolver additional parameters will be used for dependency resolution instead of the corresponding parameters configured in the pipeline.";
 			}
-            if (!StringUtil.isNullOrEmpty(errorMessage)) {
-                if (!StringUtil.isNullOrEmpty(otherWarnMessage))
+            if (!StringUtils.isEmpty(errorMessage)) {
+                if (!StringUtils.isEmpty(otherWarnMessage))
                     errorMessage += "\n" + otherWarnMessage;
                 return FormValidation.error(errorMessage);
-            } else if (!StringUtil.isNullOrEmpty(warnMessage)) {
-                if (!StringUtil.isNullOrEmpty(otherWarnMessage))
+            } else if (!StringUtils.isEmpty(warnMessage)) {
+                if (!StringUtils.isEmpty(otherWarnMessage))
                     warnMessage += "\n" + otherWarnMessage;
                 return FormValidation.warning(warnMessage);
-            } else if (!StringUtil.isNullOrEmpty(otherWarnMessage))
+            } else if (!StringUtils.isEmpty(otherWarnMessage))
                 return FormValidation.warning(otherWarnMessage);
             return FormValidation.ok();
         }
@@ -3166,9 +3165,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             if (checkAnyMandatoryAddParams(scaResolverAddParameters)) {
                 warnMessage = "Any of the parameters (-n, -s, -r/--resolver-result-path) specified in SCA Resolver additional parameters will be used for dependency resolution instead of the corresponding parameters configured in the pipeline.";
             }
-            if (!StringUtil.isNullOrEmpty(errorMessage))
+            if (!StringUtils.isEmpty(errorMessage))
                 return FormValidation.error(errorMessage);
-            else if (!StringUtil.isNullOrEmpty(warnMessage))
+            else if (!StringUtils.isEmpty(warnMessage))
                 return FormValidation.warning(warnMessage);
             return FormValidation.ok();
         }
@@ -3199,12 +3198,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 			if (checkAnyMandatoryAddParams(value)) {
 				otherWarnMessage = "Any of the parameters (-n, -s, -r/--resolver-result-path) specified in SCA Resolver additional parameters will be used for dependency resolution instead of the corresponding parameters configured in the pipeline.";
 			}
-            if (!StringUtil.isNullOrEmpty(errorMessage)) {
-                if (!StringUtil.isNullOrEmpty(otherWarnMessage))
+            if (!StringUtils.isEmpty(errorMessage)) {
+                if (!StringUtils.isEmpty(otherWarnMessage))
                     errorMessage += "\n" + otherWarnMessage;
                 return FormValidation.error(errorMessage);
             }
-            if (!StringUtil.isNullOrEmpty(warnMessage) || !StringUtil.isNullOrEmpty(otherWarnMessage))
+            if (!StringUtils.isEmpty(warnMessage) || !StringUtils.isEmpty(otherWarnMessage))
                 return FormValidation.warning(globalWarnMessage + "\n" + warnMessage + "\n" + otherWarnMessage);
             return FormValidation.ok();
         }
@@ -3232,9 +3231,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 			if (checkAnyMandatoryAddParams(globalScaResolverAddParameters)) {
                 warnMessage = "Any of the parameters (-n, -s, -r/--resolver-result-path) specified in SCA Resolver additional parameters will be used for dependency resolution instead of the corresponding parameters configured in the pipeline.";
 			}
-            if (!StringUtil.isNullOrEmpty(errorMessage))
+            if (!StringUtils.isEmpty(errorMessage))
                 return FormValidation.error(errorMessage);
-            else if (!StringUtil.isNullOrEmpty(warnMessage))
+            else if (!StringUtils.isEmpty(warnMessage))
                 return FormValidation.warning(globalWarnMessage + "\n" + warnMessage);
             return FormValidation.ok();
         }
@@ -3253,7 +3252,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             item.checkPermission(Item.CONFIGURE);
             Pattern pattern = Pattern.compile("^([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+(,([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+)*$");
             Matcher match = pattern.matcher(value);
-            if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
+            if (!StringUtils.isEmpty(value) && !match.find()) {
             	return FormValidation.error("Scan level custom fields in SAST Scan must have given format: key1:val1,key2:val2. Custom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
             }
 
@@ -3274,7 +3273,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             item.checkPermission(Item.CONFIGURE);
             Pattern pattern = Pattern.compile("^([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+(,([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*):([a-zA-Z0-9#._!%@;$&\\/\\*\\^\\-\\s\\w]*)+)*$");
             Matcher match = pattern.matcher(value);
-            if (!StringUtil.isNullOrEmpty(value) && !match.find()) {
+            if (!StringUtils.isEmpty(value) && !match.find()) {
             	return FormValidation.error("Project level custom fields in SAST Scan must have given format: key1:val1,key2:val2. Custom field allows to use these special characters : # . _ ! % @ ; $ & / * ^ - and space");
             }
 
