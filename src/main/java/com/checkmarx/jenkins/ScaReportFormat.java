@@ -1,7 +1,8 @@
 package com.checkmarx.jenkins;
 
 public enum ScaReportFormat {
-	PDF("PDF"), XML("XML"), CSV("CSV"), JSON("JSON"), cyclonedxjson("cyclonedxjson"), cyclonedxxml("cyclonedxxml");
+	PDF("PDF"), XML("XML"), CSV("CSV"), JSON("JSON"), cyclonedxjson("cyclonedxjson"), cyclonedxxml("cyclonedxxml"), 
+	spdxJson("spdxJson");
 
 	private final String displayName;
 
