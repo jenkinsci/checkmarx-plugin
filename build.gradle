@@ -22,7 +22,7 @@ repositories {
 	mavenCentral()
     mavenLocal()        // Use this to load a custom build of Common Client from a local Maven repo.
     maven { url 'https://repo.jenkins-ci.org/public/' }
-    maven { url 'http://cx-artifactory:8081/artifactory/libs-release-local/' }
+    maven { url 'http://cx-artifactory.dm.cx:8081/artifactory/libs-release-local/' }
     maven { url 'http://cx-artifactory:8081/artifactory/libs-snapshot' }
     maven { url 'http://cx-artifactory:8081/artifactory/plugins-release-local/' }
     maven { url 'http://cx-artifactory:8081/artifactory/libs-snapshot-local' }
