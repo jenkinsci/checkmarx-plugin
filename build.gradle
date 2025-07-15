@@ -112,7 +112,8 @@ dependencies {
             'io.netty:netty-resolver-dns:4.1.122.Final',
             'io.netty:netty-codec-dns:4.1.122.Final',
             'org.codehaus.plexus:plexus-utils:3.5.1',
-            'org.iq80.snappy:snappy:0.5'
+            'org.iq80.snappy:snappy:0.5',
+	    'org.freemarker:freemarker:2.3.31'
 
             constraints {
                 implementation('io.vertx:vertx-web:3.9.7') {
