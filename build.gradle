@@ -1,6 +1,6 @@
 buildscript {
     repositories {
-    	jcenter()
+    	mavenCentral()
     	maven { url 'https://repo.jenkins-ci.org/public/' }
     }
     dependencies {
@@ -19,7 +19,7 @@ apply plugin: 'org.jenkins-ci.jpi'
 apply plugin: 'nebula.provided-base'
 
 repositories {	
-	jcenter()
+	mavenCentral()
     mavenLocal()        // Use this to load a custom build of Common Client from a local Maven repo.
     maven { url 'https://repo.jenkins-ci.org/public/' }
     maven { url 'http://cx-artifactory:8081/artifactory/libs-release/' }
