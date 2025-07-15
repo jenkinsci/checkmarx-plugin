@@ -125,7 +125,7 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
         ScanResults createScanResults;
         try {
             semaphore.acquire();
-            if (config.isOsaEnabled() || config.isAstScaEnabled()) {
+            if (config.isOsaEnabled()) {
                 setFsaConfiguration();
                 //---------------------------
                 //we do this in order to redirect the logs from the filesystem agent component to the build console
