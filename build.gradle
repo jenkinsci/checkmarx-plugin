@@ -1,7 +1,7 @@
 buildscript {
     repositories {
     	jcenter()
-    	maven { url 'https://repo.jenkins-ci.org/public/' }
+    	maven { url 'http://repo.jenkins-ci.org/releases/' }
     }
     dependencies {
         classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.35.0',
@@ -21,7 +21,7 @@ apply plugin: 'nebula.provided-base'
 repositories {	
 	jcenter()
     mavenLocal()        // Use this to load a custom build of Common Client from a local Maven repo.
-    maven { url 'https://repo.jenkins-ci.org/public/' }
+    maven { url 'http://repo.jenkins-ci.org/releases/' }
     maven { url 'http://cx-artifactory:8081/artifactory/libs-release/' }
     maven { url 'http://cx-artifactory:8081/artifactory/libs-snapshot' }
     maven { url 'http://cx-artifactory:8081/artifactory/plugins-release-local/' }
