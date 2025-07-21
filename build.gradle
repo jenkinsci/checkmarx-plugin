@@ -49,7 +49,9 @@ dependencies {
         exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
         exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
         exclude group: 'org.eclipse.jgit', module: 'org.eclipse.jgit'
-        exclude group: 'com.google.guava', module: 'guava'        
+        exclude group: 'com.google.guava', module: 'guava' 
+		exclude group: 'commons-io', module: 'commons-io'
+		exclude group: 'org.apache.commons', module: 'commons-lang3'
     }
 
 
@@ -78,10 +80,13 @@ dependencies {
        exclude group: 'io.netty', module: 'netty-resolver-dns'
        exclude group: 'io.netty', module: 'netty-codec-dns'
        exclude group: 'org.iq80.snappy', module: 'snappy'
+        exclude group: 'org.apache.velocity', module: 'velocity-engine-core'
        exclude group: 'org.codehaus.plexus', module: 'plexus-utils' 
     }
-    
-    compile 'com.fasterxml.jackson.core:jackson-core:2.11.3',
+    compile ('org.apache.velocity:velocity-engine-core:2.4') {
+        exclude group: 'commons-io', module: 'commons-io'
+    }
+    compile  'com.fasterxml.jackson.core:jackson-core:2.11.3',
             'com.fasterxml.jackson.core:jackson-annotations:2.11.3',
             'com.fasterxml.jackson.core:jackson-databind:2.14.1',
             'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.11.3',
@@ -94,7 +99,7 @@ dependencies {
             'com.google.code.gson:gson:2.8.9',           
             'org.yaml:snakeyaml:2.2',
             'org.json:json:20231013',
-            'org.eclipse.jgit:org.eclipse.jgit:6.8.0.202311291450-r',
+            'org.eclipse.jgit:org.eclipse.jgit:6.10.1.202505221210-r',
             'com.google.guava:guava:32.1.1-jre',
             'io.vertx:vertx-core:4.5.9',
             'org.mozilla:rhino:1.7.15',
@@ -112,7 +117,9 @@ dependencies {
             'io.netty:netty-resolver-dns:4.1.122.Final',
             'io.netty:netty-codec-dns:4.1.122.Final',
             'org.codehaus.plexus:plexus-utils:3.5.1',
-            'org.iq80.snappy:snappy:0.5'
+            'org.iq80.snappy:snappy:0.5',
+			'org.apache.commons:commons-lang3:3.18.0',
+			'commons-io:commons-io:2.19.0'
 
             constraints {
                 implementation('io.vertx:vertx-web:3.9.7') {
@@ -134,9 +141,9 @@ dependencies {
 
     optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.4@jar',
     		'org.jenkins-ci.plugins:credentials:2.1.19@jar'
-    
 
-    testCompile 'junit:junit:4.13.1',
+	
+    testCompile  'junit:junit:4.13.1',
             'org.eclipse.sisu:org.eclipse.sisu.plexus:0.0.0.M5',
             'org.jmockit:jmockit:1.16'
 
