@@ -80,9 +80,12 @@ dependencies {
        exclude group: 'io.netty', module: 'netty-resolver-dns'
        exclude group: 'io.netty', module: 'netty-codec-dns'
        exclude group: 'org.iq80.snappy', module: 'snappy'
+        exclude group: 'org.apache.velocity', module: 'velocity-engine-core'
        exclude group: 'org.codehaus.plexus', module: 'plexus-utils' 
     }
-    
+    compile ('org.apache.velocity:velocity-engine-core:2.4') {
+        exclude group: 'commons-io', module: 'commons-io'
+    }
     compile  'com.fasterxml.jackson.core:jackson-core:2.11.3',
             'com.fasterxml.jackson.core:jackson-annotations:2.11.3',
             'com.fasterxml.jackson.core:jackson-databind:2.14.1',
