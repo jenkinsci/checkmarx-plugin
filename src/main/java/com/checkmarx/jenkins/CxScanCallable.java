@@ -89,7 +89,26 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
             // Make sure CxARMUrl is passed in the result.
             // Cannot pass CxARMUrl in the config object, because this callable can be executed on a Jenkins agent.
             // On a Jenkins agent we'll get a cloned config instead of the original object reference.
-            result.setCxARMUrl(config.getCxARMUrl());
+            String apiArmUrl = config.getCxARMUrl();
+            String uiArmUrl = apiArmUrl;
+            if (uiArmUrl != null && !uiArmUrl.isEmpty()) {
+                if (uiArmUrl.endsWith("/api")) {
+                    uiArmUrl = uiArmUrl.substring(0, uiArmUrl.length() - 4);
+                } else if (uiArmUrl.contains("/api/")) {
+                    uiArmUrl = uiArmUrl.replace("/api/", "/");
+                }
+
+                if (uiArmUrl.contains("CxPolicyManagement")) {
+                 
+                    String prefix = uiArmUrl.substring(0, uiArmUrl.indexOf("CxPolicyManagement"));
+                    uiArmUrl = prefix + "CxPolicyManagement";
+                } else {
+                    
+                    if (!uiArmUrl.endsWith("/")) uiArmUrl += "/";
+                    uiArmUrl = uiArmUrl + "cxarm/webclient/";
+                }
+            }
+            result.setCxARMUrl(uiArmUrl);
         } catch (Exception ex) {
             ScanResults scanResults = new ScanResults();
             scanResults.setGeneralException(ex);
