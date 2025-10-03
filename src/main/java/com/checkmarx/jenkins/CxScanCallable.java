@@ -12,7 +12,8 @@ import hudson.ProxyConfiguration;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import org.jenkinsci.remoting.RoleChecker;
-
+import com.cx.restclient.sast.dto.SASTResults;
+import com.cx.restclient.sast.dto.CxXMLResults;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -149,6 +150,25 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
         }
         
         ScanResults scanResults = config.getSynchronous() ? delegator.waitForScanResults() : delegator.getLatestScanResults();
+        SASTResults sast = scanResults.getSastResults();
+        if (sast != null && sast.getQueryList() != null) {
+            List<CxXMLResults.Query> filteredQueries = new ArrayList<>();
+
+            for (CxXMLResults.Query q : new ArrayList<>(sast.getQueryList())) {
+                if (q.getResult() != null) {
+                    q.getResult().removeIf(r -> "1".equals(String.valueOf(r.getState())));
+                }
+
+                if (q.getResult() == null || q.getResult().isEmpty()) {
+                    log.info("Skipping query (0 after NE filter): " + q.getName());
+                    continue;
+                }
+
+                filteredQueries.add(q);
+            }
+
+            sast.setQueryList(filteredQueries);
+        }
         results.add(scanResults);
         if (config.getSynchronous() && config.isSastEnabled() &&
                 ((createScanResults.getSastResults() != null && createScanResults.getSastResults().getException() != null && createScanResults.getSastResults().getScanId() > 0) || (scanResults.getSastResults() != null && scanResults.getSastResults().getException() != null))) {
