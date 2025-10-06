@@ -159,7 +159,10 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
 
             createScanResults = delegator.initiateScan();
             results.add(createScanResults);
-
+            if (!config.getSynchronous()) {
+                log.info("Running in Asynchronous mode. Not waiting for scan to finish.");
+            }
+           
             if (rootLog != null) {
                 handler.flush();
                 rootLog.removeHandler(handler);
