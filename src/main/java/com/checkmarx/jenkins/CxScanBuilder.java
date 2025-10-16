@@ -2252,7 +2252,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     private void logError(Exception ex) {
         if (ex != null) {
-            log.error(ex.getMessage());
+            log.error(ex.getMessage(),ex);
         }
     }
 
