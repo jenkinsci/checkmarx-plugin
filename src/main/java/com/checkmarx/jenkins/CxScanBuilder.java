@@ -102,6 +102,11 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private static final String SUPPRESS_BENIGN_ERRORS = "suppressBenignErrors";
 
     public static final String KEY_DEFAULT_ENGINE_CONFIGURATIONID = "scan.sast.project.engineConfigurationId";
+
+    // Source encoding configuration constants
+    private static final String PROJECT_DEFAULT_CONFIGURATION_NAME = "Project Default";
+    private static final int PROJECT_DEFAULT_CONFIGURATION_ID = 0;
+
     //////////////////////////////////////////////////////////////////////////////////////
     // Persistent plugin configuration parameters
     //////////////////////////////////////////////////////////////////////////////////////
@@ -1023,7 +1028,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         CxScanConfig config;
 		try {
 			config = resolveConfiguration(run, descriptor, env, log,  workspace);
-            System.setProperty(KEY_DEFAULT_ENGINE_CONFIGURATIONID, "0");
+            System.setProperty(KEY_DEFAULT_ENGINE_CONFIGURATIONID, String.valueOf(PROJECT_DEFAULT_CONFIGURATION_ID));
         
         if (configAsCode) {
             try {
@@ -1336,15 +1341,21 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 .filter(StringUtils::isNotBlank)
                 .ifPresent(pValue -> {
                     String trimmedValue = pValue.trim();
-                    if (trimmedValue.equalsIgnoreCase("Project Default")) {
+                    if (trimmedValue.equalsIgnoreCase(PROJECT_DEFAULT_CONFIGURATION_NAME)) {
                         // Special case: "Project Default" maps to ID 0
-                        scanConfig.setEngineConfigurationId(0);
-                        overridesResults.put("Configuration", "Project Default (0)");
+                        scanConfig.setEngineConfigurationId(PROJECT_DEFAULT_CONFIGURATION_ID);
+                        overridesResults.put("Configuration", PROJECT_DEFAULT_CONFIGURATION_NAME + " (" + PROJECT_DEFAULT_CONFIGURATION_ID + ")");
                     } else {
                         try {
                             int configId = Integer.parseInt(trimmedValue);
-                            scanConfig.setEngineConfigurationId(configId);
-                            overridesResults.put("Configuration", "ID " + configId);
+                            if (configId < 0) {
+                                log.warn("Invalid engine configuration ID: " + configId + ". ID must be non-negative. Using " + PROJECT_DEFAULT_CONFIGURATION_NAME);
+                                scanConfig.setEngineConfigurationId(PROJECT_DEFAULT_CONFIGURATION_ID);
+                                overridesResults.put("Configuration", PROJECT_DEFAULT_CONFIGURATION_NAME + " (" + PROJECT_DEFAULT_CONFIGURATION_ID + ") - invalid ID provided");
+                            } else {
+                                scanConfig.setEngineConfigurationId(configId);
+                                overridesResults.put("Configuration", "ID " + configId);
+                            }
                         } catch (NumberFormatException e) {
                             scanConfig.setEngineConfigurationName(trimmedValue);
                             overridesResults.put("Configuration", trimmedValue);
@@ -1688,22 +1699,29 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
             if (StringUtils.isNotBlank(sourceEncoding)) {
                 String trimmedEncoding = sourceEncoding.trim();
-                if (trimmedEncoding.equalsIgnoreCase("Project Default")) {
-                    ret.setEngineConfigurationId(0);
-                    log.info("Source encoding configuration: Project Default (0)");
+                if (trimmedEncoding.equalsIgnoreCase(PROJECT_DEFAULT_CONFIGURATION_NAME)) {
+                    ret.setEngineConfigurationId(PROJECT_DEFAULT_CONFIGURATION_ID);
+                    log.info("Source encoding configuration: " + PROJECT_DEFAULT_CONFIGURATION_NAME + " (" + PROJECT_DEFAULT_CONFIGURATION_ID + ")");
                 } else {
                     try {
                         int configurationId = Integer.parseInt(trimmedEncoding);
-                        ret.setEngineConfigurationId(configurationId);
-                        log.info("Source encoding configuration: ID " + configurationId);
+                        if (configurationId < 0) {
+                            log.warn("Invalid engine configuration ID: " + configurationId + ". ID must be non-negative. Using " + PROJECT_DEFAULT_CONFIGURATION_NAME);
+                            ret.setEngineConfigurationId(PROJECT_DEFAULT_CONFIGURATION_ID);
+                            log.info("Source encoding configuration: " + PROJECT_DEFAULT_CONFIGURATION_NAME + " (" + PROJECT_DEFAULT_CONFIGURATION_ID + ")");
+                        } else {
+                            ret.setEngineConfigurationId(configurationId);
+                            log.info("Source encoding configuration: ID " + configurationId);
+                        }
                     } catch (NumberFormatException e) {
+                        // Treat as configuration name - will be validated by server
                         ret.setEngineConfigurationName(trimmedEncoding);
-                        log.info("Source encoding configuration: " + trimmedEncoding + " (by name)");
+                        log.info("Source encoding configuration: " + trimmedEncoding + " (by name, will be validated by server)");
                     }
                 }
             } else {
-                ret.setEngineConfigurationId(0);
-                log.info("Source encoding configuration: Project Default (0)");
+                ret.setEngineConfigurationId(PROJECT_DEFAULT_CONFIGURATION_ID);
+                log.info("Source encoding configuration: " + PROJECT_DEFAULT_CONFIGURATION_NAME + " (" + PROJECT_DEFAULT_CONFIGURATION_ID + ")");
             }
             ret.setAvoidDuplicateProjectScans(avoidDuplicateProjectScans);
             ret.setGenerateXmlReport(generateXmlReport);
@@ -3709,7 +3727,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             item.checkPermission(Item.CONFIGURE);
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
-            listBoxModel.add(new ListBoxModel.Option("Project Default", "0"));
+            listBoxModel.add(new ListBoxModel.Option(PROJECT_DEFAULT_CONFIGURATION_NAME, String.valueOf(PROJECT_DEFAULT_CONFIGURATION_ID)));
             LegacyClient commonClient = null;
             try {
                 CxConnectionDetails connDetails = CxConnectionDetails.resolveCred(!useOwnServerCredentials, serverUrl, username,
