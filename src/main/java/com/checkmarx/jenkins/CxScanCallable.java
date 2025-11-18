@@ -12,7 +12,8 @@ import hudson.ProxyConfiguration;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import org.jenkinsci.remoting.RoleChecker;
-
+import com.cx.restclient.sast.dto.SASTResults;
+import com.cx.restclient.sast.dto.CxXMLResults;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -88,7 +89,26 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
             // Make sure CxARMUrl is passed in the result.
             // Cannot pass CxARMUrl in the config object, because this callable can be executed on a Jenkins agent.
             // On a Jenkins agent we'll get a cloned config instead of the original object reference.
-            result.setCxARMUrl(config.getCxARMUrl());
+            String apiArmUrl = config.getCxARMUrl();
+            String uiArmUrl = apiArmUrl;
+            if (uiArmUrl != null && !uiArmUrl.isEmpty()) {
+                if (uiArmUrl.endsWith("/api")) {
+                    uiArmUrl = uiArmUrl.substring(0, uiArmUrl.length() - 4);
+                } else if (uiArmUrl.contains("/api/")) {
+                    uiArmUrl = uiArmUrl.replace("/api/", "/");
+                }
+
+                if (uiArmUrl.contains("CxPolicyManagement")) {
+                 
+                    String prefix = uiArmUrl.substring(0, uiArmUrl.indexOf("CxPolicyManagement"));
+                    uiArmUrl = prefix + "CxPolicyManagement";
+                } else {
+                    
+                    if (!uiArmUrl.endsWith("/")) uiArmUrl += "/";
+                    uiArmUrl = uiArmUrl + "cxarm/webclient/";
+                }
+            }
+            result.setCxARMUrl(uiArmUrl);
         } catch (Exception ex) {
             ScanResults scanResults = new ScanResults();
             scanResults.setGeneralException(ex);
@@ -139,7 +159,10 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
 
             createScanResults = delegator.initiateScan();
             results.add(createScanResults);
-
+            if (!config.getSynchronous()) {
+                log.info("Running in Asynchronous mode. Not waiting for scan to finish.");
+            }
+           
             if (rootLog != null) {
                 handler.flush();
                 rootLog.removeHandler(handler);
@@ -149,6 +172,25 @@ public class CxScanCallable implements FilePath.FileCallable<RemoteScanInfo>, Se
         }
         
         ScanResults scanResults = config.getSynchronous() ? delegator.waitForScanResults() : delegator.getLatestScanResults();
+        SASTResults sast = scanResults.getSastResults();
+        if (sast != null && sast.getQueryList() != null) {
+            List<CxXMLResults.Query> filteredQueries = new ArrayList<>();
+
+            for (CxXMLResults.Query q : new ArrayList<>(sast.getQueryList())) {
+                if (q.getResult() != null) {
+                    q.getResult().removeIf(r -> "1".equals(String.valueOf(r.getState())));
+                }
+
+                if (q.getResult() == null || q.getResult().isEmpty()) {
+                    log.info("Skipping query (0 after NE filter): " + q.getName());
+                    continue;
+                }
+
+                filteredQueries.add(q);
+            }
+
+            sast.setQueryList(filteredQueries);
+        }
         results.add(scanResults);
         if (config.getSynchronous() && config.isSastEnabled() &&
                 ((createScanResults.getSastResults() != null && createScanResults.getSastResults().getException() != null && createScanResults.getSastResults().getScanId() > 0) || (scanResults.getSastResults() != null && scanResults.getSastResults().getException() != null))) {

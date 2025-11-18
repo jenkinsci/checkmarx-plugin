@@ -1177,14 +1177,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 			}
 		}
 
-		if (!descriptor.isAsyncHtmlRemoval() || config.getSynchronous()) {
-			log.info("Running in Asynchronous mode. Not waiting for scan to finish.");
-
-			if (generateAsyncReport) {
-				String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
-				cxScanResult.setHtmlReportName(reportName);
-			}
+		if (!descriptor.isAsyncHtmlRemoval() && !config.getSynchronous()) {
+		    if (generateAsyncReport) {
+		        String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
+		        cxScanResult.setHtmlReportName(reportName);
+		    }
 		}
+
         run.addAction(cxScanResult);
 			} catch (ConfigurationException e1) {
 				e1.printStackTrace();
