@@ -1340,6 +1340,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                 .filter(StringUtils::isNotBlank)
                 .ifPresent(pValue -> {
                     String trimmedValue = pValue.trim();
+                    if (scanConfig.getEngineConfigurationId() != null || scanConfig.getEngineConfigurationName() != null) {
+                        log.info("Overriding engine configuration from Config-as-Code");
+                    }
+                    scanConfig.setEngineConfigurationId(null);
+                    scanConfig.setEngineConfigurationName(null);
+                    
                     if (trimmedValue.equalsIgnoreCase(PROJECT_DEFAULT_CONFIGURATION_NAME)) {
                         // Special case: "Project Default" maps to ID 0
                         scanConfig.setEngineConfigurationId(PROJECT_DEFAULT_CONFIGURATION_ID);
