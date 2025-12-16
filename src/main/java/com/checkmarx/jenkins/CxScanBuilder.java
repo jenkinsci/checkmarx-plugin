@@ -3732,13 +3732,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             item.checkPermission(Item.CONFIGURE);
             // timestamp is not used in code, it is one of the arguments to invalidate Internet Explorer cache
             ListBoxModel listBoxModel = new ListBoxModel();
-            listBoxModel.add(new ListBoxModel.Option(PROJECT_DEFAULT_CONFIGURATION_NAME, String.valueOf(PROJECT_DEFAULT_CONFIGURATION_ID)));
             LegacyClient commonClient = null;
             try {
                 CxConnectionDetails connDetails = CxConnectionDetails.resolveCred(!useOwnServerCredentials, serverUrl, username,
                         StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, isProxy, this, item);
 
                 commonClient = prepareLoggedInClient(connDetails);
+                listBoxModel.add(new ListBoxModel.Option(PROJECT_DEFAULT_CONFIGURATION_NAME, String.valueOf(PROJECT_DEFAULT_CONFIGURATION_ID)));
                 List<CxNameObj> configurationList = commonClient.getConfigurationSetList();
 
                 for (CxNameObj cs : configurationList) {
