@@ -101,8 +101,12 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     
     private static final String SUPPRESS_BENIGN_ERRORS = "suppressBenignErrors";
 
-    private static final String scaResolverResultPath = ".cxscaresolver" + File.separator + "sca";
-    private static final String scaResolverSastResultPath = ".cxscaresolver" + File.separator + "sast";
+    public static final String KEY_DEFAULT_ENGINE_CONFIGURATIONID = "scan.sast.project.engineConfigurationId";
+
+    // Source encoding configuration constants
+    private static final String PROJECT_DEFAULT_CONFIGURATION_NAME = "Project Default";
+    private static final int PROJECT_DEFAULT_CONFIGURATION_ID = 0;
+
     //////////////////////////////////////////////////////////////////////////////////////
     // Persistent plugin configuration parameters
     //////////////////////////////////////////////////////////////////////////////////////
@@ -231,7 +235,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     private Boolean generateXmlReport = true;
 
     public static final int MINIMUM_TIMEOUT_IN_MINUTES = 1;
-    public static final String REPORTS_FOLDER = "Checkmarx" + File.separator + "Reports";
 
     @DataBoundConstructor
     public CxScanBuilder(
@@ -1025,6 +1028,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         CxScanConfig config;
 		try {
 			config = resolveConfiguration(run, descriptor, env, log,  workspace);
+            System.setProperty(KEY_DEFAULT_ENGINE_CONFIGURATIONID, String.valueOf(PROJECT_DEFAULT_CONFIGURATION_ID));
         
         if (configAsCode) {
             try {
@@ -1173,14 +1177,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 			}
 		}
 
-		if (!descriptor.isAsyncHtmlRemoval() || config.getSynchronous()) {
-			log.info("Running in Asynchronous mode. Not waiting for scan to finish.");
-
-			if (generateAsyncReport) {
-				String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
-				cxScanResult.setHtmlReportName(reportName);
-			}
+		if (!descriptor.isAsyncHtmlRemoval() && !config.getSynchronous()) {
+		    if (generateAsyncReport) {
+		        String reportName = generateHTMLReport(workspace, checkmarxBuildDir, config, scanResults);
+		        cxScanResult.setHtmlReportName(reportName);
+		    }
 		}
+
         run.addAction(cxScanResult);
 			} catch (ConfigurationException e1) {
 				e1.printStackTrace();
@@ -1188,8 +1191,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     private void overrideConfigAsCode(CxScanConfig config, FilePath workspace) throws ConfigurationException {
-        String configFilePath =
-                workspace.getRemote() + File.separator + ".checkmarx" + File.separator + CONFIG_AS_CODE_FILE_NAME;
+        FilePath configFile = workspace.child(".checkmarx").child(CONFIG_AS_CODE_FILE_NAME);
+        String configFilePath = configFile.getRemote();
         com.checkmarx.configprovider.readers.FileReader reader =
                 new com.checkmarx.configprovider.readers.FileReader(ResourceType.YAML, configFilePath);
 
@@ -1336,8 +1339,33 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         sast.map(SastConfig::getEngineConfiguration)
                 .filter(StringUtils::isNotBlank)
                 .ifPresent(pValue -> {
-                    scanConfig.setEngineConfigurationName(pValue);
-                    overridesResults.put("Configuration", pValue);
+                    String trimmedValue = pValue.trim();
+                    if (scanConfig.getEngineConfigurationId() != null || scanConfig.getEngineConfigurationName() != null) {
+                        log.info("Overriding engine configuration from Config-as-Code");
+                    }
+                    scanConfig.setEngineConfigurationId(null);
+                    scanConfig.setEngineConfigurationName(null);
+                    
+                    if (trimmedValue.equalsIgnoreCase(PROJECT_DEFAULT_CONFIGURATION_NAME)) {
+                        // Special case: "Project Default" maps to ID 0
+                        scanConfig.setEngineConfigurationId(PROJECT_DEFAULT_CONFIGURATION_ID);
+                        overridesResults.put("Configuration", PROJECT_DEFAULT_CONFIGURATION_NAME + " (" + PROJECT_DEFAULT_CONFIGURATION_ID + ")");
+                    } else {
+                        try {
+                            int configId = Integer.parseInt(trimmedValue);
+                            if (configId < 0) {
+                                log.warn("Invalid engine configuration ID: " + configId + ". ID must be non-negative. Using " + PROJECT_DEFAULT_CONFIGURATION_NAME);
+                                scanConfig.setEngineConfigurationId(PROJECT_DEFAULT_CONFIGURATION_ID);
+                                overridesResults.put("Configuration", PROJECT_DEFAULT_CONFIGURATION_NAME + " (" + PROJECT_DEFAULT_CONFIGURATION_ID + ") - invalid ID provided");
+                            } else {
+                                scanConfig.setEngineConfigurationId(configId);
+                                overridesResults.put("Configuration", "ID " + configId);
+                            }
+                        } catch (NumberFormatException e) {
+                            scanConfig.setEngineConfigurationName(trimmedValue);
+                            overridesResults.put("Configuration", trimmedValue);
+                        }
+                    }
                 });
 
         sast.map(SastConfig::isIncremental)
@@ -1439,7 +1467,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 				File pdfReportFile = new File(checkmarxBuildDir, CxScanResult.SCA_PDF_REPORT_NAME);
 				try {
 					FileUtils.writeByteArrayToFile(pdfReportFile, scaResults.getPDFReport());
-					scaResults.setScaPDFLink(checkmarxBuildDir + File.separator + CxScanResult.SCA_PDF_REPORT_NAME);
+					// Use platform-independent path construction
+					scaResults.setScaPDFLink(new File(checkmarxBuildDir, CxScanResult.SCA_PDF_REPORT_NAME).getPath());
 					log.info("PDF Report generated at location: " + pdfReportFile.getAbsolutePath());
 				} catch (IOException e) {
 					log.warn("Failed to write SCA PDF report to workspace: " + e.getMessage());
@@ -1673,8 +1702,32 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             ret.setIncremental(isThisBuildIncremental(run.getNumber()));
             ret.setGeneratePDFReport(generatePdfReport);
 
-            int configurationId = parseInt(sourceEncoding, log, "Invalid source encoding (configuration) value: [%s]. Using default configuration.", 1);
-            ret.setEngineConfigurationId(configurationId);
+            if (StringUtils.isNotBlank(sourceEncoding)) {
+                String trimmedEncoding = sourceEncoding.trim();
+                if (trimmedEncoding.equalsIgnoreCase(PROJECT_DEFAULT_CONFIGURATION_NAME)) {
+                    ret.setEngineConfigurationId(PROJECT_DEFAULT_CONFIGURATION_ID);
+                    log.info("Source encoding configuration: " + PROJECT_DEFAULT_CONFIGURATION_NAME + " (" + PROJECT_DEFAULT_CONFIGURATION_ID + ")");
+                } else {
+                    try {
+                        int configurationId = Integer.parseInt(trimmedEncoding);
+                        if (configurationId < 0) {
+                            log.warn("Invalid engine configuration ID: " + configurationId + ". ID must be non-negative. Using " + PROJECT_DEFAULT_CONFIGURATION_NAME);
+                            ret.setEngineConfigurationId(PROJECT_DEFAULT_CONFIGURATION_ID);
+                            log.info("Source encoding configuration: " + PROJECT_DEFAULT_CONFIGURATION_NAME + " (" + PROJECT_DEFAULT_CONFIGURATION_ID + ")");
+                        } else {
+                            ret.setEngineConfigurationId(configurationId);
+                            log.info("Source encoding configuration: ID " + configurationId);
+                        }
+                    } catch (NumberFormatException e) {
+                        // Treat as configuration name - will be validated by server
+                        ret.setEngineConfigurationName(trimmedEncoding);
+                        log.info("Source encoding configuration: " + trimmedEncoding + " (by name, will be validated by server)");
+                    }
+                }
+            } else {
+                ret.setEngineConfigurationId(PROJECT_DEFAULT_CONFIGURATION_ID);
+                log.info("Source encoding configuration: " + PROJECT_DEFAULT_CONFIGURATION_NAME + " (" + PROJECT_DEFAULT_CONFIGURATION_ID + ")");
+            }
             ret.setAvoidDuplicateProjectScans(avoidDuplicateProjectScans);
             ret.setGenerateXmlReport(generateXmlReport);
 
@@ -2142,7 +2195,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     private void writeJsonObjectToFile(Object jsonObj, FilePath to, String fileName) {
-        String remoteDirPath = to.getRemote() + File.separator + REPORTS_FOLDER;
         InputStream is = null;
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -2150,9 +2202,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObj);
             is = IOUtils.toInputStream(json, StandardCharsets.UTF_8);
 
-            String remoteFilePath = remoteDirPath + File.separator + fileName;
-            log.info("Copying file {} to workspace {}", fileName, remoteFilePath);
-            FilePath remoteFile = new FilePath(to.getChannel(), remoteFilePath);
+            FilePath reportsDir = to.child("Checkmarx").child("Reports");
+            FilePath remoteFile = reportsDir.child(fileName);
+            
+            log.info("Copying file {} to workspace {}", fileName, remoteFile.getRemote());
             remoteFile.copyFrom(is);
             log.info("File {} successfully written to workspace", fileName);
         } catch (Exception e) {
@@ -2252,7 +2305,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 
     private void logError(Exception ex) {
         if (ex != null) {
-            log.error(ex.getMessage());
+            log.error(ex.getMessage(),ex);
         }
     }
 
@@ -2278,13 +2331,13 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     private void writeFileToWorkspaceReports(FilePath workspace, File file) {
-        String remoteDirPath = workspace.getRemote() + File.separator + REPORTS_FOLDER;
         FileInputStream fis = null;
 
         try {
-            String remoteFilePath = remoteDirPath + File.separator + file.getName();
-            log.info("Copying file {} to workspace {}", file.getName(), remoteFilePath);
-            FilePath remoteFile = new FilePath(workspace.getChannel(), remoteFilePath);
+            FilePath reportsDir = workspace.child("Checkmarx").child("Reports");
+            FilePath remoteFile = reportsDir.child(file.getName());
+            
+            log.info("Copying file {} to workspace {}", file.getName(), remoteFile.getRemote());
             fis = new FileInputStream(file);
             remoteFile.copyFrom(fis);
 
@@ -2388,11 +2441,9 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     private boolean scaResolverPathExist(String pathToResolver) {
-        pathToResolver = pathToResolver + File.separator + "ScaResolver";
-        if(!SystemUtils.IS_OS_UNIX)
-            pathToResolver = pathToResolver + ".exe";
-
-        File file = new File(pathToResolver);
+        File resolverDir = new File(pathToResolver);
+        String executableName = SystemUtils.IS_OS_UNIX ? "ScaResolver" : "ScaResolver.exe";
+        File file = new File(resolverDir, executableName);
         if(!file.exists())
         {
             throw new CxClientException("SCA Resolver path does not exist. Path="+file.getAbsolutePath());
@@ -2446,9 +2497,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 		}
 
 		if (!additionalParams.contains("-r ") && !additionalParams.contains("--resolver-result-path ")) {
-			if (null != workspace)
-				additionalParams += " -r " + workspace + File.separator + scaResolverResultPath;
-			else
+			if (null != workspace) {
+				FilePath resultPath = workspace.child(".cxscaresolver").child("sca");
+				additionalParams += " -r " + resultPath.getRemote();
+			} else
 				throw new CxClientException("result path must be specified");
 		}
 		if (isExploitablePathByScaResolver) {
@@ -2471,9 +2523,10 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
 					throw new CxClientException("cxpassword must be specified");
 			}
 			if (!additionalParams.contains("--sast-result-path ")) {
-				if (null != workspace)
-					additionalParams += " --sast-result-path " + workspace + File.separator + scaResolverSastResultPath;
-				else
+				if (null != workspace) {
+					FilePath sastResultPath = workspace.child(".cxscaresolver").child("sast");
+					additionalParams += " --sast-result-path " + sastResultPath.getRemote();
+				} else
 					throw new CxClientException("sast result path must be specified");
 			}
 			if (!additionalParams.contains("--cxprojectname ") && !additionalParams.contains("--cxprojectid ")) {
@@ -3685,6 +3738,7 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
                         StringEscapeUtils.escapeHtml4(getPasswordPlainText(password)), credentialsId, isProxy, this, item);
 
                 commonClient = prepareLoggedInClient(connDetails);
+                listBoxModel.add(new ListBoxModel.Option(PROJECT_DEFAULT_CONFIGURATION_NAME, String.valueOf(PROJECT_DEFAULT_CONFIGURATION_ID)));
                 List<CxNameObj> configurationList = commonClient.getConfigurationSetList();
 
                 for (CxNameObj cs : configurationList) {
