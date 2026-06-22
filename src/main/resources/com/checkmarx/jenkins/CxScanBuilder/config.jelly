@@ -17,7 +17,6 @@
 
     <f:invisibleEntry>
         <f:readOnlyTextbox field="username"/>
-        <f:readOnlyTextbox field="password"/>
     </f:invisibleEntry>
 
     <f:optionalBlock title="Use default server credentials (${descriptor.credentialsDescription})"
@@ -41,7 +40,7 @@
         <f:optionalBlock title="Use Jenkins proxy" inline="true" field="isProxy" checked="${instance==null?true:instance.isProxy}" />
 
         <f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
-           with="serverUrl,password, username,timestamp,credentialsId,isProxy" />
+           with="serverUrl,username,timestamp,credentialsId,isProxy" />
     </f:optionalBlock>
 
     <f:optionalBlock title="Enable config as code" inline="true" field="configAsCode" checked="${instance==null?true:instance.configAsCode}">
