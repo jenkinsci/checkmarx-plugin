@@ -1593,6 +1593,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         	ret.setPostScanActionId(getPostScanActionId());
         	
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
+
+        // Read hostname verification settings from Jenkins environment
+        String hostnameVerificationEnv = env.get("CX_HOSTNAME_VERIFICATION_ENABLED");
+        if (hostnameVerificationEnv != null && !hostnameVerificationEnv.trim().isEmpty()) {
+            ret.setHostnameVerificationEnabled(Boolean.parseBoolean(hostnameVerificationEnv.trim()));
+        }
+        String allowedHostsEnv = env.get("CX_ALLOWED_HOSTS");
+        if (allowedHostsEnv != null && !allowedHostsEnv.trim().isEmpty()) {
+            ret.setAllowedHostname(allowedHostsEnv.trim());
+        }
+
         ret.setMvnPath(descriptor.getMvnPath());
         ret.setOsaGenerateJsonReport(false);
         

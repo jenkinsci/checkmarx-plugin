@@ -11,7 +11,6 @@ buildscript {
 
 apply plugin: 'java'
 
-// Java 17 support in Jenkins ends March 31, 2026
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
@@ -60,7 +59,7 @@ dependencies {
     }
 
 
-     implementation ('com.checkmarx:cx-client-common:2025.4.40') {
+     implementation ('com.checkmarx:cx-client-common:2026.2.32') {
        
        exclude group: 'org.yaml' , module: 'snakeyaml'
        exclude group: 'com.google.code.gson', module: 'gson'
