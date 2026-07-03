@@ -11,7 +11,6 @@ buildscript {
 
 apply plugin: 'java'
 
-// Java 17 support in Jenkins ends March 31, 2026
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
