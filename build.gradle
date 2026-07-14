@@ -12,8 +12,8 @@ buildscript {
 apply plugin: 'java'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 apply plugin: 'idea'
 apply plugin: 'eclipse'
@@ -33,8 +33,6 @@ repositories {
 test {
     maxParallelForks = Runtime.getRuntime().availableProcessors()
     useJUnitPlatform()
-    // Required for Mockito inline mocks on JDK 17+ where dynamic agent loading is restricted
-    jvmArgs '-XX:+EnableDynamicAgentLoading'
 }
 
 //currently there is an issue with Java8 and javadocs,
@@ -96,9 +94,9 @@ dependencies {
             'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.11.3',
             'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.10.5',
             'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.10.5',
-            'org.apache.logging.log4j:log4j-slf4j-impl:2.25.4',
-            'org.apache.logging.log4j:log4j-api:2.25.4',
-            'org.apache.logging.log4j:log4j-core:2.25.4',
+            'org.apache.logging.log4j:log4j-slf4j-impl:2.17.1',
+            'org.apache.logging.log4j:log4j-api:2.17.1',
+            'org.apache.logging.log4j:log4j-core:2.17.1',
             'org.apache.commons:commons-compress:1.27.0',          
             'com.google.code.gson:gson:2.8.9',           
             'org.yaml:snakeyaml:2.2',
@@ -165,7 +163,7 @@ dependencies {
             'org.jenkins-ci.plugins:matrix-project:1.18@jar'
 
     testImplementation('org.junit.jupiter:junit-jupiter-api:5.10.2',
-            'org.mockito:mockito-junit-jupiter:5.10.0')
+            'org.mockito:mockito-junit-jupiter:4.11.0')
     testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.10.2')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher:1.10.2')
 }
@@ -178,7 +176,7 @@ tasks.named('jpi') {
 
 jenkinsPlugin {
     // version of Jenkins core this plugin depends on
-    coreVersion = '2.541.1'
+    coreVersion = '2.164.1'
 
     // short name of the plugin, defaults to the project name without trailing '-plugin'
     shortName = 'checkmarx'
