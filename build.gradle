@@ -5,7 +5,7 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.55.2'
+        classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.50.0'
     }
 }
 
