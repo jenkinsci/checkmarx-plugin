@@ -241,7 +241,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
             boolean useOwnServerCredentials,
             @Nullable String serverUrl,
             @Nullable String username,
-            @Nullable String password,
             Boolean isProxy,
             String credentialsId,
             String sastCredentialsId,
@@ -297,7 +296,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
         this.username = username;
-        this.password = Secret.fromString(password).getEncryptedValue();
         this.credentialsId = credentialsId;
         this.sastCredentialsId = sastCredentialsId;
         this.configAsCode = configAsCode;
@@ -386,11 +384,6 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     public String getUsername() {
         return username;
-    }
-
-    @Nullable
-    public String getPassword() {
-        return password;
     }
 
     @Nullable
@@ -734,9 +727,8 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         this.username = username;
     }
 
-    @DataBoundSetter
     public void setPassword(@Nullable String password) {
-        this.password = password;
+        this.password = Secret.fromString(password).getEncryptedValue();
     }
 
     @DataBoundSetter
@@ -1601,6 +1593,17 @@ public class CxScanBuilder extends Builder implements SimpleBuildStep {
         	ret.setPostScanActionId(getPostScanActionId());
         	
         ret.setDisableCertificateValidation(!descriptor.isEnableCertificateValidation());
+
+        // Read hostname verification settings from Jenkins environment
+        String hostnameVerificationEnv = env.get("CX_HOSTNAME_VERIFICATION_ENABLED");
+        if (hostnameVerificationEnv != null && !hostnameVerificationEnv.trim().isEmpty()) {
+            ret.setHostnameVerificationEnabled(Boolean.parseBoolean(hostnameVerificationEnv.trim()));
+        }
+        String allowedHostsEnv = env.get("CX_ALLOWED_HOSTS");
+        if (allowedHostsEnv != null && !allowedHostsEnv.trim().isEmpty()) {
+            ret.setAllowedHostname(allowedHostsEnv.trim());
+        }
+
         ret.setMvnPath(descriptor.getMvnPath());
         ret.setOsaGenerateJsonReport(false);
         

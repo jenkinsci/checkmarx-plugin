@@ -2,30 +2,32 @@ buildscript {
     repositories {
     	mavenCentral()
     	maven { url 'https://repo.jenkins-ci.org/public/' }
+        gradlePluginPortal()
     }
     dependencies {
-        classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.35.0',
-                'com.netflix.nebula:gradle-extra-configurations-plugin:5.0.3'
+        classpath 'org.jenkins-ci.tools:gradle-jpi-plugin:0.55.2'
     }
 }
 
-plugins { id "no.nils.wsdl2java" version "0.8" }
-
 apply plugin: 'java'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
 apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'project-report'
 apply plugin: 'org.jenkins-ci.jpi'
-apply plugin: 'nebula.provided-base'
 
-repositories {	
+repositories {
 	mavenCentral()
     mavenLocal()        // Use this to load a custom build of Common Client from a local Maven repo.
     maven { url 'https://repo.jenkins-ci.org/public/' }
-    maven { url 'http://cx-artifactory:8081/artifactory/libs-release/' }
-    maven { url 'http://cx-artifactory:8081/artifactory/libs-snapshot' }
-    maven { url 'http://cx-artifactory:8081/artifactory/plugins-release-local/' }
-    maven { url 'http://cx-artifactory:8081/artifactory/libs-snapshot-local' }
+    maven { url 'http://cx-artifactory:8081/artifactory/libs-release/'; allowInsecureProtocol = true }
+    maven { url 'http://cx-artifactory:8081/artifactory/libs-snapshot'; allowInsecureProtocol = true }
+    maven { url 'http://cx-artifactory:8081/artifactory/plugins-release-local/'; allowInsecureProtocol = true }
+    maven { url 'http://cx-artifactory:8081/artifactory/libs-snapshot-local'; allowInsecureProtocol = true }
 }
 
 test {
@@ -43,7 +45,7 @@ allprojects {
 dependencies {
     compileOnly 'com.intellij:annotations:12.0'
 
-    compile ('com.checkmarx:cx-config-provider:1.0.14') {
+    implementation ('com.checkmarx:cx-config-provider:1.0.14') {
         exclude group: 'org.slf4j', module: 'slf4j-api'
         exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl'
         exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
@@ -55,7 +57,7 @@ dependencies {
     }
 
 
-     compile ('com.checkmarx:cx-client-common:2025.4.40') {
+     implementation ('com.checkmarx:cx-client-common:2026.2.32') {
        
        exclude group: 'org.yaml' , module: 'snakeyaml'
        exclude group: 'com.google.code.gson', module: 'gson'
@@ -83,10 +85,10 @@ dependencies {
         exclude group: 'org.apache.velocity', module: 'velocity-engine-core'
        exclude group: 'org.codehaus.plexus', module: 'plexus-utils' 
     }
-    compile ('org.apache.velocity:velocity-engine-core:2.4') {
+    implementation ('org.apache.velocity:velocity-engine-core:2.4') {
         exclude group: 'commons-io', module: 'commons-io'
     }
-    compile  'com.fasterxml.jackson.core:jackson-core:2.11.3',
+    implementation  'com.fasterxml.jackson.core:jackson-core:2.11.3',
             'com.fasterxml.jackson.core:jackson-annotations:2.11.3',
             'com.fasterxml.jackson.core:jackson-databind:2.14.1',
             'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.11.3',
@@ -139,11 +141,18 @@ dependencies {
                 }
             }
 
-    optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.4@jar',
-    		'org.jenkins-ci.plugins:credentials:2.1.19@jar'
+    compileOnly 'org.jenkins-ci.main:maven-plugin:1.509.4@jar'
+    compileOnly 'org.jenkins-ci.plugins:credentials:2.1.19@jar'
+    testImplementation 'org.jenkins-ci.plugins:credentials:2.1.19@jar'
+
+    optionalJenkinsPlugins 'org.jenkins-ci.main:maven-plugin:1.509.4@jar'
+
+    // credentials is a required plugin dependency - declared as implementation so JPI 0.55.2
+    // generates Plugin-Dependencies in MANIFEST.MF (jenkinsPlugins config removed in JPI 0.50+)
+    implementation 'org.jenkins-ci.plugins:credentials:2.1.19'
 
 	
-    testCompile  'junit:junit:4.13.1',
+    testImplementation  'junit:junit:4.13.1',
             'org.eclipse.sisu:org.eclipse.sisu.plexus:0.0.0.M5',
             'org.jmockit:jmockit:1.16'
 
@@ -153,14 +162,21 @@ dependencies {
             'org.jenkins-ci.plugins:mailer:1.32.1@jar',
             'org.jenkins-ci.plugins:matrix-project:1.18@jar'
 
-    testImplementation('org.junit.jupiter:junit-jupiter-api:5.4.2',
-            'org.mockito:mockito-junit-jupiter:2.23.0')
-    testRuntime('org.junit.jupiter:junit-jupiter-engine:5.4.2',
-            'org.mockito:mockito-junit-jupiter:2.23.0')
+    testImplementation('org.junit.jupiter:junit-jupiter-api:5.10.2',
+            'org.mockito:mockito-junit-jupiter:4.11.0')
+    testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.10.2')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher:1.10.2')
 }
+
+// Gradle 8 requires explicit duplicate handling strategy for War/JPI packaging.
+// Old Gradle silently excluded duplicates; this maintains the same behavior.
+tasks.named('jpi') {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
 jenkinsPlugin {
     // version of Jenkins core this plugin depends on
-    coreVersion = '2.77'
+    coreVersion = '2.164.1'
 
     // short name of the plugin, defaults to the project name without trailing '-plugin'
     shortName = 'checkmarx'
