@@ -2,7 +2,7 @@ package com.checkmarx.jenkins;
 
 
 import hudson.WebAppMain;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Marker;
 
 import java.util.logging.Logger;

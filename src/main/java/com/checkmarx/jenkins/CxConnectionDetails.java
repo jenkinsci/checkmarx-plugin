@@ -8,7 +8,7 @@ import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.cx.restclient.common.ErrorMessage;
 import hudson.model.Item;
 import hudson.model.Run;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
