@@ -1,6 +1,6 @@
 package com.checkmarx.jenkins;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
